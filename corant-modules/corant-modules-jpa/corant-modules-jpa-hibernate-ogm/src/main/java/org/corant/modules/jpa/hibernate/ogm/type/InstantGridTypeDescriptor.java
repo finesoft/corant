@@ -25,13 +25,7 @@ public class InstantGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
-      @Override
-      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-        Instant unwrap = javaTypeDescriptor.unwrap(value, Instant.class, options);
-        resultset.put(names[0], unwrap);
-      }
-    };
+    return new InstantBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override
@@ -43,6 +37,33 @@ public class InstantGridTypeDescriptor implements GridTypeDescriptor {
       }
       return javaTypeDescriptor.wrap(toInstant(document), null);
     };
+  }
+
+  /**
+   * corant-modules-jpa-hibernate-ogm
+   *
+   * @author bingo 下午3:38:43
+   *
+   */
+  private static final class InstantBasicGridBinder<X> extends BasicGridBinder<X> {
+    private final JavaTypeDescriptor<X> javaTypeDescriptor;
+
+    /**
+     * @param javaDescriptor
+     * @param gridDescriptor
+     * @param javaTypeDescriptor
+     */
+    private InstantBasicGridBinder(JavaTypeDescriptor<X> javaDescriptor,
+        GridTypeDescriptor gridDescriptor, JavaTypeDescriptor<X> javaTypeDescriptor) {
+      super(javaDescriptor, gridDescriptor);
+      this.javaTypeDescriptor = javaTypeDescriptor;
+    }
+
+    @Override
+    protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+      Instant unwrap = javaTypeDescriptor.unwrap(value, Instant.class, options);
+      resultset.put(names[0], unwrap);
+    }
   }
 
 }

@@ -311,16 +311,22 @@ public class Identifiers {
     public long parseGeneratedWorkerId(long id, int index) {
       long ls = timestampBits;
       long rs = sequenceBits;
-      for (int i = 0; i < workerSize; i++) {
-        if (i < index) {
-          ls += workerBits[i];
-        } else if (i > index) {
-          rs += workerBits[i];
+      if (index >= 0) {
+        for (int i = 0; i < workerSize; i++) {
+          if (i < index) {
+            ls += workerBits[i];
+          } else if (i > index) {
+            rs += workerBits[i];
+          }
         }
       }
       long tmp = id << ls;
       tmp >>>= ls + rs;
       return tmp;
+    }
+
+    public long parseGeneratedWorkersId(long id) {
+      return parseGeneratedWorkerId(id, -1);
     }
 
     protected synchronized Long doGenerateWithCache(Supplier<?> timeGener) {

@@ -28,20 +28,18 @@ public class JTAPlatform extends AbstractJtaPlatform {
 
   private static final long serialVersionUID = -6662006780960101741L;
 
-  protected final TransactionService transactionService;
+  public static final JTAPlatform INSTANCE = new JTAPlatform();
 
-  public JTAPlatform(TransactionService transactionService) {
-    this.transactionService = transactionService;
-  }
+  private JTAPlatform() {}
 
   @Override
   protected TransactionManager locateTransactionManager() {
-    return transactionService.getTransactionManager();
+    return TransactionService.transactionManager();
   }
 
   @Override
   protected UserTransaction locateUserTransaction() {
-    return transactionService.getUserTransaction();
+    return TransactionService.userTransaction();
   }
 
 }

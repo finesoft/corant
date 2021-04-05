@@ -25,13 +25,7 @@ public class ZonedDateTimeGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
-      @Override
-      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-        ZonedDateTime unwrap = javaTypeDescriptor.unwrap(value, ZonedDateTime.class, options);
-        resultset.put(names[0], unwrap);
-      }
-    };
+    return new ZonedDateTimeBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override
@@ -43,6 +37,33 @@ public class ZonedDateTimeGridTypeDescriptor implements GridTypeDescriptor {
       }
       return javaTypeDescriptor.wrap(toObject(document, ZonedDateTime.class), null);
     };
+  }
+
+  /**
+   * corant-modules-jpa-hibernate-ogm
+   *
+   * @author bingo 下午3:39:43
+   *
+   */
+  private static final class ZonedDateTimeBasicGridBinder<X> extends BasicGridBinder<X> {
+    private final JavaTypeDescriptor<X> javaTypeDescriptor;
+
+    /**
+     * @param javaDescriptor
+     * @param gridDescriptor
+     * @param javaTypeDescriptor
+     */
+    private ZonedDateTimeBasicGridBinder(JavaTypeDescriptor<X> javaDescriptor,
+        GridTypeDescriptor gridDescriptor, JavaTypeDescriptor<X> javaTypeDescriptor) {
+      super(javaDescriptor, gridDescriptor);
+      this.javaTypeDescriptor = javaTypeDescriptor;
+    }
+
+    @Override
+    protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+      ZonedDateTime unwrap = javaTypeDescriptor.unwrap(value, ZonedDateTime.class, options);
+      resultset.put(names[0], unwrap);
+    }
   }
 
 }

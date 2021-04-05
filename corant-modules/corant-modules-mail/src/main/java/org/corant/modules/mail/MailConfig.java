@@ -56,7 +56,7 @@ public class MailConfig implements DeclarativeConfig {
 
   private Properties mailProperties;
 
-  private Authenticator authenticator;
+  private transient Authenticator authenticator;
 
   public MailConfig(String protocol, String host, int port, String username, String password,
       int connectionTimeout, Map<String, String> properties) {

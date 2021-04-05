@@ -15,6 +15,7 @@ package org.corant.modules.jpa.hibernate.orm;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.defaultString;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -26,7 +27,6 @@ import javax.persistence.EntityManagerFactory;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.jpa.shared.JPAProvider;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.modules.jta.shared.TransactionService;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -41,24 +41,23 @@ import org.hibernate.tool.schema.Action;
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")
 public class HibernateJPAOrmProvider implements JPAProvider {
 
-  protected static final Map<String, Object> DEFAULT_PROPERTIES = new HashMap<>();
+  protected static final Map<String, Object> DEFAULT_PROPERTIES;
   static {
-    DEFAULT_PROPERTIES.put("hibernate.show_sql", false);
-    DEFAULT_PROPERTIES.put("hibernate.format_sql", false);
-    DEFAULT_PROPERTIES.put("hibernate.use_sql_comments", false);
-    DEFAULT_PROPERTIES.put("hibernate.connection.autocommit", false);
-    DEFAULT_PROPERTIES.put("hibernate.archive.autodetection", "class, hbm");
-    DEFAULT_PROPERTIES.put("javax.persistence.query.timeout", 100000);
-    DEFAULT_PROPERTIES.put("javax.persistence.schema-generation.database.action", Action.NONE);
+    Map<String, Object> tmp = new HashMap<>();
+    tmp.put("hibernate.show_sql", false);
+    tmp.put("hibernate.format_sql", false);
+    tmp.put("hibernate.use_sql_comments", false);
+    tmp.put("hibernate.connection.autocommit", false);
+    tmp.put("hibernate.archive.autodetection", "class, hbm");
+    tmp.put("javax.persistence.query.timeout", 100000);
+    tmp.put("javax.persistence.schema-generation.database.action", Action.NONE);
+    DEFAULT_PROPERTIES = Collections.unmodifiableMap(tmp);
   }
-
-  @Inject
-  protected TransactionService transactionService;
 
   @Inject
   protected BeanManager beanManager;
 
-  protected final Map<String, Object> PROPERTIES = new HashMap<>();
+  protected final Map<String, Object> defaultProperties = new HashMap<>();
 
   @Inject
   protected DataSourceService dataSourceService;
@@ -70,7 +69,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
       metaData.getProperties().putIfAbsent(k, v);
     });
     shouldNotNull(metaData).configDataSource(dataSourceService::getManaged);
-    Map<String, Object> properties = new HashMap<>(PROPERTIES);
+    Map<String, Object> properties = new HashMap<>(defaultProperties);
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
@@ -82,8 +81,8 @@ public class HibernateJPAOrmProvider implements JPAProvider {
 
   @PostConstruct
   protected void onPostConstruct() {
-    PROPERTIES.put(AvailableSettings.JTA_PLATFORM, new JTAPlatform(transactionService));
-    PROPERTIES.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
+    defaultProperties.put(AvailableSettings.JTA_PLATFORM, JTAPlatform.INSTANCE);
+    defaultProperties.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
   }
 
 }

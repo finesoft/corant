@@ -14,6 +14,7 @@
 package org.corant.modules.jpa.hibernate.ogm;
 
 import static org.corant.shared.util.Strings.defaultString;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -25,7 +26,6 @@ import javax.persistence.EntityManagerFactory;
 import org.corant.modules.jpa.hibernate.orm.JTAPlatform;
 import org.corant.modules.jpa.shared.JPAProvider;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
-import org.corant.modules.jta.shared.TransactionService;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.ogm.datastore.mongodb.dialect.impl.AssociationStorageStrategy;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
@@ -40,26 +40,24 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")
 public class HibernateJPAOgmProvider implements JPAProvider {
 
-  protected static final Map<String, Object> DEFAULT_MONGODB_PROPERTIES = new HashMap<>();
+  protected static final Map<String, Object> DEFAULT_MONGODB_PROPERTIES;
   static {
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.create_database", true);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.document.association_storage",
+    Map<String, Object> tmp = new HashMap<>();
+    tmp.put("hibernate.ogm.datastore.create_database", true);
+    tmp.put("hibernate.ogm.datastore.document.association_storage",
         AssociationStorageStrategy.IN_ENTITY);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.datastore.grid_dialect",
-        HibernateMongoDBDialect.class);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.maxConnectionIdleTime", 6000);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.socketTimeout", 300000);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.connectTimeout", 300000);
-    DEFAULT_MONGODB_PROPERTIES.put("hibernate.ogm.mongodb.driver.autoConnectRetry", true);
+    tmp.put("hibernate.ogm.datastore.grid_dialect", HibernateMongoDBDialect.class);
+    tmp.put("hibernate.ogm.mongodb.driver.maxConnectionIdleTime", 6000);
+    tmp.put("hibernate.ogm.mongodb.driver.socketTimeout", 300000);
+    tmp.put("hibernate.ogm.mongodb.driver.connectTimeout", 300000);
+    tmp.put("hibernate.ogm.mongodb.driver.autoConnectRetry", true);
+    DEFAULT_MONGODB_PROPERTIES = Collections.unmodifiableMap(tmp);
   }
-
-  @Inject
-  protected TransactionService transactionService;
 
   @Inject
   protected BeanManager beanManager;
 
-  protected final Map<String, Object> PROPERTIES = new HashMap<>();
+  protected final Map<String, Object> defaultProperties = new HashMap<>();
 
   @Override
   public EntityManagerFactory buildEntityManagerFactory(PersistenceUnitInfoMetaData metaData,
@@ -70,7 +68,7 @@ public class HibernateJPAOgmProvider implements JPAProvider {
         metaData.getProperties().putIfAbsent(k, v);
       });
     }
-    Map<String, Object> properties = new HashMap<>(PROPERTIES);
+    Map<String, Object> properties = new HashMap<>(defaultProperties);
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
@@ -81,7 +79,7 @@ public class HibernateJPAOgmProvider implements JPAProvider {
 
   @PostConstruct
   protected void onPostConstruct() {
-    PROPERTIES.put(AvailableSettings.JTA_PLATFORM, new JTAPlatform(transactionService));
-    PROPERTIES.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
+    defaultProperties.put(AvailableSettings.JTA_PLATFORM, JTAPlatform.INSTANCE);
+    defaultProperties.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
   }
 }

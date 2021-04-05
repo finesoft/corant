@@ -17,6 +17,7 @@ import static org.corant.context.qualifier.Qualifiers.resolveNamedQualifiers;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Strings.defaultTrim;
@@ -167,7 +168,7 @@ public class Instances {
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
       return inst.get();
-    } else if (inst.isUnsatisfied()) {
+    } else if (inst.isUnsatisfied() && isEmpty(qualifiers)) {
       List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
       if (list.size() == 1) {
         return list.get(0);

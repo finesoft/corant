@@ -25,13 +25,7 @@ public class BigDecimalGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
-      @Override
-      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-        BigDecimal unwrap = javaTypeDescriptor.unwrap(value, BigDecimal.class, options);
-        resultset.put(names[0], unwrap);
-      }
-    };
+    return new BigDecimalBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override
@@ -49,6 +43,33 @@ public class BigDecimalGridTypeDescriptor implements GridTypeDescriptor {
         return javaTypeDescriptor.wrap(toBigDecimal(document.toString()), null);
       }
     };
+  }
+
+  /**
+   * corant-modules-jpa-hibernate-ogm
+   *
+   * @author bingo 下午3:38:06
+   *
+   */
+  private static final class BigDecimalBasicGridBinder<X> extends BasicGridBinder<X> {
+    private final JavaTypeDescriptor<X> javaTypeDescriptor;
+
+    /**
+     * @param javaDescriptor
+     * @param gridDescriptor
+     * @param javaTypeDescriptor
+     */
+    private BigDecimalBasicGridBinder(JavaTypeDescriptor<X> javaDescriptor,
+        GridTypeDescriptor gridDescriptor, JavaTypeDescriptor<X> javaTypeDescriptor) {
+      super(javaDescriptor, gridDescriptor);
+      this.javaTypeDescriptor = javaTypeDescriptor;
+    }
+
+    @Override
+    protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+      BigDecimal unwrap = javaTypeDescriptor.unwrap(value, BigDecimal.class, options);
+      resultset.put(names[0], unwrap);
+    }
   }
 
 }

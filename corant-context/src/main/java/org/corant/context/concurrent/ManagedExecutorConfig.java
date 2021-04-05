@@ -167,7 +167,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
         + ", keepAliveTime=" + keepAliveTime + ", threadLifeTime=" + threadLifeTime
         + ", awaitTermination=" + awaitTermination + ", rejectPolicy=" + rejectPolicy
         + ", threadPriority=" + threadPriority + ", threadName=" + threadName + ", queueCapacity="
-        + queueCapacity + ", contextInfos=" + contextInfos + ", enableJndi=" + enableJndi + "]";
+        + queueCapacity + ", contextInfos=" + Arrays.toString(contextInfos) + ", enableJndi="
+        + enableJndi + "]";
   }
 
   protected void setAwaitTermination(Duration awaitTermination) {

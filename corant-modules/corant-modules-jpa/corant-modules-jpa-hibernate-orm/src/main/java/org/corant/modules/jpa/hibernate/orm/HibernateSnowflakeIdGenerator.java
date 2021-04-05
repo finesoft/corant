@@ -69,15 +69,23 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
   static Map<String, Generator> generators = new ConcurrentHashMap<>();
 
-  @Override
-  public Serializable generate(SharedSessionContractImplementor session, Object object)
-      throws HibernateException {
-    String ptu = asString(session.getFactory().getProperties()
-        .get(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME));
-    return generators.computeIfAbsent(ptu, this::createGenerator).generate(session, object);
+  public static Instant parseGeneratedInstant(String ptu, long id) {
+    return getGenerator(ptu).snowflakeGenerator.parseGeneratedInstant(id);
   }
 
-  protected Generator createGenerator(String ptu) {
+  public static long parseGeneratedSequence(String ptu, long id) {
+    return getGenerator(ptu).snowflakeGenerator.parseGeneratedSequence(id);
+  }
+
+  public static long parseGeneratedWorkersId(String ptu, long id) {
+    return getGenerator(ptu).snowflakeGenerator.parseGeneratedWorkersId(id);
+  }
+
+  public static void reset() {
+    generators.clear();
+  }
+
+  static Generator createGenerator(String ptu) {
     PersistenceUnitInfoMetaData metaData =
         resolve(JPAExtension.class).getPersistenceUnitInfoMetaDatas().values().stream()
             .filter(p -> areEqual(p.getPersistenceUnitName(), ptu)).findFirst().get();
@@ -104,6 +112,18 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     return new Generator(tryAsClass(metaData.getPersistenceProviderClassName()), generator, usePst);
   }
 
+  static Generator getGenerator(String ptu) {
+    return generators.computeIfAbsent(ptu, HibernateSnowflakeIdGenerator::createGenerator);
+  }
+
+  @Override
+  public Serializable generate(SharedSessionContractImplementor session, Object object)
+      throws HibernateException {
+    String ptu = asString(session.getFactory().getProperties()
+        .get(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME));
+    return getGenerator(ptu).generate(session, object);
+  }
+
   /**
    * corant-modules-jpa-hibernate-orm
    *
@@ -112,16 +132,12 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
    */
   public static class Generator {
     final GeneralSnowflakeUUIDGenerator snowflakeGenerator;
-    final boolean usePst;
-    final Class<?> providerClass;
     final boolean useSecond;
     final HibernateSessionTimeService timeService;
 
     public Generator(final Class<?> providerClass, GeneralSnowflakeUUIDGenerator snowflakeGenerator,
         boolean usePst) {
-      this.providerClass = providerClass;
       this.snowflakeGenerator = snowflakeGenerator;
-      this.usePst = usePst;
       useSecond = snowflakeGenerator.getUnit() == ChronoUnit.SECONDS;
       if (!usePst) {
         timeService = (u, s, o) -> specTimeGenerator.fromEpoch(u, s, o);
@@ -134,6 +150,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     public long generate(SharedSessionContractImplementor session, Object object) {
       return snowflakeGenerator.generate(() -> timeService.resolve(useSecond, session, object));
     }
+
   }
 
 }

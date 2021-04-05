@@ -25,13 +25,7 @@ public class LocalDateTimeGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BasicGridBinder<X>(javaTypeDescriptor, this) {
-      @Override
-      protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
-        LocalDateTime unwrap = javaTypeDescriptor.unwrap(value, LocalDateTime.class, options);
-        resultset.put(names[0], unwrap);
-      }
-    };
+    return new LocalDateTimeBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override
@@ -43,6 +37,33 @@ public class LocalDateTimeGridTypeDescriptor implements GridTypeDescriptor {
       }
       return javaTypeDescriptor.wrap(toObject(document, LocalDateTime.class), null);
     };
+  }
+
+  /**
+   * corant-modules-jpa-hibernate-ogm
+   *
+   * @author bingo 下午3:39:28
+   *
+   */
+  private static final class LocalDateTimeBasicGridBinder<X> extends BasicGridBinder<X> {
+    private final JavaTypeDescriptor<X> javaTypeDescriptor;
+
+    /**
+     * @param javaDescriptor
+     * @param gridDescriptor
+     * @param javaTypeDescriptor
+     */
+    private LocalDateTimeBasicGridBinder(JavaTypeDescriptor<X> javaDescriptor,
+        GridTypeDescriptor gridDescriptor, JavaTypeDescriptor<X> javaTypeDescriptor) {
+      super(javaDescriptor, gridDescriptor);
+      this.javaTypeDescriptor = javaTypeDescriptor;
+    }
+
+    @Override
+    protected void doBind(Tuple resultset, X value, String[] names, WrapperOptions options) {
+      LocalDateTime unwrap = javaTypeDescriptor.unwrap(value, LocalDateTime.class, options);
+      resultset.put(names[0], unwrap);
+    }
   }
 
 }

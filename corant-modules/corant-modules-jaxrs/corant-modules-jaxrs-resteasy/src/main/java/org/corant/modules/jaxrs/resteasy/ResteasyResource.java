@@ -13,13 +13,30 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.unmodifiableMap;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static org.corant.modules.servlet.ContentDispositions.parse;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.james.mime4j.codec.DecodeMonitor;
+import org.apache.james.mime4j.codec.DecoderUtil;
 import org.corant.modules.jaxrs.shared.AbstractJaxrsResource;
+import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
+import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Resources.SourceType;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
 /**
@@ -45,11 +62,16 @@ public class ResteasyResource extends AbstractJaxrsResource {
     }
     Map<String, Object> map = new LinkedHashMap<>(uploadForm.size());
     for (String fieldName : fieldNames) {
-      List<String> lp = new ArrayList<>();
+      List<Object> lp = new ArrayList<>();
       if (uploadForm.get(fieldName) != null) {
         for (InputPart ip : uploadForm.get(fieldName)) {
           if (ip != null) {
-            lp.add(ip.getBodyAsString());
+            ContentDisposition cd = parse(ip.getHeaders().getFirst(CONTENT_DISPOSITION));
+            if (cd.getFilename() != null) {
+              lp.add(new InputPartResource(ip, cd));
+            } else {
+              lp.add(ip.getBodyAsString());
+            }
           }
         }
       }
@@ -62,5 +84,79 @@ public class ResteasyResource extends AbstractJaxrsResource {
       }
     }
     return map;
+  }
+
+  /**
+   * corant-modules-jaxrs-resteasy
+   *
+   * resteasy InputPart resource
+   *
+   * @author don
+   * @date 2019-09-26
+   *
+   */
+  public static class InputPartResource implements Resource {
+
+    private InputPart inputPart;
+
+    private String filename;
+
+    private Map<String, Object> metaData;
+
+    public InputPartResource(InputPart inputPart) {
+      this(shouldNotNull(inputPart), parse(inputPart.getHeaders().getFirst(CONTENT_DISPOSITION)));
+    }
+
+    InputPartResource(InputPart inputPart, ContentDisposition disposition) {
+      this.inputPart = inputPart;
+      String filename = disposition.getFilename();
+      if (filename != null) {
+        if (filename.startsWith("=?") && filename.endsWith("?=")) {
+          // For RFC 2047 bingo 2021-04-06
+          filename = DecoderUtil.decodeEncodedWords(filename, DecodeMonitor.SILENT);
+        } else if (disposition.getCharset() == null && isNotBlank(filename)) {
+          // 因为apache mime4j 解析浏览器提交的文件名按ISO_8859_1处理
+          // 上传文件断点ContentUtil.decode(ByteSequence byteSequence, int offset, int length)
+          filename = new String(filename.getBytes(ISO_8859_1), UTF_8);
+        }
+      }
+      this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
+      metaData = new HashMap<>();
+      metaData.put(CONTENT_TYPE, getContentType());
+    }
+
+    public void addMetadata(String key, Object value) {
+      metaData.put(key, value);
+    }
+
+    public String getContentType() {
+      return inputPart.getMediaType().toString();
+    }
+
+    @Override
+    public String getLocation() {
+      return getName();
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+      return unmodifiableMap(metaData);
+    }
+
+    @Override
+    public String getName() {
+      return filename;
+    }
+
+    @Override
+    public SourceType getSourceType() {
+      return null;
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+      return inputPart.getBody(InputStream.class, null);
+    }
+
   }
 }

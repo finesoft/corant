@@ -28,7 +28,7 @@ import org.corant.shared.ubiquity.Sortable;
  * the target type that converter will convert source to.
  *
  * <p>
- * All converters are loaded by ServiceLoader, which means that they need to be declared in
+ * All converter factories are loaded by ServiceLoader, which means that they need to be declared in
  * META-INF/service.
  *
  * @author bingo 下午12:08:59

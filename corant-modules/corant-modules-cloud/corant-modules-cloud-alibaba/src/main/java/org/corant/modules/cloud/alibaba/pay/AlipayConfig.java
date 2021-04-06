@@ -16,58 +16,135 @@ public class AlipayConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = 6560494718072597103L;
 
-  protected String appid;
+  protected String serverUrl;
 
-  protected String merchantPrivateKey;
+  protected String appId;
 
-  protected String appPublicKeyPath;
+  protected String privateKey;
 
-  protected String certPublicKeyPath;
-
-  protected String notifyUrl;
-
-  protected String rootCertPath;
-
-  @ConfigKeyItem(defaultValue = "RSA2")
-  protected String signType;
+  @ConfigKeyItem(defaultValue = "json")
+  protected String format;
 
   @ConfigKeyItem(defaultValue = "utf-8")
   protected String charset;
 
-  protected String gatewayUrl;
+  @ConfigKeyItem(defaultValue = "RSA2")
+  protected String signType;
 
-  public String getAppid() {
-    return appid;
+  protected String certPath;
+
+  protected String alipayPublicCertPath;
+
+  protected String rootCertPath;
+
+  protected String encryptor;
+
+  protected String encryptType;
+
+  protected String proxyHost;
+
+  protected int proxyPort;
+
+  /**
+   * 
+   * @return the alipayPublicCertPath
+   */
+  public String getAlipayPublicCertPath() {
+    return alipayPublicCertPath;
   }
 
-  public String getAppPublicKeyPath() {
-    return appPublicKeyPath;
+  /**
+   * 
+   * @return the appId
+   */
+  public String getAppId() {
+    return appId;
   }
 
-  public String getCertPublicKeyPath() {
-    return certPublicKeyPath;
+  /**
+   * 
+   * @return the certPath
+   */
+  public String getCertPath() {
+    return certPath;
   }
 
+  /**
+   * 
+   * @return the charset
+   */
   public String getCharset() {
     return charset;
   }
 
-  public String getGatewayUrl() {
-    return gatewayUrl;
+  /**
+   * 
+   * @return the encryptor
+   */
+  public String getEncryptor() {
+    return encryptor;
   }
 
-  public String getMerchantPrivateKey() {
-    return merchantPrivateKey;
+  /**
+   * 
+   * @return the encryptType
+   */
+  public String getEncryptType() {
+    return encryptType;
   }
 
-  public String getNotifyUrl() {
-    return notifyUrl;
+  /**
+   * 
+   * @return the format
+   */
+  public String getFormat() {
+    return format;
   }
 
+  /**
+   * 
+   * @return the privateKey
+   */
+  public String getPrivateKey() {
+    return privateKey;
+  }
+
+  /**
+   * 
+   * @return the proxyHost
+   */
+  public String getProxyHost() {
+    return proxyHost;
+  }
+
+  /**
+   * 
+   * @return the proxyPort
+   */
+  public int getProxyPort() {
+    return proxyPort;
+  }
+
+  /**
+   * 
+   * @return the rootCertPath
+   */
   public String getRootCertPath() {
     return rootCertPath;
   }
 
+  /**
+   * 
+   * @return the serverUrl
+   */
+  public String getServerUrl() {
+    return serverUrl;
+  }
+
+  /**
+   * 
+   * @return the signType
+   */
   public String getSignType() {
     return signType;
   }

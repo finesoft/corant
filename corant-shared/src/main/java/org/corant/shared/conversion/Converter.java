@@ -16,7 +16,6 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Function;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -48,7 +47,7 @@ public interface Converter<S, T> extends Sortable {
    *         {@code after} converter
    * @throws NullPointerException if after is null
    *
-   * @see #compose(Function)
+   * @see #compose(Converter)
    */
   default <V> Converter<S, V> andThen(Converter<? super T, ? extends V> after) {
     return (t, hints) -> shouldNotNull(after).apply(apply(t, hints), hints);

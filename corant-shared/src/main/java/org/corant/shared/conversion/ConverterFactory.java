@@ -40,7 +40,7 @@ public interface ConverterFactory<S, T> extends Sortable {
    * Returns a converter for given target type
    *
    * @param targetClass the target class
-   * @param defaultValue the default value when the source object is empty
+   * @param defaultValue the default value when the source object is null
    * @param throwException whether to throw an exception when it cannot be converted
    * @return the converter
    */
@@ -62,9 +62,8 @@ public interface ConverterFactory<S, T> extends Sortable {
    * Returns whether the converter factory supports the conversion of the given source class and
    * target class
    *
-   * @param sourceClass
-   * @param targetClass
-   * @return isSupports
+   * @param sourceClass the source object class that will be converted
+   * @param targetClass the target class that will be convert to
    */
   default boolean isSupports(Class<?> sourceClass, Class<?> targetClass) {
     return isSupportSourceClass(sourceClass) && isSupportTargetClass(targetClass);
@@ -73,8 +72,7 @@ public interface ConverterFactory<S, T> extends Sortable {
   /**
    * Returns whether the converter factory supports the conversion of the given source class
    *
-   * @param sourceClass
-   * @return isSupportSourceClass
+   * @param sourceClass the source object class that will be converted
    */
   default boolean isSupportSourceClass(Class<?> sourceClass) {
     return false;
@@ -83,8 +81,7 @@ public interface ConverterFactory<S, T> extends Sortable {
   /**
    * Returns whether the converter factory supports the conversion of the given target class
    *
-   * @param targetClass
-   * @return isSupportTargetClass
+   * @param targetClass the target class that will be convert to
    */
   boolean isSupportTargetClass(Class<?> targetClass);
 }

@@ -16,7 +16,7 @@ package org.corant.shared.normal;
 import static org.corant.shared.util.Strings.defaultString;
 
 /**
- * corant-kernel
+ * corant-shared
  *
  * @author bingo 下午11:41:22
  *

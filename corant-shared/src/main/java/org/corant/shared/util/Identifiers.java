@@ -38,6 +38,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
+ * corant-shared
+ *
  * @author bingo 上午12:30:13
  */
 public class Identifiers {

@@ -14,6 +14,8 @@
 package org.corant.shared.exception;
 
 /**
+ * corant-shared
+ *
  * @author bingo 上午12:23:49
  *
  */
@@ -25,7 +27,6 @@ public class NotSupportedException extends CorantRuntimeException {
    *
    */
   public NotSupportedException() {
-    super();
   }
 
   /**

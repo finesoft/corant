@@ -30,6 +30,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Bytes.BitArray;
 
 /**
+ * corant-shared
+ *
  * @author bingo 上午12:29:41
  */
 public class Encrypts {

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
 import org.bson.Document;
 import org.corant.modules.jpa.hibernate.orm.HibernateOrmSessionTimeService;
+import org.corant.shared.normal.Priorities;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 
@@ -34,8 +35,8 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
   }
 
   @Override
-  public int getOrdinal() {
-    return super.getOrdinal() + 1;
+  public int getPriority() {
+    return Priorities.APPLICATION_LOWER;
   }
 
   @Override

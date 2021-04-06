@@ -16,10 +16,10 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Functions.optional;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
-import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import org.corant.shared.conversion.converter.IdentityConverter;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -89,8 +89,7 @@ public class Converters {
   static Pair<Converter, ConverterFactory> getMatchedConverterFromFactory(Class<?> sourceClass,
       Class<?> targetClass) {
     ConverterFactory factory = ConverterRegistry.getConverterFactories().stream()
-        .filter(f -> f.isSupports(sourceClass, targetClass))
-        .max(Comparator.comparingInt(ConverterFactory::getPriority)).orElse(null);
+        .filter(f -> f.isSupports(sourceClass, targetClass)).min(Sortable::compare).orElse(null);
     if (factory != null) {
       // FIXME initialize parameter
       return Pair.of(factory.create(targetClass, null, true), factory);

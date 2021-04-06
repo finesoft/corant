@@ -31,8 +31,8 @@ public class ManagedThreadFactoryConfig extends AbstractNamedObject implements D
 
   private static final long serialVersionUID = -293822931326474344L;
 
-  private String context;
-  private int priority = Thread.NORM_PRIORITY;
+  protected String context;
+  protected int priority = Thread.NORM_PRIORITY;
 
   /**
    *

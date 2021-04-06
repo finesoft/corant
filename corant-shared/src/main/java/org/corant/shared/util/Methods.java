@@ -28,8 +28,9 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * @author bingo 下午10:08:22
+ * corant-shared
  *
+ * @author bingo 下午10:08:22
  */
 public class Methods {
 

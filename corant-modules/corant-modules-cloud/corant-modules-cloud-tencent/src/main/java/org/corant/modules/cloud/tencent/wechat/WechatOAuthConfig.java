@@ -14,13 +14,13 @@ public class WechatOAuthConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = 4325579136120573042L;
 
-  private String appid;
+  protected String appid;
 
-  private String secret;
+  protected String secret;
 
-  private String redirectUri;
+  protected String redirectUri;
 
-  private String qrCodeUrl;
+  protected String qrCodeUrl;
 
   /**
    * 应用唯一标识

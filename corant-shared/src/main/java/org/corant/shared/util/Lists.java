@@ -30,15 +30,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
+ * corant-shared
  *
  * @author bingo 上午12:31:10
- *
  */
 public class Lists {
 
-  private Lists() {
-    super();
-  }
+  private Lists() {}
 
   /**
    * <p>

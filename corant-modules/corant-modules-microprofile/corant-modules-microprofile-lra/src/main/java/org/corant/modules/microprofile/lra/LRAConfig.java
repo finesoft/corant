@@ -30,10 +30,10 @@ public class LRAConfig implements DeclarativeConfig {
   public static final LRAConfig EMPTY = new LRAConfig("localhost", 8089);
 
   @ConfigKeyItem(defaultValue = "localhost")
-  private String host;
+  protected String host;
 
   @ConfigKeyItem(defaultValue = "8089")
-  private Integer port;
+  protected Integer port;
 
   public LRAConfig() {}
 

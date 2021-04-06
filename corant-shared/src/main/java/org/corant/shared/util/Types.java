@@ -36,6 +36,8 @@ import java.util.Properties;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
+ * corant-shared
+ *
  * Extracted from google gson.
  *
  * Static methods for working with types.
@@ -651,8 +653,7 @@ public class Types {
 
     @Override
     public boolean equals(Object other) {
-      return other instanceof ParameterizedType
-          && Types.equals(this, (ParameterizedType) other);
+      return other instanceof ParameterizedType && Types.equals(this, (ParameterizedType) other);
     }
 
     @Override

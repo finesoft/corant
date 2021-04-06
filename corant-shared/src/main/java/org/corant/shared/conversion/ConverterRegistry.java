@@ -26,7 +26,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassResource;
@@ -146,8 +146,7 @@ public class ConverterRegistry {
   public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
     if (converterFactory != null && !CONVERTER_FACTORIES.contains(converterFactory)) {
       CONVERTER_FACTORIES.add(converterFactory);
-      CONVERTER_FACTORIES
-          .sort((f1, f2) -> Integer.compare(f2.getPriority(), f1.getPriority()) * -1);
+      CONVERTER_FACTORIES.sort(Sortable::compare);
     }
   }
 
@@ -233,11 +232,9 @@ public class ConverterRegistry {
 
   static synchronized void load() {
     streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
-        .sorted(Comparator.comparingInt(Converter::getPriority))
-        .forEach(ConverterRegistry::register);
+        .sorted(Sortable::reverseCompare).forEach(ConverterRegistry::register);
     streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
-        .sorted(Comparator.comparingInt(ConverterFactory::getPriority))
-        .forEach(ConverterRegistry::register);
+        .sorted(Sortable::reverseCompare).forEach(ConverterRegistry::register);
   }
 
   static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,

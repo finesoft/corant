@@ -41,7 +41,7 @@ public class MpRestClientBuilderListener implements RestClientBuilderListener {
       logger.fine("Register default mp context resolver to RestClientBuilder");
       builder.register(MpDefaultContextResolver.class, Priorities.USER);
     }
-    select(MpRestClientBuilderConfigurator.class).stream().sorted(Sortable::compare)
+    select(MpRestClientBuilderConfigurator.class).stream().sorted(Sortable::reverseCompare)
         .forEach(x -> x.config(builder));
   }
 }

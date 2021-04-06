@@ -33,7 +33,7 @@ public interface ConfigAdjuster extends Sortable {
     ConfigAdjuster adjuster = a -> a;
     List<ConfigAdjuster> discoveredAdjusters =
         listOf(ServiceLoader.load(ConfigAdjuster.class, classLoader));
-    discoveredAdjusters.sort(Sortable::compare);
+    discoveredAdjusters.sort(Sortable::reverseCompare);
     for (ConfigAdjuster discoveredAdjuster : discoveredAdjusters) {
       adjuster = adjuster.compose(discoveredAdjuster);
     }

@@ -24,6 +24,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import sun.misc.Unsafe;
 
 /**
+ * corant-shared
  *
  * @author bingo 下午7:00:37
  *

@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
+ * corant-shared
+ *
  * @author bingo 下午8:10:18
  *
  */

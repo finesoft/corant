@@ -32,10 +32,10 @@ public class FlywayConfig extends ClassicConfiguration implements DeclarativeCon
   public static final FlywayConfig EMPTY = new FlywayConfig(false, "META-INF/dbmigration");
 
   @ConfigKeyItem(defaultValue = "false")
-  boolean enable;
+  protected boolean enable;
 
   @ConfigKeyItem(defaultValue = "META-INF/dbmigration")
-  String locationPrefix;
+  protected String locationPrefix;
 
   public FlywayConfig() {
 

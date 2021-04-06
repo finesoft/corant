@@ -52,10 +52,15 @@ import org.corant.shared.conversion.converter.StringCurrencyConverter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
+/**
+ * corant-shared
+ *
+ * @author bingo 下午4:21:10
+ *
+ */
 public class Maps {
 
   private Maps() {
-    super();
   }
 
   /**

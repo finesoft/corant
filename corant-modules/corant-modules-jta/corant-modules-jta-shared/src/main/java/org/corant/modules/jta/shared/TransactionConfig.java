@@ -33,13 +33,13 @@ public class TransactionConfig implements DeclarativeConfig {
   static final TransactionConfig EMPTY = new TransactionConfig();
 
   @ConfigKeyItem
-  boolean bindToJndi = false;
+  protected boolean bindToJndi = false;
 
   @ConfigKeyItem
-  Optional<Duration> timeout;
+  protected Optional<Duration> timeout;
 
   @ConfigKeyItem
-  boolean autoRecovery = false;
+  protected boolean autoRecovery = false;
 
   public static TransactionConfig empty() {
     return EMPTY;

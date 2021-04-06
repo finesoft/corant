@@ -158,7 +158,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
 
     streamOf(ServiceLoader.load(DBCPDataSourceConfigurator.class, defaultClassLoader()))
-        .sorted(Sortable::compare).forEach(c -> c.config(cfg, ds));
+        .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, ds));
     return ds;
   }
 

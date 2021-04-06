@@ -13,30 +13,74 @@
  */
 package org.corant.shared.ubiquity;
 
+import static org.corant.shared.util.Classes.getUserClass;
+import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Classes;
+
 /**
- * corant-config
+ * corant-shared
+ *
+ * Interface that can be used for sorting, note that in general, the smaller the priority number
+ * {@link #getPriority()}, the more preferred.
  *
  * @author bingo 上午10:44:33
  *
  */
-public interface Sortable {
+public interface Sortable extends Comparable<Sortable> {
 
   /**
-   * Reverse the order of numbers, the bigger is the front
+   * Compares two {@code Sortable} values. The value returned is identical to what would be returned
+   * by:
    *
-   * @param ccf1
-   * @param ccf2
-   * @return compare
+   * <pre>
+   * Integer.compare(s1.getPriority(), s2.getPriority())
+   * or s1.getClass().getName().compareTo(s2.getClass().getName()) if priority are same.
+   * </pre>
+   *
+   * @param s1 the first {@code Sortable} to compare
+   * @param s2 the second {@code Sortable} to compare
+   *
+   * @see Integer#compare(int, int)
+   * @see Classes#getUserClass(Object)
+   * @see String#compareTo(String)
+   *
    */
-  static int compare(Sortable ccf1, Sortable ccf2) {
-    return Integer.compare(ccf1.getOrdinal(), ccf2.getOrdinal()) * -1;
+  static int compare(Sortable s1, Sortable s2) {
+    int result;
+    if ((result = Integer.compare(s1.getPriority(), s2.getPriority())) == 0) {
+      result = getUserClass(s1).getName().compareTo(getUserClass(s2).getName());
+    }
+    return result;
   }
 
-  static int reverseCompare(Sortable ccf1, Sortable ccf2) {
-    return -1 * compare(ccf1, ccf2);
+  /**
+   * Returns the reverse compares two {@code Sortable} values. The value returned is identical to
+   * what would be returned by:
+   *
+   * <pre>
+   * -1 * compare(s1, s2)
+   * </pre>
+   *
+   * @param s1
+   * @param s2
+   * @see #compare(Sortable, Sortable)
+   */
+  static int reverseCompare(Sortable s1, Sortable s2) {
+    return -1 * compare(s1, s2);
   }
 
-  default int getOrdinal() {
-    return 0;
+  @Override
+  default int compareTo(Sortable o) {
+    return compare(this, o);
+  }
+
+  /**
+   * Returns the converter priority, used to identify the priority , the smaller the value, the more
+   * preferred. Default is {@link Priorities#FRAMEWORK_LOWER}
+   *
+   * @return the priority
+   */
+  default int getPriority() {
+    return Priorities.FRAMEWORK_LOWER;
   }
 }

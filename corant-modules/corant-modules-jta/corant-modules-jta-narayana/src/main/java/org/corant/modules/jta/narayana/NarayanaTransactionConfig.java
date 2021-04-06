@@ -44,22 +44,22 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   static final String DFLT_OBJECT_STORE_TYPE = ShadowNoFileLockStore.class.getName();
 
   @ConfigKeyItem
-  Optional<Duration> autoRecoveryBackoffPeriod;
+  protected Optional<Duration> autoRecoveryBackoffPeriod;
 
   @ConfigKeyItem
-  Optional<Duration> autoRecoveryPeriod;
+  protected Optional<Duration> autoRecoveryPeriod;
 
   @ConfigKeyItem
-  Optional<Duration> autoRecoveryInitOffset;
+  protected Optional<Duration> autoRecoveryInitOffset;
 
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
-  Map<String, String> objectStoreEnvironment = new HashMap<>();
+  protected Map<String, String> objectStoreEnvironment = new HashMap<>();
 
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
-  Map<String, String> coordinatorEnvironment = new HashMap<>();
+  protected Map<String, String> coordinatorEnvironment = new HashMap<>();
 
   @ConfigKeyItem(defaultValue = "false")
-  boolean enableMbean;
+  protected boolean enableMbean;
 
   public Optional<Duration> getAutoRecoveryBackoffPeriod() {
     return autoRecoveryBackoffPeriod;

@@ -34,6 +34,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
+ * corant-shared
+ *
  * @author bingo 2018年3月23日
  */
 public class Validates {

@@ -16,25 +16,25 @@ public class AlipayConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = 6560494718072597103L;
 
-  private String appid;
+  protected String appid;
 
-  private String merchantPrivateKey;
+  protected String merchantPrivateKey;
 
-  private String appPublicKeyPath;
+  protected String appPublicKeyPath;
 
-  private String certPublicKeyPath;
+  protected String certPublicKeyPath;
 
-  private String notifyUrl;
+  protected String notifyUrl;
 
-  private String rootCertPath;
+  protected String rootCertPath;
 
-  @ConfigKeyItem(value = "sign-type", defaultValue = "RSA2")
-  private String signType;
+  @ConfigKeyItem(defaultValue = "RSA2")
+  protected String signType;
 
-  @ConfigKeyItem(value = "charset", defaultValue = "utf-8")
-  private String charset;
+  @ConfigKeyItem(defaultValue = "utf-8")
+  protected String charset;
 
-  private String gatewayUrl;
+  protected String gatewayUrl;
 
   public String getAppid() {
     return appid;

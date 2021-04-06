@@ -35,7 +35,6 @@ import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -92,7 +91,7 @@ public class CorantConfigConversion implements Serializable {
    * @param converters
    */
   CorantConfigConversion(List<OrdinalConverter> converters) {
-    converters.sort(Comparator.comparingInt(OrdinalConverter::getOrdinal).reversed());
+    converters.sort(Sortable::reverseCompare);
     Map<Type, Converter<?>> useConverters = new HashMap<>();
     for (OrdinalConverter oc : converters) {
       useConverters.computeIfAbsent(oc.type, t -> oc.converter);
@@ -585,7 +584,7 @@ public class CorantConfigConversion implements Serializable {
     }
 
     @Override
-    public int getOrdinal() {
+    public int getPriority() {
       return ordinal;
     }
   }

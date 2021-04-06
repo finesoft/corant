@@ -39,6 +39,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
+ * corant-shared
+ *
  * @author bingo 2017年4月7日
  */
 public class Streams {

@@ -20,6 +20,7 @@ import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -37,6 +38,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-context
@@ -73,9 +75,8 @@ public class Instances {
    * Use with care, there may be a memory leak.
    *
    * @param <T>
-   * @param instanceClass
-   * @param qualifiers
-   * @return find
+   * @param instanceClass the bean instance class
+   * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> Optional<T> find(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
@@ -92,7 +93,6 @@ public class Instances {
    * @param <T>
    * @param instanceClass
    * @param name
-   * @return findNamed
    */
   public static <T> Optional<T> findNamed(Class<T> instanceClass, String name) {
     Instance<T> inst = select(instanceClass, Any.Literal.INSTANCE);
@@ -113,14 +113,29 @@ public class Instances {
   }
 
   /**
-   * Resolve CDI bean instance
+   * Make given object manageable, if given object is already managed in CDI then return it
+   * directly.
+   *
+   * @param <T> the manageable bean type
+   * @param obj the object that will be managed
+   */
+  public static <T> T manageable(T obj) {
+    if (isManagedBean(obj)) {
+      return obj;
+    } else if (obj != null) {
+      return UnmanageableInstance.of(obj).produce().inject().postConstruct().get();
+    }
+    return null;
+  }
+
+  /**
+   * Returns CDI bean instance or throws exception if can't resolve.
    *
    * Use with care, there may be a memory leak.
    *
    * @param <T>
-   * @param instanceClass
-   * @param qualifiers
-   * @return resolve
+   * @param instanceClass the bean instance class
+   * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> T resolve(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
@@ -131,12 +146,12 @@ public class Instances {
   }
 
   /**
-   * Resolve CDI bean instance and consumer it.
+   * Resolve CDI bean instance and consumer it or throws exception if can't resolve.
    *
    * @param <T>
-   * @param instanceClass
-   * @param consumer
-   * @param qualifiers resolveAccept
+   * @param instanceClass the bean instance class
+   * @param consumer the consumer that consumer the bean instance
+   * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
@@ -150,12 +165,11 @@ public class Instances {
   }
 
   /**
-   * Resolve bean instance from CDI or Service Loader
+   * Returns bean instance from CDI or Service Loader or throws exception if not found.
    *
-   * First, we try to resolve the bean instance from the CDI environment, and return the resolved
-   * instance immediately if it can be resolved; otherwise, try to look it up from the Service
-   * Loader, and resolve it with UnmanageableInstance if it is not found in the Service Loader;
-   * throw an exception if ambiguous appears in CDI.
+   * First, we try to resolve the bean instance from the CDI environment, and return the instance
+   * immediately if it can be resolved; otherwise, try to look it up from the Service Loader, throw
+   * an exception if ambiguous appears in CDI or can't load it from Service Loader.
    *
    * Use with care, there may be a memory leak.
    *
@@ -169,28 +183,15 @@ public class Instances {
     if (inst.isResolvable()) {
       return inst.get();
     } else if (inst.isUnsatisfied() && isEmpty(qualifiers)) {
-      List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
-      if (list.size() == 1) {
-        return list.get(0);
-      } else {
-        return UnmanageableInstance.of(instanceClass).produce().inject().postConstruct().get();
-      }
+      return resolveService(instanceClass);
     } else {
       throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
   }
 
-  public static <T> T resolveAnyway(T obj, Annotation... qualifiers) {
-    if (isManagedBean(obj, qualifiers)) {
-      return obj;
-    } else if (obj != null) {
-      return UnmanageableInstance.of(obj).produce().inject().postConstruct().get();
-    }
-    return null;
-  }
-
   /**
-   * Resolve CDI bean instance and returns the result using the function interface.
+   * Resolve CDI bean instance and returns the result using the given function interface, if the
+   * bean instance can't resolve then throw exception.
    *
    * @param <T>
    * @param <R>
@@ -208,6 +209,32 @@ public class Instances {
     } else {
       throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
+  }
+
+  /**
+   * Returns bean instance from Service Loader or throws exception if not found.
+   *
+   * Note: If there are multiple service instances found by ServiceLoader and given instance class
+   * is {@link org.corant.shared.ubiquity.Sortable} then return the max ordinal one, otherwise throw
+   * exception.
+   *
+   * @param <T> the instance type
+   * @param instanceClass the instance class to be resolved
+   *
+   * @see Sortable#compare(Sortable, Sortable)
+   */
+  public static <T> T resolveService(Class<T> instanceClass) {
+    List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
+    T service = null;
+    if (isNotEmpty(list)) {
+      if (list.size() == 1) {
+        service = list.get(0);
+      } else if (Sortable.class.isAssignableFrom(instanceClass)) {
+        service = forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
+            .findFirst().orElse(null));
+      }
+    }
+    return shouldNotNull(service, "Can not resolve bean class %s.", instanceClass);
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {

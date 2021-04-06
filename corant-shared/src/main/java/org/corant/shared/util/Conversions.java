@@ -41,6 +41,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
+import org.corant.shared.conversion.Converter;
+import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.NumberBigDecimalConverter;
 import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
@@ -519,14 +521,32 @@ public class Conversions {
     return toList(obj, Long.class);
   }
 
+  /**
+   *
+   * @param <T>
+   * @param obj
+   * @param clazz
+   * @return toObject
+   */
   public static <T> T toObject(Object obj, Class<T> clazz) {
-    if (clazz != null && clazz.isArray()
-        && (obj instanceof Object[] || obj instanceof Collection)) {
-      return forceCast(toArray(obj, clazz.getComponentType()));
-    }
-    return Conversion.convert(obj, clazz);
+    return toObject(obj, clazz, null);
   }
 
+  /**
+   * Converts the given original object to given target type with hints. if the given target type is
+   * an array, and the given original object is an array or a collection object, each element is
+   * converted, otherwise the overall conversion is performed.
+   *
+   * @param <T> the target type
+   * @param obj the original object that will be converted
+   * @param clazz the target class
+   * @param hints the conversion hints use to intervene in the conversion process
+   * @return the converted target object
+   *
+   * @see Conversion#convert(Object, Class, Map)
+   * @see Converter
+   * @see ConverterFactory
+   */
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
     if (clazz != null && clazz.isArray()
         && (obj instanceof Object[] || obj instanceof Collection)) {

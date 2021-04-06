@@ -52,7 +52,9 @@ import org.corant.shared.util.PathMatcher.RegexMatcher;
 import org.corant.shared.util.Resources.SourceType;
 
 /**
- * Origin of code: org.apache.commons.io.FileUtils
+ * corant-shared
+ *
+ * Some code from : org.apache.commons.io.FileUtils
  *
  * @author bingo 下午3:54:56
  *
@@ -71,9 +73,7 @@ public class FileUtils {
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());
   static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
 
-  private FileUtils() {
-    super();
-  }
+  private FileUtils() {}
 
   public static Checksum checksum(final File file, final Checksum checksum) throws IOException {
     if (file.isDirectory()) {

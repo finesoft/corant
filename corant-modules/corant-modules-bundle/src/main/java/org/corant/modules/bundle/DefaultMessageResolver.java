@@ -76,7 +76,7 @@ public class DefaultMessageResolver implements MessageResolver {
     Object[] parameters = genParameters(useLocale, messageSource.getParameters());
     MutableString ms = MutableString.of(null);
     if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::reverseCompare)
+      messageSources.stream().sorted(Sortable::compare)
           .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
           .findFirst().ifPresent(ms::set);
     }
@@ -90,7 +90,7 @@ public class DefaultMessageResolver implements MessageResolver {
     Object[] parameters = genParameters(useLocale, params);
     MutableString ms = MutableString.of(null);
     if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::reverseCompare)
+      messageSources.stream().sorted(Sortable::compare)
           .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
           .findFirst().ifPresent(ms::set);
     }
@@ -102,7 +102,7 @@ public class DefaultMessageResolver implements MessageResolver {
 
     MutableString ms = MutableString.of(null);
     if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::reverseCompare)
+      messageSources.stream().sorted(Sortable::compare)
           .map(b -> b.getMessage(locale, unknow, new Object[] {code})).filter(Strings::isNotBlank)
           .findFirst().ifPresent(ms::set);
     }
@@ -114,7 +114,7 @@ public class DefaultMessageResolver implements MessageResolver {
     if (obj instanceof Enum) {
       MutableString ms = MutableString.of(null);
       if (!enumerationSources.isUnsatisfied()) {
-        enumerationSources.stream().sorted(Sortable::reverseCompare)
+        enumerationSources.stream().sorted(Sortable::compare)
             .map(b -> b.getEnumItemLiteral((Enum) obj, locale)).filter(Strings::isNotBlank)
             .findFirst().ifPresent(ms::set);
       }

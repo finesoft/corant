@@ -139,7 +139,7 @@ public class NarayanaExtension implements TransactionExtension {
     final RecoveryEnvironmentBean recoveryBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
-        .sorted(Sortable::compare).forEach(cfgr -> {
+        .sorted(Sortable::reverseCompare).forEach(cfgr -> {
           logger.fine(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));
           cfgr.configCoreEnvironment(coreBean, config);

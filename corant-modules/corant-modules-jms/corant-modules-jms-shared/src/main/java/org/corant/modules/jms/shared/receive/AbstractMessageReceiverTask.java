@@ -219,9 +219,9 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
       } else {
         connection = connectionFactory.createConnection();
       }
-      select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
+      select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
           .forEach(c -> c.configConnection(connection, meta));
-      select(JMSExceptionListener.class).stream().max(Sortable::compare)
+      select(JMSExceptionListener.class).stream().min(Sortable::compare)
           .ifPresent(listener -> listener.tryConfig(connection));
     }
     // initialize session

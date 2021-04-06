@@ -30,13 +30,13 @@ public class ClientConfig extends AbstractNamedObject implements DeclarativeConf
 
   private static final long serialVersionUID = 6342527084682440153L;
 
-  private String name;
-  private String host;
+  protected String name;
+  protected String host;
   @ConfigKeyItem(defaultValue = "9000")
-  private int port;
-  private String certFile;
-  private String keyFile;
-  private String trustManager;
+  protected int port;
+  protected String certFile;
+  protected String keyFile;
+  protected String trustManager;
 
   @Override
   public boolean equals(Object obj) {

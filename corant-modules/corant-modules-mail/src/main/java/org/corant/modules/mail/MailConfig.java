@@ -34,29 +34,29 @@ public class MailConfig implements DeclarativeConfig {
   private static final long serialVersionUID = -230483402482161319L;
 
   @ConfigKeyItem
-  private String protocol;
+  protected String protocol;
 
   @ConfigKeyItem
-  private String host;
+  protected String host;
 
   @ConfigKeyItem
-  private int port;
+  protected int port;
 
   @ConfigKeyItem
-  private String username;
+  protected String username;
 
   @ConfigKeyItem
-  private String password;
+  protected String password;
 
   @ConfigKeyItem
-  private int connectionTimeout;
+  protected int connectionTimeout;
 
   @ConfigKeyItem
-  private Map<String, String> properties;
+  protected Map<String, String> properties;
 
-  private Properties mailProperties;
+  protected Properties mailProperties;
 
-  private transient Authenticator authenticator;
+  protected transient Authenticator authenticator;
 
   public MailConfig(String protocol, String host, int port, String username, String password,
       int connectionTimeout, Map<String, String> properties) {

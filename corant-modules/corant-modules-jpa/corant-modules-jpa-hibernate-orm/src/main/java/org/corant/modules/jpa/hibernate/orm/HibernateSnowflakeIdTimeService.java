@@ -14,7 +14,7 @@
 package org.corant.modules.jpa.hibernate.orm;
 
 import org.corant.shared.ubiquity.Sortable;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -25,5 +25,5 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 @FunctionalInterface
 public interface HibernateSnowflakeIdTimeService extends Sortable {
 
-  long fromEpoch(boolean useEpochSeconds, SharedSessionContractImplementor session, Object object);
+  long fromEpoch(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory, Object object);
 }

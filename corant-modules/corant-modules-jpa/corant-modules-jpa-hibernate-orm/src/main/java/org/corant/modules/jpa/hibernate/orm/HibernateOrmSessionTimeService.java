@@ -16,9 +16,9 @@ package org.corant.modules.jpa.hibernate.orm;
 import static org.corant.shared.util.Conversions.toObject;
 import java.sql.Timestamp;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.engine.jdbc.spi.JdbcServices;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -34,22 +34,18 @@ public class HibernateOrmSessionTimeService implements HibernateSessionTimeServi
   }
 
   @Override
-  public long resolve(boolean useEpochSeconds, SharedSessionContractImplementor session,
+  public long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
       Object object) {
-    if (session != null) {
-      final String timeSql = session.getFactory().getServiceRegistry()
-          .getService(JdbcServices.class).getDialect().getCurrentTimestampSelectString();
-      final FlushMode hfm = session.getHibernateFlushMode();
-      try {
-        session.setHibernateFlushMode(FlushMode.MANUAL);
+    if (sessionFactory != null) {
+      final String timeSql = sessionFactory.getServiceRegistry().getService(JdbcServices.class)
+          .getDialect().getCurrentTimestampSelectString();
+      try (Session session = sessionFactory.openTemporarySession()) {
         final long epochMillis =
             toObject(session.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
                 .getTime();
         return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
-      } finally {
-        session.setHibernateFlushMode(hfm);
       }
     }
     return useEpochSeconds ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis();

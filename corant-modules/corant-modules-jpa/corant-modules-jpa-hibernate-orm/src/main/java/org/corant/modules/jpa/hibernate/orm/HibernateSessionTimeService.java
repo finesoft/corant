@@ -14,7 +14,7 @@
 package org.corant.modules.jpa.hibernate.orm;
 
 import org.corant.shared.ubiquity.Sortable;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -29,6 +29,6 @@ public interface HibernateSessionTimeService extends Sortable {
     return true;
   }
 
-  long resolve(boolean useEpochSeconds, SharedSessionContractImplementor session, Object object);
+  long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory, Object object);
 
 }

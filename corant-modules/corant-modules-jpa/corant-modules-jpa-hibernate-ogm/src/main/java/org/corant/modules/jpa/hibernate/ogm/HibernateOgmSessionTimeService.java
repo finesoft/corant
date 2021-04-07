@@ -18,7 +18,7 @@ import static org.corant.shared.util.Maps.mapOf;
 import org.bson.Document;
 import org.corant.modules.jpa.hibernate.orm.HibernateOrmSessionTimeService;
 import org.corant.shared.normal.Priorities;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
 
 /**
@@ -40,9 +40,9 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
   }
 
   @Override
-  public long resolve(boolean useEpochSeconds, SharedSessionContractImplementor session,
+  public long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
       Object object) {
-    MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(session);
+    MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(sessionFactory);
     if (mp != null) {
       final Document timeBson =
           new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
@@ -50,15 +50,15 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
           getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
       return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
     } else {
-      return super.resolve(useEpochSeconds, session, object);
+      return super.resolve(useEpochSeconds, sessionFactory, object);
     }
   }
 
   MongoDBDatastoreProvider resolveMongoDBDatastoreProvider(
-      SharedSessionContractImplementor session) {
+      SessionFactoryImplementor sessionFactory) {
     try {
-      if (session != null) {
-        return session.getFactory().getServiceRegistry().getService(MongoDBDatastoreProvider.class);
+      if (sessionFactory != null) {
+        return sessionFactory.getServiceRegistry().getService(MongoDBDatastoreProvider.class);
       }
     } catch (Exception e) {
       // Noop FIXME

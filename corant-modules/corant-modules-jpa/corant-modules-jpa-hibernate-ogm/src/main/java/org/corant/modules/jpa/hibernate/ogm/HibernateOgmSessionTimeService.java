@@ -57,7 +57,9 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
   MongoDBDatastoreProvider resolveMongoDBDatastoreProvider(
       SharedSessionContractImplementor session) {
     try {
-      return session.getFactory().getServiceRegistry().getService(MongoDBDatastoreProvider.class);
+      if (session != null) {
+        return session.getFactory().getServiceRegistry().getService(MongoDBDatastoreProvider.class);
+      }
     } catch (Exception e) {
       // Noop FIXME
     }

@@ -36,19 +36,23 @@ public class HibernateOrmSessionTimeService implements HibernateSessionTimeServi
   @Override
   public long resolve(boolean useEpochSeconds, SharedSessionContractImplementor session,
       Object object) {
-    final String timeSql = session.getFactory().getServiceRegistry().getService(JdbcServices.class)
-        .getDialect().getCurrentTimestampSelectString();
-    final FlushMode hfm = session.getHibernateFlushMode();
-    try {
-      session.setHibernateFlushMode(FlushMode.MANUAL);
-      final long epochMillis =
-          toObject(session.createNativeQuery(timeSql).getSingleResult(), Timestamp.class).getTime();
-      return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
-    } catch (Exception e) {
-      throw new CorantRuntimeException(e);
-    } finally {
-      session.setHibernateFlushMode(hfm);
+    if (session != null) {
+      final String timeSql = session.getFactory().getServiceRegistry()
+          .getService(JdbcServices.class).getDialect().getCurrentTimestampSelectString();
+      final FlushMode hfm = session.getHibernateFlushMode();
+      try {
+        session.setHibernateFlushMode(FlushMode.MANUAL);
+        final long epochMillis =
+            toObject(session.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
+                .getTime();
+        return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      } finally {
+        session.setHibernateFlushMode(hfm);
+      }
     }
+    return useEpochSeconds ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis();
   }
 
 }

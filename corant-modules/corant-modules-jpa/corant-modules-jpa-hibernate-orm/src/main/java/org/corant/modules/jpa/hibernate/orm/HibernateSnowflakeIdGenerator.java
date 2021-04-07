@@ -19,8 +19,10 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toLong;
+import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.time.Instant;
@@ -32,8 +34,10 @@ import java.util.ServiceLoader.Provider;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.corant.config.Configs;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
@@ -56,6 +60,11 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   public static final String IG_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
   public static final String IG_SF_DL_TM = "identifier.generator.snowflake.delayed-timing";
   public static final String IG_SF_UP_TM = "identifier.generator.snowflake.use-persistence-timer";
+  public static final String GL_IG_SF_WK_IP = Names.CORANT_PREFIX + IG_SF_WK_IP;
+  public static final String GL_IG_SF_WK_ID = Names.CORANT_PREFIX + IG_SF_WK_ID;
+  public static final String GL_IG_SF_DC_ID = Names.CORANT_PREFIX + IG_SF_DC_ID;
+  public static final String GL_IG_SF_DL_TM = Names.CORANT_PREFIX + IG_SF_DL_TM;
+  public static final String GL_IG_SF_UP_TM = Names.CORANT_PREFIX + IG_SF_UP_TM;
 
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
 
@@ -68,6 +77,10 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
           .map(Provider::get).sorted(Sortable::compare).collect(Collectors.toList());
 
   static Map<String, Generator> generators = new ConcurrentHashMap<>();
+
+  public static long generateWoPersistenceTimer(String ptu) {
+    return getGenerator(ptu).generate();
+  }
 
   public static Instant parseGeneratedInstant(String ptu, long id) {
     return getGenerator(ptu).snowflakeGenerator.parseGeneratedInstant(id);
@@ -89,12 +102,20 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     PersistenceUnitInfoMetaData metaData =
         resolve(JPAExtension.class).getPersistenceUnitInfoMetaDatas().values().stream()
             .filter(p -> areEqual(p.getPersistenceUnitName(), ptu)).findFirst().get();
+
     final GeneralSnowflakeUUIDGenerator generator;
-    int dataCenterId = toInteger(metaData.getProperties().getOrDefault(IG_SF_DC_ID, -1));
-    int workerId = toInteger(metaData.getProperties().getOrDefault(IG_SF_WK_ID, -1));
-    String ip = asString(metaData.getProperties().get(IG_SF_WK_IP), null);
-    boolean usePst = toBoolean(metaData.getProperties().getOrDefault(IG_SF_DC_ID, "true"));
-    long delayedTiming = toLong(metaData.getProperties().getOrDefault(IG_SF_DL_TM, 16000L));
+
+    int dataCenterId = toInteger(metaData.getProperties().getOrDefault(IG_SF_DC_ID,
+        Configs.getValue(GL_IG_SF_DC_ID, Integer.class, -1)));
+    int workerId = toInteger(metaData.getProperties().getOrDefault(IG_SF_WK_ID,
+        Configs.getValue(GL_IG_SF_WK_ID, Integer.class, -1)));
+    String ip = asString(metaData.getProperties().get(IG_SF_WK_IP),
+        Configs.getValue(GL_IG_SF_WK_IP, String.class));
+    boolean usePst = toBoolean(metaData.getProperties().getOrDefault(IG_SF_UP_TM,
+        Configs.getValue(GL_IG_SF_UP_TM, String.class, "true")));
+    long delayedTiming = toLong(metaData.getProperties().getOrDefault(IG_SF_DL_TM,
+        Configs.getValue(GL_IG_SF_DL_TM, Long.class, 16000L)));
+
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
         generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId, delayedTiming);
@@ -113,14 +134,15 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   }
 
   static Generator getGenerator(String ptu) {
-    return generators.computeIfAbsent(ptu, HibernateSnowflakeIdGenerator::createGenerator);
+    return generators.computeIfAbsent(defaultTrim(ptu),
+        HibernateSnowflakeIdGenerator::createGenerator);
   }
 
   @Override
   public Serializable generate(SharedSessionContractImplementor session, Object object)
       throws HibernateException {
-    String ptu = asString(session.getFactory().getProperties()
-        .get(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME));
+    String ptu = getMapString(session.getFactory().getProperties(),
+        org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME);
     return getGenerator(ptu).generate(session, object);
   }
 
@@ -145,6 +167,10 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
         timeService = sessionTimeServices.stream().filter(s -> s.accept(providerClass)).findFirst()
             .orElse((u, s, o) -> specTimeGenerator.fromEpoch(u, s, o));
       }
+    }
+
+    public long generate() {
+      return snowflakeGenerator.generate(() -> specTimeGenerator.fromEpoch(useSecond, null, null));
     }
 
     public long generate(SharedSessionContractImplementor session, Object object) {

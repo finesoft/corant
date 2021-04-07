@@ -60,7 +60,7 @@ public class GlobalSnowflakeIdGenerator {
         () -> String.format("Create global identifier generator %s.", generator.description()));
   }
 
-  public long generate(Object object) {
+  public static long generate(Object object) {
     return generator.generate(() -> specTimeGenerator.get(object));
   }
 

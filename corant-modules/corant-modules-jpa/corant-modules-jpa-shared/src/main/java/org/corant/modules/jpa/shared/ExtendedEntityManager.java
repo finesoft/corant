@@ -38,7 +38,7 @@ import org.corant.modules.jta.shared.TransactionService;
  * @author bingo 下午5:45:13
  *
  */
-class ExtendedEntityManager implements EntityManager {
+public class ExtendedEntityManager implements EntityManager {
 
   final EntityManager delegate;
   final boolean transaction;
@@ -337,7 +337,7 @@ class ExtendedEntityManager implements EntityManager {
    *
    * destroy
    */
-  protected void destroy() {
+  protected synchronized void destroy() {
     if (delegate.isOpen()) {
       delegate.close();
     }

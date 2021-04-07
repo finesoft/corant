@@ -38,6 +38,7 @@ import org.corant.modules.ddd.model.Aggregate;
 import org.corant.modules.ddd.model.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.model.Aggregate.Lifecycle;
 import org.corant.modules.ddd.model.Entity.EntityManagerProvider;
+import org.corant.modules.jpa.shared.ExtendedEntityManager;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -205,7 +206,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
 
   protected void clear() {
     entityManagers.values().forEach(em -> {
-      if (em.isOpen()) {
+      if (em.isOpen() && !(em instanceof ExtendedEntityManager)) { // FIXME
         em.close();
       }
     });

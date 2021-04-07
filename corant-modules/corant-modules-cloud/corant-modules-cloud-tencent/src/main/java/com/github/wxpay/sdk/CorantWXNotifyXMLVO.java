@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.cloud.tencent.wechat.pay;
+package com.github.wxpay.sdk;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name = "xml")
-public class WechatNotifyXMLVO {
+public class CorantWXNotifyXMLVO {
   private String appid;
   private String mch_id;
   private String nonce_str;
@@ -99,77 +99,77 @@ public class WechatNotifyXMLVO {
     return transaction_id;
   }
 
-  public WechatNotifyXMLVO setAppid(String appid) {
+  public CorantWXNotifyXMLVO setAppid(String appid) {
     this.appid = appid;
     return this;
   }
 
-  public WechatNotifyXMLVO setBank_type(String bank_type) {
+  public CorantWXNotifyXMLVO setBank_type(String bank_type) {
     this.bank_type = bank_type;
     return this;
   }
 
-  public WechatNotifyXMLVO setCash_fee(String cash_fee) {
+  public CorantWXNotifyXMLVO setCash_fee(String cash_fee) {
     this.cash_fee = cash_fee;
     return this;
   }
 
-  public WechatNotifyXMLVO setIs_subscribe(String is_subscribe) {
+  public CorantWXNotifyXMLVO setIs_subscribe(String is_subscribe) {
     this.is_subscribe = is_subscribe;
     return this;
   }
 
-  public WechatNotifyXMLVO setMch_id(String mch_id) {
+  public CorantWXNotifyXMLVO setMch_id(String mch_id) {
     this.mch_id = mch_id;
     return this;
   }
 
-  public WechatNotifyXMLVO setNonce_str(String nonce_str) {
+  public CorantWXNotifyXMLVO setNonce_str(String nonce_str) {
     this.nonce_str = nonce_str;
     return this;
   }
 
-  public WechatNotifyXMLVO setOpenid(String openid) {
+  public CorantWXNotifyXMLVO setOpenid(String openid) {
     this.openid = openid;
     return this;
   }
 
-  public WechatNotifyXMLVO setOut_trade_no(String out_trade_no) {
+  public CorantWXNotifyXMLVO setOut_trade_no(String out_trade_no) {
     this.out_trade_no = out_trade_no;
     return this;
   }
 
-  public WechatNotifyXMLVO setResult_code(String result_code) {
+  public CorantWXNotifyXMLVO setResult_code(String result_code) {
     this.result_code = result_code;
     return this;
   }
 
-  public WechatNotifyXMLVO setSign(String sign) {
+  public CorantWXNotifyXMLVO setSign(String sign) {
     this.sign = sign;
     return this;
   }
 
-  public WechatNotifyXMLVO setSign_type(String sign_type) {
+  public CorantWXNotifyXMLVO setSign_type(String sign_type) {
     this.sign_type = sign_type;
     return this;
   }
 
-  public WechatNotifyXMLVO setTime_end(String time_end) {
+  public CorantWXNotifyXMLVO setTime_end(String time_end) {
     this.time_end = time_end;
     return this;
   }
 
-  public WechatNotifyXMLVO setTotal_fee(String total_fee) {
+  public CorantWXNotifyXMLVO setTotal_fee(String total_fee) {
     this.total_fee = total_fee;
     return this;
   }
 
-  public WechatNotifyXMLVO setTrade_type(String trade_type) {
+  public CorantWXNotifyXMLVO setTrade_type(String trade_type) {
     this.trade_type = trade_type;
     return this;
   }
 
-  public WechatNotifyXMLVO setTransaction_id(String transaction_id) {
+  public CorantWXNotifyXMLVO setTransaction_id(String transaction_id) {
     this.transaction_id = transaction_id;
     return this;
   }

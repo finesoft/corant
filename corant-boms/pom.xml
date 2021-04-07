@@ -21,6 +21,7 @@
 		<version.apache.arrow>1.0.1</version.apache.arrow>
 		<version.apache.geronimo-json>1.4</version.apache.geronimo-json>
 		<version.apache.johnzon-core>1.2.8</version.apache.johnzon-core>
+		<version.apache.httpcomponents>4.5.13</version.apache.httpcomponents>
 		<version.arquillian-core>1.6.0.Final</version.arquillian-core>
 		<version.artemis>2.15.0</version.artemis>
 		<version.asciidoctor-maven-plugin>1.5.6</version.asciidoctor-maven-plugin>
@@ -655,7 +656,11 @@
 				<artifactId>arrow-format</artifactId>
 				<version>${version.apache.arrow}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${version.apache.httpcomponents}</version>
+			</dependency>
 			<dependency>
 				<groupId>io.opentracing.contrib</groupId>
 				<artifactId>opentracing-tracerresolver</artifactId>

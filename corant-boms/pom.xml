@@ -14,6 +14,7 @@
 		<version.agroal>1.10</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
+		<version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
 		<version.apache-poi>4.1.2</version.apache-poi>
 		<version.apache-bcel>6.5.0</version.apache-bcel>
@@ -27,8 +28,9 @@
 		<version.assertj>3.10.0</version.assertj>
 		<version.atomikos>5.0.8</version.atomikos>
 		<version.bouncycastle>1.68</version.bouncycastle>
-		<version.calcite>1.25.0</version.calcite>
 		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
+		<version.caffeine>2.8.5</version.caffeine>
+		<version.calcite>1.25.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.commons-codec>1.15</version.commons-codec>
@@ -146,10 +148,11 @@
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
 		<version.weld>3.1.6.Final</version.weld>
+		<version.wxpay-sdk>3.0.9</version.wxpay-sdk>
 		<version.xadisk>1.2.2</version.xadisk>
 		<version.xnio>3.8.2.Final</version.xnio>
 		<version.zxing>3.4.1</version.zxing>
-		<version.caffeine>2.8.5</version.caffeine>
+
 	</properties>
 
 	<dependencyManagement>
@@ -510,6 +513,11 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>com.google.zxing</groupId>
+				<artifactId>core</artifactId>
+				<version>${version.zxing}</version>
+			</dependency>
 
 			<!-- Apache integration -->
 			<dependency>
@@ -763,7 +771,6 @@
 				<artifactId>xnio-api</artifactId>
 				<version>${version.xnio}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>io.undertow</groupId>
 				<artifactId>undertow-core</artifactId>
@@ -1005,6 +1012,11 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>net.wessendorf.kafka</groupId>
+				<artifactId>kafka-cdi-extension</artifactId>
+				<version>${version.kafka-cdi-extension}</version>
+			</dependency>
 
 			<!-- DataBase -->
 			<dependency>
@@ -1022,13 +1034,11 @@
 				<artifactId>ojdbc8</artifactId>
 				<version>${version.ojdbc8}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-core</artifactId>
 				<version>${version.flyway}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>transport</artifactId>
@@ -1040,13 +1050,11 @@
 				<version>${version.elasticsearch}</version>
 				<scope>provided</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>org.mongodb</groupId>
 				<artifactId>mongodb-driver</artifactId>
 				<version>${version.mongodb}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>redis.clients</groupId>
 				<artifactId>jedis</artifactId>
@@ -1063,7 +1071,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>com.datastax.cassandra</groupId>
 				<artifactId>cassandra-driver-core</artifactId>
@@ -1183,6 +1190,11 @@
 				<artifactId>poi-contrib</artifactId>
 				<version>${version.apache-poi}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.belerweb</groupId>
+				<artifactId>pinyin4j</artifactId>
+				<version>${version.pinyin4j}</version>
+			</dependency>
 
 			<!-- Reports -->
 			<dependency>
@@ -1195,12 +1207,6 @@
 						<artifactId>itext</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>com.belerweb</groupId>
-				<artifactId>pinyin4j</artifactId>
-				<version>${version.pinyin4j}</version>
 			</dependency>
 
 			<!-- LANG -->
@@ -1249,7 +1255,6 @@
 				<artifactId>kotlin-script-util</artifactId>
 				<version>${version.kotlin}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>ognl</groupId>
 				<artifactId>ognl</artifactId>
@@ -1310,6 +1315,7 @@
 				<version>${version.feign}</version>
 			</dependency>
 
+			<!-- Reactive -->
 			<dependency>
 				<groupId>io.vertx</groupId>
 				<artifactId>vertx-core</artifactId>
@@ -1501,51 +1507,6 @@
 				<version>${version.quartz}</version>
 			</dependency>
 
-			<!-- Testing -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${version.junit}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.corant</groupId>
-				<artifactId>corant-devops-test-unit</artifactId>
-				<version>${revision}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.rest-assured</groupId>
-				<artifactId>rest-assured</artifactId>
-				<version>${version.rest-assured}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.assertj</groupId>
-				<artifactId>assertj-core</artifactId>
-				<version>${version.assertj}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>${version.arquillian-core}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.openjdk.jmh</groupId>
-				<artifactId>jmh-core</artifactId>
-				<version>${version.org.openjdk.jmh}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.openjdk.jmh</groupId>
-				<artifactId>jmh-generator-annprocess</artifactId>
-				<version>${version.org.openjdk.jmh}</version>
-				<scope>test</scope>
-			</dependency>
-
 			<!-- Security -->
 			<dependency>
 				<groupId>org.apache.shiro</groupId>
@@ -1640,6 +1601,7 @@
 				<version>${version.bouncycastle}</version>
 			</dependency>
 
+			<!-- DevOps -->
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-jaxrs2</artifactId>
@@ -1651,12 +1613,7 @@
 				<version>${version.swagger}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>com.google.zxing</groupId>
-				<artifactId>core</artifactId>
-				<version>${version.zxing}</version>
-			</dependency>
-
+			<!-- Cloud PAAS -->
 			<dependency>
 				<groupId>com.aliyun</groupId>
 				<artifactId>aliyun-java-sdk-core</artifactId>
@@ -1667,14 +1624,62 @@
 				<artifactId>aliyun-sdk-oss</artifactId>
 				<version>${version.aliyun-sdk-oss}</version>
 			</dependency>
-
 			<dependency>
-				<groupId>net.wessendorf.kafka</groupId>
-				<artifactId>kafka-cdi-extension</artifactId>
-				<version>${version.kafka-cdi-extension}</version>
+				<groupId>com.alipay.sdk</groupId>
+				<artifactId>alipay-sdk-java</artifactId>
+				<version>${version.alipay-sdk-java}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.wxpay</groupId>
+				<artifactId>wxpay-sdk</artifactId>
+				<version>${version.wxpay-sdk}</version>
 			</dependency>
 
 
+			<!-- Testing -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${version.junit}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.corant</groupId>
+				<artifactId>corant-devops-test-unit</artifactId>
+				<version>${revision}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>${version.rest-assured}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${version.assertj}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian</groupId>
+				<artifactId>arquillian-bom</artifactId>
+				<version>${version.arquillian-core}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-core</artifactId>
+				<version>${version.org.openjdk.jmh}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-generator-annprocess</artifactId>
+				<version>${version.org.openjdk.jmh}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

@@ -1,4 +1,4 @@
-package org.corant.modules.cloud.tencent.wechat;
+package org.corant.modules.cloud.tencent.wechat.oauth;
 
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -9,7 +9,8 @@ import org.corant.config.declarative.DeclarativeConfig;
  * @author sushuaihao 2020/9/11
  * @since
  */
-@ConfigKeyRoot(value = "corant.cloud.tencent.wechat", keyIndex = 4, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.cloud.tencent.wechat.oauth", keyIndex = 5,
+    ignoreNoAnnotatedItem = false)
 public class WechatOAuthConfig implements DeclarativeConfig {
 
   private static final long serialVersionUID = 4325579136120573042L;

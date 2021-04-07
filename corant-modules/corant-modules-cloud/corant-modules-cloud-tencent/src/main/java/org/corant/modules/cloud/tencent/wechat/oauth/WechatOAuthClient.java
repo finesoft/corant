@@ -1,4 +1,4 @@
-package org.corant.modules.cloud.tencent.wechat;
+package org.corant.modules.cloud.tencent.wechat.oauth;
 
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import javax.ws.rs.Consumes;

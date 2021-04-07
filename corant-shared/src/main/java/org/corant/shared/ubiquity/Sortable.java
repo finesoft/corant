@@ -26,7 +26,7 @@ import org.corant.shared.util.Classes;
  * @author bingo 上午10:44:33
  *
  */
-public interface Sortable extends Comparable<Sortable> {
+public interface Sortable {
 
   /**
    * Compares two {@code Sortable} values. The value returned is identical to what would be returned
@@ -67,11 +67,6 @@ public interface Sortable extends Comparable<Sortable> {
    */
   static int reverseCompare(Sortable s1, Sortable s2) {
     return -1 * compare(s1, s2);
-  }
-
-  @Override
-  default int compareTo(Sortable o) {
-    return compare(this, o);
   }
 
   /**

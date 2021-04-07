@@ -70,11 +70,12 @@ public class Instances {
   }
 
   /**
-   * Find CDI bean instance
+   * Find CDI bean instance by given instance class and qualifiers, only return the resolved
+   * instance, ambiguous and unsatisfied return Optional.empty().
    *
    * Use with care, there may be a memory leak.
    *
-   * @param <T>
+   * @param <T> the bean type
    * @param instanceClass the bean instance class
    * @param qualifiers the bean qualifiers that use to resolve
    */
@@ -88,7 +89,24 @@ public class Instances {
   }
 
   /**
-   * Find CDI named bean instance
+   * Find bean instance from CDI or ServiceLoader by given instance class and qualifiers,
+   *
+   * @param <T> the bean type
+   * @param instanceClass the bean instance class
+   * @param qualifiers the bean qualifiers that use to resolve
+   */
+  public static <T> Optional<T> findAnyway(Class<T> instanceClass, Annotation... qualifiers) {
+    Instance<T> inst = select(instanceClass, qualifiers);
+    if (inst.isResolvable()) {
+      return Optional.of(inst.get());
+    } else {
+      return isEmpty(qualifiers) ? findService(instanceClass) : Optional.empty();
+    }
+  }
+
+  /**
+   * Find named CDI bean instance by given instance class and qualifiers, only return the resolved
+   * instance, ambiguous and unsatisfied return Optional.empty().
    *
    * @param <T>
    * @param instanceClass
@@ -106,6 +124,30 @@ public class Instances {
     } else {
       return Optional.empty();
     }
+  }
+
+  /**
+   * Returns bean instance from Service Loader or throws exception if not found.
+   *
+   * Note: If there are multiple service instances found by ServiceLoader and given instance class
+   * is {@link Sortable} then return the highest priority instance, otherwise throw exception.
+   *
+   * @param <T> the instance type
+   * @param instanceClass the instance class to be resolved
+   *
+   * @see Sortable#compare(Sortable, Sortable)
+   */
+  public static <T> Optional<T> findService(Class<T> instanceClass) {
+    List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
+    if (isNotEmpty(list)) {
+      if (list.size() == 1) {
+        Optional.of(list.get(0));
+      } else if (Sortable.class.isAssignableFrom(instanceClass)) {
+        Optional.of(forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
+            .findFirst().orElse(null)));
+      }
+    }
+    return Optional.empty();
   }
 
   public static boolean isManagedBean(Object object, Annotation... qualifiers) {
@@ -138,11 +180,7 @@ public class Instances {
    * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> T resolve(Class<T> instanceClass, Annotation... qualifiers) {
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
-      return inst.get();
-    }
-    throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
+    return select(instanceClass, qualifiers).get();
   }
 
   /**
@@ -167,25 +205,33 @@ public class Instances {
   /**
    * Returns bean instance from CDI or Service Loader or throws exception if not found.
    *
-   * First, we try to resolve the bean instance from the CDI environment, and return the instance
-   * immediately if it can be resolved; otherwise, try to look it up from the Service Loader, throw
-   * an exception if ambiguous appears in CDI or can't load it from Service Loader.
+   * <p>
+   * <ul>
+   * Resolve steps:
+   * <li>First, we try to resolve the bean instance from the CDI environment, and return the
+   * instance immediately if it can be resolved</li>
+   * <li>Second, if given qualifiers is empty then try to look it up from the Service Loader, if
+   * there are multiple instances found by Service Loader and the given instance class is
+   * {@link Sortable} then return the highest priority instance.</li>
+   * <li>throw an exception if ambiguous appears in CDI or can't load it from Service Loader.</li>
+   * </ul>
    *
    * Use with care, there may be a memory leak.
    *
    * @param <T>
    * @param instanceClass
    * @param qualifiers
-   * @return resolveAnyway
+   *
+   * @see #select(Class, Annotation...)
+   * @see #findService(Class)
    */
   public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
+    if (!inst.isUnsatisfied()) {
       return inst.get();
-    } else if (inst.isUnsatisfied() && isEmpty(qualifiers)) {
-      return resolveService(instanceClass);
     } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
+      T t = isEmpty(qualifiers) ? findService(instanceClass).orElse(null) : null;
+      return shouldNotNull(t, "Can not resolve bean class %s.", instanceClass);
     }
   }
 
@@ -209,32 +255,6 @@ public class Instances {
     } else {
       throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
     }
-  }
-
-  /**
-   * Returns bean instance from Service Loader or throws exception if not found.
-   *
-   * Note: If there are multiple service instances found by ServiceLoader and given instance class
-   * is {@link org.corant.shared.ubiquity.Sortable} then return the max ordinal one, otherwise throw
-   * exception.
-   *
-   * @param <T> the instance type
-   * @param instanceClass the instance class to be resolved
-   *
-   * @see Sortable#compare(Sortable, Sortable)
-   */
-  public static <T> T resolveService(Class<T> instanceClass) {
-    List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
-    T service = null;
-    if (isNotEmpty(list)) {
-      if (list.size() == 1) {
-        service = list.get(0);
-      } else if (Sortable.class.isAssignableFrom(instanceClass)) {
-        service = forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
-            .findFirst().orElse(null));
-      }
-    }
-    return shouldNotNull(service, "Can not resolve bean class %s.", instanceClass);
   }
 
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {

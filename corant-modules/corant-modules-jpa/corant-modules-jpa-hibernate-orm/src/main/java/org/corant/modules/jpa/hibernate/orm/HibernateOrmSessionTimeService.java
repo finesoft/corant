@@ -34,7 +34,7 @@ public class HibernateOrmSessionTimeService implements HibernateSessionTimeServi
   }
 
   @Override
-  public long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
+  public long get(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
       Object object) {
     if (sessionFactory != null) {
       final String timeSql = sessionFactory.getServiceRegistry().getService(JdbcServices.class)

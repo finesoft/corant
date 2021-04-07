@@ -35,7 +35,6 @@ import java.util.ServiceLoader.Provider;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManagerFactory;
 import org.corant.config.Configs;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService;
@@ -82,25 +81,59 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
   static Map<String, Generator> generators = new ConcurrentHashMap<>();
 
+  /**
+   * Returns the generated long type id manually.
+   *
+   * @param ptu the persistence unit name, use to identify the generator configuration.
+   */
   public static long generateManually(String ptu) {
     String usePtu = defaultTrim(ptu);
-    final EntityManagerFactory emf =
-        shouldNotNull(resolve(PersistenceService.class).getEntityManagerFactory(usePtu));
-    return getGenerator(usePtu).generate(emf.unwrap(SessionFactoryImplementor.class), null);
+    final Generator generator = getGenerator(usePtu);
+    if (generator.usePersistenceTimer) {
+      return generator
+          .generate(shouldNotNull(resolve(PersistenceService.class).getEntityManagerFactory(usePtu))
+              .unwrap(SessionFactoryImplementor.class), null);
+    } else {
+      return generator.generate(null, null);
+    }
   }
 
+  /**
+   * Parse instant from given id and persistence unit name
+   *
+   * @param ptu the persistence unit name, use to identify the generator configuration.
+   * @param id the id that will be parse
+   * @return the time sequence
+   */
   public static Instant parseGeneratedInstant(String ptu, long id) {
     return getGenerator(ptu).snowflakeGenerator.parseGeneratedInstant(id);
   }
 
+  /**
+   * Parse sequence from given id and persistence unit name
+   *
+   * @param ptu the persistence unit name, use to identify the generator configuration.
+   * @param id the id that will be parse
+   * @return the sequence
+   */
   public static long parseGeneratedSequence(String ptu, long id) {
     return getGenerator(ptu).snowflakeGenerator.parseGeneratedSequence(id);
   }
 
+  /**
+   * Parse workers id from given id and persistence unit name
+   *
+   * @param ptu the persistence unit name, use to identify the generator configuration.
+   * @param id the id that will be parse
+   * @return the workers id
+   */
   public static long parseGeneratedWorkersId(String ptu, long id) {
     return getGenerator(ptu).snowflakeGenerator.parseGeneratedWorkersId(id);
   }
 
+  /**
+   * Clear the generators
+   */
   public static void reset() {
     generators.clear();
   }
@@ -119,7 +152,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     String ip = asString(metaData.getProperties().get(IG_SF_WK_IP),
         Configs.getValue(GL_IG_SF_WK_IP, String.class));
     boolean usePst = toBoolean(metaData.getProperties().getOrDefault(IG_SF_UP_TM,
-        Configs.getValue(GL_IG_SF_UP_TM, String.class, "true")));
+        Configs.getValue(GL_IG_SF_UP_TM, String.class, "false")));
     long delayedTiming = toLong(metaData.getProperties().getOrDefault(IG_SF_DL_TM,
         Configs.getValue(GL_IG_SF_DL_TM, Long.class, 16000L)));
 
@@ -164,12 +197,14 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     final GeneralSnowflakeUUIDGenerator snowflakeGenerator;
     final boolean useSecond;
     final HibernateSessionTimeService timeService;
+    final boolean usePersistenceTimer;
 
     public Generator(final Class<?> providerClass, GeneralSnowflakeUUIDGenerator snowflakeGenerator,
         boolean usePst) {
       this.snowflakeGenerator = snowflakeGenerator;
       useSecond = snowflakeGenerator.getUnit() == ChronoUnit.SECONDS;
-      if (!usePst) {
+      usePersistenceTimer = usePst;
+      if (!usePersistenceTimer) {
         timeService = (u, s, o) -> specTimeGenerator.fromEpoch(u, s, o);
       } else {
         timeService = sessionTimeServices.stream().filter(s -> s.accept(providerClass)).findFirst()
@@ -178,8 +213,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     }
 
     public long generate(SessionFactoryImplementor sessionFactory, Object object) {
-      return snowflakeGenerator
-          .generate(() -> timeService.resolve(useSecond, sessionFactory, object));
+      return snowflakeGenerator.generate(() -> timeService.get(useSecond, sessionFactory, object));
     }
 
   }

@@ -29,6 +29,14 @@ public interface HibernateSessionTimeService extends Sortable {
     return true;
   }
 
-  long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory, Object object);
+  /**
+   * Returns the time sequence, if given sessionFactory is null, implementation must use
+   * {@link System#currentTimeMillis()}.
+   *
+   * @param useEpochSeconds whether use epoch second
+   * @param sessionFactory the session factory use to get time sequence from underly data source
+   * @param object the entity that need id, do not use here, may be used in future
+   */
+  long get(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory, Object object);
 
 }

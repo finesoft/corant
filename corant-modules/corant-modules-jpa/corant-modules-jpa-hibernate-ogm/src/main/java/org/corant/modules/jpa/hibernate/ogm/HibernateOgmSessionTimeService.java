@@ -40,7 +40,7 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
   }
 
   @Override
-  public long resolve(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
+  public long get(boolean useEpochSeconds, SessionFactoryImplementor sessionFactory,
       Object object) {
     MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(sessionFactory);
     if (mp != null) {
@@ -50,7 +50,7 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
           getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
       return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
     } else {
-      return super.resolve(useEpochSeconds, sessionFactory, object);
+      return super.get(useEpochSeconds, sessionFactory, object);
     }
   }
 

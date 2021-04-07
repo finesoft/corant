@@ -59,11 +59,12 @@ public class CorantDeclarativeScheduler {
 
   @Inject
   @ConfigProperty(name = "corant.quartz.declarative.scheduler.shutdown.wait-for-jobs-complete",
-      defaultValue = "false")
+      defaultValue = "true")
   protected boolean waitForJobsToComplete;
 
   @Inject
-  @ConfigProperty(name = "corant.quartz.declarative.scheduler.start-delayed")
+  @ConfigProperty(name = "corant.quartz.declarative.scheduler.start-delayed",
+      defaultValue = "PT16S")
   protected Optional<Duration> startDelayed;
 
   protected Scheduler scheduler;

@@ -1,6 +1,9 @@
 package org.corant.modules.quartz.embeddable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.corant.context.CDIs;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -13,6 +16,8 @@ import org.quartz.JobExecutionContext;
  */
 public class CorantDeclarativeJobImpl implements Job {
 
+  static final Logger logger = Logger.getLogger(CorantDeclarativeJobImpl.class.getName());
+
   private final ContextualMethodHandler methodHandler;
 
   public CorantDeclarativeJobImpl(ContextualMethodHandler methodHandler) {
@@ -22,9 +27,13 @@ public class CorantDeclarativeJobImpl implements Job {
   @Override
   public void execute(JobExecutionContext context) {
     try {
-      methodHandler.invoke();
+      if (CDIs.isEnabled()) {
+        methodHandler.invoke();
+      } else {
+        logger.warning(() -> "The CDI container was disabled!");
+      }
     } catch (IllegalAccessException | InvocationTargetException e) {
-      e.printStackTrace();
+      logger.log(Level.SEVERE, e, () -> "Corant job exectue occurred error!");
     }
   }
 }

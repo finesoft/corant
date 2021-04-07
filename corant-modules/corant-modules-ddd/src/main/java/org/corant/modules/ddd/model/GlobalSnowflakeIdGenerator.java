@@ -15,6 +15,7 @@ package org.corant.modules.ddd.model;
 
 import static org.corant.context.Instances.findAnyway;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;
 import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Sortable;
@@ -35,8 +36,8 @@ public class GlobalSnowflakeIdGenerator {
   public static final String IG_SF_WK_ID = "corant.identifier.generator.snowflake.worker-id";
   public static final String IG_SF_DC_ID = "corant.identifier.generator.snowflake.datacenter-id";
   public static final String IG_SF_DL_TM = "corant.identifier.generator.snowflake.delayed-timing";
-  static final TimeService specTimeGenerator =
-      findAnyway(TimeService.class).orElse(o -> System.currentTimeMillis());
+  static final TimeService specTimeGenerator = findAnyway(TimeService.class)
+      .orElse((o, s) -> s ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis());
   static final GeneralSnowflakeUUIDGenerator generator;
   static Logger logger = Logger.getLogger(GlobalSnowflakeIdGenerator.class.getName());
   static {
@@ -61,10 +62,11 @@ public class GlobalSnowflakeIdGenerator {
   }
 
   public static long generate(Object object) {
-    return generator.generate(() -> specTimeGenerator.get(object));
+    return generator
+        .generate(() -> specTimeGenerator.get(object, generator.getUnit() == ChronoUnit.SECONDS));
   }
 
   public interface TimeService extends Sortable {
-    long get(Object entity);
+    long get(Object entity, boolean useEpochSeconds);
   }
 }

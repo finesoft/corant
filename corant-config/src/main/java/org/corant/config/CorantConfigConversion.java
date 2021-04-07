@@ -480,8 +480,8 @@ public class CorantConfigConversion implements Serializable {
               return constructor.newInstance(s);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException ex) {
-              throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
-                  ex);
+              throw new IllegalArgumentException(
+                  "Unable to convert value to type " + type + " for value " + s, ex);
             }
           };
         } else {
@@ -502,8 +502,8 @@ public class CorantConfigConversion implements Serializable {
               return forceCast(factoryMethod.invoke(null, s));
             } catch (IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException ex) {
-              throw new IllegalArgumentException("Unable to convert value to type  for value " + s,
-                  ex);
+              throw new IllegalArgumentException(
+                  "Unable to convert value to type " + type + " for value " + s, ex);
             }
           };
         } else {
@@ -578,7 +578,8 @@ public class CorantConfigConversion implements Serializable {
         try {
           return toObject(s, type);
         } catch (Exception e) {
-          throw new IllegalArgumentException("Unable to convert value to type  for value " + s);
+          throw new IllegalArgumentException(
+              "Unable to convert value to type " + type + " for value " + s);
         }
       }, BUILT_IN_CONVERTER_ORDINAL);
     }

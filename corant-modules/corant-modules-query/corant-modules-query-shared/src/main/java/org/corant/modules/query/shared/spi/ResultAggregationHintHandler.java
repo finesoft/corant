@@ -113,7 +113,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    Consumer<List<Map<?, ?>>> handler = null;
+    Consumer<List<Map<?, ?>>> handler;
     if (brokens.contains(qh.getId()) || (handler = resolveHint(qh)) == null) {
       return;
     }
@@ -145,7 +145,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
       List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
       try {
         Pair<Boolean, Set<String>> fieldNames = resolveAggFieldNames(aggFieldNames);
-        String aggName = null;
+        String aggName;
         if (!fieldNames.isEmpty() && isNotEmpty(aggNames)
             && isNotBlank(aggName = aggNames.get(0).getValue())) {
           final String useAggName = aggName;

@@ -193,7 +193,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   protected Query createQuery(EntityManager em, String ql, Map<String, String> properties,
       Class<?> cls, Object... args) {
     boolean isNative = getMapBoolean(properties, PRO_KEY_NATIVE_QUERY);
-    Query query = null;
+    Query query;
     if (isNative) {
       query = em.createNativeQuery(ql, cls);
     } else {

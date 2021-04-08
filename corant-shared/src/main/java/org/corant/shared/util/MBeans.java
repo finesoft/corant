@@ -62,7 +62,7 @@ public class MBeans {
     MBeanServer server = ManagementFactory.getPlatformMBeanServer();
     for (String objectNaming : objectNamings) {
       if (isNotBlank(objectNaming)) {
-        ObjectName objectName = null;
+        ObjectName objectName;
         try {
           objectName = new ObjectName(objectNaming);
         } catch (MalformedObjectNameException ex) {
@@ -110,7 +110,7 @@ public class MBeans {
     if (object == null || isBlank(objectNaming)) {
       return null;
     }
-    ObjectName objectName = null;
+    ObjectName objectName;
     try {
       objectName = new ObjectName(objectNaming);
     } catch (MalformedObjectNameException ex) {

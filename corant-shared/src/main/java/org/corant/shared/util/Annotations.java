@@ -55,7 +55,7 @@ public class Annotations {
         LinkedList<Annotation> declareds = linkedListOf(element.getDeclaredAnnotations());
         if (declareds.peek() != null) {// not empty
           Set<Annotation> visiteds = new HashSet<>(); // prevents death loops
-          Annotation declared = null;
+          Annotation declared;
           while ((declared = declareds.poll()) != null && visiteds.add(declared)) {
             Class<? extends Annotation> declaredType = declared.annotationType();
             // ignore @Target @Retention and other java.lang.annotation meta annotations

@@ -462,7 +462,7 @@ public class QueryParseHandler extends DefaultHandler {
       nameStack.push(qName);
     } else {
       Script obj = forceCast(valueStack.pop());
-      String scriptCode = null;
+      String scriptCode;
       if (isNotBlank(obj.getSrc())) {
         scriptCode = resolveScript(obj.getSrc());
       } else {

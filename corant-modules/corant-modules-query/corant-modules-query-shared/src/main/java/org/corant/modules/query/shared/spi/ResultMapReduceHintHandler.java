@@ -69,7 +69,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
 
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    Consumer<Map> handler = null;
+    Consumer<Map> handler;
     if (brokens.contains(qh.getId()) || (handler = resolveHint(qh)) == null) {
       return;
     }

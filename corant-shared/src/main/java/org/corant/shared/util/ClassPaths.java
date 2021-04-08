@@ -394,7 +394,7 @@ public class ClassPaths {
      */
     protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) {
       String attrName = Attributes.Name.CLASS_PATH.toString();
-      Attributes attrs = null;
+      Attributes attrs;
       if (manifest == null || (attrs = manifest.getMainAttributes()) == null
           || !attrs.containsKey(attrName)) {
         return immutableSetOf();
@@ -527,7 +527,7 @@ public class ClassPaths {
       if (filePath.endsWith(JAR_EXT)) {
         scanJar(file.toURI(), file, classloader);
       } else if (!filePath.equals(JarFile.MANIFEST_NAME)) {
-        int classesIdx = -1;
+        int classesIdx;
         if ((classesIdx = filePath.indexOf(CLASSES_FOLDER)) != -1) {
           filePath = filePath.substring(classesIdx + CLASSES_FOLDER.length());
         }

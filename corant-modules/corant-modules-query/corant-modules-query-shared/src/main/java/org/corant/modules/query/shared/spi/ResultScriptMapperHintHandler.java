@@ -93,7 +93,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @SuppressWarnings("rawtypes")
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    Consumer<Object[]> func = null;
+    Consumer<Object[]> func;
     if (brokens.contains(qh.getId()) || (func = resolve(qh)) == null) {
       return;
     }

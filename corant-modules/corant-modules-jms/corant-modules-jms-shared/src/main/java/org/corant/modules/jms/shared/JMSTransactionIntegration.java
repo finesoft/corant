@@ -37,6 +37,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import org.corant.context.CDIs;
 import org.corant.modules.jta.shared.TransactionIntegration;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-modules-jms-shared
@@ -116,7 +117,9 @@ public class JMSTransactionIntegration implements TransactionIntegration {
      */
     protected JMSRecoveryXAResource(AbstractJMSConfig config) {
       this.config = config;
-      factory = findNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).get();
+      factory = findNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).orElseThrow(
+          () -> new CorantRuntimeException("Can't resolve XAConnectionFactory by id %s.",
+              config.getConnectionFactoryId()));
       LOGGER.fine(() -> String.format("Found JMS [%s] XAResource for JTA recovery processes.",
           config.getConnectionFactoryId()));
     }

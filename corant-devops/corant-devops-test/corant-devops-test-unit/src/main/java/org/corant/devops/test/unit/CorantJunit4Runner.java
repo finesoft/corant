@@ -87,7 +87,7 @@ public interface CorantJunit4Runner {
 
   default void configTestClass(final Class<?> testClass, final Set<Class<?>> suitesClasses) {
     System.setProperty(CFG_LOCATION_EXCLUDE_PATTERN, "**/target/classes/META-INF/*");
-    RunConfig rc = null;
+    RunConfig rc;
     Set<Class<?>> classes = new LinkedHashSet<>();
     classes.add(testClass);
     if (isNotEmpty(suitesClasses)) {

@@ -352,7 +352,7 @@ public class FileUtils {
     List<File> files = new ArrayList<>();
     if (root.exists()) {
       LinkedList<File> candidates = linkedListOf(root);
-      File candidate = null;
+      File candidate;
       while ((candidate = candidates.poll()) != null) {
         if (candidate.isFile()) {
           if (predicate.test(candidate)) {

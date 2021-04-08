@@ -65,9 +65,10 @@ public enum PersistenceSchema {
   private Schema getSchema(String version) {
     try {
       String xsdUrlPrefix = replace(getClass().getPackage().getName(), ".", "/") + "/persistence_";
-      return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-          .newSchema(Resources.fromClassPath(xsdUrlPrefix + replace(version, ".", "_") + ".xsd")
-              .map(ClassPathResource::getURL).findFirst().get());
+      return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(Resources
+          .fromClassPath(xsdUrlPrefix + replace(version, ".", "_") + ".xsd")
+          .map(ClassPathResource::getURL).findFirst().orElseThrow(
+              () -> new CorantRuntimeException("Can't find schema files by version %s", version)));
     } catch (SAXException | IOException e) {
       throw new CorantRuntimeException(e);
     }

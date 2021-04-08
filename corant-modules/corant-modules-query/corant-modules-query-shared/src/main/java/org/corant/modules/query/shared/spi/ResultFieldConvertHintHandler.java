@@ -147,7 +147,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
-    List<Pair<String[], Pair<Class<?>, Object[]>>> hints = null;
+    List<Pair<String[], Pair<Class<?>, Object[]>>> hints;
     if (brokens.contains(qh.getId()) || (hints = resolveHint(qh)) == null) {
       return;
     }

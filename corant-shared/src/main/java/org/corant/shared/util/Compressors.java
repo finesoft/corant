@@ -195,7 +195,7 @@ public class Compressors {
   static void zip(File file, String dir, ZipOutputStream zos) throws IOException {
     shouldBeTrue(file.exists());
     LinkedList<Pair<File, String>> sources = linkedListOf(Pair.of(file, dir));
-    Pair<File, String> source = null;
+    Pair<File, String> source;
     while ((source = sources.poll()) != null) {
       File curFile = source.left();
       String parent = source.right();

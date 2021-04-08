@@ -282,7 +282,7 @@ public class Texts {
       throws IOException {
     StringBuilder sb = new StringBuilder();
     try (Reader reader = new BufferedReader(new InputStreamReader(is, charset))) {
-      int c = 0;
+      int c;
       while ((c = reader.read()) != -1) {
         sb.append((char) c);
       }

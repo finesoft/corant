@@ -74,7 +74,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
   @Override
   public Map<String, Object> get(String sql, Object... args) throws SQLException {
-    Object result = null;
+    Object result;
     if (args.length > 0) {
       result = getRunner().select(sql, MAP_HANDLER, 1, args);
     } else {
@@ -91,7 +91,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   @Override
   public List<Map<String, Object>> select(String sql, int expectRows, Object... args)
       throws SQLException {
-    Object result = null;
+    Object result;
     if (args.length > 0) {
       result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows, args);
     } else {

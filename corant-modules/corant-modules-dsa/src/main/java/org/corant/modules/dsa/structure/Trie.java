@@ -192,7 +192,7 @@ public class Trie<T> implements Comparable<Trie<T>>, Serializable {
 
   protected Trie<T> getChildNode(char[] chars) {
     Trie<T> node = this;
-    int index = 0;
+    int index;
     for (char idx : chars) {
       index = node.indexOf(idx);
       if (index < 0) {

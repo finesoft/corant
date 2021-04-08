@@ -248,7 +248,7 @@ public class DistPackager implements Packager {
   private void packArchiveEntry(ArchiveOutputStream aos, Archive archive, Entry entry)
       throws IOException {
     String entryName = resolveArchivePath(archive.getPath(), entry.getName());
-    File file = null;
+    File file;
     if (entry instanceof FileEntry) {
       file = ((FileEntry) entry).getFile();
     } else {

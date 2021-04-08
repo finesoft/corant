@@ -76,7 +76,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
   protected final LinkedList<Message> registeredMessages = new LinkedList<>();
 
-  protected volatile boolean activated = false;
+  protected volatile boolean activated;
 
   protected AbstractJPAUnitOfWork(UnitOfWorksManager manager) {
     this.manager = manager;

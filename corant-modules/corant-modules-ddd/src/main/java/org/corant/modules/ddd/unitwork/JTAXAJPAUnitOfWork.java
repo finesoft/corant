@@ -52,7 +52,7 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     LinkedList<Message> messages = new LinkedList<>();
     extractMessages(messages);
     int cycles = 128;
-    Message msg = null;
+    Message msg;
     while ((msg = messages.poll()) != null) {
       messageDispatcher.accept(new Message[] {msg});
       if (extractMessages(messages) && --cycles < 0) {

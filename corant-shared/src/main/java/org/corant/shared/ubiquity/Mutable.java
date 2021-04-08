@@ -479,7 +479,7 @@ public interface Mutable<T> extends Supplier<T> {
 
     private static final long serialVersionUID = -6244772495084570391L;
 
-    T value = null;
+    T value;
 
     protected MutableNumber(final T object) {
       value = validate(object);
@@ -701,8 +701,7 @@ public interface Mutable<T> extends Supplier<T> {
 
     T value;
 
-    public MutableObject() {
-    }
+    public MutableObject() {}
 
     public MutableObject(final T value) {
       this.value = value;
@@ -831,8 +830,7 @@ public interface Mutable<T> extends Supplier<T> {
    */
   class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
-    protected MutableString() {
-    }
+    protected MutableString() {}
 
     protected MutableString(final String value) {
       super(value);

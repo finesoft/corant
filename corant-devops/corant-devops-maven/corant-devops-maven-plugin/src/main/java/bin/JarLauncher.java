@@ -61,7 +61,7 @@ public class JarLauncher {
   private String appName;
   private String mainClsName;
   private Path workPath;
-  private String[] args = new String[0];
+  private String[] args;
   private Manifest manifest;
 
   JarLauncher(String... args) throws IOException {
@@ -99,10 +99,8 @@ public class JarLauncher {
         File[] files = file.listFiles();
         if (files != null) {
           for (File archive : files) {
-            if (archive != null) {
-              if (!archive.delete()) {
-                log(true, "[WARNING] Can not clear archive %s.", archive.getPath());
-              }
+            if ((archive != null) && !archive.delete()) {
+              log(true, "[WARNING] Can not clear archive %s.", archive.getPath());
             }
           }
         }

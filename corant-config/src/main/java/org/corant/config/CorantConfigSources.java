@@ -137,9 +137,9 @@ public class CorantConfigSources {
   }
 
   static String resolveSourceProfile(String sourceName) {
-    String name = null;
+    String name;
     if (isNotEmpty(name = FileUtils.getFileBaseName(sourceName))) {
-      int start = -1;
+      int start;
       if ((start = name.indexOf(CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
         name = name.substring(start + CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX.length());
       } else if ((start = name.indexOf(MP_CONFIG_SOURCE_BASE_NAME_PREFIX)) == 0) {
@@ -211,7 +211,7 @@ public class CorantConfigSources {
   protected Pair<ConfigSource, String> getSourceAndValue(String propertyName) {
     int i = profilePrefixs.length;
     while (--i >= 0) {
-      String value = null;
+      String value;
       String key = profilePrefixs[i] + propertyName;
       for (CorantConfigSource cs : sources) {
         if (areEqual(cs.getSourceProfile(), profiles[i])) {

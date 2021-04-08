@@ -68,7 +68,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   public <T> Stream<T> stream(String queryName, Object parameter) {
     QueryHandler queryResolver = getQuerierResolver().getQueryResolver();
     QueryParameter queryParam = queryResolver.resolveParameter(null, parameter);
-    StreamQueryParameter useQueryParam = null;
+    StreamQueryParameter useQueryParam;
     if (queryParam instanceof StreamQueryParameter) {
       useQueryParam = (StreamQueryParameter) queryParam;
     } else {

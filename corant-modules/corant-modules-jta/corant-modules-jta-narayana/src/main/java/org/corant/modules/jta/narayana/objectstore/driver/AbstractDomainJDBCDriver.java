@@ -71,9 +71,8 @@ public abstract class AbstractDomainJDBCDriver
         pstmt.setString(1, typeName);
         pstmt.setString(2, domain);
         rs = pstmt.executeQuery();
-        boolean finished = false;
-        while (!finished && rs.next()) {
-          Uid theUid = null;
+        while (rs.next()) {
+          Uid theUid;
           try {
             theUid = new Uid(rs.getString(1));
             UidHelper.packInto(theUid, store);

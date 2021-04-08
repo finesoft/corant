@@ -86,7 +86,7 @@ public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
     XConnection connection;
     if (maxHoldedSize > 0) {
       while ((connection = cachedConnections.poll()) == null) {
-        XConnection newConn = null;
+        XConnection newConn;
         Throwable error = null;
         try {
           holdedConnections.put(newConn = new XConnection(createConnection()));
@@ -162,7 +162,7 @@ public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
       while (iterator.hasNext()) {
         String key = iterator.next();
         String value = dataSourceConfigs.get(key);
-        Method method = null;
+        Method method;
         try {
           method = dataSource.getClass().getMethod("set" + key, String.class);
           method.invoke(dataSource, value.replace("\\semi", ";"));

@@ -14,6 +14,7 @@
 package com.github.wxpay.sdk;
 
 import static org.corant.context.Instances.find;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import org.corant.config.declarative.ConfigKeyItem;
@@ -121,7 +122,13 @@ public class CorantWXPayConfig extends WXPayConfig implements DeclarativeConfig 
   @Override
   InputStream getCertStream() {
     try {
-      return Resources.from(certUri).findFirst().get().openStream();
+      if (isNotBlank(certUri)) {
+        return Resources.from(certUri).findFirst()
+            .orElseThrow(
+                () -> new CorantRuntimeException("Can't find cert resource from %s!", certUri))
+            .openStream();
+      }
+      return null;
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }

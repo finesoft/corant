@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Iterables.collectionOf;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -135,13 +136,14 @@ public class Sets {
   /**
    * Convert an array to a non-null tree set
    *
-   * @param <T>
-   * @param objects
-   * @return treeSetOf
+   * @param <T> the element type
+   * @param comparator the sort comparator
+   * @param objects the objects that will be collected to tree set
    */
   @SafeVarargs
-  public static <T> TreeSet<T> treeSetOf(final T... objects) {
-    TreeSet<T> set = new TreeSet<>();
+  public static <T> TreeSet<T> treeSetOf(final Comparator<? super T> comparator,
+      final T... objects) {
+    TreeSet<T> set = comparator == null ? new TreeSet<>() : new TreeSet<>(comparator);
     if (objects != null) {
       Collections.addAll(set, objects);
     }

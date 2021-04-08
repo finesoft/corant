@@ -134,7 +134,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     String indexName = shouldNotNull(doc.indexName());
     final Map<String, Object> propertiesSchema = resolveSchema(docCls);
     EsParentDocument poc = findAnnotation(shouldNotNull(docCls), EsParentDocument.class, false);
-    ElasticMapping mapping = null;
+    ElasticMapping mapping;
     if (poc != null) {
       Class<?>[] childClses = poc.children();
       shouldBeFalse(isEmpty(childClses));

@@ -33,8 +33,7 @@ public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExp
   /**
    *
    */
-  public MapBsonRegexConverter() {
-  }
+  public MapBsonRegexConverter() {}
 
   /**
    * @param throwException
@@ -60,7 +59,7 @@ public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExp
 
   @Override
   protected BsonRegularExpression convert(Map value, Map<String, ?> hints) throws Exception {
-    String pattern = null;
+    String pattern;
     String option;
     if (isEmpty(value) || isBlank(pattern = asDefaultString(value.get("pattern")))) {
       return getDefaultValue();

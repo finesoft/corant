@@ -138,7 +138,7 @@ public class DefaultQueryHandler implements QueryHandler {
     Map<String, Object> convertedParam = new HashMap<>();
     if (param != null) {
       param.forEach((k, v) -> {
-        Class<?> cls = null;
+        Class<?> cls;
         if (k != null && convertSchema != null && (cls = convertSchema.get(k)) != null) {
           convertedParam.put(k.toString(), conversionService.convert(v, cls));
         } else if (k != null) {

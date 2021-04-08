@@ -39,6 +39,7 @@ import org.corant.config.Configs;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
@@ -141,7 +142,9 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static Generator createGenerator(String ptu) {
     PersistenceUnitInfoMetaData metaData =
         resolve(JPAExtension.class).getPersistenceUnitInfoMetaDatas().values().stream()
-            .filter(p -> areEqual(p.getPersistenceUnitName(), ptu)).findFirst().get();
+            .filter(p -> areEqual(p.getPersistenceUnitName(), ptu)).findFirst().orElseThrow(
+                () -> new CorantRuntimeException("Can't find persistence unit %s for id generator!",
+                    ptu));
 
     final GeneralSnowflakeUUIDGenerator generator;
 

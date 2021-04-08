@@ -30,9 +30,7 @@ public class RetryAbortHandler implements RejectedExecutionHandler {
   public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
     if (r != null && !executor.isShutdown() && !executor.isTerminated()
         && !executor.isTerminating()) {
-      Threads.runInDaemon(() -> {
-        executor.getQueue().offer(r, 4L, TimeUnit.SECONDS);
-      });
+      Threads.runInDaemon(() -> executor.getQueue().offer(r, 4L, TimeUnit.SECONDS));
     }
   }
 

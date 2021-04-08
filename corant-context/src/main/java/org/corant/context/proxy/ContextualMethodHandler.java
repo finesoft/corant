@@ -113,13 +113,10 @@ public class ContextualMethodHandler implements Serializable {
       return false;
     }
     if (method == null) {
-      if (other.method != null) {
-        return false;
-      }
+      return other.method == null;
     } else {
       return method.equals(other.method);
     }
-    return true;
   }
 
   /**

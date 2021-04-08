@@ -62,12 +62,14 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
   void stop() {
     try {
       super.shutdown();
-      if (awaitTermination != null) {
-        super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS);
+      if (awaitTermination != null
+          && !super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
+        logger.log(Level.WARNING,
+            () -> String.format("Shutdown managed scheduled executor service %s timeout!", name));
       }
     } catch (InterruptedException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Shutdown managed scheduled executor service occurred error!", name));
+      logger.log(Level.WARNING, e, () -> String
+          .format("Shutdown managed scheduled executor service %s occurred error!", name));
     }
   }
 

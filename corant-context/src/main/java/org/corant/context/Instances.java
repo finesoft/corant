@@ -22,7 +22,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.trim;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
@@ -70,13 +71,13 @@ public class Instances {
   }
 
   /**
-   * Find CDI bean instance by given instance class and qualifiers, only return the resolved
-   * instance, ambiguous and unsatisfied return Optional.empty().
+   * Returns an {@link Optional} CDI bean instance that matches the given instance class and
+   * qualifiers, ambiguous and unsatisfied return an empty {@link Optional}.
    *
    * Use with care, there may be a memory leak.
    *
-   * @param <T> the bean type
-   * @param instanceClass the bean instance class
+   * @param <T> the bean type to be resolved
+   * @param instanceClass the bean instance class to be resolved
    * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> Optional<T> find(Class<T> instanceClass, Annotation... qualifiers) {
@@ -89,11 +90,19 @@ public class Instances {
   }
 
   /**
-   * Find bean instance from CDI or ServiceLoader by given instance class and qualifiers,
+   * Returns an {@link Optional} bean instance from CDI or ServiceLoader that matches the given
+   * instance class and qualifiers.
    *
-   * @param <T> the bean type
-   * @param instanceClass the bean instance class
+   * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
+   * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
+   * ServiceLoader. If there are multiple instances and the given instance class is
+   * {@link Sortable}, then return the one with the highest priority.
+   *
+   * @param <T> the bean type to be resolved
+   * @param instanceClass the bean instance class to be resolved
    * @param qualifiers the bean qualifiers that use to resolve
+   *
+   * @see #findService(Class)
    */
   public static <T> Optional<T> findAnyway(Class<T> instanceClass, Annotation... qualifiers) {
     Instance<T> inst = select(instanceClass, qualifiers);
@@ -105,34 +114,39 @@ public class Instances {
   }
 
   /**
-   * Find named CDI bean instance by given instance class and qualifiers, only return the resolved
-   * instance, ambiguous and unsatisfied return Optional.empty().
+   * Returns an {@link Optional} CDI bean instance that matches the given instance class and name,
+   * ambiguous and unsatisfied return an empty {@link Optional}.
    *
-   * @param <T>
-   * @param instanceClass
-   * @param name
+   * @param <T> the bean type to be resolved
+   * @param instanceClass the bean instance class to be resolved
+   * @param name the bean name for CDI selecting
    */
   public static <T> Optional<T> findNamed(Class<T> instanceClass, String name) {
     Instance<T> inst = select(instanceClass, Any.Literal.INSTANCE);
     if (inst.isUnsatisfied()) {
       return Optional.empty();
     }
-    String useName = defaultTrim(name);
-    if (isBlank(useName) && inst.isResolvable()
-        || (inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
-      return Optional.of(inst.get());
-    } else {
-      return Optional.empty();
+    if (name != null) {
+      Instance<T> normal = inst.select(NamedLiteral.of(trim(name)));
+      if (normal.isResolvable()) {
+        return Optional.of(normal.get());
+      }
     }
+    Instance<T> spec = inst.select(resolveNamedQualifiers(defaultTrim(name)));
+    if (spec.isResolvable()) {
+      return Optional.of(spec.get());
+    }
+    return Optional.empty();
   }
 
   /**
-   * Returns bean instance from Service Loader or throws exception if not found.
+   * Returns an {@link Optional} instance that matches the given instance class from ServiceLoader
+   * or return an empty {@link Optional} if not found.
    *
    * Note: If there are multiple service instances found by ServiceLoader and given instance class
-   * is {@link Sortable} then return the highest priority instance, otherwise throw exception.
+   * is {@link Sortable} then return the highest priority instance.
    *
-   * @param <T> the instance type
+   * @param <T> the instance type to be resolved
    * @param instanceClass the instance class to be resolved
    *
    * @see Sortable#compare(Sortable, Sortable)
@@ -175,8 +189,8 @@ public class Instances {
    *
    * Use with care, there may be a memory leak.
    *
-   * @param <T>
-   * @param instanceClass the bean instance class
+   * @param <T> the instance type to be resolved
+   * @param instanceClass the bean instance class to be resolved
    * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> T resolve(Class<T> instanceClass, Annotation... qualifiers) {
@@ -186,77 +200,62 @@ public class Instances {
   /**
    * Resolve CDI bean instance and consumer it or throws exception if can't resolve.
    *
-   * @param <T>
-   * @param instanceClass the bean instance class
+   * @param <T> the instance type to be resolved
+   * @param instanceClass the bean instance class to be resolved
    * @param consumer the consumer that consumer the bean instance
    * @param qualifiers the bean qualifiers that use to resolve
    */
   public static <T> void resolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
-    Consumer<T> useConsumer = shouldNotNull(consumer);
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
-      useConsumer.accept(inst.get());
-    } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
-    }
+    shouldNotNull(consumer).accept(resolve(instanceClass, qualifiers));
   }
 
   /**
    * Returns bean instance from CDI or Service Loader or throws exception if not found.
    *
    * <p>
-   * <ul>
-   * Resolve steps:
-   * <li>First, we try to resolve the bean instance from the CDI environment, and return the
-   * instance immediately if it can be resolved</li>
-   * <li>Second, if given qualifiers is empty then try to look it up from the Service Loader, if
-   * there are multiple instances found by Service Loader and the given instance class is
-   * {@link Sortable} then return the highest priority instance.</li>
-   * <li>throw an exception if ambiguous appears in CDI or can't load it from Service Loader.</li>
-   * </ul>
+   * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
+   * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
+   * ServiceLoader. If there are multiple instances and the given instance class is
+   * {@link Sortable}, then return the one with the highest priority; If none of the above searches
+   * are found, an exception is thrown.
    *
    * Use with care, there may be a memory leak.
    *
-   * @param <T>
-   * @param instanceClass
-   * @param qualifiers
+   * @param <T> the instance type to be resolved
+   * @param instanceClass the instance class to be resolved
+   * @param qualifiers the instance qualifiers that use to resolve
    *
-   * @see #select(Class, Annotation...)
-   * @see #findService(Class)
+   * @see #findAnyway(Class, Annotation...)
    */
   public static <T> T resolveAnyway(Class<T> instanceClass, Annotation... qualifiers) {
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (!inst.isUnsatisfied()) {
-      return inst.get();
-    } else {
-      T t = isEmpty(qualifiers) ? findService(instanceClass).orElse(null) : null;
-      return shouldNotNull(t, "Can not resolve bean class %s.", instanceClass);
-    }
+    return findAnyway(instanceClass, qualifiers).orElseThrow(
+        () -> new CorantRuntimeException("Can not resolve bean class %s.", instanceClass));
   }
 
   /**
    * Resolve CDI bean instance and returns the result using the given function interface, if the
    * bean instance can't resolve then throw exception.
    *
-   * @param <T>
-   * @param <R>
-   * @param instanceClass
-   * @param function
-   * @param qualifiers
-   * @return resolveApply
+   * @param <T> the bean instance type to be resolved
+   * @param <R> the function return type
+   * @param instanceClass the bean instance class to be resolved
+   * @param function the function that bean instance will be applied
+   * @param qualifiers the bean qualifiers to be resolved
    */
   public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
-    Function<T, R> useFunction = shouldNotNull(function);
-    Instance<T> inst = select(instanceClass, qualifiers);
-    if (inst.isResolvable()) {
-      return useFunction.apply(inst.get());
-    } else {
-      throw new CorantRuntimeException("Can not resolve bean class %s.", instanceClass);
-    }
+    return shouldNotNull(function).apply(resolve(instanceClass, qualifiers));
   }
 
+  /**
+   * Returns an instance that matches the given instance class and qualifiers or throws an exception
+   * if CDI is disabled.
+   *
+   * @param <T> the instance type to be selected
+   * @param instanceClass the instance class to be selected
+   * @param qualifiers the qualifiers to be selected
+   */
   public static <T> Instance<T> select(Class<T> instanceClass, Annotation... qualifiers) {
     if (!CDIs.isEnabled()) {
       throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
@@ -264,33 +263,31 @@ public class Instances {
     return CDI.current().select(shouldNotNull(instanceClass), qualifiers);
   }
 
+  /**
+   * Returns a bean instance from CDI that matches the given instance class and qualifiers, if not
+   * matches or CDI isn't enabled returns null.
+   *
+   * @param <T> the instance type to be resolved
+   * @param instanceClass the instance class to be resolved
+   * @param qualifiers the qualifiers to be resolved
+   */
   public static <T> T tryResolve(Class<T> instanceClass, Annotation... qualifiers) {
     return CDIs.isEnabled() ? find(instanceClass, qualifiers).orElse(null) : null;
   }
 
-  public static <T> T tryResolve(Instance<T> instance) {
-    return instance != null && instance.isResolvable() ? instance.get() : null;
-  }
-
   public static <T> void tryResolveAccept(Class<T> instanceClass, Consumer<T> consumer,
       Annotation... qualifiers) {
-    Consumer<T> useConsumer = shouldNotNull(consumer);
-    if (CDIs.isEnabled()) {
-      Instance<T> inst = select(instanceClass, qualifiers);
-      if (inst.isResolvable()) {
-        useConsumer.accept(inst.get());
-      }
+    T instance = tryResolve(instanceClass, qualifiers);
+    if (instance != null) {
+      shouldNotNull(consumer).accept(instance);
     }
   }
 
   public static <T, R> R tryResolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
-    Function<T, R> useFunction = shouldNotNull(function);
-    if (CDIs.isEnabled()) {
-      Instance<T> inst = select(instanceClass, qualifiers);
-      if (inst.isResolvable()) {
-        return useFunction.apply(inst.get());
-      }
+    T instance = tryResolve(instanceClass, qualifiers);
+    if (instance != null) {
+      return shouldNotNull(shouldNotNull(function)).apply(instance);
     }
     return null;
   }

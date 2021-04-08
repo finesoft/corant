@@ -18,9 +18,11 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -41,6 +43,8 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
 
   private static final long serialVersionUID = -3160278341411416013L;
 
+  protected boolean enable;
+
   protected String accessKeyId;
 
   protected String secretAccessKey;
@@ -51,11 +55,17 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
 
   protected List<String> signerHandlerClasses = new ArrayList<>();
 
+  protected Set<String> buckets = new HashSet<>();
+
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> defaultRequestHeaders = new LinkedHashMap<>();
 
   public String getAccessKeyId() {
     return accessKeyId;
+  }
+
+  public Set<String> getBuckets() {
+    return buckets;
   }
 
   public String getEndpoint() {
@@ -68,6 +78,10 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
 
   public String getSecurityToken() {
     return securityToken;
+  }
+
+  public boolean isEnable() {
+    return enable;
   }
 
   @Override

@@ -44,7 +44,7 @@ public class ContextualMethodHandler implements Serializable {
 
   protected Annotation[] qualifiers;
   protected Class<?> clazz;
-  protected transient Method method;
+  protected transient Method method; // ?? use java.lang.invoke.MethodHandle
   protected MethodSignature methodSignature;
 
   public ContextualMethodHandler(Method method) {

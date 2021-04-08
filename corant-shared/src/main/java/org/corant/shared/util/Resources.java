@@ -647,6 +647,15 @@ public class Resources {
     public InputStream openStream() throws IOException {
       return new FileInputStream(file);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(Class<T> cls) {
+      if (File.class.isAssignableFrom(cls)) {
+        return (T) file;
+      }
+      throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+    }
   }
 
   /**
@@ -725,6 +734,10 @@ public class Resources {
    *
    */
   public interface Resource {
+
+    String META_CONTENT_TYPE = "Content-Type";
+    String META_CONTENT_LENGTH = "Content-Length";
+    String META_LAST_MODIFIED = "Last-Modified";
 
     /**
      * Return a byte array for the content of this resource, please evaluate the size of the
@@ -914,7 +927,7 @@ public class Resources {
    * @author bingo 下午4:06:15
    *
    */
-  public static class URLResource implements Resource {
+  public static class URLResource implements WrappedResource {
     final SourceType sourceType;
     final URL url;
 
@@ -991,5 +1004,18 @@ public class Resources {
     public InputStream openStream() throws IOException {
       return url.openStream();
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unwrap(Class<T> cls) {
+      if (URL.class.isAssignableFrom(cls)) {
+        return (T) url;
+      }
+      throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+    }
+  }
+
+  public interface WrappedResource extends Resource {
+    <T> T unwrap(Class<T> cls);
   }
 }

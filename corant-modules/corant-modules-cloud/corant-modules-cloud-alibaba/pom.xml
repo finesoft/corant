@@ -25,6 +25,10 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-config</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.corant</groupId>
+			<artifactId>corant-modules-servlet</artifactId>
+		</dependency>
 	</dependencies>
 	<description>The Corant alibaba cloud integration.</description>
 </project>

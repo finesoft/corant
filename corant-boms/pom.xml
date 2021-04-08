@@ -97,7 +97,7 @@
 		<version.lombok>1.18.16</version.lombok>
 		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
 		<version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
-		<version.maven-enforcer-plugin>1.4.1</version.maven-enforcer-plugin>
+		<version.maven-enforcer-plugin>3.0.0-M3</version.maven-enforcer-plugin>
 		<version.maven-failsafe-plugin>2.20.1</version.maven-failsafe-plugin>
 		<version.maven-javadoc-plugin>3.0.0</version.maven-javadoc-plugin>
 		<version.maven-plugin-api>3.2.5</version.maven-plugin-api>

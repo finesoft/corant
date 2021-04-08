@@ -157,7 +157,7 @@ public class Instances {
       if (list.size() == 1) {
         Optional.of(list.get(0));
       } else if (Sortable.class.isAssignableFrom(instanceClass)) {
-        Optional.of(forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
+        Optional.ofNullable(forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
             .findFirst().orElse(null)));
       }
     }

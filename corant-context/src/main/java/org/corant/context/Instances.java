@@ -155,10 +155,10 @@ public class Instances {
     List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
     if (isNotEmpty(list)) {
       if (list.size() == 1) {
-        Optional.of(list.get(0));
+        return Optional.of(list.get(0));
       } else if (Sortable.class.isAssignableFrom(instanceClass)) {
-        Optional.ofNullable(forceCast(list.stream().map(t -> (Sortable) t).sorted(Sortable::compare)
-            .findFirst().orElse(null)));
+        return Optional.ofNullable(
+            forceCast(list.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
       }
     }
     return Optional.empty();

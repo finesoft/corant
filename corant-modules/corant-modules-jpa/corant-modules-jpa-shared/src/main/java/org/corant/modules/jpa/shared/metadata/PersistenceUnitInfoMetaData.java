@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
@@ -42,6 +43,9 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
+
+  private static final Logger logger =
+      Logger.getLogger(PersistenceUnitInfoMetaData.class.getName());
 
   private String name;
   private final String persistenceUnitName;
@@ -93,6 +97,23 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   public PersistenceUnitInfoMetaData configDataSource(Function<String, DataSource> dsSupplier) {
     setJtaDataSource(dsSupplier.apply(getJtaDataSourceName()));
     setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
+    if (persistenceUnitTransactionType == PersistenceUnitTransactionType.JTA) {
+      if (getJtaDataSource() == null) {
+        logger.severe(() -> String.format(
+            "Can't provide a JTA data source with name %s for persistence unit %s.",
+            getJtaDataSourceName(), getPersistenceUnitName()));
+      } else if (getNonJtaDataSource() == null) {
+        logger.warning(() -> String.format(
+            "Can't provide a non JTA data source with name %s for persistence unit %s, the entity manager with PersistenceContextType.EXTENDED may not be available.",
+            getJtaDataSourceName(), getPersistenceUnitName()));
+      }
+    }
+    if (persistenceUnitTransactionType == PersistenceUnitTransactionType.RESOURCE_LOCAL
+        && getNonJtaDataSource() == null) {
+      logger.severe(() -> String.format(
+          "Can't provide a non JTA data source with name %s for persistence unit %s.",
+          getJtaDataSourceName(), getPersistenceUnitName()));
+    }
     return this;
   }
 

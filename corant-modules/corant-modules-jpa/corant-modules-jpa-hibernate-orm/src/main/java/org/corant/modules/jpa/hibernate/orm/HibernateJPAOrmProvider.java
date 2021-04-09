@@ -68,7 +68,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     DEFAULT_PROPERTIES.forEach((k, v) -> {
       metaData.getProperties().putIfAbsent(k, v);
     });
-    shouldNotNull(metaData).configDataSource(dataSourceService::getManaged);
+    shouldNotNull(metaData).configDataSource(dataSourceService::tryGet);
     Map<String, Object> properties = new HashMap<>(defaultProperties);
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);

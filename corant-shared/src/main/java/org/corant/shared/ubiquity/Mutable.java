@@ -957,7 +957,8 @@ public interface Mutable<T> extends Supplier<T> {
 
     @Override
     public MutableTemporal<T> set(T value) {
-      return (MutableTemporal<T>) super.set(value);
+      super.set(value);
+      return this;
     }
 
     public T setAndGet(T other) {

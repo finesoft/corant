@@ -49,6 +49,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
   protected volatile InitialContext jndi;
 
   /**
+   * Returns a named qualifier configuration object manager for data source
    *
    * @return the configManager
    */
@@ -59,7 +60,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
   /**
    * Collect the data source configurations for produce data source bean.
    *
-   * @param bbd onBeforeBeanDiscovery
+   * @param bbd the CDI event
    */
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     Map<String, DataSourceConfig> configs = ConfigInstances.resolveMulti(DataSourceConfig.class);

@@ -147,9 +147,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
    * corant-modules-datasource-shared
    *
    * FIXME: Make XAResource {@link Serializable}, may use data source config ({@link #config}) to
-   * rebuild the {@link #dataSource}, and the {@link #connection} and the {@link #xaresource}}.
+   * rebuild the {@link #dataSource}, and the {@link #connection} and the {@link #xaresource}}. some
+   * issues see ARJUNA016037
    *
-   * @see ARJUNA016037
    *
    * @author bingo 下午3:17:50
    *

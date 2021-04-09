@@ -13,7 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
-import java.util.Properties;
+import java.util.Optional;
 import javax.sql.DataSource;
 
 /**
@@ -24,32 +24,21 @@ import javax.sql.DataSource;
  */
 public interface DataSourceService {
 
-  default DataSource get(String jdbcUrl) {
-    return new DriverManagerDataSource(jdbcUrl);
-  }
+  /**
+   * Returns an {@link Optional} data source instance that matches the given name or return an empty
+   * {@link Optional} if not matches.
+   *
+   * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
+   */
+  Optional<DataSource> get(String name);
 
-  default DataSource get(String jdbcUrl, Properties properties) {
-    return new DriverManagerDataSource(jdbcUrl, properties);
+  /**
+   * Try to returns an data source instance that matches the given name or return null if not
+   * matches.
+   *
+   * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
+   */
+  default DataSource tryGet(String name) {
+    return get(name).orElse(null);
   }
-
-  default DataSource get(String jdbcUrl, String driverClassName, Properties properties,
-      String username, String password) {
-    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password);
-  }
-
-  default DataSource get(String jdbcUrl, String driverClassName, Properties properties,
-      String username, String password, String catalog, String schema) {
-    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password,
-        catalog, schema);
-  }
-
-  default DataSource get(String jdbcUrl, String username, String password) {
-    return new DriverManagerDataSource(jdbcUrl, username, password);
-  }
-
-  default DataSource get(String jdbcUrl, String driverClassName, String username, String password) {
-    return new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
-  }
-
-  DataSource getManaged(String name);
 }

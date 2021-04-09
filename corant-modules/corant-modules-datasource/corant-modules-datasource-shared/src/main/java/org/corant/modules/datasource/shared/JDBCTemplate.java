@@ -71,11 +71,17 @@ public class JDBCTemplate {
   protected final QueryRunner runner;
   protected final StreamableQueryRunner streamRunner;
 
+  /**
+   * Create a JDNC Template that binded given data source
+   *
+   * @param ds the data source use to bind
+   */
   public JDBCTemplate(DataSource ds) {
     this(ds, false, null, DFLT_FETCH_SIZE, null, null, null);
   }
 
   /**
+   * Create a JDBC Template
    *
    * @param dataSource the data source
    * @param pmdKnownBroken
@@ -84,7 +90,7 @@ public class JDBCTemplate {
    *        needed.
    * @param maxFieldSize The maximum number of bytes that can be returned for character and binary
    *        column values.
-   * @param maxRows The maximum number of rows that a <code>ResultSet</code> can produce.
+   * @param maxRows The maximum number of rows that a {@code ResultSet} can produce.
    * @param queryTimeout The number of seconds the driver will wait for execution.
    */
   public JDBCTemplate(DataSource dataSource, boolean pmdKnownBroken, Integer fetchDirection,
@@ -719,8 +725,7 @@ public class JDBCTemplate {
 
   static class StreamableQueryRunner extends QueryRunner {
 
-    public StreamableQueryRunner() {
-    }
+    public StreamableQueryRunner() {}
 
     public StreamableQueryRunner(StatementConfiguration stmtConfig) {
       super(stmtConfig);

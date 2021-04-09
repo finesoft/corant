@@ -26,6 +26,11 @@ import javax.inject.Qualifier;
 /**
  * corant-context
  *
+ * This qualifier is used to extend the Named Qualifier mechanism of CDI. When an interface has
+ * multiple implementations, one of which has no specified name and the others have specified names,
+ * the instance without a specified name has a default qualifier called Unnamed. This approach may
+ * change in the future.
+ *
  * @author bingo 上午11:29:39
  *
  */

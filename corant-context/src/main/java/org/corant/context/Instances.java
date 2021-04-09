@@ -22,7 +22,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.trim;
+import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +38,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
+import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -117,24 +118,37 @@ public class Instances {
    * Returns an {@link Optional} CDI bean instance that matches the given instance class and name,
    * ambiguous and unsatisfied return an empty {@link Optional}.
    *
+   * <p>
+   * <b>Note:</b> <br/>
+   * The Named Qualifier here extends the Named Qualifier mechanism of CDI. If the given name is not
+   * null, use CDI's Named Qualifier for lookup first, if found, it will return immediately. Before
+   * the next lookup, the given name will be trimmed first. if the given name is empty, then
+   * directly do not add any qualifiers for lookup, if found, it will return immediately, otherwise
+   * it will use {@link Unnamed} qualifier performs a lookup.
+   *
    * @param <T> the bean type to be resolved
    * @param instanceClass the bean instance class to be resolved
-   * @param name the bean name for CDI selecting
+   * @param name the bean name for CDI bean lookup
+   *
+   * @see Unnamed
    */
   public static <T> Optional<T> findNamed(Class<T> instanceClass, String name) {
     Instance<T> inst = select(instanceClass, Any.Literal.INSTANCE);
     if (inst.isUnsatisfied()) {
       return Optional.empty();
     }
+    // supports the normal Named qualifier
     if (name != null) {
-      Instance<T> normal = inst.select(NamedLiteral.of(trim(name)));
+      Instance<T> normal = inst.select(NamedLiteral.of(name));
       if (normal.isResolvable()) {
         return Optional.of(normal.get());
       }
     }
-    Instance<T> spec = inst.select(resolveNamedQualifiers(defaultTrim(name)));
-    if (spec.isResolvable()) {
-      return Optional.of(spec.get());
+    // supports the extended Named qualifier
+    String useName = defaultTrim(name);
+    if (isBlank(useName) && inst.isResolvable()
+        || (inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
+      return Optional.of(inst.get());
     }
     return Optional.empty();
   }

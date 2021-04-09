@@ -105,14 +105,14 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
       } else if (getNonJtaDataSource() == null) {
         logger.warning(() -> String.format(
             "Can't provide a non JTA data source with name %s for persistence unit %s, the entity manager with PersistenceContextType.EXTENDED may not be available.",
-            getJtaDataSourceName(), getPersistenceUnitName()));
+            getNonJtaDataSourceName(), getPersistenceUnitName()));
       }
     }
     if (persistenceUnitTransactionType == PersistenceUnitTransactionType.RESOURCE_LOCAL
         && getNonJtaDataSource() == null) {
       logger.severe(() -> String.format(
           "Can't provide a non JTA data source with name %s for persistence unit %s.",
-          getJtaDataSourceName(), getPersistenceUnitName()));
+          getNonJtaDataSourceName(), getPersistenceUnitName()));
     }
     return this;
   }

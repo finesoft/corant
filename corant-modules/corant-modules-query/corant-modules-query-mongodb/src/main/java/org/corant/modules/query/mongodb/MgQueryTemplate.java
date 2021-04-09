@@ -50,6 +50,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -150,12 +151,14 @@ public class MgQueryTemplate {
   public Forwarding<Map<?, ?>> forward() {
     Forwarding<Map<?, ?>> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
-    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    if (sizeOf(list) > limit) {
-      list.remove(limit);
-      result.withHasNext(true);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<?, ?>> list = streamOf(cursor).map(this::convert).collect(Collectors.toList());
+      if (sizeOf(list) > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
+      }
+      return result.withResults(list);
     }
-    return result.withResults(list);
   }
 
   public <T> Forwarding<T> forwardAs(final Class<T> clazz) {
@@ -165,12 +168,14 @@ public class MgQueryTemplate {
   public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
-    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    if (sizeOf(list) > limit) {
-      list.remove(limit);
-      result.withHasNext(true);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<?, ?>> list = streamOf(cursor).map(this::convert).collect(Collectors.toList());
+      if (sizeOf(list) > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
+      }
+      return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
     }
-    return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
   }
 
   public Map<?, ?> get() {
@@ -236,16 +241,18 @@ public class MgQueryTemplate {
   public Paging<Map<?, ?>> page() {
     Paging<Map<?, ?>> result = Paging.of(offset, limit);
     FindIterable<Document> fi = query();
-    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0) {
-      if (size < limit) {
-        result.withTotal(offset + size);
-      } else {
-        result.withTotal((int) count());
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<?, ?>> list = streamOf(cursor).map(this::convert).collect(Collectors.toList());
+      int size = list.size();
+      if (size > 0) {
+        if (size < limit) {
+          result.withTotal(offset + size);
+        } else {
+          result.withTotal((int) count());
+        }
       }
+      return result.withResults(list);
     }
-    return result.withResults(list);
   }
 
   public <T> Paging<T> pageAs(final Class<T> clazz) {
@@ -255,16 +262,18 @@ public class MgQueryTemplate {
   public <T> Paging<T> pageAs(final Function<Object, T> converter) {
     Paging<T> result = Paging.of(offset, limit);
     FindIterable<Document> fi = query();
-    List<Map<?, ?>> list = streamOf(fi).map(this::convert).collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0) {
-      if (size < limit) {
-        result.withTotal(offset + size);
-      } else {
-        result.withTotal((int) count());
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<?, ?>> list = streamOf(cursor).map(this::convert).collect(Collectors.toList());
+      int size = list.size();
+      if (size > 0) {
+        if (size < limit) {
+          result.withTotal(offset + size);
+        } else {
+          result.withTotal((int) count());
+        }
       }
+      return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
     }
-    return result.withResults(list.stream().map(converter).collect(Collectors.toList()));
   }
 
   public MgQueryTemplate projection(boolean include, String... propertyNames) {

@@ -20,6 +20,7 @@ import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
+import java.lang.ref.Cleaner;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -197,12 +198,18 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
       return resolver;
     }
 
-    @SuppressWarnings("resource")
     protected MongoDatabase resolveDataBase(String dataBase) {
       if (isNotBlank(dataBase)
           && (dataBase.startsWith("mongodb+srv://") || dataBase.startsWith("mongodb://"))) {
         String db = dataBase.substring(dataBase.lastIndexOf('/'));
-        return new MongoClient(new MongoClientURI(dataBase)).getDatabase(db);
+        MongoClient client = new MongoClient(new MongoClientURI(dataBase));
+        MongoDatabase database = client.getDatabase(db);
+        Cleaner.create().register(database, () -> {
+          if (client != null) {
+            client.close(); // FIXME release mongodb client
+          }
+        });
+        return database;
       } else {
         return findNamed(MongoDatabase.class, dataBase).orElse(null);
       }

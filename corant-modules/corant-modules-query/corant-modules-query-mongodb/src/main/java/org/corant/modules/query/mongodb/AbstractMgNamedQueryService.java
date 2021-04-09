@@ -127,13 +127,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
     log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
-    List<Map<String, Object>> fetchedList = listOf(fi);// streamOf(fi).collect(Collectors.toList());
-    fetch(fetchedList, querier);
-    querier.handleResultHints(fetchedList);
-    if (result instanceof List) {
-      parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
-    } else {
-      parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<String, Object>> fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
+      fetch(fetchedList, querier);
+      querier.handleResultHints(fetchedList);
+      if (result instanceof List) {
+        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
+      }
     }
   }
 
@@ -145,18 +147,20 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
-    List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
-            .collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0) {
-      if (size > limit) {
-        list.remove(limit);
-        result.withHasNext(true);
+    final boolean autoSetId = isAutoSetIdField(querier);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<String, Object>> list = streamOf(cursor)
+          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
+      int size = list.size();
+      if (size > 0) {
+        if (size > limit) {
+          list.remove(limit);
+          result.withHasNext(true);
+        }
+        this.fetch(list, querier);
       }
-      this.fetch(list, querier);
+      return result.withResults(querier.handleResults(list));
     }
-    return result.withResults(querier.handleResults(list));
   }
 
   @Override
@@ -164,10 +168,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
-    Map<String, Object> result =
-        convertDocument(fi.iterator().tryNext(), querier, isAutoSetIdField(querier));
-    this.fetch(result, querier);
-    return querier.handleResult(result);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      Map<String, Object> result =
+          convertDocument(cursor.tryNext(), querier, isAutoSetIdField(querier));
+      this.fetch(result, querier);
+      return querier.handleResult(result);
+    }
   }
 
   @Override
@@ -178,19 +184,21 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
-    List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
-            .collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0) {
-      if (size < limit) {
-        result.withTotal(offset + size);
-      } else {
-        result.withTotal((int) queryCount(querier));
+    final boolean autoSetId = isAutoSetIdField(querier);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<String, Object>> list = streamOf(cursor)
+          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
+      int size = list.size();
+      if (size > 0) {
+        if (size < limit) {
+          result.withTotal(offset + size);
+        } else {
+          result.withTotal((int) queryCount(querier));
+        }
+        this.fetch(list, querier);
       }
-      this.fetch(list, querier);
+      return result.withResults(querier.handleResults(list));
     }
-    return result.withResults(querier.handleResults(list));
   }
 
   @Override
@@ -199,19 +207,21 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     int maxSelectSize = resolveMaxSelectSize(querier);
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
-    List<Map<String, Object>> list =
-        streamOf(fi).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
-            .collect(Collectors.toList());
-    int size = list.size();
-    if (size > 0) {
-      if (size > maxSelectSize) {
-        throw new QueryRuntimeException(
-            "[%s] Result record number overflow, the allowable range is %s.", queryName,
-            maxSelectSize);
+    final boolean autoSetId = isAutoSetIdField(querier);
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      List<Map<String, Object>> list = streamOf(cursor)
+          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
+      int size = list.size();
+      if (size > 0) {
+        if (size > maxSelectSize) {
+          throw new QueryRuntimeException(
+              "[%s] Result record number overflow, the allowable range is %s.", queryName,
+              maxSelectSize);
+        }
+        this.fetch(list, querier);
       }
-      this.fetch(list, querier);
+      return querier.handleResults(list);
     }
-    return querier.handleResults(list);
   }
 
   protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,

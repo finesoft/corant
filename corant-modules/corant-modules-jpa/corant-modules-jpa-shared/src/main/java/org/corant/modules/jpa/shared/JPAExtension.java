@@ -18,7 +18,6 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -73,7 +72,8 @@ public class JPAExtension implements Extension {
   volatile boolean finishedMetadatas = false;
 
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(PersistenceUnit pu) {
-    if (isBlank(pu.unitName()) && persistenceUnitInfoMetaDatas.size() == 1) {
+    if (Qualifiers.resolveName(pu.unitName()).equals(Qualifiers.EMPTY_NAME)
+        && persistenceUnitInfoMetaDatas.size() == 1) {
       return persistenceUnitInfoMetaDatas.values().iterator().next();// FIXME
     }
     return persistenceUnitInfoMetaDatas.get(pu);

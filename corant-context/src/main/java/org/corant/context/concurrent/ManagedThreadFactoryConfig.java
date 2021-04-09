@@ -70,15 +70,6 @@ public class ManagedThreadFactoryConfig extends AbstractNamedObject implements D
 
   /**
    *
-   * @param name the name to set
-   */
-  @Override
-  protected void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   *
    * @param priority the priority to set
    */
   protected void setPriority(int priority) {

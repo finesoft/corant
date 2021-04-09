@@ -17,7 +17,6 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
-import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.time.Duration;
@@ -25,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jms.shared.annotation.MessageReceive;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.corant.shared.util.Retry.RetryInterval;
@@ -61,7 +61,7 @@ public class MessageReceiverMetaData {
     acknowledge = ann.acknowledge();
     clientID = Configs.assemblyStringConfigProperty(ann.clientId());
     connectionFactoryId =
-        defaultTrim(Configs.assemblyStringConfigProperty(ann.connectionFactoryId()));
+        Qualifiers.resolveName(Configs.assemblyStringConfigProperty(ann.connectionFactoryId()));
     destination = Configs.assemblyStringConfigProperty(destinationName);
     multicast = ann.multicast();
     selector = Configs.assemblyStringConfigProperty(ann.selector());

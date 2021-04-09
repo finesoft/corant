@@ -16,7 +16,6 @@ package org.corant.context.concurrent;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Locale;
@@ -201,11 +200,6 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   protected void setMaxPoolSize(int maxPoolSize) {
     this.maxPoolSize = maxPoolSize;
-  }
-
-  @Override
-  protected void setName(String name) {
-    this.name = defaultTrim(name);
   }
 
   protected void setQueueCapacity(int queueCapacity) {

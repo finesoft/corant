@@ -16,7 +16,6 @@ package org.corant.modules.jms.shared.context;
 import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,6 +31,7 @@ import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -55,7 +55,7 @@ public class JMSContextKey implements Serializable {
   private volatile ConnectionFactory connectionFactory;
 
   public JMSContextKey(final String connectionFactoryId, final Integer sessionMode) {
-    this.connectionFactoryId = defaultTrim(connectionFactoryId);
+    this.connectionFactoryId = Qualifiers.resolveName(connectionFactoryId);
     this.sessionMode = sessionMode;
     xa = shouldNotNull(AbstractJMSExtension.getConfig(this.connectionFactoryId),
         "Can not find JMS connection factory config by id [%s]", this.connectionFactoryId).isXa();

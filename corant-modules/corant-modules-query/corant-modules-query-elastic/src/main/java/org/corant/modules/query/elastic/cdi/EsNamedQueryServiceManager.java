@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.elastic.cdi;
 
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -28,6 +27,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.elastic.AbstractEsNamedQueryService;
 import org.corant.modules.query.elastic.DefaultEsQueryExecutor;
 import org.corant.modules.query.elastic.EsNamedQuerier;
@@ -78,7 +78,8 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   public EsNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
-      final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      final String clusterName =
+          isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
       logger.fine(() -> String.format(
           "Create default elastic named query service, the data center is [%s]. ", clusterName));
       return new DefaultEsNamedQueryService(transportClientManager.apply(clusterName), this);

@@ -20,10 +20,10 @@ import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.normal.Names.JndiNames;
-import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -38,7 +38,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   private static final long serialVersionUID = -7623266774880311110L;
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/Datasources";
-  public static final String EMPTY_NAME = Strings.EMPTY;
+  public static final String EMPTY_NAME = Qualifiers.EMPTY_NAME;
 
   /**
    * JDBC driver class to use as a supplier of connections. Must be an implementation of

@@ -14,6 +14,7 @@
 package org.corant.context.qualifier;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -35,9 +36,11 @@ import org.corant.shared.util.Strings;
  */
 public class Qualifiers {
 
+  public static final String EMPTY_NAME = EMPTY;
+
   public static String resolveName(String named) {
     // XXX Is it possible to use configuration?
-    return Strings.defaultTrim(named);
+    return Strings.defaultString(named);
   }
 
   public static Annotation[] resolveNamedQualifiers(String name) {
@@ -51,7 +54,7 @@ public class Qualifiers {
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = tNames.iterator().next();
-        if (isBlank(name)) {
+        if (name.equals(EMPTY_NAME)) {
           nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
         } else {
           nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,

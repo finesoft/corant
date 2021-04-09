@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.jpql.cdi;
 
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -28,6 +27,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.modules.query.jpql.JpqlNamedQuerier;
@@ -75,7 +75,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   public NamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
-      final String pu = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      final String pu = isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
       logger.fine(() -> String
           .format("Create default jpql named query service, the persistence unit is [%s].", pu));
       return new DefaultJpqlNamedQueryService(persistenceService.getEntityManagerFactory(pu), this);

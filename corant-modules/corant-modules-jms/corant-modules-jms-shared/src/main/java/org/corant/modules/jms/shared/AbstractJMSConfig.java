@@ -18,8 +18,8 @@ import java.time.Duration;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.NamedObject;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-jms-shared
@@ -39,7 +39,7 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
 
   // the connection factory id means a artemis server or cluster
   @ConfigKeyItem
-  protected String connectionFactoryId = Strings.EMPTY;
+  protected String connectionFactoryId = Qualifiers.EMPTY_NAME;
 
   @ConfigKeyItem
   protected String username;

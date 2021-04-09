@@ -17,7 +17,6 @@ import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.forceCast;
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
@@ -35,6 +34,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
@@ -110,7 +110,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   public NamedQueryService get(Object qualifier) {
     String key = resolveQualifer(qualifier);
     return services.computeIfAbsent(key, k -> {
-      String dataSourceName = defaultQualifierValue.orElse(EMPTY);
+      String dataSourceName = defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME);
       DBMS dialect = defaultQualifierDialect;
       String useKey = k;
       boolean jndi = useKey.startsWith(JndiNames.JNDI_COMP_NME);

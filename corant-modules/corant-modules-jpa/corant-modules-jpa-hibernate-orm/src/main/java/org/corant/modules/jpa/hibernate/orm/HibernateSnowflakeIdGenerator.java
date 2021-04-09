@@ -23,7 +23,6 @@ import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.asString;
-import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.time.Instant;
@@ -36,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
@@ -88,7 +88,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
    * @param ptu the persistence unit name, use to identify the generator configuration.
    */
   public static long generateManually(String ptu) {
-    String usePtu = defaultTrim(ptu);
+    String usePtu = Qualifiers.resolveName(ptu);
     final Generator generator = getGenerator(usePtu);
     if (generator.usePersistenceTimer) {
       return generator
@@ -177,7 +177,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   }
 
   static Generator getGenerator(String ptu) {
-    return generators.computeIfAbsent(defaultTrim(ptu),
+    return generators.computeIfAbsent(Qualifiers.resolveName(ptu),
         HibernateSnowflakeIdGenerator::createGenerator);
   }
 

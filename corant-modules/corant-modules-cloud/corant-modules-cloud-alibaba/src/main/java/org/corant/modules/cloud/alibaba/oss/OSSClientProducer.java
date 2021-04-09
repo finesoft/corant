@@ -26,7 +26,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.qualifier.Naming;
-import org.corant.shared.util.Strings;
+import org.corant.context.qualifier.Qualifiers;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 
@@ -67,7 +67,7 @@ public class OSSClientProducer {
         break;
       }
     }
-    String name = Strings.EMPTY;
+    String name = Qualifiers.EMPTY_NAME;
     if (naming != null) {
       name = strip(naming.value());
     }

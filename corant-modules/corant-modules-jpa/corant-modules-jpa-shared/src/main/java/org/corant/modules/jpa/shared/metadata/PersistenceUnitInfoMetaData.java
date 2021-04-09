@@ -16,7 +16,6 @@ package org.corant.modules.jpa.shared.metadata;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.defaultTrim;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.net.URL;
@@ -33,6 +32,7 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.JPAConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -75,7 +75,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
    * @param persistenceUnitName
    */
   public PersistenceUnitInfoMetaData(String persistenceUnitName) {
-    this.persistenceUnitName = defaultTrim(persistenceUnitName);
+    this.persistenceUnitName = Qualifiers.resolveName(persistenceUnitName);
   }
 
   public void addManagedClassName(String managedClassName) {
@@ -384,7 +384,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
    * @param name the name to set
    */
   protected void setName(String name) {
-    this.name = defaultTrim(name);
+    this.name = Qualifiers.resolveName(name);
   }
 
   protected void setNewTempClassLoader(ClassLoader newTempClassLoader) {

@@ -38,6 +38,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedObject;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
@@ -357,7 +358,7 @@ public class MongoClientConfig implements NamedObject {
    * @param name the client databaseName to set
    */
   protected void setName(String name) {
-    this.name = defaultTrim(name);
+    this.name = Qualifiers.resolveName(name);
   }
 
   /**

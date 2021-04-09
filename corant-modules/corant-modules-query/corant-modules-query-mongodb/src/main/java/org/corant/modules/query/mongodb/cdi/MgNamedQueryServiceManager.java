@@ -15,7 +15,6 @@ package org.corant.modules.query.mongodb.cdi;
 
 import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -32,6 +31,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.bson.Document;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.modules.query.mongodb.Decimal128Utils;
 import org.corant.modules.query.mongodb.MgNamedQuerier;
@@ -84,7 +84,8 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   public MgNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
-      final String databaseName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      final String databaseName =
+          isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
       logger.fine(() -> String.format(
           "Create default mongodb named query service, the data base is [%s].", databaseName));
       return new DefaultMgNamedQueryService(databaseName, this);

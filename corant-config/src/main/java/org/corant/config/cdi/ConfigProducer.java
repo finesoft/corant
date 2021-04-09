@@ -59,7 +59,7 @@ public class ConfigProducer implements Serializable {
     CorantConfig config = forceCast(ConfigProvider.getConfig());
     ConfigProperty property =
         shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
-    String key = defaultTrim(property.name());
+    String key = defaultTrim(property.name());// FIXME trim ??
     if (isBlank(key)) {
       Bean<?> bean = injectionPoint.getBean();
       Member member = injectionPoint.getMember();

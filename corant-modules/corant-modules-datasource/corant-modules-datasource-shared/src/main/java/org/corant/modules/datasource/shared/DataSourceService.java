@@ -13,7 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
-import java.util.Optional;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import javax.sql.DataSource;
 
 /**
@@ -25,12 +25,13 @@ import javax.sql.DataSource;
 public interface DataSourceService {
 
   /**
-   * Returns an {@link Optional} data source instance that matches the given name or return an empty
-   * {@link Optional} if not matches.
+   * Returns a data source instance that matches the given name or throws exception if none matches.
    *
    * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
    */
-  Optional<DataSource> get(String name);
+  default DataSource get(String name) {
+    return shouldNotNull(tryGet(name), "Can't get data source by name %s", name);
+  }
 
   /**
    * Try to returns an data source instance that matches the given name or return null if not
@@ -38,7 +39,5 @@ public interface DataSourceService {
    *
    * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
    */
-  default DataSource tryGet(String name) {
-    return get(name).orElse(null);
-  }
+  DataSource tryGet(String name);
 }

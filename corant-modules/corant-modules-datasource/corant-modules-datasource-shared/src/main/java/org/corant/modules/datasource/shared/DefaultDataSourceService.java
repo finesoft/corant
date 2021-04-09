@@ -16,7 +16,6 @@ package org.corant.modules.datasource.shared;
 import static org.corant.context.Instances.findNamed;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isNotBlank;
-import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -33,15 +32,15 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class DefaultDataSourceService implements DataSourceService {
 
   @Override
-  public Optional<DataSource> get(String name) {
+  public DataSource tryGet(String name) {
     if (isNotBlank(name) && name.startsWith(DataSourceConfig.JNDI_SUBCTX_NAME)) {
       try {
-        return Optional.ofNullable(forceCast(new InitialContext().lookup(name)));
+        return forceCast(new InitialContext().lookup(name));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     } else {
-      return findNamed(DataSource.class, name);
+      return findNamed(DataSource.class, name).orElse(null);
     }
   }
 

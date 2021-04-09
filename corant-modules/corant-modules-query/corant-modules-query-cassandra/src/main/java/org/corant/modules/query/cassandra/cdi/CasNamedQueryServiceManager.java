@@ -14,7 +14,6 @@
 package org.corant.modules.query.cassandra.cdi;
 
 import static org.corant.context.Instances.findNamed;
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -28,6 +27,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.cassandra.AbstractCasNamedQueryService;
 import org.corant.modules.query.cassandra.CasNamedQuerier;
 import org.corant.modules.query.cassandra.CasQueryExecutor;
@@ -75,7 +75,8 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   public NamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
-      final String clusterName = isBlank(k) ? defaultQualifierValue.orElse(EMPTY) : k;
+      final String clusterName =
+          isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
       logger.fine(() -> String.format(
           "Create default cassandra named query service, the cluster is [%s].", clusterName));
       return new DefaultCasNamedQueryService(clusterName, this);

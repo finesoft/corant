@@ -17,7 +17,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.defaultTrim;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,7 +28,7 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.SynchronizationType;
-import org.corant.shared.util.Strings;
+import org.corant.context.qualifier.Qualifiers;
 
 /**
  * corant-modules-jpa-shared
@@ -39,7 +38,7 @@ import org.corant.shared.util.Strings;
  */
 public interface PersistenceService {
 
-  String EMPTY_PERSISTENCE_UNIT_NAME = Strings.EMPTY;
+  String EMPTY_PERSISTENCE_UNIT_NAME = Qualifiers.EMPTY_NAME;
 
   /**
    * Returns the managed entity manager for given persistence context
@@ -115,8 +114,8 @@ public interface PersistenceService {
      */
     protected PersistenceContextLiteral(String name, String unitName, PersistenceContextType type,
         SynchronizationType synchronization, Map<String, String> properties) {
-      this.name = defaultTrim(name);
-      this.unitName = defaultTrim(unitName);
+      this.name = Qualifiers.resolveName(name);
+      this.unitName = Qualifiers.resolveName(unitName);
       this.type = defaultObject(type, PersistenceContextType.TRANSACTION);
       this.synchronization = defaultObject(synchronization, SynchronizationType.SYNCHRONIZED);
       if (!isEmpty(properties)) {
@@ -206,8 +205,8 @@ public interface PersistenceService {
     final String value;
 
     public PersistencePropertyLiteral(String name, String value) {
-      this.name = defaultTrim(name);
-      this.value = defaultTrim(value);
+      this.name = Qualifiers.resolveName(name);
+      this.value = Qualifiers.resolveName(value);
     }
 
     @Override
@@ -239,8 +238,8 @@ public interface PersistenceService {
      * @param unitName
      */
     protected PersistenceUnitLiteral(String name, String unitName) {
-      this.name = defaultTrim(name);
-      this.unitName = defaultTrim(unitName);
+      this.name = Qualifiers.resolveName(name);
+      this.unitName = Qualifiers.resolveName(unitName);
     }
 
     public static PersistenceUnitLiteral of(PersistenceContext pc) {

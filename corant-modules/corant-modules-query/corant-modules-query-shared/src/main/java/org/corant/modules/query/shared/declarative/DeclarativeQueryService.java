@@ -15,7 +15,6 @@ package org.corant.modules.query.shared.declarative;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -23,6 +22,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.shared.QueryService;
 import org.corant.modules.query.shared.mapping.Query.QueryType;
 
@@ -92,7 +92,7 @@ public @interface DeclarativeQueryService {
    *
    * @return qualifier
    */
-  String qualifier() default EMPTY;
+  String qualifier() default Qualifiers.EMPTY_NAME;
 
   /**
    * The query type

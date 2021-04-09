@@ -13,11 +13,11 @@
  */
 package org.corant.modules.elastic.data.service;
 
-import static org.corant.shared.util.Strings.defaultTrim;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.elastic.data.ElasticExtension;
 import org.elasticsearch.client.transport.TransportClient;
 
@@ -38,7 +38,7 @@ public class ElasticTransportClientService {
 
   public TransportClient get(String clusterName) {
     if (!instance.isUnsatisfied()) {
-      return instance.select(NamedLiteral.of(defaultTrim(clusterName))).get();
+      return instance.select(NamedLiteral.of(Qualifiers.resolveName(clusterName))).get();
     }
     return null;
   }

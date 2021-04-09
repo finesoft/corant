@@ -13,7 +13,6 @@
  */
 package org.corant.context;
 
-import static org.corant.context.qualifier.Qualifiers.resolveNamedQualifiers;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
@@ -21,8 +20,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.forceCast;
-import static org.corant.shared.util.Strings.defaultTrim;
-import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +35,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
+import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -121,10 +119,9 @@ public class Instances {
    * <p>
    * <b>Note:</b> <br/>
    * The Named Qualifier here extends the Named Qualifier mechanism of CDI. If the given name is not
-   * null, use CDI's Named Qualifier for lookup first, if found, it will return immediately. Before
-   * the next lookup, the given name will be trimmed first. if the given name is empty, then
-   * directly do not add any qualifiers for lookup, if found, it will return immediately, otherwise
-   * it will use {@link Unnamed} qualifier performs a lookup.
+   * null, use CDI's Named Qualifier for lookup first, if found, it will return immediately. If the
+   * given name is empty, then directly do not add any qualifiers for lookup, if found, it will
+   * return immediately, otherwise it will use {@link Unnamed} qualifier for lookup.
    *
    * @param <T> the bean type to be resolved
    * @param instanceClass the bean instance class to be resolved
@@ -145,9 +142,9 @@ public class Instances {
       }
     }
     // supports the extended Named qualifier
-    String useName = defaultTrim(name);
-    if (isBlank(useName) && inst.isResolvable()
-        || (inst = inst.select(resolveNamedQualifiers(useName))).isResolvable()) {
+    String useName = Qualifiers.resolveName(name);
+    if (useName.equals(Qualifiers.EMPTY_NAME) && inst.isResolvable()
+        || (inst = inst.select(Unnamed.INST)).isResolvable()) {
       return Optional.of(inst.get());
     }
     return Optional.empty();

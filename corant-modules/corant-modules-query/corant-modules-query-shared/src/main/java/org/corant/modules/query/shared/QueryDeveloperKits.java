@@ -80,7 +80,8 @@ public class QueryDeveloperKits {
 
   protected static Corant prepare() {
     LoggerFactory.disableLogger();
-    CorantConfigResolver.adjust("webserver.auto-start", "false", "flyway.migrate.enable", "false");
+    CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
+        "corant.flyway.migrate.enable", "false");
     return Corant.startup(QueryDeveloperKits.class, new String[] {Corant.DISABLE_BOOST_LINE_CMD});
   }
 

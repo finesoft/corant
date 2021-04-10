@@ -44,7 +44,7 @@ public class Qualifiers {
   }
 
   public static Annotation[] resolveNamedQualifiers(String name) {
-    return isBlank(name) ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
+    return resolveName(name).isEmpty() ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
         : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
   }
 
@@ -54,7 +54,7 @@ public class Qualifiers {
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = tNames.iterator().next();
-        if (name.equals(EMPTY_NAME)) {
+        if (name.isEmpty()) {
           nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
         } else {
           nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
@@ -78,16 +78,15 @@ public class Qualifiers {
     protected final Map<T, Annotation[]> objectAndQualifiers;
 
     public DefaultNamedQualifierObjectManager(Iterable<T> configs) {
-      Map<String, T> tmpObjects = new HashMap<>();
+      this.objects = new HashMap<>();
       if (isNotEmpty(configs)) {
         for (T t : configs) {
           if (t != null) {
-            tmpObjects.put(resolveName(t.getName()), t);
+            objects.put(resolveName(t.getName()), t);
           }
         }
       }
-      this.objects = tmpObjects;
-      this.nameAndQualifiers = resolveNameds(tmpObjects.keySet());
+      this.nameAndQualifiers = resolveNameds(objects.keySet());
       this.objectAndQualifiers = new HashMap<>(nameAndQualifiers.size());
       nameAndQualifiers.forEach((k, v) -> this.objectAndQualifiers.put(this.objects.get(k), v));
     }

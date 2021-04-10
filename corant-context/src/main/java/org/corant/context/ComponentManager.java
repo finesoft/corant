@@ -25,6 +25,7 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.transaction.TransactionScoped;
+import org.jboss.weld.environment.se.contexts.ThreadScoped;
 
 /**
  * corant-context
@@ -93,6 +94,11 @@ public interface ComponentManager<N, C> extends Serializable {
   @SessionScoped
   abstract class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = 7462742316873226368L;
+  }
+
+  @ThreadScoped
+  abstract class thComponentManager<N, C> extends AbstractComponentManager<N, C> {
+    private static final long serialVersionUID = -5758319290954516372L;
   }
 
   @TransactionScoped

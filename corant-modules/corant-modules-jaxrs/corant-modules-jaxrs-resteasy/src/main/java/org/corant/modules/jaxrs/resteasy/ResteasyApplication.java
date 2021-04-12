@@ -18,7 +18,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
 @Documented
@@ -34,6 +33,6 @@ public @interface ResteasyApplication {
 
   int loadOnStartup() default 1;
 
-  Class<? extends HttpServletDispatcher> value() default HttpServlet30Dispatcher.class;
+  Class<? extends HttpServletDispatcher> value() default ResteasyServlet.class;
 
 }

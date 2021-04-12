@@ -59,7 +59,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   /**
    * {@inheritDoc}
    * <p>
-   * This method use {@link forward} to fetch next data records.
+   * This method use {@link #forward(String, Object)} to fetch next data records.
    * </p>
    *
    * @see AbstractNamedQueryService#stream(String, StreamQueryParameter)

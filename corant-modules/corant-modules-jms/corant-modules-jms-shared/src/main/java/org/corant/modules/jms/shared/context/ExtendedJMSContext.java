@@ -69,10 +69,10 @@ import org.corant.shared.exception.CorantRuntimeException;
  * JTA transaction as described above.
  * </pre>
  *
- * {@link <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p4">Proposed
- * changes to JMSContext to support injection (Option 4)</a>} <br/>
- * {@link <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Injection
- * of JMSContext objects - Proposals (version 4)</a>}
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p4">Proposed
+ *      changes to JMSContext to support injection (Option 4)</a>
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Injection of
+ *      JMSContext objects - Proposals (version 4)</a>
  *
  * @author bingo 下午5:24:17
  *

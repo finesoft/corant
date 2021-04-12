@@ -26,7 +26,6 @@ import java.lang.annotation.Target;
  * Use to indicates the beginning of the namespace of the configuration item.
  * <p>
  * For example:
- * <p>
  *
  * <pre>
  * The declarative configuration object:

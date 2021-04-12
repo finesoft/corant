@@ -117,7 +117,7 @@ public class Instances {
    * ambiguous and unsatisfied return an empty {@link Optional}.
    *
    * <p>
-   * <b>Note:</b> <br/>
+   * <b>Note:</b> <br>
    * The Named Qualifier here extends the Named Qualifier mechanism of CDI. If the given name is not
    * null, use CDI's Named Qualifier for lookup first, if found, it will return immediately. If the
    * given name is empty, then directly do not add any qualifiers for lookup, if found, it will

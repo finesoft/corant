@@ -40,8 +40,9 @@ import org.corant.shared.util.Conversions;
 /**
  * corant-modules-jms-artemis
  *
- * <pre>
  * <h1>Injection of JMSContext objects - Proposals (version 4)</h1>
+ *
+ * <pre>
  *
  * If an injected JMSContext is used in a JTA transaction (both bean-managed and container-managed),
  * its scope will be that of the transaction. This means that: The JMSContext object will be
@@ -68,15 +69,16 @@ import org.corant.shared.util.Conversions;
  * JTA transaction as described above.
  * </pre>
  *
- * {@link <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p4">Proposed
- * changes to JMSContext to support injection (Option 4)</a>} <br/>
- * {@link <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Injection
- * of JMSContext objects - Proposals (version 4)</a>}
- *
  * <p>
- * Attention: For now we do not supported JMSProducer.setDeliveryDelay/setTimeToLive...(six methods)
- * , Artemis implementations use singleton JMSProducer in one JMSContext, this can be problematic.
- * </p>
+ * Note: For now we do not supported JMSProducer.setDeliveryDelay/setTimeToLive...(six methods) ,
+ * Artemis implementations use singleton JMSProducer in one JMSContext, this can be problematic.
+ *
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p4">Proposed
+ *      changes to JMSContext to support injection (Option 4)</a>
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Injection of
+ *      JMSContext objects - Proposals (version 4)</a>
+ *
+ *
  *
  * @author bingo 下午4:12:15
  *

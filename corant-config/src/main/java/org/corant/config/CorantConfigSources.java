@@ -67,7 +67,7 @@ public class CorantConfigSources {
   /**
    * @param sources
    * @param expressionsEnabled
-   * @param profile
+   * @param profiles
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
       String[] profiles) {

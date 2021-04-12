@@ -35,6 +35,7 @@ import org.corant.modules.query.shared.mapping.QueryHint;
  *
  * <p>
  * The result script mapper hints, use script to intervene the result.
+ * <ul>
  * <li>The key is 'result-script-mapper'</li>
  * <li>In the current implementation, we recommend the use of stateless functions, which take two
  * arguments. The first argument 'p' is used to accept the query parameter, usually a Map structure,
@@ -43,6 +44,7 @@ import org.corant.modules.query.shared.mapping.QueryHint;
  * language. We use CompiledScript to improve performance, which means you have to pay attention to
  * writing scripts, preferably stateless functions, that can be problematic in multi-threaded
  * conditions if global variables are involved.</li>
+ * </ul>
  * </p>
  *
  * <p>
@@ -67,7 +69,7 @@ import org.corant.modules.query.shared.mapping.QueryHint;
  *       &lt;/hint&gt;
  * &lt;/query&gt;
  * </pre>
- * </p>
+ *
  *
  * @see ResultBeanMapperHintHandler
  *

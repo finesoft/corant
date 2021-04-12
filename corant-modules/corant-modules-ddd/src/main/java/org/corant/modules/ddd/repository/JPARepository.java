@@ -319,7 +319,6 @@ public interface JPARepository extends Repository<Query> {
   /**
    * {@link JPAQueries#query(String)}
    *
-   * @param <T>
    * @param qlString a Jakarta Persistence query string
    * @return JPAQuery
    */

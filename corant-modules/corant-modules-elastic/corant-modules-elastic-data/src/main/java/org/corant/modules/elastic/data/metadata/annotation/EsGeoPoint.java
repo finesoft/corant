@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * corant-modules-elastic-data
  *
  * Fields of type geo_point accept latitude-longitude pairs, which can be used:
- *
+ * <ul>
  * <li>to find geo-points within a bounding box, within a certain distance of a central point, or
  * within a polygon.</li>
  * <li>to aggregate documents geographically or by distance from a central point.</li>
@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
  * <li>Geo-point expressed as a geohash, such as "drm3btev3e86"</li>
  * <li>Geo-point expressed as an array with the format: [ lon, lat], such as [ -71.34, 41.12 ]</li>
  *
+ * </ul>
  * A geo-bounding box query which finds all geo-points that fall inside the box.
  *
  * @author bingo 上午11:45:56

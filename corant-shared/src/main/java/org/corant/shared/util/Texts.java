@@ -245,7 +245,7 @@ public class Texts {
    *
    * NOTE: The caller must maintain resource release by himself.
    *
-   * @see #asXSVLines(InputStream, Charset, int, BiPredicate, String, String)
+   * @see #asXSVLines(InputStream, Charset, int, BiPredicate, String)
    *
    * @param is the input stream
    * @param delimiter the field delimiter

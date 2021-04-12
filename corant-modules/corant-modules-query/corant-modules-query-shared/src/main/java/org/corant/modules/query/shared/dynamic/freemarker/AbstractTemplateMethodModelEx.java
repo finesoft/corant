@@ -146,7 +146,6 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    *    type = "java.time.LocalDateTime"
    *    hints = {"converter.zone-id","UTC"}
    * </pre>
-   * </p>
    *
    * @param args
    * @see ConverterHints

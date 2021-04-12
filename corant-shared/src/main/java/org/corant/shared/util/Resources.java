@@ -53,23 +53,21 @@ public class Resources {
   /**
    * Get URL resources from specified URL path, support Glob / Regex Pattern.
    * <p>
+   * <ul>
    * <li>The incoming path start with 'filesystem:'({@link SourceType#FILE_SYSTEM}) means that get
    * resources from file system.</li>
-   *
    * <li>The incoming path start with 'classpath:' ({@link SourceType#CLASS_PATH}) means that get
    * resources from class path.</li>
-   *
    * <li>The incoming path start with 'url:' ({@link SourceType#CLASS_PATH}) means that get
    * resources from URL.</li>
-   *
+   * </ul>
    * Note: If the incoming path non start with {@link SourceType} that means not specified schema
    * then use class path.
    *
+   * @param <T> the resource type
+   * @param path the resource path
+   * @throws IOException
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
-   * @param <T>
-   * @param path
-   * @return
-   * @throws IOException from
    */
   public static <T extends URLResource> Stream<T> from(String path) throws IOException {
     if (isNotBlank(path)) {

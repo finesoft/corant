@@ -34,7 +34,7 @@ import org.corant.modules.ddd.model.Aggregate.Lifecycle;
  *
  * @see EntityManager#flush()
  * @see TransactionSynchronizationRegistry
- * @see Synchronization#afterCompletion()
+ * @see Synchronization#afterCompletion(int)
  *
  * @author bingo 上午9:39:28
  */

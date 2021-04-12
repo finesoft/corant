@@ -37,7 +37,6 @@ import org.corant.shared.util.Classes;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyDeploymentImpl;
-import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.jboss.resteasy.spi.ResteasyDeployment;
@@ -112,7 +111,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
       contextPath = cp;
       ResteasyApplication restApp =
           findAnnotation(applicationClass, ResteasyApplication.class, true);
-      dispatcherClass = restApp == null ? HttpServlet30Dispatcher.class : restApp.value();
+      dispatcherClass = restApp == null ? org.corant.modules.jaxrs.resteasy.ResteasyServlet.class
+          : restApp.value();
       loadOnStartup = restApp == null ? 1 : restApp.loadOnStartup();
     }
 

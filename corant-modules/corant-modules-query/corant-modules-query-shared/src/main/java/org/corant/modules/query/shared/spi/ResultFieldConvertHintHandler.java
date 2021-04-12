@@ -48,6 +48,7 @@ import org.corant.shared.util.Objects;
  *
  * <p>
  * The result field conversion hints.
+ * <ul>
  * <li>The key is 'result-field-convert'</li>
  * <li>The value of the parameter that named 'field-name' is the field name that will be
  * convert.</li>
@@ -55,6 +56,7 @@ import org.corant.shared.util.Objects;
  * value will be convert to.</li>
  * <li>The values of the parameter that named 'convert-hint-key' and 'convert-hint-value' are the
  * conversion service hints, use for intervene conversion process.</li>
+ * </ul>
  * </p>
  * <p>
  * Use case:
@@ -72,7 +74,6 @@ import org.corant.shared.util.Objects;
  *       &lt;/hint&gt;
  * &lt;/query&gt;
  * </pre>
- * </p>
  *
  * @see ConversionService
  * @see org.corant.shared.conversion.Conversion

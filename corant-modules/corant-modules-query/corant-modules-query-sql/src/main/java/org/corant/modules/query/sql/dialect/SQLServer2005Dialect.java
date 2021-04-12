@@ -39,9 +39,9 @@ public class SQLServer2005Dialect extends SQLServerDialect {
 
   /**
    * Add a LIMIT clause to the given SQL SELECT
-   * <p/>
+   * <p>
    * The LIMIT SQL will look like:
-   * <p/>
+   * <p>
    * WITH script AS (SELECT TOP 100 percent ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as
    * __row_number__, * from table_name) SELECT * FROM script WHERE __row_number__ BETWEEN :offset
    * and :lastRows ORDER BY __row_number__

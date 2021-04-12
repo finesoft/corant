@@ -59,7 +59,7 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
 
   /**
    * @param klass
-   * @param managedClasses
+   * @param suiteClasses
    * @throws InitializationError
    */
   protected CorantJunit4Suite(Class<?> klass, Class<?>[] suiteClasses) throws InitializationError {
@@ -81,7 +81,7 @@ public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
   /**
    * @param builder
    * @param klass
-   * @param managedClasses
+   * @param suiteClasses
    * @throws InitializationError
    */
   protected CorantJunit4Suite(RunnerBuilder builder, Class<?> klass, Class<?>[] suiteClasses)

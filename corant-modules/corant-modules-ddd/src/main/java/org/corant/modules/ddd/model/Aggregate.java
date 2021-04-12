@@ -53,7 +53,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * root. A set of consistency rules applies within the AGGREGATE’S boundaries.
  * <p>
  * Aggregates are the basic element of transfer of data storage - you request to load or save whole
- * aggregates. If possable, the transactions({@link UnitOfWork}) should not cross aggregate
+ * aggregates. If possible, the transactions({@link UnitOfWork}) should not cross aggregate
  * boundaries.
  * <p>
  * Generally the aggregate is the DDD aggregate root entity.
@@ -120,7 +120,6 @@ public interface Aggregate extends Entity {
 
   /**
    * Raise message, add the message to the buffer and do not publish it immediately.
-   * <p>
    *
    * <pre>
    * The Message sending timing:

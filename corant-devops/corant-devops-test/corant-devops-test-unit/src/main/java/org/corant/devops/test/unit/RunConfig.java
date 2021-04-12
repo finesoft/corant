@@ -33,7 +33,7 @@ public @interface RunConfig {
   /**
    * additional config property, the priorities is tmp
    *
-   * @see org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_TMP_ORDINAL
+   * @see org.corant.shared.normal.Priorities.ConfigPriorities#APPLICATION_ADJUST_ORDINAL
    * @return properties
    */
   AddiConfigProperty[] addiConfigProperties() default {};

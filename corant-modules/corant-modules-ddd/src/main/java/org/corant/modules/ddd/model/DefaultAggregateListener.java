@@ -33,7 +33,7 @@ import org.corant.modules.ddd.unitwork.UnitOfWorks;
  *
  * <p>
  * Entity listener, working with the {@link UnitOfWork}. This class is annotated on
- * {@link #AbstractAggregate}, if you want to rewrite it use {@link ExcludeDefaultListeners}
+ * {@link AbstractAggregate}, if you want to rewrite it use {@link ExcludeDefaultListeners}
  * <p>
  *
  * @author bingo 下午3:35:44

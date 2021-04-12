@@ -88,7 +88,7 @@ import org.corant.shared.util.UnsafeAccessors;
  * </ul>
  *
  * <p>
- * <b>NOTE:</b><br/>
+ * <b>NOTE:</b><br>
  * When starting multiple application instances in the same system, the execution of related
  * commands may cause the reaction of multiple instances, because we use MMF. In addition to the
  * startup command, if other commands are followed by '-pid', where the 'pid' is the process id, it

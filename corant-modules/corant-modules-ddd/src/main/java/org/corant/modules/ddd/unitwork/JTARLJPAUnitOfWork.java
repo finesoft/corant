@@ -33,7 +33,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * as to keep the message from being lost), and the messages are sent(generally use async sending)
  * after the transaction is successfully. If the message sending is unsuccessful, some retry
  * mechanism is required, and after the message is successfully sent, it needs to be cleaned
- * up.<br/>
+ * up.<br>
  * This solution cannot guarantee full consistency, usually this solution is used with SAGA /LRA and
  * other finally consistent components.
  * </p>

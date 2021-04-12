@@ -199,7 +199,7 @@ public class JPAQueries {
    *
    * If the given type is JPA entity class or there is no converter which implements
    * javax.persistence.Tuple To Object conversion, call
-   * {@link EntityManager#createNativeQuery(String, Class)} directly. <br/>
+   * {@link EntityManager#createNativeQuery(String, Class)} directly. <br>
    *
    * If the given is not JPA entity class (etc., SomeDTO) and there is a converter which implements
    * javax.persistence.Tuple To Object conversion then use javax.persistence.Tuple.class as the
@@ -680,8 +680,7 @@ public class JPAQueries {
     /**
      * Execute a SELECT query that returns a single typed result.
      *
-     * @param <T>
-     * @return get
+     * @return the result object
      */
     public T get() {
       setMaxResults(1);

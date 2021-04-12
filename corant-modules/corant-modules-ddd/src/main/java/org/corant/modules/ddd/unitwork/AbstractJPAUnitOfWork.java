@@ -54,8 +54,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * <p>
  * Note that in the current implementation, a unit of work can contain multiple EntityManagers, each
  * of which has a particular {@link PersistenceContext} and the type of {@link PersistenceContext}
- * must be {@link PersistenceContextType.TRANSACTION} and the synchronization of
- * {@link PersistenceContext} must be {@link SynchronizationType.SYNCHRONIZED}
+ * must be {@link PersistenceContextType#TRANSACTION} and the synchronization of
+ * {@link PersistenceContext} must be {@link SynchronizationType#SYNCHRONIZED}
  * </p>
  *
  * @author bingo 下午7:13:58
@@ -163,8 +163,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   /**
    * {@inheritDoc}
    * <p>
+   * <b>Parameter descriptions:</b>
    * <ul>
-   * <b>Parameter descriptions</b>
    * <li>If the parameter is aggregation, the aggregation id and life cycle state, as well as the
    * message queue in the aggregation, are registered.</li>
    * <li>If the parameter is a message, the message is merged into a message queue when the message
@@ -172,6 +172,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    * <li>If the parameter is a named object (represented by Pair), the object is added to a Map as a
    * key-value pair</li>
    * </ul>
+   * </p>
    *
    * @see AggregateIdentifier
    * @see Pair

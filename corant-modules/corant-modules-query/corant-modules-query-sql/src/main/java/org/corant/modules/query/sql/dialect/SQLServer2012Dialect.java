@@ -29,9 +29,9 @@ public class SQLServer2012Dialect extends SQLServer2008Dialect {
 
   /**
    * Add a LIMIT clause to the given SQL SELECT
-   * <p/>
+   * <p>
    * The LIMIT SQL will look like:
-   * <p/>
+   * <p>
    * SELET XXX FROM T OFFSET offset FETCH NEXT limit ROWS ONLY
    *
    * @param sql The SQL statement to base the limit script off of.

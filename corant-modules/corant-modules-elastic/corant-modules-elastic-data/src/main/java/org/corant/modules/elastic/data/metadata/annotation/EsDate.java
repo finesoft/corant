@@ -23,9 +23,11 @@ import java.lang.annotation.Target;
  * corant-modules-elastic-data
  *
  * JSON doesn’t have a date datatype, so dates in Elasticsearch can either be:
+ * <ul>
  * <li>strings containing formatted dates, e.g. "2015-01-01" or "2015/01/01 12:10:30".</li>
  * <li>a long number representing milliseconds-since-the-epoch.</li>
  * <li>an integer representing seconds-since-the-epoch.</li>
+ * </ul>
  *
  * Internally, dates are converted to UTC (if the time-zone is specified) and stored as a long
  * number representing milliseconds-since-the-epoch.

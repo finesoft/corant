@@ -37,7 +37,7 @@ public class Assertions {
   /**
    * Throw CorantRuntimeException if given two arguments are not equals.
    *
-   * @see Objects#isEquals(Object, Object)
+   * @see Objects#areEqual(Object, Object)
    * @param a
    * @param b shouldBeEquals
    */
@@ -135,7 +135,6 @@ public class Assertions {
   /**
    * Throw a certain runtime exception if argument is not null
    *
-   * @param <T>
    * @param obj
    * @param ex
    * @return shouldBeNull

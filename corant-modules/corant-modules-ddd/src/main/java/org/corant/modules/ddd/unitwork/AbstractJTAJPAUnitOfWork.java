@@ -28,7 +28,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * <p>
  * The JPA unit of work based on JTA transaction boundaries. The unit of work implements
  * {@link Synchronization}, and all EntityManagers in the unit of work are
- * SynchronizationType.SYNCHRONIZED, and must be in transaction state. <br/>
+ * SynchronizationType.SYNCHRONIZED, and must be in transaction state. <br>
  * Before the transaction is committed (before prepare JTA in the two phases), all entity states in
  * EntityManagers are flushed to the underlying storage, and messages are collected at the same
  * time.

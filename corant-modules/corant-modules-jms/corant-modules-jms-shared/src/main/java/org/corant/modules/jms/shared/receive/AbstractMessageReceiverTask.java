@@ -66,8 +66,8 @@ import org.corant.shared.ubiquity.Sortable;
  * Unfinish: use connection or session pool
  *
  * <p>
- * {@link <a href = "https://developer.jboss.org/wiki/ShouldICacheJMSConnectionsAndJMSSessions">
- * Should I cache JMS connections and JMS sessions</a>}
+ * <a href = "https://developer.jboss.org/wiki/ShouldICacheJMSConnectionsAndJMSSessions"> Should I
+ * cache JMS connections and JMS sessions</a>
  *
  * @author bingo 上午11:33:15
  *

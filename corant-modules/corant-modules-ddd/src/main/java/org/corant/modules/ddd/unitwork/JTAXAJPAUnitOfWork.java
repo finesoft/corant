@@ -25,7 +25,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * The JPA unit of work based on JTA XA resource transaction boundaries, generally used for
  * single/multi database and/or use XA message queue scenarios. Through JTA's transaction
  * management, the state of the business entity are persisted and the messages are sent before the
- * transaction is committed.<br/>
+ * transaction is committed.<br>
  * This solution can theoretically guarantee full consistency.
  * </p>
  *

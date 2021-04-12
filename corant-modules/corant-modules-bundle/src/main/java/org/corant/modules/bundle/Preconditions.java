@@ -38,8 +38,7 @@ import org.corant.shared.util.Validates;
  */
 public class Preconditions {
 
-  private Preconditions() {
-  }
+  private Preconditions() {}
 
   @SafeVarargs
   public static <T> T requireAllMatch(T obj, Object code, SinglePrecondition<T>... asts) {
@@ -499,7 +498,7 @@ public class Preconditions {
    * @param collection the collection to check
    * @param code the exception code to use if the validation fails
    * @param parameters the exception info params
-   * @throws BaseException if the collection is <code>null</code> or has no elements
+   * @throws GeneralRuntimeException if the collection is <code>null</code> or has no elements
    */
   public static <C extends Collection<T>, T> C requireNotEmpty(C collection, Object code,
       Object... parameters) {
@@ -515,7 +514,7 @@ public class Preconditions {
    * @param map the map to check
    * @param code the exception code to use if the validation fails
    * @param parameters the exception info params
-   * @throws BaseException if the map is <code>null</code> or has no entries
+   * @throws GeneralRuntimeException if the map is <code>null</code> or has no entries
    */
   public static <K, V> Map<K, V> requireNotEmpty(Map<K, V> map, Object code, Object... parameters) {
     if (isEmpty(map)) {
@@ -530,7 +529,7 @@ public class Preconditions {
    * @param array the array to check
    * @param code the exception code to use if the validation fails
    * @param parameters the exception params
-   * @throws BaseException if the object array is <code>null</code> or has no elements
+   * @throws GeneralRuntimeException if the object array is <code>null</code> or has no elements
    */
   public static <T> T[] requireNotEmpty(T[] array, Object code, Object... parameters) {
     if (isEmpty(array)) {
@@ -594,7 +593,7 @@ public class Preconditions {
    * @param array the array to check
    * @param code the exception code to use if the validation fails
    * @param parameters the exception info params
-   * @throws BaseException if the object array contains a <code>null</code> element
+   * @throws GeneralRuntimeException if the object array contains a <code>null</code> element
    */
   public static <T> T[] requireNotNullEle(T[] array, Object code, Object... parameters) {
     if (array != null) {

@@ -53,8 +53,7 @@ public interface PersistenceService {
    * persistence context is TRANSACTION and synchronization of the persistence context is
    * SYNCHRONIZED
    *
-   * @param pc
-   * @return getEntityManager
+   * @param persistenceUnitName the persistence unit name
    */
   default EntityManager getEntityManager(String persistenceUnitName) {
     return getEntityManager(PersistenceContextLiteral.of(persistenceUnitName));
@@ -81,7 +80,7 @@ public interface PersistenceService {
   /**
    * Returns the managed entity manager factory for given persistence unit name
    *
-   * @param pu
+   * @param persistenceUnitName
    * @return getEntityManagerFactory
    */
   default EntityManagerFactory getEntityManagerFactory(String persistenceUnitName) {

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
@@ -28,6 +29,7 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -51,6 +53,7 @@ import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Threads;
 
 /**
  * corant-kernel
@@ -69,7 +72,6 @@ import org.corant.shared.util.Strings;
  * after CDI initialized such as web server.</li>
  * <li>After the above execution was completed, fire PostCorantReadyEvent to listeners.</li>
  * </ul>
- * </p>
  *
  * <p>
  * In most circumstances the static {@link #startup(Class, String[])} method can be called directly
@@ -159,14 +161,14 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use given config class(synthetic bean class) and arguments construct Corant instance. If the
+   * Use given config class(synthetic bean class) and arguments to construct Corant instance. If the
    * given config class is not null then the class loader of the current thread context and the CDI
    * container will be set with the given config class class loader. The given arguments will be
    * propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
    *
    * @see #Corant(Class[], ClassLoader, String...)
-   * @param configClass
-   * @param arguments
+   * @param configClass the additional synthetic bean class
+   * @param arguments the application arguments use for boot handler
    */
   public Corant(Class<?> configClass, String... arguments) {
     this(configClass == null ? null : new Class<?>[] {configClass},
@@ -181,9 +183,9 @@ public class Corant implements AutoCloseable {
    * use Corant.class class loader. The given arguments will be propagate to all CorantBootHandler
    * and all CorantLifecycleEvent listeners.
    *
-   * @param beanClasses
-   * @param classLoader
-   * @param arguments
+   * @param beanClasses the additional synthetic bean classes
+   * @param classLoader the class loader for current thread and CDI container
+   * @param arguments the application arguments use for boot handler
    */
   public Corant(Class<?>[] beanClasses, ClassLoader classLoader, String... arguments) {
     this.beanClasses =
@@ -204,8 +206,8 @@ public class Corant implements AutoCloseable {
    * with the given class loader.The given arguments will be propagate to all CorantBootHandler and
    * all CorantLifecycleEvent listeners.
    *
-   * @param classLoader
-   * @param arguments
+   * @param classLoader the class loader for current thread and CDI container
+   * @param arguments the application arguments use for boot handler
    */
   public Corant(ClassLoader classLoader, String... arguments) {
     this(null, classLoader, arguments);
@@ -215,7 +217,7 @@ public class Corant implements AutoCloseable {
    * Use given arguments and the class loader of Corant.class to construct Corant instance.The given
    * arguments will be propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
    *
-   * @param arguments
+   * @param arguments the application arguments use for boot handler
    */
   public Corant(String... arguments) {
     this(null, null, arguments);
@@ -226,12 +228,12 @@ public class Corant implements AutoCloseable {
    * works. If the Corant application is not started, this method will try to start it with incoming
    * arguments, and this method does not directly close it.
    *
-   * @param <T> The bean type
-   * @param synthetic Whether the bean class is synthetic
-   * @param beanClass The bean class
-   * @param annotations The qualifiers
-   * @param arguments The application arguments
-   * @return The managed bean instance
+   * @param <T> the bean type
+   * @param synthetic whether the bean class is synthetic
+   * @param beanClass the bean class
+   * @param annotations the qualifiers
+   * @param arguments the application arguments use for boot handler
+   * @return the managed bean instance
    */
   public static synchronized <T> T call(boolean synthetic, Class<T> beanClass,
       Annotation[] annotations, String[] arguments) {
@@ -252,10 +254,10 @@ public class Corant implements AutoCloseable {
    * for temporary works. If the Corant application is not started, this method will try to start
    * it, and this method does not directly close it.
    *
-   * @param <T>
-   * @param beanClass The bean classes
-   * @param annotations The bean qualifiers
-   * @return The managed bean instance
+   * @param <T> the bean type
+   * @param beanClass the bean class
+   * @param annotations the bean qualifiers
+   * @return the managed bean instance
    */
   public static synchronized <T> T call(Class<T> beanClass, Annotation... annotations) {
     return call(false, beanClass, annotations, Strings.EMPTY_ARRAY);
@@ -266,10 +268,9 @@ public class Corant implements AutoCloseable {
    * If the Corant application is not started, this method will try to start it, and this method
    * does not directly close it.
    *
-   * @param <T>
-   * @param beanClass
-   * @param arguments
-   * @return callSynthetic
+   * @param <T> the bean type
+   * @param beanClass the bean class
+   * @param arguments the application arguments use for boot handler
    */
   public static synchronized <T> T callSynthetic(Class<T> beanClass, String... arguments) {
     return call(true, beanClass, Annotations.EMPTY_ARRAY, arguments);
@@ -288,8 +289,8 @@ public class Corant implements AutoCloseable {
    * Run a runnable program in the CDI environment. This method will try to start the Corant
    * application and automatically close it after the runnable executed.
    *
-   * @param runnable
-   * @param arguments
+   * @param runnable the runnable program to be ran in CDI environment
+   * @param arguments the application arguments use for boot handler
    */
   public static synchronized void run(Runnable runnable, String... arguments) {
     try {
@@ -309,19 +310,70 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Shut down the Corant application, If you want to start it again, you can only start it through
+   * Shutdown the Corant application, If you want to start it again, you can only start it through
    * the {@link #startup()} method, or instantiate Corant and call the {@link #start(Consumer)}
    * method.
+   * <p>
+   * Note: This method only makes one shutdown attempt, if you need multiple shutdown attempts, you
+   * can use {@link #shutdown(int, long)}
+   *
+   * @see Corant#shutdown(int, long)
+   *
    */
-  public static synchronized void shutdown() {
+  public static void shutdown() {
+    shutdown(1, 0L);
+  }
+
+  /**
+   * Shutdown the Corant application, if an error occurs, allow multiple attempts to shutdown. If
+   * you want to start it again, you can only start it through the {@link #startup()} method, or
+   * instantiate Corant and call the {@link #start(Consumer)} method.
+   *
+   * @param attempts the number of attempts to shutdown
+   * @param intervalMs time between attempts to shutdown in milliseconds
+   */
+  public static synchronized void shutdown(int attempts, long intervalMs) {
+    int atts = max(attempts, 1);
+    long itms = max(intervalMs, 0L);
+    Throwable throwable = null;
+    while (--atts >= 0) {
+      throwable = null;
+      try {
+        if (current() != null) {
+          if (current().isRunning()) {
+            current().stop();
+          }
+          if (current().power() != null) {
+            deregisterFromMBean(POWER_MBEAN_NAME);
+          }
+          me = null;
+          break;
+        }
+      } catch (Throwable t) {
+        throwable = t;
+      } finally {
+        if (throwable != null && itms > 0 && atts > 0) {
+          Threads.tryThreadSleep(itms);
+        }
+      }
+    }
+
     if (current() != null) {
       if (current().isRunning()) {
-        current().stop();
+        if (throwable != null) {
+          throw new IllegalStateException("Can't shutdown coarnt!", throwable);
+        } else {
+          throw new IllegalStateException("Can't shutdown coarnt!");
+        }
+      } else {
+        if (throwable != null) {
+          Logger.getLogger(Corant.class.getName()).log(Level.WARNING,
+              "Corant shutdown occurred error!", throwable);
+        } else {
+          Logger.getLogger(Corant.class.getName()).warning(() -> "Corant shutdown occurred error!");
+        }
+        me = null;// FIXME
       }
-      if (current().power() != null) {
-        deregisterFromMBean(POWER_MBEAN_NAME);
-      }
-      me = null;
     }
   }
 

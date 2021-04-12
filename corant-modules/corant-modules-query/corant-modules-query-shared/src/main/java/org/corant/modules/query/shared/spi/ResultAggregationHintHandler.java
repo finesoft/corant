@@ -45,6 +45,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  *
  * <p>
  * The simple result aggregation hints.
+ * <ul>
  * <li>The key is 'result-aggregation'</li>
  * <li>The value of the parameter that named 'aggs-field-names' are the reserved field names during
  * aggregation; if the first character of this parameter is'!', it means the names of the fields
@@ -52,6 +53,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * <li>The value of the parameter that named 'aggs-name' is the name of the field that stores the
  * aggregation result. The aggregated objects are generally placed in a container object (usually a
  * List).</li>
+ * </ul>
  * </p>
  * <p>
  * Use case:

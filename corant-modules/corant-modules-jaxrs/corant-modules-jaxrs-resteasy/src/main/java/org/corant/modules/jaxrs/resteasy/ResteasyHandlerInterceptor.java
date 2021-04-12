@@ -54,7 +54,7 @@ public interface ResteasyHandlerInterceptor {
    * @param request the HTTP request currently called
    * @param response the HTTP response currently called
    *
-   * @see #afterCompletion(String, HttpServletRequest, HttpServletResponse)
+   * @see #afterCompletion(boolean, String, HttpServletRequest, HttpServletResponse)
    */
   void postHandle(String httpMethod, HttpServletRequest request, HttpServletResponse response);
 

@@ -40,7 +40,7 @@ public interface CorantLifecycleEvent {
         events.fire(event);
       } catch (Exception e) {
         logger.log(Level.SEVERE, e,
-            () -> String.format("Handle %s occurred error!", event.getClass()));
+            () -> String.format("Handle %s occurred error!", event.getClass().getName()));
         throw new CorantRuntimeException(e);
       }
     }

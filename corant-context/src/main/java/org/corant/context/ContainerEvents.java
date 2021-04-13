@@ -32,11 +32,10 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
 @ApplicationScoped
 public class ContainerEvents {
 
-  @Inject
-  protected Event<ContainerEvent> events;
+  static final Logger logger = Logger.getLogger(ContainerEvents.class.getName());
 
   @Inject
-  protected Logger logger;
+  protected Event<ContainerEvent> events;
 
   void onContainerBeforeShutdown(@Observes ContainerBeforeShutdown e) {
     try {

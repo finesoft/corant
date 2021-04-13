@@ -142,7 +142,8 @@ public class Corant implements AutoCloseable {
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before_start_handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after_started_handler";
   public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
-  public static final String POWER_MBEAN_NAME = applicationName() + ":type=kernel,name=Power";
+  public static final String APP_NAME = applicationName();
+  public static final String POWER_MBEAN_NAME = APP_NAME + ":type=kernel,name=Power";
 
   private static volatile Corant me; // NOSONAR
 
@@ -359,19 +360,10 @@ public class Corant implements AutoCloseable {
     }
 
     if (current() != null) {
+      log(Level.WARNING, throwable, "The %s shutdown occurred error!", APP_NAME);
       if (current().isRunning()) {
-        if (throwable != null) {
-          throw new IllegalStateException("Can't shutdown coarnt!", throwable);
-        } else {
-          throw new IllegalStateException("Can't shutdown coarnt!");
-        }
+        throw new CorantRuntimeException(throwable);
       } else {
-        if (throwable != null) {
-          Logger.getLogger(Corant.class.getName()).log(Level.WARNING,
-              "Corant shutdown occurred error!", throwable);
-        } else {
-          Logger.getLogger(Corant.class.getName()).warning(() -> "Corant shutdown occurred error!");
-        }
         me = null;// FIXME
       }
     }
@@ -493,9 +485,23 @@ public class Corant implements AutoCloseable {
     }
   }
 
+  private static void log(Level level, Throwable thrown, String msgOrFmt, Object... arguments) {
+    if (arguments.length > 0) {
+      Logger.getLogger(Corant.class.getName()).log(level, thrown,
+          () -> String.format(msgOrFmt, arguments));
+    } else {
+      Logger.getLogger(Corant.class.getName()).log(level, thrown, () -> msgOrFmt);
+    }
+  }
+
+  private static void logInfo(String msgOrFmt, Object... arguments) {
+    log(Level.INFO, null, msgOrFmt, arguments);
+  }
+
   private static synchronized void setMe(Corant me) {
     if (me != null) {
-      shouldBeTrue(Corant.me == null, "We already have an instance of Corant. Don't repeat it!");
+      shouldBeTrue(Corant.me == null, "We already have an instance of %s. Don't repeat it!",
+          APP_NAME);
     }
     Corant.me = me;
   }
@@ -528,7 +534,7 @@ public class Corant implements AutoCloseable {
    * @return getBeanManager
    */
   public synchronized BeanManager getBeanManager() {
-    shouldBeTrue(isRunning(), "The corant instance is null or is not in running");
+    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
     return container.getBeanManager();
   }
 
@@ -559,7 +565,7 @@ public class Corant implements AutoCloseable {
     if (isRunning()) {
       return;
     }
-    final StopWatch stopWatch = new StopWatch(applicationName());
+    final StopWatch stopWatch = new StopWatch(APP_NAME);
     Thread.currentThread().setContextClassLoader(classLoader);
     doBeforeStart(classLoader, stopWatch);
     registerMBean();
@@ -579,68 +585,45 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare).forEach(h -> {
-          try {
-            h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
-            h.close();
-          } catch (Exception e) {
-            log("After stopped handler %s occurred error %s.", h.getClass().getName(),
-                e.getMessage());
-          }
-        });
-    log("Stopped %s at %s.\n", applicationName(), Instant.now());
+    invokeBootHandlerAfterStopped();
+    logInfo("Stopped %s at %s.\n", APP_NAME, Instant.now());
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {
     stopWatch.start("All modules are initialized");
-
     LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
     emitter.fire(new PostContainerReadyEvent(arguments));
-
-    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   void doAfterStarted(ClassLoader classLoader, StopWatch stopWatch) {
     stopWatch.start("The post-started SPI processing is completed");
+    invokeBootHandlerAfterStarted();
+    stopWatch.stop(tk -> logInfo("%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
+        .destroy(sw -> {
+          double tt = sw.getTotalTimeSeconds();
+          if (tt > 8) {
+            logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
+                APP_NAME, tt);
+          } else {
+            logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
+          }
+        });
 
-    if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
-      return;
-    }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare)
-        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
-
-    stopWatch.stop(tk -> log("%s, takes %ss.", tk.getName(), tk.getTimeSeconds())).destroy(sw -> {
-      double tt = sw.getTotalTimeSeconds();
-      if (tt > 8) {
-        log("The %s has been started, takes %ss. It's been a long way, but we're here.",
-            applicationName(), tt);
-      } else {
-        log("The %s has been started, takes %ss.", applicationName(), tt);
-      }
-    });
-
-    log("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
+    logInfo("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
         Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
         TimeZone.getDefault().getID());
-    log("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
+    logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
         Launchs.getMaxMemoryMb(), boostLine());
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
-    stopWatch
-        .start("Starting " + applicationName() + ", the pre-start SPI processing is completed");
+    stopWatch.start("Starting " + APP_NAME + ", the pre-start SPI processing is completed");
     if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
       LoggerFactory.disableAccessWarnings();
     }
-    if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
-      return;
-    }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare)
-        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
-    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+    invokeBootHandlerBeforeStart();
+    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   void doOnReady() {
@@ -651,7 +634,7 @@ public class Corant implements AutoCloseable {
   synchronized void initializeContainer(Consumer<SeContainerInitializer> preInitializer,
       StopWatch stopWatch) {
     stopWatch.start("Initialization of the CDI container is completed");
-    // String id = applicationName().concat("-weld-").concat(UUID.randomUUID().toString());
+    // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString());
     SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
     initializer.setClassLoader(classLoader);
     initializer.addExtensions(new CorantExtension());
@@ -662,7 +645,7 @@ public class Corant implements AutoCloseable {
       preInitializer.accept(initializer);
     }
     container = initializer.initialize();
-    stopWatch.stop(t -> log("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   boolean registerMBean() {
@@ -676,8 +659,9 @@ public class Corant implements AutoCloseable {
         Runtime.getRuntime()
             .addShutdownHook(new Thread(() -> deregisterFromMBean(POWER_MBEAN_NAME)));
       }
-      log("Registered %s to MBean server, one can use it for shutdown or re-startup the application.",
-          applicationName(), Instant.now());
+      logInfo(
+          "Registered %s to MBean server, one can use it for shutdown or re-startup the application.",
+          APP_NAME, Instant.now());
       return true;
     }
 
@@ -699,12 +683,49 @@ public class Corant implements AutoCloseable {
     return false;
   }
 
-  private void log(String msgOrFmt, Object... arguments) {
-    if (arguments.length > 0) {
-      Logger.getLogger(Corant.class.getName()).info(() -> String.format(msgOrFmt, arguments));
-    } else {
-      Logger.getLogger(Corant.class.getName()).info(() -> msgOrFmt);
+  private void invokeBootHandlerAfterStarted() {
+    if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
+      return;
     }
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compare).forEach(h -> {
+          try {
+            h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length));
+          } catch (Exception e) {
+            log(Level.SEVERE, e, "%s handle after %s started occurred error!",
+                h.getClass().getName(), APP_NAME);
+            throw new CorantRuntimeException(e);
+          }
+        });
+  }
+
+  private void invokeBootHandlerAfterStopped() {
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compare).forEach(h -> {
+          try {
+            h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
+          } catch (Exception e) {
+            log(Level.SEVERE, e, "%s handle after %s stopped occurred error!",
+                h.getClass().getName(), APP_NAME);
+            throw new CorantRuntimeException(e);
+          }
+        });
+  }
+
+  private void invokeBootHandlerBeforeStart() {
+    if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
+      return;
+    }
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(CorantBootHandler::compare).forEach(h -> {
+          try {
+            h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length));
+          } catch (Exception e) {
+            log(Level.SEVERE, e, "%s handle before %s start occurred error!",
+                h.getClass().getName(), APP_NAME);
+            throw new CorantRuntimeException(e);
+          }
+        });
   }
 
   private Power power() {

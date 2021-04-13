@@ -13,10 +13,13 @@
  */
 package org.corant.context;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.jboss.weld.environment.se.events.ContainerBeforeShutdown;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 
@@ -32,12 +35,25 @@ public class ContainerEvents {
   @Inject
   protected Event<ContainerEvent> events;
 
+  @Inject
+  protected Logger logger;
+
   void onContainerBeforeShutdown(@Observes ContainerBeforeShutdown e) {
-    events.fire(new PreContainerStopEvent(e.getContainerId()));
+    try {
+      events.fire(new PreContainerStopEvent(e.getContainerId()));
+    } catch (Exception ex) {
+      logger.log(Level.SEVERE, ex, () -> "Handle ContainerBeforeShutdown event occurred error!");
+      throw new CorantRuntimeException(ex);
+    }
   }
 
   void onContainerInitialized(@Observes ContainerInitialized e) {
-    events.fire(new PostContainerStartedEvent(e.getContainerId()));
+    try {
+      events.fire(new PostContainerStartedEvent(e.getContainerId()));
+    } catch (Exception ex) {
+      logger.log(Level.SEVERE, ex, () -> "Handle ContainerInitialized event occurred error!");
+      throw new CorantRuntimeException(ex);
+    }
   }
 
   public interface ContainerEvent {

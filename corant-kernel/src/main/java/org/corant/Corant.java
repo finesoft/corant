@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -37,6 +38,7 @@ import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.se.SeContainerInitializer;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
@@ -574,8 +576,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Stop the Corant application. Call the appropriate pre-post boot handler and fire some
-   * appropriate events, after calling this method, you can continue to restart the Corant
+   * Stop the Corant application, after calling this method, you can continue to restart the Corant
    * application.
    */
   public synchronized void stop() {
@@ -583,8 +584,6 @@ public class Corant implements AutoCloseable {
       container.close();
     }
     container = null;
-    invokeBootHandlerAfterStopped();
-    logInfo("Stopped %s at %s.\n", APP_NAME, Instant.now());
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {
@@ -728,10 +727,16 @@ public class Corant implements AutoCloseable {
   }
 
   class CorantExtension implements Extension {
+
     void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
       event.addBean().addType(Corant.class).scope(ApplicationScoped.class)
           .addQualifier(Default.Literal.INSTANCE).addQualifier(Any.Literal.INSTANCE)
           .produceWith(obj -> Corant.this);
+    }
+
+    void onBeforeShutdown(@Observes @Priority(Integer.MAX_VALUE) BeforeShutdown event) {
+      invokeBootHandlerAfterStopped();
+      logInfo("Stopped %s at %s.\n", APP_NAME, Instant.now());
     }
   }
 }

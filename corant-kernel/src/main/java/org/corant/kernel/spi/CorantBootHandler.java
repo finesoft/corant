@@ -13,6 +13,9 @@
  */
 package org.corant.kernel.spi;
 
+import static org.corant.shared.util.Streams.streamOf;
+import java.util.ServiceLoader;
+import java.util.stream.Stream;
 import org.corant.Corant;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -31,6 +34,19 @@ import org.corant.shared.ubiquity.Sortable;
  *
  */
 public interface CorantBootHandler extends Sortable, AutoCloseable {
+
+  /**
+   * Return the sorted CorantBootHandler instance stream, using {@link java.util.ServiceLoader}
+   * mechanism to load.
+   *
+   * @param classLoader the class loader use for load the CorantBootHandler
+   *
+   * @see Sortable#compare(Sortable, Sortable)
+   */
+  static Stream<CorantBootHandler> load(ClassLoader classLoader) {
+    return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+        .sorted(Sortable::compare);
+  }
 
   @Override
   default void close() throws Exception {}

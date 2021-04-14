@@ -19,12 +19,10 @@ import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
-import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.ServiceLoader;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -49,7 +47,6 @@ import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
@@ -688,45 +685,42 @@ public class Corant implements AutoCloseable {
     if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
       return;
     }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
-        .forEach(h -> {
-          try {
-            h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length));
-          } catch (Exception e) {
-            log(Level.SEVERE, e, "%s handle after %s started occurred error!",
-                h.getClass().getName(), APP_NAME);
-            throw new CorantRuntimeException(e);
-          }
-        });
+    CorantBootHandler.load(classLoader).forEach(h -> {
+      try {
+        h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length));
+      } catch (Exception e) {
+        log(Level.SEVERE, e, "%s handle after %s started occurred error!", h.getClass().getName(),
+            APP_NAME);
+        throw new CorantRuntimeException(e);
+      }
+    });
   }
 
   private void invokeBootHandlerAfterStopped() {
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
-        .forEach(h -> {
-          try {
-            h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
-          } catch (Exception e) {
-            log(Level.SEVERE, e, "%s handle after %s stopped occurred error!",
-                h.getClass().getName(), APP_NAME);
-            throw new CorantRuntimeException(e);
-          }
-        });
+    CorantBootHandler.load(classLoader).forEach(h -> {
+      try {
+        h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
+      } catch (Exception e) {
+        log(Level.SEVERE, e, "%s handle after %s stopped occurred error!", h.getClass().getName(),
+            APP_NAME);
+        throw new CorantRuntimeException(e);
+      }
+    });
   }
 
   private void invokeBootHandlerBeforeStart() {
     if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
-        .forEach(h -> {
-          try {
-            h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length));
-          } catch (Exception e) {
-            log(Level.SEVERE, e, "%s handle before %s start occurred error!",
-                h.getClass().getName(), APP_NAME);
-            throw new CorantRuntimeException(e);
-          }
-        });
+    CorantBootHandler.load(classLoader).forEach(h -> {
+      try {
+        h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length));
+      } catch (Exception e) {
+        log(Level.SEVERE, e, "%s handle before %s start occurred error!", h.getClass().getName(),
+            APP_NAME);
+        throw new CorantRuntimeException(e);
+      }
+    });
   }
 
   private Power power() {

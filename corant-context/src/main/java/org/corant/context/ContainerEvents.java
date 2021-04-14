@@ -32,12 +32,12 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
 @ApplicationScoped
 public class ContainerEvents {
 
-  static final Logger logger = Logger.getLogger(ContainerEvents.class.getName());
+  protected static final Logger logger = Logger.getLogger(ContainerEvents.class.getName());
 
   @Inject
   protected Event<ContainerEvent> events;
 
-  void onContainerBeforeShutdown(@Observes ContainerBeforeShutdown e) {
+  protected void onContainerBeforeShutdown(@Observes ContainerBeforeShutdown e) {
     try {
       events.fire(new PreContainerStopEvent(e.getContainerId()));
     } catch (Exception ex) {
@@ -46,7 +46,7 @@ public class ContainerEvents {
     }
   }
 
-  void onContainerInitialized(@Observes ContainerInitialized e) {
+  protected void onContainerInitialized(@Observes ContainerInitialized e) {
     try {
       events.fire(new PostContainerStartedEvent(e.getContainerId()));
     } catch (Exception ex) {

@@ -49,7 +49,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
   protected volatile boolean initialized = false;
   protected volatile boolean ready = false;
 
-  void initialize() {
+  protected void initialize() {
     // initialize the recovery manager
     if (!initialized) {
       synchronized (NarayanaRecoveryManagerService.class) {
@@ -92,11 +92,11 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
     }
   }
 
-  void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
+  protected void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
     initialize();
   }
 
-  void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
+  protected void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     try {
       unInitialize();
     } catch (Exception e) {
@@ -104,7 +104,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
     }
   }
 
-  void unInitialize() throws Exception {
+  protected void unInitialize() throws Exception {
     if (ready) {
       stop();
       helpers.forEach(helper -> {

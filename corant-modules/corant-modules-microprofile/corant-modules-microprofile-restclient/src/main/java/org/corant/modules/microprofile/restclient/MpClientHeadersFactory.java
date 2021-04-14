@@ -28,7 +28,7 @@ import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
 @ApplicationScoped
 public class MpClientHeadersFactory implements ClientHeadersFactory {
 
-  static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
+  protected static final UnmodifiableMultivaluedMap<String, String> EMPTY_MAP =
       new UnmodifiableMultivaluedMap<>(new MultivaluedHashMap<>());// static?
 
   @Override

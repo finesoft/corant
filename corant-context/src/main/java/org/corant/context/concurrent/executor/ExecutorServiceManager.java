@@ -29,10 +29,10 @@ import org.corant.context.ContainerEvents.PreContainerStopEvent;
 @ApplicationScoped
 public class ExecutorServiceManager {
 
-  static final Logger logger = Logger.getLogger(ExecutorServiceManager.class.getName());
+  protected static final Logger logger = Logger.getLogger(ExecutorServiceManager.class.getName());
 
-  static final List<DefaultManagedExecutorService> managedExecutorService = new ArrayList<>();
-  static final List<DefaultManagedScheduledExecutorService> managedSecheduledExecutorService =
+  protected static final List<DefaultManagedExecutorService> managedExecutorService = new ArrayList<>();
+  protected static final List<DefaultManagedScheduledExecutorService> managedSecheduledExecutorService =
       new ArrayList<>();
 
   public void register(DefaultManagedExecutorService service) {
@@ -43,7 +43,7 @@ public class ExecutorServiceManager {
     managedSecheduledExecutorService.add(service);
   }
 
-  void beforeShutdown(@Observes final PreContainerStopEvent event) {
+  protected void beforeShutdown(@Observes final PreContainerStopEvent event) {
     for (DefaultManagedExecutorService service : managedExecutorService) {
       logger.info(() -> String.format("The managed executor service %s will be shutdown!",
           service.getName()));

@@ -14,30 +14,73 @@
 package org.corant.kernel.spi;
 
 import org.corant.Corant;
+import org.corant.kernel.event.PostContainerReadyEvent;
+import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-kernel
  *
+ * <p>
+ * This class provides a convenient mechanism for processing pre-conditions and post-conditions for
+ * application startup, it is used to do some related operations before and after the container is
+ * started. This class uses a relatively low-level {@link java.util.ServiceLoader} mechanism and
+ * does not rely on other mechanisms.
+ *
  * @author bingo 下午2:30:23
  *
  */
-public interface CorantBootHandler extends AutoCloseable {
-
-  static int compare(CorantBootHandler h1, CorantBootHandler h2) {
-    return Integer.compare(h1.getOrdinal(), h2.getOrdinal()) * -1;
-  }
+public interface CorantBootHandler extends Sortable, AutoCloseable {
 
   @Override
   default void close() throws Exception {}
 
-  default int getOrdinal() {
-    return 0;
-  }
-
+  /**
+   * Called after the container was started, the CDI context is available.
+   *
+   * <p>
+   * Note: This method was invoked after emitted the {@link PostContainerReadyEvent} and before emit
+   * the {@link PostCorantReadyEvent}. If the application startup with
+   * {@link Corant#DISABLE_AFTER_STARTED_HANDLER_CMD} argument, this method will not be invoked. If
+   * this method throws an exception, it will not affect the operation of the container, but the
+   * {@link PostCorantReadyEvent} event will not be emitted, and if there are multiple Handlers,
+   * this method of the lower priority Handler will not be invoked.
+   *
+   * @param corant
+   * @param args handleAfterStarted
+   */
   void handleAfterStarted(Corant corant, String... args);
 
+  /**
+   * Called after the container was stopped, so operations related to the CDI context should not be
+   * used in the method.
+   *
+   * <p>
+   * Note: If this method throws an exception, and if there are multiple Handlers, this method of
+   * the lower priority Handler will not be invoked.
+   *
+   * @param classLoader the class loader use for this application
+   * @param args the application startup arguments, the implementer can perform corresponding
+   *        operations based on the arguments.
+   * @param classLoader
+   * @param args handleAfterStopped
+   */
   default void handleAfterStopped(ClassLoader classLoader, String... args) {}
 
+  /**
+   * Called before the container is started, so operations related to the CDI context should not be
+   * used in the method.
+   *
+   * <p>
+   * Note: If the application startup with {@link Corant#DISABLE_BEFORE_START_HANDLER_CMD} argument,
+   * this method will not be invoked. If this method throws an exception, the container may not
+   * startup, and if there are multiple Handlers, this method of the lower priority Handler will not
+   * be invoked.
+   *
+   * @param classLoader the class loader use for this application
+   * @param args the application startup arguments, the implementer can perform corresponding
+   *        operations based on the arguments.
+   */
   void handleBeforeStart(ClassLoader classLoader, String... args);
 
 }

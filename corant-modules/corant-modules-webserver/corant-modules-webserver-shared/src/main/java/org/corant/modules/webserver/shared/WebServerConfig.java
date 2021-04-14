@@ -35,63 +35,63 @@ public class WebServerConfig {
 
   @Inject
   @ConfigProperty(name = "corant.webserver.default-charset")
-  private Optional<String> defaultCharset;
+  protected Optional<String> defaultCharset;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.display-name")
-  private Optional<String> displayName;
+  protected Optional<String> displayName;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.host", defaultValue = "0.0.0.0")
-  private String host;
+  protected String host;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.port", defaultValue = "8080")
-  private Integer port;
+  protected Integer port;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.context-path", defaultValue = "/")
-  private String contextPath;
+  protected String contextPath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.locale-charset-mappings")
-  private Optional<String> localeCharsetMappings;
+  protected Optional<String> localeCharsetMappings;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.secured.port")
-  private Optional<Integer> securedPort;
+  protected Optional<Integer> securedPort;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.keystore.path")
-  private Optional<String> keystorePath;
+  protected Optional<String> keystorePath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.keystore.type")
-  private Optional<String> keystoreType;
+  protected Optional<String> keystoreType;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.keystore.password")
-  private Optional<String> keystorePassword;
+  protected Optional<String> keystorePassword;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.truststore.path")
-  private Optional<String> truststorePath;
+  protected Optional<String> truststorePath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.truststore.type")
-  private Optional<String> truststoreType;
+  protected Optional<String> truststoreType;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.truststore.password")
-  private Optional<String> truststorePassword;
+  protected Optional<String> truststorePassword;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.work-threads", defaultValue = "128")
-  private Integer workThreads;
+  protected Integer workThreads;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.session-timeout", defaultValue = "30")
-  private Integer sessionTimeout;
+  protected Integer sessionTimeout;
 
   public String getContextPath() {
     return contextPath;

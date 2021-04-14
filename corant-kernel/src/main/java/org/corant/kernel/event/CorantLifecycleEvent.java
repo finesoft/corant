@@ -33,7 +33,7 @@ public interface CorantLifecycleEvent {
     @Inject
     protected Event<CorantLifecycleEvent> events;
     @Inject
-    Logger logger;
+    protected Logger logger;
 
     public void fire(CorantLifecycleEvent event) {
       try {

@@ -148,6 +148,7 @@ public class QueryMappingService {
       refs.clear();
     });
     if (!queryProvider.isUnsatisfied()) {
+      // FIXME CIRCULAR NO CHECK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bingo
       queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
     }
     initialized = true;

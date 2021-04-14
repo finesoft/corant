@@ -33,13 +33,13 @@ public class JsonbProvider {
 
   @Produces
   @ApplicationScoped
-  public Jsonb jsonb(JsonbConfig jsonbConfig) {
+  protected Jsonb jsonb(JsonbConfig jsonbConfig) {
     return JsonbBuilder.create(jsonbConfig);
   }
 
   @Produces
   @Dependent
-  public JsonbConfig jsonbConfig(Instance<JsonbConfigConfigurator> configurators) {
+  protected JsonbConfig jsonbConfig(Instance<JsonbConfigConfigurator> configurators) {
     final JsonbConfig jsonbConfig = new JsonbConfig();
     configurators.stream().sorted(Sortable::reverseCompare).forEach(cfr -> cfr.config(jsonbConfig));
     return jsonbConfig;

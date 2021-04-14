@@ -48,15 +48,7 @@ public class NarayanaUserTransactionActionHandler implements UserTransactionActi
     return setUserTransactionAvailable(type == TxType.NEVER || type == TxType.NOT_SUPPORTED);
   }
 
-  protected boolean setUserTransactionAvailable(boolean available) {
-    UserTransactionOperationsProvider userTransactionProvider =
-        jtaPropertyManager.getJTAEnvironmentBean().getUserTransactionOperationsProvider();
-    boolean previousUserTransactionAvailability = userTransactionProvider.getAvailability();
-    setAvailability(userTransactionProvider, available);
-    return previousUserTransactionAvailability;
-  }
-
-  private void setAvailability(UserTransactionOperationsProvider userTransactionProvider,
+  protected void setAvailability(UserTransactionOperationsProvider userTransactionProvider,
       boolean available) {
     if (System.getSecurityManager() == null) {
       userTransactionProvider.setAvailability(available);
@@ -66,6 +58,14 @@ public class NarayanaUserTransactionActionHandler implements UserTransactionActi
         return null;
       });
     }
+  }
+
+  protected boolean setUserTransactionAvailable(boolean available) {
+    UserTransactionOperationsProvider userTransactionProvider =
+        jtaPropertyManager.getJTAEnvironmentBean().getUserTransactionOperationsProvider();
+    boolean previousUserTransactionAvailability = userTransactionProvider.getAvailability();
+    setAvailability(userTransactionProvider, available);
+    return previousUserTransactionAvailability;
   }
 
 }

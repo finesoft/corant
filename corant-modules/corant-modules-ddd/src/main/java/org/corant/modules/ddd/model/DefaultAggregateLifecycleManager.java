@@ -61,7 +61,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   @Inject
-  UnitOfWorks unitOfWorks;
+  protected UnitOfWorks unitOfWorks;
 
   @Override
   public EntityManager getEntityManager(Class<?> cls) {

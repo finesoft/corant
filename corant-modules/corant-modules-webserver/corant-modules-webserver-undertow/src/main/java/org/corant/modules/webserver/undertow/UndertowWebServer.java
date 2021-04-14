@@ -87,22 +87,22 @@ public class UndertowWebServer extends AbstractWebServer {
   public static final String HANDLERS_CONF = "META-INF/undertow-handlers.conf";
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  UndertowWebServerConfig specConfig;
-
-  @Inject
-  @Any
-  Instance<UndertowWebServerConfigurator> additionalConfigurators;
+  protected UndertowWebServerConfig specConfig;
 
   @Inject
   @Any
-  Instance<SessionPersistenceManager> sessionPersistenceManager;
+  protected Instance<UndertowWebServerConfigurator> additionalConfigurators;
 
-  private Undertow server;
+  @Inject
+  @Any
+  protected Instance<SessionPersistenceManager> sessionPersistenceManager;
 
-  private DeploymentManager deploymentManager;
+  protected Undertow server;
+
+  protected DeploymentManager deploymentManager;
 
   @Override
   public void start() {

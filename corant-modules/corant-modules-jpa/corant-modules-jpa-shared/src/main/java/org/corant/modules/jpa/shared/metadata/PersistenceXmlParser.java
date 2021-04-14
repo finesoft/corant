@@ -62,7 +62,7 @@ public class PersistenceXmlParser {
     return cfgs;
   }
 
-  static void doParse(Element element, PersistenceUnitInfoMetaData puimd) {
+  protected static void doParse(Element element, PersistenceUnitInfoMetaData puimd) {
     puimd.setPersistenceUnitTransactionType(
         parseTransactionType(element.getAttribute(JPAConfig.JCX_TRANS_TYP)));
     NodeList children = element.getChildNodes();
@@ -115,7 +115,7 @@ public class PersistenceXmlParser {
     puimd.resolvePersistenceProvider();
   }
 
-  static void doParse(URL url, Set<PersistenceUnitInfoMetaData> cfgs) {
+  protected static void doParse(URL url, Set<PersistenceUnitInfoMetaData> cfgs) {
     final Document doc = loadDocument(url);
     final Element top = doc.getDocumentElement();
     final NodeList children = top.getChildNodes();
@@ -141,48 +141,7 @@ public class PersistenceXmlParser {
     }
   }
 
-  static Document loadDocument(URL url) {
-    try {
-      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(false);
-      URLConnection conn = url.openConnection();
-      conn.setUseCaches(false);
-      try (InputStream inputStream = conn.getInputStream()) {
-        final InputSource inputSource = new InputSource(inputStream);
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(inputSource);
-        // validate(document); FIXME
-        return document;
-      } catch (IOException | ParserConfigurationException | SAXException e) {
-        throw new CorantRuntimeException(e);
-      }
-    } catch (IOException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  static PersistenceUnitTransactionType parseTransactionType(String value) {
-    if (isEmpty(value)) {
-      return null;
-    } else if (value.equalsIgnoreCase("JTA")) {
-      return PersistenceUnitTransactionType.JTA;
-    } else if (value.equalsIgnoreCase("RESOURCE_LOCAL")) {
-      return PersistenceUnitTransactionType.RESOURCE_LOCAL;
-    } else {
-      throw new CorantRuntimeException("Unknown persistence unit transaction type : %s.", value);
-    }
-  }
-
-  static void validate(Document document) throws SAXException {
-    final String version = document.getDocumentElement().getAttribute("version");
-    List<Exception> exs = PersistenceSchema.validate(document, version);
-    if (!isEmpty(exs)) {
-      throw new SAXException(
-          String.join("\n", exs.stream().map(Exception::getMessage).toArray(String[]::new)));
-    }
-  }
-
-  private static boolean extractBooleanContent(Element element, boolean defaultBool) {
+  protected static boolean extractBooleanContent(Element element, boolean defaultBool) {
     String content = extractContent(element);
     if (content != null && content.length() > 0) {
       return Boolean.valueOf(content);
@@ -190,11 +149,11 @@ public class PersistenceXmlParser {
     return defaultBool;
   }
 
-  private static String extractContent(Element element) {
+  protected static String extractContent(Element element) {
     return extractContent(element, null);
   }
 
-  private static String extractContent(Element element, String defaultStr) {
+  protected static String extractContent(Element element, String defaultStr) {
     if (element == null) {
       return defaultStr;
     }
@@ -209,7 +168,7 @@ public class PersistenceXmlParser {
     return result.toString().trim();
   }
 
-  private static URL extractRootUrl(URL originalURL) {
+  protected static URL extractRootUrl(URL originalURL) {
     try {
       URL rootUrl = FileUtils.extractJarFileURL(originalURL);
       if (rootUrl == null) {
@@ -236,11 +195,52 @@ public class PersistenceXmlParser {
     }
   }
 
-  private static URL extractUrlContent(Element element) {
+  protected static URL extractUrlContent(Element element) {
     try {
       return new URL(extractContent(element, null));
     } catch (MalformedURLException e) {
       throw new CorantRuntimeException(e);
+    }
+  }
+
+  protected static Document loadDocument(URL url) {
+    try {
+      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilderFactory.setNamespaceAware(false);
+      URLConnection conn = url.openConnection();
+      conn.setUseCaches(false);
+      try (InputStream inputStream = conn.getInputStream()) {
+        final InputSource inputSource = new InputSource(inputStream);
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document document = documentBuilder.parse(inputSource);
+        // validate(document); FIXME
+        return document;
+      } catch (IOException | ParserConfigurationException | SAXException e) {
+        throw new CorantRuntimeException(e);
+      }
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  protected static PersistenceUnitTransactionType parseTransactionType(String value) {
+    if (isEmpty(value)) {
+      return null;
+    } else if (value.equalsIgnoreCase("JTA")) {
+      return PersistenceUnitTransactionType.JTA;
+    } else if (value.equalsIgnoreCase("RESOURCE_LOCAL")) {
+      return PersistenceUnitTransactionType.RESOURCE_LOCAL;
+    } else {
+      throw new CorantRuntimeException("Unknown persistence unit transaction type : %s.", value);
+    }
+  }
+
+  protected static void validate(Document document) throws SAXException {
+    final String version = document.getDocumentElement().getAttribute("version");
+    List<Exception> exs = PersistenceSchema.validate(document, version);
+    if (!isEmpty(exs)) {
+      throw new SAXException(
+          String.join("\n", exs.stream().map(Exception::getMessage).toArray(String[]::new)));
     }
   }
 

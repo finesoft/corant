@@ -39,9 +39,9 @@ import com.aliyun.oss.OSSClientBuilder;
 @ApplicationScoped
 public class OSSClientProducer {
 
-  Map<String, OSSClientConfiguration> configs = Collections.emptyMap();
+  protected Map<String, OSSClientConfiguration> configs = Collections.emptyMap();
 
-  OSS build(OSSClientConfiguration config) {
+  protected OSS build(OSSClientConfiguration config) {
     if (isNotBlank(config.getSecurityToken())) {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
           config.getSecretAccessKey(), config.getSecurityToken(), config);
@@ -52,14 +52,14 @@ public class OSSClientProducer {
   }
 
   @PostConstruct
-  void onPostConstruct() {
+  protected void onPostConstruct() {
     configs = ConfigInstances.resolveMulti(OSSClientConfiguration.class);
   }
 
   @Produces
   @Naming
   @Dependent
-  OSS produce(InjectionPoint ip) {
+  protected OSS produce(InjectionPoint ip) {
     Naming naming = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(Naming.class)) {

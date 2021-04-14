@@ -139,6 +139,20 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     logger.fine(() -> "Clear result aggregation hint handler caches.");
   }
 
+  protected Pair<Boolean, Set<String>> resolveAggFieldNames(
+      List<QueryHintParameter> aggFieldNames) {
+    if (isEmpty(aggFieldNames)) {
+      return Pair.empty();
+    } else {
+      String names = defaultTrim(aggFieldNames.get(0).getValue());
+      boolean exclude = !names.isEmpty() && names.charAt(0) == '!';
+      if (exclude) {
+        names = names.substring(1);
+      }
+      return Pair.of(exclude, linkedHashSetOf(split(names, ",", true, true)));
+    }
+  }
+
   protected Consumer<List<Map<?, ?>>> resolveHint(QueryHint qh) {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
@@ -188,18 +202,5 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
-  }
-
-  private Pair<Boolean, Set<String>> resolveAggFieldNames(List<QueryHintParameter> aggFieldNames) {
-    if (isEmpty(aggFieldNames)) {
-      return Pair.empty();
-    } else {
-      String names = defaultTrim(aggFieldNames.get(0).getValue());
-      boolean exclude = !names.isEmpty() && names.charAt(0) == '!';
-      if (exclude) {
-        names = names.substring(1);
-      }
-      return Pair.of(exclude, linkedHashSetOf(split(names, ",", true, true)));
-    }
   }
 }

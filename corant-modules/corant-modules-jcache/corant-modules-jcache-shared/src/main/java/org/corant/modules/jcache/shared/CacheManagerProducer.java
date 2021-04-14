@@ -22,12 +22,12 @@ import org.corant.context.qualifier.SURI;
 public class CacheManagerProducer {
 
   @Inject
-  CachingProvider cachingProvider;
+  protected CachingProvider cachingProvider;
 
   @Produces
   @SURI
   @Dependent
-  CacheManager produce(InjectionPoint injectionPoint) {
+  protected CacheManager produce(InjectionPoint injectionPoint) {
     CacheManager cacheManager;
     SURI suri = null;
     for (Annotation ann : injectionPoint.getQualifiers()) {

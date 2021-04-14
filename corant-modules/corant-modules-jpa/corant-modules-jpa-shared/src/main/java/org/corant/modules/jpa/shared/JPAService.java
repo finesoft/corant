@@ -132,7 +132,7 @@ public class JPAService implements PersistenceService {
   }
 
   @PreDestroy
-  synchronized void onPreDestroy() {
+  protected synchronized void onPreDestroy() {
     emfs.forEach((k, v) -> {
       if (v.isOpen()) {
         v.close();
@@ -142,7 +142,7 @@ public class JPAService implements PersistenceService {
   }
 
   @Produces
-  EntityManager produceEntityManager(InjectionPoint ip) {
+  protected EntityManager produceEntityManager(InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final PersistenceContext pc = annotated.getAnnotation(PersistenceContext.class);
     return getEntityManager(pc);

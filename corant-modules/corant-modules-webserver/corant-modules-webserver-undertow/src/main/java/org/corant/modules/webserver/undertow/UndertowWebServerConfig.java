@@ -30,99 +30,99 @@ public class UndertowWebServerConfig {
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.io-threads")
-  private Optional<Integer> ioThreads;
+  protected Optional<Integer> ioThreads;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.not-request-timeout", defaultValue = "60000")
-  private int notRequestTimeout;
+  protected int notRequestTimeout;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.high-water", defaultValue = "1048576")
-  private int highWater;
+  protected int highWater;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.low-water", defaultValue = "1048576")
-  private int lowWater;
+  protected int lowWater;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.tcp-nodelay", defaultValue = "true")
-  private boolean tcpNoDelay;
+  protected boolean tcpNoDelay;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.reuse-address", defaultValue = "true")
-  private boolean reuseAddress;
+  protected boolean reuseAddress;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.cork", defaultValue = "true")
-  private boolean cork;
+  protected boolean cork;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.enable-default-servlet", defaultValue = "false")
-  private boolean enableDefaultServlet;
+  protected boolean enableDefaultServlet;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.buffer-size", defaultValue = "16364")
-  private int bufferSize;
+  protected int bufferSize;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.eager-filter-init", defaultValue = "false")
-  private boolean eagerFilterInit;
+  protected boolean eagerFilterInit;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.enable-http2", defaultValue = "false")
-  private boolean enableHttp2;
+  protected boolean enableHttp2;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.enable-ajp", defaultValue = "false")
-  private boolean enableAjp;
+  protected boolean enableAjp;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.balancing-tokens", defaultValue = "1")
-  private int balancingTokens;
+  protected int balancingTokens;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.balancing-connections", defaultValue = "2")
-  private int balancingConnections;
+  protected int balancingConnections;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.back-log", defaultValue = "1000")
-  private int backLog;
+  protected int backLog;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.jsp-content-path")
-  private Optional<String> jspContentPath;
+  protected Optional<String> jspContentPath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.jsp-serving-path")
-  private Optional<String> jspServingPath;
+  protected Optional<String> jspServingPath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.static-content-path")
-  private Optional<String> staticContentPath;
+  protected Optional<String> staticContentPath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.static-serving-path")
-  private Optional<String> staticServingPath;
+  protected Optional<String> staticServingPath;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.static-paths")
-  private Optional<String> staticPaths;
+  protected Optional<String> staticPaths;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.persistence-session", defaultValue = "false")
-  private boolean persistenceSession;
+  protected boolean persistenceSession;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.escape-error-message", defaultValue = "true")
-  private boolean escapeErrorMessage;
+  protected boolean escapeErrorMessage;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.default-request-charset")
-  private Optional<String> defaultRequestCharset;
+  protected Optional<String> defaultRequestCharset;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.default-response-charset")
-  private Optional<String> defaultResponseCharset;
+  protected Optional<String> defaultResponseCharset;
 
   /**
    *

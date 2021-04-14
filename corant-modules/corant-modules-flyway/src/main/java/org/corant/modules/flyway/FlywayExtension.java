@@ -11,37 +11,31 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.github.wxpay.sdk;
+package org.corant.modules.flyway;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-import org.corant.config.declarative.DeclarativeConfigKey;
+import static org.corant.context.Instances.resolve;
+import java.util.logging.Logger;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.Extension;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
- * corant-modules-cloud-tencent
+ * corant-modules-flyway
  *
- * @author bingo 上午11:40:28
+ * @author bingo 上午9:56:54
  *
  */
-@ApplicationScoped
-public class CorantWXPayProvider {
+public class FlywayExtension implements Extension {
 
-  @Inject
-  @DeclarativeConfigKey
-  protected CorantWXPayConfig config;
+  Logger logger = Logger.getLogger(FlywayExtension.class.getName());
 
-  @Produces
-  @Dependent
-  protected WXPay produce(InjectionPoint ip) {
+  void after(@Observes AfterDeploymentValidation adv) {
     try {
-      return new WXPay(config, config.getNotifyUrl(), config.shouldAutoReport(),
-          config.isUseSandbox());
+      resolve(FlywayMigrator.class).migrate();
     } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      adv.addDeploymentProblem(
+          new CorantRuntimeException(e, "Flyway database migration occurred error!"));
     }
   }
 }

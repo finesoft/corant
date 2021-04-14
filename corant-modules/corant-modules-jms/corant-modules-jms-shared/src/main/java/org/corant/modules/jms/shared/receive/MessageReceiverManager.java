@@ -39,7 +39,6 @@ import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.modules.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Sets;
 
 /**
  * corant-modules-jms-shared
@@ -62,7 +61,7 @@ public class MessageReceiverManager {
   protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
       new HashMap<>();
 
-  protected final Set<MessageReceiverMetaData> receiveMetaDatas = Sets.newConcurrentHashSet();
+  protected final List<MessageReceiverMetaData> receiveMetaDatas = new ArrayList<>();
 
   protected final List<MessageReceiverTaskExecution> receiveExecutions = new ArrayList<>();
 
@@ -133,14 +132,29 @@ public class MessageReceiverManager {
     extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
         .forEach(receiveMetaDatas::addAll);
     if (!receiveMetaDatas.isEmpty()) {
-      extesion.getConfigManager().getAllWithNames().values().forEach(cfg -> {
-        if (cfg != null && cfg.isEnable()) {
+      final Map<String, ? extends AbstractJMSConfig> cfgs =
+          extesion.getConfigManager().getAllWithNames();
+      Set<AbstractJMSConfig> useCfgs = new HashSet<>();
+      Iterator<MessageReceiverMetaData> metait = receiveMetaDatas.iterator();
+      while (metait.hasNext()) {
+        MessageReceiverMetaData meta = metait.next();
+        AbstractJMSConfig f = cfgs.get(meta.getConnectionFactoryId());
+        if (f == null || !f.isEnable()) {
+          logger.warning(() -> String.format(
+              "The receiver method %s can't be performed, the connection factory %s is not available!",
+              meta.getMethod().getMethod().toString(), f.getConnectionFactoryId()));
+          metait.remove();
+        }
+        useCfgs.add(f);
+      }
+      if (!useCfgs.isEmpty()) {
+        useCfgs.forEach(cfg -> {
           ScheduledThreadPoolExecutor executor =
               new ScheduledThreadPoolExecutor(cfg.getReceiveTaskThreads());
           executor.setRemoveOnCancelPolicy(true);
           executorServices.put(cfg, executor);
-        }
-      });
+        });
+      }
       logger.info(
           () -> String.format("Find %s message receivers that involving %s connection factories.",
               receiveMetaDatas.size(), executorServices.size()));

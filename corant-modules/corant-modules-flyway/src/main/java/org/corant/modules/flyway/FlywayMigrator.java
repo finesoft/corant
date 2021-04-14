@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -36,7 +35,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.modules.datasource.shared.DataSourceService;
@@ -86,7 +84,7 @@ public class FlywayMigrator {
 
   protected FlywayConfig globalFlywayConfig;
 
-  public void migrate(@Observes PostCorantReadyEvent e) {
+  public void migrate() {
     if (globalFlywayConfig.isEnable()) {
       logger.info(() -> "Perform migrate process if necessary...");
       getConfigProviders().map(this::build).filter(Objects::isNotNull).forEach(this::doMigrate);

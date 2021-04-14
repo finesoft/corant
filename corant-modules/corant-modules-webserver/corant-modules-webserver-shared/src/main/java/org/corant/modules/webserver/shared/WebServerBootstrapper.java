@@ -39,18 +39,18 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class WebServerBootstrapper {
 
   @Inject
-  Logger logger;
+  protected Logger logger;
 
   @Inject
-  BeanManager beanManager;
+  protected BeanManager beanManager;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.auto-start", defaultValue = "true")
-  Boolean autoStart;
+  protected Boolean autoStart;
 
-  WebServer server = null;
+  protected WebServer server = null;
 
-  volatile boolean running;
+  protected volatile boolean running;
 
   public boolean isRunning() {
     return running;

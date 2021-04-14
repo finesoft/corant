@@ -92,7 +92,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
 
   @Inject
   @Any
-  Instance<ResultBeanMapper> instances;
+  protected Instance<ResultBeanMapper> instances;
 
   @Override
   public boolean canHandle(Class<?> resultClass, QueryHint hint) {

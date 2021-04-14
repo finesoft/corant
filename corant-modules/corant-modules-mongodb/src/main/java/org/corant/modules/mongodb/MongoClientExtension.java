@@ -245,7 +245,7 @@ public class MongoClientExtension implements Extension {
     @Produces
     @Dependent
     @Naming
-    GridFSBucket produce(InjectionPoint ip) {
+    protected GridFSBucket produce(InjectionPoint ip) {
       Naming naming = null;
       if (ip.getAnnotated() != null) {
         naming = ip.getAnnotated().getAnnotation(Naming.class);

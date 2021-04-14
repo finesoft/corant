@@ -39,7 +39,7 @@ public class MessageDispatcherProducer {
 
   @Produces
   @Dependent
-  public MessageDispatcher produce(final InjectionPoint ip) {
+  protected MessageDispatcher produce(final InjectionPoint ip) {
     List<MessageDispatcher> dispatchers = new ArrayList<>();
     final MessageDispatch at = CDIs.getAnnotation(ip, MessageDispatch.class);
     if (at != null) {

@@ -49,6 +49,7 @@ import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
@@ -687,8 +688,8 @@ public class Corant implements AutoCloseable {
     if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
       return;
     }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare).forEach(h -> {
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
+        .forEach(h -> {
           try {
             h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length));
           } catch (Exception e) {
@@ -700,8 +701,8 @@ public class Corant implements AutoCloseable {
   }
 
   private void invokeBootHandlerAfterStopped() {
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare).forEach(h -> {
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
+        .forEach(h -> {
           try {
             h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
           } catch (Exception e) {
@@ -716,8 +717,8 @@ public class Corant implements AutoCloseable {
     if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
       return;
     }
-    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(CorantBootHandler::compare).forEach(h -> {
+    streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader)).sorted(Sortable::compare)
+        .forEach(h -> {
           try {
             h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length));
           } catch (Exception e) {

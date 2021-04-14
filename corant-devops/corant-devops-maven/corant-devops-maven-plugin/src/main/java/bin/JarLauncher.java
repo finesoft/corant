@@ -81,14 +81,27 @@ public class JarLauncher {
       Files.createDirectories(workPath);
       cleanWorkDir();
       extract();
-      Class<?> mainClass = getClassLoader().loadClass(mainClsName);
+      Class<?> mainClass = buildClassLoader().loadClass(mainClsName);
       System.setProperty(APP_NME_KEY, appName);
-      log(true, "Find %s main class %s, the application is starting...", mainClass, appName);
+      log(true, "Find main class %s by corant class loader, the %s is starting...", mainClass,
+          appName);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchMethodException
         | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  ClassLoader buildClassLoader() {
+    return AccessController
+        .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(DFLT_APP_NAME,
+            classpaths.stream().map(path -> {
+              try {
+                return path.toUri().toURL();
+              } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+              }
+            }).toArray(URL[]::new), this.getClass().getClassLoader()));
   }
 
   void cleanWorkDir() {
@@ -99,7 +112,7 @@ public class JarLauncher {
         File[] files = file.listFiles();
         if (files != null) {
           for (File archive : files) {
-            if ((archive != null) && !archive.delete()) {
+            if (archive != null && !archive.delete()) {
               log(true, "[WARNING] Can not clear archive %s.", archive.getPath());
             }
           }
@@ -165,18 +178,6 @@ public class JarLauncher {
       }
       return crc32.getValue() + "";
     }
-  }
-
-  ClassLoader getClassLoader() {
-    return AccessController
-        .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(
-            classpaths.stream().map(path -> {
-              try {
-                return path.toUri().toURL();
-              } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-              }
-            }).toArray(URL[]::new)));
   }
 
   Method getMainMethod(Class<?> cls) throws NoSuchMethodException {

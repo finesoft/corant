@@ -25,7 +25,7 @@ public interface Names {
 
   String CORANT = "corant";
 
-  int CORANT_SIGN = 0xCA;
+  int CORANT_SIGN = 0xCBB;
 
   char NAME_SPACE_SEPARATOR = '.';
 

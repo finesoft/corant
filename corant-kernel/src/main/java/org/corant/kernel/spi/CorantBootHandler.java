@@ -62,8 +62,9 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
    * {@link PostCorantReadyEvent} event will not be emitted, and if there are multiple Handlers,
    * this method of the lower priority Handler will not be invoked.
    *
-   * @param corant
-   * @param args handleAfterStarted
+   * @param corant the Corant instance is started currently
+   * @param args the application startup arguments, the implementer can perform corresponding
+   *        operations based on the arguments.
    */
   void handleAfterStarted(Corant corant, String... args);
 

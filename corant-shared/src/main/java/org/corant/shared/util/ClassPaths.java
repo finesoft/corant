@@ -240,10 +240,21 @@ public class ClassPaths {
       ClassLoader currClsLoader = classLoader;
       do {
         if (currClsLoader instanceof URLClassLoader) {
-          try (URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader) {
-            for (URL entry : currUrlClsLoader.getURLs()) {
-              entries.putIfAbsent(entry.toURI(), currClsLoader);
-            }
+          /*
+           * FIXME: We currently do not close the class loader. After closing the class loader,
+           * problems may occur in some self-constructed class loader scenarios. For example, there
+           * may be problems when using [corant-devops-maven-plugin] to package the application into
+           * a runnable jar. --bingo
+           */
+          // try (URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader) {
+          // for (URL entry : currUrlClsLoader.getURLs()) {
+          // entries.putIfAbsent(entry.toURI(), currClsLoader);
+          // }
+          // }
+          @SuppressWarnings("resource")
+          URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
+          for (URL entry : currUrlClsLoader.getURLs()) {
+            entries.putIfAbsent(entry.toURI(), currClsLoader);
           }
         }
         if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {

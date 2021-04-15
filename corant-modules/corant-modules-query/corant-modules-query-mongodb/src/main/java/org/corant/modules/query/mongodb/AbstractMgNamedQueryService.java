@@ -228,7 +228,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
 
   protected boolean isAutoSetIdField(MgNamedQuerier querier) {
-    return querier.resolveProperties(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+    return querier.resolveProperty(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
   }
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
@@ -307,7 +307,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected String resolveCollectionName(MgNamedQuerier querier) {
-    String colName = querier.resolveProperties(PRO_KEY_COLLECTION_NAME, String.class, null);
+    String colName = querier.resolveProperty(PRO_KEY_COLLECTION_NAME, String.class, null);
     return isNotBlank(colName) ? colName : querier.getCollectionName(); // FIXME
   }
 

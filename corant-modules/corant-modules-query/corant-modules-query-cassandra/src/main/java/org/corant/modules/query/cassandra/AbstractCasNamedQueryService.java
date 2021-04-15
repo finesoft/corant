@@ -173,7 +173,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
    * @return resolveKeyspace
    */
   protected String resolveKeyspace(CasNamedQuerier querier) {
-    String keyspace = querier.resolveProperties(PRO_KEY_KEYSPACE, String.class, null);
+    String keyspace = querier.resolveProperty(PRO_KEY_KEYSPACE, String.class, null);
     return isNotBlank(keyspace) ? keyspace : split(querier.getQuery().getName(), ".")[0];
   }
 }

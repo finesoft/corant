@@ -156,7 +156,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver();
 
   protected String resolveIndexName(EsNamedQuerier querier) {
-    String indexName = querier.resolveProperties(PRO_KEY_INDEX_NAME, String.class, null);
+    String indexName = querier.resolveProperty(PRO_KEY_INDEX_NAME, String.class, null);
     return isNotBlank(indexName) ? indexName : querier.getIndexName();// FIXME
   }
 

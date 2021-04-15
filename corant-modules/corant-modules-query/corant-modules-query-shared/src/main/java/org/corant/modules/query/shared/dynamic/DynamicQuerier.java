@@ -81,7 +81,7 @@ public interface DynamicQuerier<P, S> extends Querier {
    * @see QueryParameter#getContext()
    * @see Query#getProperties()
    */
-  <X> X resolveProperties(String key, Class<X> cls, X dflt);
+  <X> X resolveProperty(String key, Class<X> cls, X dflt);
 
   /**
    * Return and validate results size.

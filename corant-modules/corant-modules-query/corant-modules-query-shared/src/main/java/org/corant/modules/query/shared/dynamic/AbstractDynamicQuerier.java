@@ -107,7 +107,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   public int resolveLimit() {
     if (limit == null) {
       limit = defaultObject(getQueryParameter().getLimit(),
-          () -> resolveProperties(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT));
+          () -> resolveProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT));
       if (limit <= 0) {
         limit = UN_LIMIT_SELECT_SIZE;
       }
@@ -124,7 +124,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public int resolveMaxSelectSize() {
     if (maxSelectSize == null) {
-      maxSelectSize = resolveProperties(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
+      maxSelectSize = resolveProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
       if (maxSelectSize <= 0) {
         maxSelectSize = UN_LIMIT_SELECT_SIZE;
       }
@@ -161,7 +161,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
    * @see Query#getProperties()
    */
   @Override
-  public <X> X resolveProperties(String key, Class<X> cls, X dflt) {
+  public <X> X resolveProperty(String key, Class<X> cls, X dflt) {
     Object pro =
         defaultObject(getQueryParameter().getContext().get(key), () -> getQuery().getProperty(key));
     if (pro != null) {
@@ -187,7 +187,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   boolean thrownExceedMaxSelectSize() {
     if (this.thrownExceedMaxSelectSize == null) {
-      this.thrownExceedMaxSelectSize = resolveProperties(PRO_KEY_THROWN_EXCEED_LIMIT_SIZE,
+      this.thrownExceedMaxSelectSize = resolveProperty(PRO_KEY_THROWN_EXCEED_LIMIT_SIZE,
           Boolean.class, THROWN_EXCEED_MAX_SELECT_SIZE);
     }
     return thrownExceedMaxSelectSize;

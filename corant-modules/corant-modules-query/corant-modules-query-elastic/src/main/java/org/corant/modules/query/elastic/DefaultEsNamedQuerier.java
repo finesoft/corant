@@ -16,6 +16,7 @@ package org.corant.modules.query.elastic;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.append;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Objects.min;
 import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,6 +92,19 @@ public class DefaultEsNamedQuerier extends
   @Override
   public Map<String, Object> getScriptParameter() {
     return null;
+  }
+
+  /**
+   * Result window is too large, from + size must be less than or equal to: [10000]
+   */
+  @Override
+  public int resolveMaxSelectSize() {
+    return min(super.resolveMaxSelectSize(), getUnLimitSize());
+  }
+
+  @Override
+  protected int getUnLimitSize() {
+    return 10000;
   }
 
 }

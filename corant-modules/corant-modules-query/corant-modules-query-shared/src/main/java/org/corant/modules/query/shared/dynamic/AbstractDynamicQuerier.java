@@ -109,7 +109,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       limit = defaultObject(getQueryParameter().getLimit(),
           () -> resolveProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT));
       if (limit <= 0) {
-        limit = UN_LIMIT_SELECT_SIZE;
+        limit = getUnLimitSize();
       }
       int max = resolveMaxSelectSize();
       if (limit > max) {
@@ -126,7 +126,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (maxSelectSize == null) {
       maxSelectSize = resolveProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
       if (maxSelectSize <= 0) {
-        maxSelectSize = UN_LIMIT_SELECT_SIZE;
+        maxSelectSize = getUnLimitSize();
       }
     }
     return maxSelectSize;
@@ -183,6 +183,10 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
           maxSize);
     }
     return size;
+  }
+
+  protected int getUnLimitSize() {
+    return UN_LIMIT_SELECT_SIZE;
   }
 
   boolean thrownExceedMaxSelectSize() {

@@ -32,7 +32,6 @@ import javax.persistence.SynchronizationType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
 import org.corant.modules.query.shared.Querier;
-import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -63,8 +62,8 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     log(queryName, scriptParameter, ql);
     EntityManager em = getEntityManager();
     try {
@@ -117,8 +116,8 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     log(queryName, scriptParameter, ql);
     EntityManager em = getEntityManager();
     try {
@@ -153,7 +152,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] queryParam = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    int maxSelectSize = resolveMaxSelectSize(querier);
+    int maxSelectSize = querier.resolveMaxSelectSize();
     String ql = querier.getScript();
     log(queryName, queryParam, ql);
     EntityManager em = getEntityManager();
@@ -161,12 +160,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
       Query query =
           createQuery(em, ql, properties, resultClass, queryParam).setMaxResults(maxSelectSize + 1);
       List<T> result = query.getResultList();
-      int size = result == null ? 0 : result.size();
-      if (size > maxSelectSize) {
-        throw new QueryRuntimeException(
-            "[%s] Result record number overflow, the allowable range is %s.", queryName,
-            maxSelectSize);
-      }
+      querier.validateResultSize(result);
       return result;
     } finally {
       if (em.isOpen()) {

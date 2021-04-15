@@ -63,14 +63,6 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Function<String, TransportClient> transportClientManager;
 
   @Inject
-  @ConfigProperty(name = "corant.query.elastic.max-select-size", defaultValue = "128")
-  protected Integer maxSelectSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.elastic.limit", defaultValue = "16")
-  protected Integer limit;
-
-  @Inject
   @ConfigProperty(name = "corant.query.elastic.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -124,8 +116,6 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   public static class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
     protected final EsQueryExecutor executor;
-    protected final int defaultMaxSelectSize;
-    protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<EsNamedQuerier> resolver;
 
     /**
@@ -136,32 +126,16 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
         EsNamedQueryServiceManager manager) {
       executor = new DefaultEsQueryExecutor(transportClient);
       resolver = manager.resolver;
-      defaultMaxSelectSize = manager.maxSelectSize;
-      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
     }
 
     /**
      * @param executor
-     * @param defaultMaxSelectSize
-     * @param defaultLimit
      * @param resolver
      */
-    protected DefaultEsNamedQueryService(EsQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, AbstractNamedQuerierResolver<EsNamedQuerier> resolver) {
+    protected DefaultEsNamedQueryService(EsQueryExecutor executor,
+        AbstractNamedQuerierResolver<EsNamedQuerier> resolver) {
       this.executor = executor;
-      this.defaultMaxSelectSize = defaultMaxSelectSize;
-      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
-    }
-
-    @Override
-    protected int getDefaultLimit() {
-      return defaultLimit;
-    }
-
-    @Override
-    protected int getDefaultMaxSelectSize() {
-      return defaultMaxSelectSize;
     }
 
     @Override

@@ -14,7 +14,6 @@
 package org.corant.modules.query.shared.mapping;
 
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultTrim;
@@ -53,8 +52,7 @@ public class Query implements Serializable {
   private String mappingFilePath;
   private String macroScript;// FIXME temporary
 
-  public Query() {
-  }
+  public Query() {}
 
   public Query(String mappingFilePath) {
     this();
@@ -169,6 +167,10 @@ public class Query implements Serializable {
     return properties;
   }
 
+  public Object getProperty(String name) {
+    return getProperties() == null ? null : getProperties().get(name);
+  }
+
   /**
    * Returns the property value of the specified type
    *
@@ -178,7 +180,7 @@ public class Query implements Serializable {
    * @return getProperty
    */
   public <T> T getProperty(String name, Class<T> cls) {
-    return isEmpty(getProperties()) ? null : toObject(getProperties().get(name), cls);
+    return toObject(getProperty(name), cls);
   }
 
   /**

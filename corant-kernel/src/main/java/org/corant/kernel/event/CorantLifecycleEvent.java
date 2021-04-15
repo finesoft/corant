@@ -13,12 +13,10 @@
  */
 package org.corant.kernel.event;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-kernel
@@ -36,14 +34,7 @@ public interface CorantLifecycleEvent {
     protected Logger logger;
 
     public void fire(CorantLifecycleEvent event) {
-      try {
-        events.fire(event);
-      } catch (Exception e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Handle %s occurred error!", event.getClass().getName()));
-        throw new CorantRuntimeException(e);
-      }
+      events.fire(event);
     }
-
   }
 }

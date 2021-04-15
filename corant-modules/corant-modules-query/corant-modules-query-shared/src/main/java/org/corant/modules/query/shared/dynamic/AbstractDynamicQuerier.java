@@ -13,12 +13,17 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Objects.max;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.FetchQueryHandler;
 import org.corant.modules.query.shared.QueryHandler;
 import org.corant.modules.query.shared.QueryParameter;
+import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.modules.query.shared.mapping.Query;
 
@@ -35,12 +40,12 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   protected final FetchQueryHandler fetchQueryHandler;
   protected final QueryParameter queryParameter;
 
-  /**
-   * @param query
-   * @param queryParameter
-   * @param queryHandler
-   * @param fetchQueryHandler
-   */
+  // Not thread safe
+  protected Integer limit;
+  protected Integer maxSelectSize;
+  protected Integer offset;
+  protected Boolean thrownExceedMaxSelectSize;
+
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryHandler, FetchQueryHandler fetchQueryHandler) {
     this.query = query;
@@ -82,9 +87,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   @Override
   public void handleResultHints(Object result) {
-    queryHandler.handleResultHints(result, Map.class, getQuery().getHints(), getQueryParameter());// FIXME
-                                                                                                  // map
-                                                                                                  // class
+    // FIXME map class
+    queryHandler.handleResultHints(result, Map.class, getQuery().getHints(), getQueryParameter());
   }
 
   @SuppressWarnings("unchecked")
@@ -99,4 +103,93 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     return fetchQueryHandler.resolveFetchQueryParameter(result, fetchQuery, getQueryParameter());
   }
 
+  @Override
+  public int resolveLimit() {
+    if (limit == null) {
+      limit = defaultObject(getQueryParameter().getLimit(),
+          () -> resolveProperties(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT));
+      if (limit <= 0) {
+        limit = UN_LIMIT_SELECT_SIZE;
+      }
+      int max = resolveMaxSelectSize();
+      if (limit > max) {
+        throw new QueryRuntimeException(
+            "Exceeded the maximum number of query [%s] results, limit is [%s].",
+            getQuery().getName(), max);
+      }
+    }
+    return limit;
+  }
+
+  @Override
+  public int resolveMaxSelectSize() {
+    if (maxSelectSize == null) {
+      maxSelectSize = resolveProperties(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
+      if (maxSelectSize <= 0) {
+        maxSelectSize = UN_LIMIT_SELECT_SIZE;
+      }
+    }
+    return maxSelectSize;
+  }
+
+  /**
+   * Resolve offset from query parameter, if the resolved offset < 0 or offset is null then return
+   * 0.
+   *
+   * @param querier
+   * @return resolveOffset
+   */
+  @Override
+  public int resolveOffset() {
+    if (offset == null) {
+      offset = max(defaultObject(getQueryParameter().getOffset(), 0), 0);
+    }
+    return offset;
+  }
+
+  /**
+   * Resolve properties from querier, first we try resolve it from the query parameter context, if
+   * not found try resolve it from query properties.
+   *
+   * @param <X> the property value type
+   * @param key the property key
+   * @param cls the property value class
+   * @param dflt the default value if property not set
+   * @return the property
+   *
+   * @see QueryParameter#getContext()
+   * @see Query#getProperties()
+   */
+  @Override
+  public <X> X resolveProperties(String key, Class<X> cls, X dflt) {
+    Object pro =
+        defaultObject(getQueryParameter().getContext().get(key), () -> getQuery().getProperty(key));
+    if (pro != null) {
+      if (cls.isInstance(pro)) {
+        return forceCast(pro);
+      }
+      return defaultObject(toObject(pro, cls), dflt);
+    }
+    return dflt;
+  }
+
+  @Override
+  public int validateResultSize(List<?> results) {
+    int size = sizeOf(results);
+    int maxSize = resolveMaxSelectSize();
+    if (size > 0 && size > maxSize && thrownExceedMaxSelectSize()) {
+      throw new QueryRuntimeException(
+          "[%s] Result record number overflow, the allowable range is %s.", getQuery().getName(),
+          maxSize);
+    }
+    return size;
+  }
+
+  boolean thrownExceedMaxSelectSize() {
+    if (this.thrownExceedMaxSelectSize == null) {
+      this.thrownExceedMaxSelectSize = resolveProperties(PRO_KEY_THROWN_EXCEED_LIMIT_SIZE,
+          Boolean.class, THROWN_EXCEED_MAX_SELECT_SIZE);
+    }
+    return thrownExceedMaxSelectSize;
+  }
 }

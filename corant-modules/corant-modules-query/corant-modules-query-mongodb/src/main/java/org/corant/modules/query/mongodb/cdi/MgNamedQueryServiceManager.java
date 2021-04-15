@@ -65,14 +65,6 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "corant.query.mongodb.max-select-size", defaultValue = "128")
-  protected Integer maxSelectSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.mongodb.limit", defaultValue = "16")
-  protected Integer limit;
-
-  @Inject
   @ConfigProperty(name = "corant.query.mongodb.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -133,8 +125,6 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   public static class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
 
     protected final MongoDatabase dataBase;
-    protected final int defaultMaxSelectSize;
-    protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
     protected final boolean convertDecimal;
 
@@ -146,24 +136,17 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
       this.dataBase = shouldNotNull(resolveDataBase(dataBase),
           "Can't build default mongo named query, the data base named %s not found.", dataBase);
       resolver = manager.resolver;
-      defaultMaxSelectSize = manager.maxSelectSize;
-      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
       convertDecimal = manager.convertDecimal;
     }
 
     /**
      * @param dataBase
-     * @param defaultMaxSelectSize
-     * @param defaultLimit
      * @param convertDecimal
      * @param resolver
      */
-    protected DefaultMgNamedQueryService(MongoDatabase dataBase, int defaultMaxSelectSize,
-        int defaultLimit, boolean convertDecimal,
+    protected DefaultMgNamedQueryService(MongoDatabase dataBase, boolean convertDecimal,
         AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
       this.dataBase = dataBase;
-      this.defaultMaxSelectSize = defaultMaxSelectSize;
-      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
       this.convertDecimal = convertDecimal;
     }
@@ -182,16 +165,6 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     @Override
     protected MongoDatabase getDataBase() {
       return dataBase;
-    }
-
-    @Override
-    protected int getDefaultLimit() {
-      return defaultLimit;
-    }
-
-    @Override
-    protected int getDefaultMaxSelectSize() {
-      return defaultMaxSelectSize;
     }
 
     @Override

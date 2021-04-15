@@ -58,7 +58,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.normal.Names;
 import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Resources.URLResource;
 
@@ -247,21 +246,17 @@ public class ClassPaths {
            * may be problems when using [corant-devops-maven-plugin] to package the application into
            * a runnable jar. --bingo
            */
-          // try (URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader) {
-          // for (URL entry : currUrlClsLoader.getURLs()) {
-          // entries.putIfAbsent(entry.toURI(), currClsLoader);
-          // }
-          // }
+          @SuppressWarnings("resource")
           URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
-          try {
-            for (URL entry : currUrlClsLoader.getURLs()) {
-              entries.putIfAbsent(entry.toURI(), currClsLoader);
-            }
-          } finally {
-            if (!Names.CORANT.equals(currUrlClsLoader.getName())) {
-              currUrlClsLoader.close();
-            }
+          // try {
+          for (URL entry : currUrlClsLoader.getURLs()) {
+            entries.putIfAbsent(entry.toURI(), currClsLoader);
           }
+          // } finally {
+          // if (!Names.CORANT.equals(currUrlClsLoader.getName())) {
+          // currUrlClsLoader.close();
+          // }
+          // }
         }
         if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
           Set<String> sysClsPaths = linkedHashSetOf(split(SYS_CLASS_PATH, SYS_PATH_SEPARATOR));

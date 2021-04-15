@@ -66,8 +66,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
@@ -109,8 +109,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     try {
       log(queryName, scriptParameter, sql, "Limit: " + limitSql);
@@ -140,19 +140,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
-    int maxSelectSize = resolveMaxSelectSize(querier);
+    int maxSelectSize = querier.resolveMaxSelectSize();
     try {
       // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
       log(queryName, scriptParameter, sql);
       List<Map<String, Object>> results =
           getExecutor().select(sql, maxSelectSize + 1, scriptParameter);
-      int size = results == null ? 0 : results.size();
-      if (size > 0) {
-        if (size > maxSelectSize) {
-          throw new QueryRuntimeException(
-              "[%s] Result record number overflow, the allowable range is %s.", queryName,
-              maxSelectSize);
-        }
+      if (querier.validateResultSize(results) > 0) {
         this.fetch(results, querier);
       }
       return querier.handleResults(results);
@@ -161,18 +155,6 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
           queryName);
     }
   }
-
-  // @Override
-  // public <T> Stream<T> stream(String queryName, Object parameter) {
-  // SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-  // Object[] scriptParameter = querier.getScriptParameter();
-  // String sql = querier.getScript(null);
-  // log("stream-> " + queryName, scriptParameter, sql);
-  // return getExecutor().stream(sql, scriptParameter).map(result -> {
-  // this.fetch(result, querier);
-  // return querier.resolveResult(result);
-  // });
-  // }
 
   protected Dialect getDialect() {
     return getExecutor().getDialect();

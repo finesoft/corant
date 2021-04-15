@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared;
 
 import java.util.List;
+import org.corant.config.Configs;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.modules.query.shared.mapping.Query;
 
@@ -27,35 +28,47 @@ import org.corant.modules.query.shared.mapping.Query;
  */
 public interface Querier {
 
+  String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
+  String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
+  String PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = ".thrown-exceed-max-select-size";
+  String GLOBAL = "corant.query";
+  String GLOBAL_PRO_KEY_MAX_SELECT_SIZE = GLOBAL + PRO_KEY_MAX_SELECT_SIZE;
+  String GLOBAL_PRO_KEY_DEFAULT_LIMIT = GLOBAL + PRO_KEY_DEFAULT_LIMIT;
+  String GLOBAL_PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = GLOBAL + PRO_KEY_THROWN_EXCEED_LIMIT_SIZE;
+  int DEFALUT_STREAM_LIMIT =
+      Configs.getValue("corant.query.default-stream-limit", Integer.class, 16);
+
+  int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 1;
+  int MAX_SELECT_SIZE = Configs.getValue(GLOBAL_PRO_KEY_MAX_SELECT_SIZE, Integer.class, 128);
+  int DEFAULT_LIMIT = Configs.getValue(GLOBAL_PRO_KEY_DEFAULT_LIMIT, Integer.class, 16);
+
+  boolean THROWN_EXCEED_MAX_SELECT_SIZE =
+      Configs.getValue(GLOBAL_PRO_KEY_THROWN_EXCEED_LIMIT_SIZE, Boolean.class, true);
+
   /**
-   * Decide whether to fetch
+   * Returns whether to fetch
    *
-   * @param result
-   * @param fetchQuery
-   * @return decideFetch
+   * @param result the parent query result for decide whether to fetch
+   * @param fetchQuery the fetch query
    */
   boolean decideFetch(Object result, FetchQuery fetchQuery);
 
   /**
-   * The query object that this querier bind, the Query object define execution plan.
-   *
-   * @return getQuery
+   * Returns the query object that this querier bind, the Query object define execution plan.
    */
   Query getQuery();
 
   /**
-   * The query parameter that this querier bind.
-   *
-   * @return getQueryParameter
+   * Returns the query parameter that this querier bind.
    */
   QueryParameter getQueryParameter();
 
   /**
    * Inject the fetched result to single result
    *
-   * @param result
-   * @param fetchedResult
-   * @param fetchQuery
+   * @param result the single parent query result
+   * @param fetchedResult the fetched result use to inject
+   * @param fetchQuery the fetch query
    * @see FetchQueryHandler#handleFetchedResult(Object, List, FetchQuery)
    */
   void handleFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
@@ -63,23 +76,25 @@ public interface Querier {
   /**
    * Inject the fetched result to result list
    *
-   * @param result
-   * @param fetchedResult
-   * @param fetchQuery
+   * @param results the parent query results
+   * @param fetchedResult the fetched result use to inject
+   * @param fetchQuery the fetch query
    * @see FetchQueryHandler#handleFetchedResults(List, List, FetchQuery)
    */
-  void handleFetchedResults(List<?> result, List<?> fetchedResult, FetchQuery fetchQuery);
+  void handleFetchedResults(List<?> results, List<?> fetchedResult, FetchQuery fetchQuery);
 
   /**
-   * Handle result, handle hints and conversions.
+   * Handle single result, handle hints and conversions.
    *
-   * @param <T>
-   * @param result
+   * @param <T> the finally query result object type
+   * @param result the result to be handled
    * @see QueryHandler#handleResult(Object, Class, List, QueryParameter)
    */
   <T> T handleResult(Object result);
 
   /**
+   * Handle the result hints
+   *
    * @param result the result to handle
    * @see QueryHandler#handleResultHints(Object, Class, List, QueryParameter)
    */
@@ -88,17 +103,17 @@ public interface Querier {
   /**
    * Handle result list, handle hints and conversions.
    *
-   * @param <T>
-   * @param results
+   * @param <T> the finally query result object type
+   * @param results the results to be handled
    * @see QueryHandler#handleResults(List, Class, List, QueryParameter)
    */
   <T> List<T> handleResults(List<?> results);
 
   /**
-   * Resolve fetch query parameter, merge parent querier criteria.
+   * Returns a resolved fetch query parameter, merge parent querier criteria.
    *
-   * @param result
-   * @param fetchQuery
+   * @param result the parent result use to extract the child query parameter
+   * @param fetchQuery the fetch query
    * @see FetchQueryHandler#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
    */
   QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery);

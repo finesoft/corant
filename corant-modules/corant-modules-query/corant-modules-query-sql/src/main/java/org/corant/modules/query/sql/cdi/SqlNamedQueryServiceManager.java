@@ -71,14 +71,6 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "corant.query.sql.max-select-size", defaultValue = "128")
-  protected Integer maxSelectSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.sql.limit", defaultValue = "16")
-  protected Integer limit;
-
-  @Inject
   @ConfigProperty(name = "corant.query.sql.fetch-size", defaultValue = "16")
   protected Integer fetchSize;
 
@@ -179,8 +171,6 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   public static class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
 
     protected final SqlQueryExecutor executor;
-    protected final int defaultMaxSelectSize;
-    protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
     /**
@@ -189,11 +179,9 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param defaultLimit
      * @param resolver
      */
-    protected DefaultSqlNamedQueryService(SqlQueryExecutor executor, int defaultMaxSelectSize,
-        int defaultLimit, AbstractNamedQuerierResolver<SqlNamedQuerier> resolver) {
+    protected DefaultSqlNamedQueryService(SqlQueryExecutor executor,
+        AbstractNamedQuerierResolver<SqlNamedQuerier> resolver) {
       this.executor = executor;
-      this.defaultMaxSelectSize = defaultMaxSelectSize;
-      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
     }
 
@@ -213,18 +201,6 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           .maxRows(manager.maxRows).queryTimeout(manager.timeout);
       manager.fetchDirection.ifPresent(builder::fetchDirection);
       executor = new DefaultSqlQueryExecutor(builder.build());
-      defaultMaxSelectSize = manager.maxSelectSize;
-      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
-    }
-
-    @Override
-    protected int getDefaultLimit() {
-      return defaultLimit;
-    }
-
-    @Override
-    protected int getDefaultMaxSelectSize() {
-      return defaultMaxSelectSize;
     }
 
     @Override

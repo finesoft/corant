@@ -30,21 +30,19 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
   /**
    *
    */
-  public AbstractNumberConverter() {
-    super();
-  }
+  protected AbstractNumberConverter() {}
 
   /**
    * @param throwException
    */
-  public AbstractNumberConverter(boolean throwException) {
+  protected AbstractNumberConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @param defaultValue
    */
-  public AbstractNumberConverter(T defaultValue) {
+  protected AbstractNumberConverter(T defaultValue) {
     super(defaultValue);
   }
 
@@ -52,7 +50,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
    * @param defaultValue
    * @param throwException
    */
-  public AbstractNumberConverter(T defaultValue, boolean throwException) {
+  protected AbstractNumberConverter(T defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 

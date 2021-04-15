@@ -14,7 +14,6 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.asStrings;
@@ -35,7 +34,6 @@ import org.corant.Corant;
 import org.corant.modules.query.shared.QueryParameter.StreamQueryParameter;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.modules.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
-import org.corant.modules.query.shared.mapping.Query;
 import org.corant.modules.query.shared.mapping.Query.QueryType;
 import org.corant.shared.util.Retry;
 
@@ -47,12 +45,8 @@ import org.corant.shared.util.Retry;
  */
 public abstract class AbstractNamedQueryService implements NamedQueryService {
 
-  public static final int MAX_SELECT_SIZE = 128;
-  public static final int DEFAULT_LIMIT = 16;
-  public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
-  public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
-
-  final Map<String, NamedQueryService> fetchQueryServices = new ConcurrentHashMap<>();// static?
+  protected static final Map<String, NamedQueryService> fetchQueryServices =
+      new ConcurrentHashMap<>();// static?
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 
@@ -74,13 +68,13 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     } else {
       useQueryParam = new StreamQueryParameter(queryParam);
     }
-    useQueryParam.limit(max(defaultObject(queryParam.getLimit(), this::getDefaultLimit), 1));
+    useQueryParam.limit(max(defaultObject(queryParam.getLimit(), Querier.DEFALUT_STREAM_LIMIT), 1));
     return stream(queryName, useQueryParam);
   }
 
   protected <T> void fetch(List<T> results, Querier querier) {
-    List<FetchQuery> fetchQueries = querier.getQuery().getFetchQueries();
-    if (!isEmpty(results) && !isEmpty(fetchQueries)) {
+    List<FetchQuery> fetchQueries;
+    if (isNotEmpty(results) && isNotEmpty(fetchQueries = querier.getQuery().getFetchQueries())) {
       for (FetchQuery fq : fetchQueries) {
         NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (fq.isEagerInject()) {
@@ -105,8 +99,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected <T> void fetch(T result, Querier parentQuerier) {
-    List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
-    if (result != null && !isEmpty(fetchQueries)) {
+    List<FetchQuery> fetchQueries;
+    if (result != null && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
       for (FetchQuery fq : fetchQueries) {
         NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (parentQuerier.decideFetch(result, fq)) {
@@ -114,14 +108,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         }
       }
     }
-  }
-
-  protected int getDefaultLimit() {
-    return DEFAULT_LIMIT;
-  }
-
-  protected int getDefaultMaxSelectSize() {
-    return MAX_SELECT_SIZE;
   }
 
   protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
@@ -140,17 +126,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         name, String.join(",", asStrings(param)), String.join(";\n", script)));
   }
 
-  /**
-   * Resolve default limit from query parameter context or query object
-   *
-   * @param querier
-   * @return resolveDefaultLimit
-   */
-  protected int resolveDefaultLimit(Querier querier) {
-    int limit = resolveProperties(querier, PRO_KEY_DEFAULT_LIMIT, Integer.class, getDefaultLimit());
-    return limit <= 0 ? Integer.MAX_VALUE : limit;
-  }
-
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     final QueryType type = fq.getReferenceQuery().getType();
     final String qualifier = fq.getReferenceQuery().getQualifier();
@@ -162,76 +137,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
             "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
       }
     });
-  }
-
-  /**
-   * Resolve limit from query parameter or query object, if the resolved limit <=0 then return
-   * Integer.MAX_VALUE.
-   *
-   * NOTE: the resolved limit can not great than the max select size.
-   *
-   * @param querier
-   * @return resolveLimit
-   */
-  protected int resolveLimit(Querier querier) {
-    int limit =
-        defaultObject(querier.getQueryParameter().getLimit(), () -> resolveDefaultLimit(querier));
-    int max = resolveMaxSelectSize(querier);
-    if (limit > max) {
-      throw new QueryRuntimeException(
-          "Exceeded the maximum number of query [%s] results, limit is [%s].",
-          querier.getQuery().getName(), max);
-    }
-    return limit;
-  }
-
-  /**
-   * Resolve max select size from query parameter context or query object, if the resolved size <=0
-   * then return Integer.MAX_VALUE.
-   *
-   * @param querier
-   * @return resolveMaxSelectSize
-   * @see AbstractNamedQueryService#resolveProperties(Querier, String, Class, Object)
-   * @see #MAX_SELECT_SIZE
-   * @see #PRO_KEY_MAX_SELECT_SIZE
-   */
-  protected int resolveMaxSelectSize(Querier querier) {
-    int mss = resolveProperties(querier, PRO_KEY_MAX_SELECT_SIZE, Integer.class,
-        getDefaultMaxSelectSize());
-    return mss <= 0 ? Integer.MAX_VALUE - 1 : mss;
-  }
-
-  /**
-   * Resolve offset from query parameter, if the resolved offset < 0 or offset is null then return
-   * 0.
-   *
-   * @param querier
-   * @return resolveOffset
-   */
-  protected int resolveOffset(Querier querier) {
-    return max(defaultObject(querier.getQueryParameter().getOffset(), 0), 0);
-  }
-
-  /**
-   * Resolve properties from querier, first we try resolve it from the query parameter context, if
-   * not found try resolve it from query properties.
-   *
-   * @param <P> the property
-   * @param querier the querier
-   * @param key the property key
-   * @param cls the property value class
-   * @param dflt the default value if property not set
-   * @return resolveProperties
-   *
-   * @see QueryParameter#getContext()
-   * @see Query#getProperties()
-   */
-  protected <P> P resolveProperties(Querier querier, String key, Class<P> cls, P dflt) {
-    P obj = toObject(querier.getQueryParameter().getContext().get(key), cls);
-    if (obj == null) {
-      obj = querier.getQuery().getProperty(key, cls);
-    }
-    return defaultObject(obj, dflt);
   }
 
   /**

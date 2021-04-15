@@ -41,7 +41,6 @@ import org.corant.modules.query.shared.AbstractNamedQueryService;
 import org.corant.modules.query.shared.Querier;
 import org.corant.modules.query.shared.QueryParameter;
 import org.corant.modules.query.shared.QueryParameter.StreamQueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.shared.util.Conversions;
 import com.mongodb.BasicDBObject;
@@ -142,8 +141,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Forwarding<T> forward(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
@@ -179,8 +178,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Paging<T> page(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
@@ -205,19 +204,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public <T> List<T> select(String queryName, Object parameter) {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    int maxSelectSize = resolveMaxSelectSize(querier);
+    int maxSelectSize = querier.resolveMaxSelectSize();
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     final boolean autoSetId = isAutoSetIdField(querier);
     try (MongoCursor<Document> cursor = fi.iterator()) {
       List<Map<String, Object>> list = streamOf(cursor)
           .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
-      int size = list.size();
-      if (size > 0) {
-        if (size > maxSelectSize) {
-          throw new QueryRuntimeException(
-              "[%s] Result record number overflow, the allowable range is %s.", queryName,
-              maxSelectSize);
-        }
+      if (querier.validateResultSize(list) > 0) {
         this.fetch(list, querier);
       }
       return querier.handleResults(list);
@@ -235,7 +228,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
 
   protected boolean isAutoSetIdField(MgNamedQuerier querier) {
-    return resolveProperties(querier, PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+    return querier.resolveProperties(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
   }
 
   protected FindIterable<Document> query(MgNamedQuerier querier) {
@@ -268,8 +261,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     Map<String, String> pros = querier.getQuery().getProperties();
     // handle properties
-    fi.batchSize(resolveDefaultLimit(querier));
-    int offset = resolveOffset(querier);
+    fi.batchSize(querier.resolveLimit());
+    int offset = querier.resolveOffset();
     if (offset > 0) {
       fi.skip(offset);
     }
@@ -314,7 +307,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected String resolveCollectionName(MgNamedQuerier querier) {
-    String colName = resolveProperties(querier, PRO_KEY_COLLECTION_NAME, String.class, null);
+    String colName = querier.resolveProperties(PRO_KEY_COLLECTION_NAME, String.class, null);
     return isNotBlank(colName) ? colName : querier.getCollectionName(); // FIXME
   }
 

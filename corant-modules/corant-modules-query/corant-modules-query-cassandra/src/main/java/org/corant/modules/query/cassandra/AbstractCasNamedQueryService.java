@@ -72,8 +72,8 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     try {
       log(queryName, scriptParameter, cql);
       Forwarding<T> result = Forwarding.inst();
@@ -117,8 +117,8 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     try {
       log(queryName, scriptParameter, cql);
       List<Map<String, Object>> list =
@@ -146,18 +146,12 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
-    int maxSelectSize = resolveMaxSelectSize(querier);
+    int maxSelectSize = querier.resolveMaxSelectSize();
     try {
       log(queryName, scriptParameter, cql);
       List<Map<String, Object>> results =
           getExecutor().paging(ks, cql, 0, maxSelectSize + 1, scriptParameter);
-      int size = sizeOf(results);
-      if (size > 0) {
-        if (size > maxSelectSize) {
-          throw new QueryRuntimeException(
-              "[%s] Result record number overflow, the allowable range is %s.", queryName,
-              maxSelectSize);
-        }
+      if (querier.validateResultSize(results) > 0) {
         this.fetch(results, querier);
       }
       return querier.handleResults(results);
@@ -178,8 +172,8 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
    * @param querier
    * @return resolveKeyspace
    */
-  protected String resolveKeyspace(Querier querier) {
-    String keyspace = resolveProperties(querier, PRO_KEY_KEYSPACE, String.class, null);
+  protected String resolveKeyspace(CasNamedQuerier querier) {
+    String keyspace = querier.resolveProperties(PRO_KEY_KEYSPACE, String.class, null);
     return isNotBlank(keyspace) ? keyspace : split(querier.getQuery().getName(), ".")[0];
   }
 }

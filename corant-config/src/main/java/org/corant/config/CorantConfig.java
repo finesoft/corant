@@ -93,6 +93,10 @@ public class CorantConfig implements Config, Serializable {
     return configConversion.getConverter(forType);
   }
 
+  public CorantConfigSources getCorantConfigSources() {
+    return configSources.get();
+  }
+
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
     logger.finer(() -> String.format("Retrieve optional config property key [%s] type [%s]",

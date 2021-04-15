@@ -566,13 +566,18 @@ public class Corant implements AutoCloseable {
       return;
     }
     final StopWatch stopWatch = new StopWatch(APP_NAME);
-    Thread.currentThread().setContextClassLoader(classLoader);
-    doBeforeStart(classLoader, stopWatch);
-    registerMBean();
-    initializeContainer(preInitializer, stopWatch);
-    doAfterContainerInitialized(stopWatch);
-    doAfterStarted(classLoader, stopWatch);
-    doOnReady();
+    try {
+      Thread.currentThread().setContextClassLoader(classLoader);
+      doBeforeStart(classLoader, stopWatch);
+      registerMBean();
+      initializeContainer(preInitializer, stopWatch);
+      doAfterContainerInitialized(stopWatch);
+      doAfterStarted(classLoader, stopWatch);
+      doOnReady();
+    } catch (Exception e) {
+      log(Level.SEVERE, e, "Start %s occurred error!", APP_NAME);
+      throw new CorantRuntimeException(e);
+    }
   }
 
   /**
@@ -580,10 +585,15 @@ public class Corant implements AutoCloseable {
    * application.
    */
   public synchronized void stop() {
-    if (isRunning()) {
-      container.close();
+    try {
+      if (isRunning()) {
+        container.close();
+      }
+      container = null;
+    } catch (Exception e) {
+      log(Level.SEVERE, e, "Stop %s occurred error!", APP_NAME);
+      throw new CorantRuntimeException(e);
     }
-    container = null;
   }
 
   void doAfterContainerInitialized(StopWatch stopWatch) {
@@ -682,44 +692,24 @@ public class Corant implements AutoCloseable {
 
   private void invokeBootHandlerAfterStarted() {
     if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
-      return;
+      logInfo("The after start boot handlers are disabled!");
     }
-    CorantBootHandler.load(classLoader).forEach(h -> {
-      try {
-        h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length));
-      } catch (Exception e) {
-        log(Level.SEVERE, e, "%s handle after %s started occurred error!", h.getClass().getName(),
-            APP_NAME);
-        throw new CorantRuntimeException(e);
-      }
-    });
+    CorantBootHandler.load(classLoader)
+        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
   }
 
   private void invokeBootHandlerAfterStopped() {
-    CorantBootHandler.load(classLoader).forEach(h -> {
-      try {
-        h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length));
-      } catch (Exception e) {
-        log(Level.SEVERE, e, "%s handle after %s stopped occurred error!", h.getClass().getName(),
-            APP_NAME);
-        throw new CorantRuntimeException(e);
-      }
-    });
+    CorantBootHandler.load(classLoader).forEach(
+        h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
   }
 
   private void invokeBootHandlerBeforeStart() {
     if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
+      logInfo("The before start boot handlers are disabled!");
       return;
     }
-    CorantBootHandler.load(classLoader).forEach(h -> {
-      try {
-        h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length));
-      } catch (Exception e) {
-        log(Level.SEVERE, e, "%s handle before %s start occurred error!", h.getClass().getName(),
-            APP_NAME);
-        throw new CorantRuntimeException(e);
-      }
-    });
+    CorantBootHandler.load(classLoader)
+        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
   }
 
   private Power power() {

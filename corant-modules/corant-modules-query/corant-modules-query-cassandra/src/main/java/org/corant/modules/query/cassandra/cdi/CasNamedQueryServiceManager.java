@@ -60,12 +60,8 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<CasNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "corant.query.cassandra.max-select-size", defaultValue = "128")
-  protected Integer maxSelectSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.cassandra.limit", defaultValue = "16")
-  protected Integer limit;
+  @ConfigProperty(name = "corant.query.cassandra.fetch-size", defaultValue = "16")
+  protected Integer fetchSize;
 
   @Inject
   @ConfigProperty(name = "corant.query.cassandra.default-qualifier-value")
@@ -121,8 +117,6 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
    */
   public static class DefaultCasNamedQueryService extends AbstractCasNamedQueryService {
 
-    protected final int defaultMaxSelectSize;
-    protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<CasNamedQuerier> resolver;
     protected final CasQueryExecutor executor;
 
@@ -132,37 +126,22 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
      */
     public DefaultCasNamedQueryService(String clusterName, CasNamedQueryServiceManager manager) {
       resolver = manager.resolver;
-      defaultMaxSelectSize = manager.maxSelectSize;
-      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
       executor = new DefaultCasQueryExecutor(
           findNamed(Cluster.class, clusterName).orElseThrow(() -> new CorantRuntimeException(
               "Can't build default cassandra named query, the cluster named %s not found.",
               clusterName)),
-          defaultMaxSelectSize);
+          manager.fetchSize);
     }
 
     /**
      * @param cluster
-     * @param defaultMaxSelectSize
-     * @param defaultLimit
+     * @param fetchSize
      * @param resolver
      */
-    protected DefaultCasNamedQueryService(Cluster cluster, int defaultMaxSelectSize,
-        int defaultLimit, AbstractNamedQuerierResolver<CasNamedQuerier> resolver) {
-      this.defaultMaxSelectSize = defaultMaxSelectSize;
-      this.defaultLimit = defaultLimit;
+    protected DefaultCasNamedQueryService(Cluster cluster, int fetchSize,
+        AbstractNamedQuerierResolver<CasNamedQuerier> resolver) {
       this.resolver = resolver;
-      executor = new DefaultCasQueryExecutor(cluster, defaultMaxSelectSize);
-    }
-
-    @Override
-    protected int getDefaultLimit() {
-      return defaultLimit;
-    }
-
-    @Override
-    protected int getDefaultMaxSelectSize() {
-      return defaultMaxSelectSize;
+      executor = new DefaultCasQueryExecutor(cluster, fetchSize);
     }
 
     @Override

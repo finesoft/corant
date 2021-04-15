@@ -11,7 +11,7 @@
 	<artifactId>corant-boms</artifactId>
 	<properties>
 
-		<version.agroal>1.10</version.agroal>
+		<version.agroal>1.11</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
@@ -120,7 +120,7 @@
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 		<version.ojdbc8>19.8.0.0</version.ojdbc8>
-		<version.narayana>5.11.0.Final</version.narayana>
+		<version.narayana>5.11.1.Final</version.narayana>
 		<version.netty>4.1.52.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
 		<version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>

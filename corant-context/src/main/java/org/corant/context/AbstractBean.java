@@ -44,8 +44,7 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
   /**
    * @param beanManager
    */
-  public AbstractBean(BeanManager beanManager) {
-    super();
+  protected AbstractBean(BeanManager beanManager) {
     this.beanManager = beanManager;
   }
 

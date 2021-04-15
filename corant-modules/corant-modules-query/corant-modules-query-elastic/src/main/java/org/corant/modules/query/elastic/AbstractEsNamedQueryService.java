@@ -82,8 +82,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Forwarding<T> forward(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
     List<T> result = hits.getValue();
     return Forwarding.of(result, hits.getLeft() > offset + limit);
@@ -103,8 +103,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> Paging<T> page(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = resolveOffset(querier);
-    int limit = resolveLimit(querier);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
     Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
     List<T> result = hits.getValue();
     return Paging.of(hits.getLeft().intValue(), result, offset, limit);
@@ -146,7 +146,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   public <T> List<T> select(String queryName, Object parameter) {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    Pair<Long, List<T>> hits = searchHits(queryName, querier, null, resolveMaxSelectSize(querier));
+    Pair<Long, List<T>> hits = searchHits(queryName, querier, null, querier.resolveMaxSelectSize());
     return hits.getValue();
   }
 
@@ -156,7 +156,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   protected abstract AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver();
 
   protected String resolveIndexName(EsNamedQuerier querier) {
-    String indexName = resolveProperties(querier, PRO_KEY_INDEX_NAME, String.class, null);
+    String indexName = querier.resolveProperties(PRO_KEY_INDEX_NAME, String.class, null);
     return isNotBlank(indexName) ? indexName : querier.getIndexName();// FIXME
   }
 

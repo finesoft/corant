@@ -60,14 +60,6 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
   @Inject
-  @ConfigProperty(name = "corant.query.jpql.max-select-size", defaultValue = "128")
-  protected Integer maxSelectSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.jpql.limit", defaultValue = "16")
-  protected Integer limit;
-
-  @Inject
   @ConfigProperty(name = "corant.query.jpql.default-qualifier-value")
   protected Optional<String> defaultQualifierValue;
 
@@ -121,8 +113,6 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   public static class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
 
     protected final EntityManagerFactory emf;
-    protected final int defaultMaxSelectSize;
-    protected final int defaultLimit;
     protected final AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
     /**
@@ -133,32 +123,16 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
         JpqlNamedQueryServiceManager manager) {
       this.emf = emf;
       resolver = manager.resolver;
-      defaultMaxSelectSize = manager.maxSelectSize;
-      defaultLimit = manager.limit < 1 ? DEFAULT_LIMIT : manager.limit;
     }
 
     /**
      * @param emf
-     * @param defaultMaxSelectSize
-     * @param defaultLimit
      * @param resolver
      */
-    protected DefaultJpqlNamedQueryService(EntityManagerFactory emf, int defaultMaxSelectSize,
-        int defaultLimit, AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver) {
+    protected DefaultJpqlNamedQueryService(EntityManagerFactory emf,
+        AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver) {
       this.emf = emf;
-      this.defaultMaxSelectSize = defaultMaxSelectSize;
-      this.defaultLimit = defaultLimit;
       this.resolver = resolver;
-    }
-
-    @Override
-    protected int getDefaultLimit() {
-      return defaultLimit;
-    }
-
-    @Override
-    protected int getDefaultMaxSelectSize() {
-      return defaultMaxSelectSize;
     }
 
     @Override

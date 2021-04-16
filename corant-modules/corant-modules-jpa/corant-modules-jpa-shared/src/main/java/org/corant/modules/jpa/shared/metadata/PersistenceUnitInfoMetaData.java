@@ -15,6 +15,7 @@ package org.corant.modules.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -446,9 +447,18 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   void resolvePersistenceProvider() {
     if (isBlank(persistenceProviderClassName)) {
-      PersistenceProvider pp = JPAConfig.resolvePersistenceProvider()
-          .orElseThrow(() -> new CorantRuntimeException("Can not find jpa provider"));
-      setPersistenceProviderClassName(getUserClass(pp.getClass()).getName());
+      List<PersistenceProvider> providers = JPAConfig.getRuntimePersistenceProvider();
+      int size = sizeOf(providers);
+      if (size == 1) {
+        setPersistenceProviderClassName(getUserClass(providers.get(0).getClass()).getName());
+      } else if (size > 1) {
+        throw new CorantRuntimeException(
+            "Multiple persistence providers found, unable to determine which one to use for %s!",
+            persistenceUnitName);
+      } else {
+        new CorantRuntimeException("Can not any persistence provider for persistence unit %s.",
+            persistenceUnitName);
+      }
     }
   }
 

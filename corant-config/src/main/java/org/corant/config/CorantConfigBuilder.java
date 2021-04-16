@@ -14,15 +14,21 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.corant.config.CorantConfigConversion.OrdinalConverter;
 import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
@@ -73,6 +79,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public Config build() {
     CorantConfigSources configSources = CorantConfigSources.of(sources, classLoader);
     CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), configSources);
+    validate(configSources, config);
     return config;
   }
 
@@ -120,6 +127,46 @@ public class CorantConfigBuilder implements ConfigBuilder {
         "Find config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
         classLoader.getClass().getName(), source.getClass().getName()));
+  }
+
+  void validate(CorantConfigSources sources, CorantConfig config) {
+    if (isNotEmpty(sources.getProfiles())) {
+      logger.fine(() -> String.format("The activated config profile is %s.",
+          String.join(", ", sources.getProfiles())));
+    }
+    logger.fine(() -> String.format("The config property expressions is %s.",
+        sources.isExpressionsEnabled() ? "enabled" : "disabled"));
+    logger.fine(() -> String.format("Resolved %s config sources:%n%n{%n  %s%n}%n%n",
+        sources.getSources().size(), sources.getSources().stream().map(CorantConfigSource::getName)
+            .collect(Collectors.joining("\n  "))));
+
+    Exception thrown = null;
+    SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);
+    for (String name : config.getPropertyNames()) {
+      try {
+        sortMap.put(name, Desensitizer.desensitize(name, defaultString(sources.getValue(name))));
+      } catch (Exception e) {
+        sortMap.put(name, String.join("", "[ERROR]:", " exception:", e.getClass().getName(),
+            ", message:", defaultString(e.getMessage(), "none")));
+        if (thrown != null) {
+          thrown.addSuppressed(e);
+        } else {
+          thrown = e;
+        }
+      }
+    }
+
+    logger.fine(() -> {
+      StringBuilder sb = new StringBuilder("Resolved config properties:\n\n{\n");
+      sortMap.forEach((k, v) -> sb.append("  ").append(k).append(" : ").append(v).append("\n"));
+      sb.append("}\n\n");
+      return sb.toString();
+    });
+    sortMap.clear();
+    if (thrown != null) {
+      // logger.log(Level.SEVERE, thrown, () -> "Process configurations occurred error");
+      throw new CorantRuntimeException(thrown);
+    }
   }
 
 }

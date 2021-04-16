@@ -566,18 +566,10 @@ public class Corant implements AutoCloseable {
       return;
     }
     final StopWatch stopWatch = new StopWatch(APP_NAME);
-    try {
-      Thread.currentThread().setContextClassLoader(classLoader);
-      doBeforeStart(classLoader, stopWatch);
-      registerMBean();
-      initializeContainer(preInitializer, stopWatch);
-      doAfterContainerInitialized(stopWatch);
-      doAfterStarted(classLoader, stopWatch);
-      doOnReady();
-    } catch (Exception e) {
-      log(Level.SEVERE, e, "Start %s occurred error!", APP_NAME);
-      throw new CorantRuntimeException(e);
-    }
+    Thread.currentThread().setContextClassLoader(classLoader);
+    doBeforeStart(classLoader, stopWatch);
+    initializeContainer(preInitializer, stopWatch);
+    doAfterStarted(classLoader, stopWatch);
   }
 
   /**
@@ -590,69 +582,84 @@ public class Corant implements AutoCloseable {
         container.close();
       }
       container = null;
-    } catch (Exception e) {
+    } catch (Throwable e) {
       log(Level.SEVERE, e, "Stop %s occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
 
-  void doAfterContainerInitialized(StopWatch stopWatch) {
-    stopWatch.start("All modules are initialized");
-    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostContainerReadyEvent(arguments));
-    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
-  }
-
   void doAfterStarted(ClassLoader classLoader, StopWatch stopWatch) {
-    stopWatch.start("The post-started SPI processing is completed");
-    invokeBootHandlerAfterStarted();
-    stopWatch.stop(tk -> logInfo("%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-        .destroy(sw -> {
-          double tt = sw.getTotalTimeSeconds();
-          if (tt > 8) {
-            logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
-                APP_NAME, tt);
-          } else {
-            logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
-          }
-        });
+    try {
+      // emit post container ready events
+      stopWatch.start("All modules are initialized");
+      LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
+      emitter.fire(new PostContainerReadyEvent(arguments));
+      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
 
-    logInfo("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
-        Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
-        TimeZone.getDefault().getID());
-    logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
-        Launchs.getMaxMemoryMb(), boostLine());
+      // handle post started spi
+      stopWatch.start("The post-started SPI processing is completed");
+      invokeBootHandlerAfterStarted();
+      stopWatch.stop(tk -> logInfo("%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
+          .destroy(sw -> {
+            double tt = sw.getTotalTimeSeconds();
+            if (tt > 8) {
+              logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
+                  APP_NAME, tt);
+            } else {
+              logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
+            }
+          });
+
+      // emit post corant ready events
+      emitter.fire(new PostCorantReadyEvent(arguments));
+
+    } catch (Throwable e) {
+      log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
+      throw new CorantRuntimeException(e);
+    } finally {
+      logInfo("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
+          Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
+          TimeZone.getDefault().getID());
+      logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
+          Launchs.getMaxMemoryMb(), boostLine());
+    }
   }
 
   void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
-    stopWatch.start("Starting " + APP_NAME + ", the pre-start SPI processing is completed");
-    if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
-      LoggerFactory.disableAccessWarnings();
+    try {
+      stopWatch.start("Starting " + APP_NAME + ", the pre-start SPI processing is completed");
+      if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
+        LoggerFactory.disableAccessWarnings();
+      }
+      invokeBootHandlerBeforeStart();
+      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+      registerMBean();
+    } catch (Throwable e) {
+      log(Level.SEVERE, e, "Start %s occurred error!", APP_NAME);
+      throw new CorantRuntimeException(e);
     }
-    invokeBootHandlerBeforeStart();
-    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
-  }
-
-  void doOnReady() {
-    LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-    emitter.fire(new PostCorantReadyEvent(arguments));
   }
 
   synchronized void initializeContainer(Consumer<SeContainerInitializer> preInitializer,
       StopWatch stopWatch) {
-    stopWatch.start("Initialization of the CDI container is completed");
-    // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString());
-    SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
-    initializer.setClassLoader(classLoader);
-    initializer.addExtensions(new CorantExtension());
-    if (beanClasses != null) {
-      initializer.addBeanClasses(beanClasses);
+    try {
+      stopWatch.start("Initialization of the CDI container is completed");
+      // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString());
+      SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
+      initializer.setClassLoader(classLoader);
+      initializer.addExtensions(new CorantExtension());
+      if (beanClasses != null) {
+        initializer.addBeanClasses(beanClasses);
+      }
+      if (preInitializer != null) {
+        preInitializer.accept(initializer);
+      }
+      container = initializer.initialize();
+      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+    } catch (Throwable e) {
+      log(Level.SEVERE, null, "Initialize %s container occurred error!", APP_NAME);
+      throw new CorantRuntimeException(e);
     }
-    if (preInitializer != null) {
-      preInitializer.accept(initializer);
-    }
-    container = initializer.initialize();
-    stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
   }
 
   boolean registerMBean() {

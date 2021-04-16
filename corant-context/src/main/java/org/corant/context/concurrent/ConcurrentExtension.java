@@ -135,9 +135,7 @@ public class ConcurrentExtension implements Extension {
     }
     scheduledExecutorConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ManagedScheduledExecutorConfig.class).values());
-    if (scheduledExecutorConfigs.isEmpty()) {
-      logger.info(() -> "Can not find any managed scheduled executor configurations.");
-    } else {
+    if (!scheduledExecutorConfigs.isEmpty()) {
       logger.fine(() -> String.format("Find %s managed scheduled executor configs named [%s].",
           scheduledExecutorConfigs.size(),
           String.join(", ", scheduledExecutorConfigs.getAllDisplayNames())));

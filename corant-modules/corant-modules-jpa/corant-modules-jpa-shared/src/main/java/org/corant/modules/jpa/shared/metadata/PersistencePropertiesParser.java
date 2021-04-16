@@ -16,9 +16,11 @@ package org.corant.modules.jpa.shared.metadata;
 import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.net.MalformedURLException;
@@ -115,17 +117,23 @@ public class PersistencePropertiesParser {
             .forEach(puimd::addMappingFileName);
       }
     });
-    if (isNotBlank(puimd.getPersistenceProviderClassName())) {
-      if (isNotEmpty(puimd.getManagedClassNames())) {
-        puimd.resolvePersistenceProvider();
-        doParseProperties(config, proPrefix, proCfgNmes, puimd);
-        shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
-            puimd.getPersistenceUnitName());
-      } else {
-        logger.warning(
-            () -> String.format("Can not find any managed classes for persistence unit %s.",
-                puimd.getPersistenceUnitName()));
+
+    if (isEmpty(puimd.getManagedClassNames()) && isEmpty(puimd.getJarFileUrls())) {
+      if (isNotEmpty(cfgs)) {
+        logger.warning(() -> String.format(
+            "Can not find any managed classes or jars for persistence unit %s, the persistence unit will be ignored!",
+            puimd.getPersistenceUnitName()));
       }
+    } else {
+      if (isBlank(puimd.getPersistenceProviderClassName())) {
+        puimd.resolvePersistenceProvider();
+        logger.warning(() -> String.format(
+            "Can't find configured persistence provider class for persistence unit %s, use the runtime persistence provider %s.",
+            puimd.getPersistenceUnitName(), puimd.getPersistenceProviderClassName()));
+      }
+      doParseProperties(config, proPrefix, proCfgNmes, puimd);
+      shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
+          puimd.getPersistenceUnitName());
     }
   }
 

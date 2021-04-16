@@ -62,7 +62,7 @@
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>3.4.5</version.hikariCP>
 		<version.icu4j>67.1</version.icu4j>
-		<version.jackson>2.12.2</version.jackson>
+		<version.jackson>2.12.3</version.jackson>
 		<version.jandex>2.2.3.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javassist>3.27.0.GA</version.javassist>
@@ -146,7 +146,7 @@
 		<version.swagger>2.0.8</version.swagger>
 
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.2.5.Final</version.undertow>
+		<version.undertow>2.2.7.Final</version.undertow>
 		<version.vertx>3.9.3</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>

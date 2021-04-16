@@ -13,14 +13,10 @@
  */
 package org.corant.config.cdi;
 
-import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
-import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -37,15 +33,9 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.config.CorantConfig;
 import org.corant.config.CorantConfigProviderResolver;
-import org.corant.config.CorantConfigSource;
-import org.corant.config.CorantConfigSources;
-import org.corant.config.Desensitizer;
 import org.corant.config.declarative.DeclarativeConfigKey;
 import org.corant.shared.normal.Priorities;
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
@@ -122,7 +112,6 @@ public class ConfigExtension20 implements Extension {
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     try {
-      validateStatic();
       validateInject();
     } catch (Exception e) {
       logger.log(Level.SEVERE, e, () -> "Process configurations occurred error!");
@@ -134,33 +123,4 @@ public class ConfigExtension20 implements Extension {
     // TODO FIXME validate config
   }
 
-  private void validateStatic() {
-    Config mpconfig = ConfigProvider.getConfig();
-    if (mpconfig instanceof CorantConfig) {
-      CorantConfig config = (CorantConfig) mpconfig;
-      CorantConfigSources sources = config.getCorantConfigSources();
-      if (isNotEmpty(sources.getProfiles())) {
-        logger.fine(() -> String.format("The activated config profile is %s.",
-            String.join(", ", sources.getProfiles())));
-      }
-      logger.fine(() -> String.format("The config property expressions is %s.",
-          sources.isExpressionsEnabled() ? "enabled" : "disabled"));
-      logger.fine(() -> String.format("Resolved %s config sources:%n%n{%n  %s%n}%n%n",
-          sources.getSources().size(), sources.getSources().stream()
-              .map(CorantConfigSource::getName).collect(Collectors.joining("\n  "))));
-
-      SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);
-      for (String name : config.getPropertyNames()) {
-        sortMap.put(name, Desensitizer.desensitize(name, defaultString(sources.getValue(name))));
-      }
-
-      logger.fine(() -> {
-        StringBuilder sb = new StringBuilder("Resolved config properties:\n\n{\n");
-        sortMap.forEach((k, v) -> sb.append("  ").append(k).append(" : ").append(v).append("\n"));
-        sb.append("}\n\n");
-        return sb.toString();
-      });
-      sortMap.clear();
-    }
-  }
 }

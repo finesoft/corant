@@ -17,10 +17,11 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
 import org.corant.context.qualifier.Qualifiers;
@@ -118,9 +119,11 @@ public class JPAConfig {
     return metaDatas;
   }
 
-  public static Optional<? extends PersistenceProvider> resolvePersistenceProvider() {
+  public static List<PersistenceProvider> getRuntimePersistenceProvider() {
     return PersistenceProviderResolverHolder.getPersistenceProviderResolver()
-        .getPersistenceProviders().stream().findFirst();
+        .getPersistenceProviders().stream()
+        .filter(p -> !p.getClass().getCanonicalName().startsWith("org.corant"))
+        .collect(Collectors.toList());
   }
 
   private static Set<PersistenceUnitInfoMetaData> generateFromConfig(Config config) {

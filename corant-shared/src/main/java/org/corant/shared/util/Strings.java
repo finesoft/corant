@@ -102,12 +102,16 @@ public class Strings {
   private Strings() {}
 
   /**
-   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
+   * Returns a grouping given elements of string, according to a classification function and filter
+   * function, and returning the results in a {@code Map}.
    *
-   * @param iterable
-   * @param filter
-   * @param func
-   * @return group
+   * <pre>
+   * ["prefix.1","prefix.2","prefix.3","unmatch.4"] = {key="prefix",value=["1","2","3"]}
+   * </pre>
+   *
+   * @param iterable the string elements for grouping
+   * @param filter filter function use for select the elements for grouping
+   * @param func the classification function
    */
   public static Map<String, List<String>> aggregate(Iterable<String> iterable,
       Predicate<String> filter, Function<String, String[]> func) {
@@ -123,18 +127,27 @@ public class Strings {
   }
 
   /**
+   * Returns either a string representation of the given object, or if the given object is
+   * {@code null}, the value of {@link #EMPTY}.
+   *
    * <pre>
    * Strings.asDefaultString(null)  = ""
    * Strings.asDefaultString("")    = ""
    * Strings.asDefaultString("abc") = "abc"
    * Strings.asDefaultString(NonNull) = NonNull.toString()
    * </pre>
+   *
+   * @param obj an object
    */
   public static String asDefaultString(final Object obj) {
-    return obj != null ? obj.toString() : EMPTY;
+    return obj != null ? defaultString(obj.toString()) : EMPTY;
   }
 
   /**
+   * Returns true if and only if the given parameters are not null and the given {@code str}
+   * contains the given specified string {@code searchStr}. The difference with
+   * {@link String#contains(CharSequence)}, this method is null safe.
+   *
    * <pre>
    * Strings.contains(null, *)    = false
    * Strings.contains("", *)      = false
@@ -142,15 +155,17 @@ public class Strings {
    * Strings.contains("abc", 'z') = false
    * </pre>
    *
-   * @param str
-   * @param searchStr
-   * @return contains
+   * @param str the string being searched
+   * @param searchStr the string to search for
    */
   public static boolean contains(String str, String searchStr) {
     return str != null && searchStr != null && str.contains(searchStr);
   }
 
   /**
+   * Returns true if and only if the given parameters are not null and the given {@code str}
+   * contains any char from the given specified string {@code searchStr}. This method is null safe.
+   *
    * <pre>
    * Strings.containsAnyChars(null, *)      = false
    * Strings.containsAnyChars("", *)        = false
@@ -159,9 +174,8 @@ public class Strings {
    * Strings.containsAnyChars("abc", "z")   = false
    * </pre>
    *
-   * @param str
-   * @param searchStr
-   * @return containsAnyChars
+   * @param str the string being searched
+   * @param searchStr the string that contains chars to search for
    */
   public static boolean containsAnyChars(String str, String searchStr) {
     return str != null && searchStr != null
@@ -169,6 +183,9 @@ public class Strings {
   }
 
   /**
+   * Returns either the given {@code str}, or if the given {@code str} is whitespace, empty ("") or
+   * {@code null}, the default value provided by the given {@code supplier}.
+   *
    * <pre>
    * Strings.defaultBlank(null, ()->"DFLT")  = "DFLT"
    * Strings.defaultBlank("", ()->"DFLT")    = "DFLT"
@@ -177,15 +194,17 @@ public class Strings {
    * Strings.defaultBlank("", null)      = null
    * </pre>
    *
-   * @param str
-   * @param supplier
-   * @return defaultBlank
+   * @param str the string
+   * @param supplier the supplier use to provide the default value
    */
   public static <T extends CharSequence> T defaultBlank(final T str, final Supplier<T> supplier) {
     return isBlank(str) ? supplier == null ? null : supplier.get() : str;
   }
 
   /**
+   * Returns either the given {@code str}, or if the given {@code str} is whitespace, empty ("") or
+   * {@code null}, the default value of the given {@code defaultStr}.
+   *
    * <pre>
    * Strings.defaultBlank(null, "DFLT")  = "DFLT"
    * Strings.defaultBlank("", "DFLT")    = "DFLT"
@@ -194,41 +213,69 @@ public class Strings {
    * Strings.defaultBlank("", null)      = null
    * </pre>
    *
-   * @param str
-   * @param dfltStr
-   * @return defaultBlank
+   * @param str the string
+   * @param dfltStr the default string
    */
   public static <T extends CharSequence> T defaultBlank(final T str, final T dfltStr) {
     return isBlank(str) ? dfltStr : str;
   }
 
   /**
+   * Returns either the given {@code str}, or if {@code null}, the {@link #EMPTY}. The difference
+   * with {@link #defaultBlank(CharSequence, CharSequence)}, this method doesn't consider the
+   * whitespace.
+   *
    * <pre>
    * Strings.defaultString(null)  = ""
    * Strings.defaultString("")    = ""
    * Strings.defaultString("abc") = "abc"
    * </pre>
+   *
+   * @param str the string
    */
   public static String defaultString(final String str) {
     return defaultString(str, EMPTY);
   }
 
   /**
+   * Returns either the given {@code str}, or if {@code null}, the default value of the given
+   * {@code defaultStr}. The difference with {@link #defaultBlank(CharSequence, CharSequence)}, this
+   * method doesn't consider the whitespace.
+   *
    * <pre>
    * Strings.defaultString(null, "DFLT")  = "DFLT"
    * Strings.defaultString("", "DFLT")    = ""
    * Strings.defaultString("abc", "DFLT") = "abc"
    * </pre>
    *
-   * @param str
-   * @param dfltStr
-   * @return defaultString
+   * @param str the string
+   * @param dfltStr the default string
    */
   public static String defaultString(final String str, final String dfltStr) {
     return str == null ? dfltStr : str;
   }
 
   /**
+   * Returns either the stripped given {@code str}, or if {@code null}, the {@link #EMPTY}
+   *
+   * <pre>
+   * Strings.defaultStrip(null)          = ""
+   * Strings.defaultStrip("")            = ""
+   * Strings.defaultStrip("     ")       = ""
+   * Strings.defaultStrip("abc")         = "abc"
+   * Strings.defaultStrip("    abc    ") = "abc"
+   * </pre>
+   *
+   * @param str the string for stripping
+   * @see String#strip()
+   */
+  public static String defaultStrip(String str) {
+    return str == null ? EMPTY : str.strip();
+  }
+
+  /**
+   * Returns either the trimmed given {@code str}, or if {@code null}, the {@link #EMPTY}
+   *
    * <pre>
    * Strings.defaultTrim(null)          = ""
    * Strings.defaultTrim("")            = ""
@@ -237,8 +284,8 @@ public class Strings {
    * Strings.defaultTrim("    abc    ") = "abc"
    * </pre>
    *
-   * @param str
-   * @return defaultTrim
+   * @param str the string for trimming
+   * @see String#trim()
    */
   public static String defaultTrim(String str) {
     return str == null ? EMPTY : str.trim();

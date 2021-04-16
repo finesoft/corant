@@ -16,7 +16,7 @@ package org.corant.modules.query.shared.mapping;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public class Query implements Serializable {
     setVersion(version);
     setParamMappings(paramMappings);
     setProperties(properties);
-    setMappingFilePath(defaultTrim(mappingFilePath));
+    setMappingFilePath(defaultStrip(mappingFilePath));
     setMacroScript(macroScript);
   }
 

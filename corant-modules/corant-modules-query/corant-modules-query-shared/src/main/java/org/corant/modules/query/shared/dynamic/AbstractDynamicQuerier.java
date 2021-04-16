@@ -142,7 +142,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public int resolveOffset() {
     if (offset == null) {
-      offset = max(defaultObject(getQueryParameter().getOffset(), 0), 0);
+      offset = max(getQueryParameter().getOffset(), 0);
     }
     return offset;
   }

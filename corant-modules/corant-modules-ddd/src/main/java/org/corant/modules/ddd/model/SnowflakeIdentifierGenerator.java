@@ -17,6 +17,8 @@ import static org.corant.context.Instances.findAnyway;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
@@ -30,22 +32,31 @@ import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
  * @author bingo 下午7:59:56
  *
  */
-public class GlobalSnowflakeIdGenerator {
+@ApplicationScoped
+public class SnowflakeIdentifierGenerator {
 
   public static final String IG_SF_WK_IP = "corant.identifier.generator.snowflake.worker-ip";
   public static final String IG_SF_WK_ID = "corant.identifier.generator.snowflake.worker-id";
   public static final String IG_SF_DC_ID = "corant.identifier.generator.snowflake.datacenter-id";
   public static final String IG_SF_DL_TM = "corant.identifier.generator.snowflake.delayed-timing";
-  static final TimeService specTimeGenerator = findAnyway(TimeService.class)
-      .orElse((o, s) -> s ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis());
-  static final GeneralSnowflakeUUIDGenerator generator;
-  static Logger logger = Logger.getLogger(GlobalSnowflakeIdGenerator.class.getName());
-  static {
+  static Logger logger = Logger.getLogger(SnowflakeIdentifierGenerator.class.getName());
+
+  TimeService specTimeGenerator;
+  GeneralSnowflakeUUIDGenerator generator;
+
+  public long generate(Object object) {
+    return generator
+        .generate(() -> specTimeGenerator.get(object, generator.getUnit() == ChronoUnit.SECONDS));
+  }
+
+  @PostConstruct
+  synchronized void initialize() {
+    specTimeGenerator = findAnyway(TimeService.class)
+        .orElse((o, s) -> s ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis());
     int dataCenterId = Configs.getValue(IG_SF_DC_ID, Integer.class, -1);
     int workerId = Configs.getValue(IG_SF_WK_ID, Integer.class, -1);
     String ip = Configs.getValue(IG_SF_WK_IP, String.class);
     long delayedTiming = Configs.getValue(IG_SF_DL_TM, Long.class, 16000L);
-
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
         generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId, delayedTiming);
@@ -59,11 +70,6 @@ public class GlobalSnowflakeIdGenerator {
     }
     logger.info(
         () -> String.format("Create global identifier generator %s.", generator.description()));
-  }
-
-  public static long generate(Object object) {
-    return generator
-        .generate(() -> specTimeGenerator.get(object, generator.getUnit() == ChronoUnit.SECONDS));
   }
 
   public interface TimeService extends Sortable {

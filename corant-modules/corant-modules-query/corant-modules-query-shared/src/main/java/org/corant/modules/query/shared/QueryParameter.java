@@ -73,10 +73,11 @@ public interface QueryParameter extends Serializable {
   }
 
   /**
-   * Used for query result handling or specific database query instructions, means skips the offset
-   * rows before beginning to return the rows. Default return 0.
+   * Returns non null and greater and equals 0 offset. Used for query result handling or specific
+   * database query instructions, means skips the offset rows before beginning to return the rows.
+   * Default return 0.
    *
-   * @return getOffset
+   * @return the offset
    */
   default Integer getOffset() {
     return 0;
@@ -84,6 +85,10 @@ public interface QueryParameter extends Serializable {
 
   /**
    * corant-modules-query-shared
+   *
+   * <p>
+   * The default query parameter use for internal query handing. All pass in query parameter will be
+   * convert to this.
    *
    * @author bingo 下午4:09:56
    *
@@ -102,18 +107,14 @@ public interface QueryParameter extends Serializable {
     public DefaultQueryParameter(QueryParameter other) {
       if (other != null) {
         criteria = other.getCriteria();
-        limit = other.getLimit();
-        offset = other.getOffset();
+        limit(other.getLimit());
+        offset(other.getOffset());
         if (other.getContext() != null) {
           context.putAll(other.getContext());
         }
       }
     }
 
-    /**
-     *
-     * @param context the context to set
-     */
     public DefaultQueryParameter context(Map<String, Object> context) {
       if (context != null) {
         this.context = context;
@@ -121,75 +122,43 @@ public interface QueryParameter extends Serializable {
       return this;
     }
 
-    /**
-     *
-     * @param objects the context to set
-     */
     public DefaultQueryParameter context(Object... objects) {
       context = mapOf(objects);
       return this;
     }
 
-    /**
-     *
-     * @param criteria the criteria to set
-     */
     public DefaultQueryParameter criteria(Object criteria) {
       this.criteria = criteria;
       return this;
     }
 
-    /**
-     *
-     * @return the context
-     */
     @Override
     public Map<String, Object> getContext() {
       return context;
     }
 
-    /**
-     *
-     * @return the criteria
-     */
     @Override
     public Object getCriteria() {
       return criteria;
     }
 
-    /**
-     *
-     * @return the limit
-     */
     @Override
     public Integer getLimit() {
       return limit;
     }
 
-    /**
-     *
-     * @return the offset
-     */
     @Override
     public Integer getOffset() {
       return offset;
     }
 
-    /**
-     *
-     * @param limit the limit to set
-     */
     public DefaultQueryParameter limit(Integer limit) {
       this.limit = limit;
       return this;
     }
 
-    /**
-     *
-     * @param offset the offset to set
-     */
     public DefaultQueryParameter offset(Integer offset) {
-      this.offset = max(offset, 0);
+      this.offset = offset == null ? 0 : max(offset, 0);
       return this;
     }
 
@@ -251,13 +220,19 @@ public interface QueryParameter extends Serializable {
     }
 
     public GenericQueryParameter<T> setOffset(Integer offset) {
-      this.offset = offset;
+      this.offset = offset == null ? 0 : max(offset, 0);
       return this;
     }
   }
 
   /**
    * corant-modules-query-shared
+   *
+   * <p>
+   * The query parameter object used for internal streaming query alone. In addition to the query
+   * interface parameters, some parameters such as termination and retry are added. Since many
+   * underlying streaming queries use batch queries, this class provides Condition adjustment
+   * mechanism for batch query.
    *
    * @author bingo 下午3:14:48
    *

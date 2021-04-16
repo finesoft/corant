@@ -15,7 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.Locale;
 import java.util.Optional;
@@ -71,7 +71,7 @@ public interface PathMatcher extends Predicate<String> {
    */
   static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
     PathMatcher matcher = null;
-    String path = defaultTrim(pathExp);
+    String path = defaultStrip(pathExp);
     if (path.startsWith(SYNTAX_REGEX)) {
       matcher = new RegexMatcher(ignoreCase, shouldNotBlank(path.substring(SYNTAX_REGEX_LEN)));
     } else {
@@ -161,7 +161,6 @@ public interface PathMatcher extends Predicate<String> {
      * @param express
      */
     protected CaseInsensitiveMatcher(String express) {
-      super();
       this.express = express;
     }
 
@@ -202,7 +201,6 @@ public interface PathMatcher extends Predicate<String> {
      * @param globExpress
      */
     protected GlobMatcher(boolean isDos, boolean ignoreCase, String globExpress) {
-      super();
       this.isDos = isDos;
       this.ignoreCase = ignoreCase;
       this.globExpress = globExpress;
@@ -630,7 +628,6 @@ public interface PathMatcher extends Predicate<String> {
      * @param express
      */
     protected RegexMatcher(boolean ignoreCase, String express) {
-      super();
       this.ignoreCase = ignoreCase;
       this.express = shouldNotNull(express);
       pattern = Pattern.compile(express, ignoreCase ? Pattern.CASE_INSENSITIVE : 0);

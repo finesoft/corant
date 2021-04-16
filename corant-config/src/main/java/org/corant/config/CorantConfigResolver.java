@@ -19,7 +19,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.aggregate;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.escapedPattern;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.left;
@@ -99,7 +99,7 @@ public class CorantConfigResolver {
     boolean puc = false;
     boolean cuc = false;
     boolean suc = false;
-    for (char i : defaultTrim(substring).toCharArray()) {
+    for (char i : defaultStrip(substring).toCharArray()) {
       cuc = i >= 'A' && i <= 'Z';
       if (cuc && !puc || puc && suc && !cuc) {
         sb.append('-');
@@ -139,7 +139,7 @@ public class CorantConfigResolver {
   }
 
   public static String regulateKeyPrefix(String prefix) {
-    String rs = defaultTrim(prefix);
+    String rs = defaultStrip(prefix);
     if (rs.length() == 0) {
       return rs;
     }
@@ -147,15 +147,15 @@ public class CorantConfigResolver {
   }
 
   public static String removeSplitor(final String str) {
-    String rs = defaultTrim(str);
+    String rs = defaultStrip(str);
     if (rs.length() == 0) {
       return rs;
     }
     while (rs.endsWith(KEY_DELIMITER) && !rs.endsWith(KEY_DELIMITER_ESCAPES)) {
-      rs = defaultTrim(rs.substring(0, rs.length() - KEY_DELIMITER_LEN));
+      rs = defaultStrip(rs.substring(0, rs.length() - KEY_DELIMITER_LEN));
     }
     while (rs.startsWith(KEY_DELIMITER)) {
-      rs = defaultTrim(rs.substring(KEY_DELIMITER_LEN));
+      rs = defaultStrip(rs.substring(KEY_DELIMITER_LEN));
     }
     return rs;
   }

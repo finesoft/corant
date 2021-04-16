@@ -15,8 +15,6 @@ package org.corant.config.source;
 
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
-import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -73,7 +71,7 @@ public class ConfigSourceLoader {
   static Optional<AbstractCorantConfigSource> load(Predicate<URL> filter, URLResource resource,
       int ordinal) {
     if (resource != null && filter.test(resource.getURL())) {
-      String location = defaultTrim(resource.getURL().getPath());
+      String location = resource.getURL().getPath();
       try (InputStream is = resource.openStream()) {
         if (location.endsWith(".properties")) {
           return Optional.of(new PropertiesConfigSource(location, ordinal, is));
@@ -92,7 +90,7 @@ public class ConfigSourceLoader {
   }
 
   static AbstractCorantConfigSource load(URL resourceUrl, int ordinal) {
-    String urlstr = defaultString(resourceUrl.getPath()).toLowerCase(Locale.ROOT);
+    String urlstr = resourceUrl.getPath().toLowerCase(Locale.ROOT);
     if (urlstr.endsWith(".properties")) {
       return new PropertiesConfigSource(resourceUrl, ordinal);
     } else if (urlstr.endsWith(".yml") || urlstr.endsWith(".yaml")) {

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.bundle;
 
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.right;
 import java.io.IOException;
@@ -90,7 +90,7 @@ public class PropertyResourceBundle extends ResourceBundle {
   }
 
   protected static Locale detectLocaleByName(String name) {
-    String useName = defaultTrim(FileUtils.getFileBaseName(name));
+    String useName = defaultStrip(FileUtils.getFileBaseName(name));
     if (isNotBlank(useName) && useName.contains(LOCALE_SPT)) {
       return LocaleUtils.langToLocale(right(useName, 5), LOCALE_SPT_CHAR);
     } else {

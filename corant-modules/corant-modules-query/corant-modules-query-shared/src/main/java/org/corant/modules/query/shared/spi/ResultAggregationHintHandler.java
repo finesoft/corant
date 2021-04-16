@@ -17,7 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -144,7 +144,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     if (isEmpty(aggFieldNames)) {
       return Pair.empty();
     } else {
-      String names = defaultTrim(aggFieldNames.get(0).getValue());
+      String names = defaultStrip(aggFieldNames.get(0).getValue());
       boolean exclude = !names.isEmpty() && names.charAt(0) == '!';
       if (exclude) {
         names = names.substring(1);

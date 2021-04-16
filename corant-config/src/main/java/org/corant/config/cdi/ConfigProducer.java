@@ -17,7 +17,7 @@ import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATOR;
 import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isBlank;
 import java.io.Serializable;
 import java.lang.reflect.Member;
@@ -59,7 +59,7 @@ public class ConfigProducer implements Serializable {
     CorantConfig config = forceCast(ConfigProvider.getConfig());
     ConfigProperty property =
         shouldNotNull(injectionPoint.getAnnotated().getAnnotation(ConfigProperty.class));
-    String key = defaultTrim(property.name());// FIXME trim ??
+    String key = defaultStrip(property.name());// FIXME trim ??
     if (isBlank(key)) {
       Bean<?> bean = injectionPoint.getBean();
       Member member = injectionPoint.getMember();

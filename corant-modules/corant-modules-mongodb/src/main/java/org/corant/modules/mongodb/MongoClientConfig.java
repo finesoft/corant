@@ -21,7 +21,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.defaultTrim;
+import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -407,7 +407,7 @@ public class MongoClientConfig implements NamedObject {
       clientName = client.getName();
       this.databaseName = isBlank(databaseName)
           ? new MongoClientURI(defaultObject(client.getUri(), DEFAULT_URI)).getDatabase()
-          : defaultTrim(databaseName);
+          : defaultStrip(databaseName);
       name = isBlank(clientName) ? this.databaseName
           : clientName + Names.NAME_SPACE_SEPARATOR + this.databaseName;
     }

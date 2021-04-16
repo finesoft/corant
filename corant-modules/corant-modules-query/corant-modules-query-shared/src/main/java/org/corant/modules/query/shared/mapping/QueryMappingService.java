@@ -152,7 +152,7 @@ public class QueryMappingService {
       queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
     }
     initialized = true;
-    logger.info(() -> String.format("Find %s queries from mapping file path %s.", queries.size(),
+    logger.info(() -> String.format("Found %s queries from mapping file path %s.", queries.size(),
         mappingFilePaths));
   }
 

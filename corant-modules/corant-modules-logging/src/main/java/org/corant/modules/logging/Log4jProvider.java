@@ -15,6 +15,7 @@ package org.corant.modules.logging;
 
 import org.corant.Corant;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.shared.normal.Priorities;
 
 /**
  * corant-modules-logging
@@ -23,6 +24,11 @@ import org.corant.kernel.spi.CorantBootHandler;
  *
  */
 public class Log4jProvider implements CorantBootHandler {
+
+  @Override
+  public int getPriority() {
+    return Priorities.FRAMEWORK_HIGHER;
+  }
 
   @Override
   public void handleAfterStarted(Corant corant, String... args) {}

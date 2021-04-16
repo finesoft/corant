@@ -111,7 +111,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {
-      logger.fine(() -> String.format("Find %s elastic clusters named [%s]", configManager.size(),
+      logger.fine(() -> String.format("Found %s elastic clusters named [%s]", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }

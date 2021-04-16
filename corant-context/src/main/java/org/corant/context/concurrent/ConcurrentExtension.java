@@ -130,13 +130,13 @@ public class ConcurrentExtension implements Extension {
     if (executorConfigs.isEmpty()) {
       logger.info(() -> "Use default managed executor config.");
     } else {
-      logger.fine(() -> String.format("Find %s managed executor configs named [%s].",
+      logger.fine(() -> String.format("Found %s managed executor configs named [%s].",
           executorConfigs.size(), String.join(", ", executorConfigs.getAllDisplayNames())));
     }
     scheduledExecutorConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ManagedScheduledExecutorConfig.class).values());
     if (!scheduledExecutorConfigs.isEmpty()) {
-      logger.fine(() -> String.format("Find %s managed scheduled executor configs named [%s].",
+      logger.fine(() -> String.format("Found %s managed scheduled executor configs named [%s].",
           scheduledExecutorConfigs.size(),
           String.join(", ", scheduledExecutorConfigs.getAllDisplayNames())));
     }
@@ -145,7 +145,7 @@ public class ConcurrentExtension implements Extension {
     if (contextServiceConfigs.isEmpty()) {
       logger.info(() -> "Use default context service config.");
     } else {
-      logger.fine(() -> String.format("Find %s context service configs named [%s].",
+      logger.fine(() -> String.format("Found %s context service configs named [%s].",
           contextServiceConfigs.size(),
           String.join(", ", contextServiceConfigs.getAllDisplayNames())));
     }

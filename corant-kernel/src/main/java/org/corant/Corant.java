@@ -15,6 +15,7 @@ package org.corant;
 
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Objects.areEqual;
@@ -498,12 +499,12 @@ public class Corant implements AutoCloseable {
     log(Level.INFO, null, msgOrFmt, arguments);
   }
 
-  private static synchronized void setMe(Corant me) {
-    if (me != null) {
+  private static synchronized void setMe(Corant corant) {
+    if (corant != null) {
       shouldBeTrue(Corant.me == null, "We already have an instance of %s. Don't repeat it!",
           APP_NAME);
     }
-    Corant.me = me;
+    Corant.me = corant;
   }
 
   public Corant accept(Consumer<Corant> consumer) {
@@ -514,10 +515,7 @@ public class Corant implements AutoCloseable {
   }
 
   public <R> R apply(Function<Corant, R> function) {
-    if (function != null) {
-      return function.apply(this);
-    }
-    return null;
+    return shouldNotNull(function).apply(this);
   }
 
   /**
@@ -567,9 +565,9 @@ public class Corant implements AutoCloseable {
     }
     final StopWatch stopWatch = new StopWatch(APP_NAME);
     Thread.currentThread().setContextClassLoader(classLoader);
-    doBeforeStart(classLoader, stopWatch);
+    doBeforeStart(stopWatch);
     initializeContainer(preInitializer, stopWatch);
-    doAfterStarted(classLoader, stopWatch);
+    doAfterStarted(stopWatch);
   }
 
   /**
@@ -588,51 +586,60 @@ public class Corant implements AutoCloseable {
     }
   }
 
-  void doAfterStarted(ClassLoader classLoader, StopWatch stopWatch) {
+  void doAfterStarted(StopWatch stopWatch) {
     try {
       // emit post container ready events
-      stopWatch.start("All modules are initialized");
+      stopWatch.start();
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
       emitter.fire(new PostContainerReadyEvent(arguments));
-      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+      stopWatch
+          .stop(t -> logInfo("All modules have been initialized, takes %ss.", t.getTimeSeconds()));
 
       // handle post started spi
-      stopWatch.start("The post-started SPI processing is completed");
+      stopWatch.start();
       invokeBootHandlerAfterStarted();
-      stopWatch.stop(tk -> logInfo("%s, takes %ss.", tk.getName(), tk.getTimeSeconds()))
-          .destroy(sw -> {
-            double tt = sw.getTotalTimeSeconds();
-            if (tt > 8) {
-              logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
-                  APP_NAME, tt);
-            } else {
-              logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
-            }
-          });
+      stopWatch.stop((tk, sw) -> {
+        logInfo("The post-started spi processing has been completed, takes %ss.",
+            tk.getTimeSeconds());
+        double tt = sw.getTotalTimeSeconds();
+        if (tt > 8000) {
+          logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
+              APP_NAME, tt);
+        } else {
+          logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
+        }
+        logInfo("Application info: process-id: %s, java-version: %s, locale: %s, timezone: %s.",
+            Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
+            TimeZone.getDefault().getID());
+        logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(),
+            Launchs.getTotalMemoryMb(), Launchs.getMaxMemoryMb(), boostLine("-"));
+      });
 
       // emit post corant ready events
+      stopWatch.start();
       emitter.fire(new PostCorantReadyEvent(arguments));
+      stopWatch.destroy(sw -> logInfo("All preparations have been completed, takes %ss.%s",
+          sw.getLastTaskInfo().getTimeSeconds(), boostLine(".")));
 
     } catch (Throwable e) {
       log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
       throw new CorantRuntimeException(e);
     } finally {
-      logInfo("Default setting: process id: %s, java version: %s, locale: %s, timezone: %s.",
-          Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
-          TimeZone.getDefault().getID());
-      logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(), Launchs.getTotalMemoryMb(),
-          Launchs.getMaxMemoryMb(), boostLine());
+
     }
   }
 
-  void doBeforeStart(ClassLoader classLoader, StopWatch stopWatch) {
+  void doBeforeStart(StopWatch stopWatch) {
     try {
-      stopWatch.start("Starting " + APP_NAME + ", the pre-start SPI processing is completed");
+      stopWatch.start();
       if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
         LoggerFactory.disableAccessWarnings();
       }
       invokeBootHandlerBeforeStart();
-      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+      stopWatch.stop(t -> {
+        logInfo("Starting the %s ...", APP_NAME);
+        logInfo("The pre-start spi processing has been completed, takes %ss.", t.getTimeSeconds());
+      });
       registerMBean();
     } catch (Throwable e) {
       log(Level.SEVERE, e, "Start %s occurred error!", APP_NAME);
@@ -643,7 +650,7 @@ public class Corant implements AutoCloseable {
   synchronized void initializeContainer(Consumer<SeContainerInitializer> preInitializer,
       StopWatch stopWatch) {
     try {
-      stopWatch.start("Initialization of the CDI container is completed");
+      stopWatch.start();
       // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString());
       SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
       initializer.setClassLoader(classLoader);
@@ -655,9 +662,10 @@ public class Corant implements AutoCloseable {
         preInitializer.accept(initializer);
       }
       container = initializer.initialize();
-      stopWatch.stop(t -> logInfo("%s, takes %ss.", t.getName(), t.getTimeSeconds()));
+      stopWatch
+          .stop(t -> logInfo("The container has been initialized, takes %ss.", t.getTimeSeconds()));
     } catch (Throwable e) {
-      log(Level.SEVERE, null, "Initialize %s container occurred error!", APP_NAME);
+      log(Level.SEVERE, null, "Initialize the %s container occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
@@ -681,9 +689,9 @@ public class Corant implements AutoCloseable {
 
   }
 
-  private String boostLine() {
+  private String boostLine(String separator) {
     if (!hasCommandArgument(DISABLE_BOOST_LINE_CMD)) {
-      return "\n".concat("-".repeat(100));
+      return "\n".concat(separator.repeat(100));
     }
     return "";
   }
@@ -733,7 +741,7 @@ public class Corant implements AutoCloseable {
 
     void onBeforeShutdown(@Observes @Priority(Integer.MAX_VALUE) BeforeShutdown event) {
       invokeBootHandlerAfterStopped();
-      logInfo("Stopped %s at %s.\n", APP_NAME, Instant.now());
+      logInfo("Stopped the %s at %s.%s\n", APP_NAME, Instant.now(), boostLine("-"));
     }
   }
 }

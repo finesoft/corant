@@ -117,14 +117,14 @@ public class CorantConfigBuilder implements ConfigBuilder {
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
     logger.fine(() -> String.format(
-        "Find config converter, name:[%s], target type:[%s], class loader:[%s].", cls.getName(),
+        "Found config converter, name:[%s], target type:[%s], class loader:[%s].", cls.getName(),
         type.getName(), classLoader));
   }
 
   void addSource(ConfigSource source) {
     sources.add(shouldNotNull(source, "Config source can not null."));
     logger.fine(() -> String.format(
-        "Find config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
+        "Found config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
         classLoader.getClass().getName(), source.getClass().getName()));
   }
@@ -136,9 +136,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
     }
     logger.fine(() -> String.format("The config property expressions is %s.",
         sources.isExpressionsEnabled() ? "enabled" : "disabled"));
-    logger.fine(() -> String.format("Resolved %s config sources:%n%n{%n  %s%n}%n%n",
+    logger.fine(() -> String.format("Found %s config sources:%n%n[%n  %s%n]%n%n",
         sources.getSources().size(), sources.getSources().stream().map(CorantConfigSource::getName)
-            .collect(Collectors.joining("\n  "))));
+            .collect(Collectors.joining(",\n  "))));
 
     Exception thrown = null;
     SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);

@@ -66,7 +66,7 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
    * @param args the application startup arguments, the implementer can perform corresponding
    *        operations based on the arguments.
    */
-  void handleAfterStarted(Corant corant, String... args);
+  default void handleAfterStarted(Corant corant, String... args) {}
 
   /**
    * Called after the container was stopped, so operations related to the CDI context should not be

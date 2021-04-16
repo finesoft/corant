@@ -83,7 +83,7 @@ public class JarLauncher {
       extract();
       Class<?> mainClass = buildClassLoader().loadClass(mainClsName);
       System.setProperty(APP_NME_KEY, appName);
-      log(true, "Find main class %s by corant class loader, the %s is starting...", mainClass,
+      log(true, "Found main class %s by corant class loader, the %s is starting...", mainClass,
           appName);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchMethodException

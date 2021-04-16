@@ -68,7 +68,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.fine(() -> String.format("Find %s data sources named [%s].", configManager.size(),
+      logger.fine(() -> String.format("Found %s data sources named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }

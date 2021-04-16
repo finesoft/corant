@@ -79,7 +79,7 @@ public class ConfigExtension implements Extension {
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperty.class)) {
       logger.fine(
-          () -> String.format("Find config property inject point %s.", pip.getInjectionPoint()));
+          () -> String.format("Found config property inject point %s.", pip.getInjectionPoint()));
       injectionPoints.add(pip.getInjectionPoint());
     }
   }

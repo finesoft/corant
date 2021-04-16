@@ -111,7 +111,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
-      logger.fine(() -> String.format("Find %s artemis brokers named [%s].", configManager.size(),
+      logger.fine(() -> String.format("Found %s artemis brokers named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }

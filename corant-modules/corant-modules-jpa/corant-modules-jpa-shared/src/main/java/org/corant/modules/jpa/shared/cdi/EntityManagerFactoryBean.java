@@ -63,7 +63,7 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
     if (instance != null && instance.isOpen()) {
       instance.close();
       logger.fine(
-          () -> String.format("Destroyed entity manager factory that persistence unit named %s.",
+          () -> String.format("Destroyed entity manager factory which persistence unit named %s.",
               defaultBlank(pu.unitName(), "unnamed")));
     }
   }

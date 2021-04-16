@@ -176,9 +176,9 @@ public class MongoClientExtension implements Extension {
     if (databaseConfigManager.isEmpty()) {
       logger.info(() -> "Can not find any mongodb databases!");
     } else {
-      logger.fine(
-          () -> String.format("Find %s mongodb databases named [%s].", databaseConfigManager.size(),
-              String.join(",", databaseConfigManager.getAllDisplayNames())));
+      logger.fine(() -> String.format("Found %s mongodb databases named [%s].",
+          databaseConfigManager.size(),
+          String.join(",", databaseConfigManager.getAllDisplayNames())));
     }
   }
 

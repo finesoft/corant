@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -144,6 +145,21 @@ public class StopWatch {
 
   public StopWatch stop() throws IllegalStateException {
     return stop((Consumer<TaskInfo>) null);
+  }
+
+  public StopWatch stop(BiConsumer<TaskInfo, StopWatch> consumer) throws IllegalStateException {
+    if (currentTaskName == null) {
+      throw new IllegalStateException("Can't stop StopWatch: it's not running");
+    }
+    long lastTime = System.currentTimeMillis() - startTimeMillis;
+    totalTimeMillis += lastTime;
+    lastTaskInfo = new TaskInfo(currentTaskName, lastTime);
+    if (consumer != null) {
+      consumer.accept(lastTaskInfo, this);
+    }
+    ++taskCount;
+    currentTaskName = null;
+    return this;
   }
 
   public StopWatch stop(Consumer<TaskInfo> consumer) throws IllegalStateException {

@@ -156,7 +156,7 @@ public class MessageReceiverManager {
         });
       }
       logger.info(
-          () -> String.format("Find %s message receivers that involving %s connection factories.",
+          () -> String.format("Found %s message receivers that involving %s connection factories.",
               receiveMetaDatas.size(), executorServices.size()));
     }
   }

@@ -87,14 +87,14 @@ public class KeycloakAdmin {
     synchronized (this) {
       try {
         if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
-          logger.fine(() -> String.format("Find keycloak admin client config json %s.",
+          logger.fine(() -> String.format("Found keycloak admin client config json %s.",
               keycloakJson.get()));
           adminConfig = JsonSerialization.readValue(keycloakJson.get(), AdapterConfig.class);
         } else if (keycloakJsonLocation.isPresent()) {
           Resource resource =
               Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
           if (resource != null) {
-            logger.fine(() -> String.format("Find keycloak admin client config json %s.",
+            logger.fine(() -> String.format("Found keycloak admin client config json %s.",
                 keycloakJsonLocation.get()));
             try (InputStream is = resource.openStream()) {
               adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);

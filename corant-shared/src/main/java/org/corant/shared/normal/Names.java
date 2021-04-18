@@ -39,6 +39,8 @@ public interface Names {
 
   String CORANT_SYS_IP = CORANT + NAME_SPACE_SEPARATORS + "system.ip";
 
+  String CORANT_DEV_MODE = CORANT + NAME_SPACE_SEPARATORS + "development";
+
   String CORANT_PREFIX = CORANT + NAME_SPACE_SEPARATORS;
 
   static String applicationName() {

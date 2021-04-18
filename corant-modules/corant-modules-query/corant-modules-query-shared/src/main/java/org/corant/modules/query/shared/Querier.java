@@ -38,7 +38,7 @@ public interface Querier {
   int DEFALUT_STREAM_LIMIT =
       Configs.getValue("corant.query.default-stream-limit", Integer.class, 16);
 
-  int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 1;
+  int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 16;
   int MAX_SELECT_SIZE = Configs.getValue(GLOBAL_PRO_KEY_MAX_SELECT_SIZE, Integer.class, 128);
   int DEFAULT_LIMIT = Configs.getValue(GLOBAL_PRO_KEY_DEFAULT_LIMIT, Integer.class, 16);
 

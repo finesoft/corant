@@ -150,7 +150,7 @@
 		<version.vertx>3.9.3</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
-		<version.weld>3.1.6.Final</version.weld>
+		<version.weld>3.1.7.SP1</version.weld>
 		<version.wxpay-sdk>3.0.9</version.wxpay-sdk>
 		<version.xadisk>1.2.2</version.xadisk>
 		<version.xnio>3.8.2.Final</version.xnio>

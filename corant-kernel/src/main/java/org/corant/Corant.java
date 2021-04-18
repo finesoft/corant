@@ -602,7 +602,7 @@ public class Corant implements AutoCloseable {
         logInfo("The post-started spi processing has been completed, takes %ss.",
             tk.getTimeSeconds());
         double tt = sw.getTotalTimeSeconds();
-        if (tt > 8000) {
+        if (tt > 8) {
           logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
               APP_NAME, tt);
         } else {

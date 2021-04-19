@@ -582,6 +582,8 @@ public class Corant implements AutoCloseable {
         container.close();
       }
       container = null;
+    } catch (IllegalStateException e) {
+      log(Level.WARNING, e, "The container is already shutdown!", APP_NAME);
     } catch (Throwable e) {
       log(Level.SEVERE, e, "Stop %s occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
@@ -608,7 +610,7 @@ public class Corant implements AutoCloseable {
           logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
               APP_NAME, tt);
         } else {
-          logInfo("The %s has been started, takes %ss.", APP_NAME, tt);
+          logInfo("The %s has started, takes %ss.", APP_NAME, tt);
         }
         logInfo("Application info: process-id: %s, java-version: %s, locale: %s, timezone: %s.",
             Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
@@ -743,7 +745,7 @@ public class Corant implements AutoCloseable {
 
     void onBeforeShutdown(@Observes @Priority(Integer.MAX_VALUE) BeforeShutdown event) {
       invokeBootHandlerAfterStopped();
-      logInfo("Stopped the %s at %s.%s\n", APP_NAME, Instant.now(), boostLine("-"));
+      logInfo("The %s stops at %s.%s\n", APP_NAME, Instant.now(), boostLine("-"));
     }
   }
 }

@@ -628,8 +628,6 @@ public class Corant implements AutoCloseable {
     } catch (Throwable e) {
       log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
       throw new CorantRuntimeException(e);
-    } finally {
-
     }
   }
 
@@ -674,9 +672,9 @@ public class Corant implements AutoCloseable {
     }
   }
 
-  boolean registerMBean() {
+  void registerMBean() {
     if (!hasCommandArgument(REGISTER_TO_MBEAN_CMD)) {
-      return false;
+      return;
     }
     synchronized (this) {
       if (power == null) {
@@ -688,9 +686,7 @@ public class Corant implements AutoCloseable {
       logInfo(
           "Registered %s to MBean server, one can use it for shutdown or re-startup the application.",
           APP_NAME, Instant.now());
-      return true;
     }
-
   }
 
   private String boostLine(String separator) {

@@ -55,7 +55,9 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
         keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService, rejectPolicy);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler());
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+    } else {
+      threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }
   }
 

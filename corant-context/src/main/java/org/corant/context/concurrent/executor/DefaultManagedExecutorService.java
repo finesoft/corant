@@ -59,7 +59,9 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         queue);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler());
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+    } else {
+      threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }
     // TODO Auto-generated constructor stub
   }
@@ -89,14 +91,16 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         contextService, rejectPolicy);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler());
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+    } else {
+      threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }
   }
 
   void stop() {
     try {
       super.shutdown();
-      if ((awaitTermination != null)
+      if (awaitTermination != null
           && !super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
         logger.log(Level.WARNING,
             () -> String.format("Shutdown managed executor service %s timeout!", name));

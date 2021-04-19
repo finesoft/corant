@@ -13,40 +13,33 @@
  */
 package org.corant.context.concurrent.executor;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import org.corant.shared.util.Threads;
 
 /**
  * corant-context
  *
- * @author bingo 上午11:00:38
+ * @author bingo 下午8:27:44
  *
  */
-public class RetryAbortHandler implements RejectedExecutionHandler {
+public class AbortHandler implements RejectedExecutionHandler {
 
-  static final Logger logger = Logger.getLogger(RetryAbortHandler.class.getName());
+  static final Logger logger = Logger.getLogger(AbortHandler.class.getName());
 
   final String name;
 
-  /**
-   * @param name
-   */
-  public RetryAbortHandler(String name) {
+  public AbortHandler(String name) {
     this.name = name;
   }
 
   @Override
   public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-    if (r != null && !executor.isShutdown() && !executor.isTerminated()
-        && !executor.isTerminating()) {
-      logger.info(() -> String.format(
-          "The task %s was rejected from %s in the executor service %s for the first time and needs to be tried once.",
-          r.toString(), executor.toString(), name));
-      Threads.runInDaemon(() -> executor.getQueue().offer(r, 4L, TimeUnit.SECONDS));
-    }
+    String msg = "Task " + r.toString() + " rejected from " + executor.toString()
+        + " in the executor service " + name;
+    logger.severe(msg);
+    throw new RejectedExecutionException(msg);
   }
 
 }

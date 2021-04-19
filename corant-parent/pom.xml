@@ -106,6 +106,7 @@
 								<classifier>bin</classifier>
 								<distFormat>tar</distFormat>
 								<withDist>true</withDist>
+                <useDirectRunner>true</useDirectRunner>
 								<vmArgs>-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai -Duser.language=zh -Duser.region=CN</vmArgs>
 								<mainClass>${runner-class}</mainClass>
 							</configuration>

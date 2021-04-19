@@ -54,6 +54,10 @@ public class CorantDeclarativeScheduler {
   protected CorantSchedulerExtension extension;
 
   @Inject
+  @ConfigProperty(name = "corant.quartz.declarative.scheduler.enable", defaultValue = "true")
+  protected boolean enable;
+
+  @Inject
   @ConfigProperty(name = "corant.quartz.declarative.scheduler.job.threads")
   protected Optional<Integer> jobThreads;
 
@@ -121,6 +125,9 @@ public class CorantDeclarativeScheduler {
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
       throws SchedulerException {
+    if (!enable) {
+      logger.info(() -> "The bulit-in declarative job scheduler is disabled!");
+    }
     if (isNotEmpty(extension.getDeclarativeJobMetaDatas())) {
       initializeDeclarativeScheduler();
       resume(startDelayed.orElse(null));

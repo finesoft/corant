@@ -45,17 +45,18 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
    * @param threadLifeTime
    * @param contextService
    * @param rejectPolicy
+   * @param retryDelay
    */
   public DefaultManagedScheduledExecutorService(String name,
       ManagedThreadFactoryImpl managedThreadFactory, long hungTaskThreshold,
       boolean longRunningTasks, int corePoolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,
       long threadLifeTime, Duration awaitTermination, ContextServiceImpl contextService,
-      RejectPolicy rejectPolicy) {
+      RejectPolicy rejectPolicy, Duration retryDelay) {
     super(name, managedThreadFactory, hungTaskThreshold, longRunningTasks, corePoolSize,
         keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService, rejectPolicy);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name, retryDelay));
     } else {
       threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }

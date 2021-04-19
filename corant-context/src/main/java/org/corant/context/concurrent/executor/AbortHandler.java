@@ -36,9 +36,9 @@ public class AbortHandler implements RejectedExecutionHandler {
 
   @Override
   public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-    String msg = "Task " + r.toString() + " rejected from " + executor.toString()
-        + " in the executor service " + name;
-    logger.severe(msg);
+    String msg = "The task " + r.toString() + " was rejected from the executor "
+        + executor.toString() + " in the executor service " + name;
+    logger.warning(msg);
     throw new RejectedExecutionException(msg);
   }
 

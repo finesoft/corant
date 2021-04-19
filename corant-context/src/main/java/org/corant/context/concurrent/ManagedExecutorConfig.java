@@ -50,6 +50,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   protected Duration threadLifeTime = Duration.ofSeconds(30L);
   protected Duration awaitTermination = Duration.ofSeconds(5L);
   protected RejectPolicy rejectPolicy = RejectPolicy.ABORT;
+  protected Duration retryDelay = Duration.ofSeconds(4L);
   protected int threadPriority = Thread.NORM_PRIORITY;
   protected String threadName;
   protected int queueCapacity = Integer.MAX_VALUE;
@@ -120,6 +121,10 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   public RejectPolicy getRejectPolicy() {
     return defaultObject(rejectPolicy, () -> RejectPolicy.ABORT);
+  }
+
+  public Duration getRetryDelay() {
+    return retryDelay;
   }
 
   public Duration getThreadLifeTime() {

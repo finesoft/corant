@@ -182,7 +182,7 @@ public class ConcurrentExtension implements Extension {
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
           cfg.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
           cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(), contextService,
-          cfg.getRejectPolicy(), ques.get().provide(cfg));
+          cfg.getRejectPolicy(), cfg.getRetryDelay(), ques.get().provide(cfg));
     } else {
       logger.fine(
           () -> String.format("Create managed executor service %s with %s.", cfg.getName(), cfg));
@@ -190,7 +190,7 @@ public class ConcurrentExtension implements Extension {
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
           cfg.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
           cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(), cfg.getQueueCapacity(),
-          contextService, cfg.getRejectPolicy());
+          contextService, cfg.getRejectPolicy(), cfg.getRetryDelay());
     }
   }
 
@@ -205,7 +205,7 @@ public class ConcurrentExtension implements Extension {
         new DefaultManagedThreadFactory(cfg.getName()), cfg.getHungTaskThreshold(),
         cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getKeepAliveTime().toMillis(),
         TimeUnit.MILLISECONDS, cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(),
-        contextService, cfg.getRejectPolicy());
+        contextService, cfg.getRejectPolicy(), cfg.getRetryDelay());
   }
 
   protected ManagedExecutorServiceAdapter register(Instance<Object> instance,

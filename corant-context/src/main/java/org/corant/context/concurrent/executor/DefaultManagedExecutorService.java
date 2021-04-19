@@ -47,19 +47,20 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
    * @param awaitTermination
    * @param contextService
    * @param rejectPolicy
+   * @param retryDelay
    * @param queue
    */
   public DefaultManagedExecutorService(String name, ManagedThreadFactoryImpl managedThreadFactory,
       long hungTaskThreshold, boolean longRunningTasks, int corePoolSize, int maxPoolSize,
       long keepAliveTime, TimeUnit keepAliveTimeUnit, long threadLifeTime,
       Duration awaitTermination, ContextServiceImpl contextService, RejectPolicy rejectPolicy,
-      BlockingQueue<Runnable> queue) {
+      Duration retryDelay, BlockingQueue<Runnable> queue) {
     super(name, managedThreadFactory, hungTaskThreshold, longRunningTasks, corePoolSize,
         maxPoolSize, keepAliveTime, keepAliveTimeUnit, threadLifeTime, contextService, rejectPolicy,
         queue);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name, retryDelay));
     } else {
       threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }
@@ -80,18 +81,19 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
    * @param queueCapacity
    * @param contextService
    * @param rejectPolicy
+   * @param retryDelay
    */
   public DefaultManagedExecutorService(String name, ManagedThreadFactoryImpl managedThreadFactory,
       long hungTaskThreshold, boolean longRunningTasks, int corePoolSize, int maxPoolSize,
       long keepAliveTime, TimeUnit keepAliveTimeUnit, long threadLifeTime,
       Duration awaitTermination, int queueCapacity, ContextServiceImpl contextService,
-      RejectPolicy rejectPolicy) {
+      RejectPolicy rejectPolicy, Duration retryDelay) {
     super(name, managedThreadFactory, hungTaskThreshold, longRunningTasks, corePoolSize,
         maxPoolSize, keepAliveTime, keepAliveTimeUnit, threadLifeTime, queueCapacity,
         contextService, rejectPolicy);
     this.awaitTermination = awaitTermination;
     if (rejectPolicy == RejectPolicy.RETRY_ABORT) {
-      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name));
+      threadPoolExecutor.setRejectedExecutionHandler(new RetryAbortHandler(name, retryDelay));
     } else {
       threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }

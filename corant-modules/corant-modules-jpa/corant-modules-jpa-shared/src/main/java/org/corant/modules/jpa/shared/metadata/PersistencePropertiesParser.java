@@ -100,6 +100,8 @@ public class PersistencePropertiesParser {
       } else if (pn.endsWith(JPAConfig.JC_VAL_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setValidationMode(ValidationMode.valueOf(s)));
+      } else if (pn.endsWith(JPAConfig.JC_ENABLE)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setEnable);
       } else if (pn.endsWith(JPAConfig.JC_SHARE_CACHE_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));

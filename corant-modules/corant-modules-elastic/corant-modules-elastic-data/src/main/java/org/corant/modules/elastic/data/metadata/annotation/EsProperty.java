@@ -13,6 +13,7 @@
  */
 package org.corant.modules.elastic.data.metadata.annotation;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -30,8 +31,8 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface EsProperty {
 
-  String name() default "";
+  String name() default EMPTY;
 
-  String value() default "";
+  String value() default EMPTY;
 
 }

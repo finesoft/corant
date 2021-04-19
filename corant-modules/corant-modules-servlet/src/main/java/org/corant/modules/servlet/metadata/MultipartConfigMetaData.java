@@ -14,6 +14,7 @@
 package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Strings.EMPTY;
 import javax.servlet.annotation.MultipartConfig;
 
 /**
@@ -24,7 +25,7 @@ import javax.servlet.annotation.MultipartConfig;
  */
 public class MultipartConfigMetaData {
 
-  private String location = "";
+  private String location = EMPTY;
 
   private long maxFileSize = -1L;
 

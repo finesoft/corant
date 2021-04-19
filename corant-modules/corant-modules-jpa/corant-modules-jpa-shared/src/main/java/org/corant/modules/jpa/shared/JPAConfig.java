@@ -63,6 +63,7 @@ public class JPAConfig {
   public static final String JCX_EX_UL_CLS = "exclude-unlisted-classes";
   public static final String JCX_VAL_MOD = "validation-mode";
   public static final String JCX_SHARE_CACHE_MOD = "shared-cache-mode";
+  public static final String JCX_ENABLE = "enable";
   public static final String JCX_PROS = "properties";
   public static final String JCX_PRO = "property";
   public static final String JCX_PRO_NME = "name";
@@ -82,6 +83,7 @@ public class JPAConfig {
   public static final String JC_VAL_MOD = "." + JCX_VAL_MOD;
   public static final String JC_SHARE_CACHE_MOD = "." + JCX_SHARE_CACHE_MOD;
   public static final String JC_PRO = "." + "property";
+  public static final String JC_ENABLE = "." + JCX_ENABLE;
 
   protected static final Logger logger = Logger.getLogger(JPAConfig.class.getName());
 
@@ -108,14 +110,22 @@ public class JPAConfig {
     names.add(dfltPrefix + JC_TRANS_TYP);
     names.add(dfltPrefix + JC_VAL_MOD);
     names.add(dfltPrefix + JC_PU_NME);
+    names.add(dfltPrefix + JC_ENABLE);
     return names;
   }
 
   public static Set<PersistenceUnitInfoMetaData> from(Config config) {
     Set<PersistenceUnitInfoMetaData> metaDatas = new HashSet<>();
     generateFromXml().forEach(metaDatas::add);
-    generateFromConfig(config).forEach(u -> shouldBeTrue(metaDatas.add(u),
-        "The persistence unit name %s is dup!", u.getPersistenceUnitName()));
+    generateFromConfig(config).forEach(u -> {
+      if (u.isEnable()) {
+        shouldBeTrue(metaDatas.add(u), "The persistence unit name %s is dup!",
+            u.getPersistenceUnitName());
+      } else {
+        logger.info(
+            () -> String.format("The persistence unit %s is disable", u.getPersistenceUnitName()));
+      }
+    });
     return metaDatas;
   }
 

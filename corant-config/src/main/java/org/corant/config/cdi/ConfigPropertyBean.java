@@ -14,6 +14,7 @@
 package org.corant.config.cdi;
 
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -111,12 +112,12 @@ public class ConfigPropertyBean<T> implements Bean<T>, PassivationCapable {
 
     @Override
     public String defaultValue() {
-      return "";
+      return EMPTY;
     }
 
     @Override
     public String name() {
-      return "";
+      return EMPTY;
     }
   }
 }

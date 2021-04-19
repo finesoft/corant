@@ -71,6 +71,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
       PersistenceUnitTransactionType.JTA;
   private ValidationMode validationMode = ValidationMode.NONE;
   private boolean bindToJndi = false;
+  private boolean enable = true;
 
   /**
    * @param persistenceUnitName
@@ -281,6 +282,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return bindToJndi;
   }
 
+  public boolean isEnable() {
+    return enable;
+  }
+
   public boolean isExcludeUnlistedClasses() {
     return excludeUnlistedClasses;
   }
@@ -345,6 +350,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   protected void setClassLoader(ClassLoader classLoader) {
     this.classLoader = classLoader;
+  }
+
+  protected void setEnable(boolean enable) {
+    this.enable = enable;
   }
 
   protected void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {

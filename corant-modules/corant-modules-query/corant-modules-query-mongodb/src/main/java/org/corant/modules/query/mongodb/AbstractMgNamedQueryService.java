@@ -13,6 +13,7 @@ package org.corant.modules.query.mongodb;
  * the License.
  */
 
+import static java.util.stream.Collectors.toList;
 import static org.corant.shared.util.Conversions.toEnum;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapEnum;
@@ -31,7 +32,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -41,6 +41,7 @@ import org.corant.modules.query.shared.AbstractNamedQueryService;
 import org.corant.modules.query.shared.Querier;
 import org.corant.modules.query.shared.QueryParameter;
 import org.corant.modules.query.shared.QueryParameter.StreamQueryParameter;
+import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.shared.util.Conversions;
 import com.mongodb.BasicDBObject;
@@ -97,129 +98,152 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public <T> List<T> aggregate(String queryName, Object parameter) {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
-    AggregateIterable<Document> ai =
-        getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
-    Map<String, String> pros = querier.getQuery().getProperties();
-    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
-    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
-        .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
-        .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
-    Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
-    bson.ifPresent(ai::hint);
-    resovleCollation(querier).ifPresent(ai::collation);
-    List<Map<String, Object>> list =
-        streamOf(ai).map(r -> convertDocument(r, querier, isAutoSetIdField(querier)))
-            .collect(Collectors.toList());
-    this.fetch(list, querier);
-    return querier.handleResults(list);
-  }
-
-  @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-    MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
-    try (MongoCursor<Document> cursor = fi.iterator()) {
-      List<Map<String, Object>> fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
-      fetch(fetchedList, querier);
-      querier.handleResultHints(fetchedList);
-      if (result instanceof List) {
-        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
-      }
+    try {
+      MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+      log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+      List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
+      AggregateIterable<Document> ai =
+          getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
+      Map<String, String> pros = querier.getQuery().getProperties();
+      getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
+      getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
+          .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
+      getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
+          .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
+      Optional<Bson> bson =
+          Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
+      bson.ifPresent(ai::hint);
+      resovleCollation(querier).ifPresent(ai::collation);
+      List<Map<String, Object>> list = streamOf(ai)
+          .map(r -> convertDocument(r, querier, isAutoSetIdField(querier))).collect(toList());
+      this.fetch(list, querier);
+      return querier.handleResults(list);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the aggregate query [%s], exception [%s].", queryName,
+          e.getMessage());
     }
   }
 
   @Override
-  public <T> Forwarding<T> forward(String queryName, Object parameter) {
+  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+    try {
+      QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+      int maxSize = fetchQuery.getMaxSize();
+      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
+      FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
+      List<Map<String, Object>> fetchedList = null;
+      try (MongoCursor<Document> cursor = fi.iterator()) {
+        fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
+      }
+      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the fetch query [%s], exception [%s].",
+          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
+    }
+  }
+
+  protected List<Document> collect(FindIterable<Document> fi) {
+    List<Document> docList = null;
+    try (MongoCursor<Document> cursor = fi.iterator()) {
+      docList = listOf(cursor);
+    }
+    return docList;
+  }
+
+  protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
+      boolean autoSetIdField) {
+    return doc;
+  }
+
+  @Override
+  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
-    final boolean autoSetId = isAutoSetIdField(querier);
-    try (MongoCursor<Document> cursor = fi.iterator()) {
-      List<Map<String, Object>> list = streamOf(cursor)
-          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
-      int size = list.size();
-      if (size > 0) {
-        if (size > limit) {
+    List<Document> docList = collect(fi);
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (docList != null) {
+      final boolean setId = isAutoSetIdField(querier);
+      list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+      docList.clear();
+      if (list.size() > 0) {
+        if (list.size() > limit) {
           list.remove(limit);
           result.withHasNext(true);
         }
         this.fetch(list, querier);
       }
-      return result.withResults(querier.handleResults(list));
     }
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
-  public <T> T get(String queryName, Object parameter) {
+  protected <T> T doGet(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).limit(1);
+    Document result = null;
     try (MongoCursor<Document> cursor = fi.iterator()) {
-      Map<String, Object> result =
-          convertDocument(cursor.tryNext(), querier, isAutoSetIdField(querier));
-      this.fetch(result, querier);
-      return querier.handleResult(result);
+      result = cursor.tryNext();
     }
+    Map<String, Object> theResult = null;
+    if (result != null) {
+      theResult = convertDocument(result, querier, isAutoSetIdField(querier));
+      this.fetch(theResult, querier);
+    }
+    return querier.handleResult(theResult);
   }
 
   @Override
-  public <T> Paging<T> page(String queryName, Object parameter) {
+  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
-    final boolean autoSetId = isAutoSetIdField(querier);
-    try (MongoCursor<Document> cursor = fi.iterator()) {
-      List<Map<String, Object>> list = streamOf(cursor)
-          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
-      int size = list.size();
-      if (size > 0) {
-        if (size < limit) {
-          result.withTotal(offset + size);
+    List<Document> docList = collect(fi);
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (docList != null) {
+      final boolean setId = isAutoSetIdField(querier);
+      list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+      docList.clear();
+      if (list.size() > 0) {
+        if (list.size() < limit) {
+          result.withTotal(offset + list.size());
         } else {
           result.withTotal((int) queryCount(querier));
         }
         this.fetch(list, querier);
       }
-      return result.withResults(querier.handleResults(list));
     }
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
-  public <T> List<T> select(String queryName, Object parameter) {
+  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     int maxSelectSize = querier.resolveMaxSelectSize();
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
-    final boolean autoSetId = isAutoSetIdField(querier);
-    try (MongoCursor<Document> cursor = fi.iterator()) {
-      List<Map<String, Object>> list = streamOf(cursor)
-          .map(r -> convertDocument(r, querier, autoSetId)).collect(Collectors.toList());
+    List<Document> docList = collect(fi);
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (docList != null) {
+      final boolean setId = isAutoSetIdField(querier);
+      list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+      docList.clear();
       if (querier.validateResultSize(list) > 0) {
         this.fetch(list, querier);
       }
-      return querier.handleResults(list);
     }
-  }
-
-  protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
-      boolean autoSetIdField) {
-    return doc;
+    return querier.handleResults(list);
   }
 
   protected abstract MongoDatabase getDataBase();

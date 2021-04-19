@@ -50,6 +50,46 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 
+  @Override
+  public <T> Forwarding<T> forward(String q, Object p) {
+    try {
+      return doForward(q, p);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the forward query [%s]!", q);
+    }
+  }
+
+  @Override
+  public <T> T get(String q, Object p) {
+    try {
+      return doGet(q, p);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s]!",
+          q);
+    }
+  }
+
+  @Override
+  public <T> Paging<T> page(String q, Object p) {
+    try {
+      return doPage(q, p);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s]!",
+          q);
+    }
+  }
+
+  @Override
+  public <T> List<T> select(String q, Object p) {
+    try {
+      return doSelect(q, p);
+    } catch (Exception e) {
+      throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s]",
+          q);
+    }
+  }
+
   /**
    * {@inheritDoc}
    * <p>
@@ -71,6 +111,14 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     useQueryParam.limit(max(defaultObject(queryParam.getLimit(), Querier.DEFALUT_STREAM_LIMIT), 1));
     return stream(queryName, useQueryParam);
   }
+
+  protected abstract <T> Forwarding<T> doForward(String q, Object p) throws Exception;
+
+  protected abstract <T> T doGet(String q, Object p) throws Exception;
+
+  protected abstract <T> Paging<T> doPage(String q, Object p) throws Exception;
+
+  protected abstract <T> List<T> doSelect(String q, Object p) throws Exception;
 
   protected <T> void fetch(List<T> results, Querier querier) {
     List<FetchQuery> fetchQueries;
@@ -124,6 +172,19 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     logger.fine(() -> String.format(
         "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s.",
         name, String.join(",", asStrings(param)), String.join(";\n", script)));
+  }
+
+  protected void postFetch(FetchQuery fetchQuery, Querier fetchQuerier,
+      List<Map<String, Object>> fetchedList, Querier parentQuerier, Object result) {
+    if (isNotEmpty(fetchedList)) {
+      fetch(fetchedList, fetchQuerier);// Next fetch
+      fetchQuerier.handleResultHints(fetchedList);
+      if (result instanceof List) {
+        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
+      } else {
+        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
+      }
+    }
   }
 
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {

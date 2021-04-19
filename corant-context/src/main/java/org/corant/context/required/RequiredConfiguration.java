@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -37,7 +38,7 @@ public @interface RequiredConfiguration {
 
   Class<?> type() default String.class;
 
-  String value() default "";
+  String value() default EMPTY;
 
   enum ValuePredicate {
     NULL, BLANK, EMPTY, NO_EMPTY, NO_NULL, NO_BLANK, EQ, GTE, GT, LT, LTE,

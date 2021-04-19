@@ -15,6 +15,7 @@ package org.corant.modules.query.shared.declarative;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -39,7 +40,7 @@ public @interface QueryMethod {
    *
    * @return name
    */
-  String name() default "";
+  String name() default EMPTY;
 
   /**
    * The method that query service execute

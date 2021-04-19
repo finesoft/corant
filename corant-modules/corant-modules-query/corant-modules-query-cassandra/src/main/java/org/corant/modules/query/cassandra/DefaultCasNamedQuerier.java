@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.cassandra;
 
+import static org.corant.shared.util.Strings.SPACE;
 import java.util.Map;
 import org.corant.modules.query.shared.FetchQueryHandler;
 import org.corant.modules.query.shared.QueryHandler;
@@ -47,7 +48,7 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
     super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;
-    this.script = script.replaceAll("[\\t\\n\\r]", " ");
+    this.script = script.replaceAll("[\\t\\n\\r]", SPACE);
   }
 
   @Override

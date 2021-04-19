@@ -41,9 +41,9 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public Map<String, Object> aggregate(String queryName, Object parameter) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    String script = resolveScript(querier.getScript(), null, null);
     try {
+      EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+      String script = resolveScript(querier.getScript(), null, null);
       Map<String, Object> result = getExecutor().searchAggregation(resolveIndexName(querier),
           script, querier.getQuery().getProperties());
       querier.handleResultHints(result);
@@ -56,67 +56,30 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-    EsNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String script = resolveScript(querier.getScript(), null, maxSize > 0 ? maxSize : null);
     try {
+      QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+      int maxSize = fetchQuery.getMaxSize();
+      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      EsNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      String script = resolveScript(querier.getScript(), null, maxSize > 0 ? maxSize : null);
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
-      fetch(fetchedList, querier);
-      querier.handleResultHints(fetchedList);
-      if (result instanceof List) {
-        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
-      }
+      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
-          fetchQuery.getReferenceQuery(), e.getMessage());
+          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
     }
-  }
-
-  @Override
-  public <T> Forwarding<T> forward(String queryName, Object parameter) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = querier.resolveOffset();
-    int limit = querier.resolveLimit();
-    Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
-    List<T> result = hits.getValue();
-    return Forwarding.of(result, hits.getLeft() > offset + limit);
-  }
-
-  @Override
-  public <T> T get(String queryName, Object parameter) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    Pair<Long, List<T>> hits = searchHits(queryName, querier, 0, 1);
-    List<T> result = hits.getValue();
-    if (!isEmpty(result)) {
-      return result.get(0);
-    }
-    return null;
-  }
-
-  @Override
-  public <T> Paging<T> page(String queryName, Object parameter) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    int offset = querier.resolveOffset();
-    int limit = querier.resolveLimit();
-    Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
-    List<T> result = hits.getValue();
-    return Paging.of(hits.getLeft().intValue(), result, offset, limit);
   }
 
   @Override
   public <T> Stream<T> scrolledSearch(String q, Object param, TimeValue scrollKeepAlive,
       int batchSize) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(q, param);
-    String script = resolveScript(querier.getScript(), null, null);
-    log("scrolled search-> " + q, querier.getQueryParameter(), script);
     try {
+      EsNamedQuerier querier = getQuerierResolver().resolve(q, param);
+      String script = resolveScript(querier.getScript(), null, null);
+      log("scrolled search-> " + q, querier.getQueryParameter(), script);
       return getExecutor()
           .scrolledSearch(resolveIndexName(querier), script, scrollKeepAlive, batchSize)
           .map(result -> {
@@ -124,15 +87,17 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
             return querier.handleResult(result);
           });
     } catch (Exception e) {
-      throw new QueryRuntimeException(e);
+      throw new QueryRuntimeException(e,
+          "An error occurred while executing the scrolled search [%s], exception [%s].", q,
+          e.getMessage());
     }
   }
 
   @Override
   public Map<String, Object> search(String queryName, Object parameter) {
-    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    String script = resolveScript(querier.getScript(), null, null);
     try {
+      EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+      String script = resolveScript(querier.getScript(), null, null);
       Map<String, Object> result = getExecutor().search(resolveIndexName(querier), script,
           querier.getQuery().getProperties());
       querier.handleResultHints(result);
@@ -144,7 +109,38 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public <T> List<T> select(String queryName, Object parameter) {
+  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
+    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
+    Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
+    List<T> result = hits.getValue();
+    return Forwarding.of(result, hits.getLeft() > offset + limit);
+  }
+
+  @Override
+  protected <T> T doGet(String queryName, Object parameter) throws Exception {
+    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    Pair<Long, List<T>> hits = searchHits(queryName, querier, 0, 1);
+    List<T> result = hits.getValue();
+    if (!isEmpty(result)) {
+      return result.get(0);
+    }
+    return null;
+  }
+
+  @Override
+  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
+    EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    int offset = querier.resolveOffset();
+    int limit = querier.resolveLimit();
+    Pair<Long, List<T>> hits = searchHits(queryName, querier, offset, limit);
+    List<T> result = hits.getValue();
+    return Paging.of(hits.getLeft().intValue(), result, offset, limit);
+  }
+
+  @Override
+  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Pair<Long, List<T>> hits = searchHits(queryName, querier, null, querier.resolveMaxSelectSize());
     return hits.getValue();
@@ -171,22 +167,16 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,
-      Integer limit) {
+      Integer limit) throws Exception {
     String script = resolveScript(querier.getScript(), offset, limit);
-    try {
-      log(q, querier.getQueryParameter(), script);
-      Pair<Long, List<Map<String, Object>>> hits =
-          getExecutor().searchHits(resolveIndexName(querier), script,
-              querier.getQuery().getProperties(), querier.getHintKeys());
-      List<T> result = new ArrayList<>();
-      if (!isEmpty(hits.getValue())) {
-        this.fetch(hits.getValue(), querier);
-        result = querier.handleResults(hits.getValue());
-      }
-      return Pair.of(hits.getLeft(), result);
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the search hits query [%s].", q);
+    log(q, querier.getQueryParameter(), script);
+    Pair<Long, List<Map<String, Object>>> hits = getExecutor().searchHits(resolveIndexName(querier),
+        script, querier.getQuery().getProperties(), querier.getHintKeys());
+    List<T> result = new ArrayList<>();
+    if (!isEmpty(hits.getValue())) {
+      this.fetch(hits.getValue(), querier);
+      result = querier.handleResults(hits.getValue());
     }
+    return Pair.of(hits.getLeft(), result);
   }
 }

@@ -18,6 +18,8 @@ import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Maps.immutableMapOf;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.SLASH;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.ByteArrayOutputStream;
@@ -887,11 +889,11 @@ public class Resources {
 
     public String getSeparator() {
       if (this == CLASS_PATH || this == URL) {
-        return "/";
+        return SLASH;
       } else if (this == FILE_SYSTEM) {
         return File.separator;
       } else {
-        return "";
+        return EMPTY;
       }
     }
 

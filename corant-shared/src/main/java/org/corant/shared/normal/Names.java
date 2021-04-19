@@ -35,25 +35,28 @@ public interface Names {
 
   String DOMAIN_SPACE_SEPARATORS = ":";
 
-  String CORANT_APP_NME_KEY = CORANT + NAME_SPACE_SEPARATORS + "application-name";
-
-  String CORANT_SYS_IP = CORANT + NAME_SPACE_SEPARATORS + "system.ip";
-
-  String CORANT_DEV_MODE = CORANT + NAME_SPACE_SEPARATORS + "development";
-
   String CORANT_PREFIX = CORANT + NAME_SPACE_SEPARATORS;
 
+  String CORANT_APP_NAME_KEY = CORANT_PREFIX + "application-name";
+
+  String CORANT_SYS_IP = CORANT_PREFIX + "system.ip";
+
+  String CORANT_DEV_MODE = CORANT_PREFIX + "development";
+
+  String CORANT_CFG_PREFIX = CORANT_PREFIX + "config";
+
   static String applicationName() {
-    return defaultString(System.getProperty(CORANT_APP_NME_KEY), CORANT);
+    return defaultString(System.getProperty(CORANT_APP_NAME_KEY), CORANT);
   }
 
   interface ConfigNames {
-    String CFG_LOCATION_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.location";
-    String CFG_PROFILE_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.profile";
-    String CFG_ADJUST_KEY = CORANT + NAME_SPACE_SEPARATORS + "config.adjust";
+    String CFG_SENSITIVES = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "sensitive.keys";
+    String CFG_LOCATION_KEY = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "location";
+    String CFG_PROFILE_KEY = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "profile";
+    String CFG_ADJUST_KEY = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "adjust";
     String CFG_ADJUST_PREFIX = CFG_ADJUST_KEY + NAME_SPACE_SEPARATORS;
     String CFG_LOCATION_EXCLUDE_PATTERN =
-        CORANT + NAME_SPACE_SEPARATORS + "config.location.exclude.pattern";
+        CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "location.exclude.pattern";
   }
 
   interface JndiNames {

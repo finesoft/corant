@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.jpql;
 
+import static org.corant.shared.util.Strings.SPACE;
 import java.util.Map;
 import org.corant.modules.query.shared.FetchQueryHandler;
 import org.corant.modules.query.shared.QueryHandler;
@@ -47,7 +48,7 @@ public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], St
     super(query, queryParameter, queryResolver, fetchQueryResolver);
     name = query.getName();
     this.scriptParameter = scriptParameter;
-    this.script = script.replaceAll("[\\t\\n\\r]", " ");
+    this.script = script.replaceAll("[\\t\\n\\r]", SPACE);
   }
 
   @Override

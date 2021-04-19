@@ -14,6 +14,8 @@
 package org.corant.modules.ddd.repository;
 
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.SPACE;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -156,9 +158,9 @@ public abstract class JPAQueryBuilder {
 
   protected String getParameterDescription() {
     if (parameterBuilder == null) {
-      return "";
+      return EMPTY;
     } else {
-      return " " + parameterBuilder.toString();
+      return SPACE + parameterBuilder.toString();
     }
   }
 

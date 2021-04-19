@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.Locale;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
@@ -53,7 +54,7 @@ public class SQLServer2005Dialect extends SQLServerDialect {
    */
   protected String getLimitString(String sql, int offset, int limit) {
     String orderby = SqlHelper.getOrderBy(sql);
-    String distinct = "";
+    String distinct = EMPTY;
     String lowered = sql.toLowerCase(Locale.ROOT);
     String sqlPart = sql;
     if (lowered.trim().startsWith(SqlHelper.SELECT_SPACE)) {

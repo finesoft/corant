@@ -37,8 +37,7 @@ public class QueryHint implements Serializable {
   private Script script = new Script();
   private final String id = UUID.randomUUID().toString();
 
-  public QueryHint() {
-  }
+  public QueryHint() {}
 
   /**
    * @param key
@@ -51,6 +50,28 @@ public class QueryHint implements Serializable {
     if (script != null) {
       this.script = script;
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    QueryHint other = (QueryHint) obj;
+    if (id == null) {
+      if (other.id != null) {
+        return false;
+      }
+    } else if (!id.equals(other.id)) {
+      return false;
+    }
+    return true;
   }
 
   public String getId() {
@@ -75,6 +96,14 @@ public class QueryHint implements Serializable {
 
   public Script getScript() {
     return script;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (id == null ? 0 : id.hashCode());
+    return result;
   }
 
   protected void addParameter(QueryHintParameter parameter) {
@@ -105,8 +134,7 @@ public class QueryHint implements Serializable {
     private String value;
     private String type;
 
-    public QueryHintParameter() {
-    }
+    public QueryHintParameter() {}
 
     /**
      * @param name

@@ -15,6 +15,7 @@ package org.corant.modules.jms.shared.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -37,7 +38,7 @@ public @interface MessageSend {
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
    * configuration file.
    */
-  String connectionFactoryId() default "";
+  String connectionFactoryId() default EMPTY;
 
   int deliveryMode() default DeliveryMode.PERSISTENT;
 

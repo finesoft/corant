@@ -90,9 +90,10 @@ public class Objects {
 
   public static String[] asStrings(UnaryOperator<String> uo, Object... objs) {
     if (uo == null) {
-      return Arrays.stream(objs).map(o -> asString(o, "null")).toArray(String[]::new);
+      return Arrays.stream(objs).map(o -> asString(o, Strings.NULL)).toArray(String[]::new);
     } else {
-      return Arrays.stream(objs).map(o -> uo.apply(asString(o, "null"))).toArray(String[]::new);
+      return Arrays.stream(objs).map(o -> uo.apply(asString(o, Strings.NULL)))
+          .toArray(String[]::new);
     }
   }
 

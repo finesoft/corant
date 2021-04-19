@@ -15,6 +15,8 @@ package org.corant.modules.query.shared.mapping;
 
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.UNDERSCORE;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -46,7 +48,7 @@ public class Query implements Serializable {
   private Script script = new Script();
   private List<FetchQuery> fetchQueries = new ArrayList<>();
   private List<QueryHint> hints = new ArrayList<>();
-  private String version = "";
+  private String version = EMPTY;
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
   private Map<String, String> properties = new HashMap<>();
   private String mappingFilePath;
@@ -100,6 +102,35 @@ public class Query implements Serializable {
     setProperties(properties);
     setMappingFilePath(defaultStrip(mappingFilePath));
     setMacroScript(macroScript);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Query other = (Query) obj;
+    if (name == null) {
+      if (other.name != null) {
+        return false;
+      }
+    } else if (!name.equals(other.name)) {
+      return false;
+    }
+    if (version == null) {
+      if (other.version != null) {
+        return false;
+      }
+    } else if (!version.equals(other.version)) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -233,7 +264,17 @@ public class Query implements Serializable {
   }
 
   public String getVersionedName() {
-    return defaultString(getName()) + (isNotBlank(getVersion()) ? "_" + getVersion() : "");
+    return defaultString(getName())
+        + (isNotBlank(getVersion()) ? UNDERSCORE + getVersion() : EMPTY);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (name == null ? 0 : name.hashCode());
+    result = prime * result + (version == null ? 0 : version.hashCode());
+    return result;
   }
 
   /**

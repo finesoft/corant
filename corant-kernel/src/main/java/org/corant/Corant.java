@@ -20,6 +20,8 @@ import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.NEWLINE;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.Arrays;
@@ -691,9 +693,9 @@ public class Corant implements AutoCloseable {
 
   private String boostLine(String separator) {
     if (!hasCommandArgument(DISABLE_BOOST_LINE_CMD)) {
-      return "\n".concat(separator.repeat(100));
+      return NEWLINE.concat(separator.repeat(100));
     }
-    return "";
+    return EMPTY;
   }
 
   private boolean hasCommandArgument(String cmd) {

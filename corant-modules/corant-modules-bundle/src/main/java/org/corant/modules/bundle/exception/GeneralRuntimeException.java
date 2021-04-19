@@ -15,6 +15,7 @@ package org.corant.modules.bundle.exception;
 
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.Arrays;
@@ -134,7 +135,7 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
     if (resolver != null) {
       return resolver.getMessage(defaultObject(locale, Locale::getDefault), this);
     } else {
-      return defaultString(super.getMessage()) + " " + asDefaultString(getCode());
+      return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
     }
   }
 

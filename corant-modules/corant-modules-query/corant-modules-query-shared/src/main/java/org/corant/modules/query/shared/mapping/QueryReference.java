@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.shared.mapping;
 
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.UNDERSCORE;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
@@ -31,7 +33,7 @@ public class QueryReference implements Serializable {
   private String name;
   private QueryType type;
   private String qualifier;
-  private String version = "";
+  private String version = EMPTY;
 
   protected QueryReference() {}
 
@@ -68,7 +70,8 @@ public class QueryReference implements Serializable {
   }
 
   public String getVersionedName() {
-    return defaultString(getName()) + (isNotBlank(getVersion()) ? "_" + getVersion() : "");
+    return defaultString(getName())
+        + (isNotBlank(getVersion()) ? UNDERSCORE + getVersion() : EMPTY);
   }
 
   @Override

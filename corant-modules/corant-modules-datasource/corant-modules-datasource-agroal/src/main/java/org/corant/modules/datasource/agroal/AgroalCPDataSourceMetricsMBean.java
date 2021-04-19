@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.agroal;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.time.Duration;
 
 /**
@@ -103,7 +104,7 @@ public interface AgroalCPDataSourceMetricsMBean {
   }
 
   default String description() {
-    return "";
+    return EMPTY;
   }
 
   /**

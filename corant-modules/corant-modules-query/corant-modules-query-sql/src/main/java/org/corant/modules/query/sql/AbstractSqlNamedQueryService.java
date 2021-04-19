@@ -35,125 +35,101 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-    SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String sql = querier.getScript();
-    Object[] scriptParameter = querier.getScriptParameter();
-    // if (maxSize > 0) {
-    // sql = getDialect().getLimitSql(sql, maxSize);
-    // }
     try {
+      QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+      int maxSize = fetchQuery.getMaxSize();
+      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      String sql = querier.getScript();
+      Object[] scriptParameter = querier.getScriptParameter();
+      // if (maxSize > 0) {
+      // sql = getDialect().getLimitSql(sql, maxSize);
+      // }
       log("fetch-> " + refQueryName, scriptParameter, sql);
       List<Map<String, Object>> fetchedList = getExecutor().select(sql, maxSize, scriptParameter);
-      fetch(fetchedList, querier);
-      querier.handleResultHints(fetchedList);
-      if (result instanceof List) {
-        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
-      }
+      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
-          fetchQuery.getReferenceQuery(), e.getMessage());
+          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
     }
   }
 
   @Override
-  public <T> Forwarding<T> forward(String queryName, Object parameter) {
+  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
-    try {
-      log(queryName, scriptParameter, sql, "Limit: " + limitSql);
-      Forwarding<T> result = Forwarding.inst();
-      List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
-      int size = list == null ? 0 : list.size();
-      if (size > 0) {
-        if (size > limit) {
-          list.remove(limit);
-          result.withHasNext(true);
-        }
-        this.fetch(list, querier);
+    log(queryName, scriptParameter, sql, "Limit: " + limitSql);
+    Forwarding<T> result = Forwarding.inst();
+    List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
+    int size = list == null ? 0 : list.size();
+    if (size > 0) {
+      if (size > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
       }
-      return result.withResults(querier.handleResults(list));
-    } catch (SQLException e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the forward query [%s].", queryName);
+      this.fetch(list, querier);
     }
+    return result.withResults(querier.handleResults(list));
+
   }
 
   @Override
-  public <T> T get(String queryName, Object parameter) {
+  protected <T> T doGet(String queryName, Object parameter) throws Exception {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
-    try {
-      log(queryName, scriptParameter, sql);
-      Map<String, Object> result = getExecutor().get(sql, scriptParameter);
-      this.fetch(result, querier);
-      return querier.handleResult(result);
-    } catch (SQLException e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
-          queryName);
-    }
+    log(queryName, scriptParameter, sql);
+    Map<String, Object> result = getExecutor().get(sql, scriptParameter);
+    this.fetch(result, querier);
+    return querier.handleResult(result);
+
   }
 
   @Override
-  public <T> Paging<T> page(String queryName, Object parameter) {
+  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
-    try {
-      log(queryName, scriptParameter, sql, "Limit: " + limitSql);
-      List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
-      Paging<T> result = Paging.of(offset, limit);
-      int size = list == null ? 0 : list.size();
-      if (size > 0) {
-        if (size < limit) {
-          result.withTotal(offset + size);
-        } else {
-          String totalSql = getDialect().getCountSql(sql);
-          log("total-> " + queryName, scriptParameter, totalSql);
-          result.withTotal(getMapInteger(getExecutor().get(totalSql, scriptParameter),
-              Dialect.COUNT_FIELD_NAME));
-        }
-        this.fetch(list, querier);
+    log(queryName, scriptParameter, sql, "Limit: " + limitSql);
+    List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
+    Paging<T> result = Paging.of(offset, limit);
+    int size = list == null ? 0 : list.size();
+    if (size > 0) {
+      if (size < limit) {
+        result.withTotal(offset + size);
+      } else {
+        String totalSql = getDialect().getCountSql(sql);
+        log("total-> " + queryName, scriptParameter, totalSql);
+        result.withTotal(
+            getMapInteger(getExecutor().get(totalSql, scriptParameter), Dialect.COUNT_FIELD_NAME));
       }
-      return result.withResults(querier.handleResults(list));
-    } catch (SQLException e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
-          queryName);
+      this.fetch(list, querier);
     }
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
-  public <T> List<T> select(String queryName, Object parameter) {
+  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int maxSelectSize = querier.resolveMaxSelectSize();
-    try {
-      // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
-      log(queryName, scriptParameter, sql);
-      List<Map<String, Object>> results =
-          getExecutor().select(sql, maxSelectSize + 1, scriptParameter);
-      if (querier.validateResultSize(results) > 0) {
-        this.fetch(results, querier);
-      }
-      return querier.handleResults(results);
-    } catch (SQLException e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
-          queryName);
+    // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
+    log(queryName, scriptParameter, sql);
+    List<Map<String, Object>> results =
+        getExecutor().select(sql, maxSelectSize + 1, scriptParameter);
+    if (querier.validateResultSize(results) > 0) {
+      this.fetch(results, querier);
     }
+    return querier.handleResults(results);
   }
 
   protected Dialect getDialect() {

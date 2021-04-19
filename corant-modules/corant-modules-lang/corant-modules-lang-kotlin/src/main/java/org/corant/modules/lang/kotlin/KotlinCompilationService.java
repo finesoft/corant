@@ -13,6 +13,7 @@
  */
 package org.corant.modules.lang.kotlin;
 
+import static org.corant.shared.util.Strings.NEWLINE;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class KotlinCompilationService implements CompilationService {
       throw new CorantRuntimeException("Unable to invoke Kotlin compiler");
     }
     if (smc.hasErrors()) {
-      throw new CorantRuntimeException("Compilation failed" + String.join("\n", smc.errors));
+      throw new CorantRuntimeException("Compilation failed" + String.join(NEWLINE, smc.errors));
     }
   }
 

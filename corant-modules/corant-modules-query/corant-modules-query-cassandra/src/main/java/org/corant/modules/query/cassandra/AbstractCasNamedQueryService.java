@@ -37,14 +37,14 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
 
   @Override
   public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    int maxSize = fetchQuery.isMultiRecords() ? fetchQuery.getMaxSize() : 1;
-    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-    CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
-    String cql = querier.getScript();
-    String ks = resolveKeyspace(querier);
-    Object[] scriptParameter = querier.getScriptParameter();
     try {
+      QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
+      int maxSize = fetchQuery.getMaxSize();
+      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      String cql = querier.getScript();
+      String ks = resolveKeyspace(querier);
+      Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, cql);
       List<Map<String, Object>> fetchedList;
       if (maxSize > 0) {
@@ -52,113 +52,86 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         fetchedList = getExecutor().select(ks, cql, scriptParameter);
       }
-      fetch(fetchedList, querier);
-      querier.handleResultHints(fetchedList);
-      if (result instanceof List) {
-        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
-      } else {
-        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
-      }
+      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
-          fetchQuery.getReferenceQuery(), e.getMessage());
+          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
     }
   }
 
   @Override
-  public <T> Forwarding<T> forward(String queryName, Object parameter) {
+  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
-    try {
-      log(queryName, scriptParameter, cql);
-      Forwarding<T> result = Forwarding.inst();
-      List<Map<String, Object>> list =
-          getExecutor().paging(ks, cql, offset, limit + 1, scriptParameter);
-      int size = sizeOf(list);
-      if (size > 0) {
-        if (size > limit) {
-          list.remove(limit);
-          result.withHasNext(true);
-        }
-        this.fetch(list, querier);
+    log(queryName, scriptParameter, cql);
+    Forwarding<T> result = Forwarding.inst();
+    List<Map<String, Object>> list =
+        getExecutor().paging(ks, cql, offset, limit + 1, scriptParameter);
+    int size = sizeOf(list);
+    if (size > 0) {
+      if (size > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
       }
-      return result.withResults(querier.handleResults(list));
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the forward query [%s].", queryName);
+      this.fetch(list, querier);
     }
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
-  public <T> T get(String queryName, Object parameter) {
+  protected <T> T doGet(String queryName, Object parameter) throws Exception {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
-    try {
-      log(queryName, scriptParameter, cql);
-      Map<String, Object> result = getExecutor().get(ks, cql, scriptParameter);
-      this.fetch(result, querier);
-      return querier.handleResult(result);
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s].",
-          queryName);
-    }
+    log(queryName, scriptParameter, cql);
+    Map<String, Object> result = getExecutor().get(ks, cql, scriptParameter);
+    this.fetch(result, querier);
+    return querier.handleResult(result);
   }
 
   @Override
-  public <T> Paging<T> page(String queryName, Object parameter) {
+  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
-    try {
-      log(queryName, scriptParameter, cql);
-      List<Map<String, Object>> list =
-          getExecutor().paging(ks, cql, offset, limit, scriptParameter);
-      Paging<T> result = Paging.of(offset, limit);
-      int size = sizeOf(list);
-      if (size > 0) {
-        if (size < limit) {
-          result.withTotal(offset + size);
-        } else {
-          result.withTotal(getExecutor().total(ks, cql, scriptParameter));
-        }
-        this.fetch(list, querier);
+    log(queryName, scriptParameter, cql);
+    List<Map<String, Object>> list = getExecutor().paging(ks, cql, offset, limit, scriptParameter);
+    Paging<T> result = Paging.of(offset, limit);
+    int size = sizeOf(list);
+    if (size > 0) {
+      if (size < limit) {
+        result.withTotal(offset + size);
+      } else {
+        result.withTotal(getExecutor().total(ks, cql, scriptParameter));
       }
-      return result.withResults(querier.handleResults(list));
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s].",
-          queryName);
+      this.fetch(list, querier);
     }
+    return result.withResults(querier.handleResults(list));
   }
 
   @Override
-  public <T> List<T> select(String queryName, Object parameter) {
+  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int maxSelectSize = querier.resolveMaxSelectSize();
-    try {
-      log(queryName, scriptParameter, cql);
-      List<Map<String, Object>> results =
-          getExecutor().paging(ks, cql, 0, maxSelectSize + 1, scriptParameter);
-      if (querier.validateResultSize(results) > 0) {
-        this.fetch(results, querier);
-      }
-      return querier.handleResults(results);
-    } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s].",
-          queryName);
+    log(queryName, scriptParameter, cql);
+    List<Map<String, Object>> results =
+        getExecutor().paging(ks, cql, 0, maxSelectSize + 1, scriptParameter);
+    if (querier.validateResultSize(results) > 0) {
+      this.fetch(results, querier);
     }
+    return querier.handleResults(results);
   }
 
   protected abstract CasQueryExecutor getExecutor();

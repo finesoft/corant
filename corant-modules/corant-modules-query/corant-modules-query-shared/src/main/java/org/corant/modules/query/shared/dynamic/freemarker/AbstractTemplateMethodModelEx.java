@@ -19,6 +19,7 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Strings.NULL;
 import java.lang.reflect.Array;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
@@ -123,7 +124,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
     } else {
       // FIXME Resolve TemplateHashModel
       throw new QueryRuntimeException("Unknow arguement,the class is %s.",
-          arg == null ? "null" : arg.getClass());
+          arg == null ? NULL : arg.getClass());
     }
   }
 

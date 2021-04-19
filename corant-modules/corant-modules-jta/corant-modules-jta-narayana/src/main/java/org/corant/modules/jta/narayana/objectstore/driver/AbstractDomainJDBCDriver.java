@@ -15,6 +15,7 @@ package org.corant.modules.jta.narayana.objectstore.driver;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -121,7 +122,7 @@ public abstract class AbstractDomainJDBCDriver
       } finally {
         release(rs, pstmt, connection);
       }
-      store.packString("");
+      store.packString(EMPTY);
       foundTypes.setBuffer(store.buffer());
       return true;
     } catch (Exception e) {

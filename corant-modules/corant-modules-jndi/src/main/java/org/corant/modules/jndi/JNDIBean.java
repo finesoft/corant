@@ -14,6 +14,8 @@
 package org.corant.modules.jndi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Strings.FALSE;
+import static org.corant.shared.util.Strings.TRUE;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -101,7 +103,7 @@ public class JNDIBean<T> implements Bean<T>, PassivationCapable {
   @Override
   public String getId() {
     return String.join(";", getBeanClass().getName() + "%" + getName(), getScope().getName(),
-        isAlternative() ? "true" : "false",
+        isAlternative() ? TRUE : FALSE,
         String.join(",",
             getQualifiers().stream().map(q -> q.annotationType().getSimpleName())
                 .toArray(String[]::new)),

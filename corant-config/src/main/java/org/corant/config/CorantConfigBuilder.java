@@ -15,6 +15,7 @@ package org.corant.config;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -146,7 +147,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
       try {
         sortMap.put(name, Desensitizer.desensitize(name, defaultString(sources.getValue(name))));
       } catch (Exception e) {
-        sortMap.put(name, String.join("", "[ERROR]:", " exception:", e.getClass().getName(),
+        sortMap.put(name, String.join(EMPTY, "[ERROR]:", " exception:", e.getClass().getName(),
             ", message:", defaultString(e.getMessage(), "none")));
         if (thrown != null) {
           thrown.addSuppressed(e);

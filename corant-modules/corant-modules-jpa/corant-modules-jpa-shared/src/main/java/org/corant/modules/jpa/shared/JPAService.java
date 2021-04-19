@@ -136,7 +136,7 @@ public class JPAService implements PersistenceService {
     emfs.forEach((k, v) -> {
       if (v.isOpen()) {
         v.close();
-        logger.fine(() -> String.format("Close entity manager factory [%s].", k));
+        logger.info(() -> String.format("Close entity manager factory [%s].", k));
       }
     });
   }

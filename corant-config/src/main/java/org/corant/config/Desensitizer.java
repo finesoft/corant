@@ -14,9 +14,13 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNoneBlank;
+import static org.corant.shared.util.Strings.split;
 import java.util.Set;
+import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-config
@@ -26,8 +30,13 @@ import org.corant.shared.util.Strings;
  */
 public class Desensitizer {
 
-  static final Set<String> sensitives =
-      setOf("password", "username", "credential", ".pwd", ".user", "secret-key", "secretkey");
+  static final Set<String> sensitives = setOf("password", "username", "credential", ".pwd", ".user",
+      "secret-key", "secretkey", "secret-access");
+
+  static {
+    streamOf(split(Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES), ","))
+        .forEach(sensitives::add);
+  }
 
   public static String desensitize(String propertyName, String propertyValue) {
     if (isNoneBlank(propertyName, propertyValue)) {

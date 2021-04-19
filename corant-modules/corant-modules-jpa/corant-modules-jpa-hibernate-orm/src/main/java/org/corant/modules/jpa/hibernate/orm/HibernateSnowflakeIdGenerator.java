@@ -23,6 +23,7 @@ import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Strings.FALSE;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.time.Instant;
@@ -155,7 +156,7 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     String ip = asString(metaData.getProperties().get(IG_SF_WK_IP),
         Configs.getValue(GL_IG_SF_WK_IP, String.class));
     boolean usePst = toBoolean(metaData.getProperties().getOrDefault(IG_SF_UP_TM,
-        Configs.getValue(GL_IG_SF_UP_TM, String.class, "false")));
+        Configs.getValue(GL_IG_SF_UP_TM, String.class, FALSE)));
     long delayedTiming = toLong(metaData.getProperties().getOrDefault(IG_SF_DL_TM,
         Configs.getValue(GL_IG_SF_DL_TM, Long.class, 16000L)));
 

@@ -17,6 +17,9 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.NEWLINE;
+import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -33,6 +36,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.corant.config.Configs;
 import org.corant.modules.jpa.shared.JPAConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.ClassPaths;
@@ -46,6 +50,9 @@ import org.xml.sax.SAXException;
 
 /**
  * corant-modules-jpa-shared
+ *
+ * <p>
+ * Note: Standard persistence unit XML dosen't support enable property.
  *
  * @author bingo 上午10:43:11
  *
@@ -100,7 +107,7 @@ public class PersistenceXmlParser {
               String propName = propElement.getAttribute(JPAConfig.JCX_PRO_NME).trim();
               String propValue = propElement.getAttribute(JPAConfig.JCX_PRO_VAL).trim();
               if (isEmpty(propValue)) {
-                propValue = extractContent(propElement, "");
+                propValue = extractContent(propElement, EMPTY);
               }
               if (propName.equals(JPAConfig.BIND_JNDI)) {
                 puimd.setBindToJndi(toBoolean(propValue));
@@ -132,8 +139,15 @@ public class PersistenceXmlParser {
           PersistenceUnitInfoMetaData puimd = new PersistenceUnitInfoMetaData(puName);
           puimd.setVersion(version);
           puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
+          if (isBlank(puName)) {
+            puimd.setEnable(Configs.getValue(JPAConfig.JC_PREFIX + JPAConfig.JCX_ENABLE,
+                Boolean.class, Boolean.TRUE));
+          } else {
+            puimd.setEnable(Configs.getValue(JPAConfig.JC_PREFIX + puName + JPAConfig.JC_ENABLE,
+                Boolean.class, Boolean.TRUE));
+          }
           doParse(element, puimd);
-          if (isNotEmpty(puimd.getManagedClassNames())) {
+          if (isNotEmpty(puimd.getManagedClassNames()) || isNotEmpty(puimd.getJarFileUrls())) {
             cfgs.add(puimd);
           }
         }
@@ -240,7 +254,7 @@ public class PersistenceXmlParser {
     List<Exception> exs = PersistenceSchema.validate(document, version);
     if (!isEmpty(exs)) {
       throw new SAXException(
-          String.join("\n", exs.stream().map(Exception::getMessage).toArray(String[]::new)));
+          String.join(NEWLINE, exs.stream().map(Exception::getMessage).toArray(String[]::new)));
     }
   }
 

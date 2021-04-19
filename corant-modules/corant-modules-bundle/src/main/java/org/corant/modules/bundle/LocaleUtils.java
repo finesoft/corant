@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.util.Locale;
 
 /**
@@ -27,19 +28,18 @@ public class LocaleUtils {
    * IETF RFC 1766 tag separator
    */
   public static final char IETF_SEPARATOR = '-';
-  public static final String EMPTY_STRING = "";
 
   public static Locale langToLocale(String lang) {
     return langToLocale(lang, IETF_SEPARATOR);
   }
 
   public static Locale langToLocale(String lang, char separator) {
-    if (lang == null || lang.equals(EMPTY_STRING)) { // not specified => getDefault
+    if (lang == null || lang.equals(EMPTY)) { // not specified => getDefault
       return Locale.getDefault();
     }
-    String language = EMPTY_STRING;
-    String country = EMPTY_STRING;
-    String variant = EMPTY_STRING;
+    String language = EMPTY;
+    String country = EMPTY;
+    String variant = EMPTY;
 
     int i1 = lang.indexOf(separator);
     if (i1 < 0) {
@@ -59,19 +59,19 @@ public class LocaleUtils {
     if (language.length() == 2) {
       language = language.toLowerCase(Locale.ENGLISH);
     } else {
-      language = EMPTY_STRING;
+      language = EMPTY;
     }
 
     if (country.length() == 2) {
       country = country.toUpperCase(Locale.ENGLISH);
     } else {
-      country = EMPTY_STRING;
+      country = EMPTY;
     }
 
     if (variant.length() > 0 && (language.length() == 2 || country.length() == 2)) {
       variant = variant.toUpperCase(Locale.ENGLISH);
     } else {
-      variant = EMPTY_STRING;
+      variant = EMPTY;
     }
 
     return new Locale(language, country, variant);

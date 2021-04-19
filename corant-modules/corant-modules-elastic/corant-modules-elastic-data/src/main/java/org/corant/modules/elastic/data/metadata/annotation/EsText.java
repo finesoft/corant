@@ -13,6 +13,7 @@
  */
 package org.corant.modules.elastic.data.metadata.annotation;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -148,7 +149,7 @@ public @interface EsText {
    *
    * @return
    */
-  String search_quote_analyzer() default "";
+  String search_quote_analyzer() default EMPTY;
 
   /**
    * Which scoring algorithm or similarity should be used. Defaults to BM25.

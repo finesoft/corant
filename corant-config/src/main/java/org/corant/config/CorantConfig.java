@@ -14,6 +14,7 @@
 package org.corant.config;
 
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.NEWLINE;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -127,7 +128,7 @@ public class CorantConfig implements Config, Serializable {
     if (value == null) {
       throw new NoSuchElementException(
           String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
-              propertyType, String.join("\n", getPropertyNames())));
+              propertyType, String.join(NEWLINE, getPropertyNames())));
     }
     return value;
   }

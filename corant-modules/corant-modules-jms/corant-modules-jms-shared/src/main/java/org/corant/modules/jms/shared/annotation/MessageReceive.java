@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared.annotation;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -86,7 +87,7 @@ public @interface MessageReceive {
    * @see JMSContext#setClientID(String)
    * @return clientId
    */
-  String clientId() default "";
+  String clientId() default EMPTY;
 
   /**
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
@@ -94,7 +95,7 @@ public @interface MessageReceive {
    *
    * @return connectionFactoryId
    */
-  String connectionFactoryId() default "";
+  String connectionFactoryId() default EMPTY;
 
   /**
    * The destination names, can use '${config property name}' to retrieve the destination names from
@@ -161,7 +162,7 @@ public @interface MessageReceive {
    * @see Session#createConsumer(javax.jms.Destination, String)
    * @return selector
    */
-  String selector() default "";
+  String selector() default EMPTY;
 
   /**
    * @return subscriptionDurable

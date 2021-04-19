@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -51,7 +52,7 @@ public @interface MgQuery {
    * @return value
    */
   @Nonbinding
-  String value() default "";
+  String value() default EMPTY;
 
   /**
    * corant-modules-query-mongodb
@@ -61,7 +62,7 @@ public @interface MgQuery {
    */
   final class MgQueryLiteral extends AnnotationLiteral<MgQuery> implements MgQuery {
 
-    public static final MgQuery INSTANCE = of("");
+    public static final MgQuery INSTANCE = of(EMPTY);
 
     private static final long serialVersionUID = 1L;
 

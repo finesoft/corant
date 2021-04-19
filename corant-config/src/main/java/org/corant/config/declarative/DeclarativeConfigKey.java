@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-config
@@ -35,7 +36,7 @@ import javax.inject.Qualifier;
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 public @interface DeclarativeConfigKey {
 
-  String UNCONFIGURED_KEY = "";
+  String UNCONFIGURED_KEY = Strings.EMPTY;
 
   @Nonbinding
   String value() default UNCONFIGURED_KEY;

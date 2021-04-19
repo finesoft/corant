@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -53,7 +54,7 @@ public @interface SqlQuery {
    * @return dialect
    */
   @Nonbinding
-  String dialect() default "";
+  String dialect() default EMPTY;
 
   /**
    * The data source name
@@ -61,7 +62,7 @@ public @interface SqlQuery {
    * @return value
    */
   @Nonbinding
-  String value() default "";
+  String value() default EMPTY;
 
   /**
    * corant-modules-query-sql
@@ -71,7 +72,7 @@ public @interface SqlQuery {
    */
   final class SqlQueryLiteral extends AnnotationLiteral<SqlQuery> implements SqlQuery {
 
-    public static final SqlQuery INSTANCE = of(DBMS.MYSQL, "");
+    public static final SqlQuery INSTANCE = of(DBMS.MYSQL, EMPTY);
 
     private static final long serialVersionUID = 1L;
 

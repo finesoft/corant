@@ -24,6 +24,8 @@ import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.SPACE;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -417,9 +419,9 @@ public class JPAQueries {
 
     protected String getParameterDescription() {
       if (parameterBuilder == null) {
-        return "";
+        return EMPTY;
       } else {
-        return " " + parameterBuilder.toString();
+        return SPACE + parameterBuilder.toString();
       }
     }
 

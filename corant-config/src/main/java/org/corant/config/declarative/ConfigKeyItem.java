@@ -19,6 +19,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
+import org.corant.shared.util.Strings;
 
 @Documented
 @Retention(RUNTIME)
@@ -39,7 +40,7 @@ public @interface ConfigKeyItem {
 
   DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
 
-  String value() default "";
+  String value() default Strings.EMPTY;
 
   class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem> implements ConfigKeyItem {
 
@@ -57,7 +58,7 @@ public @interface ConfigKeyItem {
 
     @Override
     public String value() {
-      return "";
+      return Strings.EMPTY;
     }
 
   }

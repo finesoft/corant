@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,5 +35,5 @@ public @interface MessageCodes {
   String locale() default "zh_CN";
 
   @Nonbinding
-  String value() default "";
+  String value() default EMPTY;
 }

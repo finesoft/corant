@@ -15,6 +15,7 @@ package org.corant.modules.jms.shared.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -35,7 +36,7 @@ public @interface MessageDispatch {
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
    * configuration file.
    */
-  String connectionFactoryId() default "";
+  String connectionFactoryId() default EMPTY;
 
   /**
    * The destination name, can use '${config property name}' to retrieve the destination name
@@ -45,7 +46,7 @@ public @interface MessageDispatch {
    */
   String destination();
 
-  String durableSubscription() default "";
+  String durableSubscription() default EMPTY;
 
   boolean multicast() default false;
 

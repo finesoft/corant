@@ -66,7 +66,7 @@ public class MessageReceiverManager {
   protected final List<MessageReceiverTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
-    logger.fine(() -> "Stop the message receiver tasks.");
+    logger.info(() -> "Stop the message receiver tasks.");
     while (!receiveExecutions.isEmpty()) {
       try {
         receiveExecutions.remove(0).cancel();
@@ -74,7 +74,7 @@ public class MessageReceiverManager {
         logger.log(Level.WARNING, e, () -> "Stop message receiver task error!");
       }
     }
-    logger.fine(() -> "Shut down the message receiver executor services.");
+    logger.info(() -> "Stop the message receiver executor services.");
     Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
         executorServices.entrySet().iterator();
     while (it.hasNext()) {
@@ -83,6 +83,8 @@ public class MessageReceiverManager {
         entry.getValue().shutdown();
         entry.getValue().awaitTermination(
             entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
+        logger.info(() -> String.format("The message receiver executor service %s was stopped.",
+            entry.getKey().getConnectionFactoryId()));
       } catch (InterruptedException e) {
         logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
             entry.getKey().getConnectionFactoryId()));

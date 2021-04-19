@@ -16,6 +16,7 @@ package org.corant.modules.query.shared.mapping;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -113,7 +114,7 @@ public class QueryMappingService {
     new QueryParser().parse(resolveMappingFilePaths()).forEach(m -> {
       List<String> brokens = m.selfValidate();
       if (!brokens.isEmpty()) {
-        throw new QueryRuntimeException(String.join("\n", brokens));
+        throw new QueryRuntimeException(String.join(NEWLINE, brokens));
       }
       m.getQueries().forEach(q -> {
         // q.setParamMappings(m.getParaMapping());// copy

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.elastic.data.metadata.annotation;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -90,7 +91,7 @@ public @interface EsDate {
    *
    * @return locale
    */
-  String locale() default "";
+  String locale() default EMPTY;
 
   /**
    * Accepts a date value in one of the configured format's as the field which is substituted for
@@ -98,7 +99,7 @@ public @interface EsDate {
    *
    * @return null_value
    */
-  String null_value() default "";
+  String null_value() default EMPTY;
 
   /**
    * Whether the field value should be stored and retrievable separately from the _source field.

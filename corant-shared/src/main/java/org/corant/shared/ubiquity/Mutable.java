@@ -16,6 +16,7 @@ package org.corant.shared.ubiquity;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.NULL;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -685,7 +686,7 @@ public interface Mutable<T> extends Supplier<T> {
 
     @Override
     public String toString() {
-      return value == null ? "null" : value.toString();
+      return value == null ? NULL : value.toString();
     }
 
   }
@@ -740,7 +741,7 @@ public interface Mutable<T> extends Supplier<T> {
 
     @Override
     public String toString() {
-      return value == null ? "null" : value.toString();
+      return value == null ? NULL : value.toString();
     }
   }
 

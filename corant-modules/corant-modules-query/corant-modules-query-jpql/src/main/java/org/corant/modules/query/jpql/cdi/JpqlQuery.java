@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -52,7 +53,7 @@ public @interface JpqlQuery {
    * @return value
    */
   @Nonbinding
-  String value() default "";
+  String value() default EMPTY;
 
   /**
    * corant-modules-query-jpql

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.tryCast;
+import static org.corant.shared.util.Strings.NULL;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -229,7 +230,7 @@ public class Types {
       return getRawType(((WildcardType) type).getUpperBounds()[0]);
 
     } else {
-      String className = type == null ? "null" : type.getClass().getName();
+      String className = type == null ? NULL : type.getClass().getName();
       throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
           + "GenericArrayType, but <" + type + "> is of type " + className);
     }

@@ -13,6 +13,7 @@
  */
 package org.corant.kernel.util;
 
+import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.split;
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +38,7 @@ public class Launchs {
 
   private static final Pattern debugPattern = Pattern.compile("-Xdebug|jdwp");
 
-  private Launchs() {
-    super();
-  }
+  private Launchs() {}
 
   public static void debugAs() throws IOException, InterruptedException {
     List<String> commands = new ArrayList<>();
@@ -89,7 +88,7 @@ public class Launchs {
   }
 
   public static List<String> getMainCommands() {
-    return Arrays.stream(split(System.getProperty("sun.java.command"), " "))
+    return Arrays.stream(split(System.getProperty("sun.java.command"), SPACE))
         .filter(Strings::isNotBlank).collect(Collectors.toList());
   }
 

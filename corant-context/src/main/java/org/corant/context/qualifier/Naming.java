@@ -13,6 +13,7 @@
  */
 package org.corant.context.qualifier;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,10 +33,10 @@ import javax.inject.Qualifier;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface Naming {
 
-  NamingLiteral INSTANCE = new NamingLiteral("");
+  NamingLiteral INSTANCE = new NamingLiteral(EMPTY);
 
   @Nonbinding
-  String value() default "";
+  String value() default EMPTY;
 
   class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
 

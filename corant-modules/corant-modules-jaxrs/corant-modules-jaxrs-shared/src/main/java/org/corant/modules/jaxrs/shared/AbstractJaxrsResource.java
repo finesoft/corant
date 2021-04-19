@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jaxrs.shared;
 
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.Map;
@@ -107,7 +108,7 @@ public abstract class AbstractJaxrsResource {
           return pathAnnotation.value();
         }
       }
-      return "";
+      return EMPTY;
     });
   }
 }

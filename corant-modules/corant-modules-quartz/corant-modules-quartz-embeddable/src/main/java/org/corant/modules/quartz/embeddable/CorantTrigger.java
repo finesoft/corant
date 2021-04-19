@@ -2,6 +2,7 @@ package org.corant.modules.quartz.embeddable;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -24,7 +25,7 @@ public @interface CorantTrigger {
    *
    * @return cron
    */
-  String cron() default "";
+  String cron() default EMPTY;
 
   /**
    * The trigger end at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.
@@ -46,7 +47,7 @@ public @interface CorantTrigger {
    *
    * @return key
    */
-  String key() default "";
+  String key() default EMPTY;
 
   /**
    * The trigger start at the date of milliseconds from the epoch of 1970-01-01T00:00:00Z.

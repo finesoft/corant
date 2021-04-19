@@ -127,6 +127,7 @@ public class CorantDeclarativeScheduler {
       throws SchedulerException {
     if (!enable) {
       logger.info(() -> "The bulit-in declarative job scheduler is disabled!");
+      return;
     }
     if (isNotEmpty(extension.getDeclarativeJobMetaDatas())) {
       initializeDeclarativeScheduler();

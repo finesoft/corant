@@ -36,7 +36,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public static final String PRO_KEY_KEYSPACE = "cassandra.query.keyspace";
 
   @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       int maxSize = fetchQuery.getMaxSize();
@@ -52,7 +52,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         fetchedList = getExecutor().select(ks, cql, scriptParameter);
       }
-      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
+      return new FetchResult(querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

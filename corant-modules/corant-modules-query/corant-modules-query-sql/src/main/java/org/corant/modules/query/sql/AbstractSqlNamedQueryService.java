@@ -34,7 +34,7 @@ import org.corant.modules.query.sql.dialect.Dialect;
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
 
   @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       int maxSize = fetchQuery.getMaxSize();
@@ -42,12 +42,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       String sql = querier.getScript();
       Object[] scriptParameter = querier.getScriptParameter();
-      // if (maxSize > 0) {
-      // sql = getDialect().getLimitSql(sql, maxSize);
-      // }
       log("fetch-> " + refQueryName, scriptParameter, sql);
-      List<Map<String, Object>> fetchedList = getExecutor().select(sql, maxSize, scriptParameter);
-      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
+      return new FetchResult(querier, getExecutor().select(sql, maxSize, scriptParameter));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

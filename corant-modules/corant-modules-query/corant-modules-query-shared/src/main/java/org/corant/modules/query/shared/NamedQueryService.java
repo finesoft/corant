@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.shared;
 
+import java.util.List;
+import java.util.Map;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 
 /**
@@ -23,6 +25,15 @@ import org.corant.modules.query.shared.mapping.FetchQuery;
  */
 public interface NamedQueryService extends QueryService<String, Object> {
 
-  void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
+  FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
 
+  class FetchResult {
+    public final Querier fetchQuerier;
+    public final List<Map<String, Object>> fetchedList;
+
+    public FetchResult(Querier fetchQuerier, List<Map<String, Object>> fetchedList) {
+      this.fetchQuerier = fetchQuerier;
+      this.fetchedList = fetchedList;
+    }
+  }
 }

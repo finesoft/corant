@@ -50,7 +50,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
   @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     throw new NotSupportedException();
   }
 

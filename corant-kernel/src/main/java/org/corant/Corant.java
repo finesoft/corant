@@ -583,7 +583,8 @@ public class Corant implements AutoCloseable {
       }
       container = null;
     } catch (IllegalStateException e) {
-      log(Level.WARNING, e, "The container is already shutdown!", APP_NAME);
+      log(Level.WARNING, null, "The %s container is already shutdown, message:%s", APP_NAME,
+          e.getMessage());
     } catch (Throwable e) {
       log(Level.SEVERE, e, "Stop %s occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);

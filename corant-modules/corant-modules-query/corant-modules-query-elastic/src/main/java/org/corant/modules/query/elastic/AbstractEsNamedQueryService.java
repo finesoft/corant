@@ -55,7 +55,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       int maxSize = fetchQuery.getMaxSize();
@@ -65,7 +65,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
-      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
+      return new FetchResult(querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

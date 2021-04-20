@@ -385,12 +385,17 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     Object resolvePayload(Message message) throws JMSException {
       String serialSchema = message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME);
       if (isNotBlank(serialSchema)) {
-        MessageSerializer serializer =
-            resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
-        return serializer.deserialize(message, messageClass);
-      } else {
-        return message;
+        if (!Message.class.isAssignableFrom(messageClass)) {
+          MessageSerializer serializer =
+              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
+          return serializer.deserialize(message, messageClass);
+        } else {
+          logger.warning(() -> String.format(
+              "The message has serialization scheme property, but the message consumer still use the native javax.jms.Message as method %s parameter type.",
+              method));
+        }
       }
+      return message;
     }
 
     void resolveSecurityContext(Message message) {

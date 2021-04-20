@@ -120,27 +120,29 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
   protected abstract <T> List<T> doSelect(String q, Object p) throws Exception;
 
-  protected <T> void fetch(List<T> results, Querier querier) {
+  protected <T> void fetch(List<T> results, Querier parentQuerier) {
     List<FetchQuery> fetchQueries;
-    if (isNotEmpty(results) && isNotEmpty(fetchQueries = querier.getQuery().getFetchQueries())) {
+    if (isNotEmpty(results) && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
       for (FetchQuery fq : fetchQueries) {
         NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (fq.isEagerInject()) {
           for (T result : results) {
-            if (querier.decideFetch(result, fq)) {
-              fetchQueryService.fetch(result, fq, querier);
+            if (parentQuerier.decideFetch(result, fq)) {
+              FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
+              postFetch(fq, fr, parentQuerier, result);
             }
           }
         } else {
           List<T> decideResults =
-              results.stream().filter(r -> querier.decideFetch(r, fq)).collect(Collectors.toList());
+              results.stream().filter(r -> parentQuerier.decideFetch(r, fq)).collect(Collectors.toList());
           if (isEmpty(decideResults) && isNotEmpty(fq.getParameters())
               && fq.getParameters().stream()
                   .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
                       || fp.getSource() == FetchQueryParameterSource.P)) {
             continue;
           }
-          fetchQueryService.fetch(decideResults, fq, querier);
+          FetchResult fr = fetchQueryService.fetch(decideResults, fq, parentQuerier);
+          postFetch(fq, fr, parentQuerier, decideResults);
         }
       }
     }
@@ -152,7 +154,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       for (FetchQuery fq : fetchQueries) {
         NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
         if (parentQuerier.decideFetch(result, fq)) {
-          fetchQueryService.fetch(result, fq, parentQuerier);
+          FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
+          postFetch(fq, fr, parentQuerier, result);
         }
       }
     }
@@ -174,15 +177,15 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         name, String.join(",", asStrings(param)), String.join(";\n", script)));
   }
 
-  protected void postFetch(FetchQuery fetchQuery, Querier fetchQuerier,
-      List<Map<String, Object>> fetchedList, Querier parentQuerier, Object result) {
-    if (isNotEmpty(fetchedList)) {
-      fetch(fetchedList, fetchQuerier);// Next fetch
-      fetchQuerier.handleResultHints(fetchedList);
+  protected void postFetch(FetchQuery fetchQuery, FetchResult fetchResult, Querier parentQuerier,
+      Object result) {
+    if (fetchResult != null && isNotEmpty(fetchResult.fetchedList)) {
+      fetch(fetchResult.fetchedList, fetchResult.fetchQuerier);// Next fetch
+      fetchResult.fetchQuerier.handleResultHints(fetchResult.fetchedList);
       if (result instanceof List) {
-        parentQuerier.handleFetchedResults((List<?>) result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResults((List<?>) result, fetchResult.fetchedList, fetchQuery);
       } else {
-        parentQuerier.handleFetchedResult(result, fetchedList, fetchQuery);
+        parentQuerier.handleFetchedResult(result, fetchResult.fetchedList, fetchQuery);
       }
     }
   }

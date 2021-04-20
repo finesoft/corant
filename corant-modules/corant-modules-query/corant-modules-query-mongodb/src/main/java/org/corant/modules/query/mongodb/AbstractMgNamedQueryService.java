@@ -126,7 +126,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public void fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       int maxSize = fetchQuery.getMaxSize();
@@ -138,7 +138,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       try (MongoCursor<Document> cursor = fi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
-      postFetch(fetchQuery, querier, fetchedList, parentQuerier, result);
+      return new FetchResult(querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

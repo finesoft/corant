@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -48,6 +49,8 @@ public class QueryScriptEngines {
   public static final String RESULTS_FUNC_PARAMETER_NAME = "rs";
   public static final String FETCHED_RESULTS_FUNC_PARAMETER_NAME = "frs";
   public static final String PARAMETER_FUNC_PARAMETER_NAME = "p";
+
+  static final Logger logger = Logger.getLogger(QueryScriptEngines.class.getName());
 
   static final ThreadLocal<Map<Object, Consumer<Object[]>>> CONSUMERS =
       ThreadLocal.withInitial(HashMap::new);
@@ -104,6 +107,9 @@ public class QueryScriptEngines {
   static Consumer<Object[]> complieConsumer(Object id, Supplier<Pair<Script, String[]>> supplier) {
     return CONSUMERS.get().computeIfAbsent(id, k -> {
       try {
+        logger.fine(() -> String.format(
+            "Compile the query consumer script, id is %s, the thread name is %s id is %s",
+            id.toString(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Pair<Script, String[]> snp = shouldNotNull(shouldNotNull(supplier).get());
         final Script script = shouldNotNull(snp.getKey());
         final Compilable se = getCompilable(script.getType());
@@ -131,6 +137,9 @@ public class QueryScriptEngines {
       Supplier<Pair<Script, String[]>> supplier) {
     return FUNCTIONS.get().computeIfAbsent(id, k -> {
       try {
+        logger.fine(() -> String.format(
+            "Compile the query function script, id is %s, the thread name is %s id is %s",
+            id.toString(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Pair<Script, String[]> snp = shouldNotNull(shouldNotNull(supplier).get());
         final Script script = shouldNotNull(snp.getKey());
         final Compilable se = getCompilable(script.getType());

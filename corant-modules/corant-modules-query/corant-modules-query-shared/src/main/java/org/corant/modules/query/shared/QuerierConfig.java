@@ -29,23 +29,23 @@ import org.eclipse.microprofile.config.Config;
 public class QuerierConfig implements DeclarativeConfig {
 
   public static final QuerierConfig DEFAULT =
-      new QuerierConfig(10240, 128, 10240, 16, 32, true, null);
+      new QuerierConfig(10000, 128, 10000, 16, 32, true, null);
   public static final int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 16;
   public static final String CTX_KEY_PARALLEL_FETCH = ".parallel-fetch";
   public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
-  public static final String PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = ".thrown-exceed-max-select-size";
+  public static final String PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE = ".thrown-on-max-select-size";
   public static final String PRO_KEY_LIMIT = ".limit";
   public static final String PRO_KEY_TIMEOUT = ".timeout";
 
   private static final long serialVersionUID = -2562004354294555255L;
 
-  @ConfigKeyItem(defaultValue = "10240")
+  @ConfigKeyItem(defaultValue = "10000")
   protected int maxSelectSize;
 
   @ConfigKeyItem(defaultValue = "128")
   protected int defaultSelectSize;
 
-  @ConfigKeyItem(defaultValue = "10240")
+  @ConfigKeyItem(defaultValue = "10000")
   protected int maxLimit;
 
   @ConfigKeyItem(defaultValue = "16")

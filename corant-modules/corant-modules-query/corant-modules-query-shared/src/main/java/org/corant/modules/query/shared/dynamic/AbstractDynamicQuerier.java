@@ -225,7 +225,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   boolean thrownExceedMaxSelectSize() {
     if (this.thrownExceedMaxSelectSize == null) {
       this.thrownExceedMaxSelectSize =
-          resolveProperty(QuerierConfig.PRO_KEY_THROWN_EXCEED_LIMIT_SIZE, Boolean.class,
+          resolveProperty(QuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
               config.isThrownOnMaxSelectSize());
     }
     return thrownExceedMaxSelectSize;

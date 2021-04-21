@@ -129,7 +129,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     List<FetchQuery> fetchQueries;
     if (isNotEmpty(results)
         && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
-      if (parentQuerier.parallelFetch()) {
+      if (parentQuerier.parallelFetch() && fetchQueries.size() > 1) {
         parallelFetch(results, parentQuerier);
         return;
       }
@@ -161,7 +161,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   protected <T> void fetch(T result, Querier parentQuerier) {
     List<FetchQuery> fetchQueries;
     if (result != null && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
-      if (parentQuerier.parallelFetch()) {
+      if (parentQuerier.parallelFetch() && fetchQueries.size() > 1) {
         parallelFetch(result, parentQuerier);
         return;
       }
@@ -266,9 +266,9 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected NamedQueryService resolveFetchQueryService(final FetchQuery fq) {
-    final QueryType type = fq.getReferenceQuery().getType();
-    final String qualifier = fq.getReferenceQuery().getQualifier();
     return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
+      final QueryType type = fq.getReferenceQuery().getType();
+      final String qualifier = fq.getReferenceQuery().getQualifier();
       if (type == null && isBlank(qualifier)) {
         return this;
       } else {

@@ -83,7 +83,7 @@ public class Decimal128Utils {
   private static Document convert(Document doc, int deep) {
     int dp = deep + 1;
     if (doc == null || dp > MAX_DEEP) {
-      return null;
+      return doc;
     }
     for (Entry<String, Object> e : doc.entrySet()) {
       if (e.getValue() instanceof Decimal128) {

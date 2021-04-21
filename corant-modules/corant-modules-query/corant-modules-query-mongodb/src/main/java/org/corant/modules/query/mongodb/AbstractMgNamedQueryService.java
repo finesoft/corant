@@ -389,6 +389,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return Optional.empty();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * Note: Be careful about {@link FindIterable#noCursorTimeout(boolean)}
+   *
+   * @see #query(MgNamedQuerier)
+   * @see #PRO_KEY_NO_CURSOR_TIMEOUT
+   */
   @Override
   protected <T> Stream<T> stream(String queryName, StreamQueryParameter parameter) {
     if (parameter.getEnhancer() != null) {

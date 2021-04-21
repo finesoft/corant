@@ -15,6 +15,7 @@ package org.corant.context.security;
 
 import static org.corant.shared.util.Conversions.toObject;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -34,7 +35,7 @@ public interface Principal extends java.security.Principal, Serializable {
     private static final long serialVersionUID = 282297555381317944L;
 
     protected String name;
-    protected Map<String, ? extends Serializable> properties;
+    protected Map<String, ? extends Serializable> properties = Collections.emptyMap();
 
     /**
      * @param name
@@ -42,7 +43,9 @@ public interface Principal extends java.security.Principal, Serializable {
      */
     public DefaultPrincipal(String name, Map<String, ? extends Serializable> properties) {
       this.name = name;
-      this.properties = properties;
+      if (properties != null) {
+        this.properties = Collections.unmodifiableMap(properties);
+      }
     }
 
     @Override

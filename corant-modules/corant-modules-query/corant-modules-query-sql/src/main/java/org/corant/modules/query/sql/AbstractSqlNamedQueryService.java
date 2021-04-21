@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql;
 
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import java.sql.SQLException;
 import java.util.List;
@@ -63,7 +64,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
-    int size = list == null ? 0 : list.size();
+    int size = sizeOf(list);
     if (size > 0) {
       if (size > limit) {
         list.remove(limit);
@@ -98,7 +99,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
     List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
-    int size = list == null ? 0 : list.size();
+    int size = sizeOf(list);
     if (size > 0) {
       if (size < limit) {
         result.withTotal(offset + size);

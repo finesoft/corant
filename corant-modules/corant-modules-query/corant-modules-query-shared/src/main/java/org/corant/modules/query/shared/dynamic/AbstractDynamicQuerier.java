@@ -114,7 +114,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       synchronized (this) {
         if (limit == null) {
           limit = defaultObject(getQueryParameter().getLimit(),
-              () -> resolveProperty(QuerierConfig.PRO_KEY_DEFAULT_LIMIT, Integer.class,
+              () -> resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
                   config.getDefaultLimit()));
           if (limit <= 0) {
             limit = config.getMaxLimit();

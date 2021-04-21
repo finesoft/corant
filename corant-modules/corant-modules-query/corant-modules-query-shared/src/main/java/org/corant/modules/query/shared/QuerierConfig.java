@@ -33,9 +33,8 @@ public class QuerierConfig implements DeclarativeConfig {
   public static final int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 16;
   public static final String CTX_KEY_PARALLEL_FETCH = ".parallel-fetch";
   public static final String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
-  public static final String PRO_KEY_DEFAULT_SELECT_LIMIT = ".default-select-size";
   public static final String PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = ".thrown-exceed-max-select-size";
-  public static final String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
+  public static final String PRO_KEY_LIMIT = ".limit";
   public static final String PRO_KEY_TIMEOUT = ".timeout";
 
   private static final long serialVersionUID = -2562004354294555255L;

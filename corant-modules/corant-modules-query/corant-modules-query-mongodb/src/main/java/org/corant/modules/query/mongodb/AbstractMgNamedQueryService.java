@@ -106,17 +106,29 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
       Map<String, String> pros = querier.getQuery().getProperties();
       getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
-      getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
-          .ifPresent(t -> ai.maxTime(t, TimeUnit.MILLISECONDS));
+
+      Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong);
+      if (maxTimeMs.isPresent()) {
+        ai.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+      } else if (querier.resolveTimeout() != null) {
+        ai.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+      }
       getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
           .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
       Optional<Bson> bson =
           Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
       bson.ifPresent(ai::hint);
       resovleCollation(querier).ifPresent(ai::collation);
-      List<Map<String, Object>> list = streamOf(ai)
-          .map(r -> convertDocument(r, querier, isAutoSetIdField(querier))).collect(toList());
-      this.fetch(list, querier);
+      List<Document> docList = null;
+      try (MongoCursor<Document> cursor = ai.iterator()) {
+        docList = listOf(cursor);
+      }
+      List<Map<String, Object>> list = new ArrayList<>();
+      if (docList != null) {
+        final boolean setId = isAutoSetIdField(querier);
+        list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+        this.fetch(list, querier);
+      }
       return querier.handleResults(list);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
@@ -138,7 +150,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       try (MongoCursor<Document> cursor = fi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
-      return new FetchResult(querier, fetchedList);
+      return new FetchResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -298,8 +310,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
         .ifPresent(t -> fi.maxAwaitTime(t, TimeUnit.MILLISECONDS));
-    getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong)
-        .ifPresent(t -> fi.maxTime(t, TimeUnit.MILLISECONDS));
+
+    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong);
+    if (maxTimeMs.isPresent()) {
+      fi.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+    } else if (querier.resolveTimeout() != null) {
+      fi.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
     getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, Conversions::toBoolean)
         .ifPresent(fi::noCursorTimeout);
     getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, Conversions::toBoolean).ifPresent(fi::oplogReplay);
@@ -318,8 +335,14 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     Map<String, String> pros = querier.getQuery().getProperties();
     getOptMapObject(pros, PRO_KEY_CO_LIMIT, Conversions::toInteger).ifPresent(co::limit);
-    getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, Conversions::toLong)
-        .ifPresent(t -> co.maxTime(t, TimeUnit.MILLISECONDS));
+
+    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, Conversions::toLong);
+    if (maxTimeMs.isPresent()) {
+      co.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+    } else if (querier.resolveTimeout() != null) {
+      co.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
+
     getOptMapObject(pros, PRO_KEY_CO_SKIP, Conversions::toInteger).ifPresent(co::skip);
     resovleCollation(querier).ifPresent(co::collation);
     if (co.getLimit() <= 0) {

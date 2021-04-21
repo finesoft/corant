@@ -34,6 +34,13 @@ public interface QueryHandler {
   QueryObjectMapper getObjectMapper();
 
   /**
+   * Returns the querier configuration.
+   *
+   * @return the querier configuration
+   */
+  QuerierConfig getQuerierConfig();
+
+  /**
    * Handle single result {@link #handleResults(List, Class, List, QueryParameter)}
    *
    * @param <T> the result class

@@ -245,6 +245,10 @@ public class Systems {
     return toObject(getSystemProperty(name), type);
   }
 
+  public static <T> T getSystemProperty(final String name, Class<T> type, T defaultValue) {
+    return defaultObject(getSystemProperty(name, type), defaultValue);
+  }
+
   public static String getSystemProperty(final String name, final String defaultValue) {
     shouldNotNull(name);
     String value = null;

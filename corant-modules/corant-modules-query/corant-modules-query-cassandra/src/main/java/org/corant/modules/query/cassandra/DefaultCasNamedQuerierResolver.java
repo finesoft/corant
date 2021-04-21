@@ -62,7 +62,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   protected DynamicQuerierBuilder createBuilder(String key) {
-    Query query = mappingService.getQuery(key);
+    Query query = getMappingService().getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
@@ -72,7 +72,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {
     return new FreemarkerDynamicQuerierBuilder<Object[], String, DefaultCasNamedQuerier>(query,
-        queryResolver, fetchQueryResolver) {
+        getQueryHandler(), getFetchQueryHandler()) {
 
       @Override
       protected DefaultCasNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {

@@ -52,7 +52,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         fetchedList = getExecutor().select(ks, cql, scriptParameter);
       }
-      return new FetchResult(querier, fetchedList);
+      return new FetchResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

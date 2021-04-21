@@ -28,10 +28,13 @@ public interface NamedQueryService extends QueryService<String, Object> {
   FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier);
 
   class FetchResult {
+    public final FetchQuery fetchQuery;
     public final Querier fetchQuerier;
     public final List<Map<String, Object>> fetchedList;
 
-    public FetchResult(Querier fetchQuerier, List<Map<String, Object>> fetchedList) {
+    public FetchResult(FetchQuery fetchQuery, Querier fetchQuerier,
+        List<Map<String, Object>> fetchedList) {
+      this.fetchQuery = fetchQuery;
       this.fetchQuerier = fetchQuerier;
       this.fetchedList = fetchedList;
     }

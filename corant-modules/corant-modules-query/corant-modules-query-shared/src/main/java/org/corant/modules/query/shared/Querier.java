@@ -13,8 +13,8 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Maps.getMapBoolean;
 import java.util.List;
-import org.corant.config.Configs;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.modules.query.shared.mapping.Query;
 
@@ -27,23 +27,6 @@ import org.corant.modules.query.shared.mapping.Query;
  *
  */
 public interface Querier {
-
-  String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
-  String PRO_KEY_DEFAULT_LIMIT = ".default-limit";
-  String PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = ".thrown-exceed-max-select-size";
-  String GLOBAL = "corant.query";
-  String GLOBAL_PRO_KEY_MAX_SELECT_SIZE = GLOBAL + PRO_KEY_MAX_SELECT_SIZE;
-  String GLOBAL_PRO_KEY_DEFAULT_LIMIT = GLOBAL + PRO_KEY_DEFAULT_LIMIT;
-  String GLOBAL_PRO_KEY_THROWN_EXCEED_LIMIT_SIZE = GLOBAL + PRO_KEY_THROWN_EXCEED_LIMIT_SIZE;
-  int DEFALUT_STREAM_LIMIT =
-      Configs.getValue("corant.query.default-stream-limit", Integer.class, 16);
-
-  int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 16;
-  int MAX_SELECT_SIZE = Configs.getValue(GLOBAL_PRO_KEY_MAX_SELECT_SIZE, Integer.class, 128);
-  int DEFAULT_LIMIT = Configs.getValue(GLOBAL_PRO_KEY_DEFAULT_LIMIT, Integer.class, 16);
-
-  boolean THROWN_EXCEED_MAX_SELECT_SIZE =
-      Configs.getValue(GLOBAL_PRO_KEY_THROWN_EXCEED_LIMIT_SIZE, Boolean.class, true);
 
   /**
    * Returns whether to fetch
@@ -110,7 +93,22 @@ public interface Querier {
   <T> List<T> handleResults(List<?> results);
 
   /**
+   * Experiential functions for proof of concept.
+   *
+   * @return whether to fetch in parallel
+   */
+  default boolean parallelFetch() {
+    QueryParameter param = getQueryParameter();
+    if (param != null && param.getContext() != null) {
+      return getMapBoolean(param.getContext(), QuerierConfig.CTX_KEY_PARALLEL_FETCH, false);
+    }
+    return false;
+  }
+
+  /**
    * Returns a resolved fetch query parameter, merge parent querier criteria.
+   *
+   * Note: The implementer must completely copy all contexts in the parent query parameter object.
    *
    * @param result the parent result use to extract the child query parameter
    * @param fetchQuery the fetch query

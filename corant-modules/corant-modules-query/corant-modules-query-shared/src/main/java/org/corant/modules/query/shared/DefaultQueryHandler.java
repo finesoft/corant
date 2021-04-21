@@ -26,11 +26,13 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.service.ConversionService;
 import org.corant.modules.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.modules.query.shared.mapping.Query;
@@ -61,9 +63,16 @@ public class DefaultQueryHandler implements QueryHandler {
   @Inject
   protected QueryObjectMapper objectMapper;
 
+  protected QuerierConfig querierConfig = QuerierConfig.DEFAULT;
+
   @Override
   public QueryObjectMapper getObjectMapper() {
     return objectMapper;
+  }
+
+  @Override
+  public QuerierConfig getQuerierConfig() {
+    return querierConfig;
   }
 
   @SuppressWarnings("unchecked")
@@ -159,6 +168,11 @@ public class DefaultQueryHandler implements QueryHandler {
    */
   protected <T> T convertRecord(Object record, Class<T> expectedClass) {
     return objectMapper.toObject(record, expectedClass);
+  }
+
+  @PostConstruct
+  protected synchronized void onPostConstruct() {
+    querierConfig = ConfigInstances.resolveSingle(QuerierConfig.class);
   }
 
   @PreDestroy

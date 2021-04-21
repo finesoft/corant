@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared;
 
 import java.util.Set;
+import org.corant.modules.query.shared.mapping.QueryMappingService;
 import org.corant.modules.query.shared.mapping.QueryMappingService.QueryMappingClient;
 
 /**
@@ -25,10 +26,17 @@ import org.corant.modules.query.shared.mapping.QueryMappingService.QueryMappingC
  */
 public interface NamedQuerierResolver<K, P, Q extends NamedQuerier> extends QueryMappingClient {
 
+  FetchQueryHandler getFetchQueryHandler();
+
   @Override
   default Set<String> getMappingFilePaths() {
     return null;
   }
 
+  QueryMappingService getMappingService();
+
+  QueryHandler getQueryHandler();
+
   Q resolve(K key, P param);
+
 }

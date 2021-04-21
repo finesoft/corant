@@ -13,10 +13,13 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.Querier;
+import org.corant.modules.query.shared.QuerierConfig;
 import org.corant.modules.query.shared.QueryParameter;
+import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.mapping.Query;
 
 /**
@@ -48,19 +51,30 @@ public interface DynamicQuerier<P, S> extends Querier {
   P getScriptParameter();
 
   /**
-   * Returns the resolved limit from the query parameter or the query object or
-   * {@link Querier#DEFAULT_LIMIT}, if the resolved limit <=0 then return
-   * {@link Querier#UN_LIMIT_SELECT_SIZE}.
+   * Returns either the value of the query timeout property (the property name is
+   * {@link QuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
+   * {@link QuerierConfig#getTimeout()}.
+   *
+   * @return query timeout
+   */
+  Duration resolveTimeout();
+
+  /**
+   * Returns either the limit value from the query parameter, or if the value is {@code null}, the
+   * value of {@link QuerierConfig#getDefaultLimit()}.
    *
    * <p>
-   * NOTE: the resolved limit can not great than the max select size.
+   * Note: If the limit value <=0 then returns {@link QuerierConfig#getMaxLimit()}, if the limit
+   * value great than the {@link #resolveMaxSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveLimit();
 
   /**
-   * Returns the resolved max select size from the query object or global max select
-   * size.{@link Querier#MAX_SELECT_SIZE}, if the resolved max select size <=0 then return
-   * {@link Querier#UN_LIMIT_SELECT_SIZE}.
+   * Returns either the value of the query max select size property(the property name is
+   * {@link QuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the value of
+   * {@link QuerierConfig#getDefaultSelectSize()}.
+   * <p>
+   * Note: If the value <=0 then returns {@link QuerierConfig#getMaxSelectSize()}
    */
   int resolveMaxSelectSize();
 

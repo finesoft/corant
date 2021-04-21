@@ -50,6 +50,7 @@ public interface Names {
   }
 
   interface ConfigNames {
+    String CFG_SENSITIVES_ENABLE = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "sensitive.enable";
     String CFG_SENSITIVES = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "sensitive.keys";
     String CFG_LOCATION_KEY = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "location";
     String CFG_PROFILE_KEY = CORANT_CFG_PREFIX + NAME_SPACE_SEPARATORS + "profile";

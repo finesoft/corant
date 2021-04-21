@@ -49,11 +49,11 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   protected FreemarkerEsQuerierBuilder createBuilder(String key) {
-    Query query = mappingService.getQuery(key);
+    Query query = getMappingService().getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
-    return new FreemarkerEsQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new FreemarkerEsQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

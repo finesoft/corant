@@ -43,7 +43,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       String sql = querier.getScript();
       Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, sql);
-      return new FetchResult(querier, getExecutor().select(sql, maxSize, scriptParameter));
+      return new FetchResult(fetchQuery, querier,
+          getExecutor().select(sql, maxSize, scriptParameter));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",

@@ -57,6 +57,7 @@ public interface EsQueryExecutor {
   String PRO_KEY_MAX_CONCURRENT_SHARD_REQS = ".max_concurrent_shard_requests";
   String PRO_KEY_ALLOW_PARTIAL_SEARCH_RESULTS = ".allow_partial_search_results";
   String PRO_KEY_REQ_CACHE = ".request_cache";
+  String PRO_KEY_ACT_GET_TIMEOUT = ".action_get_timeout";
 
   static SearchSourceBuilder buildSearchSourceBuilder(String script) {
     try (XContentParser parser = XContentUtils.createParser(JsonXContent.jsonXContent, script)) {
@@ -93,11 +94,12 @@ public interface EsQueryExecutor {
     return searchRequest;
   }
 
-  SearchResponse execute(SearchRequest searchRequest) throws Exception;
+  SearchResponse execute(SearchRequest searchRequest, Map<String, String> properties)
+      throws Exception;
 
   default SearchResponse execute(String indexName, String script, Map<String, String> properties)
       throws Exception {
-    return execute(buildSearchRequest(script, properties, indexName));
+    return execute(buildSearchRequest(script, properties, indexName), properties);
   }
 
   Stream<Map<String, Object>> scrolledSearch(String indexName, String script,

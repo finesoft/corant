@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.elastic;
 
+import static org.corant.shared.util.Maps.getMapDuration;
+import java.time.Duration;
 import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -37,8 +39,14 @@ public class DefaultEsQueryExecutor implements EsQueryExecutor {
   }
 
   @Override
-  public SearchResponse execute(SearchRequest searchRequest) throws Exception {
-    return transportClient.search(searchRequest).get();
+  public SearchResponse execute(SearchRequest searchRequest, Map<String, String> properties)
+      throws Exception {
+    Duration actGetTimeOut = getMapDuration(properties, EsQueryExecutor.PRO_KEY_ACT_GET_TIMEOUT);
+    if (actGetTimeOut != null) {
+      return transportClient.search(searchRequest).actionGet(actGetTimeOut.toMillis());
+    } else {
+      return transportClient.search(searchRequest).get();
+    }
   }
 
   @Override

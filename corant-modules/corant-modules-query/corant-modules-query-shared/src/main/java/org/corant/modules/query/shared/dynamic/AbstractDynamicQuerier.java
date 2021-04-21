@@ -18,9 +18,11 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.FetchQueryHandler;
+import org.corant.modules.query.shared.QuerierConfig;
 import org.corant.modules.query.shared.QueryHandler;
 import org.corant.modules.query.shared.QueryParameter;
 import org.corant.modules.query.shared.QueryRuntimeException;
@@ -39,12 +41,14 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   protected final QueryHandler queryHandler;
   protected final FetchQueryHandler fetchQueryHandler;
   protected final QueryParameter queryParameter;
+  final QuerierConfig config;
 
   // Not thread safe
-  protected Integer limit;
-  protected Integer maxSelectSize;
-  protected Integer offset;
-  protected Boolean thrownExceedMaxSelectSize;
+  protected volatile Integer limit;
+  protected volatile Integer maxSelectSize;
+  protected volatile Integer offset;
+  protected volatile Boolean thrownExceedMaxSelectSize;
+  protected volatile Duration timeout;
 
   protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryHandler, FetchQueryHandler fetchQueryHandler) {
@@ -52,6 +56,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     this.queryParameter = queryParameter;
     this.queryHandler = queryHandler;
     this.fetchQueryHandler = fetchQueryHandler;
+    this.config = queryHandler.getQuerierConfig();
   }
 
   @Override
@@ -106,16 +111,21 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public int resolveLimit() {
     if (limit == null) {
-      limit = defaultObject(getQueryParameter().getLimit(),
-          () -> resolveProperty(PRO_KEY_DEFAULT_LIMIT, Integer.class, DEFAULT_LIMIT));
-      if (limit <= 0) {
-        limit = getUnLimitSize();
-      }
-      int max = resolveMaxSelectSize();
-      if (limit > max) {
-        throw new QueryRuntimeException(
-            "Exceeded the maximum number of query [%s] results, limit is [%s].",
-            getQuery().getName(), max);
+      synchronized (this) {
+        if (limit == null) {
+          limit = defaultObject(getQueryParameter().getLimit(),
+              () -> resolveProperty(QuerierConfig.PRO_KEY_DEFAULT_LIMIT, Integer.class,
+                  config.getDefaultLimit()));
+          if (limit <= 0) {
+            limit = config.getMaxLimit();
+          }
+          int max = resolveMaxSelectSize();
+          if (limit > max) {
+            throw new QueryRuntimeException(
+                "Exceeded the maximum number of query [%s] results, limit is [%s].",
+                getQuery().getName(), max);
+          }
+        }
       }
     }
     return limit;
@@ -124,9 +134,14 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public int resolveMaxSelectSize() {
     if (maxSelectSize == null) {
-      maxSelectSize = resolveProperty(PRO_KEY_MAX_SELECT_SIZE, Integer.class, MAX_SELECT_SIZE);
-      if (maxSelectSize <= 0) {
-        maxSelectSize = getUnLimitSize();
+      synchronized (this) {
+        if (maxSelectSize == null) {
+          maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+              config.getDefaultSelectSize());
+          if (maxSelectSize <= 0) {
+            maxSelectSize = config.getMaxSelectSize();
+          }
+        }
       }
     }
     return maxSelectSize;
@@ -142,7 +157,11 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public int resolveOffset() {
     if (offset == null) {
-      offset = max(getQueryParameter().getOffset(), 0);
+      synchronized (this) {
+        if (offset == null) {
+          offset = max(getQueryParameter().getOffset(), 0);
+        }
+      }
     }
     return offset;
   }
@@ -174,6 +193,20 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   @Override
+  public Duration resolveTimeout() {
+    if (timeout == null) {
+      synchronized (this) {
+        if (timeout == null) {
+          timeout = defaultObject(
+              resolveProperty(QuerierConfig.PRO_KEY_TIMEOUT, Duration.class, config.getTimeout()),
+              () -> Duration.ZERO);
+        }
+      }
+    }
+    return timeout.equals(Duration.ZERO) ? null : timeout;
+  }
+
+  @Override
   public int validateResultSize(List<?> results) {
     int size = sizeOf(results);
     int maxSize = resolveMaxSelectSize();
@@ -186,13 +219,14 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   protected int getUnLimitSize() {
-    return UN_LIMIT_SELECT_SIZE;
+    return QuerierConfig.UN_LIMIT_SELECT_SIZE;
   }
 
   boolean thrownExceedMaxSelectSize() {
     if (this.thrownExceedMaxSelectSize == null) {
-      this.thrownExceedMaxSelectSize = resolveProperty(PRO_KEY_THROWN_EXCEED_LIMIT_SIZE,
-          Boolean.class, THROWN_EXCEED_MAX_SELECT_SIZE);
+      this.thrownExceedMaxSelectSize =
+          resolveProperty(QuerierConfig.PRO_KEY_THROWN_EXCEED_LIMIT_SIZE, Boolean.class,
+              config.isThrownOnMaxSelectSize());
     }
     return thrownExceedMaxSelectSize;
   }

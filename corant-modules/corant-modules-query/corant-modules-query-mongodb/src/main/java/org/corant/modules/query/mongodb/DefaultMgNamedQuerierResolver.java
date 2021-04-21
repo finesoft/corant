@@ -49,11 +49,11 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   protected FreemarkerMgQuerierBuilder createBuilder(String key) {
-    Query query = mappingService.getQuery(key);
+    Query query = getMappingService().getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
-    return new FreemarkerMgQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new FreemarkerMgQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

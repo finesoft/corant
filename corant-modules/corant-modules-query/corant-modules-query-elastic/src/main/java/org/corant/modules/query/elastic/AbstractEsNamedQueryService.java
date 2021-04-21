@@ -16,6 +16,7 @@ package org.corant.modules.query.elastic;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -65,7 +66,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
-      return new FetchResult(querier, fetchedList);
+      return new FetchResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -163,15 +164,19 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     if (limit != null) {
       s.put("size", limit);
     }
-    return getQuerierResolver().getQueryResolver().getObjectMapper().toJsonString(s, true, false);
+    return getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(s, true, false);
   }
 
   protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,
       Integer limit) throws Exception {
     String script = resolveScript(querier.getScript(), offset, limit);
     log(q, querier.getQueryParameter(), script);
+    Map<String, String> properties = new HashMap<>(querier.getQuery().getProperties());
+    if (querier.resolveTimeout() != null) {
+      properties.put(EsQueryExecutor.PRO_KEY_ACT_GET_TIMEOUT, querier.resolveTimeout().toString());
+    }
     Pair<Long, List<Map<String, Object>>> hits = getExecutor().searchHits(resolveIndexName(querier),
-        script, querier.getQuery().getProperties(), querier.getHintKeys());
+        script, properties, querier.getHintKeys());
     List<T> result = new ArrayList<>();
     if (!isEmpty(hits.getValue())) {
       this.fetch(hits.getValue(), querier);

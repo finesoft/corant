@@ -33,13 +33,16 @@ public class Desensitizer {
   static final Set<String> sensitives = setOf("password", "username", "credential", ".pwd", ".user",
       "secret-key", "secretkey", "secret-access");
 
+  static final boolean enable =
+      Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES_ENABLE, Boolean.class, true);
+
   static {
     streamOf(split(Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES), ","))
         .forEach(sensitives::add);
   }
 
   public static String desensitize(String propertyName, String propertyValue) {
-    if (isNoneBlank(propertyName, propertyValue)) {
+    if (enable && isNoneBlank(propertyName, propertyValue)) {
       for (String s : sensitives) {
         if (propertyName.toLowerCase().contains(s)) {
           return Strings.ASTERISK.repeat(propertyValue.length());

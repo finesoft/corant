@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import org.corant.modules.query.shared.Querier;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Streams.AbstractBatchHandlerSpliterator;
@@ -38,7 +37,7 @@ import org.elasticsearch.search.sort.SortOrder;
  */
 public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map<String, Object>> {
 
-  public static final int DFLT_BATCH_SIZE = Querier.DEFALUT_STREAM_LIMIT;
+  public static final int DFLT_BATCH_SIZE = 128;
   private final TimeValue scrollKeepAlive;
   private final TransportClient client;
   private SearchResponse searchResponse;

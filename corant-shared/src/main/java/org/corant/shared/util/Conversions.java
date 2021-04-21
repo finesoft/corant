@@ -522,11 +522,14 @@ public class Conversions {
   }
 
   /**
+   * Converts the given original object to given target type. if the given target type is an array,
+   * and the given original object is an array or a collection object, each element is converted,
+   * otherwise the overall conversion is performed.
    *
-   * @param <T>
-   * @param obj
-   * @param clazz
-   * @return toObject
+   * @param <T> the target type
+   * @param obj the original object that will be converted
+   * @param clazz the target class
+   * @return the converted target object
    */
   public static <T> T toObject(Object obj, Class<T> clazz) {
     return toObject(obj, clazz, null);

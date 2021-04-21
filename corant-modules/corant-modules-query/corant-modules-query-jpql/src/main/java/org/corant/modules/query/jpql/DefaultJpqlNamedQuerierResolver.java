@@ -56,7 +56,7 @@ public class DefaultJpqlNamedQuerierResolver
   }
 
   protected DynamicQuerierBuilder createBuilder(String key) {
-    Query query = mappingService.getQuery(key);
+    Query query = getMappingService().getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
@@ -72,11 +72,11 @@ public class DefaultJpqlNamedQuerierResolver
   }
 
   protected FreemarkerJpqlQuerierBuilder createFmProcessor(Query query) {
-    return new FreemarkerJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new FreemarkerJpqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   protected JavascriptJpqlQuerierBuilder createJsProcessor(Query query) {
-    return new JavascriptJpqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new JavascriptJpqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

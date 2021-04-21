@@ -59,7 +59,7 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   protected DynamicQuerierBuilder createBuilder(String key) {
-    Query query = mappingService.getQuery(key);
+    Query query = getMappingService().getQuery(key);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
@@ -72,11 +72,11 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {
-    return new FreemarkerSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new FreemarkerSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {
-    return new JavascriptSqlQuerierBuilder(query, queryResolver, fetchQueryResolver);
+    return new JavascriptSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

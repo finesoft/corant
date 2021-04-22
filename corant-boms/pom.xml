@@ -31,7 +31,7 @@
 		<version.bouncycastle>1.68</version.bouncycastle>
 		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
 		<version.caffeine>2.8.5</version.caffeine>
-		<version.calcite>1.25.0</version.calcite>
+		<version.calcite>1.26.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.commons-codec>1.15</version.commons-codec>

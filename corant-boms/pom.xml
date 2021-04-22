@@ -61,6 +61,7 @@
 		<version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>3.4.5</version.hikariCP>
+		<version.hppc>0.8.2</version.hppc>
 		<version.icu4j>67.1</version.icu4j>
 		<version.jackson>2.12.3</version.jackson>
 		<version.jandex>2.2.3.Final</version.jandex>
@@ -520,6 +521,11 @@
 				<groupId>com.google.zxing</groupId>
 				<artifactId>core</artifactId>
 				<version>${version.zxing}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.carrotsearch</groupId>
+				<artifactId>hppc</artifactId>
+				<version>${version.hppc}</version>
 			</dependency>
 
 			<!-- Apache integration -->
@@ -1495,7 +1501,7 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<!-- osgi -->
+			<!-- Osgi -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.cdi</artifactId>

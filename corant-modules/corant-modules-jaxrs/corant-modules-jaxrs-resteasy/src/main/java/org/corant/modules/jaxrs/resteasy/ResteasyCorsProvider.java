@@ -21,8 +21,8 @@ import org.jboss.resteasy.plugins.interceptors.CorsFilter;
 public class ResteasyCorsProvider implements Feature {
 
   @Inject
-  @ConfigProperty(name = "corant.rs.cors.enabled", defaultValue = "false")
-  protected boolean enabled;
+  @ConfigProperty(name = "corant.rs.cors.enable", defaultValue = "false")
+  protected boolean enable;
   @Inject
   @ConfigProperty(name = "corant.rs.cors.origin", defaultValue = "*")
   protected String origin;
@@ -41,7 +41,7 @@ public class ResteasyCorsProvider implements Feature {
 
   @Override
   public boolean configure(FeatureContext context) {
-    if (isEnabled()) {
+    if (isEnable()) {
       CorsFilter corsFilter = new CorsFilter();
       corsFilter.getAllowedOrigins().add(getOrigin());
       corsFilter.setAllowCredentials(getCredentials());
@@ -73,7 +73,7 @@ public class ResteasyCorsProvider implements Feature {
     return origin;
   }
 
-  public boolean isEnabled() {
-    return enabled;
+  public boolean isEnable() {
+    return enable;
   }
 }

@@ -13,13 +13,11 @@
  */
 package org.corant.modules.servlet.filter;
 
-import java.io.IOException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
@@ -35,8 +33,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public abstract class AbstractCorsFilter implements Filter {
 
   @Inject
-  @ConfigProperty(name = "corant.servlet.cors.enabled", defaultValue = "false")
-  protected boolean enabled;
+  @ConfigProperty(name = "corant.servlet.cors.enable", defaultValue = "false")
+  protected boolean enable;
   @Inject
   @ConfigProperty(name = "corant.servlet.cors.origin", defaultValue = "*")
   protected String origin;
@@ -60,9 +58,9 @@ public abstract class AbstractCorsFilter implements Filter {
 
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-      FilterChain filterChain) throws IOException, ServletException {
+      FilterChain filterChain) {
     HttpServletResponse response = (HttpServletResponse) servletResponse;
-    if (isEnabled()) {
+    if (isEnable()) {
       response.addHeader("Access-Control-Allow-Origin", getOrigin());
       response.addHeader("Access-Control-Allow-Headers", getHeaders());
       response.addHeader("Access-Control-Allow-Credentials", getCredentials());
@@ -112,16 +110,11 @@ public abstract class AbstractCorsFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
+  public void init(FilterConfig filterConfig) {
 
   }
 
-  /**
-   *
-   * @return the enabled
-   */
-  public boolean isEnabled() {
-    return enabled;
+  public boolean isEnable() {
+    return enable;
   }
-
 }

@@ -22,13 +22,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transaction;
+import org.corant.context.ContainerEvents.PostContainerStartedEvent;
 import org.corant.modules.ddd.annotation.qualifier.JTARL;
 import org.corant.modules.ddd.annotation.stereotype.InfrastructureServices;
 import org.corant.modules.ddd.message.Message;
@@ -54,6 +55,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager {
 
   protected final ExecutorService dispatcher = Executors.newSingleThreadExecutor();
+
+  @Inject
+  protected UnitOfWorks uows;
 
   @Inject
   @Any
@@ -90,12 +94,11 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
     return new JTARLJPAUnitOfWork(this, transaction);
   }
 
-  @PostConstruct
-  protected void onPostConstruct() {
-    if (lastUndispatchMessages.isResolvable()) {
+  protected void onPostContainReady(@Observes PostContainerStartedEvent e) {
+    if (!uows.isUseJtaXa() && lastUndispatchMessages.isResolvable()) {
       List<Message> messages = lastUndispatchMessages.get().get();
       if (isNotEmpty(messages)) {
-        dispatcher.submit(() -> find(MessageDispatcher.class).orElse(MessageDispatcher.empty())
+        dispatcher.execute(() -> find(MessageDispatcher.class).orElse(MessageDispatcher.empty())
             .accept(messages.toArray(new Message[messages.size()])));
       }
     }

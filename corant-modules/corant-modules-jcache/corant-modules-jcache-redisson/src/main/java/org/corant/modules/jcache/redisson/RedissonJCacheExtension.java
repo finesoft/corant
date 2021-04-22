@@ -34,7 +34,9 @@ public class RedissonJCacheExtension implements Extension {
       System.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
     } else if (!System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
         .equals(CACHE_PROVIDER_NAME)) {
-      throw new CorantRuntimeException("");
+      throw new CorantRuntimeException(
+          "Found another caching provider %s, the caching provider in current implementation is exclusive!",
+          System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
   }
 }

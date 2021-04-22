@@ -59,4 +59,8 @@ public class UnitOfWorks {
   public Optional<UnitOfWorksManager> currentUnitOfWorksManager(Annotation... qualifiers) {
     return find(UnitOfWorksManager.class, qualifiers);
   }
+
+  public boolean isUseJtaXa() {
+    return useJtaXa;
+  }
 }

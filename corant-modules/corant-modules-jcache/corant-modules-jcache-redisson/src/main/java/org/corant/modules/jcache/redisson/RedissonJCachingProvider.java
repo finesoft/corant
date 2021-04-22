@@ -58,10 +58,8 @@ public class RedissonJCachingProvider implements CachingProvider {
 
   @Override
   public void close() {
-    synchronized (managers) {
-      for (ClassLoader classLoader : managers.keySet()) {
-        close(classLoader);
-      }
+    for (ClassLoader classLoader : managers.keySet()) {
+      close(classLoader);
     }
   }
 

@@ -54,6 +54,7 @@
 		<version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>
 		<version.flyway>6.0.6</version.flyway>
 		<version.freemarker>2.3.31</version.freemarker>
+		<version.graalvm>21.1.0</version.graalvm>
 		<version.groovy>3.0.7</version.groovy>
 		<version.grpc>1.32.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
@@ -1499,6 +1500,36 @@
 				<artifactId>lombok</artifactId>
 				<version>${version.lombok}</version>
 				<scope>provided</scope>
+			</dependency>
+
+			<!-- GraalVM -->
+			<dependency>
+				<groupId>org.graalvm.sdk</groupId>
+				<artifactId>graal-sdk</artifactId>
+				<version>${version.graalvm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.js</groupId>
+				<artifactId>js</artifactId>
+				<version>${version.graalvm}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.js</groupId>
+				<artifactId>js-scriptengine</artifactId>
+				<version>${version.graalvm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.tools</groupId>
+				<artifactId>profiler</artifactId>
+				<version>${version.graalvm}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.tools</groupId>
+				<artifactId>chromeinspector</artifactId>
+				<version>${version.graalvm}</version>
+				<scope>runtime</scope>
 			</dependency>
 
 			<!-- Osgi -->

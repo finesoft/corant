@@ -36,7 +36,7 @@ import com.arjuna.ats.internal.arjuna.objectstore.jdbc.JDBCImple_driver;
 public class AbstractDomainObjectStore implements ObjectStoreAPI {
 
   protected static final String DEFAULT_TABLE_NAME = "JBossTSTxTable";
-  protected static Map<String, String> storeNames = new HashMap<>();
+  protected Map<String, String> storeNames = new HashMap<>();
   protected JDBCImple_driver _theImple;
   protected String tableName;
   protected final ObjectStoreEnvironmentBean jdbcStoreEnvironmentBean;

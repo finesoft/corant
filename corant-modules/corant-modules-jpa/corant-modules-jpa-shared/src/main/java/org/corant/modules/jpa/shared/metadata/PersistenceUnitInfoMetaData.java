@@ -465,8 +465,8 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
             "Multiple persistence providers found, unable to determine which one to use for %s!",
             persistenceUnitName);
       } else {
-        new CorantRuntimeException("Can not any persistence provider for persistence unit %s.",
-            persistenceUnitName);
+        throw new CorantRuntimeException(
+            "Can not any persistence provider for persistence unit %s.", persistenceUnitName);
       }
     }
   }

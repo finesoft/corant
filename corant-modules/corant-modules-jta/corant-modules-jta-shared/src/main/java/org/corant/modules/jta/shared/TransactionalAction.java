@@ -205,7 +205,7 @@ public abstract class TransactionalAction<T> {
         throw new TransactionalException("Don't be called inside a transaction context.",
             new InvalidTransactionException());
       }
-      return executeInCallerTx(tx);
+      return executeInCallerTx(null);
     }
   }
 

@@ -45,8 +45,8 @@ public class FreemarkerSqlQuerierBuilder
    */
   @Override
   protected DefaultSqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
-    return new DefaultSqlNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-        getFetchQueryResolver(), processed.getMiddle(), processed.getRight());
+    return new DefaultSqlNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+        getFetchQueryHandler(), processed.getMiddle(), processed.getRight());
   }
 
   @Override

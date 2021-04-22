@@ -13,6 +13,11 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Objects.forceCast;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * corant-modules-query-shared
  *
@@ -23,8 +28,18 @@ public interface QueryObjectMapper {
 
   <T> T fromJsonString(String jsonString, Class<T> type);
 
+  Map<String, Object> mapOf(Object object, boolean convert);
+
   String toJsonString(Object object, boolean Escape, boolean pretty);
 
   <T> T toObject(Object from, Class<T> type);
+
+  default <T> List<T> toObjects(List<Object> from, Class<T> type) {
+    if (from == null) {
+      return new ArrayList<>();
+    }
+    from.replaceAll(e -> toObject(e, type));
+    return forceCast(from);
+  }
 
 }

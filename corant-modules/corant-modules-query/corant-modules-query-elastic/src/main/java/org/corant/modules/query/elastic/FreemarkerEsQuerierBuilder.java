@@ -53,8 +53,8 @@ public class FreemarkerEsQuerierBuilder extends
     try {
       @SuppressWarnings("rawtypes")
       final Map esQuery = OM.readValue(processed.getRight(), Map.class);
-      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-          getFetchQueryResolver(), esQuery);
+      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+          getFetchQueryHandler(), esQuery);
     } catch (IOException e) {
       throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
     }

@@ -31,8 +31,8 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
 
   protected final long cachedTimestamp;
   protected final Query query;
-  protected final QueryHandler queryResolver;
-  protected final FetchQueryHandler fetchQueryResolver;
+  protected final QueryHandler queryHandler;
+  protected final FetchQueryHandler fetchQueryHandler;
 
   protected AbstractDynamicQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
@@ -42,8 +42,8 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
     }
     this.cachedTimestamp = Instant.now().toEpochMilli();
     this.query = query;
-    this.queryResolver = queryResolver;
-    this.fetchQueryResolver = fetchQueryResolver;
+    this.queryHandler = queryResolver;
+    this.fetchQueryHandler = fetchQueryResolver;
   }
 
   @Override
@@ -57,16 +57,16 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   }
 
   @Override
-  public QueryHandler getQueryResolver() {
-    return queryResolver;
+  public QueryHandler getQueryHandler() {
+    return queryHandler;
   }
 
-  protected FetchQueryHandler getFetchQueryResolver() {
-    return fetchQueryResolver;
+  protected FetchQueryHandler getFetchQueryHandler() {
+    return fetchQueryHandler;
   }
 
   protected QueryParameter resolveParameter(Object param) {
-    return queryResolver.resolveParameter(query, param);
+    return queryHandler.resolveParameter(query, param);
   }
 
 }

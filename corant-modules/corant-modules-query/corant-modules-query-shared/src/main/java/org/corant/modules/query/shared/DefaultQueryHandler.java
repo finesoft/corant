@@ -109,14 +109,12 @@ public class DefaultQueryHandler implements QueryHandler {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> handleResults(List<Object> results, Class<T> resultClass,
       List<QueryHint> hints, QueryParameter parameter) {
     if (!isEmpty(results)) {
       handleResultHints(results, resultClass, hints, parameter);
-      final boolean needConvert = !Map.class.isAssignableFrom(resultClass);
-      results.replaceAll(e -> needConvert ? convertRecord(e, resultClass) : (T) e);
+      return convertRecords(results, resultClass);
     }
     return forceCast(results);
   }
@@ -161,17 +159,32 @@ public class DefaultQueryHandler implements QueryHandler {
   /**
    * Convert single record to expected class object.
    *
-   * @param <T>
-   * @param record
-   * @param expectedClass
-   * @return the converted record
+   * @param <T> the expected type
+   * @param record the record to be converted
+   * @param expectedClass the excepted class
    */
   protected <T> T convertRecord(Object record, Class<T> expectedClass) {
     return objectMapper.toObject(record, expectedClass);
   }
 
+  /**
+   * Convert multiple record to expected list.
+   *
+   * @param <T> the expected type
+   * @param records the record to be converted
+   * @param expectedClass the excepted class
+   */
+  protected <T> List<T> convertRecords(List<Object> records, Class<T> expectedClass) {
+    final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
+    if (needConvert) {
+      return objectMapper.toObjects(records, expectedClass);
+    } else {
+      return forceCast(records);
+    }
+  }
+
   @PostConstruct
-  protected synchronized void onPostConstruct() {
+  protected void onPostConstruct() {
     querierConfig = ConfigInstances.resolveSingle(QuerierConfig.class);
   }
 

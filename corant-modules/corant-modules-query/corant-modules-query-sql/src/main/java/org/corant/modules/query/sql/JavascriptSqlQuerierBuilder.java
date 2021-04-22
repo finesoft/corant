@@ -48,8 +48,8 @@ public class JavascriptSqlQuerierBuilder
     QueryParameter queryParameter = resolveParameter(param);// convert parameter
     List<Object> useParam = new ArrayList<>();
     Object script = execution.apply(new Object[] {queryParameter, useParam});
-    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryResolver(),
-        getFetchQueryResolver(), useParam.toArray(new Object[useParam.size()]), script.toString());
+    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryHandler(),
+        getFetchQueryHandler(), useParam.toArray(new Object[useParam.size()]), script.toString());
   }
 
 }

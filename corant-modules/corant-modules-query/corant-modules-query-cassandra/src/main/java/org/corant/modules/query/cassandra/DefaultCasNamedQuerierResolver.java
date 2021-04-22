@@ -76,8 +76,8 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
 
       @Override
       protected DefaultCasNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
-        return new DefaultCasNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-            getFetchQueryResolver(), processed.getMiddle(), processed.getRight());
+        return new DefaultCasNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+            getFetchQueryHandler(), processed.getMiddle(), processed.getRight());
       }
 
       @SuppressWarnings("unchecked")

@@ -50,10 +50,9 @@ public class FreemarkerMgQuerierBuilder extends
   protected DefaultMgNamedQuerier build(
       Triple<QueryParameter, Map<String, Object>, String> processed) {
     @SuppressWarnings("rawtypes")
-    final Map mgQuery =
-        queryResolver.getObjectMapper().fromJsonString(processed.getRight(), Map.class);
-    return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-        getFetchQueryResolver(), mgQuery, processed.getRight());
+    final Map mgQuery = queryHandler.getObjectMapper().mapOf(processed.getRight(), false);
+    return new DefaultMgNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+        getFetchQueryHandler(), mgQuery, processed.getRight());
   }
 
   @Override

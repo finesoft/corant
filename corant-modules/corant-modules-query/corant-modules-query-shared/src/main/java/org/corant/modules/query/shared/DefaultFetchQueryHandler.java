@@ -142,8 +142,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       if (criteria instanceof Map) {
         ((Map) criteria).forEach((k, v) -> map.put(asDefaultString(k), v));
       } else if (criteria != null) {
-        objectMapper.toObject(criteria, Map.class)
-            .forEach((k, v) -> map.put(asDefaultString(k), v));
+        objectMapper.mapOf(criteria, true).forEach((k, v) -> map.put(asDefaultString(k), v));
       }
     }
     return map;

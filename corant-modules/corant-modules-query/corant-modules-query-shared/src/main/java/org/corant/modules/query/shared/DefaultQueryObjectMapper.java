@@ -13,10 +13,15 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Objects.forceCast;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.modules.json.Jsons;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -34,11 +39,28 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   protected ObjectWriter escapeObjectWriter = objectWriter.with(JsonpCharacterEscapes.instance());
   protected ObjectWriter escapePpObjectWriter =
       ppObjectWriter.with(JsonpCharacterEscapes.instance());
+  protected JavaType mapType = objectMapper.constructType(Map.class);
 
   @Override
   public <T> T fromJsonString(String jsonString, Class<T> type) {
     try {
       return objectMapper.readValue(jsonString, type);
+    } catch (JsonProcessingException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
+  public Map<String, Object> mapOf(Object object, boolean convert) {
+    if (object == null) {
+      return null;
+    }
+    try {
+      if (!convert) {
+        return objectMapper.readValue(object.toString(), mapType);
+      } else {
+        return objectMapper.convertValue(object, mapType);
+      }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
@@ -80,5 +102,15 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
         return objectMapper.convertValue(from, type);
       }
     }
+  }
+
+  @Override
+  public <T> List<T> toObjects(List<Object> from, Class<T> type) {
+    if (from == null) {
+      return new ArrayList<>();
+    }
+    final JavaType targetType = objectMapper.constructType(type);
+    from.replaceAll(e -> objectMapper.convertValue(e, targetType));
+    return forceCast(from);
   }
 }

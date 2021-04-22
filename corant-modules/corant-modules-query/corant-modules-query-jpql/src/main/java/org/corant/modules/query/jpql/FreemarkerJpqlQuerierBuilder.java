@@ -45,8 +45,8 @@ public class FreemarkerJpqlQuerierBuilder
    */
   @Override
   protected DefaultJpqlNamedQuerier build(Triple<QueryParameter, Object[], String> processed) {
-    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getQueryResolver(),
-        getFetchQueryResolver(), processed.getMiddle(), processed.getRight());
+    return new DefaultJpqlNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+        getFetchQueryHandler(), processed.getMiddle(), processed.getRight());
   }
 
   @Override

@@ -28,15 +28,14 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Bytes;
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -80,26 +79,46 @@ public class Jsons {
   private Jsons() {}
 
   /**
-   * @return The ObjectMapper clone that use in this application
+   * Convert an object to given target type object.
+   *
+   * <p>
+   * example:
+   *
+   * <pre>
+   * Map&lt;String, String&gt; map = convert(object, new TypeReference&lt;Map&lt;String, String&gt;&gt;() {});
+   * </pre>
+   *
+   * @param <T> the target type
+   * @param object the object to be convert
+   * @param targetTypeRef the target type reference
+   * @return the converted object
+   *
+   * @see ObjectMapper#convertValue(Object, Class)
+   */
+  public static <T> T convert(Object object, TypeReference<T> targetTypeRef) {
+    return objectMapper.convertValue(object, targetTypeRef);
+  }
+
+  /**
+   * Returns the ObjectMapper clone that use in this application
    */
   public static ObjectMapper copyMapper() {
     return objectMapper.copy();
   }
 
   /**
-   * Convert bytes to object
+   * Returns an typed object from given JSON bytes and class
    *
-   * @param <T>
-   * @param bytes
-   * @param cls
-   * @return fromBytes
+   * @param <T> the the expected object type
+   * @param jsonBytes the JSON serialized bytes of the object
+   * @param cls the expected object class
    */
-  public static <T> T fromBytes(byte[] bytes, Class<T> cls) {
-    if (isEmpty(bytes)) {
+  public static <T> T fromBytes(byte[] jsonBytes, Class<T> cls) {
+    if (isEmpty(jsonBytes)) {
       return null;
     } else {
       try {
-        return objectMapper.readerFor(cls).readValue(bytes);
+        return objectMapper.readerFor(cls).readValue(jsonBytes);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
@@ -107,83 +126,76 @@ public class Jsons {
   }
 
   /**
-   * Convert input string to Map.
+   * Returns a Map object from given JSON string with key class and value class.
    *
-   * @param <K>
-   * @param <V>
-   * @param keyCls
-   * @param valueCls
-   * @param cmd
-   * @return fromString
+   * @param <K> the Map key type
+   * @param <V> the Map value type
+   * @param keyCls the map key class
+   * @param valueCls the map value class
+   * @param jsonString the JSON serialized string
    */
-  public static <K, V> Map<K, V> fromString(Class<K> keyCls, Class<V> valueCls, String cmd) {
-    if (!isNotBlank(cmd)) {
+  public static <K, V> Map<K, V> fromString(Class<K> keyCls, Class<V> valueCls, String jsonString) {
+    if (!isNotBlank(jsonString)) {
       return null;
     }
     try {
-      return objectMapper.readValue(cmd,
+      return objectMapper.readValue(jsonString,
           objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
     }
   }
 
   /**
-   * Convert input json string to Map
+   * Returns a Map object from given JSON string
    *
-   * @param cmd The json string
-   * @return Map
+   * @param jsonString the JSON string to be convert
    */
   @SuppressWarnings("unchecked")
-  public static <K, V> Map<K, V> fromString(String cmd) {
-    return fromString(cmd, Map.class);
+  public static <K, V> Map<K, V> fromString(String jsonString) {
+    return fromString(jsonString, Map.class);
   }
 
   /**
-   * Convert input string to Parameterized type object.
+   * Returns an typed object from given JSON string and class
    *
-   * @param cmd
-   * @param parametrized
-   * @param parameterClasses
-   * @return Object
+   * @param jsonString the JSON serialized string of the object
+   * @param clazz the expected object class
    */
-  @SafeVarargs
-  public static <C, E> C fromString(String cmd, Class<C> parametrized,
-      Class<E>... parameterClasses) {
-    if (!isNotBlank(cmd)) {
-      return null;
-    }
-    try {
-      return objectMapper.readValue(cmd,
-          objectMapper.getTypeFactory().constructParametricType(parametrized, parameterClasses));
-    } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd);
-    }
-  }
-
-  /**
-   * Convert input string to type object.
-   *
-   * @param cmd
-   * @param clazz
-   * @return
-   */
-  public static <T> T fromString(String cmd, Class<T> clazz) {
-    if (isNotBlank(cmd)) {
+  public static <T> T fromString(String jsonString, Class<T> clazz) {
+    if (isNotBlank(jsonString)) {
       try {
-        return objectMapper.readValue(cmd, clazz);
+        return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {
-        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, cmd, clazz.getName());
+        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString,
+            clazz.getName());
       }
     }
     return null;
   }
 
   /**
-   * Convert object to bytes
+   * Returns an typed object from given JSON string and type reference.
+   *
+   * @param jsonString the JSON string to be deserialize
+   * @param targetTypeRef the target type reference
+   */
+  public static <T> T fromString(String jsonString, TypeReference<T> targetTypeRef) {
+    if (!isNotBlank(jsonString)) {
+      return null;
+    }
+    try {
+      return objectMapper.readValue(jsonString, targetTypeRef);
+    } catch (IOException e) {
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
+    }
+  }
+
+  /**
+   * Returns serialized JSON byte array from given object or empty byte array if the given object is
+   * null.
    *
    * @param obj
-   * @return toBytes
    */
   public static byte[] toBytes(Object obj) {
     if (obj == null) {
@@ -198,23 +210,19 @@ public class Jsons {
   }
 
   /**
-   * Convert object to json string
+   * Returns serialized JSON string from given object or null if the given object is null.
    *
-   * @param obj
-   * @throws IOException
-   * @throws JsonMappingException
-   * @throws JsonGenerationException
+   * @param obj the object to be serialized
    */
   public static String toString(Object obj) {
     return toString(obj, false);
   }
 
   /**
-   * Convert object to json string
+   * Returns serialized JSON string from given object or null if the given object is null.
    *
-   * @param obj
-   * @param pretty
-   * @return toJsonStr
+   * @param obj the object to be serialized
+   * @param pretty whether to enable pretty printer indentation
    */
   public static String toString(Object obj, boolean pretty) {
     if (obj != null) {
@@ -231,10 +239,18 @@ public class Jsons {
     return null;
   }
 
-  public static <T> T tryFromBytes(byte[] bytes, Class<T> cls) {
-    if (isNotEmpty(bytes)) {
+  /**
+   * Returns an typed object from given JSON bytes and class, when a exception occurs, it returns
+   * null.
+   *
+   * @param <T> the the expected object type
+   * @param jsonBytes the JSON serialized bytes of the object
+   * @param cls the expected object class
+   */
+  public static <T> T tryFromBytes(byte[] jsonBytes, Class<T> cls) {
+    if (isNotEmpty(jsonBytes)) {
       try {
-        return objectMapper.readerFor(cls).readValue(bytes);
+        return objectMapper.readerFor(cls).readValue(jsonBytes);
       } catch (IOException e) {
         logger.log(Level.WARNING, e,
             () -> String.format("Can't deserialize bytes to %s object.", cls.getName()));
@@ -244,16 +260,16 @@ public class Jsons {
   }
 
   /**
-   * Convert input string to type object.
+   * Returns an typed object from given JSON string and class, when a exception occurs, it returns
+   * null.
    *
-   * @param cmd
-   * @param clazz
-   * @return
+   * @param jsonString the JSON serialized string of the object
+   * @param clazz the expected object class
    */
-  public static <T> T tryFromString(String cmd, Class<T> clazz) {
-    if (isNotBlank(cmd)) {
+  public static <T> T tryFromString(String jsonString, Class<T> clazz) {
+    if (isNotBlank(jsonString)) {
       try {
-        return objectMapper.readValue(cmd, clazz);
+        return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {
         logger.log(Level.WARNING, e,
             () -> String.format("Can't deserialize String to %s object.", clazz.getName()));

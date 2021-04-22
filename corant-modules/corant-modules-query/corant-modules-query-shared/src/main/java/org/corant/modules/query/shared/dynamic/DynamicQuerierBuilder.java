@@ -30,6 +30,6 @@ public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 
   Query getQuery();
 
-  QueryHandler getQueryResolver();
+  QueryHandler getQueryHandler();
 
 }

@@ -90,6 +90,7 @@
 		<version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
 		<version.jcip-annotations>1.0-1</version.jcip-annotations>
 		<version.jose4j>0.7.6</version.jose4j>
+		<version.jsqlparser>4.0</version.jsqlparser>
 		<version.junit>4.13.1</version.junit>
 		<version.jython>2.7.2</version.jython>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
@@ -1099,6 +1100,11 @@
 				<groupId>com.datastax.cassandra</groupId>
 				<artifactId>cassandra-driver-extras</artifactId>
 				<version>${version.datastax.cassandra}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>${version.jsqlparser}</version>
 			</dependency>
 
 			<!-- ORM -->

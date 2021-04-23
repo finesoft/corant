@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.util.stream.Collectors.toList;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -23,14 +24,14 @@ import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import org.corant.Corant;
@@ -131,29 +132,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
       if (parentQuerier.parallelFetch() && fetchQueries.size() > 1) {
         parallelFetch(results, parentQuerier);
-        return;
-      }
-      for (FetchQuery fq : fetchQueries) {
-        NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
-        if (fq.isEagerInject()) {
-          for (T result : results) {
-            if (parentQuerier.decideFetch(result, fq)) {
-              FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
-              postFetch(fr, parentQuerier, result);
-            }
-          }
-        } else {
-          List<T> decideResults = results.stream().filter(r -> parentQuerier.decideFetch(r, fq))
-              .collect(Collectors.toList());
-          if (isEmpty(decideResults) && isNotEmpty(fq.getParameters())
-              && fq.getParameters().stream()
-                  .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
-                      || fp.getSource() == FetchQueryParameterSource.P)) {
-            continue;
-          }
-          FetchResult fr = fetchQueryService.fetch(decideResults, fq, parentQuerier);
-          postFetch(fr, parentQuerier, decideResults);
-        }
+      } else {
+        serialFetch(results, parentQuerier);
       }
     }
   }
@@ -163,14 +143,8 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     if (result != null && isNotEmpty(fetchQueries = parentQuerier.getQuery().getFetchQueries())) {
       if (parentQuerier.parallelFetch() && fetchQueries.size() > 1) {
         parallelFetch(result, parentQuerier);
-        return;
-      }
-      for (FetchQuery fq : fetchQueries) {
-        NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
-        if (parentQuerier.decideFetch(result, fq)) {
-          FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
-          postFetch(fr, parentQuerier, result);
-        }
+      } else {
+        serialFetch(result, parentQuerier);
       }
     }
   }
@@ -192,63 +166,67 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   }
 
   protected <T> void parallelFetch(List<T> results, Querier parentQuerier) {
-    // parallel fetch, experiential functions for proof of concept.
-    List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
-    List<FetchQuery> serialFetchQueriers = new ArrayList<>();
-    List<FetchQuery> parallelFetchQueiers = new ArrayList<>();
-    for (FetchQuery fq : fetchQueries) {
+    // parallel fetch, experimental features for proof of concept.
+    List<FetchQuery> fetchQueries = new ArrayList<>(parentQuerier.getQuery().getFetchQueries());
+    final Collection<Pair<FetchResult, Object>> workResults = new LinkedBlockingQueue<>();
+    fetchQueries.parallelStream().forEach(fq -> {
+      final NamedQueryService fqs = resolveFetchQueryService(fq);
       if (fq.isEagerInject()) {
-        serialFetchQueriers.add(fq);
+        for (T result : results) {
+          if (parentQuerier.decideFetch(result, fq)) {
+            FetchResult fr = fqs.fetch(result, fq, parentQuerier);
+            workResults.add(Pair.of(fr, result));
+          }
+        }
       } else {
-        parallelFetchQueiers.add(fq);
-      }
-    }
-    // handle eager inject
-    for (FetchQuery fq : serialFetchQueriers) {
-      NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
-      for (T result : results) {
-        if (parentQuerier.decideFetch(result, fq)) {
-          FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
-          postFetch(fr, parentQuerier, result);
+        List<T> decideResults =
+            results.stream().filter(r -> parentQuerier.decideFetch(r, fq)).collect(toList());
+        boolean fetch = true;
+        if (isEmpty(decideResults) && isNotEmpty(fq.getParameters())
+            && fq.getParameters().stream()
+                .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
+                    || fp.getSource() == FetchQueryParameterSource.P)) {
+          fetch = false;
+        }
+        if (fetch) {
+          FetchResult fr = fqs.fetch(decideResults, fq, parentQuerier);
+          workResults.add(Pair.of(fr, decideResults));
         }
       }
-    }
-    // handle not eager in parallel
-    List<Pair<FetchResult, List<?>>> frs = new CopyOnWriteArrayList<>();
-    parallelFetchQueiers.parallelStream().forEach(fq -> {
-      NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
-      List<T> decideResults = results.stream().filter(r -> parentQuerier.decideFetch(r, fq))
-          .collect(Collectors.toList());
-      if (!isEmpty(decideResults) || !isNotEmpty(fq.getParameters())
-          || !fq.getParameters().stream()
-              .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
-                  || fp.getSource() == FetchQueryParameterSource.P)) {
-        FetchResult fr = fetchQueryService.fetch(decideResults, fq, parentQuerier);
-        frs.add(Pair.of(fr, decideResults));
-      }
     });
-    for (FetchQuery fq : parallelFetchQueiers) {
-      frs.stream().filter(f -> areEqual(f.key().fetchQuery, fq)).findFirst().ifPresent(fr -> {
-        postFetch(fr.key(), parentQuerier, fr.value());
-      });
+
+    for (FetchQuery fq : fetchQueries) {
+      Iterator<Pair<FetchResult, Object>> it = workResults.iterator();
+      while (it.hasNext()) {
+        Pair<FetchResult, Object> pair = it.next();
+        if (areEqual(pair.key().fetchQuery, fq)) {
+          postFetch(pair.key(), parentQuerier, pair.value());
+          it.remove();
+        }
+      }
     }
   }
 
   protected <T> void parallelFetch(T result, Querier parentQuerier) {
-    // parallel fetch, experiential functions for proof of concept.
+    // parallel fetch, experimental functions for proof of concept.
     List<FetchQuery> fetchQueries = new ArrayList<>(parentQuerier.getQuery().getFetchQueries());
-    List<FetchResult> frs = new CopyOnWriteArrayList<>();
+    Collection<FetchResult> workResults = new LinkedBlockingQueue<>();
     fetchQueries.parallelStream().forEach(fq -> {
       NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
       if (parentQuerier.decideFetch(result, fq)) {
         FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
-        frs.add(fr);
+        workResults.add(fr);
       }
     });
     for (FetchQuery fq : fetchQueries) {
-      frs.stream().filter(f -> areEqual(f.fetchQuery, fq)).findFirst().ifPresent(fr -> {
-        postFetch(fr, parentQuerier, result);
-      });
+      Iterator<FetchResult> it = workResults.iterator();
+      while (it.hasNext()) {
+        FetchResult fr = it.next();
+        if (areEqual(fr.fetchQuery, fq)) {
+          postFetch(fr, parentQuerier, result);
+          it.remove();
+        }
+      }
     }
   }
 
@@ -278,13 +256,48 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     });
   }
 
+  protected <T> void serialFetch(List<T> results, Querier parentQuerier) {
+    for (FetchQuery fq : parentQuerier.getQuery().getFetchQueries()) {
+      NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
+      if (fq.isEagerInject()) {
+        for (T result : results) {
+          if (parentQuerier.decideFetch(result, fq)) {
+            FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
+            postFetch(fr, parentQuerier, result);
+          }
+        }
+      } else {
+        List<T> decideResults =
+            results.stream().filter(r -> parentQuerier.decideFetch(r, fq)).collect(toList());
+        if (isEmpty(decideResults) && isNotEmpty(fq.getParameters())
+            && fq.getParameters().stream()
+                .noneMatch(fp -> fp.getSource() == FetchQueryParameterSource.C
+                    || fp.getSource() == FetchQueryParameterSource.P)) {
+          continue;
+        }
+        FetchResult fr = fetchQueryService.fetch(decideResults, fq, parentQuerier);
+        postFetch(fr, parentQuerier, decideResults);
+      }
+    }
+  }
+
+  protected <T> void serialFetch(T result, Querier parentQuerier) {
+    for (FetchQuery fq : parentQuerier.getQuery().getFetchQueries()) {
+      NamedQueryService fetchQueryService = resolveFetchQueryService(fq);
+      if (parentQuerier.decideFetch(result, fq)) {
+        FetchResult fr = fetchQueryService.fetch(result, fq, parentQuerier);
+        postFetch(fr, parentQuerier, result);
+      }
+    }
+  }
+
   /**
    * Actual execution method for {@link #stream(String, Object)}
    *
-   * @param <T>
-   * @param queryName
-   * @param param
-   * @return stream
+   * @param <T> the result record type
+   * @param queryName the query name
+   * @param param the query parameter
+   * @return stream the query result stream
    */
   protected <T> Stream<T> stream(String queryName, StreamQueryParameter param) {
     return streamOf(new Iterator<T>() {

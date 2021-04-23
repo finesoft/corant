@@ -13,17 +13,14 @@
  */
 package org.corant.modules.query.elastic;
 
-import java.io.IOException;
 import java.util.Map;
 import org.corant.modules.query.shared.FetchQueryHandler;
 import org.corant.modules.query.shared.QueryHandler;
 import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
 import org.corant.modules.query.shared.mapping.Query;
 import org.corant.shared.ubiquity.Tuple.Triple;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-modules-query-elastic
@@ -34,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FreemarkerEsQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, Map<Object, Object>, EsNamedQuerier> {
 
-  public static final ObjectMapper OM = new ObjectMapper();
+  // public static final ObjectMapper OM = new ObjectMapper();
 
   /**
    * @param query
@@ -50,14 +47,15 @@ public class FreemarkerEsQuerierBuilder extends
   @Override
   protected DefaultEsNamedQuerier build(
       Triple<QueryParameter, Map<String, Object>, String> processed) {
-    try {
-      @SuppressWarnings("rawtypes")
-      final Map esQuery = OM.readValue(processed.getRight(), Map.class);
-      return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
-          getFetchQueryHandler(), esQuery);
-    } catch (IOException e) {
-      throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
-    }
+    // try {
+    @SuppressWarnings("rawtypes")
+    // final Map esQuery = OM.readValue(processed.getRight(), Map.class);
+    final Map esQuery = queryHandler.getObjectMapper().mapOf(processed.getRight(), false);
+    return new DefaultEsNamedQuerier(getQuery(), processed.getLeft(), getQueryHandler(),
+        getFetchQueryHandler(), esQuery);
+    // } catch (IOException e) {
+    // throw new QueryRuntimeException(e, "Freemarker process stringTemplate is error!");
+    // }
   }
 
   @Override

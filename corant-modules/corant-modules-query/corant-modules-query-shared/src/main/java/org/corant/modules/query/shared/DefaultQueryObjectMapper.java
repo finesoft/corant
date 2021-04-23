@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
@@ -40,6 +41,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   protected ObjectWriter escapePpObjectWriter =
       ppObjectWriter.with(JsonpCharacterEscapes.instance());
   protected JavaType mapType = objectMapper.constructType(Map.class);
+  protected ObjectReader mapReader = objectMapper.readerFor(mapType);
 
   @Override
   public <T> T fromJsonString(String jsonString, Class<T> type) {
@@ -57,7 +59,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     }
     try {
       if (!convert) {
-        return objectMapper.readValue(object.toString(), mapType);
+        return mapReader.readValue(object.toString());
       } else {
         return objectMapper.convertValue(object, mapType);
       }

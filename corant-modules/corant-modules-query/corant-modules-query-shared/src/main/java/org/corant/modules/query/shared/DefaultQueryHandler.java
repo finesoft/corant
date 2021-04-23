@@ -122,9 +122,8 @@ public class DefaultQueryHandler implements QueryHandler {
   @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveParameter(Query query, Object param) {
-    QueryParameter queryParameter = new DefaultQueryParameter();
     if (param instanceof QueryParameter) {
-      queryParameter = (QueryParameter) param;
+      return (QueryParameter) param;
     } else if (param instanceof Map) {
       Map<?, ?> mp = new HashMap<>((Map<?, ?>) param);
       DefaultQueryParameter qp = new DefaultQueryParameter();
@@ -133,11 +132,11 @@ public class DefaultQueryHandler implements QueryHandler {
       Optional.ofNullable(mp.remove(CONTEXT_NME))
           .ifPresent(x -> qp.context((Map<String, Object>) x));
       Map<String, Class<?>> convertSchema = query == null ? null : query.getParamConvertSchema();
-      queryParameter = qp.criteria(convertParameter(mp, convertSchema));
+      return qp.criteria(convertParameter(mp, convertSchema));
     } else if (param != null) {
-      queryParameter = new DefaultQueryParameter().criteria(param);
+      return new DefaultQueryParameter().criteria(param);
     }
-    return queryParameter;
+    return new DefaultQueryParameter();
   }
 
   protected Map<String, Object> convertParameter(Map<?, ?> param,

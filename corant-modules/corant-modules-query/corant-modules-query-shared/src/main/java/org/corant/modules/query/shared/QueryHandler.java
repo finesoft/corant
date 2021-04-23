@@ -21,6 +21,10 @@ import org.corant.modules.query.shared.spi.ResultHintHandler;
 /**
  * corant-modules-query-shared
  *
+ * <p>
+ * This interface is used to process normal queries, provide processing of the query parameters, and
+ * provide processing of the query result set.
+ *
  * @author bingo 下午4:56:52
  *
  */
@@ -41,14 +45,16 @@ public interface QueryHandler {
   QuerierConfig getQuerierConfig();
 
   /**
-   * Handle single result {@link #handleResults(List, Class, List, QueryParameter)}
+   * Handle single result, perform the hint handler and convert the result to expected typed object.
    *
-   * @param <T> the result class
+   * @param <T> the result type
    * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>
-   * @param resultClass
-   * @param hints
-   * @param parameter
+   * @param resultClass the result class
+   * @param hints the query hints
+   * @param parameter the query parameter
    *
+   * @see #handleResultHints(Object, Class, List, QueryParameter)
+   * @see #handleResults(List, Class, List, QueryParameter)
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
@@ -60,10 +66,12 @@ public interface QueryHandler {
    * Handle query hints, in this step the result set may be adjusted or inserted with certain
    * values.
    *
-   * @param result
-   * @param resultClass
-   * @param hints
-   * @param parameter
+   * @param result the result may be single object or list objects
+   * @param resultClass the query result class
+   * @param hints the query hints
+   * @param parameter the query parameter
+   *
+   * @see ResultHintHandler
    */
   void handleResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
       QueryParameter parameter);
@@ -80,11 +88,13 @@ public interface QueryHandler {
    *
    * @param <T> the result class
    * @param results the original results, currently is <b> List&lt;Map&lt;String,Object&gt;&gt;</b>
-   * @param resultClass
-   * @param hints
-   * @param parameter
+   * @param resultClass the query result class
+   * @param hints the query hints
+   * @param parameter the query parameter
    *
    *
+   * @see #handleResultHints(Object, Class, List, QueryParameter)
+   * @see #handleResults(List, Class, List, QueryParameter)
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
@@ -93,12 +103,15 @@ public interface QueryHandler {
       QueryParameter parameter);
 
   /**
-   * Resolve query parameter. NOTE: If parameter instanceof QueryParameter then implemention must be
-   * return it.
+   * Resolve query parameter.
    *
-   * @param query
-   * @param parameter
-   * @return query parameter
+   * <p>
+   * NOTE: If parameter is instance of QueryParameter then just return it, else the given parameter
+   * is regarded as the criteria of the normal query parameter.
+   *
+   * @param query the query
+   * @param parameter the original query parameter
+   * @return normal query parameter object
    */
   QueryParameter resolveParameter(Query query, Object parameter);
 }

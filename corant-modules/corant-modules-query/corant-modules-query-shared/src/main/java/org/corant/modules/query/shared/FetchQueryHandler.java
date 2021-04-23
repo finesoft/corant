@@ -19,19 +19,22 @@ import org.corant.modules.query.shared.mapping.FetchQuery;
 /**
  * corant-modules-query-shared
  *
+ * <p>
+ * This interface is used to process fetch queries, provide the query parameters of the fetch query,
+ * and provide processing of the fetch query result set.
+ *
  * @author bingo 上午10:03:39
  *
  */
 public interface FetchQueryHandler {
 
   /**
-   * Decide whether to fetch, generally, the parameter 'result' is a single result record. If the
-   * fetch query predicate script not set, this method must return true.
+   * Decide whether to fetch, generally, the given parameter 'result' is a single result record. If
+   * the fetch query predicate script not set, this method must return true.
    *
-   * @param result
-   * @param queryParameter
-   * @param fetchQuery
-   * @return canFetch
+   * @param result the query result use for decide whether to need fetch
+   * @param queryParameter the query parameter use for decide whether to need fetch
+   * @param fetchQuery the fetch query use for decide whether to need fetch
    */
   boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery);
 
@@ -46,9 +49,9 @@ public interface FetchQueryHandler {
    * Inject fetch query result in to single parent query result, the parameter 'fetchResult' may be
    * modified.
    *
-   * @param result
-   * @param fetchResults
-   * @param fetchQuery
+   * @param result the parent query result
+   * @param fetchResults the fetched results
+   * @param fetchQuery the fetch query
    */
   void handleFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
 
@@ -56,25 +59,27 @@ public interface FetchQueryHandler {
    * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
    * modified.
    *
-   * @param results
-   * @param fetchResults
-   * @param fetchQuery
+   * @param results the parent query result list
+   * @param fetchResults the fetched results
+   * @param fetchQuery the fetch query
    */
   void handleFetchedResults(List<?> results, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
-   * Resolve fetch query parameter. Generally, the fetch query parameters are composed of parent
-   * query parameters, parent query result set and constant. This method is used to parse parent
-   * query result sets or parent query parameters or constants to construct the fetch query
-   * parameter type and expression.
+   * Resolve fetch query parameter. Generally, the fetch query parameters are composed of the parent
+   * query parameters, the parent query result set and the constants. This method is used to parse
+   * the parent query result set or the parent query parameters or the constants to construct the
+   * fetch query parameter type and expression. The context information of the parent query must be
+   * propagated to the query parameters of the fetch query.
    *
    * @param result the parent query result, may be single or multiple
-   * @param query
-   * @param parentQueryparam
+   * @param fetchQuery the fetch query
+   * @param parentQueryparam the parent query parameter
    * @return fetch query parameter
+   *
    * @see FetchQuery
    */
-  QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
+  QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery,
       QueryParameter parentQueryparam);
 
 }

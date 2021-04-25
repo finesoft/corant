@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  * corant-modules-cloud-tencent
  *
  * @author bingo 上午10:05:42
- *
  */
 @XmlRootElement(name = "xml")
 public class CorantWXNotifyXMLVO {
@@ -27,6 +26,8 @@ public class CorantWXNotifyXMLVO {
   private String mch_id;
   private String nonce_str;
   private String sign;
+  private String return_code;
+  private String fee_type;
   private String sign_type;
   private String result_code;
   private String openid;
@@ -51,6 +52,10 @@ public class CorantWXNotifyXMLVO {
     return cash_fee;
   }
 
+  public String getFee_type() {
+    return fee_type;
+  }
+
   public String getIs_subscribe() {
     return is_subscribe;
   }
@@ -73,6 +78,10 @@ public class CorantWXNotifyXMLVO {
 
   public String getResult_code() {
     return result_code;
+  }
+
+  public String getReturn_code() {
+    return return_code;
   }
 
   public String getSign() {
@@ -114,6 +123,11 @@ public class CorantWXNotifyXMLVO {
     return this;
   }
 
+  public CorantWXNotifyXMLVO setFee_type(String fee_type) {
+    this.fee_type = fee_type;
+    return this;
+  }
+
   public CorantWXNotifyXMLVO setIs_subscribe(String is_subscribe) {
     this.is_subscribe = is_subscribe;
     return this;
@@ -141,6 +155,11 @@ public class CorantWXNotifyXMLVO {
 
   public CorantWXNotifyXMLVO setResult_code(String result_code) {
     this.result_code = result_code;
+    return this;
+  }
+
+  public CorantWXNotifyXMLVO setReturn_code(String return_code) {
+    this.return_code = return_code;
     return this;
   }
 

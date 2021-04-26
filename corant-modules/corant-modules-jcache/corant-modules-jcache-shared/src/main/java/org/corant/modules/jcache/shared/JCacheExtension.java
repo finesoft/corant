@@ -23,7 +23,7 @@ import org.jsr107.ri.annotations.cdi.CacheResultInterceptor;
 public class JCacheExtension implements Extension {
 
   private boolean enableGlobalAnnotation = ConfigProvider.getConfig()
-      .getOptionalValue("corant.jcache.enable_global_annotation", Boolean.class)
+      .getOptionalValue("corant.jcache.enable-global-annotation", Boolean.class)
       .orElse(Boolean.TRUE);
 
   protected CachingProvider cachingProvider;

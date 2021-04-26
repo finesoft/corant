@@ -47,11 +47,11 @@ public class KeycloakAuthzClient {
   Logger logger;
 
   @Inject
-  @ConfigProperty(name = "corant.keycloak.authz_client.json")
+  @ConfigProperty(name = "corant.keycloak.authz-client.json")
   protected Optional<String> keycloakJson;
 
   @Inject
-  @ConfigProperty(name = "corant.keycloak.authz_client.location",
+  @ConfigProperty(name = "corant.keycloak.authz-client.location",
       defaultValue = "META-INF/keycloak-authz-client.json")
   protected String keycloakJsonLocation;
 

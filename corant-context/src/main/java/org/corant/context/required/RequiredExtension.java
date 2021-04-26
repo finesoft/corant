@@ -37,9 +37,9 @@ public class RequiredExtension implements Extension {
     return beanType != null && vetoes.contains(beanType);
   }
 
-  public <T> void checkRequired(@WithAnnotations({RequiredClassNotPresent.class,
-      RequiredClassPresent.class,
-      RequiredConfiguration.class}) @Observes @Priority(Priorities.FRAMEWORK_HIGHER) ProcessAnnotatedType<T> event) {
+  public <T> void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
+      RequiredClassNotPresent.class, RequiredClassPresent.class,
+      RequiredConfiguration.class}) ProcessAnnotatedType<T> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
     if (Required.shouldVeto(type)) {
       vetoes.add(event.getAnnotatedType().getJavaClass());

@@ -39,10 +39,6 @@ public interface Dialect {
   String SQLSERVER_JDBC_URL_PREFIX = "jdbc:sqlserver:";
   String SYBASE_JDBC_URL_PREFIX = "jdbc:sybase:";
 
-  static String getNonOrderByPart(String sql) {
-    return SqlHelper.removeOrderBy(sql);
-  }
-
   /**
    * Convert SQL statement to Count SQL statement
    *
@@ -51,8 +47,7 @@ public interface Dialect {
    */
   default String getCountSql(String sql) {
     return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
-        .append(" FROM ( ").append(Dialect.getNonOrderByPart(sql)).append(" ) AS tmp_count_")
-        .toString();
+        .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) AS tmp_count_").toString();
   }
 
   /**
@@ -75,6 +70,10 @@ public interface Dialect {
    * @return Paging SQL statement
    */
   String getLimitSql(String sql, int offset, int limit);
+
+  default String getNonOrderByPart(String sql) {
+    return SqlHelper.removeOrderBy(sql);
+  }
 
   /**
    *

@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import org.corant.modules.query.shared.dynamic.SqlHelper;
+
 /**
  * corant-modules-query-sql
  *
@@ -26,6 +28,19 @@ public class H2Dialect implements Dialect {
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.LIMIT_PATTERN, pos) < 0
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.OFFSET_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

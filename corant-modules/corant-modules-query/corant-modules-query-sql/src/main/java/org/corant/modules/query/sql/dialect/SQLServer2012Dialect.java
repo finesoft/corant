@@ -27,12 +27,50 @@ public class SQLServer2012Dialect extends SQLServer2008Dialect {
 
   public static final Dialect INSTANCE = new SQLServer2012Dialect();
 
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.OFFSET_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
+  }
+
   /**
    * Add a LIMIT clause to the given SQL SELECT
    * <p>
    * The LIMIT SQL will look like:
    * <p>
    * SELET XXX FROM T OFFSET offset FETCH NEXT limit ROWS ONLY
+   *
+   * <p>
+   *
+   * <pre>
+   * -- Syntax for SQL Server and Azure SQL Database
+   *
+   * $SELECT statement$ ::=
+   *    [ WITH { [ XMLNAMESPACES ,] [ $common_table_expression$ [,...n] ] } ]
+   *    $query_expression$
+   *    [ ORDER BY $order_by_expression$ ]
+   *    [ $FOR Clause$]
+   *    [ OPTION ( $query_hint$ [ ,...n ] ) ]
+   * $query_expression$ ::=
+   *    { $query_specification$ | ( $query_expression$ ) }
+   *    [  { UNION [ ALL ] | EXCEPT | INTERSECT }
+   *    * $query_specification$ | ( $query_expression$ ) [...n ] ]
+   * $query_specification$ ::=
+   * SELECT [ ALL | DISTINCT ]
+   *    [TOP ( expression ) [PERCENT] [ WITH TIES ] ]
+   *    $ select_list $
+   *    [ INTO new_table ]
+   *    [ FROM { $table_source$ } [ ,...n ] ]
+   *    [ WHERE $search_condition$ ]
+   *    [ $GROUP BY$ ]
+   *    [ HAVING $ search_condition $ ]
+   * </pre>
    *
    * @param sql The SQL statement to base the limit script off of.
    * @param offset Offset of the first row to be returned by the script (zero-based)

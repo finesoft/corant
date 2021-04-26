@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import org.corant.modules.query.shared.dynamic.SqlHelper;
+
 /**
  * corant-modules-query-sql
  *
@@ -27,24 +29,68 @@ public class MySQLDialect implements Dialect {
 
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));
+    return getLimitString(sql, offset, limit);
   }
 
   /**
    * <pre>
-   * dialect.getLimitString("select * from user", 12, ":offset",0,":limit") will return
-   * select * from user limit :offset,:limit
+   * dialect.getLimitString("select * from user", 12, 14) will return
+   * select * from user limit 12,14
+   * </pre>
+   *
+   * <p>
+   *
+   * <pre>
+   * SELECT
+   *    [ALL | DISTINCT | DISTINCTROW ]
+   *    [HIGH_PRIORITY]
+   *    [STRAIGHT_JOIN]
+   *    [SQL_SMALL_RESULT] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+   *    [SQL_CACHE | SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
+   *    select_expr [, select_expr] ...
+   *    [into_option]
+   *    [FROM table_references
+   *      [PARTITION partition_list]]
+   *    [WHERE where_condition]
+   *    [GROUP BY {col_name | expr | position}
+   *      [ASC | DESC], ... [WITH ROLLUP]]
+   *    [HAVING where_condition]
+   *    [ORDER BY {col_name | expr | position}
+   *      [ASC | DESC], ...]
+   *    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+   *    [PROCEDURE procedure_name(argument_list)]
+   *    [into_option]
+   *    [FOR UPDATE | LOCK IN SHARE MODE]
+
+   * into_option: {
+   *    INTO OUTFILE 'file_name'
+   *    * [CHARACTER SET charset_name]
+   *    * export_options
+   *   | INTO DUMPFILE 'file_name'
+   *   | INTO var_name [, var_name] ...
+   * }
    * </pre>
    */
-  public String getLimitString(String sql, int offset, String offsetPlaceholder,
-      String limitPlaceholder) {
+  public String getLimitString(String sql, int offset, int limit) {
     if (offset > 0) {
-      return new StringBuilder(sql.length() + 32).append(sql).append(" LIMIT ")
-          .append(offsetPlaceholder).append(",").append(limitPlaceholder).toString();
+      return new StringBuilder(sql.length() + 32).append(sql).append(" LIMIT ").append(offset)
+          .append(",").append(limit).toString();
     } else {
-      return new StringBuilder(sql.length() + 16).append(sql).append(" LIMIT ")
-          .append(limitPlaceholder).toString();
+      return new StringBuilder(sql.length() + 16).append(sql).append(" LIMIT ").append(limit)
+          .toString();
     }
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.LIMIT_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

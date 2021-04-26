@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import org.corant.modules.query.shared.dynamic.SqlHelper;
+
 /**
  * corant-modules-query-sql
  *
@@ -30,7 +32,7 @@ public class PostgreSQLDialect implements Dialect {
 
   /**
    * <pre>
-   * dialect.getLimitString("select * from user", 12, ":offset",0,":limit") will return
+   * dialect.getLimitString("select * from user",":offset",":limit") will return
    * select * from user limit :offset,:limit
    * </pre>
    */
@@ -39,6 +41,19 @@ public class PostgreSQLDialect implements Dialect {
     pageSql = offset <= 0 ? pageSql.append(" LIMIT ").append(limit)
         : pageSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
     return pageSql.toString();
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.LIMIT_PATTERN, pos) < 0
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.OFFSET_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

@@ -27,23 +27,35 @@ public class HSQLDialect implements Dialect {
 
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, Integer.toString(offset), Integer.toString(limit));
+    return getLimitString(sql, offset, limit);
   }
 
   /**
    * <pre>
-   * dialect.getLimitString("select * from user", 12, ":offset",0,":limit") will return
-   * select limit 0 12 * from user
+   * dialect.getLimitString("select * from user",":offset",":limit") will return
+   * select limit :offset :limit * from user
    * </pre>
    */
-  public String getLimitString(String sql, int offset, String offsetPlaceholder,
-      String limitPlaceholder) {
+  public String getLimitString(String sql, int offset, int limit) {
     boolean hasOffset = offset > 0;
     return new StringBuffer(sql.length() + 10).append(sql)
         .insert(SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0) + 7,
-            hasOffset ? " LIMIT " + offsetPlaceholder + " " + limitPlaceholder
-                : " TOP " + limitPlaceholder)
+            hasOffset ? " LIMIT " + offset + " " + limit : " TOP " + limit)
         .toString();
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.LIMIT_PATTERN, pos) < 0
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.FETCH_PATTERN, pos) < 0
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.OFFSET_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

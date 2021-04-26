@@ -14,6 +14,8 @@
 package org.corant.modules.query.sql.dialect;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
+import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
  * corant-modules-query-sql
@@ -25,17 +27,15 @@ public class OracleDialect implements Dialect {
 
   public static final Dialect INSTANCE = new OracleDialect();
 
+  public static final String ORDER_SIBLINGS_BY = "order\\s+siblings\\s+by";
+  public static final Pattern ORDER_SIBLINGS_BY_PATTERN =
+      SqlHelper.buildShallowIndexPattern(ORDER_SIBLINGS_BY, true);
+
   @Override
   public String getLimitSql(String sql, int offset, int limit) {
     return getLimitString(sql, offset, limit);
   }
 
-  /**
-   * <pre>
-   * dialect.getLimitString("select * from user", 12, ":offset",0,":limit") will return
-   * select * from user limit :offset,:limit
-   * </pre>
-   */
   public String getLimitString(String sql, int offset, int limit) {
     String sqlToUse = sql.trim();
     boolean isForUpdate = false;
@@ -62,6 +62,21 @@ public class OracleDialect implements Dialect {
       pagingSelect.append(" FOR UPDATE");
     }
     return pagingSelect.toString();
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1) {
+        return sql.substring(0, pos);
+      }
+      pos = SqlHelper.shallowIndexOfPattern(sql, ORDER_SIBLINGS_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

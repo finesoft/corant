@@ -23,4 +23,17 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  *
  */
 public interface SqlNamedQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
+
+  String PRO_KEY_PAGINATION_PROCESS_PATTERN = ".pagination-process-pattern";
+  String PRO_KEY_PAGINATION_COUNT_QUERY = ".pagination-count-query";
+
+  default PaginationProcessPattern resolvePaginationProcessPattern() {
+    return resolveProperty(PRO_KEY_PAGINATION_PROCESS_PATTERN, PaginationProcessPattern.class,
+        PaginationProcessPattern.DEFAULT);
+  }
+
+  enum PaginationProcessPattern {
+    DEFAULT, SEPARATE, PARSABLE
+  }
+
 }

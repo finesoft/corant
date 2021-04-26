@@ -31,24 +31,41 @@ import java.util.regex.Pattern;
 public class SqlHelper {
 
   public static final String SELECT = "select";
+  public static final String SELECT_SPACE = "select ";
   public static final String FROM = "from";
   public static final String WHERE = "where";
   public static final String DISTINCT = "distinct";
   public static final String ORDER_BY = "order\\s+by";
+  public static final String OFFSET = "offset\\s";
+  public static final String LIMIT = "limit\\s";
+  public static final String FETCH = "fetch\\s";
   public static final String SELECT_DISTINCT = SELECT + " " + DISTINCT;
   public static final String SELECT_DISTINCT_SPACE = SELECT_DISTINCT + " ";
   public static final Pattern SELECT_DISTINCT_PATTERN =
       buildShallowIndexPattern(SELECT_DISTINCT_SPACE, true);
 
   public static final Pattern SELECT_PATTERN = buildShallowIndexPattern(SELECT + "(.*)", true);
-
   public static final Pattern FROM_PATTERN = buildShallowIndexPattern(FROM, true);
   public static final Pattern WHERE_PATTERN = buildShallowIndexPattern(WHERE, true);
   public static final Pattern DISTINCT_PATTERN = buildShallowIndexPattern(DISTINCT, true);
   public static final Pattern ORDER_BY_PATTERN = buildShallowIndexPattern(ORDER_BY, true);
-  public static final String SELECT_SPACE = "select ";
+  public static final Pattern OFFSET_PATTERN = SqlHelper.buildShallowIndexPattern(OFFSET, true);
+  public static final Pattern LIMIT_PATTERN = SqlHelper.buildShallowIndexPattern(LIMIT, true);
+  public static final Pattern FETCH_PATTERN = SqlHelper.buildShallowIndexPattern(FETCH, true);
 
-  private SqlHelper() {
+  private SqlHelper() {}
+
+  /**
+   * Builds a pattern that can be used to find matches of case-insensitive matches based on the
+   * search pattern that is not enclosed in parenthesis.
+   *
+   * @param pattern String search pattern.
+   * @param wordBoundary whether to apply a word boundary restriction.
+   * @return Compiled {@link Pattern}.
+   */
+  public static Pattern buildShallowIndexPattern(String pattern, boolean wordBoundary) {
+    return Pattern.compile("(" + (wordBoundary ? "\\b" : "") + pattern + (wordBoundary ? "\\b" : "")
+        + ")(?![^\\(|\\[]*(\\)|\\]))", Pattern.CASE_INSENSITIVE);
   }
 
   public static boolean containDistinct(String sql) {
@@ -83,11 +100,6 @@ public class SqlHelper {
     return null;
   }
 
-  public static String getSelectColumns(String sql) {
-    return sql.substring(getSelectColumnsStartPosition(sql),
-        shallowIndexOfPattern(sql, FROM_PATTERN, 0));
-  }
-
   // public static void main(String... regex) {
   // String sql = "SELECT distinct a.*,basd,asd as aa ,asdasd,"
   // + "(selectr top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
@@ -103,6 +115,11 @@ public class SqlHelper {
   // System.out.println("========================Get Order By==========================");
   // System.out.println(getOrderBy(sql));
   // }
+
+  public static String getSelectColumns(String sql) {
+    return sql.substring(getSelectColumnsStartPosition(sql),
+        shallowIndexOfPattern(sql, FROM_PATTERN, 0));
+  }
 
   public static String removeOrderBy(String sql) {
     if (sql != null) {
@@ -166,19 +183,6 @@ public class SqlHelper {
       }
     }
     return index;
-  }
-
-  /**
-   * Builds a pattern that can be used to find matches of case-insensitive matches based on the
-   * search pattern that is not enclosed in parenthesis.
-   *
-   * @param pattern String search pattern.
-   * @param wordBoundary whether to apply a word boundary restriction.
-   * @return Compiled {@link Pattern}.
-   */
-  static Pattern buildShallowIndexPattern(String pattern, boolean wordBoundary) {
-    return Pattern.compile("(" + (wordBoundary ? "\\b" : "") + pattern + (wordBoundary ? "\\b" : "")
-        + ")(?![^\\(|\\[]*(\\)|\\]))", Pattern.CASE_INSENSITIVE);
   }
 
   /**

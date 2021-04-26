@@ -30,12 +30,7 @@ public class DB2Dialect implements Dialect {
     return getLimitString(sql, offset, limit);
   }
 
-  /**
-   * <pre>
-   * dialect.getLimitString("select * from user", 12, ":offset",0,":limit") will return
-   * select * from user limit :offset,:limit
-   * </pre>
-   */
+
   public String getLimitString(String sql, int offset, int limit) {
     int startOfSelect = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0);
     StringBuilder sqlToUse =
@@ -53,6 +48,20 @@ public class DB2Dialect implements Dialect {
       sqlToUse.append("< ").append(limit);
     }
     return sqlToUse.toString();
+  }
+
+  @Override
+  public String getNonOrderByPart(String sql) {
+    if (sql != null) {
+      int pos = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.ORDER_BY_PATTERN, 0);
+      if (pos > 0 && sql.indexOf('?', pos) == -1
+      // For IBM i 7.1 TR11 or IBM i 7.2 TR3
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.LIMIT_PATTERN, pos) < 0
+          && SqlHelper.shallowIndexOfPattern(sql, SqlHelper.OFFSET_PATTERN, pos) < 0) {
+        return sql.substring(0, pos);
+      }
+    }
+    return sql;
   }
 
   @Override

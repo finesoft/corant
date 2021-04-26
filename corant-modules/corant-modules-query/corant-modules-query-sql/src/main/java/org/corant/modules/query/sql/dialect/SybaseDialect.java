@@ -26,7 +26,7 @@ public class SybaseDialect implements Dialect {
   @Override
   public String getCountSql(String sql) {
     return new StringBuilder(sql.length() + 64).append("select count(1) from ( ")
-        .append(Dialect.getNonOrderByPart(sql)).append(" ) as tmp_count").toString();
+        .append(getNonOrderByPart(sql)).append(" ) as tmp_count").toString();
   }
 
   @Override

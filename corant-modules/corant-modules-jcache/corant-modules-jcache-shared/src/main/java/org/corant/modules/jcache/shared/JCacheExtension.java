@@ -24,7 +24,7 @@ public class JCacheExtension implements Extension {
 
   private boolean enableGlobalAnnotation = ConfigProvider.getConfig()
       .getOptionalValue("corant.jcache.enable-global-annotation", Boolean.class)
-      .orElse(Boolean.TRUE);
+      .orElse(Boolean.FALSE);
 
   protected CachingProvider cachingProvider;
 
@@ -35,6 +35,7 @@ public class JCacheExtension implements Extension {
 
   public void observeAfterTypeDiscovery(@Observes AfterTypeDiscovery afterTypeDiscovery) {
     if (enableGlobalAnnotation) {
+      // FIXME Will be deprecated in next iteration
       afterTypeDiscovery.getInterceptors().add(CacheResultInterceptor.class);
       afterTypeDiscovery.getInterceptors().add(CacheRemoveEntryInterceptor.class);
       afterTypeDiscovery.getInterceptors().add(CacheRemoveAllInterceptor.class);

@@ -77,12 +77,18 @@ public class WebExtension implements Extension, WebMetaDataProvider {
 
   void findFilterMetaDatas(
       @Observes @WithAnnotations({WebFilter.class}) ProcessAnnotatedType<? extends Filter> pat) {
+    if (Required.shouldVeto(pat.getAnnotatedType())) {
+      return;
+    }
     filterMetaDatas.add(new WebFilterMetaData(pat.getAnnotatedType().getAnnotation(WebFilter.class),
         pat.getAnnotatedType().getJavaClass()));
   }
 
   void findListenerMetaDatas(@Observes @WithAnnotations({
       WebListener.class}) ProcessAnnotatedType<? extends ServletContextListener> pat) {
+    if (Required.shouldVeto(pat.getAnnotatedType())) {
+      return;
+    }
     listenerMetaDatas.add(new WebListenerMetaData(pat.getAnnotatedType().getJavaClass()));
   }
 

@@ -33,6 +33,7 @@ import org.corant.shared.ubiquity.Tuple.Triple;
 import freemarker.core.Environment;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
+import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -78,11 +79,26 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
 
   protected Triple<QueryParameter, P, String> execute(QueryParameter param) {
     try (StringWriter sw = new StringWriter()) {
+      // Inject query criteria
+      Environment e = execution.createProcessingEnvironment(param.getCriteria(), sw);
+
+      // Inject template method model
       DynamicTemplateMethodModelEx<P> tmm = getTemplateMethodModelEx();
       String tmmTyp = tmm.getType();
-      Environment e = execution.createProcessingEnvironment(param.getCriteria(), sw);
       checkVarNames(e, tmmTyp);
       e.setVariable(tmmTyp, tmm);
+
+      // Inject query limit & offset
+      if (param.getLimit() != null) {
+        checkVarNames(e, QueryParameter.LIMIT_PARAM_NME);
+        e.setVariable(QueryParameter.LIMIT_PARAM_NME, new SimpleNumber(param.getLimit()));
+      }
+      if (param.getOffset() != null) {
+        checkVarNames(e, QueryParameter.OFFSET_PARAM_NME);
+        e.setVariable(QueryParameter.OFFSET_PARAM_NME, new SimpleNumber(param.getOffset()));
+      }
+
+      // Inject query context
       ObjectWrapper ow = execution.getObjectWrapper();
       if (isNotEmpty(param.getContext())) {
         for (Entry<String, Object> ctx : param.getContext().entrySet()) {
@@ -91,6 +107,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
           e.setVariable(ctx.getKey(), val);
         }
       }
+
+      // Inject parameter reviser
       setEnvironmentVariables(e, ow);
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
@@ -137,11 +155,13 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
         });
   }
 
-  void checkVarNames(Environment e, String varName) throws TemplateModelException {
-    if (e.getKnownVariableNames().contains(varName)) {
-      throw new QueryRuntimeException(
-          "Freemarker dynamic querier buildr [%s] error, the key [%s] name conflict.",
-          query.getName(), varName);
+  void checkVarNames(Environment e, String... varNames) throws TemplateModelException {
+    for (String varName : varNames) {
+      if (e.getKnownVariableNames().contains(varName)) {
+        throw new QueryRuntimeException(
+            "Freemarker dynamic querier buildr [%s] error, the key [%s] name conflict.",
+            query.getName(), varName);
+      }
     }
   }
 

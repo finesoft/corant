@@ -40,8 +40,8 @@ import org.corant.shared.exception.NotSupportedException;
  * (application.properties/microprofile-config.properties/System.properties):
  *
  * <b>
- * jta.transaction.object-store-environment.jdbcAccess = domain=the-domain-name;database=mysql;non-xa-datasource=the-data-source
- * jta.transaction.object-store-environment.objectStoreType = org.corant.modules.jta.narayana.extend.DomainDataSourceStore
+ * corant.jta.transaction.object-store-environment.jdbcAccess = domain=the-domain-name;database=mysql;non-xa-datasource=the-data-source
+ * corant.jta.transaction.object-store-environment.objectStoreType = org.corant.modules.jta.narayana.extend.DomainDataSourceStore
  * </b>
 
  * param explain:
@@ -64,11 +64,6 @@ public class DomainDataSourceAccess extends AbstractDomainJDBCAccess {
   protected volatile String domain;
   protected volatile Named dataSourceName;
   protected volatile String database;
-
-  @Override
-  public void finalize() {
-    // Noop! we are pooled
-  }
 
   @Override
   public Connection getConnection() throws SQLException {

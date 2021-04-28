@@ -34,7 +34,7 @@ import com.arjuna.ats.internal.arjuna.objectstore.ShadowNoFileLockStore;
  * @author bingo 下午9:23:19
  *
  */
-@ConfigKeyRoot(value = "jta.transaction", keyIndex = 2, ignoreNoAnnotatedItem = false)
+@ConfigKeyRoot(value = "corant.jta.transaction", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class NarayanaTransactionConfig extends TransactionConfig {
 
   private static final long serialVersionUID = -1353597648110310051L;

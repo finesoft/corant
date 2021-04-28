@@ -34,16 +34,16 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   protected final QueryHandler queryHandler;
   protected final FetchQueryHandler fetchQueryHandler;
 
-  protected AbstractDynamicQuerierBuilder(Query query, QueryHandler queryResolver,
-      FetchQueryHandler fetchQueryResolver) {
-    if (query == null || queryResolver == null) {
+  protected AbstractDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
+      FetchQueryHandler fetchQueryHandler) {
+    if (query == null || queryHandler == null) {
       throw new QueryRuntimeException(
           "Can not initialize dynamic querier builder from null query param!");
     }
     this.cachedTimestamp = Instant.now().toEpochMilli();
     this.query = query;
-    this.queryHandler = queryResolver;
-    this.fetchQueryHandler = fetchQueryResolver;
+    this.queryHandler = queryHandler;
+    this.fetchQueryHandler = fetchQueryHandler;
   }
 
   @Override

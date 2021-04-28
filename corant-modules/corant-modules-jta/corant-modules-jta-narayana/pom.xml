@@ -18,6 +18,12 @@
 			<artifactId>narayana-jts-integration</artifactId>
 		</dependency>
 		<dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging-annotations</artifactId>
+            <version>2.2.1.Final</version><!-- FIXME -->
+            <scope>provided</scope>
+        </dependency>
+		<dependency>
 			<groupId>org.corant</groupId>
 			<artifactId>corant-modules-jta-shared</artifactId>
 		</dependency>

@@ -53,13 +53,15 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * Create a free marker dynamic querier builder
+   *
+   * @param query the query object
+   * @param queryHandler the query handler
+   * @param fetchQueryHandler the fetch query handler
    */
-  protected FreemarkerDynamicQuerierBuilder(Query query, QueryHandler queryResolver,
-      FetchQueryHandler fetchQueryResolver) {
-    super(query, queryResolver, fetchQueryResolver);
+  protected FreemarkerDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
+      FetchQueryHandler fetchQueryHandler) {
+    super(query, queryHandler, fetchQueryHandler);
     try {
       String scriptSource =
           defaultString(query.getMacroScript()).concat(query.getScript().getCode());// FIXME
@@ -119,14 +121,11 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   }
 
   /**
-   * @return getTemplateMethodModelEx
+   * Returns a template method model use for variables handling. The "extended method" template
+   * language data type: Objects that act like functions.
    */
   protected abstract DynamicTemplateMethodModelEx<P> getTemplateMethodModelEx();
 
-  /**
-   * @param env
-   * @param ow
-   */
   protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
     select(ParameterReviser.class).stream().filter(r -> r.canHandle(getQuery()))
         .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority()) * -1).forEach(r -> {

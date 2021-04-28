@@ -32,12 +32,6 @@ public class NarayanaXAResourceWrapper implements XAResourceWrapper {
   final String productName;
   final String productVersion;
 
-  /**
-   * @param resource
-   * @param jndiName
-   * @param productName
-   * @param productVersion
-   */
   public NarayanaXAResourceWrapper(XAResource resource, String jndiName, String productName,
       String productVersion) {
     this.resource = shouldNotNull(resource);

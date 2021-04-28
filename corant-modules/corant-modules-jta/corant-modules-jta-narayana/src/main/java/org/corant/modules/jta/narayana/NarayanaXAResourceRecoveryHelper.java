@@ -27,9 +27,6 @@ public class NarayanaXAResourceRecoveryHelper implements XAResourceRecoveryHelpe
 
   private final TransactionIntegration integration;
 
-  /**
-   * @param integration
-   */
   public NarayanaXAResourceRecoveryHelper(TransactionIntegration integration) {
     this.integration = integration;
   }

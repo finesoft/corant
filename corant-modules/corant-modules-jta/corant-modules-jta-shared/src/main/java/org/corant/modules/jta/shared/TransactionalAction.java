@@ -57,12 +57,17 @@ public abstract class TransactionalAction<T> {
   final Integer timeout;
 
   /**
-   * @param type
-   * @param supplier
-   * @param synchronization
-   * @param rollbackOn
-   * @param dontRollbackOn
-   * @param timeout
+   * Return a convenient transaction execution object.
+   *
+   * @param type the TX type
+   * @param supplier the customized program executed in this transaction
+   * @param synchronization the synchronization code used to register to the current transaction
+   * @param rollbackOn the rollbackOn element can be set to indicate exceptions that must cause the
+   *        interceptor to mark the transaction for roll back.
+   * @param dontRollbackOn the dontRollbackOn element can be set to indicate exceptions that must
+   *        not cause the interceptor to mark the transaction for roll back.
+   * @param timeout the timeout value (in seconds) that is associated with transactions started by
+   *        the current thread with the begin method
    */
   protected TransactionalAction(TxType type, Supplier<T> supplier, Synchronization synchronization,
       Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout) {
@@ -314,6 +319,10 @@ public abstract class TransactionalAction<T> {
   /**
    * corant-modules-jta-shared
    *
+   * <p>
+   * The simplifies programmatic transaction execution by wrapping the transaction manager and
+   * providing some convenient methods around which a transactional boundary is started.
+   *
    * @author bingo 上午10:45:58
    *
    */
@@ -330,6 +339,11 @@ public abstract class TransactionalAction<T> {
       return this;
     }
 
+    /**
+     * Execute the given Supplier in the transaction context and return the result.
+     *
+     * @param supplier the execution
+     */
     public T get(final Supplier<T> supplier) {
       try {
         return plan(shouldNotNull(supplier)).execute();
@@ -363,6 +377,11 @@ public abstract class TransactionalAction<T> {
       return this;
     }
 
+    /**
+     * Execute the given Runnable in the transaction context
+     *
+     * @param runner the execution
+     */
     public void run(final Runnable runner) {
       shouldNotNull(runner);
       try {
@@ -381,7 +400,8 @@ public abstract class TransactionalAction<T> {
 
     public TransactionalActuator<T> synchronization(final Synchronization synchronization) {
       if ((txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED) && synchronization != null) {
-        throw new NotSupportedException();
+        throw new NotSupportedException(
+            "The synchronization contained in the current actuator may not execute correctly!");
       }
       this.synchronization = synchronization;
       return this;
@@ -394,7 +414,8 @@ public abstract class TransactionalAction<T> {
 
     public TransactionalActuator<T> txType(final TxType txType) {
       if (synchronization != null && (txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED)) {
-        throw new NotSupportedException();
+        throw new NotSupportedException(
+            "The synchronization contained in the current actuator may not execute correctly!");
       }
       this.txType = defaultObject(txType, TxType.REQUIRED);
       return this;

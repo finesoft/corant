@@ -165,7 +165,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
-    logger.fine(() -> "Clear default fetch query resolver caches.");
+    logger.fine(() -> "Clear default fetch query handler caches.");
   }
 
   protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,

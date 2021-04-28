@@ -34,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 public interface TransactionService {
 
   /**
-   * Unfinish yet! This is an experiential function, used to handle transaction-related operations
+   * Unfinish yet! This is an experimental function, used to handle transaction-related operations
    * manually.
    *
    * <pre>
@@ -79,8 +79,8 @@ public interface TransactionService {
   /**
    * Delist XAResource and flag to current transaction.
    *
-   * @param xar
-   * @param flag delistXAResourceFromCurrentTransaction
+   * @param xar The XAResource object associated with the resource(connection).
+   * @param flag One of the values of TMSUCCESS, TMSUSPEND, or TMFAIL.
    */
   static void delistXAResourceFromCurrentTransaction(XAResource xar, int flag) {
     try {
@@ -90,6 +90,13 @@ public interface TransactionService {
     }
   }
 
+  /**
+   * Enlist the resource specified with the transaction associated with the current transaction
+   * object.
+   *
+   * @param xar the XAResource object associated with the resource(connection)
+   * @return true if the resource was enlisted successfully; otherwise false.
+   */
   static boolean enlistXAResourceToCurrentTransaction(XAResource xar) {
     try {
       return resolveAnyway(TransactionService.class).enlistXAResource(xar);
@@ -98,6 +105,9 @@ public interface TransactionService {
     }
   }
 
+  /**
+   * Returns whether the current transaction is active.
+   */
   static boolean isCurrentTransactionActive() {
     return resolveAnyway(TransactionService.class).isTransactionActive();
   }

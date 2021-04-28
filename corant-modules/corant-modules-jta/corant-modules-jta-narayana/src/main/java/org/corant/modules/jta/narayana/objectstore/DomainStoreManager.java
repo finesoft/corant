@@ -14,7 +14,6 @@
 package org.corant.modules.jta.narayana.objectstore;
 
 import javax.enterprise.context.ApplicationScoped;
-import org.corant.modules.jta.narayana.objectstore.accessor.DomainDataSourceAccess;
 import org.corant.modules.jta.narayana.objectstore.accessor.DomainJDBCAccess;
 
 /**
@@ -27,7 +26,6 @@ import org.corant.modules.jta.narayana.objectstore.accessor.DomainJDBCAccess;
 public class DomainStoreManager {
 
   public void clear() {
-    DomainDataSourceAccess.instance.finalize();
     DomainJDBCAccess.instance.finalize();
   }
 

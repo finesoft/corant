@@ -13,6 +13,7 @@
  */
 package org.corant.config.declarative;
 
+import static org.corant.config.CorantConfigResolver.KEY_DELIMITER;
 import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.config.CorantConfigResolver.regulateKeyPrefix;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -130,22 +131,27 @@ public class ConfigInstances {
         itemKeys.add(itemKey);
       }
     }
-    Set<String> dfltKeys = new HashSet<>();
-    configClass.getDefaultItemKeys().forEach(dik -> {
-      if (itemKeys.removeIf(ik -> ik.startsWith(dik))) {
-        dfltKeys.add(dik);
+    Set<String> matchedItemKeys = new HashSet<>(itemKeys);
+    Set<String> defaultItemKeys = new HashSet<>();
+    for (String configDefaultKey : configClass.getDefaultItemKeys()) {
+      if (itemKeys.removeIf(ik -> isDefaultKey(configDefaultKey, ik))) {
+        defaultItemKeys.add(configDefaultKey);
       }
-    });
-    if (isNotEmpty(dfltKeys)) {
+    }
+    if (isNotEmpty(defaultItemKeys)) {
       keys.add(EMPTY);
     }
-    itemKeys.removeAll(dfltKeys);
     if (isNotEmpty(itemKeys) && configClass.getKeyIndex() > 0) {
-      keys.addAll(getGroupConfigKeys(config,
-          s -> defaultString(s).startsWith(prefix) && dfltKeys.stream().noneMatch(s::startsWith),
+      keys.addAll(getGroupConfigKeys(matchedItemKeys,
+          s -> defaultString(s).startsWith(prefix)
+              && defaultItemKeys.stream().noneMatch(d -> isDefaultKey(d, s)),
           configClass.getKeyIndex()).keySet());
     }
     return keys;
+  }
+
+  private static boolean isDefaultKey(String defaultKey, String candidateKey) {
+    return defaultKey.equals(candidateKey) || candidateKey.startsWith(defaultKey + KEY_DELIMITER);
   }
 
 }

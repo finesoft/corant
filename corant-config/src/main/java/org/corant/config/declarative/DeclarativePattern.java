@@ -13,6 +13,7 @@
  */
 package org.corant.config.declarative;
 
+import static org.corant.config.CorantConfigResolver.KEY_DELIMITER;
 import static org.corant.config.CorantConfigResolver.removeSplitor;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
@@ -64,7 +65,7 @@ public enum DeclarativePattern implements ConfigInjector {
         ConfigMetaField configField) throws Exception {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();
-      String key = ConfigInjector.resolveInfixKey(infix, configField);
+      String key = ConfigInjector.resolveInfixKey(infix, configField) + KEY_DELIMITER;
       streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> rawMap
           .put(removeSplitor(k.substring(key.length())), config.getOptionalValue(k, String.class)));
 

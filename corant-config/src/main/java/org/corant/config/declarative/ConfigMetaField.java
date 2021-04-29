@@ -42,7 +42,6 @@ public class ConfigMetaField {
    */
   protected ConfigMetaField(ConfigMetaClass configClass, Field field, String keyItem,
       ConfigInjector injector, String defaultValue, String defaultKey, String defaultNull) {
-    super();
     this.configClass = configClass;
     this.field = field;
     this.keyItem = keyItem;
@@ -78,9 +77,9 @@ public class ConfigMetaField {
 
   @Override
   public String toString() {
-    return "ConfigField [configClass=" + configClass + ", field=" + field + ", keyItem=" + keyItem
-        + ", pattern=" + injector + ", defaultValue=" + defaultValue + ", defaultKey=" + defaultKey
-        + ", defaultNull=" + defaultNull + "]";
+    return "ConfigField [configClass=" + configClass.getClazz() + ", field=" + field + ", keyItem="
+        + keyItem + ", pattern=" + injector + ", defaultValue=" + defaultValue + ", defaultKey="
+        + defaultKey + ", defaultNull=" + defaultNull + "]";
   }
 
 }

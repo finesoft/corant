@@ -26,6 +26,18 @@ public class SecurityContexts {
     return sc;
   }
 
+  public static Principal getCurrentPrincipal() {
+    return getCurrent().getPrincipal();
+  }
+
+  public static Subject getCurrentSubject() {
+    return getCurrent().getSubject();
+  }
+
+  public static boolean hasCurrentContext() {
+    return currentSecCtx.get() != null;
+  }
+
   public static void setCurrent(SecurityContext sc) {
     if (sc != null && sc != SecurityContext.EMPTY_INST) {
       SecurityContext current = currentSecCtx.get();

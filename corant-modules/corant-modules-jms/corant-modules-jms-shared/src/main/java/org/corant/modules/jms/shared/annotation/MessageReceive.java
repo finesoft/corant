@@ -178,6 +178,15 @@ public @interface MessageReceive {
   int tryThreshold() default 4;
 
   /**
+   * The value of the timeout in seconds. If the value is zero, the transaction service restores the
+   * default value. If the value is negative a SystemException is thrown. Only works if
+   * {@link #xa()} = true.
+   *
+   * @return txTimeout
+   */
+  int txTimeout() default 0;
+
+  /**
    * @return type
    */
   Class<?> type() default String.class;

@@ -37,6 +37,7 @@ import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.security.SecurityContext;
@@ -78,7 +79,6 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
 
   // config
   protected final MessageReceiverMetaData meta;
-  protected final boolean xa;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
   protected final long loopIntervalMillis;
@@ -96,7 +96,6 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
 
   protected AbstractMessageReceiverTask(MessageReceiverMetaData metaData) {
     meta = metaData;
-    xa = metaData.xa();
     connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
     messageListener = new MessageHandler(metaData.getMethod());
     receiveThreshold = metaData.getReceiveThreshold();
@@ -214,7 +213,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
   protected boolean initialize() throws JMSException {
     // initialize connection
     if (connection == null) {
-      if (xa) {
+      if (meta.isXa()) {
         connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
       } else {
         connection = connectionFactory.createConnection();
@@ -227,7 +226,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     // initialize session
     if (session == null) {
       try {
-        if (xa) {
+        if (meta.isXa()) {
           session = ((XAConnection) connection).createXASession();
         } else {
           session = connection.createSession(meta.getAcknowledge());
@@ -286,7 +285,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
    */
   protected void onException(Exception e) {
     try {
-      if (xa) {
+      if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
           logger.log(Level.SEVERE, () -> String.format("Rollback the transaction, %s.", meta));
@@ -315,7 +314,7 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
    */
   protected void postConsume(Message message) throws JMSException {
     try {
-      if (xa) {
+      if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().commit();
         }
@@ -339,10 +338,14 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
    */
   protected void preConsume() throws JMSException {
     try {
-      if (xa) {
-        TransactionService.transactionManager().begin();
+      if (meta.isXa()) {
+        final TransactionManager tm = TransactionService.transactionManager();
+        if (meta.getTxTimeout() > 0) {
+          tm.setTransactionTimeout(meta.getTxTimeout());
+        }
+        tm.begin();
         XAResource xar = ((XASession) session).getXAResource();
-        TransactionService.enlistXAResourceToCurrentTransaction(xar);
+        tm.getTransaction().enlistResource(xar);
       }
     } catch (Exception te) {
       throw generateJMSException(te);

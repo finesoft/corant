@@ -43,6 +43,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   public static final String JTW_EXCEPTION_KEY = "___JWT-EX___";
 
   private static Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
+  private static boolean debugLogging = logger.isDebugEnabled();
 
   @Inject
   private JWTParser jwtParser;
@@ -73,7 +74,11 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           securityManager.bind(securityContext, jwtPrincipal);
           logger.debugf("JWT authentication filter handle successfully");
         } catch (Exception e) {
-          logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
+          if (debugLogging) {
+            logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
+          } else {
+            logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
+          }
           requestContext.setProperty(JTW_EXCEPTION_KEY, e);
         }
       }

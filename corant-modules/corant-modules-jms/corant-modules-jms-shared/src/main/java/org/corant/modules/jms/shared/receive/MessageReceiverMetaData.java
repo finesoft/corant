@@ -54,6 +54,7 @@ public class MessageReceiverMetaData {
   private final RetryInterval breakedInterval;
   private final long loopIntervalMs;
   private final boolean xa;
+  private final int txTimeout;
 
   MessageReceiverMetaData(ContextualMethodHandler method, String destinationName) {
     this.method = method;
@@ -93,6 +94,7 @@ public class MessageReceiverMetaData {
           ann.breakedBackoffFactor());
     }
     xa = ann.xa();
+    txTimeout = ann.txTimeout();
   }
 
   public static Set<MessageReceiverMetaData> of(ContextualMethodHandler method) {
@@ -200,6 +202,10 @@ public class MessageReceiverMetaData {
     return tryThreshold;
   }
 
+  public int getTxTimeout() {
+    return txTimeout;
+  }
+
   public Class<?> getType() {
     return type;
   }
@@ -223,6 +229,10 @@ public class MessageReceiverMetaData {
     return subscriptionDurable;
   }
 
+  public boolean isXa() {
+    return xa;
+  }
+
   @Override
   public String toString() {
     return "MessageReceiverMetaData [method=" + method.getMethod().toGenericString() + ", clientID="
@@ -230,7 +240,4 @@ public class MessageReceiverMetaData {
         + "]";
   }
 
-  boolean xa() {
-    return xa;
-  }
 }

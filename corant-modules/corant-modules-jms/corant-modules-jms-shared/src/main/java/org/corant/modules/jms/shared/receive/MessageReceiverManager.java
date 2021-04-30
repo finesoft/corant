@@ -107,7 +107,7 @@ public class MessageReceiverManager {
       final AbstractJMSConfig cfg =
           AbstractJMSExtension.getConfig(metaData.getConnectionFactoryId());
       if (cfg != null && cfg.isEnable()) {
-        if (metaData.xa()) {
+        if (metaData.isXa()) {
           shouldBeTrue(cfg.isXa(),
               "Can not schedule xa message receiver task, the connection factory [%s] not supported! message receiver [%s].",
               cfg.getConnectionFactoryId(), metaData);

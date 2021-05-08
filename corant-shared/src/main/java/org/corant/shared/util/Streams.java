@@ -52,10 +52,10 @@ public class Streams {
   /**
    * Receive stream object converts it to a list stream, use stream grouping.
    *
-   * @param <T>
-   * @param batchSize
-   * @param source
-   * @return batchCollectStream
+   * @param <T> the element type
+   * @param batchSize the batch size
+   * @param source the source
+   * @return the list stream
    */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
     final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
@@ -70,10 +70,10 @@ public class Streams {
    *
    * NOTE : parallel not support
    *
-   * @param <T>
-   * @param batchSize
-   * @param source
-   * @return batchStream
+   * @param <T> the element type
+   * @param batchSize the batch size
+   * @param source the source
+   * @return the list stream
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Iterable<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
@@ -84,10 +84,10 @@ public class Streams {
    *
    * NOTE : parallel not support
    *
-   * @param <T>
-   * @param batchSize
-   * @param it
-   * @return batchStream
+   * @param <T> the element type
+   * @param batchSize the batch size
+   * @param it the source
+   * @return the list stream
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Iterator<? extends T> it) {
 
@@ -135,22 +135,22 @@ public class Streams {
    *
    * NOTE : parallel not support
    *
-   * @param <T>
-   * @param batchSize
-   * @param source
-   * @return batchStream
+   * @param <T> the element type
+   * @param batchSize the batch size
+   * @param source the source
+   * @return the list stream
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Stream<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
   /**
-   * Copy the input stream to the output stream without closing the streams.
+   * Copy the given input stream to the given output stream without closing the streams.
    *
-   * @param input
-   * @param output
-   * @return
-   * @throws IOException copy
+   * @param input the input stream
+   * @param output the output stream
+   * @return the bytes length
+   * @throws IOException If I/O errors occur
    */
   public static long copy(InputStream input, OutputStream output) throws IOException {
     byte[] buffer = new byte[4096];
@@ -185,11 +185,11 @@ public class Streams {
   }
 
   /**
-   * Read the input stream to byte array.
+   * Read the input stream to byte array without closing the input stream.
    *
-   * @param is
-   * @return
-   * @throws IOException readAllBytes
+   * @param is the input stream for reading
+   * @return the bytes
+   * @throws IOException If I/O errors occur
    */
   public static byte[] readAllBytes(InputStream is) throws IOException {
     byte[] buf = new byte[4096];
@@ -220,9 +220,9 @@ public class Streams {
   /**
    * Convert Enumeration object to Stream object
    *
-   * @param <T>
-   * @param enumeration
-   * @return streamOf
+   * @param <T> the element type
+   * @param enumeration the source
+   * @return the enumeration object stream
    */
   public static <T> Stream<T> streamOf(final Enumeration<? extends T> enumeration) {
     if (enumeration != null) {
@@ -247,9 +247,9 @@ public class Streams {
   /**
    * Convert Iterable object to Stream object
    *
-   * @param <T>
-   * @param iterable
-   * @return streamOf
+   * @param <T> the element type
+   * @param iterable the source
+   * @return the object stream
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> Stream<T> streamOf(final Iterable<? extends T> iterable) {
@@ -264,9 +264,9 @@ public class Streams {
   /**
    * Convert Iterator object to Stream object
    *
-   * @param <T>
-   * @param iterator
-   * @return streamOf
+   * @param <T> the element type
+   * @param iterator the source
+   * @return the object stream
    */
   public static <T> Stream<T> streamOf(final Iterator<? extends T> iterator) {
     if (iterator != null) {
@@ -277,12 +277,12 @@ public class Streams {
   }
 
   /**
-   * Convert the entries of Map to Stream
+   * Convert the entries of the given map to Stream or {@link Stream#empty()} if given map is null.
    *
-   * @param <K>
-   * @param <V>
-   * @param map
-   * @return streamOf
+   * @param <K> the type of entry key
+   * @param <V> the type of entry value
+   * @param map the source
+   * @return then entries stream
    */
   public static <K, V> Stream<Map.Entry<K, V>> streamOf(Map<K, V> map) {
     if (map != null) {
@@ -294,9 +294,9 @@ public class Streams {
   /**
    * Convert object array to Stream
    *
-   * @param <T>
-   * @param objects
-   * @return streamOf
+   * @param <T> the element type
+   * @param objects the source
+   * @return the object stream
    */
   @SuppressWarnings("unchecked")
   public static <T> Stream<T> streamOf(T... objects) {

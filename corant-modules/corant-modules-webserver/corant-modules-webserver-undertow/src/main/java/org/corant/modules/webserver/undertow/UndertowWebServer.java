@@ -253,6 +253,7 @@ public class UndertowWebServer extends AbstractWebServer {
     if (specConfig.isPersistenceSession() && sessionPersistenceManager.isResolvable()) {
       di.setSessionPersistenceManager(sessionPersistenceManager.get());
     }
+    specConfig.getDefaultSessionTimeout().ifPresent(di::setDefaultSessionTimeout);
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);
     di.addServletContextAttribute(WeldServletLifecycle.BEAN_MANAGER_ATTRIBUTE_NAME,
         CDI.current().getBeanManager());
@@ -275,6 +276,9 @@ public class UndertowWebServer extends AbstractWebServer {
   }
 
   protected void resolveServerOptions(Builder builder) {
+    if (specConfig.isEnableHttp2()) {
+      builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true);
+    }
     builder.setServerOption(UndertowOptions.NO_REQUEST_TIMEOUT, specConfig.getNotRequestTimeout());
     if (!additionalConfigurators.isUnsatisfied()) {
       additionalConfigurators.stream().sorted()

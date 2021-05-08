@@ -62,7 +62,7 @@ public class UndertowWebServerConfig {
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.buffer-size", defaultValue = "16364")
-  protected int bufferSize;
+  protected int bufferSize; // 1024 * 16 -20, 20 some space for protocol headers
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.eager-filter-init", defaultValue = "false")
@@ -111,6 +111,10 @@ public class UndertowWebServerConfig {
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.persistence-session", defaultValue = "false")
   protected boolean persistenceSession;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.default-session-timeout")
+  protected Optional<Integer> defaultSessionTimeout;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.escape-error-message", defaultValue = "true")
@@ -172,6 +176,10 @@ public class UndertowWebServerConfig {
     return defaultResponseCharset;
   }
 
+  public Optional<Integer> getDefaultSessionTimeout() {
+    return defaultSessionTimeout;
+  }
+
   /**
    *
    * @return the highWater
@@ -185,7 +193,7 @@ public class UndertowWebServerConfig {
    * @return the ioThreads
    */
   public Integer getIoThreads() {
-    return ioThreads.orElse(max(Runtime.getRuntime().availableProcessors(), 2));
+    return ioThreads.orElse(max(Runtime.getRuntime().availableProcessors() * 2, 2));
   }
 
   public Optional<String> getJspContentPath() {

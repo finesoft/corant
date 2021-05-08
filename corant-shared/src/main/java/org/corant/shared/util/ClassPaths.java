@@ -56,6 +56,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.ClassPathResource;
@@ -72,8 +73,10 @@ import org.corant.shared.util.Resources.URLResource;
  */
 public class ClassPaths {
 
+  public static final char CLASS_PATH_SEPARATOR = '.';
   public static final char PATH_SEPARATOR = '/';
   public static final String PATH_SEPARATOR_STRING = "/";
+  public static final String TOP_PATH = "..";
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String CLASSES = "classes";
   public static final String CLASSES_FOLDER = "classes/";
@@ -84,7 +87,8 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
-  public static final String SYS_PATH_SEPARATOR = System.getProperty("path.separator");
+  public static final String SYS_PATH_SEPARATOR =
+      Pattern.quote(System.getProperty("path.separator"));
   public static final String SYS_CLASS_PATH = System.getProperty("java.class.path");
   public static final String SYS_BOOT_CLASS_PATH = System.getProperty("sun.boot.class.path");
   public static final String SYS_EXT_DIRS = System.getProperty("java.ext.dirs");
@@ -102,11 +106,11 @@ public class ClassPaths {
    * Build an war class loader, Careful use may result in leakage. We only extract WEB-INF folder to
    * default temporary-file directory.
    *
-   * @param path
-   * @param parentClassLoader
+   * @param path the temporary-file path that use to place the war resources.
+   * @param parentClassLoader the parent class loader
    * @see Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute...)
    * @return The war class loader
-   * @throws IOException buildWarClassLoader
+   * @throws IOException If I/O errors occur
    */
   public static synchronized URLClassLoader buildWarClassLoader(Path path,
       final ClassLoader parentClassLoader) throws IOException {
@@ -154,11 +158,12 @@ public class ClassPaths {
    * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex,
    * case insensitive.
    *
+   * @param classLoader the class loader use to load resource
+   * @param path the resource path or expression, supports glob-pattern/regex
+   * @return the class path resources that match the given path or expression
+   * @throws IOException If I/O errors occur
+   *
    * @see #from(ClassLoader, String, boolean)
-   * @param classLoader
-   * @param path
-   * @return
-   * @throws IOException from
    */
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path)
       throws IOException {
@@ -166,10 +171,11 @@ public class ClassPaths {
   }
 
   /**
-   * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex.
-   * If path start with 'glob:' then use Glob pattern else if path start with 'regex:' then use
-   * regex pattern; if pattern not found this method will auto decide matcher, if matcher no found
-   * then use class loader getResources() and the parameter ignoreCase will be abandoned.
+   * Scan class path resource with the given path or path expression, path separator is '/', allowed
+   * for use glob-pattern/regex. If path start with 'glob:' then use Glob pattern else if path start
+   * with 'regex:' then use regex pattern; if pattern not found this method will auto decide
+   * matcher, if matcher no found then use class loader getResources() and the parameter ignoreCase
+   * will be abandoned.
    *
    * <pre>
    * for example:
@@ -183,11 +189,11 @@ public class ClassPaths {
    *
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    *
-   * @param classLoader
-   * @param path
-   * @param ignoreCase only use in pattern matcher
-   * @return
-   * @throws IOException from
+   * @param classLoader the class loader use to load resource
+   * @param path the resource path or expression, supports glob-pattern/regex
+   * @param ignoreCase whether to ignore case when matching
+   * @return the class path resources that match the given path or expression
+   * @throws IOException If I/O errors occur
    */
   public static Set<ClassPathResource> from(ClassLoader classLoader, String path,
       boolean ignoreCase) throws IOException {
@@ -215,15 +221,23 @@ public class ClassPaths {
   /**
    * Get the resources of a relative path through a class and path
    *
-   * @param relative
-   * @param path
-   * @return fromRelative
+   * @param relative the class to load resources with
+   * @param path relative or absolute path within the class path
+   * @return the class path resource
    */
   public static URLResource fromRelative(Class<?> relative, String path) {
     URL url = null;
     if (path != null) {
       if (relative != null) {
-        url = relative.getResource(path);
+        url =
+            relative.getResource(
+                path.contains(TOP_PATH)
+                    ? PATH_SEPARATOR_STRING.concat(Path
+                        .of(relative.getCanonicalName().replace(CLASS_PATH_SEPARATOR,
+                            PATH_SEPARATOR))
+                        .getParent().resolve(path).normalize().toString()
+                        .replace(File.separatorChar, PATH_SEPARATOR))
+                    : path);
       } else {
         url = defaultClassLoader().getResource(path);
       }
@@ -240,29 +254,17 @@ public class ClassPaths {
       ClassLoader currClsLoader = classLoader;
       do {
         if (currClsLoader instanceof URLClassLoader) {
-          /*
-           * FIXME: We currently do not close the class loader. After closing the class loader,
-           * problems may occur in some self-constructed class loader scenarios. For example, there
-           * may be problems when using [corant-devops-maven-plugin] to package the application into
-           * a runnable jar. --bingo
-           */
           @SuppressWarnings("resource")
           URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
-          // try {
           for (URL entry : currUrlClsLoader.getURLs()) {
             entries.putIfAbsent(entry.toURI(), currClsLoader);
           }
-          // } finally {
-          // if (!Names.CORANT.equals(currUrlClsLoader.getName())) {
-          // currUrlClsLoader.close();
-          // }
-          // }
         }
         if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
-          Set<String> sysClsPaths = linkedHashSetOf(split(SYS_CLASS_PATH, SYS_PATH_SEPARATOR));
+          Set<String> sysClsPaths = linkedHashSetOf(SYS_CLASS_PATH.split(SYS_PATH_SEPARATOR));
           if (loadAll(path)) {
-            sysClsPaths.addAll(listOf(split(SYS_BOOT_CLASS_PATH, SYS_PATH_SEPARATOR)));
-            sysClsPaths.addAll(listOf(split(SYS_EXT_DIRS, SYS_PATH_SEPARATOR)));
+            sysClsPaths.addAll(listOf(SYS_BOOT_CLASS_PATH.split(SYS_PATH_SEPARATOR)));
+            sysClsPaths.addAll(listOf(SYS_EXT_DIRS.split(SYS_PATH_SEPARATOR)));
           }
           for (String classPath : sysClsPaths) {
             try {
@@ -381,11 +383,6 @@ public class ClassPaths {
 
     /**
      * Unfinish yet // FIXME
-     *
-     * @param jarFile
-     * @param path
-     * @return
-     * @throws URISyntaxException getClassPathEntry
      */
     protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException {
       URI uri = new URI(path);
@@ -399,10 +396,6 @@ public class ClassPaths {
 
     /**
      * Unfinish yet // FIXME
-     *
-     * @param jarFile
-     * @param manifest
-     * @return getClassPathFromManifest
      */
     protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) {
       String attrName = Attributes.Name.CLASS_PATH.toString();

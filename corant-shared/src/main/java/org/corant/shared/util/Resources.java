@@ -22,7 +22,6 @@ import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.SLASH;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -743,13 +742,13 @@ public class Resources {
      * Return a byte array for the content of this resource, please evaluate the size of the
      * resource when using it to avoid OOM.
      *
-     * @return
-     * @throws IOException getBytes
+     * NOTE: the stream will be closed after reading.
+     *
+     * @throws IOException If I/O errors occur
      */
     default byte[] getBytes() throws IOException {
-      try (ByteArrayOutputStream os = new ByteArrayOutputStream(); InputStream is = openStream()) {
-        Streams.copy(is, os);
-        return os.toByteArray();
+      try (InputStream is = openStream()) {
+        return Streams.readAllBytes(is);
       }
     }
 

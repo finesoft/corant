@@ -39,6 +39,8 @@ public interface Defaults {
 
   long ONE_MB = ONE_KB * (long) ONE_KB;
 
+  int CORANT_SIGN = 3259;
+
   static Path corantUserDir(String suffix) {
     return Paths.get(System.getProperty("user.home"))
         .resolve("." + Names.applicationName() + defaultString(suffix));

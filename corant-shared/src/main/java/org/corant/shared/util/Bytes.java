@@ -33,26 +33,24 @@ public class Bytes {
 
   public static final byte[] EMPTY_ARRAY = new byte[0];
 
-  private Bytes() {
-    super();
-  }
+  private Bytes() {}
 
   /**
    * Create BitArray from bytes array.
    *
-   * @param bytes
-   * @return asBitArray
+   * @param bytes the bytes array that use to create BitArray
+   * @return A bit array constructed from the given bytes array
    */
   public static BitArray asBitArray(byte[] bytes) {
     return new BitArray(bytes);
   }
 
   /**
-   * Create BitArray and initialize with parameter.
+   * Create BitArray and initialize with the given size and the given default boolean value.
    *
    * @param size the BitArray length
-   * @param in the boolean that the BitArray initialized
-   * @return asBitArray
+   * @param in the boolean value that the BitArray initialized
+   * @return a BitArray
    */
   public static BitArray asBitArray(int size, boolean in) {
     return new BitArray(size, in);
@@ -61,8 +59,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 2-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the char value
+   * @return a big-endian representation of the given char value in a 2-element byte array.
    */
   public static byte[] toBytes(char value) {
     return new byte[] {(byte) (value >> 8), (byte) value};
@@ -71,8 +69,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 8-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the double value
+   * @return a big-endian representation of the given double value in a 8-element byte array.
    */
   public static byte[] toBytes(double value) {
     long data = Double.doubleToRawLongBits(value);
@@ -84,8 +82,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 4-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the float value
+   * @return a big-endian representation of the given float value in a 4-element byte array.
    */
   public static byte[] toBytes(float value) {
     int data = Float.floatToIntBits(value);
@@ -96,8 +94,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 4-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the integer value
+   * @return a big-endian representation of the given integer value in a 4-element byte array.
    */
   public static byte[] toBytes(int value) {
     return new byte[] {(byte) (value >> 24), (byte) (value >> 16), (byte) (value >> 8),
@@ -107,8 +105,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 8-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the long integer value
+   * @return a big-endian representation of the given long integer in a 8-element byte array.
    */
   public static byte[] toBytes(long value) {
     byte[] result = new byte[8];
@@ -122,8 +120,8 @@ public class Bytes {
   /**
    * Returns a big-endian representation of {@code value} in a 2-element byte array.
    *
-   * @param value
-   * @return toBytes
+   * @param value the short integer value
+   * @return a big-endian representation of the given short integer in a 2-element byte array.
    */
   public static byte[] toBytes(short value) {
     return new byte[] {(byte) (value >> 8), (byte) value};

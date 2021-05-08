@@ -31,6 +31,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
+import org.corant.config.Configs;
 import org.corant.context.required.Required;
 import org.corant.modules.servlet.metadata.WebFilterMetaData;
 import org.corant.modules.servlet.metadata.WebListenerMetaData;
@@ -45,6 +46,8 @@ import org.corant.shared.normal.Priorities;
  */
 public class WebExtension implements Extension, WebMetaDataProvider {
 
+  protected static final boolean autoDescovery =
+      Configs.getValue("corant.servlet.auto-descovery", Boolean.class, Boolean.FALSE);
   private final List<WebListenerMetaData> listenerMetaDatas = new ArrayList<>();
   private final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
   private final List<WebFilterMetaData> filterMetaDatas = new ArrayList<>();
@@ -113,6 +116,8 @@ public class WebExtension implements Extension, WebMetaDataProvider {
   // Jandex
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     // TODO use jandex to find out web meta data
+    if (!autoDescovery) {
+    }
   }
 
 }

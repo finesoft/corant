@@ -41,6 +41,7 @@ public class DriverManagerDataSource implements DataSource {
   private static final Logger LOGGER = Logger.getLogger(DriverManagerDataSource.class.getName());
   protected static final String PASSWORD = "password";
   protected static final String USER = "user";
+  protected static final String USER_NAME = USER + "name";
 
   protected final String jdbcUrl;
   protected final Properties properties;
@@ -71,10 +72,10 @@ public class DriverManagerDataSource implements DataSource {
       properties.forEach((k, v) -> this.properties.put(k.toString(), v.toString()));
     }
     if (username != null) {
-      this.properties.put(USER, this.properties.getProperty("user", username));
+      this.properties.put(USER, this.properties.getProperty(USER, username));
     }
     if (password != null) {
-      this.properties.put(PASSWORD, this.properties.getProperty("password", password));
+      this.properties.put(PASSWORD, this.properties.getProperty(PASSWORD, password));
     }
 
     if (driverClassName != null) {
@@ -166,13 +167,13 @@ public class DriverManagerDataSource implements DataSource {
       throws SQLException {
     final Properties cloned = (Properties) properties.clone();
     if (username != null) {
-      cloned.put("user", username);
-      if (cloned.containsKey("username")) {
-        cloned.put("username", username);
+      cloned.put(USER, username);
+      if (cloned.containsKey(USER_NAME)) {
+        cloned.put(USER_NAME, username);
       }
     }
     if (password != null) {
-      cloned.put("password", password);
+      cloned.put(PASSWORD, password);
     }
 
     return getConnection(driver.connect(jdbcUrl, cloned));

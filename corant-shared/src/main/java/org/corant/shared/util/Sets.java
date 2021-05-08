@@ -39,10 +39,10 @@ public class Sets {
    * resulting set contains all the elements that are in the left set but not in the right set.
    * Neither input is mutated by this operation, an entirely new set is returned.
    *
-   * @param <T>
-   * @param left
-   * @param right
-   * @return difference
+   * @param <T> the element type
+   * @param left the source of the different elements
+   * @param right the set for comparison
+   * @return a new set contains the elements that are in the left set but not in the right set.
    */
   public static <T> Set<T> difference(Set<? extends T> left, Set<? extends T> right) {
     Set<T> diffs = new HashSet<>();
@@ -59,8 +59,8 @@ public class Sets {
   /**
    * Convert an array to a non-null immutable set
    *
-   * @param <T>
-   * @param objects the array
+   * @param <T> the element type
+   * @param objects the source of the elements in the set
    * @return an immutable set that combined by the passed in array
    */
   @SafeVarargs
@@ -74,8 +74,8 @@ public class Sets {
   /**
    * Convert an array to a non-null linked hash set
    *
-   * @param <T>
-   * @param objects
+   * @param <T> the element type
+   * @param objects the source of the elements in the set
    * @return a linked hash set that combined by the passed in array
    */
   @SafeVarargs
@@ -86,7 +86,7 @@ public class Sets {
   /**
    * Collections.newSetFromMap(new ConcurrentHashMap<>());
    *
-   * @param <T>
+   * @param <T> the element type
    * @return newConcurrentHashSet
    */
   public static <T> Set<T> newConcurrentHashSet() {
@@ -96,9 +96,9 @@ public class Sets {
   /**
    * Convert an iterable to a non-null linked hash set
    *
-   * @param <T>
-   * @param iterable
-   * @return setOf
+   * @param <T> the element type
+   * @param iterable the source of the elements in the set
+   * @return a new hash set consisting of elements iterated by the passed iterable
    */
   public static <T> Set<T> setOf(final Iterable<? extends T> iterable) {
     if (iterable instanceof Set) {
@@ -113,9 +113,9 @@ public class Sets {
   /**
    * Convert an iterator to a non-null linked hash set
    *
-   * @param <T>
-   * @param iterator
-   * @return setOf
+   * @param <T> the element type
+   * @param iterator the source of the elements in the set
+   * @return a new hash set consisting of elements iterated by the passed iterator
    */
   public static <T> Set<T> setOf(final Iterator<? extends T> iterator) {
     return collectionOf(HashSet::new, iterator);
@@ -124,8 +124,8 @@ public class Sets {
   /**
    * Convert an array to a non-null set
    *
-   * @param <T>
-   * @param objects
+   * @param <T> the element type
+   * @param objects the source of the elements in the set
    * @return a set that combined by the passed in array
    */
   @SafeVarargs

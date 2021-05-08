@@ -38,8 +38,8 @@ public class Assertions {
    * Throw CorantRuntimeException if given two arguments are not equals.
    *
    * @see Objects#areEqual(Object, Object)
-   * @param a
-   * @param b shouldBeEquals
+   * @param a an object
+   * @param b an object to be compared with {@code a} for equality
    */
   public static void shouldBeEquals(Object a, Object b) {
     shouldBeEquals(a, b, "Objects should be equal!");
@@ -49,10 +49,10 @@ public class Assertions {
    * Throw CorantRuntimeException if given two arguments are not equals with given message and
    * message parameters.
    *
-   * @param a
-   * @param b
-   * @param messageOrFormat
-   * @param args
+   * @param a an object
+   * @param b an object to be compared with {@code a} for equality
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message arguments
    */
   public static void shouldBeEquals(Object a, Object b, String messageOrFormat, Object... args) {
     if (!areEqual(a, b)) {
@@ -63,9 +63,9 @@ public class Assertions {
   /**
    * Throw a certain runtime exception if given two arguments are not equals
    *
-   * @param a
-   * @param b
-   * @param ex shouldBeEquals
+   * @param a an object
+   * @param b an object to be compared with {@code a} for equality
+   * @param ex the supplying function that produces an exception to be thrown
    */
   public static void shouldBeEquals(Object a, Object b, Supplier<? extends RuntimeException> ex) {
     if (!areEqual(a, b)) {
@@ -74,9 +74,9 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument or expression is true
+   * Throw CorantRuntimeException if the given argument or expression is true
    *
-   * @param condition shouldBeFalse
+   * @param condition an argument or expression that should be false
    */
   public static void shouldBeFalse(boolean condition) {
     shouldBeFalse(condition, "Condition or expression should be false!");
@@ -86,9 +86,9 @@ public class Assertions {
    * Throw CorantRuntimeException with message and message parameter if argument or expression is
    * true
    *
-   * @param condition
-   * @param messageOrFormat
-   * @param args shouldBeFalse
+   * @param condition an argument or expression that should be false
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message arguments
    */
   public static void shouldBeFalse(boolean condition, String messageOrFormat, Object... args) {
     if (condition) {
@@ -99,8 +99,8 @@ public class Assertions {
   /**
    * Throw a certain runtime exception if argument or expression is true
    *
-   * @param condition
-   * @param ex shouldBeFalse
+   * @param condition an argument or expression that should be false
+   * @param ex the supplying function that produces an exception to be thrown
    */
   public static void shouldBeFalse(boolean condition, Supplier<? extends RuntimeException> ex) {
     if (condition) {
@@ -111,8 +111,7 @@ public class Assertions {
   /**
    * Throw CorantRuntimeException if argument is not null
    *
-   * @param obj
-   * @return shouldBeNull
+   * @param obj an object that should be null
    */
   public static void shouldBeNull(Object obj) {
     shouldBeNull(obj, "Object should be null!");
@@ -121,10 +120,9 @@ public class Assertions {
   /**
    * Throw CorantRuntimeException if argument is not null
    *
-   * @param obj the argument that must be null
-   * @param messageOrFormat the exception message or message formatter
-   * @param args the exception message parameter
-   * @return shouldBeNull
+   * @param obj an object that should be null
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
    */
   public static void shouldBeNull(Object obj, String messageOrFormat, Object... args) {
     if (obj != null) {
@@ -135,9 +133,8 @@ public class Assertions {
   /**
    * Throw a certain runtime exception if argument is not null
    *
-   * @param obj
-   * @param ex
-   * @return shouldBeNull
+   * @param obj an object that should be null
+   * @param ex the supplying function that produces an exception to be thrown
    */
   public static void shouldBeNull(Object obj, Supplier<? extends RuntimeException> ex) {
     if (obj != null) {
@@ -146,21 +143,21 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument is not null
+   * Throw CorantRuntimeException if argument is false
    *
-   * @param condition shouldBeTrue
+   * @param condition an argument or expression that should be true
    */
   public static void shouldBeTrue(boolean condition) {
     shouldBeTrue(condition, "Condition or expression should be true!");
   }
 
   /**
-   * Throw CorantRuntimeException with message and message parameter if argument or expression is
-   * false
+   * Throw CorantRuntimeException with message and message parameter if given argument or expression
+   * is false
    *
-   * @param condition the argument or expression
-   * @param messageOrFormat the exception message or message formatter
-   * @param args the exception message parameter
+   * @param condition an argument or expression that should be true
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
    */
   public static void shouldBeTrue(boolean condition, String messageOrFormat, Object... args) {
     if (!condition) {
@@ -169,10 +166,10 @@ public class Assertions {
   }
 
   /**
-   * Throw a certain runtime exception if argument or expression is false
+   * Throw a certain runtime exception if given argument or expression is false
    *
-   * @param condition
-   * @param ex shouldBeTrue
+   * @param condition an argument or expression that should be true
+   * @param ex the supplying function that produces an exception to be thrown
    */
   public static void shouldBeTrue(boolean condition, Supplier<? extends RuntimeException> ex) {
     if (!condition) {
@@ -181,9 +178,9 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument is null
+   * Throw CorantRuntimeException if one of the given arguments is null.
    *
-   * @param args shouldNoneNull
+   * @param args the objects that should none null
    */
   public static void shouldNoneNull(Object... args) {
     for (Object obj : args) {
@@ -192,23 +189,25 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument is blank.
+   * Throw CorantRuntimeException if the given char sequence is blank.
    *
-   * @param obj
+   * @param <T> the type of the char sequence
+   * @param obj the char sequence that should not blank
    * @see Strings#isNotBlank(CharSequence)
-   * @return shouldNotBlank
+   * @return the given char sequence
    */
   public static <T extends CharSequence> T shouldNotBlank(T obj) {
     return shouldNotBlank(obj, "Object should not blank!");
   }
 
   /**
-   * Throw CorantRuntimeException with message if argument is blank.
+   * Throw CorantRuntimeException with message if the given char sequence is blank.
    *
-   * @param obj the argument
-   * @param messageOrFormat the exception message or message formatter
+   * @param <T> the type of the char sequence
+   * @param obj the char sequence that should not blank
+   * @param messageOrFormat the exception message or message format, use for exception messaging
    * @param args the exception message parameters
-   * @return shouldNotBlank
+   * @return the given char sequence
    */
   public static <T extends CharSequence> T shouldNotBlank(T obj, String messageOrFormat,
       Object... args) {
@@ -219,12 +218,12 @@ public class Assertions {
   }
 
   /**
-   * Throw a certain runtime exception if argument is blank.
+   * Throw a certain runtime exception if the given char sequence is blank.
    *
-   * @param <T>
-   * @param obj
-   * @param ex
-   * @return shouldNotBlank
+   * @param <T> the type of the char sequence
+   * @param obj the char sequence that should not blank
+   * @param ex the supplying function that produces an exception to be thrown
+   * @return the given char sequence
    */
   public static <T extends CharSequence> T shouldNotBlank(T obj,
       Supplier<? extends RuntimeException> ex) {
@@ -235,24 +234,28 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument is empty, usually the argument type is
-   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * Throw CorantRuntimeException if the given object is empty or null, usually the type of the
+   * given object is Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
    *
-   * @param obj the argument
-   * @return shouldNotEmpty
+   * @param <T> the type of the given object, support
+   *        Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * @param obj the object that should not empty or null
+   * @return the given object
    */
   public static <T> T shouldNotEmpty(T obj) {
     return shouldNotEmpty(obj, "Object should not empty!");
   }
 
   /**
-   * Throw CorantRuntimeException with message if argument is empty, usually the argument type is
-   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * Throw CorantRuntimeException with message if the given object is empty or null, usually the
+   * type of the given object Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
    *
-   * @param obj the argument
-   * @param messageOrFormat the exception message or message formatter
+   * @param <T> the type of the given object, support
+   *        Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * @param obj the object that should not empty or null
+   * @param messageOrFormat the exception message or message format, use for exception messaging
    * @param args the exception message parameters
-   * @return shouldNotEmpty
+   * @return the given object
    */
   public static <T> T shouldNotEmpty(T obj, String messageOrFormat, Object... args) {
     if (isEmpty(obj)) {
@@ -262,13 +265,14 @@ public class Assertions {
   }
 
   /**
-   * Throw a certain runtime exception if argument is empty, usually the argument type is
-   * Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * Throw a certain runtime exception if the given object is empty or null, usually the type of the
+   * given object is Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
    *
-   * @param <T>
-   * @param obj
-   * @param ex
-   * @return shouldNotEmpty
+   * @param <T> the type of the given object, support
+   *        Map/Collection/CharSequence/Iterable/Iterator/Enumeration/Array.
+   * @param obj the object that should not empty or null
+   * @param ex the supplying function that produces an exception to be thrown
+   * @return the given object
    */
   public static <T> T shouldNotEmpty(T obj, Supplier<? extends RuntimeException> ex) {
     if (isEmpty(obj)) {
@@ -278,22 +282,24 @@ public class Assertions {
   }
 
   /**
-   * Throw CorantRuntimeException if argument is null
+   * Throw CorantRuntimeException if the given object is null
    *
-   * @param obj the argument
-   * @return shouldNotNull
+   * @param <T> the type of the given object
+   * @param obj the object that should not null
+   * @return the given object
    */
   public static <T> T shouldNotNull(T obj) {
     return shouldNotNull(obj, "Object should not null!");
   }
 
   /**
-   * Throw CorantRuntimeException with message if argument is null
+   * Throw CorantRuntimeException with message if the given object is null
    *
-   * @param obj the argument
-   * @param messageOrFormat the exception message or message formatter
-   * @param args the exception message parameter
-   * @return shouldNotNull
+   * @param <T> the type of the given object
+   * @param obj the object that should not null
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
+   * @return the given object
    */
   public static <T> T shouldNotNull(T obj, String messageOrFormat, Object... args) {
     if (obj == null) {
@@ -305,10 +311,10 @@ public class Assertions {
   /**
    * Throw a certain runtime exception if argument is null
    *
-   * @param <T>
-   * @param obj
-   * @param ex
-   * @return shouldNotNull
+   * @param <T> the type of the given object
+   * @param obj the object that should not null
+   * @param ex the supplying function that produces an exception to be thrown
+   * @return the given object
    */
   public static <T> T shouldNotNull(T obj, Supplier<? extends RuntimeException> ex) {
     if (obj == null) {

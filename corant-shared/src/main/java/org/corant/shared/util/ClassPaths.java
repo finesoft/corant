@@ -20,7 +20,6 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.immutableSetOf;
-import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.replace;
@@ -39,6 +38,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -261,10 +261,17 @@ public class ClassPaths {
           }
         }
         if (currClsLoader.equals(ClassLoader.getSystemClassLoader())) {
-          Set<String> sysClsPaths = linkedHashSetOf(SYS_CLASS_PATH.split(SYS_PATH_SEPARATOR));
+          Set<String> sysClsPaths = new LinkedHashSet<>();
+          if (SYS_CLASS_PATH != null) {
+            Collections.addAll(sysClsPaths, SYS_CLASS_PATH.split(SYS_PATH_SEPARATOR));
+          }
           if (loadAll(path)) {
-            sysClsPaths.addAll(listOf(SYS_BOOT_CLASS_PATH.split(SYS_PATH_SEPARATOR)));
-            sysClsPaths.addAll(listOf(SYS_EXT_DIRS.split(SYS_PATH_SEPARATOR)));
+            if (SYS_BOOT_CLASS_PATH != null) {
+              sysClsPaths.addAll(listOf(SYS_BOOT_CLASS_PATH.split(SYS_PATH_SEPARATOR)));
+            }
+            if (SYS_EXT_DIRS != null) {
+              sysClsPaths.addAll(listOf(SYS_EXT_DIRS.split(SYS_PATH_SEPARATOR)));
+            }
           }
           for (String classPath : sysClsPaths) {
             try {

@@ -36,6 +36,7 @@ import org.corant.context.required.Required;
 import org.corant.modules.servlet.metadata.WebFilterMetaData;
 import org.corant.modules.servlet.metadata.WebListenerMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Priorities;
 
 /**
@@ -46,8 +47,8 @@ import org.corant.shared.normal.Priorities;
  */
 public class WebExtension implements Extension, WebMetaDataProvider {
 
-  protected static final boolean autoDescovery =
-      Configs.getValue("corant.servlet.auto-descovery", Boolean.class, Boolean.FALSE);
+  protected static final boolean cdiDiscovery =
+      Configs.getValue("corant.servlet.discovery-by-cdi", Boolean.class, Boolean.TRUE);
   private final List<WebListenerMetaData> listenerMetaDatas = new ArrayList<>();
   private final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
   private final List<WebFilterMetaData> filterMetaDatas = new ArrayList<>();
@@ -116,7 +117,8 @@ public class WebExtension implements Extension, WebMetaDataProvider {
   // Jandex
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     // TODO use jandex to find out web meta data
-    if (!autoDescovery) {
+    if (!cdiDiscovery) {
+      throw new NotSupportedException("For now we only support cdi descovery!");
     }
   }
 

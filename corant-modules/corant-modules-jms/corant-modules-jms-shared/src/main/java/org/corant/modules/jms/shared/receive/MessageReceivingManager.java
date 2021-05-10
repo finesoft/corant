@@ -15,6 +15,7 @@ package org.corant.modules.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,8 +145,10 @@ public class MessageReceivingManager {
         if (f == null || !f.isEnable()) {
           logger.warning(() -> String.format(
               "The receiver method %s can't be performed, the connection factory %s is not available!",
-              meta.getMethod().getMethod().toString(), f.getConnectionFactoryId()));
+              meta.getMethod().getMethod().toString(),
+              f != null ? f.getConnectionFactoryId() : EMPTY));
           metait.remove();
+          continue;
         }
         useCfgs.add(f);
       }

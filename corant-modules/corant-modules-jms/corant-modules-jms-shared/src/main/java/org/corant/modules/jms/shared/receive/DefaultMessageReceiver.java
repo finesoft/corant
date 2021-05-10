@@ -94,6 +94,8 @@ public class DefaultMessageReceiver implements MessageReceiver {
       return false;
     }
     if (connection == null) {
+      // FIXME If the task is closed while waiting for the link to be established, an exception may
+      // be thrown
       if (meta.isXa()) {
         connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
       } else {
@@ -191,6 +193,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
       closeSessionIfNecessary(stop);
       closeConnectionIfNecessary(stop);
     } finally {
+      // Noop!
     }
   }
 
@@ -309,7 +312,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
   /**
    * Related work after consume, commit transaction or session if necessary
    *
-   * @param message
+   * @param message the message that received and has been handled
    * @throws JMSException postConsume
    */
   protected void postConsume(Message message) throws JMSException {
@@ -326,8 +329,6 @@ public class DefaultMessageReceiver implements MessageReceiver {
     } catch (RollbackException | HeuristicMixedException | HeuristicRollbackException
         | SecurityException | IllegalStateException | SystemException te) {
       throw generateJMSException(te);
-    } catch (JMSException je) {
-      throw je;
     }
   }
 

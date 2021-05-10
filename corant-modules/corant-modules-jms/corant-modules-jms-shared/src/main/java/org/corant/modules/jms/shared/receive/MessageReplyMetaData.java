@@ -36,12 +36,6 @@ public class MessageReplyMetaData {
 
   private final SerializationSchema serialization;// () default SerializationSchema.JSON_STRING;
 
-  /**
-   * @param deliveryMode
-   * @param destination
-   * @param multicast
-   * @param serialization
-   */
   protected MessageReplyMetaData(int deliveryMode, String destination, boolean multicast,
       SerializationSchema serialization) {
     this.deliveryMode = deliveryMode;

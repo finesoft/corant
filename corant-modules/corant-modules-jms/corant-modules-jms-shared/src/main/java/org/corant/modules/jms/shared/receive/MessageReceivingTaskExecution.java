@@ -27,21 +27,12 @@ public class MessageReceivingTaskExecution {
   private final MessageReceivingTask task;
   private final Runnable cancelledHook;
 
-  /**
-   * @param future
-   * @param task
-   */
   public MessageReceivingTaskExecution(ScheduledFuture<?> future, MessageReceivingTask task) {
     this.future = future;
     this.task = task;
     cancelledHook = null;
   }
 
-  /**
-   * @param future
-   * @param task
-   * @param cancelledHook
-   */
   public MessageReceivingTaskExecution(ScheduledFuture<?> future, MessageReceivingTask task,
       Runnable cancelledHook) {
     this.future = future;

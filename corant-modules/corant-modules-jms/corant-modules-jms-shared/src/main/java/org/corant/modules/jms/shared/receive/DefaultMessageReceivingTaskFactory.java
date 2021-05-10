@@ -13,16 +13,14 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import javax.jms.Message;
+import javax.enterprise.context.ApplicationScoped;
 
-/**
- * corant-modules-jms-shared
- *
- * @author bingo 下午11:43:12
- *
- */
-public interface MessageHandler {
+@ApplicationScoped
+public class DefaultMessageReceivingTaskFactory implements MessageReceivingTaskFactory {
 
-  Object onMessage(Message message);
+  @Override
+  public MessageReceivingTask create(MessageReceivingMetaData metaData) {
+    return new DefaultMessageReceivingTask(metaData);
+  }
 
 }

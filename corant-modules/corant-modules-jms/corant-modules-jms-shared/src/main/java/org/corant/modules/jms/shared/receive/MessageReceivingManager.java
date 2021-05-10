@@ -37,7 +37,6 @@ import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
-import org.corant.modules.jms.shared.receive.MessageReceivingTaskFactory.CancellableTask;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -115,7 +114,7 @@ public class MessageReceivingManager {
         ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
             "Can not schedule message receiver task, connection factory id [%s] not found. message receiver [%s].",
             cfg.getConnectionFactoryId(), metaData);
-        CancellableTask task = taskFactory.create(metaData);
+        MessageReceivingTask task = taskFactory.create(metaData);
         ScheduledFuture<?> future =
             ses.scheduleWithFixedDelay(task, cfg.getReceiveTaskInitialDelay().toMillis(),
                 cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);

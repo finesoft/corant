@@ -14,7 +14,6 @@
 package org.corant.modules.jms.shared.receive;
 
 import java.util.concurrent.ScheduledFuture;
-import org.corant.modules.jms.shared.receive.MessageReceivingTaskFactory.CancellableTask;
 
 /**
  * corant-modules-jms-shared
@@ -25,14 +24,14 @@ import org.corant.modules.jms.shared.receive.MessageReceivingTaskFactory.Cancell
 public class MessageReceivingTaskExecution {
 
   private final ScheduledFuture<?> future;
-  private final CancellableTask task;
+  private final MessageReceivingTask task;
   private final Runnable cancelledHook;
 
   /**
    * @param future
    * @param task
    */
-  public MessageReceivingTaskExecution(ScheduledFuture<?> future, CancellableTask task) {
+  public MessageReceivingTaskExecution(ScheduledFuture<?> future, MessageReceivingTask task) {
     this.future = future;
     this.task = task;
     cancelledHook = null;
@@ -43,7 +42,7 @@ public class MessageReceivingTaskExecution {
    * @param task
    * @param cancelledHook
    */
-  public MessageReceivingTaskExecution(ScheduledFuture<?> future, CancellableTask task,
+  public MessageReceivingTaskExecution(ScheduledFuture<?> future, MessageReceivingTask task,
       Runnable cancelledHook) {
     this.future = future;
     this.task = task;

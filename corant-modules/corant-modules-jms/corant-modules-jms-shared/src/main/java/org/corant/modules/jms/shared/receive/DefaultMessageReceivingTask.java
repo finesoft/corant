@@ -51,16 +51,17 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   public static final byte STATE_TRY = 1;
   public static final byte STATE_BRK = 2;
 
-  final Logger logger = Logger.getLogger(this.getClass().getName());
+  protected static final Logger logger =
+      Logger.getLogger(DefaultMessageReceivingTask.class.getName());
 
-  // config
+  // configuration
   protected final MessageReceivingMetaData meta;
   protected final long loopIntervalMillis;
 
   // executor controller
   protected final AtomicBoolean cancellation = new AtomicBoolean();
 
-  // control to reconnect jms server
+  // control to reconnect JMS server
   protected final int jmsFailureThreshold;
   protected final AtomicInteger jmsFailureCounter = new AtomicInteger(0);
 
@@ -73,13 +74,13 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   protected volatile long breakedTimePoint;
   protected volatile long breakedMillis;
   protected volatile boolean inProgress;
+  protected volatile boolean lastExecutionSuccessfully = false;
 
   protected final AtomicInteger failureCounter = new AtomicInteger(0);
   protected final AtomicInteger tryCounter = new AtomicInteger(0);
   protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
-  protected volatile boolean lastExecutionSuccessfully = false;
-
+  // the workhorse
   protected final MessageReceiver messageReceiver;
   protected final MessageHandler messageHandler;
   protected final MessageReplier messageReplier;
@@ -97,7 +98,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
     breakedInterval = retryInterval;
     tryThreshold = metaData.getTryThreshold();
     messageReplier = new DefaultMessageReplier(meta);
-    messageHandler = new DefaultMessageHandler(meta.getMethod());
+    messageHandler = new DefaultMessageHandler(meta);
     messageReceiver = new DefaultMessageReceiver(metaData, messageHandler, this);
     logger.log(Level.FINE, () -> String.format("Create message receive task for %s.", metaData));
   }

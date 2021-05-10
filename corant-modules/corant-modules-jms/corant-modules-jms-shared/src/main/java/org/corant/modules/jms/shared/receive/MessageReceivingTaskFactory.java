@@ -13,8 +13,6 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import javax.enterprise.context.ApplicationScoped;
-
 /**
  * corant-modules-jms-shared
  *
@@ -23,21 +21,6 @@ import javax.enterprise.context.ApplicationScoped;
  */
 public interface MessageReceivingTaskFactory {
 
-  CancellableTask create(MessageReceivingMetaData metaData);
-
-  interface CancellableTask extends Runnable {
-
-    boolean cancel();
-  }
-
-  @ApplicationScoped
-  class DefaultMessageReceivingTaskFactory implements MessageReceivingTaskFactory {
-
-    @Override
-    public CancellableTask create(MessageReceivingMetaData metaData) {
-      return new DefaultMessageReceivingTask(metaData);
-    }
-
-  }
+  MessageReceivingTask create(MessageReceivingMetaData metaData);
 
 }

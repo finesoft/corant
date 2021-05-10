@@ -42,6 +42,7 @@ public class DefaultMessageReplier implements MessageReplier {
   public void reply(Session session, Message originalMessage, Object payload) throws JMSException {
     String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
     if (originalMessage != null && originalMessage.getJMSReplyTo() != null) {
+      // FIXME use original message or no?
       SerializationSchema serialSchema = SerializationSchema.JSON_STRING;
       String desSerialSchema = originalMessage.getStringProperty(REPLY_MSG_SERIAL_SCHAME);
       if (desSerialSchema != null) {

@@ -31,14 +31,20 @@ import org.corant.modules.jms.shared.context.SecurityContextPropagator;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.shared.exception.CorantRuntimeException;
 
+/**
+ * corant-modules-jms-shared
+ *
+ * @author bingo 下午8:48:45
+ *
+ */
 public class DefaultMessageHandler implements MessageHandler {
 
+  protected static final Logger logger = Logger.getLogger(DefaultMessageHandler.class.getName());
   final ContextualMethodHandler method;
   final Class<?> messageClass;
-  final Logger logger = Logger.getLogger(DefaultMessageHandler.class.getName());
 
-  protected DefaultMessageHandler(ContextualMethodHandler method) {
-    this.method = method;
+  protected DefaultMessageHandler(MessageReceivingMetaData meta) {
+    method = meta.getMethod();
     messageClass = method.getMethod().getParameters()[0].getType();
   }
 

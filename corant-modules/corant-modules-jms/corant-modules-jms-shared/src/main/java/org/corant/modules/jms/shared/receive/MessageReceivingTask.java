@@ -13,14 +13,13 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import org.corant.modules.jms.shared.receive.MessageReceivingTaskFactory.CancellableTask;
-
 /**
  * corant-modules-jms-shared
  *
  * @author bingo 下午11:17:19
  *
  */
-public interface MessageReceivingTask extends CancellableTask {
+public interface MessageReceivingTask extends Runnable {
 
+  boolean cancel();
 }

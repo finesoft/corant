@@ -61,7 +61,7 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public class DefaultMessageReceiver implements MessageReceiver {
 
-  final Logger logger = Logger.getLogger(this.getClass().getName());
+  protected static final Logger logger = Logger.getLogger(DefaultMessageReceiver.class.getName());
 
   // config
   protected final MessageReceivingMetaData meta;

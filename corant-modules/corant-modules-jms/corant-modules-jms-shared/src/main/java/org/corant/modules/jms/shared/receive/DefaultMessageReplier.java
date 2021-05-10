@@ -13,9 +13,9 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.resolve;
 import static org.corant.modules.jms.shared.MessagePropertyNames.REPLY_MSG_SERIAL_SCHAME;
+import static org.corant.modules.jms.shared.MessagePropertyNames.SECURITY_CONTEXT_PROPERTY_NAME;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -23,8 +23,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.MessageSerializer;
-import org.corant.modules.jms.shared.context.SecurityContextPropagator;
-import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 
 /**
  * corant-modules-jms-shared
@@ -42,8 +40,7 @@ public class DefaultMessageReplier implements MessageReplier {
 
   @Override
   public void reply(Session session, Message originalMessage, Object payload) throws JMSException {
-    SecurityContextPropagator sctxs =
-        find(SecurityContextPropagator.class).orElse(SimpleSecurityContextPropagator.INSTANCE);
+    String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
     if (originalMessage != null && originalMessage.getJMSReplyTo() != null) {
       SerializationSchema serialSchema = SerializationSchema.JSON_STRING;
       String desSerialSchema = originalMessage.getStringProperty(REPLY_MSG_SERIAL_SCHAME);
@@ -60,7 +57,9 @@ public class DefaultMessageReplier implements MessageReplier {
       if ((clids = originalMessage.getJMSCorrelationIDAsBytes()) != null) {
         msg.setJMSCorrelationIDAsBytes(clids);
       }
-      sctxs.propagate(msg);
+      if (sctx != null) {
+        msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
+      }
       session.createProducer(originalMessage.getJMSReplyTo()).send(msg);
     }
     for (MessageReplyMetaData rd : meta.getReplies()) {
@@ -68,7 +67,9 @@ public class DefaultMessageReplier implements MessageReplier {
           : session.createQueue(rd.getDestination());
       MessageSerializer ms = resolve(MessageSerializer.class, rd.getSerialization().qualifier());
       Message msg = ms.serialize(session, payload);
-      sctxs.propagate(msg);
+      if (sctx != null) {
+        msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
+      }
       MessageProducer producer = session.createProducer(dest);
       producer.setDeliveryMode(rd.getDeliveryMode());
       producer.send(msg);

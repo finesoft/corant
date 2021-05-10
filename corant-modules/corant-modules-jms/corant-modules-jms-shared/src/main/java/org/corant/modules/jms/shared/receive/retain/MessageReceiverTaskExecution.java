@@ -11,10 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared.receive;
+package org.corant.modules.jms.shared.receive.retain;
 
 import java.util.concurrent.ScheduledFuture;
-import org.corant.modules.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
+import org.corant.modules.jms.shared.receive.retain.MessageReceiverTaskFactory.CancellableTask;
 
 /**
  * corant-modules-jms-shared

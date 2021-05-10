@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
-import org.corant.modules.jms.shared.annotation.MessageSend.SerializationSchema;
 
 /**
  * corant-modules-jms-shared
@@ -67,5 +66,19 @@ public @interface MessageSerialization {
       return schame;
     }
 
+  }
+
+  enum SerializationSchema {
+    JSON_STRING, BINARY, JAVA_SERIAL, MAP;
+
+    private final MessageSerialization qualifier;
+
+    SerializationSchema() {
+      qualifier = MessageSerializationLiteral.of(this);
+    }
+
+    public MessageSerialization qualifier() {
+      return qualifier;
+    }
   }
 }

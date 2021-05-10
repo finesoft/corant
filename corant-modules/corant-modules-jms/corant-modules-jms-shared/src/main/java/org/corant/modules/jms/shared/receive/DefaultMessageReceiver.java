@@ -13,13 +13,9 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.find;
 import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Strings.isNotBlank;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
@@ -28,7 +24,6 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
@@ -39,16 +34,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
-import org.corant.context.proxy.ContextualMethodHandler;
-import org.corant.context.security.SecurityContext;
-import org.corant.context.security.SecurityContexts;
-import org.corant.modules.jms.shared.MessagePropertyNames;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
 import org.corant.modules.jms.shared.context.JMSExceptionListener;
-import org.corant.modules.jms.shared.context.MessageSerializer;
-import org.corant.modules.jms.shared.context.SecurityContextPropagator;
-import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
-import org.corant.modules.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -73,39 +59,139 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 上午11:33:15
  *
  */
-public abstract class AbstractMessageReceiverTask implements CancellableTask {
+public class DefaultMessageReceiver implements MessageReceiver {
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
   // config
-  protected final MessageReceiverMetaData meta;
+  protected final MessageReceivingMetaData meta;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
-  protected final long loopIntervalMillis;
 
   // worker object
   protected final ConnectionFactory connectionFactory;
-  protected final MessageListener messageListener;
+  protected final MessageHandler messageHandler;
+  protected final MessageReceivingMediator mediator;
   protected volatile Connection connection;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
-  protected volatile boolean lastExecutionSuccessfully = false;
 
-  // executor controller
-  protected final AtomicBoolean cancellation = new AtomicBoolean();
-
-  protected AbstractMessageReceiverTask(MessageReceiverMetaData metaData) {
+  protected DefaultMessageReceiver(MessageReceivingMetaData metaData, MessageHandler messageHandler,
+      MessageReceivingMediator mediator) {
     meta = metaData;
     connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
-    messageListener = new MessageHandler(metaData.getMethod());
+    this.messageHandler = messageHandler;
+    this.mediator = mediator;
     receiveThreshold = metaData.getReceiveThreshold();
     receiveTimeout = metaData.getReceiveTimeout();
-    loopIntervalMillis = metaData.getLoopIntervalMs();
+
   }
 
   @Override
-  public synchronized boolean cancel() {
-    return cancellation.compareAndSet(false, true);
+  public boolean initialize() throws JMSException {
+    // initialize connection
+    if (mediator.checkCancelled()) {
+      return false;
+    }
+    if (connection == null) {
+      if (meta.isXa()) {
+        connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
+      } else {
+        connection = connectionFactory.createConnection();
+      }
+      select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
+          .forEach(c -> c.configConnection(connection, meta));
+      select(JMSExceptionListener.class).stream().min(Sortable::compare)
+          .ifPresent(listener -> listener.tryConfig(connection));
+    }
+    // initialize session
+    if (session == null) {
+      try {
+        if (meta.isXa()) {
+          session = ((XAConnection) connection).createXASession();
+        } else {
+          session = connection.createSession(meta.getAcknowledge());
+        }
+        select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
+            .forEach(c -> c.configSession(session, meta));
+      } catch (JMSException je) {
+        if (connection != null) {
+          try {
+            connection.close();
+            connection = null;
+          } catch (JMSException e) {
+            je.addSuppressed(e);
+          }
+        }
+        throw je;
+      }
+    }
+    // initialize message consumer
+    if (messageConsumer == null) {
+      try {
+        Destination destination = meta.isMulticast() ? session.createTopic(meta.getDestination())
+            : session.createQueue(meta.getDestination());
+        if (isNotBlank(meta.getSelector())) {
+          messageConsumer = session.createConsumer(destination, meta.getSelector());
+        } else {
+          messageConsumer = session.createConsumer(destination);
+        }
+        select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
+            .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
+      } catch (JMSException je) {
+        try {
+          if (session != null) {
+            session.close();
+            session = null;
+          }
+          if (connection != null) {
+            connection.close();
+            connection = null;
+          }
+        } catch (JMSException e) {
+          je.addSuppressed(e);
+        }
+        throw je;
+      }
+    }
+    connection.start();
+    return true;
+  }
+
+  @Override
+  public synchronized boolean receive() {
+    logger.log(Level.FINE, () -> String.format(">>> Begin receiving messages, %s.", meta));
+    Throwable throwable = null;
+    try {
+      if (initialize()) {
+        int rt = receiveThreshold;
+        while (--rt >= 0) {
+          preConsume();
+          Message message = consume();
+          postConsume(message);
+          if (message == null) {
+            logger.log(Level.FINE, () -> String.format("No message for now, %s.", meta));
+            break;
+          }
+        }
+      }
+    } catch (Exception e) {
+      throwable = e;
+      onException(e);
+    } finally {
+      logger.log(Level.FINE, () -> String.format("<<< End receiving messages, %s%n.", meta));
+    }
+    return throwable == null;
+  }
+
+  @Override
+  public void release(boolean stop) {
+    try {
+      closeMessageConsumerIfNecessary(stop);
+      closeSessionIfNecessary(stop);
+      closeConnectionIfNecessary(stop);
+    } finally {
+    }
   }
 
   protected void closeConnectionIfNecessary(boolean forceClose) {
@@ -163,7 +249,8 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     }
     if (message != null) {
       logger.log(Level.FINE, () -> String.format("Received message start handling, [%s]", meta));
-      messageListener.onMessage(message);
+      Object result = messageHandler.onMessage(message);
+      mediator.onPostMessageHandled(message, session, result);
       logger.log(Level.FINE, () -> String.format("Finished message handling, [%s]", meta));
     }
     return message;
@@ -173,31 +260,6 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
         () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
             connectionFactoryId));
-  }
-
-  protected synchronized void execute() {
-    logger.log(Level.FINE, () -> String.format("Begin receiving messages, %s.", meta));
-    Throwable throwable = null;
-    try {
-      if (!cancellation.get() && initialize()) {
-        int rt = receiveThreshold;
-        while (--rt >= 0) {
-          preConsume();
-          Message message = consume();
-          postConsume(message);
-          if (message == null) {
-            logger.log(Level.FINE, () -> String.format("No message for now, %s.", meta));
-            break;
-          }
-        }
-      }
-    } catch (Exception e) {
-      throwable = e;
-      onException(e);
-    } finally {
-      lastExecutionSuccessfully = throwable == null;
-      logger.log(Level.FINE, () -> String.format("End receiving messages, %s.", meta));
-    }
   }
 
   protected JMSException generateJMSException(Exception t) {
@@ -210,73 +272,6 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
     }
   }
 
-  protected boolean initialize() throws JMSException {
-    // initialize connection
-    if (connection == null) {
-      if (meta.isXa()) {
-        connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
-      } else {
-        connection = connectionFactory.createConnection();
-      }
-      select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
-          .forEach(c -> c.configConnection(connection, meta));
-      select(JMSExceptionListener.class).stream().min(Sortable::compare)
-          .ifPresent(listener -> listener.tryConfig(connection));
-    }
-    // initialize session
-    if (session == null) {
-      try {
-        if (meta.isXa()) {
-          session = ((XAConnection) connection).createXASession();
-        } else {
-          session = connection.createSession(meta.getAcknowledge());
-        }
-        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
-            .forEach(c -> c.configSession(session, meta));
-      } catch (JMSException je) {
-        if (connection != null) {
-          try {
-            connection.close();
-            connection = null;
-          } catch (JMSException e) {
-            je.addSuppressed(e);
-          }
-        }
-        throw je;
-      }
-    }
-    // initialize message consumer
-    if (messageConsumer == null) {
-      try {
-        Destination destination = meta.isMulticast() ? session.createTopic(meta.getDestination())
-            : session.createQueue(meta.getDestination());
-        if (isNotBlank(meta.getSelector())) {
-          messageConsumer = session.createConsumer(destination, meta.getSelector());
-        } else {
-          messageConsumer = session.createConsumer(destination);
-        }
-        select(MessageReceiverTaskConfigurator.class).stream().sorted(Sortable::compare)
-            .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
-      } catch (JMSException je) {
-        try {
-          if (session != null) {
-            session.close();
-            session = null;
-          }
-          if (connection != null) {
-            connection.close();
-            connection = null;
-          }
-        } catch (JMSException e) {
-          je.addSuppressed(e);
-        }
-        throw je;
-      }
-    }
-    connection.start();
-    return true;
-  }
-
   /**
    * Related work on consume occurred error, rollback transaction or rollback/recover session if
    * necessary
@@ -285,6 +280,12 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
    */
   protected void onException(Exception e) {
     try {
+      mediator.onReceivingException(e);
+    } catch (Exception ex) {
+      logger.log(Level.SEVERE, ex, () -> String.format("Execution occurred error!, %s.", meta));
+    }
+    try {
+      mediator.onReceivingException(e);
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
@@ -344,74 +345,12 @@ public abstract class AbstractMessageReceiverTask implements CancellableTask {
           tm.setTransactionTimeout(meta.getTxTimeout());
         }
         tm.begin();
-        XAResource xar = ((XASession) session).getXAResource();
-        tm.getTransaction().enlistResource(xar);
+        XAResource xaresource = ((XASession) session).getXAResource();
+        tm.getTransaction().enlistResource(xaresource);
       }
     } catch (Exception te) {
       throw generateJMSException(te);
     }
-  }
-
-  protected void release(boolean stop) {
-    try {
-      closeMessageConsumerIfNecessary(stop);
-      closeSessionIfNecessary(stop);
-      closeConnectionIfNecessary(stop);
-    } finally {
-    }
-  }
-
-  static class MessageHandler implements MessageListener {
-
-    final ContextualMethodHandler method;
-    final Class<?> messageClass;
-    final Logger logger = Logger.getLogger(MessageHandler.class.getName());
-
-    MessageHandler(ContextualMethodHandler method) {
-      this.method = method;
-      messageClass = method.getMethod().getParameters()[0].getType();
-    }
-
-    @Override
-    public void onMessage(Message message) {
-      try {
-        resolveSecurityContext(message);
-        method.invoke(resolvePayload(message));
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | JMSException e) {
-        throw new CorantRuntimeException(e);
-      } finally {
-        SecurityContexts.setCurrent(null);
-      }
-    }
-
-    Object resolvePayload(Message message) throws JMSException {
-      String serialSchema = message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME);
-      if (isNotBlank(serialSchema)) {
-        if (!Message.class.isAssignableFrom(messageClass)) {
-          MessageSerializer serializer =
-              resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
-          return serializer.deserialize(message, messageClass);
-        } else {
-          logger.warning(() -> String.format(
-              "The message has serialization scheme property, but the message consumer still use the native javax.jms.Message as method %s parameter type.",
-              method));
-        }
-      }
-      return message;
-    }
-
-    void resolveSecurityContext(Message message) {
-      try {
-        SecurityContext ctx = find(SecurityContextPropagator.class)
-            .orElse(SimpleSecurityContextPropagator.INSTANCE).extract(message);
-        SecurityContexts.setCurrent(ctx);
-      } catch (Exception e) {
-        logger.log(Level.SEVERE, e,
-            () -> "Resolve security context propagation from message occurred error!");
-      }
-    }
-
   }
 
 }

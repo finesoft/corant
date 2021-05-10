@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.modules.jms.shared.annotation.MessageSend.SerializationSchema;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
 import org.corant.modules.jms.shared.context.MessageSerializer;
 

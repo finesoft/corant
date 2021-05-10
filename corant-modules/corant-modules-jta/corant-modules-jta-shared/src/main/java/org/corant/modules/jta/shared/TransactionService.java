@@ -79,6 +79,11 @@ public interface TransactionService {
   /**
    * Delist XAResource and flag to current transaction.
    *
+   * <p>
+   * Note:The only case in which you need to handle a delist is when using the same resource
+   * instance in multiple transaction contexts.
+   * </p>
+   *
    * @param xar The XAResource object associated with the resource(connection).
    * @param flag One of the values of TMSUCCESS, TMSUSPEND, or TMFAIL.
    */

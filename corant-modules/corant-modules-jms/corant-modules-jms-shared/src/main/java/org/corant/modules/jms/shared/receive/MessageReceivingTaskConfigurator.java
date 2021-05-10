@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,16 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared;
+package org.corant.modules.jms.shared.receive;
+
+import javax.jms.Connection;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-jms-shared
  *
- * @author bingo 下午5:28:21
+ * @author bingo 下午7:27:36
  *
  */
-public interface MessagePropertyNames {
-  String SECURITY_CONTEXT_PROPERTY_NAME = "__CORANT_SECURITY_CONTEXT__";
-  String MSG_SERIAL_SCHAME = "__CORANT_MSG_SERIAL_SCHAME__";
-  String REPLY_MSG_SERIAL_SCHAME = "__CORANT_REPLY_MSG_SERIAL_SCHAME__";
+public interface MessageReceivingTaskConfigurator extends Sortable {
+
+  void configConnection(Connection connection, MessageReceivingMetaData metaData);
+
+  void configMessageConsumer(MessageConsumer messageConsumer, MessageReceivingMetaData metaData);
+
+  void configSession(Session session, MessageReceivingMetaData metaData);
 }

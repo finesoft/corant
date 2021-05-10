@@ -159,6 +159,11 @@ public @interface MessageReceive {
   long receiveTimeout() default 1000L;
 
   /**
+   * The message reply config
+   */
+  MessageReply[] reply() default {};
+
+  /**
    * @see Session#createConsumer(javax.jms.Destination, String)
    * @return selector
    */

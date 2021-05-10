@@ -37,7 +37,7 @@ import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
-import org.corant.modules.jms.shared.receive.MessageReceiverTaskFactory.CancellableTask;
+import org.corant.modules.jms.shared.receive.MessageReceivingTaskFactory.CancellableTask;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -47,7 +47,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  *
  */
 @ApplicationScoped
-public class MessageReceiverManager {
+public class MessageReceivingManager {
 
   @Inject
   protected Logger logger;
@@ -56,14 +56,14 @@ public class MessageReceiverManager {
   protected AbstractJMSExtension extesion;
 
   @Inject
-  protected MessageReceiverTaskFactory taskFactory;
+  protected MessageReceivingTaskFactory taskFactory;
 
   protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
       new HashMap<>();
 
-  protected final List<MessageReceiverMetaData> receiveMetaDatas = new ArrayList<>();
+  protected final List<MessageReceivingMetaData> receiveMetaDatas = new ArrayList<>();
 
-  protected final List<MessageReceiverTaskExecution> receiveExecutions = new ArrayList<>();
+  protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected synchronized void beforeShutdown(@Observes final PreContainerStopEvent event) {
     logger.info(() -> "Stop the message receiver tasks.");
@@ -97,7 +97,7 @@ public class MessageReceiverManager {
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     Set<Pair<String, String>> anycasts = new HashSet<>();
-    for (final MessageReceiverMetaData metaData : receiveMetaDatas) {
+    for (final MessageReceivingMetaData metaData : receiveMetaDatas) {
       if (!metaData.isMulticast()
           && !anycasts.add(Pair.of(metaData.getConnectionFactoryId(), metaData.getDestination()))) {
         logger.warning(() -> String.format(
@@ -119,7 +119,7 @@ public class MessageReceiverManager {
         ScheduledFuture<?> future =
             ses.scheduleWithFixedDelay(task, cfg.getReceiveTaskInitialDelay().toMillis(),
                 cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
-        receiveExecutions.add(new MessageReceiverTaskExecution(future, task));
+        receiveExecutions.add(new MessageReceivingTaskExecution(future, task));
         logger.fine(() -> String.format(
             "Scheduled message receiver task, connection factory id [%s], destination [%s], initial delay [%s]Ms",
             metaData.getConnectionFactoryId(), metaData.getDestination(),
@@ -131,15 +131,16 @@ public class MessageReceiverManager {
 
   @PostConstruct
   protected void postConstruct() {
-    extesion.getReceiveMethods().stream().map(MessageReceiverMetaData::of)
+    extesion.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
         .forEach(receiveMetaDatas::addAll);
     if (!receiveMetaDatas.isEmpty()) {
+      // FIXME check receive and reply recursion
       final Map<String, ? extends AbstractJMSConfig> cfgs =
           extesion.getConfigManager().getAllWithNames();
       Set<AbstractJMSConfig> useCfgs = new HashSet<>();
-      Iterator<MessageReceiverMetaData> metait = receiveMetaDatas.iterator();
+      Iterator<MessageReceivingMetaData> metait = receiveMetaDatas.iterator();
       while (metait.hasNext()) {
-        MessageReceiverMetaData meta = metait.next();
+        MessageReceivingMetaData meta = metait.next();
         AbstractJMSConfig f = cfgs.get(meta.getConnectionFactoryId());
         if (f == null || !f.isEnable()) {
           logger.warning(() -> String.format(

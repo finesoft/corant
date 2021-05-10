@@ -11,24 +11,31 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared.receive;
+package org.corant.modules.jms.shared.annotation;
 
-import javax.jms.Connection;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import org.corant.shared.ubiquity.Sortable;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.jms.DeliveryMode;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 
 /**
  * corant-modules-jms-shared
  *
- * @author bingo 下午7:27:36
+ * @author bingo 下午3:49:53
  *
  */
-public interface MessageReceiverTaskConfigurator extends Sortable {
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface MessageReply {
 
-  void configConnection(Connection connection, MessageReceiverMetaData metaData);
+  int deliveryMode() default DeliveryMode.PERSISTENT;
 
-  void configMessageConsumer(MessageConsumer messageConsumer, MessageReceiverMetaData metaData);
+  String destination();
 
-  void configSession(Session session, MessageReceiverMetaData metaData);
+  boolean multicast() default false;
+
+  SerializationSchema serialization() default SerializationSchema.JSON_STRING;
+
 }

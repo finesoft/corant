@@ -13,19 +13,24 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jms.shared.annotation.MessageReceive;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.corant.shared.util.Retry.RetryInterval;
 
@@ -35,7 +40,9 @@ import org.corant.shared.util.Retry.RetryInterval;
  * @author bingo 下午3:33:51
  *
  */
-public class MessageReceiverMetaData {
+public class MessageReceivingMetaData {
+
+  static final Logger logger = Logger.getLogger(MessageReceivingMetaData.class.getName());
 
   private final ContextualMethodHandler method;
   private final int acknowledge;
@@ -55,8 +62,9 @@ public class MessageReceiverMetaData {
   private final long loopIntervalMs;
   private final boolean xa;
   private final int txTimeout;
+  private final MessageReplyMetaData[] replies;
 
-  MessageReceiverMetaData(ContextualMethodHandler method, String destinationName) {
+  MessageReceivingMetaData(ContextualMethodHandler method, String destinationName) {
     this.method = method;
     final MessageReceive ann = method.getMethod().getAnnotation(MessageReceive.class);
     acknowledge = ann.acknowledge();
@@ -95,9 +103,29 @@ public class MessageReceiverMetaData {
     }
     xa = ann.xa();
     txTimeout = ann.txTimeout();
+    replies = MessageReplyMetaData.from(ann.reply());
+    shouldBeTrue(setOf(replies).size() == replies.length);
+    for (MessageReplyMetaData r : replies) {
+      if (isBlank(r.getDestination()) || r.getDestination().equals(destination)) {
+        throw new CorantRuntimeException(
+            "The reply destination %s can't blank and must not equals receive destination.",
+            r.getDestination());
+      }
+    }
+    if (isNotEmpty(replies)) {
+      shouldBeFalse(method.getMethod().getReturnType().equals(Void.class),
+          "The message receiving method %s requires a return type because the method is configured with a reply.",
+          method.getMethod());
+    } else {
+      if (!method.getMethod().getReturnType().equals(Void.class)) {
+        logger.warning(() -> String.format(
+            "The message receiving method %s has a return type, but the method is configured without a reply.",
+            method.getMethod()));
+      }
+    }
   }
 
-  public static Set<MessageReceiverMetaData> of(ContextualMethodHandler method) {
+  public static Set<MessageReceivingMetaData> of(ContextualMethodHandler method) {
     final MessageReceive ann =
         shouldNotNull(shouldNotNull(method).getMethod().getAnnotation(MessageReceive.class));
     shouldBeTrue(isNoneBlank(ann.destinations()));
@@ -105,8 +133,8 @@ public class MessageReceiverMetaData {
     for (String dest : ann.destinations()) {
       dests.addAll(Configs.assemblyStringConfigProperties(dest));
     }
-    Set<MessageReceiverMetaData> beans = new LinkedHashSet<>(dests.size());
-    dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceiverMetaData(method, d)),
+    Set<MessageReceivingMetaData> beans = new LinkedHashSet<>(dests.size());
+    dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceivingMetaData(method, d)),
         "The message receive method %s dup!", method.toString()));
     return beans;
   }
@@ -122,7 +150,7 @@ public class MessageReceiverMetaData {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    MessageReceiverMetaData other = (MessageReceiverMetaData) obj;
+    MessageReceivingMetaData other = (MessageReceivingMetaData) obj;
     if (connectionFactoryId == null) {
       if (other.connectionFactoryId != null) {
         return false;
@@ -194,6 +222,10 @@ public class MessageReceiverMetaData {
     return receiveTimeout;
   }
 
+  public MessageReplyMetaData[] getReplies() {
+    return replies;
+  }
+
   public String getSelector() {
     return selector;
   }
@@ -235,9 +267,9 @@ public class MessageReceiverMetaData {
 
   @Override
   public String toString() {
-    return "MessageReceiverMetaData [method=" + method.getMethod().toGenericString() + ", clientID="
-        + clientID + ", connectionFactoryId=" + connectionFactoryId + ", destination=" + destination
-        + "]";
+    return "connectionFactoryId=[" + connectionFactoryId + "], destination=[" + destination
+        + "], method=" + method.getMethod().getDeclaringClass().getCanonicalName() + "#"
+        + method.getMethod().getName() + ", clientID=[" + clientID + "]";
   }
 
 }

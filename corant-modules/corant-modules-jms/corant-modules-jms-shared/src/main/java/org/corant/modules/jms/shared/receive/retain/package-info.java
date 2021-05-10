@@ -11,16 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared;
-
 /**
  * corant-modules-jms-shared
- *
- * @author bingo 下午5:28:21
+ * 
+ * @author bingo 下午6:39:43
  *
  */
-public interface MessagePropertyNames {
-  String SECURITY_CONTEXT_PROPERTY_NAME = "__CORANT_SECURITY_CONTEXT__";
-  String MSG_SERIAL_SCHAME = "__CORANT_MSG_SERIAL_SCHAME__";
-  String REPLY_MSG_SERIAL_SCHAME = "__CORANT_REPLY_MSG_SERIAL_SCHAME__";
-}
+package org.corant.modules.jms.shared.receive.retain;

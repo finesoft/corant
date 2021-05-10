@@ -11,33 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared.receive;
+package org.corant.modules.jms.shared.receive.retain;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.jms.Connection;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-jms-shared
  *
- * @author bingo 14:59:51
+ * @author bingo 下午7:27:36
  *
  */
-public interface MessageReceiverTaskFactory {
+public interface MessageReceiverTaskConfigurator extends Sortable {
 
-  CancellableTask create(MessageReceiverMetaData metaData);
+  void configConnection(Connection connection, MessageReceiverMetaData metaData);
 
-  interface CancellableTask extends Runnable {
+  void configMessageConsumer(MessageConsumer messageConsumer, MessageReceiverMetaData metaData);
 
-    boolean cancel();
-  }
-
-  @ApplicationScoped
-  class DefaultMessageReceiverTaskFactory implements MessageReceiverTaskFactory {
-
-    @Override
-    public CancellableTask create(MessageReceiverMetaData metaData) {
-      return new DefaultMessageReceiverTask(metaData);
-    }
-
-  }
-
+  void configSession(Session session, MessageReceiverMetaData metaData);
 }

@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.CLASS_FILE_NAME_EXTENSION;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.asString;
@@ -36,7 +37,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.AccessController;
+import java.security.CodeSource;
 import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -87,6 +90,7 @@ public class ClassPaths {
   public static final String WEB_INF = "WEB-INF";
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
+  public static final String JRT_SCHEMA = "jrt";// from JDK9
   public static final String SYS_PATH_SEPARATOR =
       Pattern.quote(System.getProperty("path.separator"));
   public static final String SYS_CLASS_PATH = System.getProperty("java.class.path");
@@ -243,6 +247,48 @@ public class ClassPaths {
       }
     }
     return url != null ? new URLResource(url) : null;
+  }
+
+  public static URI getJarSource(URI uri) {
+    try {
+      if (!JAR_SCHEMA.equals(uri.getScheme())) {
+        return uri;
+      }
+      String s = uri.getRawSchemeSpecificPart();
+      int bangSlash = s.indexOf(JAR_URL_SEPARATOR);
+      if (bangSlash >= 0) {
+        s = s.substring(0, bangSlash);
+      }
+      return new URI(s);
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  public static URI getLocationOfClass(Class<?> clazz) {
+    try {
+      ProtectionDomain domain = clazz.getProtectionDomain();
+      if (domain != null) {
+        CodeSource source = domain.getCodeSource();
+        if (source != null) {
+          URL location = source.getLocation();
+          if (location != null) {
+            return location.toURI();
+          }
+        }
+      }
+      String resourceName =
+          clazz.getName().replace(CLASS_PATH_SEPARATOR, PATH_SEPARATOR) + CLASS_FILE_NAME_EXTENSION;
+      ClassLoader loader = clazz.getClassLoader();
+      URL url =
+          (loader == null ? ClassLoader.getSystemClassLoader() : loader).getResource(resourceName);
+      if (url != null) {
+        return getJarSource(url.toURI());
+      }
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    return null;
   }
 
   static Map<URI, ClassLoader> getClassPathEntries(ClassLoader classLoader, String path) {

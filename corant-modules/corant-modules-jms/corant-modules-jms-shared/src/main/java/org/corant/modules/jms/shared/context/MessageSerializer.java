@@ -14,12 +14,13 @@
 package org.corant.modules.jms.shared.context;
 
 import static org.corant.modules.jms.shared.MessagePropertyNames.MSG_SERIAL_SCHAME;
-import java.io.Serializable;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import org.corant.modules.jms.shared.annotation.MessageSend.SerializationSchema;
+import javax.jms.Session;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-jms-shared
@@ -39,6 +40,10 @@ public interface MessageSerializer {
     }
   }
 
-  Message serialize(JMSContext jmsContext, Serializable object);
+  Message serialize(JMSContext jmsContext, Object object);
+
+  default Message serialize(Session session, Object object) {
+    throw new NotSupportedException();
+  }
 
 }

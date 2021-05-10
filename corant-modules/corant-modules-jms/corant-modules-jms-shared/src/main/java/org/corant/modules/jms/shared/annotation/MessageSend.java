@@ -21,7 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSContext;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
+import javax.jms.Session;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 
 /**
  * corant-modules-jms-shared
@@ -40,34 +41,36 @@ public @interface MessageSend {
    */
   String connectionFactoryId() default EMPTY;
 
+  /**
+   * This delivery mode instructs the Jakarta Messaging provider to log the message to stable
+   * storage as part of the client's send operation
+   */
   int deliveryMode() default DeliveryMode.PERSISTENT;
 
   /**
-   * The destination name, can use '${config property name}' to retrieve the destination name
-   * frommicroprofile config source.
+   * The destination name, can use '${config property name}' to retrieve the destination name from
+   * microprofile config source.
    *
    * @return destination
    */
   String destination();
 
+  /**
+   * The message propagation method, equivalent to Queue if false otherwise Topic .
+   */
   boolean multicast() default false;
 
+  /**
+   * The message pay load serialization schema.
+   */
   SerializationSchema serialization() default SerializationSchema.JSON_STRING;
 
+  /**
+   * @see Session#AUTO_ACKNOWLEDGE
+   * @see Session#CLIENT_ACKNOWLEDGE
+   * @see Session#DUPS_OK_ACKNOWLEDGE
+   * @see Session#SESSION_TRANSACTED
+   */
   int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
-
-  enum SerializationSchema {
-    JSON_STRING, BINARY, JAVA_SERIAL, MAP;
-
-    private final MessageSerialization qualifier;
-
-    SerializationSchema() {
-      qualifier = MessageSerializationLiteral.of(this);
-    }
-
-    public MessageSerialization qualifier() {
-      return qualifier;
-    }
-  }
 
 }

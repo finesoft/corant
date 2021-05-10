@@ -285,7 +285,6 @@ public class DefaultMessageReceiver implements MessageReceiver {
       logger.log(Level.SEVERE, ex, () -> String.format("Execution occurred error!, %s.", meta));
     }
     try {
-      mediator.onReceivingException(e);
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();

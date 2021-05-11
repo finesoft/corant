@@ -13,6 +13,8 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Threads.tryThreadSleep;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,6 +25,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.corant.context.CDIs;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
+import org.corant.modules.jms.shared.context.MessageSerializer;
 import org.corant.shared.util.Retry.RetryInterval;
 
 /**
@@ -97,8 +101,8 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
     jmsFailureThreshold = max(failureThreshold / 2, 2);
     breakedInterval = retryInterval;
     tryThreshold = metaData.getTryThreshold();
-    messageReplier = new DefaultMessageReplier(meta);
-    messageHandler = new DefaultMessageHandler(meta);
+    messageReplier = new DefaultMessageReplier(meta, this);
+    messageHandler = new DefaultMessageHandler(meta, this);
     messageReceiver = new DefaultMessageReceiver(metaData, messageHandler, this);
     logger.log(Level.FINE, () -> String.format("Create message receive task for %s.", metaData));
   }
@@ -117,6 +121,12 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
       return true;
     }
     return false;
+  }
+
+  @Override
+  public MessageSerializer getMessageSerializer(SerializationSchema schema) {
+    return resolve(MessageSerializer.class,
+        defaultObject(schema, SerializationSchema.JAVA_BUILTIN).qualifier());
   }
 
   public boolean isInProgress() {

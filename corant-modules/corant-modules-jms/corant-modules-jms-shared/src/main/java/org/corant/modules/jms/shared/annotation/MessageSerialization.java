@@ -23,6 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
+import javax.jms.BytesMessage;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
 
 /**
  * corant-modules-jms-shared
@@ -69,12 +74,20 @@ public @interface MessageSerialization {
   }
 
   enum SerializationSchema {
-    JSON_STRING, BINARY, JAVA_SERIAL, MAP;
+
+    JSON_STRING(TextMessage.class), BINARY(BytesMessage.class), JAVA_BUILTIN(
+        ObjectMessage.class), MAP(MapMessage.class), KRYO(BytesMessage.class);
 
     private final MessageSerialization qualifier;
+    private final Class<? extends Message> messageClass;
 
-    SerializationSchema() {
+    SerializationSchema(Class<? extends Message> messageClass) {
       qualifier = MessageSerializationLiteral.of(this);
+      this.messageClass = messageClass;
+    }
+
+    public Class<? extends Message> messageClass() {
+      return messageClass;
     }
 
     public MessageSerialization qualifier() {

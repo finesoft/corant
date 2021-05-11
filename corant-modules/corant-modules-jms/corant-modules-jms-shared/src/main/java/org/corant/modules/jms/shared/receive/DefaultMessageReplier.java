@@ -13,7 +13,6 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.resolve;
 import static org.corant.modules.jms.shared.MessagePropertyNames.REPLY_MSG_SERIAL_SCHAME;
 import static org.corant.modules.jms.shared.MessagePropertyNames.SECURITY_CONTEXT_PROPERTY_NAME;
 import javax.jms.Destination;
@@ -22,7 +21,6 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
-import org.corant.modules.jms.shared.context.MessageSerializer;
 
 /**
  * corant-modules-jms-shared
@@ -33,9 +31,12 @@ import org.corant.modules.jms.shared.context.MessageSerializer;
 public class DefaultMessageReplier implements MessageReplier {
 
   final MessageReceivingMetaData meta;
+  final MessageReceivingMediator mediator;
 
-  protected DefaultMessageReplier(MessageReceivingMetaData meta) {
+  protected DefaultMessageReplier(MessageReceivingMetaData meta,
+      MessageReceivingMediator mediator) {
     this.meta = meta;
+    this.mediator = mediator;
   }
 
   @Override
@@ -43,13 +44,12 @@ public class DefaultMessageReplier implements MessageReplier {
     String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
     if (originalMessage != null && originalMessage.getJMSReplyTo() != null) {
       // FIXME use original message or no?
-      SerializationSchema serialSchema = SerializationSchema.JSON_STRING;
+      SerializationSchema serialSchema = SerializationSchema.JAVA_BUILTIN;
       String desSerialSchema = originalMessage.getStringProperty(REPLY_MSG_SERIAL_SCHAME);
       if (desSerialSchema != null) {
         serialSchema = SerializationSchema.valueOf(desSerialSchema);
       }
-      MessageSerializer ms = resolve(MessageSerializer.class, serialSchema.qualifier());
-      Message msg = ms.serialize(session, payload);
+      Message msg = mediator.getMessageSerializer(serialSchema).serialize(session, payload);
       String clid;
       if ((clid = originalMessage.getJMSCorrelationID()) != null) {
         msg.setJMSCorrelationID(clid);
@@ -66,8 +66,8 @@ public class DefaultMessageReplier implements MessageReplier {
     for (MessageReplyMetaData rd : meta.getReplies()) {
       Destination dest = rd.isMulticast() ? session.createTopic(rd.getDestination())
           : session.createQueue(rd.getDestination());
-      MessageSerializer ms = resolve(MessageSerializer.class, rd.getSerialization().qualifier());
-      Message msg = ms.serialize(session, payload);
+      Message msg =
+          mediator.getMessageSerializer(rd.getSerialization()).serialize(session, payload);
       if (sctx != null) {
         msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
       }

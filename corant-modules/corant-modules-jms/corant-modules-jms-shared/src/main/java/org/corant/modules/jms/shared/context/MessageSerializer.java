@@ -32,9 +32,10 @@ public interface MessageSerializer {
 
   <T> T deserialize(Message message, Class<T> clazz);
 
-  default void resolveSchemaProperty(Message message, SerializationSchema schema) {
+  default <T extends Message> T resolveSchemaProperty(T message, SerializationSchema schema) {
     try {
       message.setStringProperty(MSG_SERIAL_SCHAME, schema.name());
+      return message;
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);
     }

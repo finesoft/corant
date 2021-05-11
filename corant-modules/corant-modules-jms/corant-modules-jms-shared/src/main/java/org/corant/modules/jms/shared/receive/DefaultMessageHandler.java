@@ -14,8 +14,7 @@
 package org.corant.modules.jms.shared.receive;
 
 import static org.corant.context.Instances.find;
-import static org.corant.context.Instances.resolve;
-import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +24,7 @@ import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.jms.shared.MessagePropertyNames;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.MessageSerializationLiteral;
-import org.corant.modules.jms.shared.context.MessageSerializer;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -41,11 +39,14 @@ public class DefaultMessageHandler implements MessageHandler {
 
   protected static final Logger logger = Logger.getLogger(DefaultMessageHandler.class.getName());
   final ContextualMethodHandler method;
+  final MessageReceivingMediator mediator;
   final Class<?> messageClass;
 
-  protected DefaultMessageHandler(MessageReceivingMetaData meta) {
+  protected DefaultMessageHandler(MessageReceivingMetaData meta,
+      MessageReceivingMediator mediator) {
     method = meta.getMethod();
     messageClass = method.getMethod().getParameters()[0].getType();
+    this.mediator = mediator;
   }
 
   @Override
@@ -62,17 +63,12 @@ public class DefaultMessageHandler implements MessageHandler {
   }
 
   protected Object resolvePayload(Message message) throws JMSException {
-    String serialSchema = message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME);
-    if (isNotBlank(serialSchema)) {
-      if (!Message.class.isAssignableFrom(messageClass)) {
-        MessageSerializer serializer =
-            resolve(MessageSerializer.class, MessageSerializationLiteral.of(serialSchema));
-        return serializer.deserialize(message, messageClass);
-      } else {
-        logger.warning(() -> String.format(
-            "The message has serialization scheme property, but the message consumer still use the native javax.jms.Message as method %s parameter type.",
-            method));
-      }
+    if (!Message.class.isAssignableFrom(messageClass)) {
+      SerializationSchema serialSchema = SerializationSchema
+          .valueOf(shouldNotBlank(message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME),
+              "Resolve message payload occurred error, missing [%s] information message header.",
+              MessagePropertyNames.MSG_SERIAL_SCHAME));
+      return mediator.getMessageSerializer(serialSchema).deserialize(message, messageClass);
     }
     return message;
   }

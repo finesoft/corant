@@ -26,6 +26,10 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-modules-jta-shared</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+		</dependency>
 		<!-- Standard JEE -->
 		<dependency>
 			<groupId>jakarta.jms</groupId>

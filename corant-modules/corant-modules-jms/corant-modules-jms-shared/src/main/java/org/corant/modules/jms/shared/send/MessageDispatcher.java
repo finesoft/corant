@@ -13,9 +13,11 @@
  */
 package org.corant.modules.jms.shared.send;
 
+import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,8 +35,11 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import org.corant.config.Configs;
 import org.corant.modules.jms.shared.annotation.MessageDispatch;
+import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
+import org.corant.modules.jms.shared.context.MessageSerializer;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-jms-shared
@@ -49,6 +54,10 @@ public interface MessageDispatcher {
   void dispatch(Map<String, Object> message);
 
   void dispatch(Message message);
+
+  default void dispatch(Object object, SerializationSchema serializationSchema) {
+    throw new NotSupportedException();
+  }
 
   void dispatch(Serializable message);
 
@@ -97,6 +106,13 @@ public interface MessageDispatcher {
     public void dispatch(Message message) {
       for (MessageDispatcher dispatcher : dispatchers) {
         dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(Object object, SerializationSchema serializationSchema) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(object, serializationSchema);
       }
     }
 
@@ -156,6 +172,20 @@ public interface MessageDispatcher {
     @Override
     public void dispatch(Message message) {
       doDispatch(message);
+    }
+
+    @Override
+    public void dispatch(Object object, SerializationSchema serializationSchema) {
+      final JMSContext jmsc =
+          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
+      final MessageSerializer seri = resolve(MessageSerializer.class,
+          defaultObject(serializationSchema, () -> SerializationSchema.JAVA_BUILTIN).qualifier());
+      try {
+        Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
+        jmsc.createProducer().send(d, seri.serialize(jmsc, object));
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
     }
 
     @Override

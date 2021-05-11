@@ -94,7 +94,8 @@ public class DefaultMessageReceiver implements MessageReceiver {
       return false;
     }
     if (connection == null) {
-      // FIXME If the task is closed while waiting for the link to be established, an exception may
+      // FIXME If the task is closed while waiting for the connection to be established, an
+      // exception may
       // be thrown
       if (meta.isXa()) {
         connection = ((XAConnectionFactory) connectionFactory).createXAConnection();

@@ -36,6 +36,6 @@ public @interface MessageStream {
 
   String output();
 
-  MessageConfigProperty[] properties() default {};
+  JMSProperty[] properties() default {};
 
 }

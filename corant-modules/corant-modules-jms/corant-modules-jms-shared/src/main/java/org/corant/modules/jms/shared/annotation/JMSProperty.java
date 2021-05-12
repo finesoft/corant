@@ -27,43 +27,54 @@ import javax.enterprise.util.AnnotationLiteral;
  */
 @Target({})
 @Retention(RUNTIME)
-public @interface MessageConfigProperty {
+public @interface JMSProperty {
+
+  static final JMSProperty[] EMPTY_ARRAY = new JMSProperty[0];
 
   /** The name of the property */
   String name();
 
+  Class<?> type() default String.class;
+
   /** The value of the property */
   String value();
 
-  class MessageConfigPropertyLiteral extends AnnotationLiteral<MessageConfigProperty>
-      implements MessageConfigProperty {
+  class JMSPropertyLiteral extends AnnotationLiteral<JMSProperty>
+      implements JMSProperty {
 
     private static final long serialVersionUID = 7660764550683179095L;
 
     final String name;
     final String value;
+    final Class<?> type;
 
-    private MessageConfigPropertyLiteral(String name, String value) {
+    private JMSPropertyLiteral(String name, String value, Class<?> type) {
       this.name = name;
       this.value = value;
+      this.type = type;
     }
 
-    public static MessageConfigPropertyLiteral[] from(MessageConfigProperty... properties) {
-      return streamOf(properties).map(MessageConfigPropertyLiteral::of)
-          .toArray(MessageConfigPropertyLiteral[]::new);
+    public static JMSPropertyLiteral[] from(JMSProperty... properties) {
+      return streamOf(properties).map(JMSPropertyLiteral::of)
+          .toArray(JMSPropertyLiteral[]::new);
     }
 
-    public static MessageConfigPropertyLiteral of(MessageConfigProperty p) {
-      return new MessageConfigPropertyLiteral(p.name(), p.value());
+    public static JMSPropertyLiteral of(JMSProperty p) {
+      return new JMSPropertyLiteral(p.name(), p.value(), p.type());
     }
 
-    public static MessageConfigPropertyLiteral of(String name, String value) {
-      return new MessageConfigPropertyLiteral(name, value);
+    public static JMSPropertyLiteral of(String name, String value, Class<?> type) {
+      return new JMSPropertyLiteral(name, value, type);
     }
 
     @Override
     public String name() {
       return name;
+    }
+
+    @Override
+    public Class<?> type() {
+      return type;
     }
 
     @Override

@@ -17,14 +17,18 @@ import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.resolveApply;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.copy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSDestinationDefinition;
@@ -51,6 +55,14 @@ public interface MessageDispatcher {
 
   void dispatch(byte[] message);
 
+  default void dispatch(InputStream message) throws IOException {
+    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+      copy(message, buffer);
+      byte[] bytes = buffer.toByteArray();
+      dispatch(bytes);
+    }
+  }
+
   void dispatch(Map<String, Object> message);
 
   void dispatch(Message message);
@@ -62,14 +74,6 @@ public interface MessageDispatcher {
   void dispatch(Serializable message);
 
   void dispatch(String message);
-
-  default void send(InputStream message) throws IOException {
-    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-      copy(message, buffer);
-      byte[] bytes = buffer.toByteArray();
-      dispatch(bytes);
-    }
-  }
 
   /**
    * corant-modules-jms-shared
@@ -140,16 +144,21 @@ public interface MessageDispatcher {
    */
   class MessageDispatcherImpl implements MessageDispatcher {
 
-    protected final boolean multicast;
-    protected final String destination;
-    protected final String connectionFactoryId;
-    protected final int sessionMode;
+    protected boolean multicast;
+    protected String destination;
+    protected String connectionFactoryId;
+    protected int sessionMode;
+    protected int deliveryMode;
+    protected long deliveryDelay = -1;
+    protected long timeToLive = -1;
+    protected Map<String, Object> properties = new HashMap<>();
 
     public MessageDispatcherImpl(JMSDestinationDefinition dann, JMSSessionMode sann) {
       multicast = Queue.class.isAssignableFrom(tryAsClass(dann.description()));
       destination = shouldNotNull(Configs.assemblyStringConfigProperty(dann.destinationName()));
       connectionFactoryId = shouldNotNull(Configs.assemblyStringConfigProperty(dann.name()));
       sessionMode = sann == null ? Session.AUTO_ACKNOWLEDGE : sann.value();
+      deliveryMode = DeliveryMode.PERSISTENT;
     }
 
     public MessageDispatcherImpl(MessageDispatch mpl) {
@@ -157,49 +166,26 @@ public interface MessageDispatcher {
       destination = shouldNotNull(Configs.assemblyStringConfigProperty(mpl.destination()));
       connectionFactoryId = Configs.assemblyStringConfigProperty(mpl.connectionFactoryId());
       sessionMode = mpl.sessionMode();
+      deliveryMode = mpl.deliveryMode();
+      deliveryDelay = mpl.deliveryDelay();
+      timeToLive = mpl.timeToLive();
+      if (isNotEmpty(mpl.properties())) {
+        Arrays.stream(mpl.properties())
+            .forEach(p -> properties.put(p.name(), toObject(p.value(), p.type())));
+      }
+    }
+
+    protected MessageDispatcherImpl() {
+
     }
 
     @Override
     public void dispatch(byte[] message) {
-      doDispatch(message);
+      doDispatch(message, null);
     }
 
     @Override
-    public void dispatch(Map<String, Object> message) {
-      doDispatch(message);
-    }
-
-    @Override
-    public void dispatch(Message message) {
-      doDispatch(message);
-    }
-
-    @Override
-    public void dispatch(Object object, SerializationSchema serializationSchema) {
-      final JMSContext jmsc =
-          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
-      final MessageSerializer seri = resolve(MessageSerializer.class,
-          defaultObject(serializationSchema, () -> SerializationSchema.JAVA_BUILTIN).qualifier());
-      try {
-        Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
-        jmsc.createProducer().send(d, seri.serialize(jmsc, object));
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-
-    @Override
-    public void dispatch(Serializable message) {
-      doDispatch(message);
-    }
-
-    @Override
-    public void dispatch(String message) {
-      doDispatch(message);
-    }
-
-    @Override
-    public void send(InputStream message) throws IOException {
+    public void dispatch(InputStream message) throws IOException {
       try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
         copy(message, buffer);
         byte[] bytes = buffer.toByteArray();
@@ -207,14 +193,55 @@ public interface MessageDispatcher {
       }
     }
 
+    @Override
+    public void dispatch(Map<String, Object> message) {
+      doDispatch(message, null);
+    }
+
+    @Override
+    public void dispatch(Message message) {
+      doDispatch(message, null);
+    }
+
+    @Override
+    public void dispatch(Object object, SerializationSchema serializationSchema) {
+      doDispatch(object, serializationSchema);
+    }
+
+    @Override
+    public void dispatch(Serializable message) {
+      doDispatch(message, null);
+    }
+
+    @Override
+    public void dispatch(String message) {
+      doDispatch(message, null);
+    }
+
+    protected void configurateProducer(JMSContext jmsc, JMSProducer producer) {
+      producer.setDeliveryMode(deliveryMode);
+      if (deliveryDelay > 0) {
+        producer.setDeliveryDelay(deliveryDelay);
+      }
+      if (timeToLive > 0) {
+        producer.setTimeToLive(timeToLive);
+      }
+      if (isNotEmpty(properties)) {
+        properties.forEach(producer::setProperty);
+      }
+    }
+
     @SuppressWarnings("unchecked")
-    void doDispatch(Object message) {
-      final JMSContext jmsc =
-          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
+    protected void doDispatch(JMSContext jmsc, SerializationSchema serializationSchema,
+        Object message) {
       try {
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();
-        if (message instanceof String) {
+        configurateProducer(jmsc, p);
+        if (serializationSchema != null) {
+          p.send(d, resolve(MessageSerializer.class, serializationSchema.qualifier())
+              .serialize(jmsc, message));
+        } else if (message instanceof String) {
           p.send(d, (String) message);
         } else if (message instanceof Message) {
           p.send(d, (Message) message);
@@ -228,6 +255,12 @@ public interface MessageDispatcher {
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
+    }
+
+    protected void doDispatch(Object message, SerializationSchema serializationSchema) {
+      final JMSContext jmsc =
+          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
+      doDispatch(jmsc, serializationSchema, message);
     }
   }
 }

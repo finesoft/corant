@@ -19,6 +19,7 @@ import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSContext;
 
 /**
@@ -38,11 +39,13 @@ public @interface MessageDispatch {
    */
   String connectionFactoryId() default EMPTY;
 
+  long deliveryDelay() default -1;
+
+  int deliveryMode() default DeliveryMode.PERSISTENT;
+
   /**
-   * The destination name, can use '${config property name}' to retrieve the destination name
-   * frommicroprofile config source.
-   *
-   * @return destination
+   * The destination name, can use '${config property name}' to retrieve the destination name from
+   * microprofile config source.
    */
   String destination();
 
@@ -50,6 +53,10 @@ public @interface MessageDispatch {
 
   boolean multicast() default false;
 
+  JMSProperty[] properties() default {};
+
   int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
+
+  long timeToLive() default -1;
 
 }

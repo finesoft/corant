@@ -80,9 +80,6 @@ public interface MessageDispatcher {
 
     final List<MessageDispatcher> dispatchers;
 
-    /**
-     * @param dispatchers
-     */
     protected GroupMessageDispatcherImpl(List<MessageDispatcher> dispatchers) {
       this.dispatchers = dispatchers;
     }
@@ -174,7 +171,7 @@ public interface MessageDispatcher {
 
     @Override
     public void dispatch(byte[] message) {
-      doDispatch(null, message);
+      doDispatch(null, new Object[] {message});// FIXME
     }
 
     @Override
@@ -241,8 +238,7 @@ public interface MessageDispatcher {
       }
     }
 
-    protected void doDispatch(JMSContext jmsc, SerialSchema serialSchema,
-        Object... messages) {
+    protected void doDispatch(JMSContext jmsc, SerialSchema serialSchema, Object... messages) {
       if (isNotEmpty(messages)) {
         try {
           final MessageSerializer serializer = serializer(serialSchema);

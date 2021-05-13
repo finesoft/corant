@@ -44,14 +44,6 @@ public class MessageSenderMetaData {
         annotation.deliveryMode());
   }
 
-  /**
-   * @param connectionFactoryId
-   * @param destination
-   * @param multicast
-   * @param dupsOkAck
-   * @param serialization
-   * @param deliveryMode
-   */
   public MessageSenderMetaData(String connectionFactoryId, String destination, boolean multicast,
       boolean dupsOkAck, SerialSchema serialization, int deliveryMode) {
     this.connectionFactoryId = Configs.assemblyStringConfigProperty(connectionFactoryId);

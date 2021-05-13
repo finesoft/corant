@@ -25,7 +25,6 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -35,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 @ApplicationScoped
-@MessageSerialization(schema = SerializationSchema.MAP)
+@MessageSerialization(schema = SerialSchema.MAP)
 public class MapMessageSerializer implements MessageSerializer {
 
   @SuppressWarnings("rawtypes")
@@ -71,7 +70,7 @@ public class MapMessageSerializer implements MessageSerializer {
         }
       });
     }
-    return resolveSchemaProperty(mapMsg, SerializationSchema.MAP);
+    return resolveSchemaProperty(mapMsg, SerialSchema.MAP);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -89,7 +88,7 @@ public class MapMessageSerializer implements MessageSerializer {
           }
         });
       }
-      return resolveSchemaProperty(mapMsg, SerializationSchema.MAP);
+      return resolveSchemaProperty(mapMsg, SerialSchema.MAP);
     } catch (JMSException e1) {
       throw new CorantRuntimeException(e1);
     }

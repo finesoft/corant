@@ -30,7 +30,6 @@ import javax.jms.Message;
 import org.corant.modules.jms.shared.annotation.MessageSend;
 import org.corant.modules.jms.shared.annotation.MessageSends;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
-import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-jms-shared
@@ -41,7 +40,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 public abstract class AnnotatedMessageSender extends AbstractMessageSender {
 
   public void send(Serializable... annotatedPayloads) {
-    Map<Pair<String, Integer>, JMSContext> jmscs = new HashMap<>();
+    Map<String, JMSContext> jmscs = new HashMap<>();
     for (Serializable annotatedPayload : annotatedPayloads) {
       Class<?> payloadClass = getUserClass(shouldNotNull(annotatedPayload));
       Set<MessageSenderMetaData> sends = resolveMetaDatas(payloadClass);
@@ -49,8 +48,8 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
           "The payload class %s must include either MessageSend or MessageSends annotaion.",
           payloadClass);
       for (MessageSenderMetaData send : sends) {
-        JMSContext jmsc = jmscs.computeIfAbsent(send.getFactoryKey(),
-            s -> resolveApply(JMSContextProducer.class, b -> b.create(s.getKey(), s.getValue())));
+        JMSContext jmsc = jmscs.computeIfAbsent(send.getConnectionFactoryId(),
+            s -> resolveApply(JMSContextProducer.class, b -> b.create(s, send.isDupsOkAck())));
         Message message = resolveMessage(jmsc, annotatedPayload, send.getSerialization());
         super.send(jmsc, message, send.getDestination(), send.isMulticast());
         logger.fine(() -> String.format("Send message %s to %s %s.", payloadClass,

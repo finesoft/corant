@@ -23,7 +23,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.shared.exception.CorantRuntimeException;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -36,7 +35,7 @@ import com.esotericsoftware.kryo.io.Output;
  *
  */
 @ApplicationScoped
-@MessageSerialization(schema = SerializationSchema.KRYO)
+@MessageSerialization(schema = SerialSchema.KRYO)
 public class KryoMessageSerializer implements MessageSerializer {
 
   protected static final ThreadLocal<Kryo> kryoCache = ThreadLocal.withInitial(() -> {
@@ -71,7 +70,7 @@ public class KryoMessageSerializer implements MessageSerializer {
         throw new CorantRuntimeException(e);
       }
     }
-    return resolveSchemaProperty(bytMsg, SerializationSchema.KRYO);
+    return resolveSchemaProperty(bytMsg, SerialSchema.KRYO);
   }
 
   @Override
@@ -81,7 +80,7 @@ public class KryoMessageSerializer implements MessageSerializer {
       if (object != null) {
         bytMsg.writeBytes(toBytes(object));
       }
-      return resolveSchemaProperty(bytMsg, SerializationSchema.KRYO);
+      return resolveSchemaProperty(bytMsg, SerialSchema.KRYO);
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);
     }

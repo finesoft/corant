@@ -16,8 +16,8 @@ package org.corant.modules.jms.shared.receive;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.MessageSerializer;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -29,7 +29,7 @@ public interface MessageReceivingMediator {
 
   boolean checkCancelled();
 
-  MessageSerializer getMessageSerializer(SerializationSchema schema);
+  MessageSerializer getMessageSerializer(SerialSchema schema);
 
   void onPostMessageHandled(Message message, Session session, Object result) throws JMSException;
 

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
@@ -36,14 +37,12 @@ import javax.jms.JMSProducer;
 import javax.jms.JMSSessionMode;
 import javax.jms.Message;
 import javax.jms.Queue;
-import javax.jms.Session;
 import org.corant.config.Configs;
 import org.corant.modules.jms.shared.annotation.MessageDispatch;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
 import org.corant.modules.jms.shared.context.MessageSerializer;
+import org.corant.modules.jms.shared.context.SerialSchema;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-jms-shared
@@ -65,13 +64,9 @@ public interface MessageDispatcher {
 
   void dispatch(Map<String, Object> message);
 
-  void dispatch(Message message);
-
-  default void dispatch(Object object, SerializationSchema serializationSchema) {
-    throw new NotSupportedException();
-  }
-
   void dispatch(Serializable message);
+
+  void dispatch(SerialSchema serialSchema, Object... messages);
 
   void dispatch(String message);
 
@@ -107,23 +102,16 @@ public interface MessageDispatcher {
     }
 
     @Override
-    public void dispatch(Message message) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(message);
-      }
-    }
-
-    @Override
-    public void dispatch(Object object, SerializationSchema serializationSchema) {
-      for (MessageDispatcher dispatcher : dispatchers) {
-        dispatcher.dispatch(object, serializationSchema);
-      }
-    }
-
-    @Override
     public void dispatch(Serializable message) {
       for (MessageDispatcher dispatcher : dispatchers) {
         dispatcher.dispatch(message);
+      }
+    }
+
+    @Override
+    public void dispatch(SerialSchema serializationSchema, Object... messages) {
+      for (MessageDispatcher dispatcher : dispatchers) {
+        dispatcher.dispatch(serializationSchema, messages);
       }
     }
 
@@ -139,6 +127,9 @@ public interface MessageDispatcher {
   /**
    * corant-modules-jms-artemis
    *
+   *
+   * setDisableMessageTimestamp setDisableMessageID
+   *
    * @author bingo 下午4:29:24
    *
    */
@@ -147,8 +138,8 @@ public interface MessageDispatcher {
     protected boolean multicast;
     protected String destination;
     protected String connectionFactoryId;
-    protected int sessionMode;
-    protected int deliveryMode;
+    protected boolean dupsOkAck = false;
+    protected int deliveryMode = DeliveryMode.PERSISTENT;
     protected long deliveryDelay = -1;
     protected long timeToLive = -1;
     protected Map<String, Object> properties = new HashMap<>();
@@ -157,7 +148,9 @@ public interface MessageDispatcher {
       multicast = Queue.class.isAssignableFrom(tryAsClass(dann.description()));
       destination = shouldNotNull(Configs.assemblyStringConfigProperty(dann.destinationName()));
       connectionFactoryId = shouldNotNull(Configs.assemblyStringConfigProperty(dann.name()));
-      sessionMode = sann == null ? Session.AUTO_ACKNOWLEDGE : sann.value();
+      if (sann.value() == JMSContext.DUPS_OK_ACKNOWLEDGE) {
+        dupsOkAck = true;
+      }
       deliveryMode = DeliveryMode.PERSISTENT;
     }
 
@@ -165,7 +158,7 @@ public interface MessageDispatcher {
       multicast = mpl.multicast();
       destination = shouldNotNull(Configs.assemblyStringConfigProperty(mpl.destination()));
       connectionFactoryId = Configs.assemblyStringConfigProperty(mpl.connectionFactoryId());
-      sessionMode = mpl.sessionMode();
+      dupsOkAck = mpl.dupsOkAck();
       deliveryMode = mpl.deliveryMode();
       deliveryDelay = mpl.deliveryDelay();
       timeToLive = mpl.timeToLive();
@@ -181,7 +174,7 @@ public interface MessageDispatcher {
 
     @Override
     public void dispatch(byte[] message) {
-      doDispatch(message, null);
+      doDispatch(null, message);
     }
 
     @Override
@@ -195,27 +188,22 @@ public interface MessageDispatcher {
 
     @Override
     public void dispatch(Map<String, Object> message) {
-      doDispatch(message, null);
-    }
-
-    @Override
-    public void dispatch(Message message) {
-      doDispatch(message, null);
-    }
-
-    @Override
-    public void dispatch(Object object, SerializationSchema serializationSchema) {
-      doDispatch(object, serializationSchema);
+      doDispatch(null, message);
     }
 
     @Override
     public void dispatch(Serializable message) {
-      doDispatch(message, null);
+      doDispatch(null, message);
+    }
+
+    @Override
+    public void dispatch(SerialSchema serialSchema, Object... messages) {
+      doDispatch(serialSchema, messages);
     }
 
     @Override
     public void dispatch(String message) {
-      doDispatch(message, null);
+      doDispatch(null, message);
     }
 
     protected void configurateProducer(JMSContext jmsc, JMSProducer producer) {
@@ -232,15 +220,11 @@ public interface MessageDispatcher {
     }
 
     @SuppressWarnings("unchecked")
-    protected void doDispatch(JMSContext jmsc, SerializationSchema serializationSchema,
-        Object message) {
+    protected void doDispatch(JMSContext jmsc, Destination d, JMSProducer p,
+        MessageSerializer serializer, Object message) {
       try {
-        Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
-        JMSProducer p = jmsc.createProducer();
-        configurateProducer(jmsc, p);
-        if (serializationSchema != null) {
-          p.send(d, resolve(MessageSerializer.class, serializationSchema.qualifier())
-              .serialize(jmsc, message));
+        if (serializer != null) {
+          p.send(d, serializer.serialize(jmsc, message));
         } else if (message instanceof String) {
           p.send(d, (String) message);
         } else if (message instanceof Message) {
@@ -257,10 +241,47 @@ public interface MessageDispatcher {
       }
     }
 
-    protected void doDispatch(Object message, SerializationSchema serializationSchema) {
-      final JMSContext jmsc =
-          resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
-      doDispatch(jmsc, serializationSchema, message);
+    protected void doDispatch(JMSContext jmsc, SerialSchema serialSchema,
+        Object... messages) {
+      if (isNotEmpty(messages)) {
+        try {
+          final MessageSerializer serializer = serializer(serialSchema);
+          Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
+          JMSProducer p = jmsc.createProducer();
+          configurateProducer(jmsc, p);
+          for (Object message : messages) {
+            doDispatch(jmsc, d, p, serializer, message);
+          }
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        }
+      }
+    }
+
+    protected void doDispatch(SerialSchema serialSchema, Object... messages) {
+      if (isNotEmpty(messages)) {
+        final JMSContext jmsc =
+            resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, dupsOkAck));
+        doDispatch(jmsc, serialSchema, messages);
+      }
+    }
+
+    protected void doStreamDispatch(JMSContext jmsc, Stream<?> messages,
+        SerialSchema serializationSchema) {
+      try {
+        final MessageSerializer serializer = serializer(serializationSchema);
+        Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
+        JMSProducer p = jmsc.createProducer();
+        configurateProducer(jmsc, p);
+        messages.forEach(message -> doDispatch(jmsc, d, p, serializer, message));
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+    protected MessageSerializer serializer(SerialSchema serialSchema) {
+      return serialSchema != null ? resolve(MessageSerializer.class, serialSchema.qualifier())
+          : null;
     }
   }
 }

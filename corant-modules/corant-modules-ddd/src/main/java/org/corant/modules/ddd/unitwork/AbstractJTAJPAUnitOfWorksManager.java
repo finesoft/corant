@@ -30,6 +30,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import org.corant.modules.ddd.message.MessageDispatcher;
+import org.corant.modules.jta.shared.SynchronizationAdapter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -160,15 +161,4 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     return transaction;// JTA1.3 Spec-> 3.3.4 Transaction Equality and Hash Code
   }
 
-  abstract static class SynchronizationAdapter implements Synchronization {
-    @Override
-    public void afterCompletion(int status) {
-      // NOOP!
-    }
-
-    @Override
-    public void beforeCompletion() {
-      // NOOP!
-    }
-  }
 }

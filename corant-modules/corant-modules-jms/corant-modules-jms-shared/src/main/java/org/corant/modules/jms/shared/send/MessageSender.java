@@ -24,6 +24,6 @@ import javax.jms.Message;
 public interface MessageSender {
 
   void send(Message message, String connectionFactoryId, String destination, boolean multicast,
-      int sessionMode);
+      boolean dupsOkAck);
 
 }

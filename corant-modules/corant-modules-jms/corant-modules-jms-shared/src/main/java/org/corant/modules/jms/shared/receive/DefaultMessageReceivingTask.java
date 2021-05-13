@@ -25,8 +25,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.corant.context.CDIs;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.MessageSerializer;
+import org.corant.modules.jms.shared.context.SerialSchema;
 import org.corant.shared.util.Retry.RetryInterval;
 
 /**
@@ -109,7 +109,20 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
 
   @Override
   public synchronized boolean cancel() {
-    return cancellation.compareAndSet(false, true);
+    int tryTimes = 0;
+    long waitMs = max(meta.getReceiveTimeout(), 500L);
+    while (true) {
+      final int t = tryTimes++;
+      if (!isInProgress() || t > 128) {
+        logger.log(Level.INFO,
+            () -> String.format("Cancel message receiving task try times %s, %s.", t, meta));
+        return cancellation.compareAndSet(false, true);
+      } else {
+        logger.log(Level.INFO,
+            () -> String.format("Waiting for message receiving task finished, %s.", meta));
+        tryThreadSleep(waitMs);
+      }
+    }
   }
 
   @Override
@@ -117,16 +130,17 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
     if (cancellation.get()) {
       resetMonitors();
       messageReceiver.release(true);
-      logger.log(Level.INFO, () -> String.format("Cancelled message receiving task, %s.", meta));
+      logger.log(Level.INFO,
+          () -> String.format("The message receiving task was cancelled, %s.", meta));
       return true;
     }
     return false;
   }
 
   @Override
-  public MessageSerializer getMessageSerializer(SerializationSchema schema) {
+  public MessageSerializer getMessageSerializer(SerialSchema schema) {
     return resolve(MessageSerializer.class,
-        defaultObject(schema, SerializationSchema.JAVA_BUILTIN).qualifier());
+        defaultObject(schema, SerialSchema.JAVA_BUILTIN).qualifier());
   }
 
   public boolean isInProgress() {
@@ -152,7 +166,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   }
 
   @Override
-  public void run() {
+  public synchronized void run() {
     if (checkCancelled()) {
       return;
     }

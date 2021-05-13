@@ -16,8 +16,7 @@ package org.corant.modules.jms.shared.send;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import org.corant.config.Configs;
 import org.corant.modules.jms.shared.annotation.MessageSend;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
-import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -33,15 +32,15 @@ public class MessageSenderMetaData {
 
   private final boolean multicast;
 
-  private final int sessionMode;
+  private final boolean dupsOkAck;
 
-  private final SerializationSchema serialization;
+  private final SerialSchema serialization;
 
   private final int deliveryMode;
 
   public MessageSenderMetaData(MessageSend annotation) {
     this(shouldNotNull(annotation).connectionFactoryId(), annotation.destination(),
-        annotation.multicast(), annotation.sessionMode(), annotation.serialization(),
+        annotation.multicast(), annotation.dupsOkAck(), annotation.serialization(),
         annotation.deliveryMode());
   }
 
@@ -49,16 +48,16 @@ public class MessageSenderMetaData {
    * @param connectionFactoryId
    * @param destination
    * @param multicast
-   * @param sessionMode
+   * @param dupsOkAck
    * @param serialization
    * @param deliveryMode
    */
   public MessageSenderMetaData(String connectionFactoryId, String destination, boolean multicast,
-      int sessionMode, SerializationSchema serialization, int deliveryMode) {
+      boolean dupsOkAck, SerialSchema serialization, int deliveryMode) {
     this.connectionFactoryId = Configs.assemblyStringConfigProperty(connectionFactoryId);
     this.destination = Configs.assemblyStringConfigProperty(destination);
     this.multicast = multicast;
-    this.sessionMode = sessionMode;
+    this.dupsOkAck = dupsOkAck;
     this.serialization = serialization;
     this.deliveryMode = deliveryMode;
   }
@@ -119,24 +118,12 @@ public class MessageSenderMetaData {
     return destination;
   }
 
-  public Pair<String, Integer> getFactoryKey() {
-    return Pair.of(connectionFactoryId, sessionMode);
-  }
-
   /**
    *
    * @return the serialization
    */
-  public SerializationSchema getSerialization() {
+  public SerialSchema getSerialization() {
     return serialization;
-  }
-
-  /**
-   *
-   * @return the sessionMode
-   */
-  public int getSessionMode() {
-    return sessionMode;
   }
 
   @Override
@@ -147,6 +134,10 @@ public class MessageSenderMetaData {
     result = prime * result + (destination == null ? 0 : destination.hashCode());
     result = prime * result + (multicast ? 1231 : 1237);
     return result;
+  }
+
+  public boolean isDupsOkAck() {
+    return dupsOkAck;
   }
 
   /**

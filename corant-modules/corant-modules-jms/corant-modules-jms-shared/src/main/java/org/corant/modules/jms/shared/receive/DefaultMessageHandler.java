@@ -24,8 +24,8 @@ import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.jms.shared.MessagePropertyNames;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator;
+import org.corant.modules.jms.shared.context.SerialSchema;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -64,7 +64,7 @@ public class DefaultMessageHandler implements MessageHandler {
 
   protected Object resolvePayload(Message message) throws JMSException {
     if (!Message.class.isAssignableFrom(messageClass)) {
-      SerializationSchema serialSchema = SerializationSchema
+      SerialSchema serialSchema = SerialSchema
           .valueOf(shouldNotBlank(message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME),
               "Resolve message payload occurred error, missing [%s] information message header.",
               MessagePropertyNames.MSG_SERIAL_SCHAME));

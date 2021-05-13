@@ -18,7 +18,6 @@ import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -32,7 +31,7 @@ public interface MessageSerializer {
 
   <T> T deserialize(Message message, Class<T> clazz);
 
-  default <T extends Message> T resolveSchemaProperty(T message, SerializationSchema schema) {
+  default <T extends Message> T resolveSchemaProperty(T message, SerialSchema schema) {
     try {
       message.setStringProperty(MSG_SERIAL_SCHAME, schema.name());
       return message;

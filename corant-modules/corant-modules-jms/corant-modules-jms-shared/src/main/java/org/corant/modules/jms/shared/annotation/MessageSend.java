@@ -20,9 +20,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.jms.DeliveryMode;
-import javax.jms.JMSContext;
-import javax.jms.Session;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -56,6 +54,17 @@ public @interface MessageSend {
   String destination();
 
   /**
+   * In the Jakarta EE web or EJB container, when there is no active JTA transaction in progress:
+   * The argument acknowledgeMode must be set to either of JMSContext.AUTO_ACKNOWLEDGE or
+   * JMSContext.DUPS_OK_ACKNOWLEDGE. The session will be non-transacted and messages received by
+   * this session willbe acknowledged automatically according to the value of acknowledgeMode. For a
+   * definition of the meaning ofthese acknowledgement modes see the links below. The values
+   * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
+   *
+   */
+  boolean dupsOkAck() default false;
+
+  /**
    * The message propagation method, equivalent to Queue if false otherwise Topic .
    */
   boolean multicast() default false;
@@ -63,14 +72,6 @@ public @interface MessageSend {
   /**
    * The message pay load serialization schema.
    */
-  SerializationSchema serialization() default SerializationSchema.JSON_STRING;
-
-  /**
-   * @see Session#AUTO_ACKNOWLEDGE
-   * @see Session#CLIENT_ACKNOWLEDGE
-   * @see Session#DUPS_OK_ACKNOWLEDGE
-   * @see Session#SESSION_TRANSACTED
-   */
-  int sessionMode() default JMSContext.AUTO_ACKNOWLEDGE;
+  SerialSchema serialization() default SerialSchema.JSON_STRING;
 
 }

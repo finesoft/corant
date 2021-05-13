@@ -20,7 +20,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -44,10 +44,10 @@ public class DefaultMessageReplier implements MessageReplier {
     String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
     if (originalMessage != null && originalMessage.getJMSReplyTo() != null) {
       // FIXME use original message or no?
-      SerializationSchema serialSchema = SerializationSchema.JAVA_BUILTIN;
+      SerialSchema serialSchema = SerialSchema.JAVA_BUILTIN;
       String desSerialSchema = originalMessage.getStringProperty(REPLY_MSG_SERIAL_SCHAME);
       if (desSerialSchema != null) {
-        serialSchema = SerializationSchema.valueOf(desSerialSchema);
+        serialSchema = SerialSchema.valueOf(desSerialSchema);
       }
       Message msg = mediator.getMessageSerializer(serialSchema).serialize(session, payload);
       String clid;

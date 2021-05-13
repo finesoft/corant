@@ -182,7 +182,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
       throwable = e;
       onException(e);
     } finally {
-      logger.log(Level.FINE, () -> String.format("<<< End receiving messages, %s%n.", meta));
+      logger.log(Level.FINE, () -> String.format("<<< End receiving messages, %s.%n", meta));
     }
     return throwable == null;
   }
@@ -317,6 +317,9 @@ public class DefaultMessageReceiver implements MessageReceiver {
    * @throws JMSException postConsume
    */
   protected void postConsume(Message message) throws JMSException {
+    if (message == null && mediator.checkCancelled()) {
+      return;
+    }
     try {
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {

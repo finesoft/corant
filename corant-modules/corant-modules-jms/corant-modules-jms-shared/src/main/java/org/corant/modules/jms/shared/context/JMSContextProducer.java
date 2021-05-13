@@ -40,8 +40,8 @@ public class JMSContextProducer {
   @Any
   protected TsJMSContextManager tsJMSContextManager;
 
-  public JMSContext create(final String connectionFactoryId, final int sessionMode) {
-    return new ExtendedJMSContext(new JMSContextKey(connectionFactoryId, sessionMode),
+  public JMSContext create(final String connectionFactoryId, final boolean dupsOkAck) {
+    return new ExtendedJMSContext(new JMSContextKey(connectionFactoryId, dupsOkAck),
         getRsJMSContextManager(), getTsJMSContextManager());
   }
 

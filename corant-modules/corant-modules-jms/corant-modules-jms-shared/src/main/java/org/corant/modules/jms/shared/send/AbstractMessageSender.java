@@ -19,9 +19,9 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
 import org.corant.modules.jms.shared.context.MessageSerializer;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -35,14 +35,14 @@ public abstract class AbstractMessageSender implements MessageSender {
 
   @Override
   public void send(Message message, String connectionFactoryId, String destination,
-      boolean multicast, int sessionMode) {
+      boolean multicast, boolean dupsOkAck) {
     final JMSContext jmsc =
-        resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, sessionMode));
+        resolveApply(JMSContextProducer.class, b -> b.create(connectionFactoryId, dupsOkAck));
     send(jmsc, message, destination, multicast);
   }
 
   protected Message resolveMessage(JMSContext jmsc, Serializable payload,
-      SerializationSchema schema) {
+      SerialSchema schema) {
     if (payload instanceof Message) {
       return (Message) payload;
     } else {

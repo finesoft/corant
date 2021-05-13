@@ -16,7 +16,7 @@ package org.corant.modules.jms.shared.receive;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import org.corant.modules.jms.shared.annotation.MessageReply;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -34,10 +34,10 @@ public class MessageReplyMetaData {
 
   private final boolean multicast;// () default false;
 
-  private final SerializationSchema serialization;// () default SerializationSchema.JSON_STRING;
+  private final SerialSchema serialization;// () default SerializationSchema.JSON_STRING;
 
   protected MessageReplyMetaData(int deliveryMode, String destination, boolean multicast,
-      SerializationSchema serialization) {
+      SerialSchema serialization) {
     this.deliveryMode = deliveryMode;
     this.destination = destination;
     this.multicast = multicast;
@@ -85,7 +85,7 @@ public class MessageReplyMetaData {
     return destination;
   }
 
-  public SerializationSchema getSerialization() {
+  public SerialSchema getSerialization() {
     return serialization;
   }
 

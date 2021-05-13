@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.jms.DeliveryMode;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -36,6 +36,6 @@ public @interface MessageReply {
 
   boolean multicast() default false;
 
-  SerializationSchema serialization() default SerializationSchema.JSON_STRING;
+  SerialSchema serialization() default SerialSchema.JSON_STRING;
 
 }

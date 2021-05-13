@@ -22,7 +22,6 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization;
-import org.corant.modules.jms.shared.annotation.MessageSerialization.SerializationSchema;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -32,7 +31,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 @ApplicationScoped
-@MessageSerialization(schema = SerializationSchema.JAVA_BUILTIN)
+@MessageSerialization(schema = SerialSchema.JAVA_BUILTIN)
 public class JavaMessageSerializer implements MessageSerializer {
 
   @SuppressWarnings("unchecked")
@@ -58,7 +57,7 @@ public class JavaMessageSerializer implements MessageSerializer {
         throw new CorantRuntimeException(e);
       }
     }
-    return resolveSchemaProperty(msg, SerializationSchema.JAVA_BUILTIN);
+    return resolveSchemaProperty(msg, SerialSchema.JAVA_BUILTIN);
   }
 
   @Override
@@ -69,7 +68,7 @@ public class JavaMessageSerializer implements MessageSerializer {
         shouldBeTrue(object instanceof Serializable);
         msg.setObject((Serializable) object);
       }
-      return resolveSchemaProperty(msg, SerializationSchema.JAVA_BUILTIN);
+      return resolveSchemaProperty(msg, SerialSchema.JAVA_BUILTIN);
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);
     }

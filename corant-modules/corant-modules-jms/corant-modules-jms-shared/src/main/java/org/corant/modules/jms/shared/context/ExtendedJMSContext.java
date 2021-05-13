@@ -19,6 +19,7 @@ import javax.jms.BytesMessage;
 import javax.jms.ConnectionMetaData;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
+import javax.jms.IllegalStateRuntimeException;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
@@ -32,13 +33,10 @@ import javax.jms.TemporaryQueue;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.jms.XAJMSContext;
-import javax.transaction.xa.XAResource;
 import org.corant.modules.jms.shared.context.JMSContextManager.RsJMSContextManager;
 import org.corant.modules.jms.shared.context.JMSContextManager.TsJMSContextManager;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.modules.jta.shared.TransactionService;
-import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-modules-jms-shared
@@ -69,10 +67,14 @@ import org.corant.shared.exception.CorantRuntimeException;
  * JTA transaction as described above.
  * </pre>
  *
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Proposed
+ *      changes to JMSContext to support injection (Option 4)-1</a>
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p2">Proposed
+ *      changes to JMSContext to support injection (Option 4)-2</a>
+ * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p3">Proposed
+ *      changes to JMSContext to support injection (Option 4)-3</a>
  * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p4">Proposed
- *      changes to JMSContext to support injection (Option 4)</a>
- * @see <a href="https://javaee.github.io/jms-spec/pages/JMSContextScopeProposalsv4p1">Injection of
- *      JMSContext objects - Proposals (version 4)</a>
+ *      changes to JMSContext to support injection (Option 4)-4</a>
  *
  * @author bingo 下午5:24:17
  *
@@ -101,27 +103,19 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void acknowledge() {
-    context().acknowledge();
+    // context().acknowledge();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
   public void close() {
-    JMSContext ctx = context();
-    // When manually called close() then delistResource from current transaction if necessarily
-    if (ctx != null && key.isXa() && TransactionService.isCurrentTransactionActive()) {
-      try {
-        TransactionService.delistXAResourceFromCurrentTransaction(
-            XAJMSContext.class.cast(ctx).getXAResource(), XAResource.TMSUCCESS);
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-    context().close();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
   public void commit() {
-    context().commit();
+    // context().commit();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
@@ -288,12 +282,14 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void recover() {
-    context().recover();
+    // context().recover();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
   public void rollback() {
-    context().rollback();
+    // context().rollback();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
@@ -303,12 +299,14 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void setClientID(final String clientID) {
-    context().setClientID(clientID);
+    // context().setClientID(clientID);
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
   public void setExceptionListener(final ExceptionListener listener) {
-    context().setExceptionListener(listener);
+    // context().setExceptionListener(listener);
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
@@ -318,7 +316,8 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void stop() {
-    context().stop();
+    // context().stop();
+    prohibitStateChange();// since 1.6.2
   }
 
   @Override
@@ -326,10 +325,16 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
     context().unsubscribe(name);
   }
 
-  private synchronized JMSContext context() {
+  synchronized JMSContext context() {
     if (TransactionService.isCurrentTransactionActive()) {
-      return txCtxManager.computeIfAbsent(key, JMSContextKey::create);
+      return txCtxManager.computeIfAbsent(key, k -> k.create(true));
     }
-    return reqCtxManager.computeIfAbsent(key, JMSContextKey::create);
+    return reqCtxManager.computeIfAbsent(key, k -> k.create(false));
+  }
+
+  void prohibitStateChange() {
+    // since 1.6.2
+    throw new IllegalStateRuntimeException(
+        "Prohibit all the methods which change the state of a JMSContext, see JMSContext scope proposals v4 option 4");
   }
 }

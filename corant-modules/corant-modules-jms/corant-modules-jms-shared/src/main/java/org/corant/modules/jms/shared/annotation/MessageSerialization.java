@@ -23,11 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
-import javax.jms.BytesMessage;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
+import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
  * corant-modules-jms-shared
@@ -40,7 +36,7 @@ import javax.jms.TextMessage;
 @Target({METHOD, FIELD, PARAMETER, TYPE})
 public @interface MessageSerialization {
 
-  SerializationSchema schema();
+  SerialSchema schema();
 
   /**
    * corant-modules-jms-shared
@@ -52,9 +48,9 @@ public @interface MessageSerialization {
       implements MessageSerialization {
     private static final long serialVersionUID = -4241417907420530257L;
 
-    private final SerializationSchema schame;
+    private final SerialSchema schame;
 
-    protected MessageSerializationLiteral(SerializationSchema schame) {
+    protected MessageSerializationLiteral(SerialSchema schame) {
       this.schame = schame;
     }
 
@@ -62,36 +58,14 @@ public @interface MessageSerialization {
       if (obj instanceof MessageSerialization) {
         return new MessageSerializationLiteral(((MessageSerialization) obj).schema());
       } else {
-        return new MessageSerializationLiteral(toObject(obj, SerializationSchema.class));
+        return new MessageSerializationLiteral(toObject(obj, SerialSchema.class));
       }
     }
 
     @Override
-    public SerializationSchema schema() {
+    public SerialSchema schema() {
       return schame;
     }
 
-  }
-
-  enum SerializationSchema {
-
-    JSON_STRING(TextMessage.class), BINARY(BytesMessage.class), JAVA_BUILTIN(
-        ObjectMessage.class), MAP(MapMessage.class), KRYO(BytesMessage.class);
-
-    private final MessageSerialization qualifier;
-    private final Class<? extends Message> messageClass;
-
-    SerializationSchema(Class<? extends Message> messageClass) {
-      qualifier = MessageSerializationLiteral.of(this);
-      this.messageClass = messageClass;
-    }
-
-    public Class<? extends Message> messageClass() {
-      return messageClass;
-    }
-
-    public MessageSerialization qualifier() {
-      return qualifier;
-    }
   }
 }

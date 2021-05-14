@@ -16,6 +16,8 @@ package org.corant.modules.jms.shared.context;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.enterprise.context.ApplicationScoped;
 import javax.jms.BytesMessage;
 import javax.jms.JMSContext;
@@ -25,6 +27,7 @@ import javax.jms.Session;
 import org.corant.modules.jms.shared.annotation.MessageSerialization;
 import org.corant.shared.exception.CorantRuntimeException;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
@@ -38,11 +41,23 @@ import com.esotericsoftware.kryo.io.Output;
 @MessageSerialization(schema = SerialSchema.KRYO)
 public class KryoMessageSerializer implements MessageSerializer {
 
+  protected static final Map<Class<?>, Serializer<?>> customSerializers = new ConcurrentHashMap<>();
+
   protected static final ThreadLocal<Kryo> kryoCache = ThreadLocal.withInitial(() -> {
     Kryo inst = new Kryo();
+    customSerializers.forEach(inst::addDefaultSerializer);
     inst.setRegistrationRequired(false);// FIXME
+    inst.setReferences(false);
     return inst;
   });
+
+  public static Serializer<?> putCustomSerializer(Class<?> type, Serializer<?> serializer) {
+    return customSerializers.put(type, serializer);
+  }
+
+  public static Serializer<?> removeCustomSerializer(Class<?> type) {
+    return customSerializers.remove(type);
+  }
 
   @Override
   public <T> T deserialize(Message message, Class<T> clazz) {

@@ -23,8 +23,9 @@ import org.corant.modules.jms.shared.annotation.MessageSerialization.MessageSeri
 
 public enum SerialSchema {
 
-  JSON_STRING(TextMessage.class), BINARY(BytesMessage.class), JAVA_BUILTIN(
-      ObjectMessage.class), MAP(MapMessage.class), KRYO(BytesMessage.class);
+  JSON_STRING(TextMessage.class), ZIP_BINARY(BytesMessage.class), BINARY(
+      BytesMessage.class), JAVA_BUILTIN(
+          ObjectMessage.class), MAP(MapMessage.class), KRYO(BytesMessage.class);
 
   private final MessageSerialization qualifier;
   private final Class<? extends Message> messageClass;

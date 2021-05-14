@@ -15,7 +15,9 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -33,6 +35,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -625,8 +628,9 @@ public class Resources {
     @Override
     public Map<String, Object> getMetadata() {
       return immutableMapOf("location", getLocation(), "sourceType", SourceType.FILE_SYSTEM.name(),
-          "path", file.getPath(), "fileName", getName(), "lastModified", file.lastModified(),
-          "length", file.length());
+          "path", file.getPath(), "fileName", getName(), META_LAST_MODIFIED, file.lastModified(),
+          META_CONTENT_LENGTH, file.length(), META_CONTENT_TYPE,
+          FileUtils.getFileNameExtension(getName()));
     }
 
     @Override
@@ -670,38 +674,65 @@ public class Resources {
     final String location;
     final SourceType sourceType = SourceType.UNKNOWN;
     final InputStream inputStream;
+    final Map<String, Object> metadata;
 
-    /**
-     * @param inputStream
-     * @param name
-     */
     public InputStreamResource(InputStream inputStream, String name) {
       this.name = name;
       this.inputStream = inputStream;
       location = null;
+      metadata = resolveMetadata(null, name, null);
     }
 
     public InputStreamResource(InputStream inputStream, String location, String name) {
       this.name = name;
       this.location = location;
       this.inputStream = inputStream;
+      metadata = resolveMetadata(location, name, null);
     }
 
-    /**
-     *
-     * @param url
-     * @throws MalformedURLException
-     * @throws IOException
-     */
+    public InputStreamResource(InputStream inputStream, String location, String name,
+        Map<String, Object> metadata) {
+      this.inputStream = inputStream;
+      this.name = name;
+      this.location = location;
+      this.metadata = resolveMetadata(location, name, metadata);
+    }
+
+    public InputStreamResource(Map<String, Object> metadata, InputStream inputStream) {
+      name = getMapString(metadata, "name");
+      location = getMapString(metadata, "location");
+      this.metadata = resolveMetadata(location, name, metadata);
+      this.inputStream = inputStream;
+    }
+
     public InputStreamResource(URL url) throws IOException {
       location = url.toExternalForm();
       inputStream = url.openStream();
       name = url.getFile();
+      metadata = immutableMapOf("name", url.getFile(), "location", location, "protocol",
+          url.getProtocol(), "path", url.getPath(), "authority", url.getAuthority(), "defaultPort",
+          url.getDefaultPort(), "file", url.getFile(), "host", url.getHost(), "port", url.getPort(),
+          "query", url.getQuery(), "ref", url.getRef(), "userInfo", url.getUserInfo());
+    }
+
+    static Map<String, Object> resolveMetadata(String location, String name,
+        Map<String, Object> metadata) {
+      Map<String, Object> temp =
+          mapOf("location", location, "sourceType", SourceType.UNKNOWN.name(), "name", name);
+      if (metadata != null) {
+        temp.putAll(metadata);
+      }
+      return Collections.unmodifiableMap(temp);
     }
 
     @Override
     public String getLocation() {
       return location;
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+      return metadata;
     }
 
     @Override
@@ -718,7 +749,6 @@ public class Resources {
     public InputStream openStream() throws IOException {
       return inputStream;
     }
-
   }
 
   /**

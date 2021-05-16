@@ -13,26 +13,23 @@
  */
 package org.corant.modules.query.shared.spi;
 
-import java.util.Map;
-import java.util.function.Supplier;
-import org.corant.modules.query.shared.mapping.Query;
+import java.util.function.UnaryOperator;
+import org.corant.modules.query.shared.QueryParameter;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-query-shared
  *
- * Deprecated since 1.6.2, replace with {@link QueryParameterReviser}
- *
  * @author bingo 上午10:51:35
  *
  */
-@Deprecated
-public interface ParameterReviser extends Supplier<Map<String, Object>> {
+public interface QueryParameterReviser extends UnaryOperator<QueryParameter>, Sortable {
 
-  default boolean canHandle(Query query) {
+  default boolean canHandle(Object query) {
     return true;
   }
 
-  default int getPriority() {
-    return 0;
+  default boolean useInFetchQuery() {
+    return false;
   }
 }

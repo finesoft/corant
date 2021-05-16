@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toList;
@@ -40,7 +41,10 @@ import org.corant.modules.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.modules.query.shared.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.shared.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.modules.query.shared.spi.QueryParameterReviser;
 import org.corant.shared.normal.Names;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-query-shared
@@ -123,8 +127,13 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparameter) {
-    return new DefaultQueryParameter().context(parentQueryparameter.getContext())
-        .criteria(resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter)));
+    MutableObject<QueryParameter> resolved = new MutableObject<>(
+        new DefaultQueryParameter().context(parentQueryparameter.getContext()).criteria(
+            resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter))));
+    select(QueryParameterReviser.class).stream()
+        .filter(r -> r.useInFetchQuery() && r.canHandle(query)).sorted(Sortable::compare)
+        .forEach(resolved::apply);
+    return resolved.get();
   }
 
   protected Object convertCriteriaValue(Object obj, Class<?> type) {

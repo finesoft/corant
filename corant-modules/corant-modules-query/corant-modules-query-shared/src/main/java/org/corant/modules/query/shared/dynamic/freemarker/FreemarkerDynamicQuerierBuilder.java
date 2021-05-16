@@ -45,6 +45,7 @@ import freemarker.template.TemplateModelException;
  * @author bingo 上午10:00:50
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
@@ -111,7 +112,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       }
 
       // Inject parameter reviser
-      setEnvironmentVariables(e, ow);
+      // setEnvironmentVariables(e, ow); deprecated since 1.6.2
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
     } catch (IOException | TemplateException e) {
@@ -126,6 +127,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
    */
   protected abstract DynamicTemplateMethodModelEx<P> getTemplateMethodModelEx();
 
+  @Deprecated
   protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
     select(ParameterReviser.class).stream().filter(r -> r.canHandle(getQuery()))
         .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority()) * -1).forEach(r -> {

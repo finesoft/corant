@@ -103,11 +103,11 @@ public interface QueryHandler {
       QueryParameter parameter);
 
   /**
-   * Resolve query parameter.
+   * Resolve query parameter. If QueryParameterReviser exists, the given parameter may be adjusted.
    *
    * <p>
-   * NOTE: If parameter is instance of QueryParameter then just return it, else the given parameter
-   * is regarded as the criteria of the normal query parameter.
+   * NOTE: If the given parameter is not an instance of QueryParameter then the given parameter is
+   * regarded as the criteria of the normal query parameter.
    *
    * @param query the query
    * @param parameter the original query parameter

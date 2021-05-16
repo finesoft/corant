@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.context.Instances.select;
 import static org.corant.modules.query.shared.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.shared.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.modules.query.shared.QueryParameter.OFFSET_PARAM_NME;
@@ -37,8 +38,11 @@ import org.corant.context.service.ConversionService;
 import org.corant.modules.query.shared.QueryParameter.DefaultQueryParameter;
 import org.corant.modules.query.shared.mapping.Query;
 import org.corant.modules.query.shared.mapping.QueryHint;
+import org.corant.modules.query.shared.spi.QueryParameterReviser;
 import org.corant.modules.query.shared.spi.ResultHintHandler;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-query-shared
@@ -122,8 +126,9 @@ public class DefaultQueryHandler implements QueryHandler {
   @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveParameter(Query query, Object param) {
+    MutableObject<QueryParameter> resolved = new MutableObject<>();
     if (param instanceof QueryParameter) {
-      return (QueryParameter) param;
+      resolved.set((QueryParameter) param);
     } else if (param instanceof Map) {
       Map<?, ?> mp = new HashMap<>((Map<?, ?>) param);
       DefaultQueryParameter qp = new DefaultQueryParameter();
@@ -132,11 +137,15 @@ public class DefaultQueryHandler implements QueryHandler {
       Optional.ofNullable(mp.remove(CONTEXT_NME))
           .ifPresent(x -> qp.context((Map<String, Object>) x));
       Map<String, Class<?>> convertSchema = query == null ? null : query.getParamConvertSchema();
-      return qp.criteria(convertParameter(mp, convertSchema));
+      resolved.set(qp.criteria(convertParameter(mp, convertSchema)));
     } else if (param != null) {
-      return new DefaultQueryParameter().criteria(param);
+      resolved.set(new DefaultQueryParameter().criteria(param));
+    } else {
+      resolved.set(new DefaultQueryParameter());
     }
-    return new DefaultQueryParameter();
+    select(QueryParameterReviser.class).stream().filter(r -> r.canHandle(query))
+        .sorted(Sortable::compare).forEach(resolved::apply);
+    return resolved.get();
   }
 
   protected Map<String, Object> convertParameter(Map<?, ?> param,

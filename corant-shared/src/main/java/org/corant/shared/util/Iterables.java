@@ -41,39 +41,37 @@ import java.util.stream.StreamSupport;
  */
 public class Iterables {
 
-  private Iterables() {
-    super();
-  }
+  private Iterables() {}
 
   /**
    * Return a breadth-first iterator for an iterable object whose internal elements are also
    * iterable, Mainly used for object traversal in tree structure.
    *
-   * @param <T>
-   * @param obj
+   * @param <E> the element type
+   * @param obj the object to be expanded
    * @return breadthIterator
    */
-  public static <T extends Iterable<T>> Iterator<T> breadthIterator(T obj) {
+  public static <E extends Iterable<E>> Iterator<E> breadthIterator(E obj) {
     return new BreadthIterable<>(obj).iterator();
   }
 
   /**
    * Convert an array to a non-null collection
    *
-   * @param <T>
-   * @param <C>
+   * @param <E> the element type
+   * @param <C> the collection type
    * @param supplier the collection instance builder
    * @param objects the array
    * @return an collection that combined by the passed in array
    */
   @SafeVarargs
-  public static <T, C extends Collection<T>> C collectionOf(final IntFunction<C> supplier,
-      final T... objects) {
+  public static <E, C extends Collection<E>> C collectionOf(final IntFunction<C> supplier,
+      final E... objects) {
     if (objects == null || objects.length == 0) {
       return supplier.apply(0);
     } else {
       final C collection = supplier.apply(objects.length);
-      for (T object : objects) {
+      for (E object : objects) {
         collection.add(object);
       }
       return collection;
@@ -83,14 +81,14 @@ public class Iterables {
   /**
    * Convert an iterator to a non-null collection
    *
-   * @param <T>
-   * @param <C>
+   * @param <E> the element type
+   * @param <C> the collection type
    * @param supplier the collection instance builder
    * @param it the iterator
    * @return an collection that combined by the passed in iterator
    */
-  public static <T, C extends Collection<T>> C collectionOf(final Supplier<C> supplier,
-      final Iterator<? extends T> it) {
+  public static <E, C extends Collection<E>> C collectionOf(final Supplier<C> supplier,
+      final Iterator<? extends E> it) {
     if (it == null) {
       return supplier.get();
     } else {
@@ -105,21 +103,20 @@ public class Iterables {
   /**
    * Connect multiple iterables of matching types into one iterable.
    *
-   * @param <T>
-   * @param inputs
-   * @return concat
+   * @param <E> the element type
+   * @param inputs the iterables for connecting
    */
   @SafeVarargs
-  public static <T> Iterable<T> concat(final Iterable<? extends T>... inputs) {
+  public static <E> Iterable<E> concat(final Iterable<? extends E>... inputs) {
     shouldNotNull(inputs);
     return new Iterable<>() {
-      final Iterable<? extends T>[] iterables = Arrays.copyOf(inputs, inputs.length);
+      final Iterable<? extends E>[] iterables = Arrays.copyOf(inputs, inputs.length);
 
       @SuppressWarnings("unchecked")
       @Override
-      public Iterator<T> iterator() {
+      public Iterator<E> iterator() {
         return Stream.of(iterables)
-            .map(it -> StreamSupport.stream((Spliterator<T>) it.spliterator(), false))
+            .map(it -> StreamSupport.stream((Spliterator<E>) it.spliterator(), false))
             .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
       }
     };
@@ -128,16 +125,15 @@ public class Iterables {
   /**
    * Connect multiple iterators of matching types into one iterator
    *
-   * @param <T>
-   * @param inputs
-   * @return concat
+   * @param <E> the element type
+   * @param inputs the iterator for connecting
    */
   @SafeVarargs
-  public static <T> Iterator<T> concat(final Iterator<? extends T>... inputs) {
+  public static <E> Iterator<E> concat(final Iterator<? extends E>... inputs) {
     shouldNotNull(inputs);
     return new Iterator<>() {
       @SuppressWarnings("unchecked")
-      final Iterator<T>[] iterators =
+      final Iterator<E>[] iterators =
           streamOf(inputs).filter(Objects::isNotNull).toArray(Iterator[]::new);
       int index = 0;
 
@@ -151,7 +147,7 @@ public class Iterables {
       }
 
       @Override
-      public T next() {
+      public E next() {
         if (!hasNext()) {
           throw new NoSuchElementException();
         }
@@ -164,21 +160,20 @@ public class Iterables {
    * Return a depth-first iterator for an iterable object whose internal elements are also iterable,
    * Mainly used for object traversal in tree structure.
    *
-   * @param <T>
-   * @param obj
-   * @return depthIterator
+   * @param <E> the element type
+   * @param obj the object to be expanded
    */
-  public static <T extends Iterable<T>> Iterator<T> depthIterator(T obj) {
+  public static <E extends Iterable<E>> Iterator<E> depthIterator(E obj) {
     return new DepthIterable<>(obj).iterator();
   }
 
   /**
    * Returns an empty enumeration
    *
-   * @param <T>
+   * @param <E> the element type
    * @return emptyEnumeration
    */
-  public static <T> Enumeration<T> emptyEnumeration() {
+  public static <E> Enumeration<E> emptyEnumeration() {
     return new Enumeration<>() {
 
       @Override
@@ -187,7 +182,7 @@ public class Iterables {
       }
 
       @Override
-      public T nextElement() {
+      public E nextElement() {
         throw new NoSuchElementException();
       }
     };
@@ -196,17 +191,17 @@ public class Iterables {
   /**
    * Returns an empty iterable
    *
-   * @param <T>
+   * @param <E> the element type
    * @return emptyIterable
    */
-  public static <T> Iterable<T> emptyIterable() {
+  public static <E> Iterable<E> emptyIterable() {
     return Iterables::emptyIterator;
   }
 
   /**
    * Returns an enpty iterator
    *
-   * @param <T>
+   * @param <T> the element type
    * @return emptyIterator
    */
   public static <T> Iterator<T> emptyIterator() {
@@ -226,12 +221,11 @@ public class Iterables {
   /**
    * Converts an iterator to enumeration
    *
-   * @param <T>
-   * @param it
-   * @return enumerationOf
+   * @param <E> the element type
+   * @param it the iterator to convert
    */
-  public static <T> Enumeration<T> enumerationOf(Iterator<? extends T> it) {
-    final Iterator<? extends T> useIt = it == null ? emptyIterator() : it;
+  public static <E> Enumeration<E> enumerationOf(Iterator<? extends E> it) {
+    final Iterator<? extends E> useIt = it == null ? emptyIterator() : it;
     return new Enumeration<>() {
 
       @Override
@@ -240,7 +234,7 @@ public class Iterables {
       }
 
       @Override
-      public T nextElement() {
+      public E nextElement() {
         return useIt.next();
       }
     };
@@ -250,12 +244,11 @@ public class Iterables {
    * Returns the index-th value in enumeration, throwing IndexOutOfBoundsException if there is no
    * such element.
    *
-   * @param <T>
-   * @param e
-   * @param index
-   * @return get
+   * @param <E> the element type
+   * @param e the enumeration that contain the index-th value
+   * @param index the index
    */
-  public static <T> T get(final Enumeration<? extends T> e, final int index) {
+  public static <E> E get(final Enumeration<? extends E> e, final int index) {
     int i = index;
     if (i < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + i);
@@ -274,10 +267,9 @@ public class Iterables {
    * Returns the index-th value in iterable, throwing IndexOutOfBoundsException if there is nosuch
    * element.
    *
-   * @param <E>
-   * @param iterable
-   * @param index
-   * @return get
+   * @param <E> the element type
+   * @param iterable the iterable that contain the index-th value
+   * @param index the index
    */
   public static <E> E get(final Iterable<? extends E> iterable, final int index) {
     if (index < 0) {
@@ -294,10 +286,9 @@ public class Iterables {
    * Returns the index-th value in iterator, throwing IndexOutOfBoundsException if there is nosuch
    * element.
    *
-   * @param <E>
-   * @param iterator
-   * @param index
-   * @return get
+   * @param <E> the element type
+   * @param iterator the iterator that use to retrieve the index-th value
+   * @param index the index
    */
   public static <E> E get(final Iterator<? extends E> iterator, final int index) {
     int i = index;
@@ -315,43 +306,19 @@ public class Iterables {
   }
 
   /**
-   * Converts an enumeration to an non-null iterable
-   *
-   * @param <T>
-   * @param enums
-   * @return iterableOf
-   */
-  public static <T> Iterable<T> iterableOf(final Enumeration<? extends T> enums) {
-    return enums == null ? emptyIterable() : () -> new Iterator<>() {
-      final Enumeration<? extends T> fromEnums = enums;
-
-      @Override
-      public boolean hasNext() {
-        return fromEnums.hasMoreElements();
-      }
-
-      @Override
-      public T next() {
-        return fromEnums.nextElement();
-      }
-    };
-  }
-
-  /**
    * Converts an array to an non-null iterable
    *
-   * @param <T>
-   * @param objects
-   * @return iterableOf
+   * @param <E> the element type
+   * @param objects the elements array
    */
   @SafeVarargs
-  public static <T> Iterable<T> iterableOf(final T... objects) {
+  public static <E> Iterable<E> iterableOf(final E... objects) {
     return new Iterable<>() {
-      final T[] array = objects;
+      final E[] array = objects;
       final int size = array.length;
 
       @Override
-      public Iterator<T> iterator() {
+      public Iterator<E> iterator() {
         return new Iterator<>() {
           int i = 0;
 
@@ -361,7 +328,7 @@ public class Iterables {
           }
 
           @Override
-          public T next() {
+          public E next() {
             if (!hasNext()) {
               throw new NoSuchElementException();
             }
@@ -373,29 +340,49 @@ public class Iterables {
   }
 
   /**
+   * Converts an enumeration to an non-null iterable
+   *
+   * @param <E> the element type
+   * @param enums the enumeration that contain the index-th value
+   */
+  public static <E> Iterable<E> iterableOf(final Enumeration<? extends E> enums) {
+    return enums == null ? emptyIterable() : () -> new Iterator<>() {
+      final Enumeration<? extends E> fromEnums = enums;
+
+      @Override
+      public boolean hasNext() {
+        return fromEnums.hasMoreElements();
+      }
+
+      @Override
+      public E next() {
+        return fromEnums.nextElement();
+      }
+    };
+  }
+
+  /**
    * Use the specified conversion function to convert the iterable element type
    *
-   * @param <T>
-   * @param it
-   * @param convert
-   * @return transform
+   * @param <E> the element type
+   * @param it the source element iterable
+   * @param convert the conversion function
    */
-  public static <T> Iterable<T> transform(final Iterable<?> it, final Function<Object, T> convert) {
+  public static <E> Iterable<E> transform(final Iterable<?> it, final Function<Object, E> convert) {
     return () -> transform(it == null ? (Iterator<?>) null : it.iterator(), convert);
   }
 
   /**
    * Use the specified conversion function to convert the iterator element type
    *
-   * @param <T>
-   * @param it
-   * @param convert
-   * @return transform
+   * @param <E> the element type
+   * @param it the source element iterable
+   * @param convert the conversion function
    */
-  public static <T> Iterator<T> transform(final Iterator<?> it, final Function<Object, T> convert) {
+  public static <E> Iterator<E> transform(final Iterator<?> it, final Function<Object, E> convert) {
     return it == null ? emptyIterator() : new Iterator<>() {
       final Iterator<?> fromIterator = it;
-      final Function<Object, T> useConvert = defaultObject(convert, Objects::forceCast);
+      final Function<Object, E> useConvert = defaultObject(convert, Objects::forceCast);
 
       @Override
       public boolean hasNext() {
@@ -403,7 +390,7 @@ public class Iterables {
       }
 
       @Override
-      public T next() {
+      public E next() {
         return useConvert.apply(fromIterator.next());
       }
 

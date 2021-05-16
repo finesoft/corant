@@ -45,18 +45,18 @@ public class Lists {
    * The new array contains all of the element of {@code src} followed by all of the elements
    * {@code ts}. When an array is returned, it is always a new array.
    *
-   * @param <T>
+   * @param <E>
    * @param src
    * @param ts
    * @return append
    */
   @SuppressWarnings("unchecked")
-  public static <T> T[] append(T[] src, T... ts) {
+  public static <E> E[] append(E[] src, E... ts) {
     if (src == null) {
       return ts.clone();
     }
     final Class<?> st = src.getClass().getComponentType();
-    final T[] appendArray = (T[]) Array.newInstance(st, src.length + ts.length);
+    final E[] appendArray = (E[]) Array.newInstance(st, src.length + ts.length);
     System.arraycopy(src, 0, appendArray, 0, src.length);
     try {
       System.arraycopy(ts, 0, appendArray, src.length, ts.length);
@@ -81,24 +81,24 @@ public class Lists {
    * get(list,-2) equals list.get(list.size()-2)
    * </pre>
    *
-   * @param <T>
+   * @param <E>
    * @param list
    * @param index
    * @return get
    */
-  public static <T> T get(List<? extends T> list, int index) {
+  public static <E> E get(List<? extends E> list, int index) {
     return index < 0 ? list.get(sizeOf(list) + index) : list.get(index);
   }
 
   /**
    * Convert an array to a non-null immutable list
    *
-   * @param <T>
+   * @param <E>
    * @param objects
    * @return an immutable list that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> List<T> immutableListOf(final T... objects) {
+  public static <E> List<E> immutableListOf(final E... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptyList();
     }
@@ -108,15 +108,15 @@ public class Lists {
   /**
    * Convert an array to a non-null linked list
    *
-   * @param <T>
+   * @param <E>
    * @param objects
    * @return a linked list that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> LinkedList<T> linkedListOf(final T... objects) {
-    LinkedList<T> list = new LinkedList<>();
+  public static <E> LinkedList<E> linkedListOf(final E... objects) {
+    LinkedList<E> list = new LinkedList<>();
     if (objects != null) {
-      for (T object : objects) {
+      for (E object : objects) {
         list.add(object);
       }
     }
@@ -126,12 +126,12 @@ public class Lists {
   /**
    * Convert an enumeration to a non-null list
    *
-   * @param <T>
+   * @param <E>
    * @param enumeration
    * @return a list that combined by the passed in enumeration
    */
-  public static <T> List<T> listOf(final Enumeration<? extends T> enumeration) {
-    List<T> list = new ArrayList<>();
+  public static <E> List<E> listOf(final Enumeration<? extends E> enumeration) {
+    List<E> list = new ArrayList<>();
     if (enumeration != null) {
       while (enumeration.hasMoreElements()) {
         list.add(enumeration.nextElement());
@@ -143,11 +143,11 @@ public class Lists {
   /**
    * Convert an iterable to a non-null list
    *
-   * @param <T>
+   * @param <E>
    * @param iterable
    * @return a list that combined by the passed in iterable
    */
-  public static <T> List<T> listOf(final Iterable<? extends T> iterable) {
+  public static <E> List<E> listOf(final Iterable<? extends E> iterable) {
     if (iterable instanceof List) {
       return forceCast(iterable);
     } else if (iterable != null) {
@@ -160,12 +160,12 @@ public class Lists {
   /**
    * Convert an iterator to a non-null list
    *
-   * @param <T>
+   * @param <E>
    * @param iterator
    * @return a list that combined by the passed in iterator
    */
-  public static <T> List<T> listOf(final Iterator<? extends T> iterator) {
-    List<T> list = new ArrayList<>();
+  public static <E> List<E> listOf(final Iterator<? extends E> iterator) {
+    List<E> list = new ArrayList<>();
     if (iterator != null) {
       while (iterator.hasNext()) {
         list.add(iterator.next());
@@ -177,25 +177,25 @@ public class Lists {
   /**
    * Convert an array to non-null list
    *
-   * @param <T>
+   * @param <E>
    * @param objects
    * @return a list that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> List<T> listOf(final T... objects) {
+  public static <E> List<E> listOf(final E... objects) {
     return collectionOf(ArrayList::new, objects);
   }
 
   /**
    * Break a collection into smaller non-null pieces
    *
-   * @param <T>
+   * @param <E>
    * @param collection
    * @param size
    * @return partition
    */
-  public static <T> List<List<T>> partition(final Collection<T> collection, int size) {
-    List<List<T>> result = new ArrayList<>();
+  public static <E> List<List<E>> partition(final Collection<E> collection, int size) {
+    List<List<E>> result = new ArrayList<>();
     if (collection != null) {
       final AtomicInteger counter = new AtomicInteger(0);
       result.addAll(collection.stream()
@@ -208,13 +208,13 @@ public class Lists {
    * Null safe removeIf, execution begins only if the parameters passed in are not null.
    *
    * @param <C>
-   * @param <T>
+   * @param <E>
    * @param collection
    * @param p
    * @return removeIf
    */
-  public static <C extends Collection<T>, T> C removeIf(final C collection,
-      Predicate<? super T> p) {
+  public static <C extends Collection<E>, E> C removeIf(final C collection,
+      Predicate<? super E> p) {
     if (collection != null && p != null) {
       collection.removeIf(p);
     }
@@ -229,20 +229,20 @@ public class Lists {
    * that pass predicate tests. The component type of the returned array is always the same as that
    * of the input array.
    *
-   * @param <T>
+   * @param <E>
    * @param src
    * @param predicate
    * @return removeIf
    */
   @SuppressWarnings("unchecked")
-  public static <T> T[] removeIf(T[] src, Predicate<? super T> predicate) {
+  public static <E> E[] removeIf(E[] src, Predicate<? super E> predicate) {
     if (src == null || predicate == null) {
       return src;
     }
     final Class<?> st = src.getClass().getComponentType();
-    final T[] removedArray = (T[]) Array.newInstance(st, src.length);
+    final E[] removedArray = (E[]) Array.newInstance(st, src.length);
     int j = 0;
-    for (T element : src) {
+    for (E element : src) {
       if (!predicate.test(element)) {
         removedArray[j++] = element;
       }
@@ -254,25 +254,25 @@ public class Lists {
    * Swaps the elements at the specified positions in the specified list.(If the specified positions
    * are equal, invoking this method leaves the list unchanged.)
    *
-   * @param <T>
+   * @param <E>
    * @param l
    * @param i
    * @param j swap
    */
-  public static <T> void swap(List<? extends T> l, int i, int j) {
+  public static <E> void swap(List<? extends E> l, int i, int j) {
     Collections.swap(l, i, j);
   }
 
   /**
    * Swaps the two specified elements in the specified array.
    *
-   * @param <T>
+   * @param <E>
    * @param a
    * @param i
    * @param j swap
    */
-  public static <T> void swap(T[] a, int i, int j) {
-    final T t = a[i];
+  public static <E> void swap(E[] a, int i, int j) {
+    final E t = a[i];
     a[i] = a[j];
     a[j] = t;
   }

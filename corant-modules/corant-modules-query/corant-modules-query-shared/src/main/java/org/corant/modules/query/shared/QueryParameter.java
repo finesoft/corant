@@ -15,6 +15,7 @@ package org.corant.modules.query.shared;
 
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import java.io.Serializable;
 import java.time.Duration;
@@ -171,34 +172,47 @@ public interface QueryParameter extends Serializable {
    * @author bingo 下午6:56:58
    *
    */
-  class GenericQueryParameter<T> implements QueryParameter {
+  class GenericQueryParameter<T> extends DefaultQueryParameter {
     private static final long serialVersionUID = 7809436027996029494L;
-    protected T criteria;
-    protected Integer limit;
-    protected Integer offset = 0;
-    protected Map<String, Object> context = new HashMap<>();
 
     public GenericQueryParameter() {}
+
+    @Override
+    public GenericQueryParameter<T> context(Map<String, Object> context) {
+      return setContext(context);
+    }
+
+    @Override
+    public GenericQueryParameter<T> context(Object... objects) {
+      return setContext(mapOf(objects));
+    }
+
+    @Override
+    public GenericQueryParameter<T> criteria(Object criteria) {
+      return setCriteria(forceCast(criteria));
+    }
 
     @JsonIgnore
     @Override
     public Map<String, Object> getContext() {
-      return this.context;
+      return context;
     }
 
     @Override
     public T getCriteria() {
-      return this.criteria;
+      return forceCast(criteria);
     }
 
     @Override
-    public Integer getLimit() {
-      return this.limit;
+    public GenericQueryParameter<T> limit(Integer limit) {
+      super.limit(limit);
+      return this;
     }
 
     @Override
-    public Integer getOffset() {
-      return this.offset;
+    public DefaultQueryParameter offset(Integer offset) {
+      super.offset(limit);
+      return this;
     }
 
     public GenericQueryParameter<T> setContext(Map<String, Object> context) {
@@ -215,14 +229,15 @@ public interface QueryParameter extends Serializable {
     }
 
     public GenericQueryParameter<T> setLimit(Integer limit) {
-      this.limit = limit;
+      super.limit(limit);
       return this;
     }
 
     public GenericQueryParameter<T> setOffset(Integer offset) {
-      this.offset = offset == null ? 0 : max(offset, 0);
+      super.offset(offset);
       return this;
     }
+
   }
 
   /**
@@ -358,8 +373,7 @@ public interface QueryParameter extends Serializable {
      * occurred, this method use to set the retry interval. The underly query service implemention
      * may not support
      *
-     * @param retryInterval
-     * @return retryInterval
+     * @param retryInterval the retry interval, if given is null, the default interval is 2 seconds.
      */
     public StreamQueryParameter retryInterval(RetryInterval retryInterval) {
       this.retryInterval =
@@ -373,8 +387,7 @@ public interface QueryParameter extends Serializable {
      * occurred, this method use to set the retry times. The underly query service implemention may
      * not support retry.
      *
-     * @param retryTimes
-     * @return retryTimes
+     * @param retryTimes the retry times, if given is less than or equal to 0, it means no retry.
      */
     public StreamQueryParameter retryTimes(int retryTimes) {
       this.retryTimes = max(retryTimes, 0);
@@ -400,8 +413,7 @@ public interface QueryParameter extends Serializable {
      * flowed out, The second parameter is an object that represents the last object that has flowed
      * out.
      *
-     * @param terminater
-     * @return terminater
+     * @param terminater the terminater to terminate the stream if the conditions are met.
      */
     public StreamQueryParameter terminater(BiPredicate<Integer, Object> terminater) {
       this.terminater = terminater;

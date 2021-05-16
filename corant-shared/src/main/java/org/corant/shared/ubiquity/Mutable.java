@@ -26,6 +26,7 @@ import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalField;
 import java.time.temporal.TemporalUnit;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -36,8 +37,10 @@ import org.corant.shared.exception.NotSupportedException;
  */
 public interface Mutable<T> extends Supplier<T> {
 
-  @Override
-  T get();
+  default Mutable<T> apply(UnaryOperator<T> op) {
+    set(op.apply(get()));
+    return this;
+  }
 
   Mutable<T> set(T object);
 

@@ -60,8 +60,7 @@ import org.corant.shared.exception.NotSupportedException;
  */
 public class Maps {
 
-  private Maps() {
-  }
+  private Maps() {}
 
   /**
    * extract value from map object and remove the entry, use key path
@@ -737,6 +736,10 @@ public class Maps {
 
   public static <K, V> Map<K, V> mapOf(Object... objects) {
     return mapOf(HashMap::new, objects);
+  }
+
+  public static <K, V> Map<K, V> newHashMap(Map<? extends K, ? extends V> map) {
+    return map != null ? new HashMap<>(map) : new HashMap<>();
   }
 
   public static Properties propertiesOf(String... strings) {

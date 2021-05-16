@@ -39,13 +39,13 @@ public class Sets {
    * resulting set contains all the elements that are in the left set but not in the right set.
    * Neither input is mutated by this operation, an entirely new set is returned.
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param left the source of the different elements
    * @param right the set for comparison
    * @return a new set contains the elements that are in the left set but not in the right set.
    */
-  public static <T> Set<T> difference(Set<? extends T> left, Set<? extends T> right) {
-    Set<T> diffs = new HashSet<>();
+  public static <E> Set<E> difference(Set<? extends E> left, Set<? extends E> right) {
+    Set<E> diffs = new HashSet<>();
     if (isNotEmpty(left)) {
       if (isEmpty(right)) {
         diffs.addAll(left);
@@ -59,12 +59,12 @@ public class Sets {
   /**
    * Convert an array to a non-null immutable set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param objects the source of the elements in the set
    * @return an immutable set that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> Set<T> immutableSetOf(final T... objects) {
+  public static <E> Set<E> immutableSetOf(final E... objects) {
     if (objects == null || objects.length == 0) {
       return Collections.emptySet();
     }
@@ -74,12 +74,12 @@ public class Sets {
   /**
    * Convert an array to a non-null linked hash set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param objects the source of the elements in the set
    * @return a linked hash set that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> LinkedHashSet<T> linkedHashSetOf(final T... objects) {
+  public static <E> LinkedHashSet<E> linkedHashSetOf(final E... objects) {
     return collectionOf(LinkedHashSet::new, objects);
   }
 
@@ -96,11 +96,11 @@ public class Sets {
   /**
    * Convert an iterable to a non-null linked hash set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param iterable the source of the elements in the set
    * @return a new hash set consisting of elements iterated by the passed iterable
    */
-  public static <T> Set<T> setOf(final Iterable<? extends T> iterable) {
+  public static <E> Set<E> setOf(final Iterable<? extends E> iterable) {
     if (iterable instanceof Set) {
       return forceCast(iterable);
     } else if (iterable != null) {
@@ -113,37 +113,37 @@ public class Sets {
   /**
    * Convert an iterator to a non-null linked hash set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param iterator the source of the elements in the set
    * @return a new hash set consisting of elements iterated by the passed iterator
    */
-  public static <T> Set<T> setOf(final Iterator<? extends T> iterator) {
+  public static <E> Set<E> setOf(final Iterator<? extends E> iterator) {
     return collectionOf(HashSet::new, iterator);
   }
 
   /**
    * Convert an array to a non-null set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param objects the source of the elements in the set
    * @return a set that combined by the passed in array
    */
   @SafeVarargs
-  public static <T> Set<T> setOf(final T... objects) {
+  public static <E> Set<E> setOf(final E... objects) {
     return collectionOf(HashSet::new, objects);
   }
 
   /**
    * Convert an array to a non-null tree set
    *
-   * @param <T> the element type
+   * @param <E> the element type
    * @param comparator the sort comparator
    * @param objects the objects that will be collected to tree set
    */
   @SafeVarargs
-  public static <T> TreeSet<T> treeSetOf(final Comparator<? super T> comparator,
-      final T... objects) {
-    TreeSet<T> set = comparator == null ? new TreeSet<>() : new TreeSet<>(comparator);
+  public static <E> TreeSet<E> treeSetOf(final Comparator<? super E> comparator,
+      final E... objects) {
+    TreeSet<E> set = comparator == null ? new TreeSet<>() : new TreeSet<>(comparator);
     if (objects != null) {
       Collections.addAll(set, objects);
     }

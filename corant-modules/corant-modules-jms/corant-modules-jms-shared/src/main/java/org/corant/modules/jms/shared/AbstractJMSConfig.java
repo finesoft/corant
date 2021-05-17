@@ -48,6 +48,9 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
   protected String password;
 
   @ConfigKeyItem
+  protected String clientId;
+
+  @ConfigKeyItem
   protected Boolean enable = true;
 
   @ConfigKeyItem
@@ -85,6 +88,10 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
       return false;
     }
     return true;
+  }
+
+  public String getClientId() {
+    return clientId;
   }
 
   /**

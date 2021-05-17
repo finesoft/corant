@@ -16,6 +16,7 @@ package org.corant.modules.jms.shared.receive;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +28,9 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -38,6 +41,7 @@ import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
+import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -155,7 +159,8 @@ public class MessageReceivingManager {
       if (!useCfgs.isEmpty()) {
         useCfgs.forEach(cfg -> {
           ScheduledThreadPoolExecutor executor =
-              new ScheduledThreadPoolExecutor(cfg.getReceiveTaskThreads());
+              new ScheduledThreadPoolExecutor(cfg.getReceiveTaskThreads(),
+                  new MessageReceivingThreadFactory(cfg.getConnectionFactoryId()));
           executor.setRemoveOnCancelPolicy(true);
           executorServices.put(cfg, executor);
         });
@@ -164,6 +169,26 @@ public class MessageReceivingManager {
           () -> String.format("Found %s message receivers that involving %s connection factories.",
               receiveMetaDatas.size(), executorServices.size()));
     }
+  }
+
+  static class MessageReceivingThreadFactory implements ThreadFactory {
+
+    private final static AtomicLong COUNT = new AtomicLong(1);
+    private final String name;
+
+    MessageReceivingThreadFactory(String connectionFactoryId) {
+      if (isBlank(connectionFactoryId)) {
+        name = Names.CORANT_PREFIX + "msg-rec-";
+      } else {
+        name = Names.CORANT_PREFIX + "msg-rec-" + connectionFactoryId + "-";
+      }
+    }
+
+    @Override
+    public Thread newThread(final Runnable r) {
+      return new Thread(r, name + COUNT.getAndIncrement());
+    }
+
   }
 
 }

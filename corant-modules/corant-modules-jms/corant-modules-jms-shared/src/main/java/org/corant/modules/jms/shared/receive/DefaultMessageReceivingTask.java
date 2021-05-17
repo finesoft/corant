@@ -175,7 +175,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
       lastExecutionSuccessfully = messageReceiver.receive();
       inProgress = false;
       postRun();
-    } else {
+    } else if (!cancellation.get()) {
       tryThreadSleep(loopIntervalMillis);
     }
   }

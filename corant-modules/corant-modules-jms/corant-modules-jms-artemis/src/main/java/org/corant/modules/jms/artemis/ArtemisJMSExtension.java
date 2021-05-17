@@ -15,6 +15,7 @@ package org.corant.modules.jms.artemis;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,6 +147,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (cfg.hasAuthentication()) {
       activeMQConnectionFactory.setUser(cfg.getUsername());
       activeMQConnectionFactory.setPassword(cfg.getPassword());
+    }
+    if (isNotBlank(cfg.getClientId())) {
+      activeMQConnectionFactory.setClientID(cfg.getClientId());
     }
     cfg.getProperties().forEach((m, v) -> {
       if (v.isPresent()) {

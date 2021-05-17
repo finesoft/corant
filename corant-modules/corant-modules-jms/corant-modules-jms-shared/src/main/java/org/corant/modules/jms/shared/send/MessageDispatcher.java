@@ -203,7 +203,7 @@ public interface MessageDispatcher {
       doDispatch(null, message);
     }
 
-    protected void configurateProducer(JMSContext jmsc, JMSProducer producer) {
+    protected void configurate(JMSContext jmsc, JMSProducer producer) {
       producer.setDeliveryMode(deliveryMode);
       if (deliveryDelay > 0) {
         producer.setDeliveryDelay(deliveryDelay);
@@ -244,7 +244,7 @@ public interface MessageDispatcher {
           final MessageSerializer serializer = serializer(serialSchema);
           Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
           JMSProducer p = jmsc.createProducer();
-          configurateProducer(jmsc, p);
+          configurate(jmsc, p);
           for (Object message : messages) {
             doDispatch(jmsc, d, p, serializer, message);
           }
@@ -268,7 +268,7 @@ public interface MessageDispatcher {
         final MessageSerializer serializer = serializer(serializationSchema);
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();
-        configurateProducer(jmsc, p);
+        configurate(jmsc, p);
         messages.forEach(message -> doDispatch(jmsc, d, p, serializer, message));
       } catch (Exception e) {
         throw new CorantRuntimeException(e);

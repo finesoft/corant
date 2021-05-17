@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.jms.CompletionListener;
 import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.XAConnectionFactory;
@@ -55,6 +56,11 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
   protected int priority = -1;
   protected CompletionListener completionListener;
   protected int sessionMode;
+  protected boolean disableMessageID;
+  protected boolean disableMessageTimestamp;
+  protected String jmsType;
+  protected String clientId;
+  protected ExceptionListener exceptionListener;
 
   public MessageDispatcherTemplate() {
     connectionFactoryId = EMPTY;
@@ -62,6 +68,11 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
 
   public static MessageDispatcherTemplate use(String connectionFactoryId) {
     return new MessageDispatcherTemplate().connectionFactoryId(connectionFactoryId);
+  }
+
+  public MessageDispatcherTemplate clientId(String clientId) {
+    this.clientId = clientId;
+    return this;
   }
 
   public MessageDispatcherTemplate connectionFactoryId(String connectionFactoryId) {
@@ -81,6 +92,26 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
 
   public MessageDispatcherTemplate destination(String destination) {
     this.destination = shouldNotBlank(destination);
+    return this;
+  }
+
+  public MessageDispatcherTemplate disableMessageID(boolean disableMessageID) {
+    this.disableMessageID = disableMessageID;
+    return this;
+  }
+
+  public MessageDispatcherTemplate disableMessageTimestamp(boolean disableMessageTimestamp) {
+    this.disableMessageTimestamp = disableMessageTimestamp;
+    return this;
+  }
+
+  public MessageDispatcherTemplate exceptionListener(ExceptionListener exceptionListener) {
+    this.exceptionListener = exceptionListener;
+    return this;
+  }
+
+  public MessageDispatcherTemplate jmsType(String jmsType) {
+    this.jmsType = jmsType;
     return this;
   }
 
@@ -163,7 +194,7 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
   }
 
   @Override
-  protected void configurateProducer(JMSContext jmsc, JMSProducer producer) {
+  protected void configurate(JMSContext jmsc, JMSProducer producer) {
     if (isNotBlank(replyTo)) {
       producer
           .setJMSReplyTo(multicastReplyTo ? jmsc.createTopic(replyTo) : jmsc.createQueue(replyTo));
@@ -174,7 +205,22 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
     if (completionListener != null) {
       producer.setAsync(completionListener);
     }
-    super.configurateProducer(jmsc, producer);
+    if (disableMessageID) {
+      producer.setDisableMessageID(disableMessageID);
+    }
+    if (disableMessageTimestamp) {
+      producer.setDisableMessageTimestamp(disableMessageTimestamp);
+    }
+    if (isNotBlank(jmsType)) {
+      producer.setJMSType(jmsType);
+    }
+    if (isNotBlank(clientId)) {
+      jmsc.setClientID(clientId);
+    }
+    if (exceptionListener != null) {
+      jmsc.setExceptionListener(exceptionListener);
+    }
+    super.configurate(jmsc, producer);
   }
 
   @Override

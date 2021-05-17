@@ -267,9 +267,9 @@ public class MessageReceivingMetaData {
 
   @Override
   public String toString() {
-    return "connectionFactoryId=[" + connectionFactoryId + "], destination=[" + destination
-        + "], method=" + method.getMethod().getDeclaringClass().getCanonicalName() + "#"
-        + method.getMethod().getName() + ", clientID=[" + clientID + "]";
+    return "destination=[" + (isBlank(connectionFactoryId) ? "" : connectionFactoryId + "#")
+        + destination + "], method=" + method.getMethod().getDeclaringClass().getCanonicalName()
+        + "#" + method.getMethod().getName() + ", clientID=[" + clientID + "]";
   }
 
 }

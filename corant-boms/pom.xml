@@ -30,7 +30,7 @@
 		<version.atomikos>5.0.8</version.atomikos>
 		<version.bouncycastle>1.68</version.bouncycastle>
 		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
-		<version.caffeine>2.8.5</version.caffeine>
+		<version.caffeine>3.0.2</version.caffeine>
 		<version.calcite>1.25.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
@@ -124,7 +124,7 @@
 		<version.mssql-jdbc>8.2.2.jre8</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 		<version.ojdbc8>19.8.0.0</version.ojdbc8>
-		<version.narayana>5.11.1.Final</version.narayana>
+		<version.narayana>5.11.2.Final</version.narayana>
 		<version.netty>4.1.52.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
 		<version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>

@@ -25,29 +25,26 @@ import java.util.Map;
 public class NumberBigIntegerConverter extends AbstractConverter<Number, BigInteger> {
 
   /**
-   *
+   * @see AbstractConverter#AbstractConverter()
    */
-  public NumberBigIntegerConverter() {
-    super();
-  }
+  public NumberBigIntegerConverter() {}
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberBigIntegerConverter(BigInteger defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Objet,boolean)
    */
   public NumberBigIntegerConverter(BigInteger defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberBigIntegerConverter(boolean throwException) {
     super(throwException);
@@ -55,9 +52,6 @@ public class NumberBigIntegerConverter extends AbstractConverter<Number, BigInte
 
   @Override
   protected BigInteger convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     if (value instanceof BigInteger) {
       return (BigInteger) value;
     } else {

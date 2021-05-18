@@ -238,28 +238,26 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
       );
 
   /**
-   *
+   * @see AbstractConverter#AbstractConverter()
    */
-  protected AbstractTemporalConverter() {
-  }
+  protected AbstractTemporalConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   protected AbstractTemporalConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   protected AbstractTemporalConverter(T defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   protected AbstractTemporalConverter(T defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -273,7 +271,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     return DEFAULT_FORMATTERS.stream().filter(tm -> tm.match(value));
   }
 
-  protected Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
+  protected static Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
     DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_KEY);
     if (dtf == null) {
       String dtfPtn = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY);
@@ -289,7 +287,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     return Optional.ofNullable(dtf);
   }
 
-  protected Optional<ZoneId> resolveHintZoneId(Map<String, ?> hints) {
+  protected static Optional<ZoneId> resolveHintZoneId(Map<String, ?> hints) {
     ZoneId zoneId = null;
     Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
     if (hintZoneId instanceof ZoneId) {

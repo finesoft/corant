@@ -28,27 +28,27 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Instant> {
 
-  public SqlDateInstantConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public SqlDateInstantConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public SqlDateInstantConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public SqlDateInstantConverter(Instant defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public SqlDateInstantConverter(Instant defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -61,10 +61,6 @@ public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Ins
 
   @Override
   protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
-    // return Instant.ofEpochMilli(((java.util.Date) value).getTime());
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       return value.toLocalDate().atStartOfDay(zoneId.get()).toInstant();

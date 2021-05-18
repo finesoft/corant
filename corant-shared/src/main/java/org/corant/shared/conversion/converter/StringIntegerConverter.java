@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,27 +23,27 @@ import java.util.Map;
  */
 public class StringIntegerConverter extends AbstractNumberConverter<String, Integer> {
 
-  public StringIntegerConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringIntegerConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringIntegerConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringIntegerConverter(Integer defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringIntegerConverter(Integer defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -52,26 +51,17 @@ public class StringIntegerConverter extends AbstractNumberConverter<String, Inte
 
   @Override
   protected Integer convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     } else {
       String val = value.trim();
-      if (hasHex(val)) {
+      if (hasPrefix(val)) {
         return Integer.decode(val);
       } else {
-        Integer radix = getHintsRadix(hints);
         if (isHintsUnsigned(hints)) {
-          if (radix != null) {
-            return Integer.parseUnsignedInt(val, radix);
-          } else {
-            return Integer.parseUnsignedInt(val);
-          }
+          return Integer.parseUnsignedInt(val, getHintsRadix(hints));
         } else {
-          if (radix != null) {
-            return Integer.valueOf(val, radix);
-          } else {
-            return Integer.valueOf(val);
-          }
+          return Integer.valueOf(val, getHintsRadix(hints));
         }
       }
     }

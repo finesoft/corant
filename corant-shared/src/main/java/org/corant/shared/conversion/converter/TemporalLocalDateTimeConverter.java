@@ -31,27 +31,28 @@ import java.util.Optional;
 public class TemporalLocalDateTimeConverter
     extends AbstractTemporalConverter<Temporal, LocalDateTime> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public TemporalLocalDateTimeConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TemporalLocalDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TemporalLocalDateTimeConverter(LocalDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TemporalLocalDateTimeConverter(LocalDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -64,9 +65,6 @@ public class TemporalLocalDateTimeConverter
 
   @Override
   protected LocalDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       // violate JSR-310

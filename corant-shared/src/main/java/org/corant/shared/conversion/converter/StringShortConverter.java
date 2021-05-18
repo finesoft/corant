@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,27 +23,27 @@ import java.util.Map;
  */
 public class StringShortConverter extends AbstractNumberConverter<String, Short> {
 
-  public StringShortConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringShortConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringShortConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringShortConverter(Short defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringShortConverter(Short defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -52,18 +51,14 @@ public class StringShortConverter extends AbstractNumberConverter<String, Short>
 
   @Override
   protected Short convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     } else {
       String val = value.trim();
-      if (hasHex(val)) {
+      if (hasPrefix(val)) {
         return Short.decode(val);
       } else {
-        Integer radix = getHintsRadix(hints);
-        if (radix != null) {
-          return Short.valueOf(val, radix);
-        }
-        return Short.valueOf(val);
+        return Short.valueOf(val, getHintsRadix(hints));
       }
     }
   }

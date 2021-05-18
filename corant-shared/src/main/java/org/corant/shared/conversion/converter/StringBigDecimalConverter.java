@@ -25,27 +25,28 @@ import java.util.Map;
  */
 public class StringBigDecimalConverter extends AbstractNumberConverter<String, BigDecimal> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public StringBigDecimalConverter() {
-    super();
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringBigDecimalConverter(BigDecimal defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringBigDecimalConverter(BigDecimal defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringBigDecimalConverter(boolean throwException) {
     super(throwException);

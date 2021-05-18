@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public class LocalDateSqlDateConverter extends AbstractConverter<LocalDate, Date> {
 
-  public LocalDateSqlDateConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public LocalDateSqlDateConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public LocalDateSqlDateConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public LocalDateSqlDateConverter(Date defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public LocalDateSqlDateConverter(Date defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -58,9 +58,6 @@ public class LocalDateSqlDateConverter extends AbstractConverter<LocalDate, Date
 
   @Override
   protected Date convert(LocalDate value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     return Date.valueOf(value);
   }
 

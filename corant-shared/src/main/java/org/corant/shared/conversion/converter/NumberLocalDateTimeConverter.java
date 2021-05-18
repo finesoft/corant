@@ -30,27 +30,27 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Number, LocalDateTime> {
 
-  public NumberLocalDateTimeConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberLocalDateTimeConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberLocalDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberLocalDateTimeConverter(LocalDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberLocalDateTimeConverter(LocalDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -63,9 +63,6 @@ public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Numb
 
   @Override
   protected LocalDateTime convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (!ozoneId.isPresent()) {
       if (!isStrict(hints)) {

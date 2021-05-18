@@ -30,32 +30,7 @@ import org.corant.shared.conversion.ConverterFactory;
  */
 public class IntArrayTemporalConverterFactory implements ConverterFactory<int[], Temporal> {
 
-  @Override
-  public Converter<int[], Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
-      boolean throwException) {
-    return (t, h) -> {
-      if (targetClass.equals(LocalTime.class)) {
-        return convertLocalTime(t, defaultValue);
-      } else if (targetClass.equals(LocalDate.class)) {
-        return convertLocalDate(t, defaultValue);
-      } else {
-        return convertLocalDateTime(t, defaultValue);
-      }
-    };
-  }
-
-  @Override
-  public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return int[].class.isAssignableFrom(sourceClass) || Integer[].class.equals(sourceClass);
-  }
-
-  @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
-        || targetClass.equals(LocalTime.class);
-  }
-
-  Temporal convertLocalDate(int[] value, Temporal defaultValue) {
+  public static LocalDate convertLocalDate(int[] value, LocalDate defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -66,7 +41,7 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
     }
   }
 
-  Temporal convertLocalDateTime(int[] value, Temporal defaultValue) {
+  public static LocalDateTime convertLocalDateTime(int[] value, LocalDateTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -83,7 +58,7 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
     }
   }
 
-  Temporal convertLocalTime(int[] value, Temporal defaultValue) {
+  public static LocalTime convertLocalTime(int[] value, LocalTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -95,6 +70,31 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
       }
       throw new ConversionException("Can't convert value to LocalTime from int array.");
     }
+  }
+
+  @Override
+  public Converter<int[], Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
+      boolean throwException) {
+    return (t, h) -> {
+      if (targetClass.equals(LocalTime.class)) {
+        return convertLocalTime(t, (LocalTime) defaultValue);
+      } else if (targetClass.equals(LocalDate.class)) {
+        return convertLocalDate(t, (LocalDate) defaultValue);
+      } else {
+        return convertLocalDateTime(t, (LocalDateTime) defaultValue);
+      }
+    };
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return int[].class.isAssignableFrom(sourceClass) || Integer[].class.equals(sourceClass);
+  }
+
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
+        || targetClass.equals(LocalTime.class);
   }
 
 }

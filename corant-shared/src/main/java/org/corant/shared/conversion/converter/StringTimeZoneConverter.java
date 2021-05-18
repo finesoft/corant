@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -25,27 +24,27 @@ import java.util.TimeZone;
  */
 public class StringTimeZoneConverter extends AbstractConverter<String, TimeZone> {
 
-  public StringTimeZoneConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringTimeZoneConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringTimeZoneConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringTimeZoneConverter(TimeZone defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringTimeZoneConverter(TimeZone defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,7 +52,7 @@ public class StringTimeZoneConverter extends AbstractConverter<String, TimeZone>
 
   @Override
   protected TimeZone convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return TimeZone.getTimeZone(value);

@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -25,27 +24,27 @@ import java.util.Map;
  */
 public class StringCharsetConverter extends AbstractConverter<String, Charset> {
 
-  public StringCharsetConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringCharsetConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringCharsetConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringCharsetConverter(Charset defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringCharsetConverter(Charset defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,7 +52,7 @@ public class StringCharsetConverter extends AbstractConverter<String, Charset> {
 
   @Override
   protected Charset convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return Charset.forName(value);

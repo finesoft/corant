@@ -48,45 +48,7 @@ import org.corant.shared.util.Objects;
  */
 public class StringObjectConverterFactory implements ConverterFactory<String, Object> {
 
-  @Override
-  public Converter<String, Object> create(Class<Object> targetClass, Object defaultValue,
-      boolean throwException) {
-    return forType(targetClass).get();
-  }
-
-  @Override
-  public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return String.class.equals(sourceClass) || CharSequence.class.equals(sourceClass);
-  }
-
-  @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    // enums use ObjectEnumConverterFactory
-    return forType(targetClass).isPresent() && !Enum.class.isAssignableFrom(targetClass);
-  }
-
-  @SuppressWarnings("unchecked")
-  <T> Optional<Converter<String, T>> forType(Type generalType) {
-    if (!(generalType instanceof Class)) {
-      return Optional.empty();
-    }
-    Class<T> type = (Class<T>) generalType;
-    //@formatter:off
-    return Stream.<Supplier<Converter<String, T>>>of(
-        () -> forMethod(type, "of", String.class),
-        () -> forMethod(type, "of", CharSequence.class),
-        () -> forMethod(type, "valueOf", String.class),
-        () -> forMethod(type, "valueOf", CharSequence.class),
-        () -> forMethod(type, "parse", String.class),
-        () -> forMethod(type, "parse", CharSequence.class),
-        () -> forConstructor(type, String.class),
-        () -> forConstructor(type, CharSequence.class)
-        ).map(Supplier::get)
-        .filter(Objects::isNotNull).findFirst();
-    //@formatter:on
-  }
-
-  private <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
+  static <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
     try {
       Constructor<?> constructor = targetClass.getConstructor(argumentTypes);
       if (Modifier.isPublic(constructor.getModifiers())) {
@@ -107,7 +69,7 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     }
   }
 
-  private <T> Converter<String, T> forMethod(Class<?> targetClass, String method,
+  static <T> Converter<String, T> forMethod(Class<?> targetClass, String method,
       Class<?>... argumentTypes) {
     try {
       Method factoryMethod = targetClass.getMethod(method, argumentTypes);
@@ -128,6 +90,44 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     } catch (NoSuchMethodException | SecurityException e) {
       return null;
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> Optional<Converter<String, T>> forType(Type generalType) {
+    if (!(generalType instanceof Class)) {
+      return Optional.empty();
+    }
+    Class<T> type = (Class<T>) generalType;
+    //@formatter:off
+    return Stream.<Supplier<Converter<String, T>>>of(
+        () -> forMethod(type, "of", String.class),
+        () -> forMethod(type, "of", CharSequence.class),
+        () -> forMethod(type, "valueOf", String.class),
+        () -> forMethod(type, "valueOf", CharSequence.class),
+        () -> forMethod(type, "parse", String.class),
+        () -> forMethod(type, "parse", CharSequence.class),
+        () -> forConstructor(type, String.class),
+        () -> forConstructor(type, CharSequence.class)
+        ).map(Supplier::get)
+        .filter(Objects::isNotNull).findFirst();
+    //@formatter:on
+  }
+
+  @Override
+  public Converter<String, Object> create(Class<Object> targetClass, Object defaultValue,
+      boolean throwException) {
+    return forType(targetClass).get();
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return String.class.equals(sourceClass) || CharSequence.class.equals(sourceClass);
+  }
+
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    // enums use ObjectEnumConverterFactory
+    return forType(targetClass).isPresent() && !Enum.class.isAssignableFrom(targetClass);
   }
 
 }

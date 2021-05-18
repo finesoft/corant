@@ -32,27 +32,28 @@ import java.util.Optional;
 public class TemporalZonedDateTimeConverter
     extends AbstractTemporalConverter<Temporal, ZonedDateTime> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public TemporalZonedDateTimeConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TemporalZonedDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TemporalZonedDateTimeConverter(ZonedDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TemporalZonedDateTimeConverter(ZonedDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -65,9 +66,6 @@ public class TemporalZonedDateTimeConverter
 
   @Override
   protected ZonedDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       // violate JSR-310

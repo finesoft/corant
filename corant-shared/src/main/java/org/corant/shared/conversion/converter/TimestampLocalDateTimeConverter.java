@@ -25,27 +25,28 @@ import java.util.Map;
  */
 public class TimestampLocalDateTimeConverter extends AbstractConverter<Timestamp, LocalDateTime> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public TimestampLocalDateTimeConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TimestampLocalDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TimestampLocalDateTimeConverter(LocalDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TimestampLocalDateTimeConverter(LocalDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -58,9 +59,6 @@ public class TimestampLocalDateTimeConverter extends AbstractConverter<Timestamp
 
   @Override
   protected LocalDateTime convert(Timestamp value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     return value.toLocalDateTime();
   }
 

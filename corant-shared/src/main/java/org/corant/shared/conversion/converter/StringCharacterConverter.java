@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 import org.corant.shared.conversion.ConversionException;
 
@@ -25,27 +24,27 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class StringCharacterConverter extends AbstractConverter<String, Character> {
 
-  public StringCharacterConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringCharacterConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringCharacterConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringCharacterConverter(Character defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringCharacterConverter(Character defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,7 +52,7 @@ public class StringCharacterConverter extends AbstractConverter<String, Characte
 
   @Override
   protected Character convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     if (value.length() == 1) {

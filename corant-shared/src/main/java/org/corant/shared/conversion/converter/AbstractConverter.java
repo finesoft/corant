@@ -26,7 +26,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 下午4:59:59
- *
  */
 public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
@@ -34,29 +33,50 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
   protected boolean throwException = true;
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
+  /**
+   * Constructs a converter, if the converted object is null, the conversion result is null; if it
+   * cannot be converted or an exception occurs during the conversion, an exception will be thrown.
+   */
   protected AbstractConverter() {}
 
   /**
-   * @param throwException
+   * Constructs a converter, if the converted object is null, the conversion result is null.
+   *
+   * @param throwException whether to throw an exception when a conversion error occurs
    */
   protected AbstractConverter(boolean throwException) {
     this.throwException = throwException;
   }
 
   /**
-   * @param defaultValue
+   * Constructs a converter, if the converted object is null, the conversion result is the given
+   * {@code defaultValue}; if it cannot be converted or an exception occurs during the conversion,
+   * an exception will be thrown.
+   *
+   * @param defaultValue if the object to be converted is null or the converted result is null then
+   *        use this value as converted as result
    */
   protected AbstractConverter(T defaultValue) {
     this.defaultValue = defaultValue;
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * Constructs a converter with the given default value and whether to throw exceptions.
+   *
+   * @param defaultValue if the object to be converted is null or the converted result is null then
+   *        use this value as converted as result
+   * @param throwException whether to throw an exception when a conversion error occurs
    */
   protected AbstractConverter(T defaultValue, boolean throwException) {
     this.defaultValue = defaultValue;
     this.throwException = throwException;
+  }
+
+  protected static boolean isStrict(Map<String, ?> hints) {
+    if (ConverterHints.containsKey(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY)) {
+      return ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY);
+    }
+    return false;
   }
 
   @Override
@@ -85,21 +105,22 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
   }
 
   /**
-   * @return the throwException
+   * Returns whether to throw an exception when a conversion error occurs
    */
   @Override
   public boolean isThrowException() {
     return throwException;
   }
 
+  /**
+   * The actual conversion method to facilitate the implementation of subclasses.
+   *
+   * @param value the object to be converted, do not need to check for null.
+   * @param hints the conversion hints use to intervene in the conversion process
+   * @return the converted value
+   * @throws Exception exception occurred during the conversion process
+   */
   protected abstract T convert(S value, Map<String, ?> hints) throws Exception;
-
-  protected boolean isStrict(Map<String, ?> hints) {
-    if (ConverterHints.containsKey(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY)) {
-      return ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY);
-    }
-    return false;
-  }
 
   protected void warn(Class<?> target, Object object) {
     if (object == null) {

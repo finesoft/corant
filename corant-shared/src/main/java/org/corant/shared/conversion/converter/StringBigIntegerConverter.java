@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public class StringBigIntegerConverter extends AbstractNumberConverter<String, BigInteger> {
 
-  public StringBigIntegerConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringBigIntegerConverter() {}
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringBigIntegerConverter(BigInteger defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringBigIntegerConverter(BigInteger defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringBigIntegerConverter(boolean throwException) {
     super(throwException);
@@ -57,11 +57,10 @@ public class StringBigIntegerConverter extends AbstractNumberConverter<String, B
       return getDefaultValue();
     } else {
       String val = value.trim();
-      if (hasHex(val)) {
+      if (hasPrefix(val)) {
         return BigInteger.valueOf(Long.decode(val));
       }
-      Integer radix = getHintsRadix(hints);
-      return radix != null ? new BigInteger(val, radix) : new BigInteger(val);
+      return new BigInteger(val, getHintsRadix(hints));
     }
   }
 

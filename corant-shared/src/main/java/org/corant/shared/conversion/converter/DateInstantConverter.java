@@ -25,27 +25,28 @@ import java.util.Map;
  */
 public class DateInstantConverter extends AbstractConverter<Date, Instant> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public DateInstantConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public DateInstantConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public DateInstantConverter(Instant defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public DateInstantConverter(Instant defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -58,9 +59,6 @@ public class DateInstantConverter extends AbstractConverter<Date, Instant> {
 
   @Override
   protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     return value.toInstant();
   }
 

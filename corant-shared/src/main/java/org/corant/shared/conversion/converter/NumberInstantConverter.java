@@ -26,27 +26,27 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberInstantConverter extends AbstractTemporalConverter<Number, Instant> {
 
-  public NumberInstantConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberInstantConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberInstantConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberInstantConverter(Instant defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberInstantConverter(Instant defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -59,9 +59,6 @@ public class NumberInstantConverter extends AbstractTemporalConverter<Number, In
 
   @Override
   protected Instant convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     if (ChronoUnit.SECONDS
         .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
       return Instant.ofEpochSecond(value.longValue());

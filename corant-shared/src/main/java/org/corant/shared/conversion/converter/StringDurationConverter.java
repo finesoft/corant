@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.time.Duration;
 import java.util.Map;
 
@@ -25,27 +24,27 @@ import java.util.Map;
  */
 public class StringDurationConverter extends AbstractConverter<String, Duration> {
 
-  public StringDurationConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringDurationConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringDurationConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringDurationConverter(Duration defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringDurationConverter(Duration defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,7 +52,7 @@ public class StringDurationConverter extends AbstractConverter<String, Duration>
 
   @Override
   protected Duration convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return Duration.parse(value.trim());

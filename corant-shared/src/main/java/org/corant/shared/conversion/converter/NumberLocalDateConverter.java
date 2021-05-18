@@ -29,27 +29,27 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberLocalDateConverter extends AbstractTemporalConverter<Number, LocalDate> {
 
-  public NumberLocalDateConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberLocalDateConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberLocalDateConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberLocalDateConverter(LocalDate defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberLocalDateConverter(LocalDate defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -62,9 +62,6 @@ public class NumberLocalDateConverter extends AbstractTemporalConverter<Number, 
 
   @Override
   protected LocalDate convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     ChronoUnit cu = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY);
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (ozoneId.isPresent()) {

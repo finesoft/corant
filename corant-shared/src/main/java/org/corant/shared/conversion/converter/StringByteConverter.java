@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,27 +23,27 @@ import java.util.Map;
  */
 public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
 
-  public StringByteConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringByteConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringByteConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringByteConverter(Byte defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringByteConverter(Byte defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -52,15 +51,14 @@ public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
 
   @Override
   protected Byte convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     } else {
       String val = value.trim();
-      if (hasHex(val)) {
+      if (hasPrefix(val)) {
         return Byte.decode(val);
       } else {
-        Integer radix = getHintsRadix(hints);
-        return radix != null ? Byte.valueOf(val, radix) : Byte.valueOf(val);
+        return Byte.valueOf(val, getHintsRadix(hints));
       }
     }
   }

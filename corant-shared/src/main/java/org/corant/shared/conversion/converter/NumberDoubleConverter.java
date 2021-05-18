@@ -23,27 +23,27 @@ import java.util.Map;
  */
 public class NumberDoubleConverter extends AbstractConverter<Number, Double> {
 
-  public NumberDoubleConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberDoubleConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberDoubleConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberDoubleConverter(Double defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberDoubleConverter(Double defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,8 +53,6 @@ public class NumberDoubleConverter extends AbstractConverter<Number, Double> {
   protected Double convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Double) {
       return (Double) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     return value.doubleValue();
   }

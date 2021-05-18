@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.net.URL;
 import java.util.Map;
 
@@ -25,27 +24,27 @@ import java.util.Map;
  */
 public class StringURLConverter extends AbstractConverter<String, URL> {
 
-  public StringURLConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringURLConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringURLConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringURLConverter(URL defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringURLConverter(URL defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,7 +52,7 @@ public class StringURLConverter extends AbstractConverter<String, URL> {
 
   @Override
   protected URL convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return new URL(value);

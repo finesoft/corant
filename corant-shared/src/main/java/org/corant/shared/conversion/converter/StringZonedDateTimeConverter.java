@@ -14,7 +14,6 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Chars.isDecimalNumber;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.split;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,27 +34,27 @@ import java.util.Optional;
  */
 public class StringZonedDateTimeConverter extends AbstractTemporalConverter<String, ZonedDateTime> {
 
-  public StringZonedDateTimeConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringZonedDateTimeConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringZonedDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringZonedDateTimeConverter(ZonedDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringZonedDateTimeConverter(ZonedDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -68,7 +67,7 @@ public class StringZonedDateTimeConverter extends AbstractTemporalConverter<Stri
 
   @Override
   protected ZonedDateTime convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     String val = value.trim();

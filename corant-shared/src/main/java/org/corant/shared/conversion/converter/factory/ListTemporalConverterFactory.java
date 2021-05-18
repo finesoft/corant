@@ -32,32 +32,7 @@ import org.corant.shared.conversion.ConverterFactory;
 @SuppressWarnings("rawtypes")
 public class ListTemporalConverterFactory implements ConverterFactory<List, Temporal> {
 
-  @Override
-  public Converter<List, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
-      boolean throwException) {
-    return (t, h) -> {
-      if (targetClass.equals(LocalTime.class)) {
-        return convertLocalTime(t, defaultValue);
-      } else if (targetClass.equals(LocalDate.class)) {
-        return convertLocalDate(t, defaultValue);
-      } else {
-        return convertLocalDateTime(t, defaultValue);
-      }
-    };
-  }
-
-  @Override
-  public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return List.class.isAssignableFrom(sourceClass);
-  }
-
-  @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
-        || targetClass.equals(LocalTime.class);
-  }
-
-  Temporal convertLocalDate(List value, Temporal defaultValue) {
+  public static LocalDate convertLocalDate(List value, LocalDate defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -68,7 +43,7 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
     }
   }
 
-  Temporal convertLocalDateTime(List value, Temporal defaultValue) {
+  public static LocalDateTime convertLocalDateTime(List value, LocalDateTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -89,7 +64,7 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
     }
   }
 
-  Temporal convertLocalTime(List value, Temporal defaultValue) {
+  static LocalTime convertLocalTime(List value, LocalTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -102,6 +77,31 @@ public class ListTemporalConverterFactory implements ConverterFactory<List, Temp
       }
       throw new ConversionException("Can't convert value to LocalTime from List object.");
     }
+  }
+
+  @Override
+  public Converter<List, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
+      boolean throwException) {
+    return (t, h) -> {
+      if (targetClass.equals(LocalTime.class)) {
+        return convertLocalTime(t, (LocalTime) defaultValue);
+      } else if (targetClass.equals(LocalDate.class)) {
+        return convertLocalDate(t, (LocalDate) defaultValue);
+      } else {
+        return convertLocalDateTime(t, (LocalDateTime) defaultValue);
+      }
+    };
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return List.class.isAssignableFrom(sourceClass);
+  }
+
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
+        || targetClass.equals(LocalTime.class);
   }
 
 }

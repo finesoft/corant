@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public class NumberBigDecimalConverter extends AbstractConverter<Number, BigDecimal> {
 
-  public NumberBigDecimalConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberBigDecimalConverter() {}
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberBigDecimalConverter(BigDecimal defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberBigDecimalConverter(BigDecimal defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberBigDecimalConverter(boolean throwException) {
     super(throwException);
@@ -53,9 +53,6 @@ public class NumberBigDecimalConverter extends AbstractConverter<Number, BigDeci
 
   @Override
   protected BigDecimal convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     if (value instanceof BigDecimal) {
       return (BigDecimal) value;
     } else if (value instanceof BigInteger) {

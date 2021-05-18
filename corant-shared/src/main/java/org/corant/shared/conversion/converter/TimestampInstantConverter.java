@@ -25,27 +25,27 @@ import java.util.Map;
  */
 public class TimestampInstantConverter extends AbstractConverter<Timestamp, Instant> {
 
-  public TimestampInstantConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public TimestampInstantConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TimestampInstantConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TimestampInstantConverter(Instant defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TimestampInstantConverter(Instant defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -58,9 +58,6 @@ public class TimestampInstantConverter extends AbstractConverter<Timestamp, Inst
 
   @Override
   protected Instant convert(Timestamp value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     return value.toInstant();
   }
 

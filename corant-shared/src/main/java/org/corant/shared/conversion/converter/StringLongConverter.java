@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,27 +23,27 @@ import java.util.Map;
  */
 public class StringLongConverter extends AbstractNumberConverter<String, Long> {
 
-  public StringLongConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringLongConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringLongConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringLongConverter(Long defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringLongConverter(Long defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -52,26 +51,17 @@ public class StringLongConverter extends AbstractNumberConverter<String, Long> {
 
   @Override
   protected Long convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     } else {
       String val = value.trim();
-      if (hasHex(val)) {
+      if (hasPrefix(val)) {
         return Long.decode(val);
       } else {
-        Integer radix = getHintsRadix(hints);
         if (isHintsUnsigned(hints)) {
-          if (radix != null) {
-            return Long.parseUnsignedLong(val, radix);
-          } else {
-            return Long.parseUnsignedLong(val);
-          }
+          return Long.parseUnsignedLong(val, getHintsRadix(hints));
         } else {
-          if (radix != null) {
-            return Long.valueOf(val, radix);
-          } else {
-            return Long.valueOf(val);
-          }
+          return Long.valueOf(val, getHintsRadix(hints));
         }
       }
     }

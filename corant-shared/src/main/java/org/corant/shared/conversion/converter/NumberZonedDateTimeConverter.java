@@ -31,27 +31,28 @@ import org.corant.shared.conversion.ConverterHints;
  */
 public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Number, ZonedDateTime> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public NumberZonedDateTimeConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberZonedDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberZonedDateTimeConverter(ZonedDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberZonedDateTimeConverter(ZonedDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -64,9 +65,6 @@ public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Numb
 
   @Override
   protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (!ozoneId.isPresent()) {
       if (!isStrict(hints)) {

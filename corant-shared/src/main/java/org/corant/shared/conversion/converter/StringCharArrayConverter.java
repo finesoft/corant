@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,26 +23,27 @@ import java.util.Map;
  */
 public class StringCharArrayConverter extends AbstractConverter<String, char[]> {
 
-  public StringCharArrayConverter() {
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringCharArrayConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringCharArrayConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringCharArrayConverter(char[] defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringCharArrayConverter(char[] defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -51,7 +51,7 @@ public class StringCharArrayConverter extends AbstractConverter<String, char[]> 
 
   @Override
   protected char[] convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return value.toCharArray();

@@ -14,7 +14,6 @@
 package org.corant.shared.conversion.converter;
 
 import static org.corant.shared.util.Chars.isDecimalNumber;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.split;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,27 +34,27 @@ import java.util.Optional;
  */
 public class StringLocalDateTimeConverter extends AbstractTemporalConverter<String, LocalDateTime> {
 
-  public StringLocalDateTimeConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringLocalDateTimeConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringLocalDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringLocalDateTimeConverter(LocalDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringLocalDateTimeConverter(LocalDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -63,7 +62,7 @@ public class StringLocalDateTimeConverter extends AbstractTemporalConverter<Stri
 
   @Override
   protected LocalDateTime convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     String val = value.trim();

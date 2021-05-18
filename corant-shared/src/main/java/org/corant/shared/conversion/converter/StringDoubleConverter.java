@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Map;
 
 /**
@@ -24,27 +23,27 @@ import java.util.Map;
  */
 public class StringDoubleConverter extends AbstractNumberConverter<String, Double> {
 
-  public StringDoubleConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringDoubleConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringDoubleConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringDoubleConverter(Double defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringDoubleConverter(Double defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -52,7 +51,7 @@ public class StringDoubleConverter extends AbstractNumberConverter<String, Doubl
 
   @Override
   protected Double convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     return Double.valueOf(value.trim());

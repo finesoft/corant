@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Locale;
 import java.util.Map;
 
@@ -29,27 +28,27 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
   public static final String EMPTY_STRING = "";
   public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
-  public StringLocaleConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public StringLocaleConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringLocaleConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringLocaleConverter(Locale defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringLocaleConverter(Locale defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -57,7 +56,7 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
 
   @Override
   protected Locale convert(String value, Map<String, ?> hints) throws Exception {
-    if (isEmpty(value)) {
+    if (value.isEmpty()) {
       return getDefaultValue();
     }
     String language;

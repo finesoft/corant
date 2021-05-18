@@ -24,27 +24,28 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberShortConverter extends AbstractConverter<Number, Short> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public NumberShortConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberShortConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberShortConverter(Short defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberShortConverter(Short defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -54,8 +55,6 @@ public class NumberShortConverter extends AbstractConverter<Number, Short> {
   protected Short convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Short) {
       return (Short) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     final long longValue = value.longValue();
     if (longValue > Short.MAX_VALUE) {

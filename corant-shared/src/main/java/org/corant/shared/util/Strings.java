@@ -97,6 +97,7 @@ public class Strings {
       "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   public static final String NUMBERS_AND_LOWER_CASE_LETTERS =
       "0123456789abcdefghijklmnopqrstuvwxyz";
+  public static final int SPLIT_ARRAY_LENGTH = 8;
   //@formatter:on
 
   private Strings() {}
@@ -374,6 +375,24 @@ public class Strings {
       }
     }
     return true;
+  }
+
+  /**
+   * <pre>
+   * Strings.isBlank(null)      = true
+   * Strings.isBlank("\t")      = true
+   * Strings.isBlank("")        = true
+   * Strings.isBlank(" ")       = true
+   * Strings.isBlank("abc")     = false
+   * Strings.isBlank("  abc  ") = false
+   * </pre>
+   *
+   * @since 1.6.2
+   * @param cs
+   * @return isBlank
+   */
+  public static boolean isBlank(final String cs) {
+    return cs == null || cs.isBlank();
   }
 
   /**
@@ -721,7 +740,7 @@ public class Strings {
     }
     int i = 0;
     int s = 0;
-    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
     int ai = 0;
     String[] array = new String[g];
     boolean match = false;
@@ -796,7 +815,7 @@ public class Strings {
     }
     int i = 0;
     int s = 0;
-    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
     int ai = 0;
     String[] array = new String[g];
     boolean match = false;
@@ -847,7 +866,7 @@ public class Strings {
     int s = 0;
     int e = 0;
     int i = 0;
-    int g = len > 16 ? 16 : (len >> 1) + 1;
+    int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
     String[] array = new String[g];
     while (e < len) {
       e = str.indexOf(wholeSeparator, s);

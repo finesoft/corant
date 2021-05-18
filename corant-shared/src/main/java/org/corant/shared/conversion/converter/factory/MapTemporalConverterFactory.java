@@ -35,34 +35,7 @@ import org.corant.shared.conversion.ConverterFactory;
 @SuppressWarnings("rawtypes")
 public class MapTemporalConverterFactory implements ConverterFactory<Map, Temporal> {
 
-  @Override
-  public Converter<Map, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
-      boolean throwException) {
-    return (t, h) -> {
-      if (targetClass.equals(Instant.class)) {
-        return convertInstant(t, defaultValue);
-      } else if (targetClass.equals(LocalDate.class)) {
-        return convertLocalDate(t, defaultValue);
-      } else if (targetClass.equals(LocalDateTime.class)) {
-        return convertLocalDateTime(t, defaultValue);
-      } else {
-        return convertLocalTime(t, defaultValue);
-      }
-    };
-  }
-
-  @Override
-  public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return Map.class.isAssignableFrom(sourceClass);
-  }
-
-  @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
-        || targetClass.equals(LocalTime.class) || targetClass.equals(Instant.class);
-  }
-
-  Temporal convertInstant(Map value, Temporal defaultValue) {
+  public static Instant convertInstant(Map value, Instant defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -76,7 +49,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     }
   }
 
-  Temporal convertLocalDate(Map value, Temporal defaultValue) {
+  public static LocalDate convertLocalDate(Map value, LocalDate defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -95,7 +68,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     }
   }
 
-  Temporal convertLocalDateTime(Map value, Temporal defaultValue) {
+  public static Temporal convertLocalDateTime(Map value, LocalDateTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -137,7 +110,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     }
   }
 
-  Temporal convertLocalTime(Map value, Temporal defaultValue) {
+  public static Temporal convertLocalTime(Map value, LocalTime defaultValue) {
     if (value == null) {
       return defaultValue;
     } else {
@@ -161,7 +134,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     }
   }
 
-  int resolveInteger(Object obj) {
+  static int resolveInteger(Object obj) {
     if (obj != null) {
       if (obj instanceof Integer) {
         return (Integer) obj;
@@ -176,7 +149,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
     throw new ConversionException("Can't convert %s to integer!", obj);
   }
 
-  long resolveLong(Object obj) {
+  static long resolveLong(Object obj) {
     if (obj != null) {
       if (obj instanceof Long) {
         return (Long) obj;
@@ -189,6 +162,33 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       }
     }
     throw new ConversionException("Can't convert %s to long!", obj);
+  }
+
+  @Override
+  public Converter<Map, Temporal> create(Class<Temporal> targetClass, Temporal defaultValue,
+      boolean throwException) {
+    return (t, h) -> {
+      if (targetClass.equals(Instant.class)) {
+        return convertInstant(t, (Instant) defaultValue);
+      } else if (targetClass.equals(LocalDate.class)) {
+        return convertLocalDate(t, (LocalDate) defaultValue);
+      } else if (targetClass.equals(LocalDateTime.class)) {
+        return convertLocalDateTime(t, (LocalDateTime) defaultValue);
+      } else {
+        return convertLocalTime(t, (LocalTime) defaultValue);
+      }
+    };
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return Map.class.isAssignableFrom(sourceClass);
+  }
+
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    return targetClass.equals(LocalDate.class) || targetClass.equals(LocalDateTime.class)
+        || targetClass.equals(LocalTime.class) || targetClass.equals(Instant.class);
   }
 
 }

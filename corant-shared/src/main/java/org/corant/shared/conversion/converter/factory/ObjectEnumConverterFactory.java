@@ -39,38 +39,9 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
   final Set<Class<?>> supportedSourceClass = immutableSetOf(Enum.class, Number.class,
       CharSequence.class, Integer.TYPE, Long.TYPE, Short.TYPE, Byte.TYPE);
 
-  @Override
-  public Converter<Object, Enum<?>> create(Class<Enum<?>> targetClass, Enum<?> defaultValue,
-      boolean throwException) {
-    return (t, h) -> {
-      Enum<?> result = null;
-      try {
-        result = convert(t, targetClass, h);
-      } catch (Exception e) {
-        if (throwException) {
-          throw new ConversionException(e);
-        } else {
-          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
-        }
-      }
-      return defaultObject(result, defaultValue);
-    };
-  }
-
-  @Override
-  public boolean isSupportSourceClass(Class<?> sourceClass) {
-    return supportedSourceClass.contains(sourceClass)
-        || supportedSourceClass.stream().anyMatch(c -> c.isAssignableFrom(sourceClass));
-  }
-
-  @Override
-  public boolean isSupportTargetClass(Class<?> targetClass) {
-    return Enum.class.isAssignableFrom(targetClass);
-  }
-
   @SuppressWarnings("rawtypes")
-  protected <T extends Enum<?>> T convert(Object value, Class<T> targetClass, Map<String, ?> hints)
-      throws Exception {
+  public static <T extends Enum<?>> T convert(Object value, Class<T> targetClass,
+      Map<String, ?> hints) throws Exception {
     if (value == null) {
       return null;
     }
@@ -99,5 +70,34 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
       }
       throw new ConversionException("Can not convert %s -> %s.", value.getClass(), targetClass);
     }
+  }
+
+  @Override
+  public Converter<Object, Enum<?>> create(Class<Enum<?>> targetClass, Enum<?> defaultValue,
+      boolean throwException) {
+    return (t, h) -> {
+      Enum<?> result = null;
+      try {
+        result = convert(t, targetClass, h);
+      } catch (Exception e) {
+        if (throwException) {
+          throw new ConversionException(e);
+        } else {
+          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
+        }
+      }
+      return defaultObject(result, defaultValue);
+    };
+  }
+
+  @Override
+  public boolean isSupportSourceClass(Class<?> sourceClass) {
+    return supportedSourceClass.contains(sourceClass)
+        || supportedSourceClass.stream().anyMatch(c -> c.isAssignableFrom(sourceClass));
+  }
+
+  @Override
+  public boolean isSupportTargetClass(Class<?> targetClass) {
+    return Enum.class.isAssignableFrom(targetClass);
   }
 }

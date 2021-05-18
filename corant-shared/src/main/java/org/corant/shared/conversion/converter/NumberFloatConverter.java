@@ -24,27 +24,27 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberFloatConverter extends AbstractConverter<Number, Float> {
 
-  public NumberFloatConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberFloatConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberFloatConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberFloatConverter(Float defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberFloatConverter(Float defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -54,8 +54,6 @@ public class NumberFloatConverter extends AbstractConverter<Number, Float> {
   protected Float convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Float) {
       return (Float) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     if (value.doubleValue() > Float.MAX_VALUE) {
       throw new ConversionException("Can not convert, the source value is too big for float!");

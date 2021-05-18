@@ -24,27 +24,27 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
 
-  public NumberIntegerConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberIntegerConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberIntegerConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberIntegerConverter(Integer defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberIntegerConverter(Integer defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -54,8 +54,6 @@ public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
   protected Integer convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Integer) {
       return (Integer) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     final long longValue = value.longValue();
     if (longValue > Integer.MAX_VALUE) {

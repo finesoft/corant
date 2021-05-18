@@ -29,27 +29,27 @@ import java.util.Map;
  */
 public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal, Instant> {
 
-  public TemporalInstantConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public TemporalInstantConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TemporalInstantConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TemporalInstantConverter(Instant defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TemporalInstantConverter(Instant defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -57,9 +57,6 @@ public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal
 
   @Override
   protected Instant convert(Temporal value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     ZoneId zoneId = resolveHintZoneId(hints).orElse(null);
     if (zoneId != null) {
       // violate JSR-310

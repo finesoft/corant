@@ -23,27 +23,28 @@ import java.util.Map;
  */
 public class NumberLongConverter extends AbstractConverter<Number, Long> {
 
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
   public NumberLongConverter() {
-    super();
   }
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberLongConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberLongConverter(Long defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberLongConverter(Long defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -53,8 +54,6 @@ public class NumberLongConverter extends AbstractConverter<Number, Long> {
   protected Long convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Long) {
       return (Long) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     return value.longValue();
   }

@@ -27,27 +27,27 @@ import org.corant.shared.conversion.ConverterHints;
 @SuppressWarnings("rawtypes")
 public class ObjectClassConverter extends AbstractConverter<Object, Class> {
 
-  public ObjectClassConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public ObjectClassConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public ObjectClassConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public ObjectClassConverter(Class defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public ObjectClassConverter(Class defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -55,9 +55,6 @@ public class ObjectClassConverter extends AbstractConverter<Object, Class> {
 
   @Override
   protected Class convert(Object value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
-    }
     if (value instanceof Class) {
       return (Class) value;
     } else {

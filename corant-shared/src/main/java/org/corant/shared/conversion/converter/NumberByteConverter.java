@@ -24,27 +24,27 @@ import org.corant.shared.conversion.ConversionException;
  */
 public class NumberByteConverter extends AbstractConverter<Number, Byte> {
 
-  public NumberByteConverter() {
-    super();
-  }
+  /**
+   * @see AbstractConverter#AbstractConverter()
+   */
+  public NumberByteConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public NumberByteConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public NumberByteConverter(Byte defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public NumberByteConverter(Byte defaultValue, boolean throwException) {
     super(defaultValue, throwException);
@@ -54,8 +54,6 @@ public class NumberByteConverter extends AbstractConverter<Number, Byte> {
   protected Byte convert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Byte) {
       return (Byte) value;
-    } else if (value == null) {
-      return getDefaultValue();
     }
     final long longValue = value.longValue();
     if (longValue > Byte.MAX_VALUE) {

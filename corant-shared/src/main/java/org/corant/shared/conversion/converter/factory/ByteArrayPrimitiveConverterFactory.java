@@ -34,6 +34,13 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
 
   final Logger logger = Logger.getLogger(this.getClass().getName());
 
+  protected static boolean isStrict(Map<String, ?> hints) {
+    if (ConverterHints.containsKey(hints, ConverterHints.CVT_BYTES_PRIMITIVE_STRICTLY_KEY)) {
+      return ConverterHints.getHint(hints, ConverterHints.CVT_BYTES_PRIMITIVE_STRICTLY_KEY);
+    }
+    return true;
+  }
+
   @Override
   public Converter<byte[], Object> create(Class<Object> targetClass, Object defaultValue,
       boolean throwException) {
@@ -80,13 +87,6 @@ public class ByteArrayPrimitiveConverterFactory implements ConverterFactory<byte
         || targetClass.equals(Long.class) || targetClass.equals(Integer.class)
         || targetClass.equals(Short.class) || targetClass.equals(Character.class)
         || targetClass.equals(Float.class) || targetClass.equals(Double.class);
-  }
-
-  protected boolean isStrict(Map<String, ?> hints) {
-    if (ConverterHints.containsKey(hints, ConverterHints.CVT_BYTES_PRIMITIVE_STRICTLY_KEY)) {
-      return ConverterHints.getHint(hints, ConverterHints.CVT_BYTES_PRIMITIVE_STRICTLY_KEY);
-    }
-    return true;
   }
 
 }

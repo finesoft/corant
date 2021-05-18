@@ -274,6 +274,13 @@
                  </xsd:documentation>
              </xsd:annotation>            
         </xsd:attribute>
+        <xsd:attribute name="single-as-list" type="xsd:boolean" use="optional" default="false">
+            <xsd:annotation>
+                 <xsd:documentation>
+                    When the parameter value is a single object, whether to treat it as a list.
+                 </xsd:documentation>
+             </xsd:annotation>           
+        </xsd:attribute>
         <xsd:attribute name="distinct" type="xsd:boolean" use="optional" default="true">
             <xsd:annotation>
                  <xsd:documentation>

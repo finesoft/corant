@@ -19,17 +19,21 @@ import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
@@ -208,6 +212,17 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
           } else {
             // handle single results
             Object resultValue = resolveFetchQueryCriteriaValue(result, namePath);
+            if (resultValue instanceof Collection) {
+              if (distinct && !(resultValue instanceof Set)) {
+                resultValue = new LinkedHashSet<>((Collection) resultValue);
+              }
+            } else if (parameter.isSingleAsList()) {
+              if (resultValue != null) {
+                resultValue = distinct ? setOf(resultValue) : listOf(resultValue);
+              } else {
+                resultValue = distinct ? Collections.emptySet() : Collections.emptyList();
+              }
+            }
             fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
           }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

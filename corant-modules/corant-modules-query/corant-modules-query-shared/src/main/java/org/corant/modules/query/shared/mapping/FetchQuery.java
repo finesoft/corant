@@ -297,6 +297,7 @@ public class FetchQuery implements Serializable {
       setValue(value);
       setType(type);
       setDistinct(distinct);
+      setSingleAsList(singleAsList);
     }
 
     /**

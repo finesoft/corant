@@ -28,7 +28,6 @@ import static org.corant.shared.util.Strings.asDefaultString;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -185,10 +184,11 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       Map<String, Object> criteria) {
     Map<String, Object> fetchCriteria = new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
-      Class<?> type = parameter.getType();
-      boolean distinct = parameter.isDistinct();
-      String name = parameter.getName();
-      FetchQueryParameterSource source = parameter.getSource();
+      final Class<?> type = parameter.getType();
+      final boolean distinct = parameter.isDistinct();
+      final boolean singleAsList = parameter.isSingleAsList();
+      final String name = parameter.getName();
+      final FetchQueryParameterSource source = parameter.getSource();
       if (source == FetchQueryParameterSource.C) {
         fetchCriteria.put(name, convertCriteriaValue(parameter.getValue(), type));
       } else if (source == FetchQueryParameterSource.P) {
@@ -216,12 +216,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
               if (distinct && !(resultValue instanceof Set)) {
                 resultValue = new LinkedHashSet<>((Collection) resultValue);
               }
-            } else if (parameter.isSingleAsList()) {
-              if (resultValue != null) {
-                resultValue = distinct ? setOf(resultValue) : listOf(resultValue);
-              } else {
-                resultValue = distinct ? Collections.emptySet() : Collections.emptyList();
-              }
+            } else if (singleAsList && (resultValue != null)) {
+              resultValue = distinct ? setOf(resultValue) : listOf(resultValue);
             }
             fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
           }

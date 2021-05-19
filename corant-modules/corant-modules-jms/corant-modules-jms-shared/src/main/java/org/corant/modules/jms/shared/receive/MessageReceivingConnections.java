@@ -105,11 +105,17 @@ public class MessageReceivingConnections {
     if (removeAndClose) {
       if (xa) {
         if ((conn = xaconns.remove(connectionFactoryId)) != null) {
+          logger.info(() -> String.format(
+              "Stop and close and remove xa connection, the connection factory id %s.",
+              connectionFactoryId));
           conn.stop();
           conn.close();
         }
       } else {
         if ((conn = conns.remove(connectionFactoryId)) != null) {
+          logger.info(() -> String.format(
+              "Stop and close and remove connection, the connection factory id %s.",
+              connectionFactoryId));
           conn.stop();
           conn.close();
         }
@@ -117,10 +123,14 @@ public class MessageReceivingConnections {
     } else {
       if (xa) {
         if ((conn = xaconns.get(connectionFactoryId)) != null) {
+          logger.info(() -> String.format("Stop xa connection, the connection factory id %s.",
+              connectionFactoryId));
           conn.stop();
         }
       } else {
         if ((conn = conns.get(connectionFactoryId)) != null) {
+          logger.info(() -> String.format("Stop connection, the connection factory id %s.",
+              connectionFactoryId));
           conn.stop();
         }
       }

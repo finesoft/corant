@@ -85,7 +85,7 @@ public class MessageReceivingMetaData {
     String bds = Configs.assemblyStringConfigProperty(ann.breakedDuration());
     String maxBds = Configs.assemblyStringConfigProperty(ann.maxBreakedDuration());
     Duration breakedDuration =
-        max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(8L));
+        max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(1L));
     if (ann.breakedBackoffAlgo() == BackoffAlgorithm.NONE) {
       breakedInterval = RetryInterval.noBackoff(breakedDuration);
     } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO) {

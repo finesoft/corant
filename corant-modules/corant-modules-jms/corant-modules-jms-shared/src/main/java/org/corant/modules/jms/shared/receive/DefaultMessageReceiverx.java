@@ -14,7 +14,6 @@
 package org.corant.modules.jms.shared.receive;
 
 import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.logging.Level;
@@ -27,6 +26,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.XAConnection;
+import javax.jms.XAConnectionFactory;
 import javax.jms.XASession;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -34,6 +34,7 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
+import org.corant.modules.jms.shared.context.JMSExceptionListener;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -58,24 +59,27 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 上午11:33:15
  *
  */
-public class DefaultMessageReceiver implements MessageReceiver {
+public class DefaultMessageReceiverx implements MessageReceiver {
 
-  protected static final Logger logger = Logger.getLogger(DefaultMessageReceiver.class.getName());
+  protected static final Logger logger = Logger.getLogger(DefaultMessageReceiverx.class.getName());
 
   // config
   protected final MessageReceivingMetaData meta;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
 
-  // worker workhorse
+  // worker object
+  protected final ConnectionFactory connectionFactory;
   protected final MessageHandler messageHandler;
   protected final MessageReceivingMediator mediator;
+  protected volatile Connection connection;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
 
-  protected DefaultMessageReceiver(MessageReceivingMetaData metaData, MessageHandler messageHandler,
+  protected DefaultMessageReceiverx(MessageReceivingMetaData metaData, MessageHandler messageHandler,
       MessageReceivingMediator mediator) {
     meta = metaData;
+    connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
     this.messageHandler = messageHandler;
     this.mediator = mediator;
     receiveThreshold = metaData.getReceiveThreshold();
@@ -89,22 +93,40 @@ public class DefaultMessageReceiver implements MessageReceiver {
     if (mediator.checkCancelled()) {
       return false;
     }
-
-    // FIXME If the task is closed while waiting for the connection to be established, an
-    // exception may be thrown
-
-    // initialize connection
-    Connection connection = resolve(MessageReceivingConnections.class).startConnection(meta);
-
+    if (connection == null) {
+      // FIXME If the task is closed while waiting for the connection to be established, an
+      // exception may be thrown
+      if (meta.isXa()) {
+        connection = ((XAConnectionFactory) connectionFactory).createXAConnection();
+      } else {
+        connection = connectionFactory.createConnection();
+      }
+      select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
+          .forEach(c -> c.configConnection(connection, meta));
+      select(JMSExceptionListener.class).stream().min(Sortable::compare)
+          .ifPresent(listener -> listener.tryConfig(connection));
+    }
     // initialize session
     if (session == null) {
-      if (meta.isXa()) {
-        session = ((XAConnection) connection).createXASession();
-      } else {
-        session = connection.createSession(meta.getAcknowledge());
+      try {
+        if (meta.isXa()) {
+          session = ((XAConnection) connection).createXASession();
+        } else {
+          session = connection.createSession(meta.getAcknowledge());
+        }
+        select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
+            .forEach(c -> c.configSession(session, meta));
+      } catch (JMSException je) {
+        if (connection != null) {
+          try {
+            connection.close();
+            connection = null;
+          } catch (JMSException e) {
+            je.addSuppressed(e);
+          }
+        }
+        throw je;
       }
-      select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
-          .forEach(c -> c.configSession(session, meta));
     }
     // initialize message consumer
     if (messageConsumer == null) {
@@ -124,12 +146,17 @@ public class DefaultMessageReceiver implements MessageReceiver {
             session.close();
             session = null;
           }
+          if (connection != null) {
+            connection.close();
+            connection = null;
+          }
         } catch (JMSException e) {
           je.addSuppressed(e);
         }
         throw je;
       }
     }
+    connection.start();
     return true;
   }
 
@@ -164,8 +191,25 @@ public class DefaultMessageReceiver implements MessageReceiver {
     try {
       closeMessageConsumerIfNecessary(stop);
       closeSessionIfNecessary(stop);
+      closeConnectionIfNecessary(stop);
     } finally {
       // Noop!
+    }
+  }
+
+  protected void closeConnectionIfNecessary(boolean forceClose) {
+    if (connection != null && (forceClose || meta.getCacheLevel() <= 0)) {
+      try {
+        connection.stop();
+        connection.close();
+      } catch (JMSException e) {
+        logger.log(Level.SEVERE, e,
+            () -> String.format("Close connection occurred error, [%s]", meta));
+      } finally {
+        messageConsumer = null;
+        session = null;
+        connection = null;
+      }
     }
   }
 
@@ -186,6 +230,9 @@ public class DefaultMessageReceiver implements MessageReceiver {
     if (session != null && (forceClose || meta.getCacheLevel() <= 1)) {
       try {
         session.close();
+        if (connection != null) {
+          connection.stop();
+        }
       } catch (JMSException e) {
         logger.log(Level.SEVERE, e,
             () -> String.format("Close session occurred error, [%s]", meta));
@@ -238,8 +285,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
     try {
       mediator.onReceivingException(e);
     } catch (Exception ex) {
-      logger.log(Level.SEVERE, ex,
-          () -> String.format("Message receiving task occurred error!, %s.", meta));
+      logger.log(Level.SEVERE, ex, () -> String.format("Execution occurred error!, %s.", meta));
     }
     try {
       if (meta.isXa()) {
@@ -259,8 +305,7 @@ public class DefaultMessageReceiver implements MessageReceiver {
     } catch (Exception te) {
       e.addSuppressed(te);
     } finally {
-      logger.log(Level.SEVERE, e,
-          () -> String.format("Message receiving occurred error!, %s.", meta));
+      logger.log(Level.SEVERE, e, () -> String.format("Execution occurred error!, %s.", meta));
     }
   }
 

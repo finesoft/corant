@@ -194,7 +194,7 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
   }
 
   @Override
-  protected void configurate(JMSContext jmsc, JMSProducer producer) {
+  protected void configure(JMSContext jmsc, JMSProducer producer) {
     if (isNotBlank(replyTo)) {
       producer
           .setJMSReplyTo(multicastReplyTo ? jmsc.createTopic(replyTo) : jmsc.createQueue(replyTo));
@@ -220,7 +220,7 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
     if (exceptionListener != null) {
       jmsc.setExceptionListener(exceptionListener);
     }
-    super.configurate(jmsc, producer);
+    super.configure(jmsc, producer);
   }
 
   @Override

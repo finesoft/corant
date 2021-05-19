@@ -44,7 +44,7 @@ import org.corant.shared.ubiquity.Sortable;
  * consumer usually requires a network round trip to set up. Producer is often more lightweight,
  * although there is often some overhead in creating it.
  *
- * NOTE: This is not threadsafe.
+ * NOTE: This is not thread safe.
  *
  * Unfinish: use connection or session pool
  *

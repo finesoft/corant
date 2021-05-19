@@ -210,7 +210,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   protected boolean preRun() {
     if (!CDIs.isEnabled()) {
       logger.log(Level.SEVERE,
-          () -> String.format("The executeion can't run because the CDI not enabled, %s.", meta));
+          () -> String.format("The execution can't run because the CDI not enabled, %s.", meta));
       return false;
     }
     if (state == STATE_BRK) {

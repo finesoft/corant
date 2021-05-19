@@ -138,7 +138,7 @@ public class MessageReceivingConnections {
     }
   }
 
-  protected Connection configurateConnection(MessageReceivingMetaData meta, Connection connection) {
+  protected Connection configureConnection(MessageReceivingMetaData meta, Connection connection) {
     select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
         .forEach(c -> c.configConnection(connection, meta));
     select(JMSExceptionListener.class).stream().min(Sortable::compare)
@@ -155,10 +155,10 @@ public class MessageReceivingConnections {
                 meta.getConnectionFactoryId()));
     try {
       if (meta.isXa()) {
-        return configurateConnection(meta,
+        return configureConnection(meta,
             ((XAConnectionFactory) connectionFactory).createXAConnection());
       } else {
-        return configurateConnection(meta, connectionFactory.createConnection());
+        return configureConnection(meta, connectionFactory.createConnection());
       }
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);

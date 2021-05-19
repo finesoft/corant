@@ -45,23 +45,24 @@ public class MessageReceivingConnections {
   public synchronized void shutdown() {
     conns.forEach((k, v) -> {
       try {
-        logger.info(() -> String.format("Close connection, the connection factory id %s.", k));
+        logger.info(() -> String.format("Dismantle connection, the connection factory id %s.", k));
         v.stop();
         v.close();
       } catch (Exception e) {
         logger.log(Level.WARNING, e, () -> String
-            .format("Close connection occurred error, the connection factory id %s", k));
+            .format("Dismantle connection occurred error, the connection factory id %s", k));
       }
     });
     conns.clear();
     xaconns.forEach((k, v) -> {
       try {
-        logger.info(() -> String.format("Close xa connection, the connection factory id %s.", k));
+        logger
+            .info(() -> String.format("Dismantle xa connection, the connection factory id %s.", k));
         v.stop();
         v.close();
       } catch (Exception e) {
         logger.log(Level.WARNING, e, () -> String
-            .format("Close xa connection occurred error, the connection factory id %s.", k));
+            .format("Dismantle xa connection occurred error, the connection factory id %s.", k));
       }
     });
     xaconns.clear();
@@ -75,7 +76,7 @@ public class MessageReceivingConnections {
       conn.start();
     } catch (Throwable e) {
       logger.warning(
-          () -> String.format("Start connection occurred error!, the connection factory id %s.",
+          () -> String.format("Start connection occurred error, the connection factory id %s.",
               meta.getConnectionFactoryId()));
       try {
         // the connection can't start, need to evict it for next step to re-create new connection.
@@ -146,7 +147,7 @@ public class MessageReceivingConnections {
   }
 
   protected Connection createConnection(MessageReceivingMetaData meta) {
-    logger.info(() -> String.format("Create %s connection, the connection factory id %s.",
+    logger.fine(() -> String.format("Create %s connection, the connection factory id %s.",
         meta.isXa() ? "xa" : "", meta.getConnectionFactoryId()));
     ConnectionFactory connectionFactory =
         findNamed(ConnectionFactory.class, meta.getConnectionFactoryId()).orElseThrow(

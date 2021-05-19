@@ -74,24 +74,24 @@ public class MessageReceiverMetaData {
     failureThreshold = max(4, ann.failureThreshold());
     tryThreshold = max(2, ann.tryThreshold());
     loopIntervalMs = max(500L, ann.loopIntervalMs());
-    String bds = Configs.assemblyStringConfigProperty(ann.breakedDuration());
-    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBreakedDuration());
+    String bds = Configs.assemblyStringConfigProperty(ann.brokenDuration());
+    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBrokenDuration());
     Duration breakedDuration =
         max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(8L));
-    if (ann.breakedBackoffAlgo() == BackoffAlgorithm.NONE) {
+    if (ann.brokenBackoffAlgo() == BackoffAlgorithm.NONE) {
       breakedInterval = RetryInterval.noBackoff(breakedDuration);
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO) {
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO) {
       breakedInterval = RetryInterval.expoBackoff(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
+          ann.brokenBackoffFactor());
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
       breakedInterval = RetryInterval.expoBackoffDecorr(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
+          ann.brokenBackoffFactor());
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
       breakedInterval = RetryInterval.expoBackoffEqualJitter(breakedDuration,
-          Duration.parse(maxBds), ann.breakedBackoffFactor());
+          Duration.parse(maxBds), ann.brokenBackoffFactor());
     } else {
       breakedInterval = RetryInterval.expoBackoffFullJitter(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
+          ann.brokenBackoffFactor());
     }
     xa = ann.xa();
     txTimeout = ann.txTimeout();

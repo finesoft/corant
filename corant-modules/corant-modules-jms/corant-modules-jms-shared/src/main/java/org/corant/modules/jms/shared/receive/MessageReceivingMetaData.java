@@ -58,7 +58,7 @@ public class MessageReceivingMetaData {
   private final int receiveThreshold;
   private final int failureThreshold;
   private final int tryThreshold;
-  private final RetryInterval breakedInterval;
+  private final RetryInterval brokenInterval;
   private final long loopIntervalMs;
   private final boolean xa;
   private final int txTimeout;
@@ -82,24 +82,24 @@ public class MessageReceivingMetaData {
     failureThreshold = max(4, ann.failureThreshold());
     tryThreshold = max(2, ann.tryThreshold());
     loopIntervalMs = max(500L, ann.loopIntervalMs());
-    String bds = Configs.assemblyStringConfigProperty(ann.breakedDuration());
-    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBreakedDuration());
-    Duration breakedDuration =
+    String bds = Configs.assemblyStringConfigProperty(ann.brokenDuration());
+    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBrokenDuration());
+    Duration brokenDuration =
         max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(1L));
-    if (ann.breakedBackoffAlgo() == BackoffAlgorithm.NONE) {
-      breakedInterval = RetryInterval.noBackoff(breakedDuration);
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO) {
-      breakedInterval = RetryInterval.expoBackoff(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
-      breakedInterval = RetryInterval.expoBackoffDecorr(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
-    } else if (ann.breakedBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
-      breakedInterval = RetryInterval.expoBackoffEqualJitter(breakedDuration,
-          Duration.parse(maxBds), ann.breakedBackoffFactor());
+    if (ann.brokenBackoffAlgo() == BackoffAlgorithm.NONE) {
+      brokenInterval = RetryInterval.noBackoff(brokenDuration);
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO) {
+      brokenInterval = RetryInterval.expoBackoff(brokenDuration, Duration.parse(maxBds),
+          ann.brokenBackoffFactor());
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
+      brokenInterval = RetryInterval.expoBackoffDecorr(brokenDuration, Duration.parse(maxBds),
+          ann.brokenBackoffFactor());
+    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
+      brokenInterval = RetryInterval.expoBackoffEqualJitter(brokenDuration,
+          Duration.parse(maxBds), ann.brokenBackoffFactor());
     } else {
-      breakedInterval = RetryInterval.expoBackoffFullJitter(breakedDuration, Duration.parse(maxBds),
-          ann.breakedBackoffFactor());
+      brokenInterval = RetryInterval.expoBackoffFullJitter(brokenDuration, Duration.parse(maxBds),
+          ann.brokenBackoffFactor());
     }
     xa = ann.xa();
     txTimeout = ann.txTimeout();
@@ -182,8 +182,8 @@ public class MessageReceivingMetaData {
     return acknowledge;
   }
 
-  public RetryInterval getBreakedInterval() {
-    return breakedInterval;
+  public RetryInterval getBrokenInterval() {
+    return brokenInterval;
   }
 
   public int getCacheLevel() {

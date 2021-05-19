@@ -13,14 +13,12 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.findNamed;
 import static org.corant.context.Instances.resolve;
 import static org.corant.context.Instances.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -35,7 +33,6 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import org.corant.modules.jta.shared.TransactionService;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -210,12 +207,6 @@ public class DefaultMessageReceiver implements MessageReceiver {
       logger.log(Level.FINE, () -> String.format("Finished message handling, [%s]", meta));
     }
     return message;
-  }
-
-  protected ConnectionFactory createConnectionFactory(String connectionFactoryId) {
-    return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
-        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
-            connectionFactoryId));
   }
 
   protected JMSException generateJMSException(Exception t) {

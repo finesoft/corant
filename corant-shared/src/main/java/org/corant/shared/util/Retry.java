@@ -419,7 +419,7 @@ public class Retry {
     }
 
     /**
-     * The exception handler, if the thrower throw any exceptions the attempt will be breaked.
+     * The exception handler, if the thrower throw any exceptions the attempt will be broken.
      *
      * @param thrower
      * @return thrower

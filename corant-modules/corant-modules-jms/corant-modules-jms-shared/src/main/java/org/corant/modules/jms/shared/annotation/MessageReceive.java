@@ -51,23 +51,23 @@ public @interface MessageReceive {
    *
    * @return tryBackoffAlgo
    */
-  BackoffAlgorithm breakedBackoffAlgo() default BackoffAlgorithm.NONE;
+  BackoffAlgorithm brokenBackoffAlgo() default BackoffAlgorithm.NONE;
 
   /**
-   * The breaked backoff factor, for Exponential backoff + jitter algorithm to compute the delay.
-   * The value of backoff factor must greater then 1.0, default is 0 means do not enable Exponential
+   * The broken backoff factor, for Exponential backoff + jitter algorithm to compute the delay. The
+   * value of backoff factor must greater then 1.0, default is 0 means do not enable Exponential
    * backoff + jitter algorithm.
    *
-   * @return breakedBackoff
+   * @return brokenBackoff
    */
-  double breakedBackoffFactor() default 2.0;
+  double brokenBackoffFactor() default 2.0;
 
   /**
-   * The breaked duration, if exceeds then start try mode.
+   * The broken duration, if exceeds then start try mode.
    *
-   * @return breakedDuration
+   * @return brokenDuration
    */
-  String breakedDuration() default "PT5M";
+  String brokenDuration() default "PT5M";
 
   /**
    * Marks whether a connection or session is cached.
@@ -122,11 +122,11 @@ public @interface MessageReceive {
   long loopIntervalMs() default 1000L;
 
   /**
-   * The max breaked duration, if exceeds then start try mode.
+   * The max broken duration, if exceeds then start try mode.
    *
-   * @return breakedDuration
+   * @return maxBrokenDuration
    */
-  String maxBreakedDuration() default "PT1H";
+  String maxBrokenDuration() default "PT1H";
 
   /**
    * Marks whether a queue or topic.

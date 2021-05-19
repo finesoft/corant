@@ -71,12 +71,12 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
 
   // control circuit break
   protected final int failureThreshold;
-  protected final RetryInterval breakedInterval;
+  protected final RetryInterval brokenInterval;
   protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
-  protected volatile long breakedTimePoint;
-  protected volatile long breakedMillis;
+  protected volatile long brokenTimePoint;
+  protected volatile long brokenMillis;
   protected volatile boolean inProgress;
   protected volatile boolean lastExecutionSuccessfully = false;
 
@@ -90,7 +90,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   protected final MessageReplier messageReplier;
 
   public DefaultMessageReceivingTask(MessageReceivingMetaData metaData) {
-    this(metaData, metaData.getBreakedInterval());
+    this(metaData, metaData.getBrokenInterval());
   }
 
   public DefaultMessageReceivingTask(MessageReceivingMetaData metaData,
@@ -99,7 +99,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
     loopIntervalMillis = metaData.getLoopIntervalMs();
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
-    breakedInterval = retryInterval;
+    brokenInterval = retryInterval;
     tryThreshold = metaData.getTryThreshold();
     messageReplier = new DefaultMessageReplier(meta, this);
     messageHandler = new DefaultMessageHandler(meta, this);
@@ -194,7 +194,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
           return;
         } else {
           tryFailureCounter.set(0);
-          breakedInterval.reset();
+          brokenInterval.reset();
           if (tryCounter.incrementAndGet() >= tryThreshold) {
             stateRun();
           }
@@ -214,11 +214,11 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
       return false;
     }
     if (state == STATE_BRK) {
-      long countdownMs = breakedMillis - (System.currentTimeMillis() - breakedTimePoint);
+      long countdownMs = brokenMillis - (System.currentTimeMillis() - brokenTimePoint);
       if (countdownMs > 0) {
         if (countdownMs < loopIntervalMillis * 3) {
           logger.log(Level.INFO, () -> String
-              .format("The execution was breaked countdown %s ms, [%s]!", countdownMs, meta));
+              .format("The execution was broken countdown %s ms, [%s]!", countdownMs, meta));
         }
         return false;
       } else {
@@ -226,7 +226,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
         return true;
       }
     }
-    breakedMillis = 0L;
+    brokenMillis = 0L;
     return true;
   }
 
@@ -234,17 +234,17 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
     lastExecutionSuccessfully = true;
     jmsFailureCounter.set(0);
     failureCounter.set(0);
-    breakedTimePoint = 0;
+    brokenTimePoint = 0;
     tryCounter.set(0);
   }
 
   protected void stateBrk() {
     resetMonitors();
-    breakedTimePoint = System.currentTimeMillis();
-    breakedMillis = breakedInterval.calculateMillis(tryFailureCounter.get());
+    brokenTimePoint = System.currentTimeMillis();
+    brokenMillis = brokenInterval.calculateMillis(tryFailureCounter.get());
     state = STATE_BRK;
     logger.log(Level.WARNING, () -> String
-        .format("The execution enters breaking mode wait for [%s] ms, [%s]!", breakedMillis, meta));
+        .format("The execution enters breaking mode wait for [%s] ms, [%s]!", brokenMillis, meta));
     messageReceiver.release(true);
   }
 

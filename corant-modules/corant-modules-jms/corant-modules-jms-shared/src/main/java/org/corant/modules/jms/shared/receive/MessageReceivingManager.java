@@ -57,7 +57,7 @@ public class MessageReceivingManager {
   protected Logger logger;
 
   @Inject
-  protected AbstractJMSExtension extesion;
+  protected AbstractJMSExtension extension;
 
   @Inject
   protected MessageReceivingTaskFactory taskFactory;
@@ -68,13 +68,13 @@ public class MessageReceivingManager {
   protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
       new HashMap<>();
 
-  protected final List<MessageReceivingMetaData> receiveMetaDatas = new ArrayList<>();
+  protected final List<MessageReceivingMetaData> receivingMetaData = new ArrayList<>();
 
   protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     Set<Pair<String, String>> anycasts = new HashSet<>();
-    for (final MessageReceivingMetaData metaData : receiveMetaDatas) {
+    for (final MessageReceivingMetaData metaData : receivingMetaData) {
       if (!metaData.isMulticast()
           && !anycasts.add(Pair.of(metaData.getConnectionFactoryId(), metaData.getDestination()))) {
         logger.warning(() -> String.format(
@@ -86,11 +86,11 @@ public class MessageReceivingManager {
       if (cfg != null && cfg.isEnable()) {
         if (metaData.isXa()) {
           shouldBeTrue(cfg.isXa(),
-              "Can't schedule xa message receiveing task, the connection factory doesn't support xa! message receiver [%s].",
+              "Can't schedule xa message receiving task, the connection factory doesn't support xa! message receiver [%s].",
               metaData);
         }
         ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
-            "Can't schedule message receiveing task, the connection factory not found. message receiver [%s].",
+            "Can't schedule message receiving task, the connection factory not found. message receiver [%s].",
             metaData);
         MessageReceivingTask task = taskFactory.create(metaData);
         ScheduledFuture<?> future =
@@ -98,7 +98,7 @@ public class MessageReceivingManager {
                 cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
         receiveExecutions.add(new MessageReceivingTaskExecution(future, task));
         logger.fine(() -> String.format(
-            "Scheduled message receiveing task initial delay [%s]Ms. message receiver [%s].",
+            "Scheduled message receiving task initial delay [%s]Ms. message receiver [%s].",
             cfg.getReceiveTaskInitialDelay(), metaData));
       }
     }
@@ -106,15 +106,15 @@ public class MessageReceivingManager {
   }
 
   protected void onPreContainerStopEvent(@Observes final PreContainerStopEvent event) {
-    logger.info(() -> "Stopping the message receiveing tasks...");
+    logger.info(() -> "Stopping the message receiving tasks...");
     while (!receiveExecutions.isEmpty()) {
       try {
         receiveExecutions.remove(0).cancel();
       } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> "Stop message receiveing task error!");
+        logger.log(Level.WARNING, e, () -> "Stop message receiving task error!");
       }
     }
-    logger.info(() -> "All message receiveing tasks were stopped.");
+    logger.info(() -> "All message receiving tasks were stopped.");
     logger.info(() -> "Stopping the message receiving executor services.");
     Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
         executorServices.entrySet().iterator();
@@ -124,7 +124,7 @@ public class MessageReceivingManager {
         entry.getValue().shutdown();
         entry.getValue().awaitTermination(
             entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
-        logger.info(() -> String.format("The message receiveing executor service %s was stopped.",
+        logger.info(() -> String.format("The message receiving executor service %s was stopped.",
             entry.getKey().getConnectionFactoryId()));
       } catch (InterruptedException e) {
         logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
@@ -134,21 +134,21 @@ public class MessageReceivingManager {
         it.remove();
       }
     }
-    logger.info(() -> "All message receiveing executor services were stopped.");
+    logger.info(() -> "All message receiving executor services were stopped.");
     connections.shutdown();
-    logger.info(() -> "All message receiveing connections were released.");
+    logger.info(() -> "All message receiving connections were released.");
   }
 
   @PostConstruct
   protected void postConstruct() {
-    extesion.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
-        .forEach(receiveMetaDatas::addAll);
-    if (!receiveMetaDatas.isEmpty()) {
+    extension.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
+        .forEach(receivingMetaData::addAll);
+    if (!receivingMetaData.isEmpty()) {
       // FIXME check receive and reply recursion
       final Map<String, ? extends AbstractJMSConfig> cfgs =
-          extesion.getConfigManager().getAllWithNames();
+          extension.getConfigManager().getAllWithNames();
       Set<AbstractJMSConfig> useCfgs = new HashSet<>();
-      Iterator<MessageReceivingMetaData> metait = receiveMetaDatas.iterator();
+      Iterator<MessageReceivingMetaData> metait = receivingMetaData.iterator();
       while (metait.hasNext()) {
         MessageReceivingMetaData meta = metait.next();
         AbstractJMSConfig f = cfgs.get(meta.getConnectionFactoryId());
@@ -173,7 +173,7 @@ public class MessageReceivingManager {
       }
       logger.info(
           () -> String.format("Found %s message receivers that involving %s connection factories.",
-              receiveMetaDatas.size(), executorServices.size()));
+              receivingMetaData.size(), executorServices.size()));
     }
   }
 

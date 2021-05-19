@@ -86,36 +86,36 @@ public class MessageReceivingManager {
       if (cfg != null && cfg.isEnable()) {
         if (metaData.isXa()) {
           shouldBeTrue(cfg.isXa(),
-              "Can not schedule xa message receiver task, the connection factory [%s] not supported! message receiver [%s].",
-              cfg.getConnectionFactoryId(), metaData);
+              "Can't schedule xa message receiveing task, the connection factory doesn't support xa! message receiver [%s].",
+              metaData);
         }
         ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
-            "Can not schedule message receiver task, connection factory id [%s] not found. message receiver [%s].",
-            cfg.getConnectionFactoryId(), metaData);
+            "Can't schedule message receiveing task, the connection factory not found. message receiver [%s].",
+            metaData);
         MessageReceivingTask task = taskFactory.create(metaData);
         ScheduledFuture<?> future =
             ses.scheduleWithFixedDelay(task, cfg.getReceiveTaskInitialDelay().toMillis(),
                 cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
         receiveExecutions.add(new MessageReceivingTaskExecution(future, task));
         logger.fine(() -> String.format(
-            "Scheduled message receiver task, connection factory id [%s], destination [%s], initial delay [%s]Ms",
-            metaData.getConnectionFactoryId(), metaData.getDestination(),
-            cfg.getReceiveTaskInitialDelay()));
+            "Scheduled message receiveing task initial delay [%s]Ms. message receiver [%s].",
+            cfg.getReceiveTaskInitialDelay(), metaData));
       }
     }
     anycasts.clear();
   }
 
   protected void onPreContainerStopEvent(@Observes final PreContainerStopEvent event) {
-    logger.info(() -> "Stop the message receiver tasks.");
+    logger.info(() -> "Stopping the message receiveing tasks...");
     while (!receiveExecutions.isEmpty()) {
       try {
         receiveExecutions.remove(0).cancel();
       } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> "Stop message receiver task error!");
+        logger.log(Level.WARNING, e, () -> "Stop message receiveing task error!");
       }
     }
-    logger.info(() -> "Stop the message receiver executor services.");
+    logger.info(() -> "All message receiveing tasks were stopped.");
+    logger.info(() -> "Stopping the message receiving executor services.");
     Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
         executorServices.entrySet().iterator();
     while (it.hasNext()) {
@@ -124,7 +124,7 @@ public class MessageReceivingManager {
         entry.getValue().shutdown();
         entry.getValue().awaitTermination(
             entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
-        logger.info(() -> String.format("The message receiver executor service %s was stopped.",
+        logger.info(() -> String.format("The message receiveing executor service %s was stopped.",
             entry.getKey().getConnectionFactoryId()));
       } catch (InterruptedException e) {
         logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
@@ -134,7 +134,9 @@ public class MessageReceivingManager {
         it.remove();
       }
     }
+    logger.info(() -> "All message receiveing executor services were stopped.");
     connections.shutdown();
+    logger.info(() -> "All message receiveing connections were released.");
   }
 
   @PostConstruct

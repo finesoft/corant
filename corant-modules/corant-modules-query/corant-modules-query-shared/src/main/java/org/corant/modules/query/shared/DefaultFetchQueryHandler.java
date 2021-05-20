@@ -133,9 +133,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     MutableObject<QueryParameter> resolved = new MutableObject<>(
         new DefaultQueryParameter().context(parentQueryparameter.getContext()).criteria(
             resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter))));
-    select(QueryParameterReviser.class).stream()
-        .filter(r -> r.useInFetchQuery() && r.canHandle(query)).sorted(Sortable::compare)
-        .forEach(resolved::apply);
+    select(QueryParameterReviser.class).stream().filter(r -> r.canHandle(query))
+        .sorted(Sortable::compare).forEach(resolved::apply);
     return resolved.get();
   }
 
@@ -216,7 +215,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
               if (distinct && !(resultValue instanceof Set)) {
                 resultValue = new LinkedHashSet<>((Collection) resultValue);
               }
-            } else if (singleAsList && (resultValue != null)) {
+            } else if (singleAsList && resultValue != null) {
               resultValue = distinct ? setOf(resultValue) : listOf(resultValue);
             }
             fetchCriteria.put(name, convertCriteriaValue(resultValue, type));

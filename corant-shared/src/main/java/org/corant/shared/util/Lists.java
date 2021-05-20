@@ -45,9 +45,9 @@ public class Lists {
    * The new array contains all of the element of {@code src} followed by all of the elements
    * {@code ts}. When an array is returned, it is always a new array.
    *
-   * @param <E>
-   * @param src
-   * @param ts
+   * @param <E> the element type
+   * @param src the first array whose elements are added to the new array
+   * @param ts the second array whose elements are added to the new array
    * @return append
    */
   @SuppressWarnings("unchecked")
@@ -81,10 +81,9 @@ public class Lists {
    * get(list,-2) equals list.get(list.size()-2)
    * </pre>
    *
-   * @param <E>
-   * @param list
-   * @param index
-   * @return get
+   * @param <E> the element type
+   * @param list the list to get a value from
+   * @param index the index to get
    */
   public static <E> E get(List<? extends E> list, int index) {
     return index < 0 ? list.get(sizeOf(list) + index) : list.get(index);
@@ -93,8 +92,8 @@ public class Lists {
   /**
    * Convert an array to a non-null immutable list
    *
-   * @param <E>
-   * @param objects
+   * @param <E> the element type
+   * @param objects the objects to construct an immutable list
    * @return an immutable list that combined by the passed in array
    */
   @SafeVarargs
@@ -108,8 +107,8 @@ public class Lists {
   /**
    * Convert an array to a non-null linked list
    *
-   * @param <E>
-   * @param objects
+   * @param <E> the element type
+   * @param objects the objects to construct a linked list
    * @return a linked list that combined by the passed in array
    */
   @SafeVarargs
@@ -124,10 +123,22 @@ public class Lists {
   }
 
   /**
+   * Convert an array to non-null list
+   *
+   * @param <E> the element type
+   * @param objects the objects to construct a list
+   * @return a list that combined by the passed in array
+   */
+  @SafeVarargs
+  public static <E> List<E> listOf(final E... objects) {
+    return collectionOf(ArrayList::new, objects);
+  }
+
+  /**
    * Convert an enumeration to a non-null list
    *
-   * @param <E>
-   * @param enumeration
+   * @param <E> the element type
+   * @param enumeration the elements that the list should contain
    * @return a list that combined by the passed in enumeration
    */
   public static <E> List<E> listOf(final Enumeration<? extends E> enumeration) {
@@ -143,8 +154,8 @@ public class Lists {
   /**
    * Convert an iterable to a non-null list
    *
-   * @param <E>
-   * @param iterable
+   * @param <E> the element type
+   * @param iterable the elements that the list should contain
    * @return a list that combined by the passed in iterable
    */
   public static <E> List<E> listOf(final Iterable<? extends E> iterable) {
@@ -160,8 +171,8 @@ public class Lists {
   /**
    * Convert an iterator to a non-null list
    *
-   * @param <E>
-   * @param iterator
+   * @param <E> the element type
+   * @param iterator the elements that the list should contain
    * @return a list that combined by the passed in iterator
    */
   public static <E> List<E> listOf(final Iterator<? extends E> iterator) {
@@ -175,24 +186,11 @@ public class Lists {
   }
 
   /**
-   * Convert an array to non-null list
-   *
-   * @param <E>
-   * @param objects
-   * @return a list that combined by the passed in array
-   */
-  @SafeVarargs
-  public static <E> List<E> listOf(final E... objects) {
-    return collectionOf(ArrayList::new, objects);
-  }
-
-  /**
    * Break a collection into smaller non-null pieces
    *
-   * @param <E>
-   * @param collection
-   * @param size
-   * @return partition
+   * @param <E> the element type
+   * @param collection the elements that the smaller list should contain
+   * @param size the pieces list size
    */
   public static <E> List<List<E>> partition(final Collection<E> collection, int size) {
     List<List<E>> result = new ArrayList<>();
@@ -207,11 +205,10 @@ public class Lists {
   /**
    * Null safe removeIf, execution begins only if the parameters passed in are not null.
    *
-   * @param <C>
-   * @param <E>
-   * @param collection
-   * @param p
-   * @return removeIf
+   * @param <C> the collection type
+   * @param <E> the element type
+   * @param collection the collection that elements will be removed
+   * @param p the predicate which returns true for elements to be removed
    */
   public static <C extends Collection<E>, E> C removeIf(final C collection,
       Predicate<? super E> p) {
@@ -229,10 +226,9 @@ public class Lists {
    * that pass predicate tests. The component type of the returned array is always the same as that
    * of the input array.
    *
-   * @param <E>
-   * @param src
-   * @param predicate
-   * @return removeIf
+   * @param <E> the collection type
+   * @param src the array that elements will be removed
+   * @param predicate the predicate which returns true for elements to be removed
    */
   @SuppressWarnings("unchecked")
   public static <E> E[] removeIf(E[] src, Predicate<? super E> predicate) {
@@ -251,29 +247,49 @@ public class Lists {
   }
 
   /**
+   * Swaps the two specified elements in the specified array.
+   *
+   * @param <E> the element type
+   * @param a the array in which the elements at two positions will be swapped
+   * @param i the position index
+   * @param j the other position index
+   */
+  public static <E> void swap(E[] a, int i, int j) {
+    final E t = a[i];
+    a[i] = a[j];
+    a[j] = t;
+  }
+
+  /**
    * Swaps the elements at the specified positions in the specified list.(If the specified positions
    * are equal, invoking this method leaves the list unchanged.)
    *
-   * @param <E>
-   * @param l
-   * @param i
-   * @param j swap
+   * @param <E> the element type
+   * @param l the list in which the elements at two positions will be swapped
+   * @param i the position index
+   * @param j the other position index
    */
   public static <E> void swap(List<? extends E> l, int i, int j) {
     Collections.swap(l, i, j);
   }
 
   /**
-   * Swaps the two specified elements in the specified array.
+   * Returns a new list containing the given collections. The List.addAll(Collection) operation is
+   * used to append the given collections into a new list.
    *
-   * @param <E>
-   * @param a
-   * @param i
-   * @param j swap
+   * @param <E> the element type
+   * @param collections the collections to be union
    */
-  public static <E> void swap(E[] a, int i, int j) {
-    final E t = a[i];
-    a[i] = a[j];
-    a[j] = t;
+  @SafeVarargs
+  public static <E> List<E> union(Collection<? extends E>... collections) {
+    List<E> union = new ArrayList<>();
+    if (collections.length > 0) {
+      for (Collection<? extends E> collection : collections) {
+        if (collection != null) {
+          union.addAll(collection);
+        }
+      }
+    }
+    return union;
   }
 }

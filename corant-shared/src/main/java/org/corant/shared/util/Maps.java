@@ -769,6 +769,27 @@ public class Maps {
     return pops;
   }
 
+  /**
+   * Returns a new map containing the given maps. The Map.putAll(Map) operation is used to append
+   * the given maps into a new map.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param maps the maps to be union
+   */
+  @SafeVarargs
+  public static <K, V> Map<K, V> union(Map<? extends K, ? extends V>... maps) {
+    Map<K, V> union = new HashMap<>();
+    if (maps.length > 0) {
+      for (Map<? extends K, ? extends V> map : maps) {
+        if (map != null) {
+          union.putAll(map);
+        }
+      }
+    }
+    return union;
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   static void doFlatMap(Map<FlatMapKey, Object> resultMap, FlatMapKey key, Object val,
       int maxDepth) {

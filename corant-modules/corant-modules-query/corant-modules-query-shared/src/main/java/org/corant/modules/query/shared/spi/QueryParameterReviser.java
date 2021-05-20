@@ -15,6 +15,8 @@ package org.corant.modules.query.shared.spi;
 
 import java.util.function.UnaryOperator;
 import org.corant.modules.query.shared.QueryParameter;
+import org.corant.modules.query.shared.mapping.FetchQuery;
+import org.corant.modules.query.shared.mapping.Query;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -25,11 +27,22 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface QueryParameterReviser extends UnaryOperator<QueryParameter>, Sortable {
 
+  /**
+   * Check the query or fetch query object and return whether the reviser can perform query
+   * parameter revision. It can be checked based various attributes of the {@link Query} object or
+   * the {@link FetchQuery} object, for example: check whether the name of the query
+   * {@link Query#getName()} is satisfy some condition to decide whether the reviser can perform
+   * query parameter revision.
+   *
+   * <p>
+   * Default we just check whether the given object is instance of {@link Query}, it means that is
+   * not support {@link FetchQuery} parameter revision.
+   *
+   * @param query the query object may be Query or FetchQuery
+   * @return whether the reviser can perform query parameter revision
+   */
   default boolean canHandle(Object query) {
-    return true;
+    return query instanceof Query;
   }
 
-  default boolean useInFetchQuery() {
-    return false;
-  }
 }

@@ -35,27 +35,30 @@ public class Objects {
 
   protected Objects() {}
 
+  /**
+   * @see java.util.Objects#deepEquals(Object, Object)
+   */
   public static boolean areDeepEqual(Object a, Object b) {
     return java.util.Objects.deepEquals(a, b);
   }
 
   /**
-   * @see java.util.Objects#hash(Object...)
-   * @param a
-   * @param b
-   * @return areEqual
+   * @see java.util.Objects#equals(Object, Object)
    */
   public static boolean areEqual(Object a, Object b) {
     return java.util.Objects.equals(a, b);
   }
 
   /**
-   * Use to compare Number
+   * Returns true if the arguments are equal to each other or the result of the comparison is 0 and
+   * false otherwise. Consequently, if both arguments are null, true is returned and if exactly one
+   * argument is null, false is returned. Otherwise, equality is determined by using the equals or
+   * compareTo method of the first argument. Therefore, this method can be used to determine the
+   * equivalence of numeric values.
    *
-   * @param <T>
-   * @param a
-   * @param b
-   * @return areEqual
+   * @param <T> the object type
+   * @param a a comparable object
+   * @param b a comparable object to be compared with a for equality
    */
   public static <T extends Number & Comparable<T>> boolean areEqual(T a, T b) {
     return java.util.Objects.equals(a, b) || a != null && b != null && a.compareTo(b) == 0;
@@ -63,8 +66,6 @@ public class Objects {
 
   /**
    * @see java.util.Objects#toString(Object)
-   * @param o
-   * @return asString
    */
   public static String asString(Object o) {
     return java.util.Objects.toString(o);
@@ -72,9 +73,6 @@ public class Objects {
 
   /**
    * @see java.util.Objects#toString(Object, String)
-   * @param o
-   * @param nullDefault
-   * @return asString
    */
   public static String asString(Object o, String nullDefault) {
     return java.util.Objects.toString(o, nullDefault);
@@ -102,10 +100,9 @@ public class Objects {
    *
    * Note: Code come from apache.
    *
-   * @param <T>
-   * @param c1
-   * @param c2
-   * @return compare
+   * @param <T> the comparable object type
+   * @param c1 a comparable object
+   * @param c2 a comparable object to be compared with a
    */
   public static <T extends Comparable<? super T>> int compare(final T c1, final T c2) {
     if (c1 == c2) {
@@ -118,31 +115,67 @@ public class Objects {
     return c1.compareTo(c2);
   }
 
+  /**
+   * @see java.util.Objects#compare(Object, Object, Comparator)
+   */
   public static <T> int compare(T a, T b, Comparator<? super T> c) {
     return java.util.Objects.compare(a, b, c);
   }
 
+  /**
+   * If the first given parameter is not null, returns the value, otherwise returns the result of
+   * the given supplier.
+   *
+   * @param <T> the object type
+   * @param obj the object to return if not null
+   * @param supplier the supplier for supporting the return value if the first given parameter is
+   *        null
+   */
   public static <T> T defaultObject(T obj, Supplier<? extends T> supplier) {
     return obj != null ? obj : supplier.get();
   }
 
+  /**
+   * If the first given parameter is not null, returns the value, otherwise returns the second given
+   * parameter.
+   *
+   * @param <T> the object type
+   * @param obj the object to return if not null
+   * @param altObj the alternative object to return if the first given parameter is null
+   */
   public static <T> T defaultObject(T obj, T altObj) {
     return obj != null ? obj : altObj;
   }
 
+  /**
+   * Simple cast object to expect type.
+   *
+   * @param <T> the object type
+   * @param o the object to be cast
+   * @return forceCast
+   */
   @SuppressWarnings("unchecked")
   public static <T> T forceCast(Object o) {
     return o != null ? (T) o : null;
   }
 
+  /**
+   * @see java.util.Objects#hash(Object...)
+   */
   public static int hash(Object... values) {
     return java.util.Objects.hash(values);
   }
 
+  /**
+   * @see java.util.Objects#hashCode(Object)
+   */
   public static int hashCode(Object o) {
     return java.util.Objects.hashCode(o);
   }
 
+  /**
+   * Return true if all given parameter are not null and false otherwise.
+   */
   public static boolean isNoneNull(Object... objs) {
     for (Object obj : objs) {
       if (isNull(obj)) {
@@ -152,10 +185,16 @@ public class Objects {
     return true;
   }
 
+  /**
+   * Return true if given parameter is not null and false otherwise.
+   */
   public static boolean isNotNull(Object obj) {
     return java.util.Objects.nonNull(obj);
   }
 
+  /**
+   * Return false if given parameter is not null and true otherwise.
+   */
   public static boolean isNull(Object obj) {
     return java.util.Objects.isNull(obj);
   }
@@ -164,9 +203,8 @@ public class Objects {
    * Return the max one, if the two parameters are the same, then return the first. If any of the
    * comparables are null, return the greater of the non-null objects.
    *
-   * @param <T>
-   * @param comparables
-   * @return max
+   * @param <T> the comparable type
+   * @param comparables the given comparable object to find out the max one
    */
   @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> T max(final T... comparables) {
@@ -195,9 +233,8 @@ public class Objects {
    * Return the min one, if the two parameters are the same, then return the first. If any of the
    * comparables are null, return the lesser of the non-null objects.
    *
-   * @param <T>
-   * @param comparables
-   * @return min
+   * @param <T> the comparable type
+   * @param comparables the given comparable object to find out the min one
    */
   @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> T min(final T... comparables) {
@@ -222,6 +259,12 @@ public class Objects {
     return result;
   }
 
+  /**
+   * Returns a new instance of the given class, use {@link Class#getDeclaredConstructor()}.
+   *
+   * @param <T> the instance type
+   * @param cls the instance class
+   */
   public static <T> T newInstance(Class<T> cls) {
     try {
       // return cls != null ? cls.newInstance() : null;// JDK8

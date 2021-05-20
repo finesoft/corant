@@ -17,6 +17,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Iterables.collectionOf;
 import static org.corant.shared.util.Objects.forceCast;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -94,6 +95,18 @@ public class Sets {
   }
 
   /**
+   * Convert an array to a non-null set
+   *
+   * @param <E> the element type
+   * @param objects the source of the elements in the set
+   * @return a set that combined by the passed in array
+   */
+  @SafeVarargs
+  public static <E> Set<E> setOf(final E... objects) {
+    return collectionOf(HashSet::new, objects);
+  }
+
+  /**
    * Convert an iterable to a non-null linked hash set
    *
    * @param <E> the element type
@@ -122,18 +135,6 @@ public class Sets {
   }
 
   /**
-   * Convert an array to a non-null set
-   *
-   * @param <E> the element type
-   * @param objects the source of the elements in the set
-   * @return a set that combined by the passed in array
-   */
-  @SafeVarargs
-  public static <E> Set<E> setOf(final E... objects) {
-    return collectionOf(HashSet::new, objects);
-  }
-
-  /**
    * Convert an array to a non-null tree set
    *
    * @param <E> the element type
@@ -148,5 +149,25 @@ public class Sets {
       Collections.addAll(set, objects);
     }
     return set;
+  }
+
+  /**
+   * Returns a new set containing the given collections. The Set.addAll(Collection) operation is
+   * used to append the given collections into a new set.
+   *
+   * @param <E> the element types
+   * @param collections the collections to be union
+   */
+  @SafeVarargs
+  public static <E> Set<E> union(Collection<? extends E>... collections) {
+    Set<E> union = new HashSet<>();
+    if (collections.length > 0) {
+      for (Collection<? extends E> collection : collections) {
+        if (collection != null) {
+          union.addAll(collection);
+        }
+      }
+    }
+    return union;
   }
 }

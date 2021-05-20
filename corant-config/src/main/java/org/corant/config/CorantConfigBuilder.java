@@ -16,6 +16,7 @@ package org.corant.config;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -145,7 +146,12 @@ public class CorantConfigBuilder implements ConfigBuilder {
     SortedMap<String, String> sortMap = new TreeMap<>(String::compareToIgnoreCase);
     for (String name : config.getPropertyNames()) {
       try {
-        sortMap.put(name, Desensitizer.desensitize(name, defaultString(sources.getValue(name))));
+        String value = defaultString(sources.getValue(name));
+        sortMap.put(name, Desensitizer.desensitize(name, value));
+        if (value.isBlank() || value.startsWith(SPACE) || value.endsWith(SPACE)) {
+          logger.warning(() -> String
+              .format("The value of config property [%s] may be a problem, please check!", name));
+        }
       } catch (Exception e) {
         sortMap.put(name, String.join(EMPTY, "[ERROR]:", " exception:", e.getClass().getName(),
             ", message:", defaultString(e.getMessage(), "none")));

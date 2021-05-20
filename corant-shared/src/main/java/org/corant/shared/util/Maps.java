@@ -63,11 +63,15 @@ public class Maps {
   private Maps() {}
 
   /**
-   * extract value from map object and remove the entry, use key path
+   * Extract the value corresponding to the given key path in the given object, and remove the key
+   * value in the given object. The given object can be a Map, or a collection of Maps or an array
+   * of Maps. If the value extracted is a collection or array, it will be merged into a single list
+   * and use the first element of the list as the result and then force type casting the result
+   * according to the expected return type.
    *
-   * @param <T>
-   * @param object
-   * @param keyPath
+   * @param <T> the expected return type
+   * @param object the object to be extracted from
+   * @param keyPath the key path
    */
   public static <T> T extractMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
@@ -82,12 +86,17 @@ public class Maps {
   }
 
   /**
-   * extract and convert value from map object and remove the entry, use key path
+   * Extract the value corresponding to the given key path in the given object, and remove the key
+   * value in the given object. The given object can be a Map, or a collection of Maps or an array
+   * of Maps. If the value extracted is a collection or array, it will be merged into a single list
+   * and use the first element of the list as the result and then use
+   * {@link Conversions#toObject(Object, Class)} to cast the result according to the expected return
+   * type.
    *
-   * @param <T>
-   * @param object
-   * @param keyPath
-   * @param expectedType
+   * @param <T> the expected return type
+   * @param object the object to be extracted from
+   * @param keyPath the key path
+   * @param expectedType the expected class
    */
   public static <T> T extractMapKeyPathValue(Object object, Object[] keyPath,
       Class<T> expectedType) {
@@ -95,10 +104,13 @@ public class Maps {
   }
 
   /**
-   * extract list value from map object and remove the entry, use key path
+   * Extract the value corresponding to the given key path in the given object, and remove the key
+   * value in the given object. The given object can be a Map, or a collection of Maps or an array
+   * of Maps. If the value extracted is not a collection and array, it will be added into a list and
+   * return.
    *
-   * @param object
-   * @param keyPath
+   * @param object the object to be extracted from
+   * @param keyPath the key path
    */
   public static List<Object> extractMapKeyPathValues(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
@@ -107,13 +119,14 @@ public class Maps {
   }
 
   /**
-   * extract and convert list value from map object and remove the entry, use key path
+   * Extract the value corresponding to the given key path in the given object, and remove the key
+   * value in the given object. The given object can be a Map, or a collection of Maps or an array
+   * of Maps. If the value extracted is not a collection and array, it will be added into a list.
    *
-   * @param <T>
-   * @param object
-   * @param keyPath
-   * @param expectedElementType
-   * @return extractMapKeyPathValues
+   * @param <T> the element type
+   * @param object the object to be extracted from
+   * @param keyPath the key path
+   * @param expectedElementType the expected class
    */
   public static <T> List<T> extractMapKeyPathValues(Object object, Object[] keyPath,
       Class<T> expectedElementType) {
@@ -163,9 +176,9 @@ public class Maps {
    *
    * @see Conversions#toBigDecimal(Object)
    *
-   * @param map
-   * @param key
-   * @return getMapBigDecimal
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped BigDecimal value
    */
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBigDecimal, null);
@@ -178,11 +191,11 @@ public class Maps {
    *
    * @see Conversions#toBigDecimal(Object)
    *
-   * @param map
-   * @param key
+   * @param map the map to use
+   * @param key the key to lookup
    * @param nvt The return alternative value when the key or map does not exist or the value
    *        corresponding to the key is null
-   * @return getMapBigDecimal
+   * @return the mapped BigDecimal value
    */
   public static BigDecimal getMapBigDecimal(final Map<?, ?> map, final Object key, BigDecimal nvt) {
     return getMapObject(map, key, Conversions::toBigDecimal, nvt);
@@ -194,9 +207,9 @@ public class Maps {
    * BigInteger.
    *
    * @see Conversions#toBigInteger(Object)
-   * @param map
-   * @param key
-   * @return getMapBigInteger
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped BigInteger value
    */
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBigInteger, null);
@@ -209,11 +222,11 @@ public class Maps {
    *
    * @see Conversions#toBigInteger(Object)
    *
-   * @param map
-   * @param key
+   * @param map the map to use
+   * @param key the key to lookup
    * @param nvt The return alternative value when the key or map does not exist or the value
    *        corresponding to the key is null
-   * @return getMapBigInteger
+   * @return the mapped BigInteger value
    */
   public static BigInteger getMapBigInteger(final Map<?, ?> map, final Object key, BigInteger nvt) {
     return getMapObject(map, key, Conversions::toBigInteger, nvt);
@@ -226,9 +239,9 @@ public class Maps {
    *
    * @see Conversions#toBoolean(Object)
    *
-   * @param map
-   * @param key
-   * @return getMapBoolean
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped boolean value
    */
   public static Boolean getMapBoolean(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toBoolean, Boolean.FALSE);
@@ -239,27 +252,31 @@ public class Maps {
    * {@code nvt} if this map contains no mapping for the key or the mapped value is {@code null},
    * and converted value if the mapped value type is not Boolean.
    *
-   * @param map
-   * @param key
+   * @param map the map to use
+   * @param key the key to lookup
    * @param nvt The return alternative value when the key or map does not exist or the value
    *        corresponding to the key is null
-   * @return getMapBoolean
+   * @return the mapped boolean value
    */
   public static Boolean getMapBoolean(final Map<?, ?> map, final Object key, Boolean nvt) {
     return getMapObject(map, key, Conversions::toBoolean, nvt);
   }
 
   /**
-   * Convert mapped value to collection, use built-in converter
+   * Return and convert the collection value mapped to the given key in the given Map.
+   *
+   * <p>
+   * Note: The returned collection is reconstructed, and the result of modifying the collection may
+   * not be reflected in the given map.
    *
    * @param <T> the target class of item of the collection
    * @param <C> the target collection class
-   * @param map the source map to convert
-   * @param key the key corresponding to the value to be converted
-   * @param elementClazz the target class of item of the collection
+   * @param map the map to use
+   * @param key the key to lookup
    * @param collectionFactory the constructor of collection
+   * @param elementClazz the target class of item of the collection
    * @param hints the lastConverter hints use for intervening converters
-   * @return getMapCollection
+   * @return the mapped expected collection value
    *
    * @see Conversion#convert(Object, Class, java.util.function.Supplier, Map)
    * @see Conversion#convert(Collection, IntFunction, Class, Map)
@@ -283,9 +300,9 @@ public class Maps {
    * Returns the Currency value that the specified key is mapped to, convert if necessary.
    *
    * @see StringCurrencyConverter
-   * @param map
-   * @param key
-   * @return getMapCurrency
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped currency value
    */
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toCurrency, null);
@@ -296,10 +313,10 @@ public class Maps {
    * return the specified default value when the key value is not found or the mapped value is null.
    *
    * @see StringCurrencyConverter
-   * @param map
-   * @param key
-   * @param nvt
-   * @return getMapCurrency
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped currency value
    */
   public static Currency getMapCurrency(final Map<?, ?> map, final Object key, Currency nvt) {
     return getMapObject(map, key, Conversions::toCurrency, nvt);
@@ -308,9 +325,9 @@ public class Maps {
   /**
    * Returns the Double value that the specified key is mapped to, convert if necessary.
    *
-   * @param map
-   * @param key
-   * @return getMapDouble
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped double value
    */
   public static Double getMapDouble(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toDouble, null);
@@ -320,10 +337,10 @@ public class Maps {
    * Returns the Double value that the specified key is mapped to, convert if necessary, and return
    * the specified default value when the key value is not found or the mapped value is null.
    *
-   * @param map
-   * @param key
-   * @param nvt
-   * @return getMapDouble
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped double value
    */
   public static Double getMapDouble(final Map<?, ?> map, final Object key, Double nvt) {
     return getMapObject(map, key, Conversions::toDouble, nvt);
@@ -332,14 +349,23 @@ public class Maps {
   /**
    * Returns the Duration value that the specified key is mapped to, convert if necessary.
    *
-   * @param map
-   * @param key
-   * @return getMapDuration
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped duration value
    */
   public static Duration getMapDuration(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toDuration, null);
   }
 
+  /**
+   * Returns the Duration value that the specified key is mapped to, convert if necessary, and
+   * return the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped duration value
+   */
   public static Duration getMapDuration(final Map<?, ?> map, final Object key, Duration nvt) {
     return getMapObject(map, key, Conversions::toDuration, nvt);
   }
@@ -380,13 +406,18 @@ public class Maps {
   }
 
   /**
-   * Get value from map object, use key path, only support extract value from map/iterable/array
-   * object
+   * Returns the value corresponding to the given key path in the given object. The given object can
+   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is a collection
+   * or array, it will be merged into a single list and use the first element of the list as the
+   * result and then force type casting the result according to the expected return type.
    *
-   * @param <T>
-   * @param object map/iterable/array
-   * @param keyPath
-   * @return
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the given object.
+   *
+   * @param <T> the expected return type
+   * @param object the object to be lookup from
+   * @param keyPath the key path
    */
   public static <T> T getMapKeyPathValue(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
@@ -401,24 +432,36 @@ public class Maps {
   }
 
   /**
-   * Get and convert value from map object, use key path, only support extract value from
-   * map/iterable/array
+   * Returns the value corresponding to the given key path in the given object. The given object can
+   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is a collection
+   * or array, it will be merged into a single list and use the first element of the list as the
+   * result and then use {@link Conversions#toObject(Object, Class)} to cast the result according to
+   * the expected return type.
    *
-   * @param <T>
-   * @param object
-   * @param keyPath
-   * @param expectedType
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the given object.
+   *
+   * @param <T> the expected return type
+   * @param object the object to be lookup from
+   * @param keyPath the key path
+   * @param expectedType the expected class
    */
   public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, Class<T> expectedType) {
     return toObject(getMapKeyPathValue(object, keyPath), expectedType);
   }
 
   /**
-   * Get list value from map object, use key path, only support extract value from
-   * map/iterable/array
+   * Return the value corresponding to the given key path in the given object. The given object can
+   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is not a
+   * collection and array, it will be added into a list and return.
    *
-   * @param object
-   * @param keyPath
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the given object.
+   *
+   * @param object the object to be lookup from
+   * @param keyPath the key path
    */
   public static List<Object> getMapKeyPathValues(Object object, Object[] keyPath) {
     List<Object> holder = new ArrayList<>();
@@ -427,12 +470,17 @@ public class Maps {
   }
 
   /**
-   * Get and convert list value from map object, use key path, only support extract value from
-   * map/iterable/array
+   * Return the value corresponding to the given key path in the given object. The given object can
+   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is not a
+   * collection and array, it will be added into a list and return.
    *
-   * @param <T>
-   * @param object
-   * @param keyPath
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the given object.
+   *
+   * @param object the object to be lookup from
+   * @param keyPath the key path
+   * @param expectedElementType the expected element type
    */
   public static <T> List<T> getMapKeyPathValues(Object object, Object[] keyPath,
       Class<T> expectedElementType) {
@@ -442,24 +490,32 @@ public class Maps {
   /**
    * Retrieve and convert the list value with the key from a map, use force cast convert.
    *
-   * @param <T>
-   * @param map
-   * @param key
-   * @return getMapList
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param <T> the list element type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the expected list
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, Objects::forceCast);
   }
 
   /**
-   * Retrieve and convert the list value with the key and element class from a map, use built-in
-   * converter.
+   * Return a new list, the elements in the list come from the value corresponding to the given key
+   * specified in the specified given map, and the intermediate process may involve type conversion.
    *
-   * @param <T> the expected element type in list
-   * @param map
-   * @param key
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the original map.
+   *
+   * @param <T> the expected returned element type
+   * @param map the map to use
+   * @param key the key to lookup
    * @param elementClazz the expected element class in list
-   * @return getMapList
+   * @return the expected list
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
       final Class<T> elementClazz) {
@@ -467,19 +523,24 @@ public class Maps {
   }
 
   /**
-   * Retrieve and convert the list value with the key and convert function from a map, use specified
-   * element extractor.
+   * Return a new list, the elements in the list come from the value corresponding to the given key
+   * specified in the specified given map. the intermediate process may involve type conversion, if
+   * involved use the given single element converter to convert.
    *
-   * @param <T> the expected element type in list
-   * @param map
-   * @param key
-   * @param singleElementExtractor the extractor function that extract value to expected list
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the original map.
+   *
+   * @param <T> the expected returned element type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param singleElementconverter the converter function that extract value to expected list
    *        element.
-   * @return getMapList
+   * @return the expected list
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
-      final Function<Object, T> singleElementExtractor) {
-    return getMapObjectList(map, key, v -> toList(v, singleElementExtractor));
+      final Function<Object, T> singleElementconverter) {
+    return getMapObjectList(map, key, v -> toList(v, singleElementconverter));
   }
 
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
@@ -524,100 +585,163 @@ public class Maps {
     return getMapObject(map, key, Conversions::toLong, nvt);
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  /**
+   * Get the map value corresponding to the given key from the given map, use force cast convert.
+   *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped map value
+   */
   public static <K, V> Map<K, V> getMapMap(final Map<?, ?> map, final Object key) {
-    return getMapObject(map, key, o -> o instanceof Map ? (Map) o : null, null);
+    return getMapObject(map, key, Objects::forceCast, null);
   }
 
+  /**
+   * Get the list of maps value corresponding to the given key from the given map, use force cast
+   * convert.
+   *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped list maps value
+   */
   public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, Objects::forceCast);
   }
 
+  /**
+   * Null safe {@link Map#get(Object)}
+   *
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped object
+   */
   public static Object getMapObject(final Map<?, ?> map, final Object key) {
     return map == null ? null : map.get(key);
   }
 
   /**
-   * Retrieves the value of the specified type with key from map, use converter.
+   * Convert and return the value corresponding to the given key in the given map, and the
+   * intermediate process may involve type conversion.
    *
    * @param <T> the expected value type
-   * @param map
-   * @param key
+   * @param map the map to use
+   * @param key the key to lookup
    * @param clazz the expected value class
-   * @return getMapObject
+   * @return the mapped object
    */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
     return toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
   }
 
   /**
-   * Retrieves the value of the specified type with key from map, use specified extractor.
+   * Convert and return the value corresponding to the given key in the given map, use the given
+   * converter if involve type conversion.
    *
    * @param <T> the expected value type
-   * @param map
-   * @param key
-   * @param extractor the value extractor
-   * @return getMapObject
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param converter the value converter
+   * @return the mapped object
    */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
-      final Function<Object, T> extractor) {
-    return getMapObject(map, key, extractor, null);
+      final Function<Object, T> converter) {
+    return getMapObject(map, key, converter, null);
   }
 
+  /**
+   * Returns the converted value corresponding to the given key in the given map or return the given
+   * default value when the key value is not found or the mapped value is null, use the given
+   * converter if involve type conversion.
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param converter the value converter
+   * @param nvt the default return value when the key value is not found or the mapped value is null
+   * @return the mapped object
+   */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
-      final Function<Object, T> extractor, final T nvt) {
+      final Function<Object, T> converter, final T nvt) {
     Object val = map == null ? null : map.get(key);
-    return val != null ? defaultObject(extractor.apply(val), nvt) : nvt;
+    return val != null ? defaultObject(converter.apply(val), nvt) : nvt;
   }
 
   /**
    * Retrieve and convert the value of the specified type with key from map, use specified list
    * extractor.
    *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may not affect
+   * the given original map, whether it will be affected depends on the given converter.
+   *
    * @param <T> the expected value type
-   * @param map
-   * @param key
-   * @param extractor the value extractor that extract map value.
-   * @return getMapObjectList
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param converter the value converter.
+   * @return the list
    */
   public static <T> List<T> getMapObjectList(final Map<?, ?> map, final Object key,
-      final Function<Object, List<T>> extractor) {
-    return map != null ? extractor.apply(map.get(key)) : null;
+      final Function<Object, List<T>> converter) {
+    return map != null ? converter.apply(map.get(key)) : null;
   }
 
   /**
    * Retrieve and convert the value of the specified type with key from map, use specified set
    * extractor.
    *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may not affect
+   * the given original map, whether it will be affected depends on the given converter.
+   *
    * @param <T> the expected value type
-   * @param map
-   * @param key
-   * @param extractor the value extractor that extract map value.
-   * @return getMapObjectSet
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param converter the value converter.
+   * @return the set
    */
   public static <T> Set<T> getMapObjectSet(final Map<?, ?> map, final Object key,
-      final Function<Object, Set<T>> extractor) {
-    return map != null ? extractor.apply(map.get(key)) : null;
+      final Function<Object, Set<T>> converter) {
+    return map != null ? converter.apply(map.get(key)) : null;
   }
 
   /**
    * Retrieve and convert the set value with the key from a map, use force cast convert.
    *
-   * @param <T>
-   * @param map
-   * @param key
-   * @return getMapList
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the set
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key) {
     return getMapSet(map, key, Objects::forceCast);
   }
 
   /**
-   * Retrieve and convert the value of the specified type with key from map, use bulit-in converter.
+   * Return a new set, the elements in the set come from the value corresponding to the given key
+   * specified in the specified given map, and the intermediate process may involve type conversion.
+   *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the original map.
    *
    * @param <T> the expected value type
-   * @param map
-   * @param key
+   * @param map the map to use
+   * @param key the key to lookup
    * @param clazz the expected value class
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key, final Class<T> clazz) {
@@ -625,18 +749,23 @@ public class Maps {
   }
 
   /**
-   * Retrieve and convert the value of the specified type with key from map, use specified element
-   * extractor.
+   * Return a new set, the elements in the set come from the value corresponding to the given key
+   * specified in the specified given map, and the intermediate process may involve type conversion,
+   * if the conversion involve use the given single element converter.
    *
-   * @param <T>
-   * @param map
-   * @param key
-   * @param singleElementExtractor
-   * @return getMapSet
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it is not
+   * guaranteed that it will affect the original map.
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param singleElementConverter the value converter.
+   * @return the set
    */
   public static <T> Set<T> getMapSet(final Map<?, ?> map, final Object key,
-      final Function<Object, T> singleElementExtractor) {
-    return getMapObjectSet(map, key, v -> toSet(v, singleElementExtractor));
+      final Function<Object, T> singleElementConverter) {
+    return getMapObjectSet(map, key, v -> toSet(v, singleElementConverter));
   }
 
   public static Short getMapShort(final Map<?, ?> map, final Object key) {

@@ -95,8 +95,8 @@ public class MessageReceivingMetaData {
       brokenInterval = RetryInterval.expoBackoffDecorr(brokenDuration, Duration.parse(maxBds),
           ann.brokenBackoffFactor());
     } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
-      brokenInterval = RetryInterval.expoBackoffEqualJitter(brokenDuration,
-          Duration.parse(maxBds), ann.brokenBackoffFactor());
+      brokenInterval = RetryInterval.expoBackoffEqualJitter(brokenDuration, Duration.parse(maxBds),
+          ann.brokenBackoffFactor());
     } else {
       brokenInterval = RetryInterval.expoBackoffFullJitter(brokenDuration, Duration.parse(maxBds),
           ann.brokenBackoffFactor());
@@ -104,7 +104,8 @@ public class MessageReceivingMetaData {
     xa = ann.xa();
     txTimeout = ann.txTimeout();
     replies = MessageReplyMetaData.from(ann.reply());
-    shouldBeTrue(setOf(replies).size() == replies.length);
+    shouldBeTrue(setOf(replies).size() == replies.length,
+        "The reply destination in annotation must be unique.");
     for (MessageReplyMetaData r : replies) {
       if (isBlank(r.getDestination()) || r.getDestination().equals(destination)) {
         throw new CorantRuntimeException(
@@ -113,11 +114,11 @@ public class MessageReceivingMetaData {
       }
     }
     if (isNotEmpty(replies)) {
-      shouldBeFalse(method.getMethod().getReturnType().equals(Void.class),
+      shouldBeFalse(method.getMethod().getReturnType().equals(Void.TYPE),
           "The message receiving method %s requires a return type because the method is configured with a reply.",
           method.getMethod());
     } else {
-      if (!method.getMethod().getReturnType().equals(Void.class)) {
+      if (!method.getMethod().getReturnType().equals(Void.TYPE)) {
         logger.warning(() -> String.format(
             "The message receiving method %s has a return type, but the method is configured without a reply.",
             method.getMethod()));

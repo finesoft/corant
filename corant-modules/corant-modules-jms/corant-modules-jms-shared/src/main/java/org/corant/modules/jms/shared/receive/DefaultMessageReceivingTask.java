@@ -239,6 +239,7 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   }
 
   protected void stateBrk() {
+    // TODO To be improved, when entering BROKEN mode, should exit from the executor.
     resetMonitors();
     brokenTimePoint = System.currentTimeMillis();
     brokenMillis = brokenInterval.calculateMillis(tryFailureCounter.get());

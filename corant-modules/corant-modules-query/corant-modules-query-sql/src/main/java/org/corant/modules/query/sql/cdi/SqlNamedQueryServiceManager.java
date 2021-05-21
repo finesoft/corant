@@ -21,7 +21,6 @@ import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.lang.annotation.Annotation;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,16 +79,8 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Optional<Integer> fetchDirection;
 
   @Inject
-  @ConfigProperty(name = "corant.query.sql.timeout")
-  protected Optional<Integer> timeout;
-
-  @Inject
   @ConfigProperty(name = "corant.query.sql.max-field-size", defaultValue = "0")
   protected Integer maxFieldSize;
-
-  @Inject
-  @ConfigProperty(name = "corant.query.sql.max-rows", defaultValue = "0")
-  protected Integer maxRows;
 
   @Inject
   @ConfigProperty(name = "corant.query.sql.default-qualifier-value")
@@ -198,14 +189,13 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           .dataSource(shouldNotNull(resolveDataSource(dataSourceName),
               "Can't build default sql named query, the data source named %s not found.",
               dataSourceName))
-          .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize)
-          .maxRows(manager.maxRows).queryTimeout(manager.timeout.orElseGet(() -> {
-            Duration d = manager.resolver.getQueryHandler().getQuerierConfig().getTimeout();
-            if (d != null) {
-              return Long.valueOf(d.toSeconds()).intValue();
-            }
-            return null;
-          }));
+          .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize);
+      //DON'T CONFIGURE MAX ROWS AND TIME OUT, USE QUERIER since 1.6.2
+      /*
+       * .maxRows(manager.maxRows).queryTimeout(manager.timeout.orElseGet(() -> { Duration d =
+       * manager.resolver.getQueryHandler().getQuerierConfig().getTimeout(); if (d != null) { return
+       * Long.valueOf(d.toSeconds()).intValue(); } return null; }));
+       */
       manager.fetchDirection.ifPresent(builder::fetchDirection);
       executor = new DefaultSqlQueryExecutor(builder.build());
     }

@@ -48,6 +48,7 @@ public class StreamableQueryRunner extends QueryRunner {
     defaultBatchSize = 16;
   }
 
+  @SuppressWarnings("deprecation")
   public StreamableQueryRunner(SqlQueryConfiguration confiuration) {
     super(new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
         confiuration.getMaxFieldSize(), confiuration.getMaxRows(), confiuration.getQueryTimeout()));

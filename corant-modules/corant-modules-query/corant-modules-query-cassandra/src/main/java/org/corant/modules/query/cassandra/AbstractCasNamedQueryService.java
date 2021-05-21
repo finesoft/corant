@@ -16,6 +16,7 @@ package org.corant.modules.query.cassandra;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -43,14 +44,15 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
       CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       String cql = querier.getScript();
+      Duration timeout = querier.resolveTimeout();
       String ks = resolveKeyspace(querier);
       Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, cql);
       List<Map<String, Object>> fetchedList;
       if (maxSize > 0) {
-        fetchedList = getExecutor().paging(ks, cql, 0, maxSize, scriptParameter);
+        fetchedList = getExecutor().paging(ks, cql, 0, maxSize, timeout, scriptParameter);
       } else {
-        fetchedList = getExecutor().select(ks, cql, scriptParameter);
+        fetchedList = getExecutor().select(ks, cql, timeout, scriptParameter);
       }
       return new FetchResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
@@ -68,10 +70,11 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list =
-        getExecutor().paging(ks, cql, offset, limit + 1, scriptParameter);
+        getExecutor().paging(ks, cql, offset, limit + 1, timeout, scriptParameter);
     int size = sizeOf(list);
     if (size > 0) {
       if (size > limit) {
@@ -89,8 +92,9 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
-    Map<String, Object> result = getExecutor().get(ks, cql, scriptParameter);
+    Map<String, Object> result = getExecutor().get(ks, cql, timeout, scriptParameter);
     this.fetch(result, querier);
     return querier.handleResult(result);
   }
@@ -103,15 +107,17 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
-    List<Map<String, Object>> list = getExecutor().paging(ks, cql, offset, limit, scriptParameter);
+    List<Map<String, Object>> list =
+        getExecutor().paging(ks, cql, offset, limit, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
     int size = sizeOf(list);
     if (size > 0) {
       if (size < limit) {
         result.withTotal(offset + size);
       } else {
-        result.withTotal(getExecutor().total(ks, cql, scriptParameter));
+        result.withTotal(getExecutor().total(ks, cql, timeout, scriptParameter));
       }
       this.fetch(list, querier);
     }
@@ -125,10 +131,11 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int maxSelectSize = querier.resolveMaxSelectSize();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
     List<Map<String, Object>> results =
-        getExecutor().paging(ks, cql, 0, maxSelectSize + 1, scriptParameter);
-    if (querier.validateResultSize(results) > 0) {
+        getExecutor().paging(ks, cql, 0, maxSelectSize + 1, timeout, scriptParameter);
+    if (querier.handleResultSize(results) > 0) {
       this.fetch(results, querier);
     }
     return querier.handleResults(results);

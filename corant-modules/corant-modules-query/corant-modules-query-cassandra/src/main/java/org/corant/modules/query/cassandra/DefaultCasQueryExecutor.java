@@ -16,6 +16,7 @@ package org.corant.modules.query.cassandra;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.max;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,10 +52,10 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
   }
 
   @Override
-  public Map<String, Object> get(String keyspace, String cql, Object... args) {
+  public Map<String, Object> get(String keyspace, String cql, Duration timeout, Object... args) {
     Map<String, Object> map = new LinkedHashMap<>();
     try (Session session = cluster.connect(keyspace)) {
-      final Statement stm = prepare(session, cql, args).setFetchSize(1);
+      final Statement stm = prepare(session, cql, timeout, args).setFetchSize(1);
       ResultSet rs = session.execute(stm);
       if (rs != null) {
         CasMapHandler.get(rs).forEach(x -> x.forEach((k, v) -> map.put(k.toString(), v)));
@@ -67,18 +68,18 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
 
   @Override
   public List<Map<String, Object>> paging(String keyspace, String cql, int offset, int limit,
-      Object... args) {
+      Duration timeout, Object... args) {
     if (offset <= 0) {
       int af = cql.toUpperCase(Locale.ROOT).lastIndexOf("ALLOW FILTERING");
       if (af != -1) {
         return select(keyspace, cql.substring(0, af) + " LIMIT " + limit + " ALLOW FILTERING",
-            args);
+            timeout, args);
       }
-      return select(keyspace, cql + " LIMIT " + limit, args);
+      return select(keyspace, cql + " LIMIT " + limit, timeout, args);
     } else {
       List<Map<String, Object>> list = new ArrayList<>();
       try (Session session = cluster.connect(keyspace)) {
-        final Statement stm = prepare(session, cql, args).setFetchSize(limit);
+        final Statement stm = prepare(session, cql, timeout, args).setFetchSize(limit);
         ResultSet rs = session.execute(stm);
         if (rs != null) {
           int currentRow = 0;
@@ -116,10 +117,11 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
   }
 
   @Override
-  public List<Map<String, Object>> select(String keyspace, String cql, Object... args) {
+  public List<Map<String, Object>> select(String keyspace, String cql, Duration timeout,
+      Object... args) {
     List<Map<String, Object>> list = new ArrayList<>();
     try (Session session = cluster.connect(keyspace)) {
-      final Statement stm = prepare(session, cql, args).setFetchSize(fetchSize);
+      final Statement stm = prepare(session, cql, timeout, args).setFetchSize(fetchSize);
       ResultSet rs = session.execute(stm);
       if (rs != null) {
         CasMapHandler.get(rs).forEach(x -> {
@@ -134,11 +136,17 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
     return list;
   }
 
-  protected Statement prepare(Session session, String cql, Object... args) {
+  protected Statement prepare(Session session, String cql, Duration timeout, Object... args) {
+    final Statement stm;
     if (isEmpty(args)) {
-      return session.prepare(cql).bind();
+      stm = session.prepare(cql).bind();
+    } else {
+      stm = session.prepare(cql).bind(args);
     }
-    return session.prepare(cql).bind(args);
+    if (timeout != null) {
+      stm.setReadTimeoutMillis((int) timeout.toMillis());
+    }
+    return stm;
   }
 
 }

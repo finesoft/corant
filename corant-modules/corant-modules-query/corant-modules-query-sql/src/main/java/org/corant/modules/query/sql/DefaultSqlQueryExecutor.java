@@ -16,6 +16,7 @@ package org.corant.modules.query.sql;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,6 +45,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   protected final DefaultQueryRunner runner;
   protected final Dialect dialect;
 
+  @SuppressWarnings("deprecation")
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
     this.confiuration = confiuration;
     runner = new DefaultQueryRunner(confiuration.getDataSource(),
@@ -73,12 +75,12 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public Map<String, Object> get(String sql, Object... args) throws SQLException {
+  public Map<String, Object> get(String sql, Duration timeout, Object... args) throws SQLException {
     Object result;
     if (args.length > 0) {
-      result = getRunner().select(sql, MAP_HANDLER, 1, args);
+      result = getRunner().select(sql, MAP_HANDLER, 1, timeout, args);
     } else {
-      result = getRunner().select(sql, MAP_HANDLER, 1);
+      result = getRunner().select(sql, MAP_HANDLER, 1, timeout);
     }
     return forceCast(result);
   }
@@ -89,19 +91,19 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public List<Map<String, Object>> select(String sql, int expectRows, Object... args)
-      throws SQLException {
+  public List<Map<String, Object>> select(String sql, int expectRows, Duration timeout,
+      Object... args) throws SQLException {
     Object result;
     if (args.length > 0) {
-      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows, args);
+      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows, timeout, args);
     } else {
-      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows);
+      result = getRunner().select(sql, MAP_LIST_HANDLER, expectRows, timeout);
     }
     return forceCast(result);
   }
 
   @Override
-  public Stream<Map<String, Object>> stream(String sql, Object... args) {
+  public Stream<Map<String, Object>> stream(String sql, Duration timeout, Object... args) {
     try {
       return new StreamableQueryRunner(confiuration)
           .streamQuery(confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, args);

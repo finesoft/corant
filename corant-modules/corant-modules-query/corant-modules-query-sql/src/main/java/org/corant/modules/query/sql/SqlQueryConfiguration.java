@@ -63,16 +63,18 @@ public interface SqlQueryConfiguration {
    * @see java.sql.Statement#getMaxRows()
    * @return the maxFieldSize
    */
+  @Deprecated(since = "1.6.2")
   default Integer getMaxRows() {
-    return 0;
+    return null;
   }
 
   /**
    * @see java.sql.Statement#getQueryTimeout()
    * @return the maxFieldSize
    */
+  @Deprecated(since = "1.6.2")
   default Integer getQueryTimeout() {
-    return 0;
+    return null;
   }
 
   class Builder {
@@ -111,11 +113,13 @@ public interface SqlQueryConfiguration {
       return this;
     }
 
+    @Deprecated(since = "1.6.2")
     public Builder maxRows(Integer maxRows) {
       cfg.maxRows = maxRows;
       return this;
     }
 
+    @Deprecated(since = "1.6.2")
     public Builder queryTimeout(Integer queryTimeout) {
       cfg.queryTimeout = queryTimeout;
       return this;
@@ -129,8 +133,8 @@ public interface SqlQueryConfiguration {
     protected Integer fetchDirection;
     protected Integer fetchSize = DFLT_FETCH_SIZE;
     protected Integer maxFieldSize = 0;
-    protected Integer queryTimeout = 0;
-    protected Integer maxRows = 0;
+    protected Integer queryTimeout;
+    protected Integer maxRows;
 
     @Override
     public DataSource getDataSource() {
@@ -158,11 +162,13 @@ public interface SqlQueryConfiguration {
     }
 
     @Override
+    @Deprecated(since = "1.6.2")
     public Integer getMaxRows() {
       return maxRows;
     }
 
     @Override
+    @Deprecated(since = "1.6.2")
     public Integer getQueryTimeout() {
       return queryTimeout;
     }

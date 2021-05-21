@@ -14,6 +14,7 @@
 package org.corant.modules.query.cassandra;
 
 import static org.corant.shared.util.Maps.getMapInteger;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
@@ -26,16 +27,16 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  */
 public interface CasQueryExecutor {
 
-  Map<String, Object> get(String keyspace, String cql, Object... args);
+  Map<String, Object> get(String keyspace, String cql, Duration timeout, Object... args);
 
   List<Map<String, Object>> paging(String keyspace, String cql, int offset, int limit,
-      Object... args);
+      Duration timeout, Object... args);
 
-  List<Map<String, Object>> select(String keyspace, String cql, Object... args);
+  List<Map<String, Object>> select(String keyspace, String cql, Duration timeout, Object... args);
 
-  default int total(String keyspace, String cql, Object... args) {
+  default int total(String keyspace, String cql, Duration timeout, Object... args) {
     String totalCql = "SELECT COUNT(*) AS total ".concat(SqlHelper.removeSelect(cql));
-    return getMapInteger(get(keyspace, totalCql, args), "total", 0);
+    return getMapInteger(get(keyspace, totalCql, timeout, args), "total", 0);
   }
 
 }

@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -33,8 +34,7 @@ public class DefaultQueryRunner extends QueryRunner {
   /**
    *
    */
-  public DefaultQueryRunner() {
-  }
+  public DefaultQueryRunner() {}
 
   /**
    * @param pmdKnownBroken
@@ -83,19 +83,20 @@ public class DefaultQueryRunner extends QueryRunner {
     super(stmtConfig);
   }
 
-  public <T> T select(String sql, ResultSetHandler<T> rsh, int expectRows) throws SQLException {
-    Connection conn = prepareConnection();
-    return this.<T>select(conn, true, sql, rsh, expectRows, (Object[]) null);
-  }
-
-  public <T> T select(String sql, ResultSetHandler<T> rsh, int expectRows, Object... params)
+  public <T> T select(String sql, ResultSetHandler<T> rsh, int expectRows, Duration timeout)
       throws SQLException {
     Connection conn = prepareConnection();
-    return this.<T>select(conn, true, sql, rsh, expectRows, params);
+    return this.<T>select(conn, true, sql, rsh, expectRows, timeout, (Object[]) null);
+  }
+
+  public <T> T select(String sql, ResultSetHandler<T> rsh, int expectRows, Duration timeout,
+      Object... params) throws SQLException {
+    Connection conn = prepareConnection();
+    return this.<T>select(conn, true, sql, rsh, expectRows, timeout, params);
   }
 
   <T> T select(Connection conn, boolean closeConn, String sql, ResultSetHandler<T> rsh,
-      int expectRows, Object... params) throws SQLException {
+      int expectRows, Duration timeout, Object... params) throws SQLException {
     if (conn == null) {
       throw new SQLException("Null connection");
     }
@@ -122,6 +123,9 @@ public class DefaultQueryRunner extends QueryRunner {
       stmt = this.prepareStatement(conn, sql);
       if (expectRows > 0) {
         stmt.setMaxRows(expectRows);// force max rows
+      }
+      if (timeout != null) {
+        stmt.setQueryTimeout((int) timeout.toSeconds());// set the time out
       }
       fillStatement(stmt, params);
       rs = wrap(stmt.executeQuery());

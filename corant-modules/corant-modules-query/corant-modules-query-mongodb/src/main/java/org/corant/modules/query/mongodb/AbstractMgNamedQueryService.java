@@ -251,7 +251,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       final boolean setId = isAutoSetIdField(querier);
       list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
       docList.clear();
-      if (querier.validateResultSize(list) > 0) {
+      if (querier.handleResultSize(list) > 0) {
         this.fetch(list, querier);
       }
     }

@@ -21,6 +21,7 @@ import static org.corant.shared.util.Objects.max;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.corant.modules.query.shared.FetchQueryHandler;
 import org.corant.modules.query.shared.QuerierConfig;
 import org.corant.modules.query.shared.QueryHandler;
@@ -36,6 +37,8 @@ import org.corant.modules.query.shared.mapping.Query;
  *
  */
 public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
+
+  protected static final Logger logger = Logger.getLogger(AbstractDynamicQuerier.class.getName());
 
   protected final Query query;
   protected final QueryHandler queryHandler;
@@ -101,6 +104,27 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   public <T> List<T> handleResults(List<?> results) {
     return queryHandler.handleResults((List<Object>) results,
         forceCast(getQuery().getResultClass()), getQuery().getHints(), getQueryParameter());
+  }
+
+  @Override
+  public int handleResultSize(List<?> results) {
+    int size = sizeOf(results);
+    final int maxSize;
+    if (size > 0 && size > (maxSize = resolveMaxSelectSize())) {
+      if (thrownExceedMaxSelectSize()) {
+        throw new QueryRuntimeException(
+            "The size of query[%s] result is exceeded, the allowable range is %s.",
+            getQuery().getName(), maxSize);
+      } else {
+        logger.warning(String.format(
+            "The size of query[%s] result is exceeded, the allowable range is %s, the excess records are silently dropped.",
+            query.getName(), maxSize));
+        do {
+          results.remove(size - 1);
+        } while ((size = sizeOf(results)) > maxSize);
+      }
+    }
+    return size;
   }
 
   @Override
@@ -204,18 +228,6 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       }
     }
     return timeout.equals(Duration.ZERO) ? null : timeout;
-  }
-
-  @Override
-  public int validateResultSize(List<?> results) {
-    int size = sizeOf(results);
-    int maxSize = resolveMaxSelectSize();
-    if (size > 0 && size > maxSize && thrownExceedMaxSelectSize()) {
-      throw new QueryRuntimeException(
-          "[%s] Result record number overflow, the allowable range is %s.", getQuery().getName(),
-          maxSize);
-    }
-    return size;
   }
 
   protected int getUnLimitSize() {

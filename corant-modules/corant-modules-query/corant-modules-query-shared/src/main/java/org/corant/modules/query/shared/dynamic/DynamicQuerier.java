@@ -38,8 +38,8 @@ public interface DynamicQuerier<P, S> extends Querier {
   }
 
   /**
-   * Returns the processed query script with the underlying database dialect., implemention can use
-   * the pass in additional parameter to compute the script.
+   * Returns the processed query script with the underlying database dialect., implementation can
+   * use the pass in additional parameter to compute the script.
    *
    * @param additionals the additional adjustment parameter
    */
@@ -51,13 +51,13 @@ public interface DynamicQuerier<P, S> extends Querier {
   P getScriptParameter();
 
   /**
-   * Returns either the value of the query timeout property (the property name is
-   * {@link QuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
-   * {@link QuerierConfig#getTimeout()}.
+   * Check the size of the result set, trim according to the appropriate
+   * size({@link #resolveMaxSelectSize()}) if necessary, and return the size of the final result
+   * set.
    *
-   * @return query timeout
+   * @param results
    */
-  Duration resolveTimeout();
+  int handleResultSize(List<?> results);
 
   /**
    * Returns either the limit value from the query parameter, or if the value is {@code null}, the
@@ -98,9 +98,11 @@ public interface DynamicQuerier<P, S> extends Querier {
   <X> X resolveProperty(String key, Class<X> cls, X dflt);
 
   /**
-   * Return and validate results size.
+   * Returns either the value of the query timeout property (the property name is
+   * {@link QuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
+   * {@link QuerierConfig#getTimeout()}.
    *
-   * @param results
+   * @return query timeout
    */
-  int validateResultSize(List<?> results);
+  Duration resolveTimeout();
 }

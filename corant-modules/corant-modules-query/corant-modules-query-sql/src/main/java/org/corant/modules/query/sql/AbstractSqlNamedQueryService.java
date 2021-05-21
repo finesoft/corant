@@ -16,6 +16,7 @@ package org.corant.modules.query.sql;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -42,10 +43,11 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
       SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       String sql = querier.getScript();
+      Duration timeout = querier.resolveTimeout();
       Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, sql);
       return new FetchResult(fetchQuery, querier,
-          getExecutor().select(sql, maxSize, scriptParameter));
+          getExecutor().select(sql, maxSize, timeout, scriptParameter));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -60,10 +62,11 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
     Forwarding<T> result = Forwarding.inst();
-    List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
+    List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     int size = sizeOf(list);
     if (size > 0) {
       if (size > limit) {
@@ -81,8 +84,9 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, sql);
-    Map<String, Object> result = getExecutor().get(sql, scriptParameter);
+    Map<String, Object> result = getExecutor().get(sql, timeout, scriptParameter);
     this.fetch(result, querier);
     return querier.handleResult(result);
 
@@ -95,9 +99,10 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     String limitSql = getDialect().getLimitSql(sql, offset, limit);
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
-    List<Map<String, Object>> list = getExecutor().select(limitSql, scriptParameter);
+    List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
     int size = sizeOf(list);
     if (size > 0) {
@@ -106,8 +111,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       } else {
         String totalSql = getDialect().getCountSql(sql);
         log("total-> " + queryName, scriptParameter, totalSql);
-        result.withTotal(
-            getMapInteger(getExecutor().get(totalSql, scriptParameter), Dialect.COUNT_FIELD_NAME));
+        result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
+            Dialect.COUNT_FIELD_NAME));
       }
       this.fetch(list, querier);
     }
@@ -120,11 +125,12 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int maxSelectSize = querier.resolveMaxSelectSize();
+    Duration timeout = querier.resolveTimeout();
     // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
     log(queryName, scriptParameter, sql);
     List<Map<String, Object>> results =
-        getExecutor().select(sql, maxSelectSize + 1, scriptParameter);
-    if (querier.validateResultSize(results) > 0) {
+        getExecutor().select(sql, maxSelectSize + 1, timeout, scriptParameter);
+    if (querier.handleResultSize(results) > 0) {
       this.fetch(results, querier);
     }
     return querier.handleResults(results);

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,22 +62,26 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
+    Duration timeout = querier.resolveTimeout();
     String ql = querier.getScript();
     log("stream-> " + queryName, scriptParameter, ql);
     final EntityManager em = getEntityManager(); // FIXME close
     Stream<T> stream =
-        createQuery(em, ql, properties, resultClass, scriptParameter).getResultStream();
+        createQuery(em, ql, properties, resultClass, timeout, scriptParameter).getResultStream();
     return stream.onClose(em::close);
   }
 
   protected Query createQuery(EntityManager em, String ql, Map<String, String> properties,
-      Class<?> cls, Object... args) {
+      Class<?> cls, Duration timeout, Object... args) {
     boolean isNative = getMapBoolean(properties, PRO_KEY_NATIVE_QUERY);
     Query query;
     if (isNative) {
       query = em.createNativeQuery(ql, cls);
     } else {
       query = em.createQuery(ql);
+    }
+    if (timeout != null) {
+      query.setHint("javax.persistence.query.timeout", (int) timeout.toSeconds());
     }
     FlushModeType fmt = getMapEnum(properties, PRO_KEY_FLUSH_MODE_TYPE, FlushModeType.class);
     if (fmt != null) {
@@ -115,11 +120,12 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     String ql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, ql);
     EntityManager em = getEntityManager();
     try {
       Forwarding<T> result = Forwarding.inst();
-      Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
+      Query query = createQuery(em, ql, properties, resultClass, timeout, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit + 1);
       List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       int size = list.size();
@@ -143,11 +149,13 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] scriptParameter = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     String ql = querier.getScript();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, ql);
     T result = null;
     EntityManager em = getEntityManager();
     try {
-      List<T> list = createQuery(em, ql, properties, resultClass, scriptParameter).getResultList();
+      List<T> list =
+          createQuery(em, ql, properties, resultClass, timeout, scriptParameter).getResultList();
       if (!isEmpty(list)) {
         result = list.get(0);
       }
@@ -169,10 +177,11 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     String ql = querier.getScript();
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, ql);
     EntityManager em = getEntityManager();
     try {
-      Query query = createQuery(em, ql, properties, resultClass, scriptParameter);
+      Query query = createQuery(em, ql, properties, resultClass, timeout, scriptParameter);
       query.setFirstResult(offset).setMaxResults(limit);
       List<T> list = defaultObject(query.getResultList(), ArrayList::new);
       Paging<T> result = Paging.of(offset, limit);
@@ -184,7 +193,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
           String totalSql = getCountJpql(ql);
           log("total-> " + queryName, scriptParameter, totalSql);
           result.withTotal(
-              ((Number) createQuery(em, totalSql, properties, resultClass, scriptParameter)
+              ((Number) createQuery(em, totalSql, properties, resultClass, timeout, scriptParameter)
                   .getSingleResult()).intValue());
         }
       }
@@ -204,14 +213,15 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Object[] queryParam = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
     int maxSelectSize = querier.resolveMaxSelectSize();
+    Duration timeout = querier.resolveTimeout();
     String ql = querier.getScript();
     log(queryName, queryParam, ql);
     EntityManager em = getEntityManager();
     try {
-      Query query =
-          createQuery(em, ql, properties, resultClass, queryParam).setMaxResults(maxSelectSize + 1);
+      Query query = createQuery(em, ql, properties, resultClass, timeout, queryParam)
+          .setMaxResults(maxSelectSize + 1);
       List<T> result = query.getResultList();
-      querier.validateResultSize(result);
+      querier.handleResultSize(result);
       return result;
     } finally {
       if (em.isOpen()) {

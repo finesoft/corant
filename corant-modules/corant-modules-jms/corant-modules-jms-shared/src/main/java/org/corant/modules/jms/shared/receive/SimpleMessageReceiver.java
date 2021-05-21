@@ -59,9 +59,9 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 上午11:33:15
  *
  */
-public class DefaultMessageReceiverx implements MessageReceiver {
+public class SimpleMessageReceiver implements MessageReceiver {
 
-  protected static final Logger logger = Logger.getLogger(DefaultMessageReceiverx.class.getName());
+  protected static final Logger logger = Logger.getLogger(SimpleMessageReceiver.class.getName());
 
   // config
   protected final MessageReceivingMetaData meta;
@@ -76,7 +76,7 @@ public class DefaultMessageReceiverx implements MessageReceiver {
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
 
-  protected DefaultMessageReceiverx(MessageReceivingMetaData metaData, MessageHandler messageHandler,
+  protected SimpleMessageReceiver(MessageReceivingMetaData metaData, MessageHandler messageHandler,
       MessageReceivingMediator mediator) {
     meta = metaData;
     connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());

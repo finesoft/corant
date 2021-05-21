@@ -163,9 +163,9 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
       try {
         ctx = connectionFactory().createContext(sessionMode);
         doStreamDispatch(ctx, messages, serializationSchema);
-        doDispatched(ctx, false);
+        afterDispatched(ctx, false);
       } catch (RuntimeException e) {
-        doDispatched(ctx, true);
+        afterDispatched(ctx, true);
         throw e;
       } finally {
         if (ctx != null) {
@@ -243,9 +243,9 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
       try {
         ctx = connectionFactory().createContext(sessionMode);
         doDispatch(ctx, serializationSchema, messages);
-        doDispatched(ctx, false);
+        afterDispatched(ctx, false);
       } catch (RuntimeException e) {
-        doDispatched(ctx, true);
+        afterDispatched(ctx, true);
         throw e;
       } finally {
         if (ctx != null) {
@@ -261,7 +261,7 @@ public class MessageDispatcherTemplate extends MessageDispatcherImpl {
             connectionFactoryId));
   }
 
-  void doDispatched(JMSContext ctx, boolean occurrError) {
+  void afterDispatched(JMSContext ctx, boolean occurrError) {
     if (ctx != null) {
       if (!occurrError) {
         if (sessionMode == JMSContext.CLIENT_ACKNOWLEDGE) {

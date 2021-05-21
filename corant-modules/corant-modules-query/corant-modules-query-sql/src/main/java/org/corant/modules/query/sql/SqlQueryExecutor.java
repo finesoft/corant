@@ -14,6 +14,7 @@
 package org.corant.modules.query.sql;
 
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -27,16 +28,18 @@ import org.corant.modules.query.sql.dialect.Dialect;
  */
 public interface SqlQueryExecutor {
 
-  Map<String, Object> get(String sql, Object... args) throws SQLException;
+  Map<String, Object> get(String sql, Duration timeout, Object... args) throws SQLException;
 
   Dialect getDialect();
 
-  List<Map<String, Object>> select(String sql, int expectRows, Object... args) throws SQLException;
-
-  default List<Map<String, Object>> select(String sql, Object... args) throws SQLException {
-    return select(sql, 0, args);
+  default List<Map<String, Object>> select(String sql, Duration timeout, Object... args)
+      throws SQLException {
+    return select(sql, 0, timeout, args);
   }
 
-  Stream<Map<String, Object>> stream(String sql, Object... args);
+  List<Map<String, Object>> select(String sql, int expectRows, Duration timeout, Object... args)
+      throws SQLException;
+
+  Stream<Map<String, Object>> stream(String sql, Duration timeout, Object... args);
 
 }

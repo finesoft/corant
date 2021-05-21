@@ -120,7 +120,7 @@ public class QuerierConfig implements DeclarativeConfig {
     if (defaultSelectSize > maxSelectSize) {
       defaultSelectSize = maxSelectSize;
       logger.warning(() -> String.format(
-          "The value of querier config [default select size] is greater than the value of [max select size], the value was revised, the value is %s",
+          "The value of querier config [default select size] is greater than the value of [max select size], the value will be revised to %s",
           defaultSelectSize));
     }
     if (maxLimit <= 0) {
@@ -137,7 +137,7 @@ public class QuerierConfig implements DeclarativeConfig {
     if (defaultLimit > maxLimit) {
       defaultLimit = maxLimit;
       logger.warning(() -> String.format(
-          "The value of querier config [default limit] is greater than the value of [max limit], the value was revised, the value is %s",
+          "The value of querier config [default limit] is greater than the value of [max limit], the value will be revised to %s",
           defaultLimit));
     }
     if (defaultStreamLimit <= 0) {

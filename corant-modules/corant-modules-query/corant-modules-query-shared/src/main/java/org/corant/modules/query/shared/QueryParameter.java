@@ -118,9 +118,7 @@ public interface QueryParameter extends Serializable {
     }
 
     public DefaultQueryParameter context(Map<String, Object> context) {
-      if (context != null) {
-        this.context = context;
-      }
+      context = newHashMap(context);
       return this;
     }
 

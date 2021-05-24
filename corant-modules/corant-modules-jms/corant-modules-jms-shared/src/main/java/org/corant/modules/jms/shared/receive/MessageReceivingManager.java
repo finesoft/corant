@@ -15,7 +15,6 @@ package org.corant.modules.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,32 +73,20 @@ public class MessageReceivingManager {
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     Set<Pair<String, String>> anycasts = new HashSet<>();
-    for (final MessageReceivingMetaData metaData : receivingMetaData) {
-      if (!metaData.isMulticast()
-          && !anycasts.add(Pair.of(metaData.getConnectionFactoryId(), metaData.getDestination()))) {
+    for (final MessageReceivingMetaData meta : receivingMetaData) {
+      if (!meta.isMulticast()
+          && !anycasts.add(Pair.of(meta.getConnectionFactoryId(), meta.getDestination()))) {
         logger.warning(() -> String.format(
-            "The anycast message receiver with same connection factory id and same destination appeared more than once, it should be avoided in general. message receiver [%s].",
-            metaData));
+            "The anycast message receiver destination appeared more than once, it should be avoided in general. message receiver [%s].",
+            meta));
       }
-      final AbstractJMSConfig cfg =
-          AbstractJMSExtension.getConfig(metaData.getConnectionFactoryId());
-      if (cfg != null && cfg.isEnable()) {
-        if (metaData.isXa()) {
-          shouldBeTrue(cfg.isXa(),
-              "Can't schedule xa message receiving task, the connection factory doesn't support xa! message receiver [%s].",
-              metaData);
-        }
-        ScheduledExecutorService ses = shouldNotNull(executorServices.get(cfg),
-            "Can't schedule message receiving task, the connection factory not found. message receiver [%s].",
-            metaData);
-        MessageReceivingTask task = taskFactory.create(metaData);
-        ScheduledFuture<?> future =
-            ses.scheduleWithFixedDelay(task, cfg.getReceiveTaskInitialDelay().toMillis(),
-                cfg.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
-        receiveExecutions.add(new MessageReceivingTaskExecution(future, task));
+      AbstractJMSConfig config = AbstractJMSExtension.getConfig(meta.getConnectionFactoryId());
+      if (config != null && config.isEnable()) {
+        MessageReceivingTaskExecution execution = createExecution(config, meta);
+        receiveExecutions.add(execution);
         logger.fine(() -> String.format(
             "Scheduled message receiving task initial delay [%s]Ms. message receiver [%s].",
-            cfg.getReceiveTaskInitialDelay(), metaData));
+            config.getReceiveTaskInitialDelay(), meta));
       }
     }
     anycasts.clear();
@@ -145,25 +132,26 @@ public class MessageReceivingManager {
         .forEach(receivingMetaData::addAll);
     if (!receivingMetaData.isEmpty()) {
       // FIXME check receive and reply recursion
-      final Map<String, ? extends AbstractJMSConfig> cfgs =
+      final Map<String, ? extends AbstractJMSConfig> allConfigs =
           extension.getConfigManager().getAllWithNames();
-      Set<AbstractJMSConfig> useCfgs = new HashSet<>();
-      Iterator<MessageReceivingMetaData> metait = receivingMetaData.iterator();
-      while (metait.hasNext()) {
-        MessageReceivingMetaData meta = metait.next();
-        AbstractJMSConfig f = cfgs.get(meta.getConnectionFactoryId());
-        if (f == null || !f.isEnable()) {
+      Set<AbstractJMSConfig> configs = new HashSet<>();
+      Iterator<MessageReceivingMetaData> metaIt = receivingMetaData.iterator();
+      while (metaIt.hasNext()) {
+        MessageReceivingMetaData meta = metaIt.next();
+        final String connectionFactoryId = meta.getConnectionFactoryId();
+        final AbstractJMSConfig config = allConfigs.get(connectionFactoryId);
+        if (config == null || !config.isEnable()) {
           logger.warning(() -> String.format(
               "The receiver method %s can't be performed, the connection factory %s is not available!",
-              meta.getMethod().getMethod().toString(),
-              f != null ? f.getConnectionFactoryId() : EMPTY));
-          metait.remove();
+              meta.getMethod().getMethod().toString(), connectionFactoryId));
+          metaIt.remove();
           continue;
         }
-        useCfgs.add(f);
+        configs.add(config);
       }
-      if (!useCfgs.isEmpty()) {
-        useCfgs.forEach(cfg -> {
+
+      if (!configs.isEmpty()) {
+        configs.forEach(cfg -> {
           ScheduledThreadPoolExecutor executor =
               new ScheduledThreadPoolExecutor(cfg.getReceiveTaskThreads(),
                   new MessageReceivingThreadFactory(cfg.getConnectionFactoryId()));
@@ -175,6 +163,21 @@ public class MessageReceivingManager {
           () -> String.format("Found %s message receivers that involving %s connection factories.",
               receivingMetaData.size(), executorServices.size()));
     }
+  }
+
+  MessageReceivingTaskExecution createExecution(AbstractJMSConfig config,
+      MessageReceivingMetaData meta) {
+    if (meta.isXa()) {
+      shouldBeTrue(config.isXa(),
+          "The connection factory doesn't support xa! message receiver [%s].", meta);
+    }
+    ScheduledExecutorService service = shouldNotNull(executorServices.get(config),
+        "Can't find any scheduled executore service! message receiver [%s].", meta);
+    final MessageReceivingTask task = taskFactory.create(meta);
+    final ScheduledFuture<?> future =
+        service.scheduleWithFixedDelay(task, config.getReceiveTaskInitialDelay().toMillis(),
+            config.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
+    return new MessageReceivingTaskExecution(future, task);
   }
 
   static class MessageReceivingThreadFactory implements ThreadFactory {

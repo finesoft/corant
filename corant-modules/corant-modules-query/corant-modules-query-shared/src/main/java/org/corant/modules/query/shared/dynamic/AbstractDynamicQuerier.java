@@ -29,7 +29,6 @@ import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.DefaultQuerierConfig;
 
 /**
  * corant-modules-query-shared
@@ -139,7 +138,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       synchronized (this) {
         if (limit == null) {
           limit = defaultObject(getQueryParameter().getLimit(),
-              () -> resolveProperty(DefaultQuerierConfig.PRO_KEY_LIMIT, Integer.class,
+              () -> resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
                   config.getDefaultLimit()));
           if (limit <= 0) {
             limit = config.getMaxLimit();
@@ -161,8 +160,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (maxSelectSize == null) {
       synchronized (this) {
         if (maxSelectSize == null) {
-          maxSelectSize = resolveProperty(DefaultQuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
-              Integer.class, config.getDefaultSelectSize());
+          maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE, Integer.class,
+              config.getDefaultSelectSize());
           if (maxSelectSize <= 0) {
             maxSelectSize = config.getMaxSelectSize();
           }
@@ -175,9 +174,6 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   /**
    * Resolve offset from query parameter, if the resolved offset < 0 or offset is null then return
    * 0.
-   *
-   * @param querier
-   * @return resolveOffset
    */
   @Override
   public int resolveOffset() {
@@ -222,8 +218,9 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (timeout == null) {
       synchronized (this) {
         if (timeout == null) {
-          timeout = defaultObject(resolveProperty(DefaultQuerierConfig.PRO_KEY_TIMEOUT,
-              Duration.class, config.getTimeout()), () -> Duration.ZERO);
+          timeout = defaultObject(
+              resolveProperty(QuerierConfig.PRO_KEY_TIMEOUT, Duration.class, config.getTimeout()),
+              () -> Duration.ZERO);
         }
       }
     }
@@ -231,13 +228,13 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   protected int getUnLimitSize() {
-    return DefaultQuerierConfig.UN_LIMIT_SELECT_SIZE;
+    return QuerierConfig.UN_LIMIT_SELECT_SIZE;
   }
 
   boolean thrownExceedMaxSelectSize() {
     if (this.thrownExceedMaxSelectSize == null) {
       this.thrownExceedMaxSelectSize =
-          resolveProperty(DefaultQuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
+          resolveProperty(QuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
               config.isThrownOnMaxSelectSize());
     }
     return thrownExceedMaxSelectSize;

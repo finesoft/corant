@@ -167,8 +167,6 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
     /**
      * @param executor
-     * @param defaultMaxSelectSize
-     * @param defaultLimit
      * @param resolver
      */
     protected DefaultSqlNamedQueryService(SqlQueryExecutor executor,
@@ -190,7 +188,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
               "Can't build default sql named query, the data source named %s not found.",
               dataSourceName))
           .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize);
-      //DON'T CONFIGURE MAX ROWS AND TIME OUT, USE QUERIER since 1.6.2
+      // DON'T CONFIGURE MAX ROWS AND TIME OUT, USE QUERIER since 1.6.2
       /*
        * .maxRows(manager.maxRows).queryTimeout(manager.timeout.orElseGet(() -> { Duration d =
        * manager.resolver.getQueryHandler().getQuerierConfig().getTimeout(); if (d != null) { return

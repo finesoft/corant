@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Maps.newHashMap;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
@@ -216,10 +217,7 @@ public interface QueryParameter extends Serializable {
     }
 
     public GenericQueryParameter<T> setContext(Map<String, Object> context) {
-      this.context.clear();
-      if (context != null) {
-        this.context.putAll(context);
-      }
+      this.context = newHashMap(context);
       return this;
     }
 

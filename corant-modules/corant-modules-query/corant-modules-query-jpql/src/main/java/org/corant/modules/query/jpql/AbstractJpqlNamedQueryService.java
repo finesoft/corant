@@ -30,10 +30,10 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
+import org.corant.modules.query.Querier;
+import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
-import org.corant.modules.query.shared.Querier;
-import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.shared.exception.NotSupportedException;
 
 /**

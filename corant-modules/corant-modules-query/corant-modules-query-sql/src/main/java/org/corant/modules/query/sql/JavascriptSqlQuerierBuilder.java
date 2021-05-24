@@ -15,11 +15,11 @@ package org.corant.modules.query.sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.modules.query.shared.FetchQueryHandler;
-import org.corant.modules.query.shared.QueryHandler;
-import org.corant.modules.query.shared.QueryParameter;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.javascript.JavascriptDynamicQuerierBuilder;
-import org.corant.modules.query.shared.mapping.Query;
 
 /**
  * corant-modules-query-sql

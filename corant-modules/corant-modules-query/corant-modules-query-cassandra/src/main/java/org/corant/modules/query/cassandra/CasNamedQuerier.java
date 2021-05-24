@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.cassandra;
 
-import org.corant.modules.query.shared.NamedQuerier;
+import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**

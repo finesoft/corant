@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.shared.QueryRuntimeException;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Conversions;
 import org.elasticsearch.action.search.SearchRequest;

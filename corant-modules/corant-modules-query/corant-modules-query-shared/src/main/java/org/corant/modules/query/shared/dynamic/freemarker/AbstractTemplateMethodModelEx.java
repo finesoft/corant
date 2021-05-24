@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.corant.modules.query.shared.QueryRuntimeException;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.exception.CorantRuntimeException;

@@ -16,11 +16,11 @@ package org.corant.modules.query.shared.dynamic;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import org.corant.modules.query.shared.Querier;
-import org.corant.modules.query.shared.QuerierConfig;
-import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
-import org.corant.modules.query.shared.mapping.Query;
+import org.corant.modules.query.Querier;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.shared.DefaultQuerierConfig;
 
 /**
  * corant-modules-query-shared
@@ -61,20 +61,20 @@ public interface DynamicQuerier<P, S> extends Querier {
 
   /**
    * Returns either the limit value from the query parameter, or if the value is {@code null}, the
-   * value of {@link QuerierConfig#getDefaultLimit()}.
+   * value of {@link DefaultQuerierConfig#getDefaultLimit()}.
    *
    * <p>
-   * Note: If the limit value <=0 then returns {@link QuerierConfig#getMaxLimit()}, if the limit
+   * Note: If the limit value <=0 then returns {@link DefaultQuerierConfig#getMaxLimit()}, if the limit
    * value great than the {@link #resolveMaxSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveLimit();
 
   /**
    * Returns either the value of the query max select size property(the property name is
-   * {@link QuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the value of
-   * {@link QuerierConfig#getDefaultSelectSize()}.
+   * {@link DefaultQuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the value of
+   * {@link DefaultQuerierConfig#getDefaultSelectSize()}.
    * <p>
-   * Note: If the value <=0 then returns {@link QuerierConfig#getMaxSelectSize()}
+   * Note: If the value <=0 then returns {@link DefaultQuerierConfig#getMaxSelectSize()}
    */
   int resolveMaxSelectSize();
 
@@ -99,8 +99,8 @@ public interface DynamicQuerier<P, S> extends Querier {
 
   /**
    * Returns either the value of the query timeout property (the property name is
-   * {@link QuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
-   * {@link QuerierConfig#getTimeout()}.
+   * {@link DefaultQuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
+   * {@link DefaultQuerierConfig#getTimeout()}.
    *
    * @return query timeout
    */

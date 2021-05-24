@@ -31,10 +31,10 @@ import org.corant.context.AbstractBean;
 import org.corant.context.proxy.MethodInvoker;
 import org.corant.context.proxy.ProxyBuilder;
 import org.corant.context.qualifier.AutoCreated;
+import org.corant.modules.query.QueryService;
+import org.corant.modules.query.QueryService.QueryWay;
+import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
-import org.corant.modules.query.shared.QueryService;
-import org.corant.modules.query.shared.QueryService.QueryWay;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
 import org.corant.shared.normal.Names;
 
 /**

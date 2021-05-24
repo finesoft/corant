@@ -36,10 +36,11 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.context.service.ConversionService;
-import org.corant.modules.query.shared.QueryService.Forwarding;
-import org.corant.modules.query.shared.QueryService.Paging;
-import org.corant.modules.query.shared.mapping.QueryHint;
-import org.corant.modules.query.shared.mapping.QueryHint.QueryHintParameter;
+import org.corant.modules.query.QueryService.Forwarding;
+import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.QueryHint;
+import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
+import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 

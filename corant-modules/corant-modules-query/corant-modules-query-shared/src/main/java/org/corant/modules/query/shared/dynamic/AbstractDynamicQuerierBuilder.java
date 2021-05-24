@@ -14,11 +14,11 @@
 package org.corant.modules.query.shared.dynamic;
 
 import java.time.Instant;
-import org.corant.modules.query.shared.FetchQueryHandler;
-import org.corant.modules.query.shared.QueryHandler;
-import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
-import org.corant.modules.query.shared.mapping.Query;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
 
 /**
  * corant-modules-query-shared

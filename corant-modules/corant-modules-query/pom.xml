@@ -14,5 +14,6 @@
   	<module>corant-modules-query-jpql</module>
   	<module>corant-modules-query-elastic</module>
   	<module>corant-modules-query-cassandra</module>
+  	<module>corant-modules-query-api</module>
   </modules>
 </project>

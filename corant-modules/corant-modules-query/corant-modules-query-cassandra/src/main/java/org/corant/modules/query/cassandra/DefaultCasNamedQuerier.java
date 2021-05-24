@@ -15,11 +15,11 @@ package org.corant.modules.query.cassandra;
 
 import static org.corant.shared.util.Strings.SPACE;
 import java.util.Map;
-import org.corant.modules.query.shared.FetchQueryHandler;
-import org.corant.modules.query.shared.QueryHandler;
-import org.corant.modules.query.shared.QueryParameter;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
-import org.corant.modules.query.shared.mapping.Query;
 
 /**
  * corant-modules-query-cassandra

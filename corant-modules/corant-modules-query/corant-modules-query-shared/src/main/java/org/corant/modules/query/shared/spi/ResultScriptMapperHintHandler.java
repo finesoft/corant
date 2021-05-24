@@ -25,10 +25,11 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.modules.query.QueryService.Forwarding;
+import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.shared.QueryScriptEngines;
-import org.corant.modules.query.shared.QueryService.Forwarding;
-import org.corant.modules.query.shared.QueryService.Paging;
-import org.corant.modules.query.shared.mapping.QueryHint;
+import org.corant.modules.query.spi.ResultHintHandler;
 
 /**
  * corant-modules-query-shared

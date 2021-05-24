@@ -20,8 +20,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.modules.query.shared.QueryService;
-import org.corant.modules.query.shared.QueryService.QueryWay;
+import org.corant.modules.query.QueryService;
+import org.corant.modules.query.QueryService.QueryWay;
 
 /**
  * corant-modules-query-shared

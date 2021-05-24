@@ -21,13 +21,13 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.modules.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
-import org.corant.modules.query.shared.mapping.Query;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

@@ -14,8 +14,10 @@
 package org.corant.modules.query.shared;
 
 import java.util.Set;
-import org.corant.modules.query.shared.mapping.QueryMappingService;
-import org.corant.modules.query.shared.mapping.QueryMappingService.QueryMappingClient;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.NamedQuerier;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.shared.QueryMappingService.QueryMappingClient;
 
 /**
  * corant-modules-query-shared

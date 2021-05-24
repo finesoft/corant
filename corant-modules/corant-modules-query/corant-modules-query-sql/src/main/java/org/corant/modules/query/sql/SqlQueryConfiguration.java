@@ -14,7 +14,7 @@
 package org.corant.modules.query.sql;
 
 import javax.sql.DataSource;
-import org.corant.modules.query.shared.QueryRuntimeException;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.sql.dialect.Dialect;
 
 /**

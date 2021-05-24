@@ -21,11 +21,11 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.QueryRuntimeException;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
-import org.corant.modules.query.shared.mapping.Query;
-import org.corant.modules.query.shared.mapping.Script.ScriptType;
 import org.corant.shared.exception.NotSupportedException;
 
 /**

@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.corant.modules.query.shared.QueryRuntimeException;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.sql.dialect.Dialect;
 import org.corant.shared.exception.CorantRuntimeException;
 

@@ -15,7 +15,9 @@ package org.corant.modules.query.shared;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.modules.query.shared.mapping.QueryMappingService;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.NamedQuerier;
+import org.corant.modules.query.QueryHandler;
 
 /**
  * corant-modules-query-shared

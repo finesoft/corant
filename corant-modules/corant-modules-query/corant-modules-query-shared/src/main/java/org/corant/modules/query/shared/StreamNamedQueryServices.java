@@ -25,8 +25,11 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.corant.modules.query.shared.QueryParameter.StreamQueryParameter;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
+import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.QueryObjectMapper;
+import org.corant.modules.query.QueryService;
+import org.corant.modules.query.QueryParameter.StreamQueryParameter;
+import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.util.Retry.RetryInterval;
 import org.corant.shared.util.Streams;
 

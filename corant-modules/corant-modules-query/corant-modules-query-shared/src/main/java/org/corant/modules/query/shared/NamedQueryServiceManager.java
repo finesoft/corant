@@ -14,7 +14,8 @@
 package org.corant.modules.query.shared;
 
 import org.corant.context.Instances;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
+import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 
 /**

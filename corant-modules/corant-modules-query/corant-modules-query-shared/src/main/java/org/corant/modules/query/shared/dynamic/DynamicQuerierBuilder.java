@@ -13,8 +13,8 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
-import org.corant.modules.query.shared.QueryHandler;
-import org.corant.modules.query.shared.mapping.Query;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.mapping.Query;
 
 /**
  * corant-modules-query-shared

@@ -21,10 +21,12 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.shared.QueryParameter.DefaultQueryParameter;
-import org.corant.modules.query.shared.QueryService.Forwarding;
-import org.corant.modules.query.shared.QueryService.Paging;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
+import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.QueryObjectMapper;
+import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
+import org.corant.modules.query.QueryService.Forwarding;
+import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.util.Streams;
 
 /**

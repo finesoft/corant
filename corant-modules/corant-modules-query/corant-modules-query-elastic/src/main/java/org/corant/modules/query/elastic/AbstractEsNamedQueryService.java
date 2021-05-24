@@ -20,12 +20,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.modules.query.Querier;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
-import org.corant.modules.query.shared.Querier;
-import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
-import org.corant.modules.query.shared.mapping.FetchQuery;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.elasticsearch.common.unit.TimeValue;
 

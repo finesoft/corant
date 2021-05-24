@@ -1,7 +1,7 @@
 package org.corant.modules.query.mongodb;
 
 import java.util.List;
-import org.corant.modules.query.shared.NamedQueryService;
+import org.corant.modules.query.NamedQueryService;
 
 /**
  * corant-modules-query-mongodb

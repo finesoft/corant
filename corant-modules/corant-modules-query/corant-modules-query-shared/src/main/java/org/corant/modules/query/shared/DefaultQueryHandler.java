@@ -14,9 +14,9 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.context.Instances.select;
-import static org.corant.modules.query.shared.QueryParameter.CONTEXT_NME;
-import static org.corant.modules.query.shared.QueryParameter.LIMIT_PARAM_NME;
-import static org.corant.modules.query.shared.QueryParameter.OFFSET_PARAM_NME;
+import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
+import static org.corant.modules.query.QueryParameter.LIMIT_PARAM_NME;
+import static org.corant.modules.query.QueryParameter.OFFSET_PARAM_NME;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.forceCast;
@@ -35,11 +35,14 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.service.ConversionService;
-import org.corant.modules.query.shared.QueryParameter.DefaultQueryParameter;
-import org.corant.modules.query.shared.mapping.Query;
-import org.corant.modules.query.shared.mapping.QueryHint;
-import org.corant.modules.query.shared.spi.QueryParameterReviser;
-import org.corant.modules.query.shared.spi.ResultHintHandler;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryObjectMapper;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.mapping.QueryHint;
+import org.corant.modules.query.spi.QueryParameterReviser;
+import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
@@ -67,7 +70,7 @@ public class DefaultQueryHandler implements QueryHandler {
   @Inject
   protected QueryObjectMapper objectMapper;
 
-  protected QuerierConfig querierConfig = QuerierConfig.DEFAULT;
+  protected DefaultQuerierConfig querierConfig = DefaultQuerierConfig.DEFAULT;
 
   @Override
   public QueryObjectMapper getObjectMapper() {
@@ -75,7 +78,7 @@ public class DefaultQueryHandler implements QueryHandler {
   }
 
   @Override
-  public QuerierConfig getQuerierConfig() {
+  public DefaultQuerierConfig getQuerierConfig() {
     return querierConfig;
   }
 
@@ -193,7 +196,7 @@ public class DefaultQueryHandler implements QueryHandler {
 
   @PostConstruct
   protected void onPostConstruct() {
-    querierConfig = ConfigInstances.resolveSingle(QuerierConfig.class);
+    querierConfig = ConfigInstances.resolveSingle(DefaultQuerierConfig.class);
   }
 
   @PreDestroy

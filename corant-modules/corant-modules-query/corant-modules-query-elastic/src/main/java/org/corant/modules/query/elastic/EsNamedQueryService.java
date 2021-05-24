@@ -15,7 +15,7 @@ package org.corant.modules.query.elastic;
 
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.shared.NamedQueryService;
+import org.corant.modules.query.NamedQueryService;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**

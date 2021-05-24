@@ -31,10 +31,11 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.corant.modules.query.shared.QueryService.Forwarding;
-import org.corant.modules.query.shared.QueryService.Paging;
-import org.corant.modules.query.shared.mapping.QueryHint;
-import org.corant.modules.query.shared.mapping.QueryHint.QueryHintParameter;
+import org.corant.modules.query.QueryService.Forwarding;
+import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.QueryHint;
+import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
+import org.corant.modules.query.spi.ResultHintHandler;
 
 /**
  * corant-modules-query-shared

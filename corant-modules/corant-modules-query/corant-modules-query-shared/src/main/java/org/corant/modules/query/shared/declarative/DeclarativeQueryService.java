@@ -23,8 +23,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.query.shared.QueryService;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
+import org.corant.modules.query.QueryService;
+import org.corant.modules.query.mapping.Query.QueryType;
 
 /**
  * corant-modules-query-shared

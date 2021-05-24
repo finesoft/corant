@@ -33,9 +33,9 @@ import org.corant.modules.query.elastic.DefaultEsQueryExecutor;
 import org.corant.modules.query.elastic.EsNamedQuerier;
 import org.corant.modules.query.elastic.EsNamedQueryService;
 import org.corant.modules.query.elastic.EsQueryExecutor;
+import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
-import org.corant.modules.query.shared.mapping.Query.QueryType;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
 

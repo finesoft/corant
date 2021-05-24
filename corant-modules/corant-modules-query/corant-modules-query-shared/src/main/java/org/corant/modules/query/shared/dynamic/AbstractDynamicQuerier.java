@@ -22,13 +22,14 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.corant.modules.query.shared.FetchQueryHandler;
-import org.corant.modules.query.shared.QuerierConfig;
-import org.corant.modules.query.shared.QueryHandler;
-import org.corant.modules.query.shared.QueryParameter;
-import org.corant.modules.query.shared.QueryRuntimeException;
-import org.corant.modules.query.shared.mapping.FetchQuery;
-import org.corant.modules.query.shared.mapping.Query;
+import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.QuerierConfig;
+import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.shared.DefaultQuerierConfig;
 
 /**
  * corant-modules-query-shared
@@ -138,7 +139,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       synchronized (this) {
         if (limit == null) {
           limit = defaultObject(getQueryParameter().getLimit(),
-              () -> resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
+              () -> resolveProperty(DefaultQuerierConfig.PRO_KEY_LIMIT, Integer.class,
                   config.getDefaultLimit()));
           if (limit <= 0) {
             limit = config.getMaxLimit();
@@ -160,8 +161,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (maxSelectSize == null) {
       synchronized (this) {
         if (maxSelectSize == null) {
-          maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE, Integer.class,
-              config.getDefaultSelectSize());
+          maxSelectSize = resolveProperty(DefaultQuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
+              Integer.class, config.getDefaultSelectSize());
           if (maxSelectSize <= 0) {
             maxSelectSize = config.getMaxSelectSize();
           }
@@ -221,9 +222,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (timeout == null) {
       synchronized (this) {
         if (timeout == null) {
-          timeout = defaultObject(
-              resolveProperty(QuerierConfig.PRO_KEY_TIMEOUT, Duration.class, config.getTimeout()),
-              () -> Duration.ZERO);
+          timeout = defaultObject(resolveProperty(DefaultQuerierConfig.PRO_KEY_TIMEOUT,
+              Duration.class, config.getTimeout()), () -> Duration.ZERO);
         }
       }
     }
@@ -231,13 +231,13 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   protected int getUnLimitSize() {
-    return QuerierConfig.UN_LIMIT_SELECT_SIZE;
+    return DefaultQuerierConfig.UN_LIMIT_SELECT_SIZE;
   }
 
   boolean thrownExceedMaxSelectSize() {
     if (this.thrownExceedMaxSelectSize == null) {
       this.thrownExceedMaxSelectSize =
-          resolveProperty(QuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
+          resolveProperty(DefaultQuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
               config.isThrownOnMaxSelectSize());
     }
     return thrownExceedMaxSelectSize;

@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.cassandra;
 
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
@@ -22,5 +21,5 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * @author bingo 下午11:00:41
  *
  */
-public interface CasNamedQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
+public interface CasNamedQuerier extends DynamicQuerier<Object[], String> {
 }

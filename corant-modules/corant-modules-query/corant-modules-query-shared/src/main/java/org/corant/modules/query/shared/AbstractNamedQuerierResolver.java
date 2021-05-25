@@ -16,8 +16,8 @@ package org.corant.modules.query.shared;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.FetchQueryHandler;
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
  * corant-modules-query-shared
@@ -26,7 +26,7 @@ import org.corant.modules.query.QueryHandler;
  *
  */
 @ApplicationScoped
-public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
+public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?>>
     implements NamedQuerierResolver<String, Object, Q> {
 
   @Inject
@@ -38,14 +38,17 @@ public abstract class AbstractNamedQuerierResolver<Q extends NamedQuerier>
   @Inject
   protected FetchQueryHandler fetchQueryHandler;
 
+  @Override
   public FetchQueryHandler getFetchQueryHandler() {
     return fetchQueryHandler;
   }
 
+  @Override
   public QueryMappingService getMappingService() {
     return mappingService;
   }
 
+  @Override
   public QueryHandler getQueryHandler() {
     return queryHandler;
   }

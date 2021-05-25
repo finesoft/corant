@@ -15,7 +15,6 @@ package org.corant.modules.query.mongodb;
 
 import java.util.EnumMap;
 import java.util.Map;
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
@@ -26,7 +25,7 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  *
  */
 public interface MgNamedQuerier
-    extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Object>>, NamedQuerier {
+    extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Object>> {
 
   String getCollectionName(); // from 2020-03-18
 

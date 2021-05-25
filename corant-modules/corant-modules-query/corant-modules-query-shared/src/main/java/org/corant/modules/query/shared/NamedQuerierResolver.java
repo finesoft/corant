@@ -15,9 +15,9 @@ package org.corant.modules.query.shared;
 
 import java.util.Set;
 import org.corant.modules.query.FetchQueryHandler;
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.shared.QueryMappingService.QueryMappingClient;
+import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
  * corant-modules-query-shared
@@ -26,7 +26,8 @@ import org.corant.modules.query.shared.QueryMappingService.QueryMappingClient;
  *
  * @author bingo 下午12:07:37
  */
-public interface NamedQuerierResolver<K, P, Q extends NamedQuerier> extends QueryMappingClient {
+public interface NamedQuerierResolver<K, P, Q extends DynamicQuerier<?, ?>>
+    extends QueryMappingClient {
 
   FetchQueryHandler getFetchQueryHandler();
 

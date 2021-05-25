@@ -40,7 +40,6 @@ public class DefaultMgNamedQuerier
     implements MgNamedQuerier {
 
   protected String collectionName;
-  protected final String name;
   protected final EnumMap<MgOperator, Object> script = new EnumMap<>(MgOperator.class);
   protected final String originalScript;
 
@@ -56,7 +55,6 @@ public class DefaultMgNamedQuerier
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Map<?, ?> mgQuery,
       String originalScript) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    name = query.getName();
     this.originalScript = originalScript;
     init(mgQuery);
   }
@@ -64,11 +62,6 @@ public class DefaultMgNamedQuerier
   @Override
   public String getCollectionName() {
     return collectionName;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

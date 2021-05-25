@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.sql;
 
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
@@ -22,7 +21,7 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * @author bingo 下午7:11:05
  *
  */
-public interface SqlNamedQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
+public interface SqlNamedQuerier extends DynamicQuerier<Object[], String> {
 
   String PRO_KEY_PAGINATION_PROCESS_PATTERN = ".pagination-process-pattern";
   String PRO_KEY_PAGINATION_COUNT_QUERY = ".pagination-count-query";

@@ -28,6 +28,7 @@ public interface QuerierConfig {
   String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";
   String PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE = ".thrown-on-max-select-size";
   String PRO_KEY_LIMIT = ".limit";
+  String PRO_KEY_STREAM_LIMIT = ".stream-limit";
   String PRO_KEY_TIMEOUT = ".timeout";
 
   int getDefaultLimit();

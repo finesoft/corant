@@ -29,7 +29,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
 public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
     implements SqlNamedQuerier {
 
-  private final String name;
   private final Object[] scriptParameter;
   private final String script;
 
@@ -45,14 +44,8 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    name = query.getName();
     this.scriptParameter = scriptParameter;
     this.script = script;// .replaceAll("[\\t\\n\\r]", " ");
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

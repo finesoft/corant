@@ -399,9 +399,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
    * @see #PRO_KEY_NO_CURSOR_TIMEOUT
    */
   @Override
-  protected <T> Stream<T> stream(String queryName, StreamQueryParameter parameter) {
+  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter parameter) {
     if (parameter.getEnhancer() != null) {
-      return super.stream(queryName, parameter);
+      return super.doStream(queryName, parameter);
     }
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());

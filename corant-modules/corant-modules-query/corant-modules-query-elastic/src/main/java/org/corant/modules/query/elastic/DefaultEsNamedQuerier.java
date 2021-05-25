@@ -37,7 +37,6 @@ public class DefaultEsNamedQuerier extends
     AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsNamedQuerier {
 
   protected final Map<Object, Object> script;
-  protected final String name;
   protected final String indexName;
   protected final String[] hintKeys;
 
@@ -53,7 +52,6 @@ public class DefaultEsNamedQuerier extends
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver,
       Map<Object, Object> scriptMap) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    name = query.getName();
     String[] useHintKeys = new String[] {EsQueryExecutor.HIT_RS_KEY};
     if (isNotEmpty(scriptMap)) {
       Entry<?, ?> entry = scriptMap.entrySet().iterator().next();
@@ -77,11 +75,6 @@ public class DefaultEsNamedQuerier extends
   @Override
   public String getIndexName() {
     return indexName;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

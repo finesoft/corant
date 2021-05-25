@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.jpql;
 
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
@@ -22,5 +21,5 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * @author bingo 下午10:50:07
  *
  */
-public interface JpqlNamedQuerier extends DynamicQuerier<Object[], String>, NamedQuerier {
+public interface JpqlNamedQuerier extends DynamicQuerier<Object[], String> {
 }

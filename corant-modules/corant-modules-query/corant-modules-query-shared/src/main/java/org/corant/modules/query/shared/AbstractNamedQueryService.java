@@ -38,13 +38,13 @@ import org.corant.Corant;
 import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.Querier;
-import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryParameter.StreamQueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.modules.query.mapping.Query.QueryType;
+import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Retry;
 
@@ -107,21 +107,20 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    * This method use {@link #forward(String, Object)} to fetch next data records.
    * </p>
    *
-   * @see AbstractNamedQueryService#stream(String, StreamQueryParameter)
+   * @see AbstractNamedQueryService#doStream(String, StreamQueryParameter)
    */
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    QueryHandler queryHandler = getQuerierResolver().getQueryHandler();
-    QueryParameter queryParam = queryHandler.resolveParameter(null, parameter);
+    DynamicQuerier<?, ?> querier = getQuerierResolver().resolve(queryName, parameter);
+    QueryParameter queryParam = querier.getQueryParameter();
     StreamQueryParameter useQueryParam;
     if (queryParam instanceof StreamQueryParameter) {
       useQueryParam = (StreamQueryParameter) queryParam;
     } else {
       useQueryParam = new StreamQueryParameter(queryParam);
     }
-    useQueryParam.limit(max(defaultObject(queryParam.getLimit(),
-        queryHandler.getQuerierConfig().getDefaultStreamLimit()), 1));
-    return stream(queryName, useQueryParam);
+    useQueryParam.limit(max(querier.resolveStreamLimit(), 1));
+    return doStream(queryName, useQueryParam);
   }
 
   protected abstract <T> Forwarding<T> doForward(String q, Object p) throws Exception;
@@ -305,7 +304,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
    * @param param the query parameter
    * @return stream the query result stream
    */
-  protected <T> Stream<T> stream(String queryName, StreamQueryParameter param) {
+  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter param) {
     return streamOf(new Iterator<T>() {
       Forwarding<T> buffer = null;
       int counter = 0;

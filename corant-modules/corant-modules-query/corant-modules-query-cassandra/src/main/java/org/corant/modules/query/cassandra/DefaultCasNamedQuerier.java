@@ -30,7 +30,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
 public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], String>
     implements CasNamedQuerier {
 
-  private final String name;
   private final Object[] scriptParameter;
   private final String script;
 
@@ -46,14 +45,8 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    name = query.getName();
     this.scriptParameter = scriptParameter;
     this.script = script.replaceAll("[\\t\\n\\r]", SPACE);
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

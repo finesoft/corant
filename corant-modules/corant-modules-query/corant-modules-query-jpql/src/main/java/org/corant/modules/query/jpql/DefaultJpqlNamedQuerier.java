@@ -30,7 +30,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
 public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
     implements JpqlNamedQuerier {
 
-  protected final String name;
   protected final String script;
   protected final Object[] scriptParameter;
 
@@ -46,14 +45,8 @@ public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], St
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    name = query.getName();
     this.scriptParameter = scriptParameter;
     this.script = script.replaceAll("[\\t\\n\\r]", SPACE);
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override

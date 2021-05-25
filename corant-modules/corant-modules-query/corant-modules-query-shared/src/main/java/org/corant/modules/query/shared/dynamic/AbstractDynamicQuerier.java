@@ -48,6 +48,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   // Not thread safe
   protected volatile Integer limit;
+  protected volatile Integer streamLimit;
   protected volatile Integer maxSelectSize;
   protected volatile Integer offset;
   protected volatile Boolean thrownExceedMaxSelectSize;
@@ -65,6 +66,11 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   @Override
   public boolean decideFetch(Object result, FetchQuery fetchQuery) {
     return fetchQueryHandler.canFetch(result, queryParameter, fetchQuery);
+  }
+
+  @Override
+  public String getName() {
+    return query.getName();
   }
 
   @Override
@@ -113,8 +119,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (size > 0 && size > (maxSize = resolveMaxSelectSize())) {
       if (thrownExceedMaxSelectSize()) {
         throw new QueryRuntimeException(
-            "The size of query[%s] result is exceeded, the allowable range is %s.",
-            getQuery().getName(), maxSize);
+            "The size of query[%s] result is exceeded, the allowable range is %s.", getName(),
+            maxSize);
       } else {
         logger.warning(String.format(
             "The size of query[%s] result is exceeded, the allowable range is %s, the excess records are silently dropped.",
@@ -146,8 +152,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
           int max = resolveMaxSelectSize();
           if (limit > max) {
             throw new QueryRuntimeException(
-                "Exceeded the maximum number of query [%s] results, limit is [%s].",
-                getQuery().getName(), max);
+                "Exceeded the maximum number of query [%s] results, limit is [%s].", getName(),
+                max);
           }
         }
       }
@@ -211,6 +217,29 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       return defaultObject(toObject(pro, cls), dflt);
     }
     return dflt;
+  }
+
+  @Override
+  public int resolveStreamLimit() {
+    if (streamLimit == null) {
+      synchronized (this) {
+        if (streamLimit == null) {
+          streamLimit = defaultObject(getQueryParameter().getLimit(),
+              () -> resolveProperty(QuerierConfig.PRO_KEY_STREAM_LIMIT, Integer.class,
+                  config.getDefaultStreamLimit()));
+          if (streamLimit <= 0) {
+            streamLimit = config.getMaxLimit();
+          }
+          int max = resolveMaxSelectSize();
+          if (streamLimit > max) {
+            throw new QueryRuntimeException(
+                "Exceeded the maximum number of query [%s] results, limit is [%s].", getName(),
+                max);
+          }
+        }
+      }
+    }
+    return streamLimit;
   }
 
   @Override

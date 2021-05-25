@@ -14,7 +14,6 @@
 package org.corant.modules.query.elastic;
 
 import java.util.Map;
-import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
@@ -23,8 +22,7 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * @author bingo 下午10:54:47
  *
  */
-public interface EsNamedQuerier
-    extends DynamicQuerier<Map<String, Object>, Map<Object, Object>>, NamedQuerier {
+public interface EsNamedQuerier extends DynamicQuerier<Map<String, Object>, Map<Object, Object>> {
 
   String[] getHintKeys();
 

@@ -92,12 +92,26 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       e.setVariable(tmmTyp, tmm);
 
       // Inject query limit & offset
-      if (param.getLimit() != null) {
-        checkVarNames(e, QueryParameter.LIMIT_PARAM_NME);
+
+      // if (param.getLimit() != null) {
+      // checkVarNames(e, QueryParameter.LIMIT_PARAM_NME);
+      // e.setVariable(QueryParameter.LIMIT_PARAM_NME, new SimpleNumber(param.getLimit()));
+      // }
+
+      if (param.getLimit() != null
+          && !e.getKnownVariableNames().contains(QueryParameter.LIMIT_PARAM_NME)) {
+        // For compatibility issues, temporarily use this
         e.setVariable(QueryParameter.LIMIT_PARAM_NME, new SimpleNumber(param.getLimit()));
       }
-      if (param.getOffset() != null) {
-        checkVarNames(e, QueryParameter.OFFSET_PARAM_NME);
+
+      // if (param.getOffset() != null) {
+      // checkVarNames(e, QueryParameter.OFFSET_PARAM_NME);
+      // e.setVariable(QueryParameter.OFFSET_PARAM_NME, new SimpleNumber(param.getOffset()));
+      // }
+
+      if (param.getOffset() != null
+          && !e.getKnownVariableNames().contains(QueryParameter.OFFSET_PARAM_NME)) {
+        // For compatibility issues, temporarily use this
         e.setVariable(QueryParameter.OFFSET_PARAM_NME, new SimpleNumber(param.getOffset()));
       }
 

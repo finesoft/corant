@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.devops.test.unit.web.RandomWebServerPortSourceProvider.RandomWebServerPortConfigSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -27,6 +29,7 @@ import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.restassured.RestAssured;
+import io.restassured.authentication.AuthenticationScheme;
 import io.restassured.authentication.PreemptiveOAuth2HeaderScheme;
 import io.restassured.specification.MultiPartSpecification;
 import io.restassured.specification.RequestSpecification;
@@ -50,6 +53,10 @@ public class RestAssuredInitializer {
   @ConfigProperty(name = TEST_JWT)
   private Optional<String> jwt;
 
+  @Inject
+  @Any
+  private Instance<AuthenticationScheme> authSchema;
+
   public static void initializeMultipartFormParam(RequestSpecification rs,
       Map<String, Object> params) {
     params.forEach((k, v) -> rs.multiPart(new IdiotMultiPartSpecification(k, v)));
@@ -69,6 +76,8 @@ public class RestAssuredInitializer {
       PreemptiveOAuth2HeaderScheme auth = new PreemptiveOAuth2HeaderScheme();
       auth.setAccessToken(jwt.get());
       RestAssured.authentication = auth;
+    } else if (authSchema.isResolvable()) {
+      RestAssured.authentication = authSchema.get();
     }
   }
 

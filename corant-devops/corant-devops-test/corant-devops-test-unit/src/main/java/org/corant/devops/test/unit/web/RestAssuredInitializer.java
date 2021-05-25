@@ -17,6 +17,7 @@ import static org.corant.shared.util.Maps.mapOf;
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.restassured.RestAssured;
+import io.restassured.authentication.PreemptiveOAuth2HeaderScheme;
 import io.restassured.specification.MultiPartSpecification;
 import io.restassured.specification.RequestSpecification;
 
@@ -38,9 +40,15 @@ import io.restassured.specification.RequestSpecification;
 @ApplicationScoped
 public class RestAssuredInitializer {
 
+  public static final String TEST_JWT = "corant.test.jwt";
+
   @Inject
   @ConfigProperty(name = RandomWebServerPortConfigSource.WEB_SERVER_PORT_PN, defaultValue = "0")
   private int port;
+
+  @Inject
+  @ConfigProperty(name = TEST_JWT)
+  private Optional<String> jwt;
 
   public static void initializeMultipartFormParam(RequestSpecification rs,
       Map<String, Object> params) {
@@ -57,6 +65,11 @@ public class RestAssuredInitializer {
 
   void initializeRestAssured(@Observes PostCorantReadyEvent event) {
     RestAssured.port = port;
+    if (jwt.isPresent()) {
+      PreemptiveOAuth2HeaderScheme auth = new PreemptiveOAuth2HeaderScheme();
+      auth.setAccessToken(jwt.get());
+      RestAssured.authentication = auth;
+    }
   }
 
   /**

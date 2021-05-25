@@ -95,6 +95,18 @@ public class Sets {
   }
 
   /**
+   * Constructs a new hash set containing the elements in the specified collection, null safe.
+   *
+   * @see HashSet#HashSet(Collection)
+   *
+   * @param <E> the element type
+   * @param initials the collection whose elements are to be placed into the hash set
+   */
+  public static <E> Set<E> newHashSet(final Collection<E> initials) {
+    return initials == null ? new HashSet<>() : new HashSet<>(initials);
+  }
+
+  /**
    * Convert an array to a non-null set
    *
    * @param <E> the element type
@@ -107,7 +119,9 @@ public class Sets {
   }
 
   /**
-   * Convert an iterable to a non-null linked hash set
+   * Convert an iterable to a non-null linked hash set.
+   * <p>
+   * Note:If the given iterable object itself is a set, return the object itself directly.
    *
    * @param <E> the element type
    * @param iterable the source of the elements in the set

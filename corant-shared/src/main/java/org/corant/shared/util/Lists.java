@@ -152,7 +152,9 @@ public class Lists {
   }
 
   /**
-   * Convert an iterable to a non-null list
+   * Convert an iterable to a non-null list.
+   * <p>
+   * Note: If the given iterable object itself is a list, return the object itself directly.
    *
    * @param <E> the element type
    * @param iterable the elements that the list should contain
@@ -183,6 +185,18 @@ public class Lists {
       }
     }
     return list;
+  }
+
+  /**
+   * Constructs a new array list containing the elements in the specified collection, null safe.
+   *
+   * @see ArrayList#ArrayList(Collection)
+   *
+   * @param <E> the element type
+   * @param initials the collection whose elements are to be placed into the array list
+   */
+  public static <E> List<E> newArrayList(final Collection<E> initials) {
+    return initials == null ? new ArrayList<>() : new ArrayList<>(initials);
   }
 
   /**

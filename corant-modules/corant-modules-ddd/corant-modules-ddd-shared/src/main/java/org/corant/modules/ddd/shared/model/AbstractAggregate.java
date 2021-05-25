@@ -33,10 +33,10 @@ import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.AggregateAssistant;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
 import org.corant.modules.ddd.AggregateLifecycleManager;
+import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.Event;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.UnitOfWork;
-import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
 import org.corant.modules.ddd.shared.event.AggregateLifecycleEvent;
 import org.corant.modules.ddd.shared.message.AggregateLifecycleMessage;
@@ -80,13 +80,13 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   @Override
-  public void raise(Event event, Annotation... qualifiers) {
-    callAssistant().fireEvent(event, qualifiers);
+  public void raise(boolean anyway, Message... messages) {
+    callAssistant().enqueueMessages(anyway, messages);
   }
 
   @Override
-  public void raise(Message... messages) {
-    callAssistant().enqueueMessages(messages);
+  public void raise(Event event, Annotation... qualifiers) {
+    callAssistant().fireEvent(event, qualifiers);
   }
 
   @Override

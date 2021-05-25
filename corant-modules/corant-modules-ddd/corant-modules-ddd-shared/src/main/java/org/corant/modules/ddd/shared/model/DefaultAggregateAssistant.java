@@ -32,6 +32,7 @@ import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.MessageUtils;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.shared.unitwork.UnitOfWorks;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-modules-ddd-shared
@@ -77,15 +78,8 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   }
 
   @Override
-  public void enqueueMessages(Message... messages) {
-    if (aggregate.getId() != null) {
-      for (Message msg : messages) {
-        if (msg != null) {
-          logger.fine(() -> String.format(RISE_LOG, msg.toString()));
-          MessageUtils.mergeToQueue(this.messages, msg);
-        }
-      }
-    } else {
+  public void enqueueMessages(boolean anyway, Message... messages) {
+    if (aggregate.getId() == null || anyway) {
       Optional<? extends UnitOfWork> uow = currentUnitOfWork();
       if (uow.isPresent()) {
         for (Message msg : messages) {
@@ -95,7 +89,14 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
           }
         }
       } else {
-        logger.warning(() -> "The UnitOfWork not found! please check the implements!");
+        throw new CorantRuntimeException("The UnitOfWork not found! please check the implements!");
+      }
+    } else {
+      for (Message msg : messages) {
+        if (msg != null) {
+          logger.fine(() -> String.format(RISE_LOG, msg.toString()));
+          MessageUtils.mergeToQueue(this.messages, msg);
+        }
       }
     }
   }

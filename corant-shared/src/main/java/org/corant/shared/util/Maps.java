@@ -263,7 +263,9 @@ public class Maps {
   }
 
   /**
-   * Return and convert the collection value mapped to the given key in the given Map.
+   * Return and convert the collection value mapped to the given key in the given Map or
+   * {@code null} if the given map is {@code null} or the map contains no mapping for the key or the
+   * mapped value is {@code null}.
    *
    * <p>
    * Note: The returned collection is reconstructed, and the result of modifying the collection may
@@ -292,8 +294,9 @@ public class Maps {
       return Conversion.convert((Object[]) obj, collectionFactory, elementClazz, hints);
     } else if (obj != null) {
       return Conversion.convert(obj, elementClazz, () -> collectionFactory.apply(10), hints);
+    } else {
+      return null;
     }
-    return collectionFactory.apply(0);
   }
 
   /**

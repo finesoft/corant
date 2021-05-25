@@ -44,7 +44,6 @@ public interface Aggregate extends Entity {
    * before unit of work completed.
    *
    * @param flush if true then clear messages buffer
-   * @return extractMessages
    */
   List<Message> extractMessages(boolean flush);
 
@@ -83,19 +82,10 @@ public interface Aggregate extends Entity {
   }
 
   /**
-   * Raise event, use the CDI event mechanism to emit event.
-   * <p>
-   * Generally the event is not the DDD domain event. It is simply event-driven architecture for
-   * decoupling.
-   * </p>
-   *
-   * @param event
-   * @param qualifiers raise
-   */
-  void raise(Event event, Annotation... qualifiers);
-
-  /**
    * Raise message, add the message to the buffer and do not publish it immediately.
+   *
+   * <p>
+   * Note: This method may be implemented in other ways in the future.
    *
    * <pre>
    * The Message sending timing:
@@ -109,17 +99,31 @@ public interface Aggregate extends Entity {
    *
    * Generally the message is the DDD domain event.
    *
-   * @param messages
+   * @param anyway whether to send as long as the unit of works is completed anyway, or send only
+   *        when the aggregation state changes and unit of works is completed.
+   * @param messages the messages to be sent.
    *
    * @see UnitOfWork
    */
-  void raise(Message... messages);
+  void raise(boolean anyway, Message... messages);
+
+  /**
+   * Raise event, use the CDI event mechanism to emit event.
+   * <p>
+   * Generally the event is not the DDD domain event. It is simply event-driven architecture for
+   * decoupling.
+   * </p>
+   *
+   * @param event the events to be sent
+   * @param qualifiers the CDI event listener qualifiers
+   */
+  void raise(Event event, Annotation... qualifiers);
 
   /**
    * Raise asynchronous events, {@link #raise(Event, Annotation...)}
    *
-   * @param event
-   * @param qualifiers raiseAsync
+   * @param event the events to be sent
+   * @param qualifiers the CDI event listener qualifiers
    *
    */
   void raiseAsync(Event event, Annotation... qualifiers);

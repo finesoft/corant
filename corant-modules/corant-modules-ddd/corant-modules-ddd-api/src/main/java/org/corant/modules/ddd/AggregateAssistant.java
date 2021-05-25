@@ -51,7 +51,7 @@ public interface AggregateAssistant {
   /**
    * enqueue aggregate message to queue
    */
-  void enqueueMessages(Message... messages);
+  void enqueueMessages(boolean anyway, Message... messages);
 
   /**
    * fire aggregate asynchronous event

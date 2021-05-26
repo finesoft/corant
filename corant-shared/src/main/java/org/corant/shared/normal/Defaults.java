@@ -54,24 +54,26 @@ public interface Defaults {
   }
 
   static Optional<String> getCorantVersion() {
-    try {
-      // FIXME get version from /META-INF/MANIFEST.MF
-      Optional<ClassPathResource> res = Resources
-          .fromClassPath("META-INF/maven/org.corant/corant-shared/pom.properties").findFirst();
-      if (res.isPresent()) {
-        try (InputStream is = res.get().openStream();
-            InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
-          Properties properties = new Properties();
-          properties.load(isr);
-          String version = properties.getProperty("version");
-          properties.clear();
-          return Optional.ofNullable(version);
+    String version = Defaults.class.getPackage().getImplementationVersion();
+    if (version == null) {
+      try {
+        // FIXME get version from /META-INF/MANIFEST.MF
+        Optional<ClassPathResource> res = Resources
+            .fromClassPath("META-INF/maven/org.corant/corant-shared/pom.properties").findFirst();
+        if (res.isPresent()) {
+          try (InputStream is = res.get().openStream();
+              InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
+            Properties properties = new Properties();
+            properties.load(isr);
+            version = properties.getProperty("version");
+
+          }
         }
+      } catch (IOException e) {
+        // Ignore
       }
-    } catch (IOException e) {
-      // Ignore
     }
-    return Optional.empty();
+    return Optional.ofNullable(version);
   }
 
 }

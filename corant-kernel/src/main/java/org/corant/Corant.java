@@ -52,6 +52,7 @@ import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
@@ -640,7 +641,7 @@ public class Corant implements AutoCloseable {
       }
       invokeBootHandlerBeforeStart();
       stopWatch.stop(t -> {
-        Launchs.getCorantVersion().ifPresent(v -> logInfo("Corant Version: %s", v));
+        Defaults.getCorantVersion().ifPresent(v -> logInfo("Corant Version: %s", v));
         logInfo("Starting the %s ...", APP_NAME);
         logInfo("The pre-start spi processing has been completed, takes %ss.", t.getTimeSeconds());
       });

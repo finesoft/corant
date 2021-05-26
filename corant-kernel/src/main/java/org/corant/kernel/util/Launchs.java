@@ -17,21 +17,15 @@ import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.split;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.corant.shared.normal.Defaults;
-import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Strings;
 
 /**
@@ -71,27 +65,6 @@ public class Launchs {
   public static List<String> getClassPaths() {
     return Arrays.stream(split(System.getProperty("java.class.path"), File.pathSeparator))
         .filter(Strings::isNotBlank).collect(Collectors.toList());
-  }
-
-  public static Optional<String> getCorantVersion() {
-    try {
-      // FIXME get version from /META-INF/MANIFEST.MF
-      Optional<ClassPathResource> res = Resources
-          .fromClassPath("META-INF/maven/org.corant/corant-kernel/pom.properties").findFirst();
-      if (res.isPresent()) {
-        try (InputStream is = res.get().openStream();
-            InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
-          Properties properties = new Properties();
-          properties.load(isr);
-          String version = properties.getProperty("version");
-          properties.clear();
-          return Optional.ofNullable(version);
-        }
-      }
-    } catch (IOException e) {
-      // Ignore
-    }
-    return Optional.empty();
   }
 
   public static String getDebugArgs() {

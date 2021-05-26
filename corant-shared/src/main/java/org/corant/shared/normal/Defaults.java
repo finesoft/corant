@@ -14,10 +14,17 @@
 package org.corant.shared.normal;
 
 import static org.corant.shared.util.Strings.defaultString;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.Properties;
+import org.corant.shared.util.Resources;
+import org.corant.shared.util.Resources.ClassPathResource;
 
 /**
  * corant-shared
@@ -44,6 +51,27 @@ public interface Defaults {
   static Path corantUserDir(String suffix) {
     return Paths.get(System.getProperty("user.home"))
         .resolve("." + Names.applicationName() + defaultString(suffix));
+  }
+
+  static Optional<String> getCorantVersion() {
+    try {
+      // FIXME get version from /META-INF/MANIFEST.MF
+      Optional<ClassPathResource> res = Resources
+          .fromClassPath("META-INF/maven/org.corant/corant-shared/pom.properties").findFirst();
+      if (res.isPresent()) {
+        try (InputStream is = res.get().openStream();
+            InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
+          Properties properties = new Properties();
+          properties.load(isr);
+          String version = properties.getProperty("version");
+          properties.clear();
+          return Optional.ofNullable(version);
+        }
+      }
+    } catch (IOException e) {
+      // Ignore
+    }
+    return Optional.empty();
   }
 
 }

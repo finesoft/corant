@@ -48,6 +48,8 @@ public interface Defaults {
 
   int CORANT_SIGN = 3259;
 
+  Optional<String> CORANT_VERSION = getCorantVersion();
+
   static Path corantUserDir(String suffix) {
     return Paths.get(System.getProperty("user.home"))
         .resolve("." + Names.applicationName() + defaultString(suffix));
@@ -66,7 +68,7 @@ public interface Defaults {
             Properties properties = new Properties();
             properties.load(isr);
             version = properties.getProperty("version");
-
+            properties.clear();
           }
         }
       } catch (IOException e) {

@@ -16,13 +16,22 @@ package org.corant.modules.ddd.shared.unitwork;
 import static org.corant.context.Instances.find;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
 import org.corant.modules.ddd.shared.annotation.JTARL;
 import org.corant.modules.ddd.shared.annotation.JTAXA;
+import org.corant.modules.jta.shared.SynchronizationAdapter;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -62,7 +71,84 @@ public class UnitOfWorks {
     return find(UnitOfWorksManager.class, qualifiers);
   }
 
+  public void deregisterMessage(Message... messages) {
+    if (messages.length > 0) {
+      AbstractJTAJPAUnitOfWork uow = curUow();
+      for (Message message : messages) {
+        uow.deregister(message);
+      }
+    }
+  }
+
+  public void deregisterVariable(Object key, Object value) {
+    curUow().deregister(Pair.of(key, value));
+  }
+
+  public int getTxStatus() {
+    try {
+      return curUow().transaction.getStatus();
+    } catch (SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
   public boolean isUseJtaXa() {
     return useJtaXa;
+  }
+
+  public void makeTxRollbackOnly() {
+    try {
+      curUow().transaction.setRollbackOnly();
+    } catch (IllegalStateException | SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public void registerAfterCompletion(final Consumer<Boolean> consumer) {
+    if (consumer != null) {
+      registerTxSynchronization(new SynchronizationAdapter() {
+        @Override
+        public void afterCompletion(int status) {
+          consumer.accept(status == Status.STATUS_COMMITTED);
+        }
+      });
+    }
+  }
+
+  public void registerBeforeCompletion(final Runnable runner) {
+    if (runner != null) {
+      registerTxSynchronization(new SynchronizationAdapter() {
+        @Override
+        public void beforeCompletion() {
+          runner.run();
+        }
+      });
+    }
+  }
+
+  public void registerMessage(Message... messages) {
+    if (messages.length > 0) {
+      AbstractJTAJPAUnitOfWork uow = curUow();
+      for (Message message : messages) {
+        uow.register(message);
+      }
+    }
+  }
+
+  public void registerTxSynchronization(Synchronization sync) {
+    try {
+      curUow().transaction.registerSynchronization(sync);
+    } catch (IllegalStateException | RollbackException | SystemException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public void registerVariable(Object key, Object value) {
+    curUow().register(Pair.of(key, value));
+  }
+
+  protected AbstractJTAJPAUnitOfWork curUow() {
+    return currentDefaultUnitOfWork()
+        .orElseThrow(() -> new CorantRuntimeException("Can't find any unit of works"));
   }
 }

@@ -13,26 +13,19 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-import static org.corant.context.Instances.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.RollbackException;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import org.corant.modules.ddd.MessageDispatcher;
-import org.corant.modules.jta.shared.SynchronizationAdapter;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-ddd-shared
@@ -55,62 +48,6 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   @Inject
   @Any
   protected Instance<MessageDispatcher> messageDispatcher;
-
-  public static AbstractJTAJPAUnitOfWork curUow() {
-    Optional<AbstractJTAJPAUnitOfWork> curuow =
-        resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
-    if (curuow.isPresent() && curuow.get() instanceof JTAXAJPAUnitOfWork) {
-      return curuow.get();
-    } else {
-      throw new NotSupportedException();
-    }
-  }
-
-  public static int getTxStatus() {
-    try {
-      return curUow().transaction.getStatus();
-    } catch (SystemException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  public static void makeTxRollbackOnly() {
-    try {
-      curUow().transaction.setRollbackOnly();
-    } catch (IllegalStateException | SystemException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  public static void registerAfterCompletion(final Consumer<Boolean> consumer) {
-    if (consumer != null) {
-      registerTxSynchronization(new SynchronizationAdapter() {
-        @Override
-        public void afterCompletion(int status) {
-          consumer.accept(status == Status.STATUS_COMMITTED);
-        }
-      });
-    }
-  }
-
-  public static void registerBeforeCompletion(final Runnable runner) {
-    if (runner != null) {
-      registerTxSynchronization(new SynchronizationAdapter() {
-        @Override
-        public void beforeCompletion() {
-          runner.run();
-        }
-      });
-    }
-  }
-
-  public static void registerTxSynchronization(Synchronization sync) {
-    try {
-      curUow().transaction.registerSynchronization(sync);
-    } catch (IllegalStateException | RollbackException | SystemException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
 
   @Override
   public AbstractJTAJPAUnitOfWork getCurrentUnitOfWork() {

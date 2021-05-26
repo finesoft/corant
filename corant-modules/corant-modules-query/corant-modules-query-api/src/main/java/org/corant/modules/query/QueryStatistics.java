@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
  */
 public interface QueryStatistics {
 
+  List<QueryStatisticsRecord> getHightFrequencyQueries();
+
   List<QueryStatisticsRecord> getSlowestEntranceQueries();
 
   List<QueryStatisticsRecord> getSlowestQueries();
@@ -35,6 +38,7 @@ public interface QueryStatistics {
     final String id = UUID.randomUUID().toString();
     final String key;
     final QueryParameter parameter;
+    final Serializable script;
     final Instant occurredTime;
     final long uptime;
     final int resultSize;
@@ -42,15 +46,17 @@ public interface QueryStatistics {
     /**
      * @param key the query key, may be a query name
      * @param parameter the query parameter
+     * @param script the query script
      * @param occurredTime the query occurred time
      * @param uptime the query execution uptime
      * @param resultSize the query result size
      */
-    public QueryStatisticsRecord(String key, QueryParameter parameter, Instant occurredTime,
-        long uptime, int resultSize) {
+    public QueryStatisticsRecord(String key, QueryParameter parameter, Serializable script,
+        Instant occurredTime, long uptime, int resultSize) {
       this.key = key;
       this.parameter = parameter;
       this.occurredTime = occurredTime;
+      this.script = script;
       this.uptime = uptime;
       this.resultSize = resultSize;
     }
@@ -82,6 +88,10 @@ public interface QueryStatistics {
       return true;
     }
 
+    public String getId() {
+      return id;
+    }
+
     public String getKey() {
       return key;
     }
@@ -96,6 +106,10 @@ public interface QueryStatistics {
 
     public int getResultSize() {
       return resultSize;
+    }
+
+    public Serializable getScript() {
+      return script;
     }
 
     public long getUptime() {
@@ -115,6 +129,7 @@ public interface QueryStatistics {
   class QueryWatcher {
     String key;
     QueryParameter parameter;
+    Serializable script;
     Instant occurredTime;
     long uptime;
     int resultSize;
@@ -128,10 +143,11 @@ public interface QueryStatistics {
     }
 
     public QueryStatisticsRecord getRecord() {
-      return new QueryStatisticsRecord(key, parameter, occurredTime, uptime, resultSize);
+      return new QueryStatisticsRecord(key, parameter, script, occurredTime, uptime, resultSize);
     }
 
-    public QueryWatcher stop(int resultSize) {
+    public QueryWatcher stop(Serializable script, int resultSize) {
+      this.script = script;
       uptime = ChronoUnit.MILLIS.between(occurredTime, Instant.now());
       this.resultSize = resultSize;
       return this;

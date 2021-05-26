@@ -48,7 +48,14 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import org.corant.shared.conversion.Conversion;
+import org.corant.shared.conversion.converter.NumberLocalDateConverter;
+import org.corant.shared.conversion.converter.SqlDateLocalDateConverter;
 import org.corant.shared.conversion.converter.StringCurrencyConverter;
+import org.corant.shared.conversion.converter.StringLocalDateConverter;
+import org.corant.shared.conversion.converter.TemporalLocalDateConverter;
+import org.corant.shared.conversion.converter.factory.IntArrayTemporalConverterFactory;
+import org.corant.shared.conversion.converter.factory.ListTemporalConverterFactory;
+import org.corant.shared.conversion.converter.factory.MapTemporalConverterFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -373,37 +380,107 @@ public class Maps {
     return getMapObject(map, key, Conversions::toDuration, nvt);
   }
 
+  /**
+   * Returns the Enumeration value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param enumClazz the expected enumeration class
+   * @return the mapped enumeration value
+   */
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
       final Class<T> enumClazz) {
     return getMapObject(map, key, o -> Conversions.toEnum(o, enumClazz), null);
   }
 
+  /**
+   * Returns the Enumeration value that the specified key is mapped to, convert if necessary, and
+   * return the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param enumClazz the expected enumeration class
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped enumeration value
+   */
   public static <T extends Enum<T>> T getMapEnum(final Map<?, ?> map, final Object key,
       final Class<T> enumClazz, T nvt) {
     T enumObj = getMapEnum(map, key, enumClazz);
     return enumObj == null ? nvt : enumObj;
   }
 
+  /**
+   * Returns the Float value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped float value
+   */
   public static Float getMapFloat(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toFloat, null);
   }
 
+  /**
+   * Returns the Float value that the specified key is mapped to, convert if necessary, and return
+   * the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped float value
+   */
   public static Float getMapFloat(final Map<?, ?> map, final Object key, Float nvt) {
     return getMapObject(map, key, Conversions::toFloat, nvt);
   }
 
+  /**
+   * Returns the Instant value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped instant value
+   */
   public static Instant getMapInstant(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toInstant, null);
   }
 
+  /**
+   * Returns the Instant value that the specified key is mapped to, convert if necessary, and return
+   * the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped instant value
+   */
   public static Instant getMapInstant(final Map<?, ?> map, final Object key, Instant nvt) {
     return getMapObject(map, key, Conversions::toInstant, nvt);
   }
 
+  /**
+   * Returns the Integer value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped integer value
+   */
   public static Integer getMapInteger(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toInteger, null);
   }
 
+  /**
+   * Returns the Integer value that the specified key is mapped to, convert if necessary, and return
+   * the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped integer value
+   */
   public static Integer getMapInteger(final Map<?, ?> map, final Object key, Integer nvt) {
     return getMapObject(map, key, Conversions::toInteger, nvt);
   }
@@ -546,14 +623,59 @@ public class Maps {
     return getMapObjectList(map, key, v -> toList(v, singleElementconverter));
   }
 
+  /**
+   * Returns the LocalDate value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   *
+   * <p>
+   * Note: Supports the type of mapped value include {@link java.time.temporal.Temporal},
+   * {@link java.lang.String}, {@link java.lang.Number},{@link java.sql.Date}, integer array or
+   * list, a map contains day/year/month value. Be careful some conversions may violate JSR-310.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @return the mapped LocalDate value
+   *
+   * @see NumberLocalDateConverter
+   * @see StringLocalDateConverter
+   * @see TemporalLocalDateConverter
+   * @see SqlDateLocalDateConverter
+   * @see ListTemporalConverterFactory
+   * @see MapTemporalConverterFactory
+   * @see IntArrayTemporalConverterFactory
+   */
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key) {
     return getMapObject(map, key, Conversions::toLocalDate, null);
   }
 
+  /**
+   * Returns the LocalDate value that the specified key is mapped to, convert if necessary, and
+   * return the specified default value when the key value is not found or the mapped value is null.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped LocalDate value
+   *
+   * @see #getMapLocalDate(Map, Object)
+   */
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, LocalDate nvt) {
     return getMapObject(map, key, Conversions::toLocalDate, nvt);
   }
 
+  /**
+   * Returns the LocalDate value that the specified key is mapped to, convert if necessary, or
+   * {@code null} if the key value is not found or the mapped value is null.
+   * <p>
+   * Note: if the mapped value is {@link java.time.Instant}, the given zone id may be used, if the
+   * zone id is {@code null} then use {@link ZoneId#systemDefault()}, be careful the converting may
+   * violate JSR-310.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param zoneId the zoneId use for converting
+   * @return the mapped LocalDate value
+   */
   public static LocalDate getMapLocalDate(final Map<?, ?> map, final Object key, ZoneId zoneId) {
     return getMapObject(map, key, v -> Conversions.toLocalDate(v, zoneId), null);
   }

@@ -65,9 +65,9 @@ public class JMSContextKey implements Serializable {
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
     final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
-    final JMSSessionMode sessionMode = annotated.getAnnotation(JMSSessionMode.class);
-    return new JMSContextKey(factory == null ? null : factory.value(),
-        sessionMode.value() == JMSContext.AUTO_ACKNOWLEDGE ? false : true);
+    final JMSSessionMode mode = annotated.getAnnotation(JMSSessionMode.class);
+    final boolean dupAck = mode != null && mode.value() == JMSContext.DUPS_OK_ACKNOWLEDGE;
+    return new JMSContextKey(factory == null ? null : factory.value(), dupAck);
   }
 
   public JMSContext create(boolean xa) {

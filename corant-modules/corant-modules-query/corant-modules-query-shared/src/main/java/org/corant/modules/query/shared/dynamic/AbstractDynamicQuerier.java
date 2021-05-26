@@ -46,7 +46,6 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   protected final QueryParameter queryParameter;
   final QuerierConfig config;
 
-  // Not thread safe
   protected volatile Integer limit;
   protected volatile Integer streamLimit;
   protected volatile Integer maxSelectSize;
@@ -143,10 +142,9 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (limit == null) {
       synchronized (this) {
         if (limit == null) {
-          limit = defaultObject(getQueryParameter().getLimit(),
+          if ((limit = defaultObject(getQueryParameter().getLimit(),
               () -> resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
-                  config.getDefaultLimit()));
-          if (limit <= 0) {
+                  config.getDefaultLimit()))) <= 0) {
             limit = config.getMaxLimit();
           }
           int max = resolveMaxSelectSize();
@@ -165,12 +163,10 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   public int resolveMaxSelectSize() {
     if (maxSelectSize == null) {
       synchronized (this) {
-        if (maxSelectSize == null) {
-          maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE, Integer.class,
-              config.getDefaultSelectSize());
-          if (maxSelectSize <= 0) {
-            maxSelectSize = config.getMaxSelectSize();
-          }
+        if (maxSelectSize == null
+            && (maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
+                Integer.class, config.getDefaultSelectSize())) <= 0) {
+          maxSelectSize = config.getMaxSelectSize();
         }
       }
     }
@@ -224,10 +220,9 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (streamLimit == null) {
       synchronized (this) {
         if (streamLimit == null) {
-          streamLimit = defaultObject(getQueryParameter().getLimit(),
+          if ((streamLimit = defaultObject(getQueryParameter().getLimit(),
               () -> resolveProperty(QuerierConfig.PRO_KEY_STREAM_LIMIT, Integer.class,
-                  config.getDefaultStreamLimit()));
-          if (streamLimit <= 0) {
+                  config.getDefaultStreamLimit()))) <= 0) {
             streamLimit = config.getMaxLimit();
           }
           int max = resolveMaxSelectSize();

@@ -99,11 +99,13 @@
 		<version.kryo>5.1.1</version.kryo>
 		<version.log4j2>2.14.1</version.log4j2>
 		<version.lombok>1.18.16</version.lombok>
+		<version.maven-bundle-plugin>5.1.2</version.maven-bundle-plugin>
 		<version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
 		<version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
 		<version.maven-enforcer-plugin>3.0.0-M3</version.maven-enforcer-plugin>
 		<version.maven-failsafe-plugin>2.20.1</version.maven-failsafe-plugin>
 		<version.maven-javadoc-plugin>3.0.0</version.maven-javadoc-plugin>
+		<version.maven-jar-plugin>3.2.0</version.maven-jar-plugin>
 		<version.maven-plugin-api>3.2.5</version.maven-plugin-api>
 		<version.maven-plugin-plugin>3.6.0</version.maven-plugin-plugin>
 		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
@@ -1817,6 +1819,11 @@
 					<version>${version.maven-project-info-reports-plugin}</version>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${version.maven-jar-plugin}</version>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>${version.exec-maven-plugin}</version>
@@ -1835,6 +1842,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>${version.flatten-maven-plugin}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<version>${version.maven-bundle-plugin}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

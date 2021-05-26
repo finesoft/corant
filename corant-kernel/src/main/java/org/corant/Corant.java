@@ -640,6 +640,7 @@ public class Corant implements AutoCloseable {
       }
       invokeBootHandlerBeforeStart();
       stopWatch.stop(t -> {
+        Launchs.getCorantVersion().ifPresent(v -> logInfo("Corant Version: %s", v));
         logInfo("Starting the %s ...", APP_NAME);
         logInfo("The pre-start spi processing has been completed, takes %ss.", t.getTimeSeconds());
       });

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.bundle;
+package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.areDeepEqual;
@@ -29,11 +29,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.corant.modules.bundle.exception.GeneralRuntimeException;
-import org.corant.shared.util.Objects;
-import org.corant.shared.util.Validates;
+import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
+ * corant-shared
+ *
  * @author bingo 2013年6月24日
  */
 public class Preconditions {

@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.bundle.exception;
+package org.corant.shared.exception;
 
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.defaultString;
@@ -24,21 +26,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
-import javax.enterprise.inject.spi.CDI;
-import org.corant.modules.bundle.MessageResolver;
-import org.corant.modules.bundle.MessageResolver.MessageParameter;
-import org.corant.modules.bundle.MessageResolver.MessageSeverity;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 
 /**
- * corant-modules-bundle
+ * corant-shared
  *
  * @author bingo 下午6:19:52
  *
  */
-public class GeneralRuntimeException extends CorantRuntimeException implements MessageParameter {
+public class GeneralRuntimeException extends CorantRuntimeException {
+
+  protected static final ExceptionMessageResolver messageResolver =
+      streamOf(ServiceLoader.load(ExceptionMessageResolver.class, defaultClassLoader()))
+          .min(Sortable::compare).orElse(null);
 
   private static final long serialVersionUID = -3720369148530068164L;
 
@@ -121,19 +124,13 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
   }
 
   @Override
-  public Object getCodes() {
-    return getMessageSeverity().genMessageCode(code, subCode);
-  }
-
-  @Override
   public String getLocalizedMessage() {
     return getLocalizedMessage(Locale.getDefault());
   }
 
   public String getLocalizedMessage(Locale locale) {
-    MessageResolver resolver = CDI.current().select(MessageResolver.class).get();
-    if (resolver != null) {
-      return resolver.getMessage(defaultObject(locale, Locale::getDefault), this);
+    if (messageResolver != null) {
+      return messageResolver.getMessage(this, defaultObject(locale, Locale::getDefault));
     } else {
       return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
     }
@@ -144,12 +141,10 @@ public class GeneralRuntimeException extends CorantRuntimeException implements M
     return getLocalizedMessage(Locale.getDefault());
   }
 
-  @Override
-  public MessageSeverity getMessageSeverity() {
-    return MessageSeverity.ERR;
+  public String getOriginalMessage() {
+    return super.getMessage();
   }
 
-  @Override
   public Object[] getParameters() {
     return Arrays.copyOf(parameters, parameters.length);
   }

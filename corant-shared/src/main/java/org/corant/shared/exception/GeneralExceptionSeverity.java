@@ -11,10 +11,24 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.shared.exception;
+
 /**
- * corant-modules-bundle
+ * corant-shared
  *
- * @author bingo 上午11:35:56
+ * @author bingo 下午6:02:36
  *
  */
-package org.corant.modules.bundle.exception;
+public enum GeneralExceptionSeverity {
+  ERROR(2), WARN(1), CRITICAL(0);
+
+  private final int id;
+
+  GeneralExceptionSeverity(int id) {
+    this.id = id;
+  }
+
+  public int getId() {
+    return id;
+  }
+}

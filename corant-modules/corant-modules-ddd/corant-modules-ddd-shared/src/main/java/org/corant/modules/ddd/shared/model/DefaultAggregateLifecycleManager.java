@@ -94,7 +94,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
   protected void handle(Aggregate entity, LifecycleAction action, boolean effectImmediately) {
     EntityManager em = getEntityManager(entity.getClass());
     if (action == LifecycleAction.PERSIST) {
-      if (entity.getLifecycle() == Lifecycle.INITIAL || entity.getId() == null) {
+      if (entity.getLifecycle() == Lifecycle.INITIAL) {
         em.persist(entity);
         if (effectImmediately) {
           em.flush();

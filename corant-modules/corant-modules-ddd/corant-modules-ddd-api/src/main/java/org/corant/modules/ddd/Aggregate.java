@@ -64,21 +64,24 @@ public interface Aggregate extends Entity {
 
   /**
    * If the aggregate isn't persisted, or is destroyed, but still live in memory until the GC
-   * recycle then return true else return false.
+   * recycle then return true else return false. It means that the value of aggregate life cycle is
+   * in one of {@link Lifecycle#INITIAL}, {@link Lifecycle#PRE_PERSIST},
+   * {@link Lifecycle#POST_REMOVED}, {@link Lifecycle#DESTROYED}.
    */
   @Transient
   @javax.persistence.Transient
-  default Boolean isPhantom() {
-    return getId() == null || !isPreserved();
+  default boolean isPhantom() {
+    return !getLifecycle().signPreserved();
   }
 
   /**
-   * Indicates whether the aggregate is persisted or not.
+   * Indicates whether the aggregate is persisted or not, the return value just the opposite of
+   * {@link #isPhantom()}.
    */
   @Transient
   @javax.persistence.Transient
   default boolean isPreserved() {
-    return getLifecycle() != null && getLifecycle().signPreserved();
+    return getLifecycle().signPreserved();
   }
 
   /**
@@ -245,7 +248,7 @@ public interface Aggregate extends Entity {
      * @return signPreserved
      */
     public boolean signPreserved() {
-      return (sign & 254) != 0;
+      return (sign & 246) != 0;
     }
 
     public boolean signRefreshable() {

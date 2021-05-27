@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.modules.bundle.Preconditions.requireFalse;
+import static org.corant.shared.util.Preconditions.requireFalse;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.ObjectInputStream;

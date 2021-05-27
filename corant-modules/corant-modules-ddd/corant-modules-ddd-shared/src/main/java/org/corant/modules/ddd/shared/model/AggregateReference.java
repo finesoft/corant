@@ -26,8 +26,8 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.corant.modules.bundle.exception.GeneralRuntimeException;
 import org.corant.modules.ddd.Aggregate;
+import org.corant.shared.exception.GeneralRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**

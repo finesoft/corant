@@ -14,8 +14,10 @@
 package org.corant.modules.ddd.shared.unitwork;
 
 import static org.corant.context.Instances.find;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,6 +25,8 @@ import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
+import org.corant.context.CDIs;
+import org.corant.modules.ddd.Event;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.UnitOfWorksManager;
@@ -82,6 +86,16 @@ public class UnitOfWorks {
 
   public void deregisterVariable(Object key, Object value) {
     curUow().deregister(Pair.of(key, value));
+  }
+
+  public <U extends Event> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers) {
+    shouldNotNull(event);
+    return CDIs.fireAsyncEvent(event, qualifiers);
+  }
+
+  public void fireEvent(Event event, Annotation... qualifiers) {
+    shouldNotNull(event);
+    CDIs.fireEvent(event, qualifiers);
   }
 
   public int getTxStatus() {

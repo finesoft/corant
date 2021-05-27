@@ -178,12 +178,11 @@ public class StopWatch {
   }
 
   public StopWatch stop(Logger logger) throws IllegalStateException {
-    return stop(t -> logger.info(
-        () -> String.format("Task %s take %s.", defaultString(t.getName()), t.getDuration())));
+    return stop(t -> logger.info(t::toString));
   }
 
   public StopWatch stop(PrintStream ps) throws IllegalStateException {
-    return stop(t -> ps.printf("Task %s take %s.", defaultString(t.getName()), t.getDuration()));
+    return stop(ps::print);
   }
 
   public static final class TaskInfo {
@@ -211,6 +210,11 @@ public class StopWatch {
 
     public double getTimeSeconds() {
       return timeMillis / 1000.0;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("Task name: %s, uptime: %sms.", name, timeMillis);
     }
   }
 

@@ -37,7 +37,7 @@ public interface MessageResolver {
     return sb.toString();
   }
 
-  String getMessage(Locale locale, MessageParameter messageSource);
+  String getMessage(Locale locale, MessageParameter parameter);
 
   String getMessage(Locale locale, Object codes, Object... params);
 

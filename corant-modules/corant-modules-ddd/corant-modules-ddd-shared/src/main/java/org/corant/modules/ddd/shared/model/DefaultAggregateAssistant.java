@@ -14,8 +14,8 @@
 package org.corant.modules.ddd.shared.model;
 
 import static org.corant.context.Instances.resolve;
-import static org.corant.modules.bundle.Preconditions.requireNotNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;

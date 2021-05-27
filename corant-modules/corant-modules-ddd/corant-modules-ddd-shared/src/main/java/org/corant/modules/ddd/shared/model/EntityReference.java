@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.modules.bundle.Preconditions.requireTrue;
+import static org.corant.shared.util.Preconditions.requireTrue;
 import java.io.Serializable;
 import java.util.function.Predicate;
 import org.corant.modules.ddd.Entity;

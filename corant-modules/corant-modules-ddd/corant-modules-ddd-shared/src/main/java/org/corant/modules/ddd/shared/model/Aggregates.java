@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.corant.context.Instances;
-import org.corant.modules.bundle.exception.GeneralRuntimeException;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.shared.repository.JPARepository;
 import org.corant.modules.ddd.shared.repository.JPARepositoryExtension;
+import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
  * corant-modules-ddd-shared

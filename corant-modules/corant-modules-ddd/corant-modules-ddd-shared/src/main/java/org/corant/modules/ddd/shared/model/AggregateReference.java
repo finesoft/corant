@@ -78,7 +78,7 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
 
   static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
     return Aggregates.tryResolve(cls, id)
-        .orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD));
+        .orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
   }
 
   @Override

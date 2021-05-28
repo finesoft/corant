@@ -41,6 +41,8 @@ import org.corant.shared.util.Strings;
 /**
  * corant-modules-bundle
  *
+ * FIXME: Need to simplify
+ *
  * @author bingo 下午8:01:13
  */
 @ApplicationScoped
@@ -66,13 +68,13 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   @Override
-  public String getMessage(Locale locale, MessageParameter messageSource) {
-    if (messageSource == null) {
+  public String getMessage(Locale locale, MessageParameter messageParameter) {
+    if (messageParameter == null) {
       return null;
     }
-    String codes = asDefaultString(messageSource.getCodes());
+    String codes = asDefaultString(messageParameter.getCodes());
     Locale useLocale = defaultObject(locale, Locale::getDefault);
-    Object[] parameters = genParameters(useLocale, messageSource.getParameters());
+    Object[] parameters = genParameters(useLocale, messageParameter.getParameters());
     MutableString ms = MutableString.of(null);
     if (!messageSources.isUnsatisfied()) {
       messageSources.stream().sorted(Sortable::compare)
@@ -80,7 +82,7 @@ public class DefaultMessageResolver implements MessageResolver {
           .findFirst().ifPresent(ms::set);
     }
     return defaultObject(ms.get(),
-        () -> getUnknowMessage(useLocale, messageSource.getMessageSeverity(), codes));
+        () -> getUnknowMessage(useLocale, messageParameter.getMessageSeverity(), codes));
   }
 
   @Override

@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -649,4 +650,22 @@ public class Conversions {
       return toList(obj, ZonedDateTime.class);
     }
   }
+
+  public static <T> Optional<T> tryConvert(Object obj, Class<T> type) {
+    return tryConvert(obj, type, null);
+  }
+
+  public static <T> Optional<T> tryConvert(Object obj, Class<T> type, Map<String, ?> hints) {
+    T target = null;
+    if (obj != null) {
+      try {
+        target = toObject(obj, type, hints);
+      } catch (Exception e) {
+        // Ignore
+        e.printStackTrace();
+      }
+    }
+    return Optional.ofNullable(target);
+  }
+
 }

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.right;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
 import java.util.Enumeration;
@@ -64,7 +65,8 @@ public class PropertyResourceBundle extends ResourceBundle {
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
     Properties properties = new Properties();
-    try (InputStreamReader isr = new InputStreamReader(fo.openStream(), Defaults.DFLT_CHARSET)) {
+    try (InputStream is = fo.openStream();
+        InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
       properties.load(isr);
     }
     lookup = new HashMap(properties);

@@ -15,6 +15,7 @@ package org.corant.modules.ddd.shared.model;
 
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
+import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_AGG_RESOLVE_MULTI;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -41,7 +42,7 @@ public class Aggregates {
   public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
     if (id != null && cls != null) {
       return shouldNotNull(resolveRepository(cls).get(cls, id),
-          () -> new GeneralRuntimeException(ERR_PARAM));
+          () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
     }
     throw new GeneralRuntimeException(ERR_PARAM);
   }
@@ -52,7 +53,7 @@ public class Aggregates {
       List<X> list = resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
       if (!isEmpty(list)) {
         if (list.size() > 1) {
-          throw new GeneralRuntimeException(ERR_OBJ_NON_FUD);
+          throw new GeneralRuntimeException(ERR_AGG_RESOLVE_MULTI, params);
         }
         return list.get(0);
       }
@@ -65,7 +66,7 @@ public class Aggregates {
       List<X> list = resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
       if (!isEmpty(list)) {
         if (list.size() > 1) {
-          throw new GeneralRuntimeException(ERR_OBJ_NON_FUD);
+          throw new GeneralRuntimeException(ERR_AGG_RESOLVE_MULTI, params);
         }
         return list.get(0);
       }

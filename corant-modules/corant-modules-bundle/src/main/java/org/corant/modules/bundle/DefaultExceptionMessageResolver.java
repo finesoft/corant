@@ -69,6 +69,11 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
       return MessageSeverity.ERR;
     }
 
+    @Override
+    public Object[] getParameters() {
+      return ex.getParameters();
+    }
+
   }
 
 }

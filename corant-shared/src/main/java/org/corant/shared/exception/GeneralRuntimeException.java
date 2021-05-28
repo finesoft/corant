@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
+import org.corant.shared.exception.ExceptionMessageResolver.SimpleExceptionMessageResolver;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 
@@ -41,7 +42,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   protected static final ExceptionMessageResolver messageResolver =
       streamOf(ServiceLoader.load(ExceptionMessageResolver.class, defaultClassLoader()))
-          .min(Sortable::compare).orElse(null);
+          .min(Sortable::compare).orElseGet(SimpleExceptionMessageResolver::new);
 
   private static final long serialVersionUID = -3720369148530068164L;
 

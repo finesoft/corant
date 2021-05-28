@@ -32,6 +32,7 @@ class PkgMsgCds implements GlobalMessageCodes {
   static final String ERR_AGG_AST_INSTAL = "aggregate.assistant_install_error";
   static final String ERR_AGG_MSG_SEQ = "aggregate.msgSeqNum_error";
   static final String ERR_AGG_ID = "aggregate.identifier_error";
+  static final String ERR_AGG_RESOLVE_MULTI = "aggregate.resolve_multi_error";
 
   private PkgMsgCds() {}
 

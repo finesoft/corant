@@ -15,6 +15,7 @@ package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.NULL;
 import java.io.Serializable;
@@ -40,6 +41,14 @@ public interface Mutable<T> extends Supplier<T> {
   default Mutable<T> apply(UnaryOperator<T> op) {
     set(op.apply(get()));
     return this;
+  }
+
+  default T orElse(T alt) {
+    return defaultObject(get(), alt);
+  }
+
+  default T orElseGet(Supplier<? extends T> supplier) {
+    return defaultObject(get(), supplier);
   }
 
   Mutable<T> set(T object);

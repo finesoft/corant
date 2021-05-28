@@ -122,8 +122,9 @@ public class PropertyMessageSource implements MessageSource {
             paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
               PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
                 logger.fine(() -> String.format("Found message resource from %s.", s));
-                Map<String, MessageFormat> localeMap = res.dump().entrySet().stream()
-                    .collect(Collectors.toMap(Entry::getKey, v -> new MessageFormat(v.getValue())));
+                Map<String, MessageFormat> localeMap =
+                    res.dump().entrySet().stream().collect(Collectors.toMap(Entry::getKey,
+                        v -> new MessageFormat(v.getValue(), res.getLocale())));
                 holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())
                     .putAll(localeMap);
                 logger.fine(() -> String.format("Found %s %s message keys from %s.",

@@ -15,7 +15,6 @@ package org.corant.modules.jms.shared.receive.retain;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNoneBlank;
@@ -45,7 +44,6 @@ public class MessageReceiverMetaData {
   private final boolean multicast;
   private final String selector;
   private final boolean subscriptionDurable;
-  private final Class<?> type;
   private final int cacheLevel;
   private final long receiveTimeout;
   private final int receiveThreshold;
@@ -67,7 +65,6 @@ public class MessageReceiverMetaData {
     multicast = ann.multicast();
     selector = Configs.assemblyStringConfigProperty(ann.selector());
     subscriptionDurable = ann.subscriptionDurable();
-    type = defaultObject(ann.type(), String.class);
     cacheLevel = ann.cacheLevel();
     receiveTimeout = ann.receiveTimeout();
     receiveThreshold = max(1, ann.receiveThreshold());
@@ -204,10 +201,6 @@ public class MessageReceiverMetaData {
 
   public int getTxTimeout() {
     return txTimeout;
-  }
-
-  public Class<?> getType() {
-    return type;
   }
 
   @Override

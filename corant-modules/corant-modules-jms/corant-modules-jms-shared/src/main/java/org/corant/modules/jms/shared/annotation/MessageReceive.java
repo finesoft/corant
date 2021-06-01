@@ -48,8 +48,7 @@ public @interface MessageReceive {
   int acknowledge() default Session.CLIENT_ACKNOWLEDGE;
 
   /**
-   *
-   * @return tryBackoffAlgo
+   * Returns the Backoff Algorithm
    */
   BackoffAlgorithm brokenBackoffAlgo() default BackoffAlgorithm.NONE;
 
@@ -190,11 +189,6 @@ public @interface MessageReceive {
    * @return txTimeout
    */
   int txTimeout() default 0;
-
-  /**
-   * @return type
-   */
-  Class<?> type() default String.class;
 
   /**
    * Whether to enable XA to receive messages, if true the Connection factory must support

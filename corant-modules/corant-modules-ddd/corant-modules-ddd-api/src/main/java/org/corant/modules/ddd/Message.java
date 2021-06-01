@@ -15,10 +15,14 @@ package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.immutableMapOf;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Arrays;
-import org.corant.shared.util.Objects;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import org.corant.modules.ddd.annotation.Messages;
 
 /**
  * corant-modules-ddd-api
@@ -48,6 +52,10 @@ public interface Message extends Serializable {
 
   MessageMetadata getMetadata();
 
+  interface AggregateMessage extends Message {
+
+  }
+
   interface ExchangedMessage extends Message {
 
     MessageIdentifier getOriginalMessage();
@@ -58,50 +66,113 @@ public interface Message extends Serializable {
 
     private static final long serialVersionUID = -7393678217089712798L;
 
-    protected Serializable destination;
-    protected boolean multicast;
+    protected final String broker;
+    protected final String destination;
+    protected final boolean multicast;
+    protected final Map<String, String> properties;
+
+    public MessageDestination(Messages messages) {
+      broker = messages.broker();
+      destination = shouldNotNull(messages.destination());
+      multicast = messages.multicast();
+      if (isNotEmpty(messages.properties())) {
+        properties = immutableMapOf((Object[]) messages.properties());
+      } else {
+        properties = Collections.emptyMap();
+      }
+    }
 
     /**
-     * @param destination
-     * @param multicast
+     * @param broker the message broker name or id
+     * @param destination the message destination
+     * @param multicast whether the message destination is topic or queue
+     * @param properties key and value pairs properties
      */
-    public MessageDestination(Serializable destination, boolean multicast) {
+    public MessageDestination(String broker, String destination, boolean multicast,
+        String... properties) {
+      this.broker = broker;
       this.destination = shouldNotNull(destination);
       this.multicast = multicast;
-    }
-
-    protected MessageDestination() {
-
-    }
-
-    public static MessageDestination[] anycastTo(Serializable... destinations) {
-      if (isNotEmpty(destinations)) {
-        return Arrays.stream(destinations).filter(Objects::isNotNull)
-            .map(x -> new MessageDestination(x, false)).toArray(MessageDestination[]::new);
+      if (isNotEmpty(properties)) {
+        this.properties = immutableMapOf((Object[]) properties);
+      } else {
+        this.properties = Collections.emptyMap();
       }
-      return EMPTY_DESTINATIONS;
     }
 
-    public static MessageDestination[] multicastTo(Serializable... destinations) {
-      if (isNotEmpty(destinations)) {
-        return Arrays.stream(destinations).filter(Objects::isNotNull)
-            .map(x -> new MessageDestination(x, true)).toArray(MessageDestination[]::new);
+    public static Set<MessageDestination> from(Class<?> clazz) {
+      Messages[] metas = shouldNotNull(clazz).getAnnotationsByType(Messages.class);
+      Set<MessageDestination> dests = new LinkedHashSet<>();
+      if (isNotEmpty(metas)) {
+        for (Messages meta : metas) {
+          dests.add(new MessageDestination(meta));
+        }
       }
-      return EMPTY_DESTINATIONS;
+      return dests;
     }
 
-    /**
-     *
-     * @return the destination
-     */
-    public Serializable getDestination() {
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      MessageDestination other = (MessageDestination) obj;
+      if (broker == null) {
+        if (other.broker != null) {
+          return false;
+        }
+      } else if (!broker.equals(other.broker)) {
+        return false;
+      }
+      if (destination == null) {
+        if (other.destination != null) {
+          return false;
+        }
+      } else if (!destination.equals(other.destination)) {
+        return false;
+      }
+      if (multicast != other.multicast) {
+        return false;
+      }
+      if (properties == null) {
+        if (other.properties != null) {
+          return false;
+        }
+      } else if (!properties.equals(other.properties)) {
+        return false;
+      }
+      return true;
+    }
+
+    public String getBroker() {
+      return broker;
+    }
+
+    public String getDestination() {
       return destination;
     }
 
-    /**
-     *
-     * @return the multicast
-     */
+    public Map<String, String> getProperties() {
+      return properties;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (broker == null ? 0 : broker.hashCode());
+      result = prime * result + (destination == null ? 0 : destination.hashCode());
+      result = prime * result + (multicast ? 1231 : 1237);
+      result = prime * result + (properties == null ? 0 : properties.hashCode());
+      return result;
+    }
+
     public boolean isMulticast() {
       return multicast;
     }
@@ -140,12 +211,6 @@ public interface Message extends Serializable {
     Instant getOccurredTime();
 
     Serializable getSource();
-  }
-
-  interface MessageQueues {
-
-    String DFLT = "default";
-
   }
 
 }

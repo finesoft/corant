@@ -33,6 +33,16 @@ public class JTAPlatform extends AbstractJtaPlatform {
   private JTAPlatform() {}
 
   @Override
+  protected boolean canCacheTransactionManager() {
+    return false;// Don't cache the TM, since we allow restart the CDI container.
+  }
+
+  @Override
+  protected boolean canCacheTransactionManagerByDefault() {
+    return false;// Don't cache the TM, since we allow restart the CDI container.
+  }
+
+  @Override
   protected TransactionManager locateTransactionManager() {
     return TransactionService.transactionManager();
   }

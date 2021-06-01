@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -64,78 +66,56 @@ public class MessageReceivingManager {
   @Inject
   protected MessageReceivingConnections connections;
 
-  protected final Map<AbstractJMSConfig, ScheduledExecutorService> executorServices =
-      new HashMap<>();
+  @Inject
+  @Any
+  protected Instance<MessageReceivingMetaDataSupplier> metaDataSuppliers;
 
-  protected final List<MessageReceivingMetaData> receivingMetaData = new ArrayList<>();
+  protected final Map<AbstractJMSConfig, ScheduledExecutorService> executors = new HashMap<>();
+
+  protected final List<MessageReceivingMetaData> metaDatas = new ArrayList<>();
 
   protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
-    Set<Pair<String, String>> anycasts = new HashSet<>();
-    for (final MessageReceivingMetaData meta : receivingMetaData) {
-      if (!meta.isMulticast()
-          && !anycasts.add(Pair.of(meta.getConnectionFactoryId(), meta.getDestination()))) {
-        logger.warning(() -> String.format(
-            "The anycast message receiver destination appeared more than once, it should be avoided in general. message receiver [%s].",
-            meta));
-      }
-      AbstractJMSConfig config = AbstractJMSExtension.getConfig(meta.getConnectionFactoryId());
-      if (config != null && config.isEnable()) {
-        MessageReceivingTaskExecution execution = createExecution(config, meta);
-        receiveExecutions.add(execution);
-        logger.fine(() -> String.format(
-            "Scheduled message receiving task initial delay [%s]Ms. message receiver [%s].",
-            config.getReceiveTaskInitialDelay(), meta));
-      }
-    }
-    anycasts.clear();
+    start();
   }
 
   protected void onPreContainerStopEvent(@Observes final PreContainerStopEvent event) {
-    logger.info(() -> "Stopping the message receiving tasks...");
-    while (!receiveExecutions.isEmpty()) {
-      try {
-        receiveExecutions.remove(0).cancel();
-      } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> "Stop message receiving task error!");
-      }
-    }
-    logger.info(() -> "All message receiving tasks were stopped.");
-    logger.info(() -> "Stopping the message receiving executor services.");
-    Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
-        executorServices.entrySet().iterator();
-    while (it.hasNext()) {
-      Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
-      try {
-        entry.getValue().shutdown();
-        entry.getValue().awaitTermination(
-            entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
-        logger.info(() -> String.format("The message receiving executor service %s was stopped.",
-            entry.getKey().getConnectionFactoryId()));
-      } catch (InterruptedException e) {
-        logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
-            entry.getKey().getConnectionFactoryId()));
-        Thread.currentThread().interrupt();
-      } finally {
-        it.remove();
-      }
-    }
-    logger.info(() -> "All message receiving executor services were stopped.");
-    connections.shutdown();
-    logger.info(() -> "All message receiving connections were released.");
+    stop();
   }
 
   @PostConstruct
   protected void postConstruct() {
+    initialize();
+  }
+
+  MessageReceivingTaskExecution createExecution(AbstractJMSConfig config,
+      MessageReceivingMetaData meta) {
+    if (meta.isXa()) {
+      shouldBeTrue(config.isXa(),
+          "The connection factory doesn't support xa! message receiver [%s].", meta);
+    }
+    ScheduledExecutorService service = shouldNotNull(executors.get(config),
+        "Can't find any scheduled executore service! message receiver [%s].", meta);
+    final MessageReceivingTask task = taskFactory.create(meta);
+    final ScheduledFuture<?> future =
+        service.scheduleWithFixedDelay(task, config.getReceiveTaskInitialDelay().toMillis(),
+            config.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
+    return new MessageReceivingTaskExecution(future, task);
+  }
+
+  void initialize() {
     extension.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
-        .forEach(receivingMetaData::addAll);
-    if (!receivingMetaData.isEmpty()) {
+        .forEach(metaDatas::addAll);
+    if (!metaDataSuppliers.isUnsatisfied()) {
+      metaDataSuppliers.stream().forEach(s -> metaDatas.addAll(s.get()));
+    }
+    if (!metaDatas.isEmpty()) {
       // FIXME check receive and reply recursion
       final Map<String, ? extends AbstractJMSConfig> allConfigs =
           extension.getConfigManager().getAllWithNames();
       Set<AbstractJMSConfig> configs = new HashSet<>();
-      Iterator<MessageReceivingMetaData> metaIt = receivingMetaData.iterator();
+      Iterator<MessageReceivingMetaData> metaIt = metaDatas.iterator();
       while (metaIt.hasNext()) {
         MessageReceivingMetaData meta = metaIt.next();
         final String connectionFactoryId = meta.getConnectionFactoryId();
@@ -156,28 +136,69 @@ public class MessageReceivingManager {
               new ScheduledThreadPoolExecutor(cfg.getReceiveTaskThreads(),
                   new MessageReceivingThreadFactory(cfg.getConnectionFactoryId()));
           executor.setRemoveOnCancelPolicy(true);
-          executorServices.put(cfg, executor);
+          executors.put(cfg, executor);
         });
       }
+
       logger.info(
           () -> String.format("Found %s message receivers that involving %s connection factories.",
-              receivingMetaData.size(), executorServices.size()));
+              metaDatas.size(), executors.size()));
     }
   }
 
-  MessageReceivingTaskExecution createExecution(AbstractJMSConfig config,
-      MessageReceivingMetaData meta) {
-    if (meta.isXa()) {
-      shouldBeTrue(config.isXa(),
-          "The connection factory doesn't support xa! message receiver [%s].", meta);
+  void start() {
+    Set<Pair<String, String>> anycasts = new HashSet<>();
+    for (final MessageReceivingMetaData meta : metaDatas) {
+      if (!meta.isMulticast()
+          && !anycasts.add(Pair.of(meta.getConnectionFactoryId(), meta.getDestination()))) {
+        logger.warning(() -> String.format(
+            "The anycast message receiver destination appeared more than once, it should be avoided in general. message receiver [%s].",
+            meta));
+      }
+      AbstractJMSConfig config = AbstractJMSExtension.getConfig(meta.getConnectionFactoryId());
+      if (config != null && config.isEnable()) {
+        MessageReceivingTaskExecution execution = createExecution(config, meta);
+        receiveExecutions.add(execution);
+        logger.fine(() -> String.format(
+            "Scheduled message receiving task initial delay [%s]Ms. message receiver [%s].",
+            config.getReceiveTaskInitialDelay(), meta));
+      }
     }
-    ScheduledExecutorService service = shouldNotNull(executorServices.get(config),
-        "Can't find any scheduled executore service! message receiver [%s].", meta);
-    final MessageReceivingTask task = taskFactory.create(meta);
-    final ScheduledFuture<?> future =
-        service.scheduleWithFixedDelay(task, config.getReceiveTaskInitialDelay().toMillis(),
-            config.getReceiveTaskDelay().toMillis(), TimeUnit.MICROSECONDS);
-    return new MessageReceivingTaskExecution(future, task);
+    anycasts.clear();
+  }
+
+  void stop() {
+    logger.info(() -> "Stopping the message receiving tasks...");
+    while (!receiveExecutions.isEmpty()) {
+      try {
+        receiveExecutions.remove(0).cancel();
+      } catch (Exception e) {
+        logger.log(Level.WARNING, e, () -> "Stop message receiving task error!");
+      }
+    }
+    logger.info(() -> "All message receiving tasks were stopped.");
+    logger.info(() -> "Stopping the message receiving executor services.");
+    Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
+        executors.entrySet().iterator();
+    while (it.hasNext()) {
+      Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
+      try {
+        entry.getValue().shutdown();
+        entry.getValue().awaitTermination(
+            entry.getKey().getReceiverExecutorAwaitTermination().toMillis(), TimeUnit.MICROSECONDS);
+        logger.info(() -> String.format("The message receiving executor service %s was stopped.",
+            entry.getKey().getConnectionFactoryId()));
+      } catch (InterruptedException e) {
+        logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
+            entry.getKey().getConnectionFactoryId()));
+        Thread.currentThread().interrupt();
+      } finally {
+        it.remove();
+      }
+    }
+    logger.info(() -> "All message receiving executor services were stopped.");
+    connections.shutdown();
+    logger.info(() -> "All message receiving connections were released.");
   }
 
   static class MessageReceivingThreadFactory implements ThreadFactory {

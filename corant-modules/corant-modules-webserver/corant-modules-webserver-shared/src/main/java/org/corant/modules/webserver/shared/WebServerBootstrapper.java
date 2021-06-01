@@ -26,6 +26,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PostContainerStartedEvent;
+import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -81,12 +82,21 @@ public class WebServerBootstrapper {
     }
   }
 
-  @PreDestroy
-  protected synchronized void onPreDestroy() {
+  protected void onPreContainerStopEvent(@Observes PreContainerStopEvent event) {
     if (server != null && running) {
       logger.info(() -> String.format("Stop web server %s ", getUserClass(server).getSimpleName()));
       server.stop();
       running = false;
     }
+  }
+
+  @PreDestroy
+  protected synchronized void onPreDestroy() {
+    // if (server != null && running) {
+    // logger.info(() -> String.format("Stop web server %s ",
+    // getUserClass(server).getSimpleName()));
+    // server.stop();
+    // running = false;
+    // }
   }
 }

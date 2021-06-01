@@ -13,9 +13,14 @@
  */
 package org.corant.modules.jms.shared.send;
 
+import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Lists.listOf;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.corant.config.Configs;
 import org.corant.modules.jms.shared.annotation.MessageSend;
+import org.corant.modules.jms.shared.annotation.MessageSends;
 import org.corant.modules.jms.shared.context.SerialSchema;
 
 /**
@@ -52,6 +57,20 @@ public class MessageSenderMetaData {
     this.dupsOkAck = dupsOkAck;
     this.serialization = serialization;
     this.deliveryMode = deliveryMode;
+  }
+
+  public static Set<MessageSenderMetaData> from(Class<?> messageClass) {
+    Set<MessageSenderMetaData> metas = new LinkedHashSet<>();
+    MessageSends anns = findAnnotation(messageClass, MessageSends.class, false);// FIXME inherit
+    if (anns == null) {
+      MessageSend ann = findAnnotation(messageClass, MessageSend.class, false);// FIXME inherit
+      if (ann != null) {
+        metas.add(new MessageSenderMetaData(ann));
+      }
+    } else {
+      listOf(anns.value()).stream().map(MessageSenderMetaData::new).forEach(metas::add);
+    }
+    return metas;
   }
 
   @Override

@@ -14,21 +14,16 @@
 package org.corant.modules.jms.shared.send;
 
 import static org.corant.context.Instances.resolveApply;
-import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.listOf;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.jms.JMSContext;
 import javax.jms.Message;
-import org.corant.modules.jms.shared.annotation.MessageSend;
-import org.corant.modules.jms.shared.annotation.MessageSends;
 import org.corant.modules.jms.shared.context.JMSContextProducer;
 
 /**
@@ -59,16 +54,6 @@ public abstract class AnnotatedMessageSender extends AbstractMessageSender {
   }
 
   protected Set<MessageSenderMetaData> resolveMetaDatas(Class<?> messageClass) {
-    Set<MessageSenderMetaData> sends = new LinkedHashSet<>();
-    MessageSends anns = findAnnotation(messageClass, MessageSends.class, false);// FIXME inherit
-    if (anns == null) {
-      MessageSend ann = findAnnotation(messageClass, MessageSend.class, false);// FIXME inherit
-      if (ann != null) {
-        sends.add(new MessageSenderMetaData(ann));
-      }
-    } else {
-      listOf(anns.value()).stream().map(MessageSenderMetaData::new).forEach(sends::add);
-    }
-    return sends;
+    return MessageSenderMetaData.from(messageClass);
   }
 }

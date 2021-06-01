@@ -17,12 +17,12 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.inject.Stereotype;
-import org.corant.modules.ddd.Message.MessageQueues;
 
 /**
  * corant-modules-ddd-api
@@ -37,6 +37,12 @@ import org.corant.modules.ddd.Message.MessageQueues;
 @Stereotype
 public @interface Messages {
 
-  String[] queues() default MessageQueues.DFLT;
+  String broker() default EMPTY;
+
+  String destination() default EMPTY;
+
+  boolean multicast() default false;
+
+  String[] properties() default {};
 
 }

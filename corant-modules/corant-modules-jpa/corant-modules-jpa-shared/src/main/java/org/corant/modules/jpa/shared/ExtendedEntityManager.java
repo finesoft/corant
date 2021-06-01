@@ -146,6 +146,24 @@ public class ExtendedEntityManager implements EntityManager {
     return delegate.createStoredProcedureQuery(procedureName, resultSetMappings);
   }
 
+  /**
+   * TODO FIXME:
+   *
+   * After the JTA transaction has completed (either by transaction commit or rollback), the
+   * container closes the entity manager by calling EntityManager.close. [88] Note that the JTA
+   * transaction may rollback in a background thread (e.g., as a result of transaction timeout), in
+   * which case the container should arrange for the entity manager to be closed but the Entity-
+   * Manager.close method should not be concurrently invoked while the application is in an
+   * EntityManager invocation.
+   *
+   * destroy
+   */
+  public synchronized void destroy() {
+    if (delegate.isOpen()) {
+      delegate.close();
+    }
+  }
+
   @Override
   public void detach(Object entity) {
     delegate.detach(entity);
@@ -322,24 +340,6 @@ public class ExtendedEntityManager implements EntityManager {
     if (transaction && !TransactionService.isCurrentTransactionActive()) {
       throw new TransactionRequiredException(
           "The transaction is required but is not active! See JPA 2.0 section 7.9.1");
-    }
-  }
-
-  /**
-   * TODO FIXME:
-   *
-   * After the JTA transaction has completed (either by transaction commit or rollback), the
-   * container closes the entity manager by calling EntityManager.close. [88] Note that the JTA
-   * transaction may rollback in a background thread (e.g., as a result of transaction timeout), in
-   * which case the container should arrange for the entity manager to be closed but the Entity-
-   * Manager.close method should not be concurrently invoked while the application is in an
-   * EntityManager invocation.
-   *
-   * destroy
-   */
-  protected synchronized void destroy() {
-    if (delegate.isOpen()) {
-      delegate.close();
     }
   }
 

@@ -21,6 +21,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import org.corant.context.CDIs;
 import org.corant.context.ResourceReferences;
+import org.corant.modules.jpa.shared.ExtendedEntityManager;
 import org.corant.modules.jpa.shared.JPAProvider;
 import org.corant.modules.jpa.shared.PersistenceService;
 import org.jboss.weld.injection.spi.JpaInjectionServices;
@@ -47,15 +48,20 @@ public class JPAInjectionServices implements JpaInjectionServices {
       InjectionPoint injectionPoint) {
     final PersistenceContext pc = CDIs.getAnnotation(injectionPoint, PersistenceContext.class);
     return ResourceReferences
-        .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManager(pc)));
+        .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManager(pc)), t -> {
+          if (t instanceof ExtendedEntityManager) {
+            ((ExtendedEntityManager) t).destroy();
+          }
+        }); // FIXME close?
   }
 
   @Override
   public ResourceReferenceFactory<EntityManagerFactory> registerPersistenceUnitInjectionPoint(
       InjectionPoint injectionPoint) {
     PersistenceUnit pu = CDIs.getAnnotation(injectionPoint, PersistenceUnit.class);
-    return ResourceReferences
-        .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)));
+    return ResourceReferences.refac(
+        () -> resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)),
+        EntityManagerFactory::close);// FIXME close?
   }
 
 }

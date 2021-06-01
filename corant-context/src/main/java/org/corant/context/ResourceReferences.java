@@ -61,4 +61,9 @@ public class ResourceReferences {
   public static <T> ResourceReferenceFactory<T> refac(final Supplier<T> supplier) {
     return () -> ref(supplier);
   }
+
+  public static <T> ResourceReferenceFactory<T> refac(final Supplier<T> supplier,
+      final Consumer<T> releaser) {
+    return () -> ref(supplier, releaser);
+  }
 }

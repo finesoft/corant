@@ -31,7 +31,9 @@ import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigBuilder;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -170,9 +172,15 @@ public class CorantConfigBuilder implements ConfigBuilder {
       return sb.toString();
     });
     sortMap.clear();
-    if (thrown != null) {
+    if (thrown != null
+        && !Systems.getSystemProperty(Names.CORANT_PREFIX + "config.builder.supress-exception",
+            Boolean.class, false)) {
       // logger.log(Level.SEVERE, thrown, () -> "Process configurations occurred error");
-      throw new CorantRuntimeException(thrown);
+      if (thrown instanceof RuntimeException) {
+        throw (RuntimeException) thrown;
+      } else {
+        throw new CorantRuntimeException(thrown);
+      }
     }
   }
 

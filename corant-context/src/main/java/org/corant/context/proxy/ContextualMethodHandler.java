@@ -47,16 +47,15 @@ public class ContextualMethodHandler implements Serializable {
   protected transient Method method; // ?? use java.lang.invoke.MethodHandle
   protected MethodSignature methodSignature;
 
-  public ContextualMethodHandler(Method method) {
-    this(null, method);
-  }
-
-  protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
-      Annotation... qualifiers) {
+  public ContextualMethodHandler(Class<?> beanClass, Method beanMethod, Annotation... qualifiers) {
     method = shouldNotNull(beanMethod);
     methodSignature = MethodSignature.of(method);
     clazz = defaultObject(beanClass, beanMethod::getDeclaringClass);
     this.qualifiers = qualifiers;
+  }
+
+  public ContextualMethodHandler(Method method) {
+    this(null, method);
   }
 
   public static Set<ContextualMethodHandler> from(Class<?> clazz, Predicate<Method> methodPredicate,
@@ -133,6 +132,14 @@ public class ContextualMethodHandler implements Serializable {
    */
   public Method getMethod() {
     return method;
+  }
+
+  public MethodSignature getMethodSignature() {
+    return methodSignature;
+  }
+
+  public Annotation[] getQualifiers() {
+    return Arrays.copyOf(qualifiers, qualifiers.length);
   }
 
   @Override

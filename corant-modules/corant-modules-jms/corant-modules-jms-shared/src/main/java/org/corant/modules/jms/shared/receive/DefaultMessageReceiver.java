@@ -32,6 +32,8 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
+import org.corant.modules.jms.receive.ManagedMessageReceiver;
+import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -55,7 +57,7 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 上午11:33:15
  *
  */
-public class DefaultMessageReceiver implements MessageReceiver {
+public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected static final Logger logger = Logger.getLogger(DefaultMessageReceiver.class.getName());
 
@@ -65,13 +67,13 @@ public class DefaultMessageReceiver implements MessageReceiver {
   protected final long receiveTimeout;
 
   // worker workhorse
-  protected final MessageHandler messageHandler;
+  protected final ManagedMessageReceivingHandler messageHandler;
   protected final MessageReceivingMediator mediator;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
 
-  protected DefaultMessageReceiver(MessageReceivingMetaData metaData, MessageHandler messageHandler,
-      MessageReceivingMediator mediator) {
+  protected DefaultMessageReceiver(MessageReceivingMetaData metaData,
+      ManagedMessageReceivingHandler messageHandler, MessageReceivingMediator mediator) {
     meta = metaData;
     this.messageHandler = messageHandler;
     this.mediator = mediator;

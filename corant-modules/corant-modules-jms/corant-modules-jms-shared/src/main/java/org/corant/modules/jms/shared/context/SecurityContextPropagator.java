@@ -14,7 +14,7 @@
 package org.corant.modules.jms.shared.context;
 
 import static org.corant.context.Instances.find;
-import static org.corant.modules.jms.shared.MessagePropertyNames.SECURITY_CONTEXT_PROPERTY_NAME;
+import static org.corant.modules.jms.JMSNames.SECURITY_CONTEXT_PROPERTY_NAME;
 import static org.corant.shared.util.Strings.isNotBlank;
 import javax.jms.JMSException;
 import javax.jms.JMSProducer;

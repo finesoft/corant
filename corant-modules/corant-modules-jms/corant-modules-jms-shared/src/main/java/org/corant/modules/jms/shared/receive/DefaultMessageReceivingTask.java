@@ -21,12 +21,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.corant.context.CDIs;
-import org.corant.modules.jms.shared.context.MessageSerializer;
-import org.corant.modules.jms.shared.context.SerialSchema;
+import org.corant.modules.jms.JMSNames;
+import org.corant.modules.jms.marshaller.MessageMarshaller;
+import org.corant.modules.jms.receive.ManagedMessageReceiveReplier;
+import org.corant.modules.jms.receive.ManagedMessageReceiver;
+import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
+import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 import org.corant.shared.util.Retry.RetryInterval;
 
 /**
@@ -49,7 +54,8 @@ import org.corant.shared.util.Retry.RetryInterval;
  * @author bingo 上午11:33:15
  *
  */
-public class DefaultMessageReceivingTask implements MessageReceivingTask, MessageReceivingMediator {
+public class DefaultMessageReceivingTask
+    implements ManagedMessageReceivingTask, MessageReceivingMediator {
 
   public static final byte STATE_RUN = 0;
   public static final byte STATE_TRY = 1;
@@ -85,9 +91,9 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   protected final AtomicInteger tryFailureCounter = new AtomicInteger(0);
 
   // the workhorse
-  protected final MessageReceiver messageReceiver;
-  protected final MessageHandler messageHandler;
-  protected final MessageReplier messageReplier;
+  protected final ManagedMessageReceiver messageReceiver;
+  protected final ManagedMessageReceivingHandler messageHandler;
+  protected final ManagedMessageReceiveReplier messageReplier;
 
   public DefaultMessageReceivingTask(MessageReceivingMetaData metaData) {
     this(metaData, metaData.getBrokenInterval());
@@ -138,9 +144,9 @@ public class DefaultMessageReceivingTask implements MessageReceivingTask, Messag
   }
 
   @Override
-  public MessageSerializer getMessageSerializer(SerialSchema schema) {
-    return resolve(MessageSerializer.class,
-        defaultObject(schema, SerialSchema.JAVA_BUILTIN).qualifier());
+  public MessageMarshaller getMessageMarshaller(String schema) {
+    return resolve(MessageMarshaller.class,
+        NamedLiteral.of(defaultObject(schema, JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA)));
   }
 
   public boolean isInProgress() {

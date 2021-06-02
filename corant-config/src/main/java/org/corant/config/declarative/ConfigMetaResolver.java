@@ -65,7 +65,7 @@ public class ConfigMetaResolver {
           ConfigKeyItem configKeyItem =
               defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
           String keyItem =
-              isBlank(configKeyItem.value()) ? dashify(field.getName()) : configKeyItem.value();
+              isBlank(configKeyItem.name()) ? dashify(field.getName()) : configKeyItem.name();
           DeclarativePattern pattern =
               defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
           String defaultValue = configKeyItem.defaultValue();

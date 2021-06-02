@@ -14,12 +14,13 @@
 package org.corant.modules.jms.shared.receive;
 
 import javax.enterprise.context.ApplicationScoped;
+import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 
 @ApplicationScoped
 public class DefaultMessageReceivingTaskFactory implements MessageReceivingTaskFactory {
 
   @Override
-  public MessageReceivingTask create(MessageReceivingMetaData metaData) {
+  public ManagedMessageReceivingTask create(MessageReceivingMetaData metaData) {
     return new DefaultMessageReceivingTask(metaData);
   }
 

@@ -34,7 +34,6 @@ import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.DefaultAggregateIdentifier;
 import org.corant.modules.ddd.Entity.EntityManagerProvider;
 import org.corant.modules.ddd.Message;
-import org.corant.modules.ddd.MessageUtils;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
@@ -76,7 +75,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   protected final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
   protected final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
   protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
-  protected final LinkedList<Message> registeredMessages = new LinkedList<>();
+  protected final LinkedList<WrappedMessage> registeredMessages = new LinkedList<>();
 
   protected volatile boolean activated;
 
@@ -102,10 +101,10 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.remove(ai);
           evolutiveAggregates.remove(ai);
-          registeredMessages.removeIf(e -> areEqual(e.getMetadata().getSource(), ai));
+          registeredMessages.removeIf(e -> areEqual(e.getSource(), ai));
         }
       } else if (obj instanceof Message) {
-        registeredMessages.remove(obj);
+        registeredMessages.removeIf(um -> areEqual(obj, um.delegate));
       } else if (obj instanceof Map.Entry<?, ?>) {
         Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
         registeredVariables.remove(p.getKey());
@@ -144,7 +143,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    *
    * @return the registered messsages
    */
-  public List<Message> getMessages() {
+  public List<WrappedMessage> getMessages() {
     return Collections.unmodifiableList(registeredMessages);
   }
 
@@ -193,11 +192,11 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
             evolutiveAggregates.put(ai, al);
           }
           for (Message message : aggregate.extractMessages(true)) {
-            MessageUtils.mergeToQueue(registeredMessages, message);
+            WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage(message, ai));
           }
         }
       } else if (obj instanceof Message) {
-        MessageUtils.mergeToQueue(registeredMessages, (Message) obj);
+        WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage((Message) obj));
       } else if (obj instanceof Map.Entry<?, ?>) {
         Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
         registeredVariables.put(p.getKey(), p.getValue());
@@ -219,9 +218,9 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     registeredVariables.clear();
   }
 
-  protected boolean extractMessages(LinkedList<Message> messages) {
+  protected boolean extractMessages(LinkedList<WrappedMessage> messages) {
     if (!registeredMessages.isEmpty()) {
-      registeredMessages.stream().sorted(Message::compare).forEach(messages::offer);
+      registeredMessages.stream().sorted().forEach(messages::offer);
       registeredMessages.clear();
       return true;
     }

@@ -10,5 +10,6 @@
   <modules>
   	<module>corant-modules-jms-shared</module>
   	<module>corant-modules-jms-artemis</module>
+  	<module>corant-modules-jms-api</module>
   </modules>
 </project>

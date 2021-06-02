@@ -31,6 +31,7 @@ import javax.jms.JMSSessionMode;
 import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.jms.annotation.MessageContext;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.modules.jta.shared.TransactionService;
@@ -64,10 +65,15 @@ public class JMSContextKey implements Serializable {
 
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
-    final JMSSessionMode mode = annotated.getAnnotation(JMSSessionMode.class);
-    final boolean dupAck = mode != null && mode.value() == JMSContext.DUPS_OK_ACKNOWLEDGE;
-    return new JMSContextKey(factory == null ? null : factory.value(), dupAck);
+    final MessageContext messageContext = annotated.getAnnotation(MessageContext.class);
+    if (messageContext != null) {
+      return new JMSContextKey(messageContext.connectionFactoryId(), messageContext.dupsOkAck());
+    } else {
+      final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
+      final JMSSessionMode mode = annotated.getAnnotation(JMSSessionMode.class);
+      final boolean dupAck = mode != null && mode.value() == JMSContext.DUPS_OK_ACKNOWLEDGE;
+      return new JMSContextKey(factory == null ? null : factory.value(), dupAck);
+    }
   }
 
   public JMSContext create(boolean xa) {

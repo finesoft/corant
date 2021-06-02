@@ -34,7 +34,9 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
-import org.corant.modules.jms.shared.context.JMSExceptionListener;
+import org.corant.modules.jms.receive.ManagedMessageReceiver;
+import org.corant.modules.jms.receive.ManagedMessageReceivingExceptionListener;
+import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
@@ -59,7 +61,7 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 上午11:33:15
  *
  */
-public class SimpleMessageReceiver implements MessageReceiver {
+public class SimpleMessageReceiver implements ManagedMessageReceiver {
 
   protected static final Logger logger = Logger.getLogger(SimpleMessageReceiver.class.getName());
 
@@ -70,14 +72,14 @@ public class SimpleMessageReceiver implements MessageReceiver {
 
   // worker object
   protected final ConnectionFactory connectionFactory;
-  protected final MessageHandler messageHandler;
+  protected final ManagedMessageReceivingHandler messageHandler;
   protected final MessageReceivingMediator mediator;
   protected volatile Connection connection;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
 
-  protected SimpleMessageReceiver(MessageReceivingMetaData metaData, MessageHandler messageHandler,
-      MessageReceivingMediator mediator) {
+  protected SimpleMessageReceiver(MessageReceivingMetaData metaData,
+      ManagedMessageReceivingHandler messageHandler, MessageReceivingMediator mediator) {
     meta = metaData;
     connectionFactory = createConnectionFactory(metaData.getConnectionFactoryId());
     this.messageHandler = messageHandler;
@@ -103,7 +105,7 @@ public class SimpleMessageReceiver implements MessageReceiver {
       }
       select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
           .forEach(c -> c.configConnection(connection, meta));
-      select(JMSExceptionListener.class).stream().min(Sortable::compare)
+      select(ManagedMessageReceivingExceptionListener.class).stream().min(Sortable::compare)
           .ifPresent(listener -> listener.tryConfig(connection));
     }
     // initialize session

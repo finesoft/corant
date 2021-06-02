@@ -13,13 +13,12 @@
  */
 package org.corant.modules.jms.shared;
 
-import static org.corant.shared.util.Objects.max;
-import java.time.Duration;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.NamedObject;
+import org.corant.modules.jms.JMSConfig;
 
 /**
  * corant-modules-jms-shared
@@ -28,7 +27,7 @@ import org.corant.context.qualifier.Qualifiers.NamedObject;
  *
  */
 @ConfigKeyRoot(value = "corant.jms", keyIndex = 2)
-public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfig {
+public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, DeclarativeConfig {
 
   private static final long serialVersionUID = 2263743463205278263L;
 
@@ -51,22 +50,10 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
   protected String clientId;
 
   @ConfigKeyItem
-  protected Boolean enable = true;
+  protected boolean enable = true;
 
   @ConfigKeyItem
-  protected Boolean xa = true;
-
-  @ConfigKeyItem(defaultValue = "PT30S")
-  protected Duration receiveTaskInitialDelay;
-
-  @ConfigKeyItem(defaultValue = "PT1S")
-  protected Duration receiveTaskDelay;
-
-  @ConfigKeyItem(defaultValue = "PT4S")
-  protected Duration receiverExecutorAwaitTermination;
-
-  @ConfigKeyItem(defaultValue = "2")
-  protected Integer receiveTaskThreads = max(2, Runtime.getRuntime().availableProcessors());
+  protected boolean xa = true;
 
   @Override
   public boolean equals(Object obj) {
@@ -90,6 +77,7 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
     return true;
   }
 
+  @Override
   public String getClientId() {
     return clientId;
   }
@@ -98,6 +86,7 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
    *
    * @return the connectionFactoryId
    */
+  @Override
   public String getConnectionFactoryId() {
     return connectionFactoryId;
   }
@@ -109,38 +98,6 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
 
   public String getPassword() {
     return password;
-  }
-
-  /**
-   *
-   * @return the receiverExecutorAwaitTermination
-   */
-  public Duration getReceiverExecutorAwaitTermination() {
-    return receiverExecutorAwaitTermination;
-  }
-
-  /**
-   *
-   * @return the receiveTaskDelay
-   */
-  public Duration getReceiveTaskDelay() {
-    return receiveTaskDelay;
-  }
-
-  /**
-   *
-   * @return the receiveTaskInitialDelay
-   */
-  public Duration getReceiveTaskInitialDelay() {
-    return receiveTaskInitialDelay;
-  }
-
-  /**
-   *
-   * @return the receiveTaskThreads
-   */
-  public Integer getReceiveTaskThreads() {
-    return receiveTaskThreads;
   }
 
   public String getUsername() {
@@ -155,19 +112,13 @@ public abstract class AbstractJMSConfig implements NamedObject, DeclarativeConfi
     return result;
   }
 
-  /**
-   *
-   * @return the enable
-   */
-  public Boolean isEnable() {
+  @Override
+  public boolean isEnable() {
     return enable;
   }
 
-  /**
-   *
-   * @return the xa
-   */
-  public Boolean isXa() {
+  @Override
+  public boolean isXa() {
     return xa;
   }
 

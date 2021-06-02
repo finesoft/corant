@@ -49,12 +49,12 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     logger.fine(() -> String.format(
         "Sorted the flushed messages and store them if nessuary, dispatch them to the message dispatcher, before %s completion.",
         transaction.toString()));
-    LinkedList<Message> messages = new LinkedList<>();
+    LinkedList<WrappedMessage> messages = new LinkedList<>();
     extractMessages(messages);
     int cycles = 128;
-    Message msg;
-    while ((msg = messages.poll()) != null) {
-      messageDispatcher.accept(new Message[] {msg});
+    WrappedMessage wm;
+    while ((wm = messages.poll()) != null) {
+      messageDispatcher.accept(new Message[] {wm.delegate});
       if (extractMessages(messages) && --cycles < 0) {
         throw new CorantRuntimeException("Can not handle messages!");
       }

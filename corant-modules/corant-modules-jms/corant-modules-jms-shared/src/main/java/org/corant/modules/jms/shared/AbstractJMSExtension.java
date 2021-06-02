@@ -15,7 +15,13 @@ package org.corant.modules.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
 import static org.corant.context.Instances.select;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.union;
+import static org.corant.shared.util.Sets.setOf;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,11 +39,10 @@ import javax.jms.JMSConnectionFactory;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.required.Required;
-import org.corant.modules.jms.shared.annotation.MessageDispatch;
-import org.corant.modules.jms.shared.annotation.MessageReceive;
-import org.corant.modules.jms.shared.annotation.MessageSend;
-import org.corant.modules.jms.shared.annotation.MessageSends;
-import org.corant.modules.jms.shared.annotation.MessageStream;
+import org.corant.modules.jms.annotation.MessageContext;
+import org.corant.modules.jms.annotation.MessageDestination;
+import org.corant.modules.jms.annotation.MessageDriven;
+import org.corant.modules.jms.annotation.MessageSend;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
 
@@ -84,8 +89,9 @@ public abstract class AbstractJMSExtension implements Extension {
     streamMethods.clear();
   }
 
-  protected void onProcessAnnotatedType(@Observes @WithAnnotations({MessageReceive.class,
-      MessageStream.class, MessageSend.class, MessageSends.class}) ProcessAnnotatedType<?> pat) {
+  protected void onProcessAnnotatedType(
+      @Observes @WithAnnotations({MessageSend.class, MessageContext.class, MessageDriven.class,
+          JMSConnectionFactory.class, MessageDestination.class}) ProcessAnnotatedType<?> pat) {
     if (Required.shouldVeto(pat.getAnnotatedType())) {
       return;
     }
@@ -93,35 +99,28 @@ public abstract class AbstractJMSExtension implements Extension {
     MessageSend[] mss = beanClass.getAnnotationsByType(MessageSend.class);
     if (isNotEmpty(mss)) {
       for (MessageSend ms : mss) {
-        connectionFactories.add(ms.connectionFactoryId());
+        connectionFactories.add(ms.destination().connectionFactoryId());
       }
     }
-    MessageSends ms = beanClass.getAnnotation(MessageSends.class);
-    if (ms != null) {
-      for (MessageSend m : ms.value()) {
-        connectionFactories.add(m.connectionFactoryId());
-      }
-    }
-
     logger
         .fine(() -> String.format("Scanning JMS message consumer type: %s.", beanClass.getName()));
-    ContextualMethodHandler
-        .fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageReceive.class)).forEach(cm -> {
+    ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageDriven.class))
+        .forEach(cm -> {
+          Method method = cm.getMethod();
           logger.fine(() -> String.format(
               "Found annotated JMS message consumer method %s.%s, adding for further processing.",
-              beanClass.getName(), cm.getMethod().getName()));
+              beanClass.getName(), method.getName()));
+          shouldBeTrue(cm.getMethod().getParameters().length > 0);
+          Set<MessageDestination> mds =
+              setOf(method.getAnnotationsByType(MessageDestination.class));
+          Set<MessageDestination> pds =
+              setOf(method.getParameterTypes()[0].getAnnotationsByType(MessageDestination.class));
+          shouldBeFalse(isNotEmpty(mds) && isNotEmpty(pds));
+          shouldBeFalse(isEmpty(mds) && isEmpty(pds));
+          for (MessageDestination ds : union(mds, pds)) {
+            connectionFactories.add(ds.connectionFactoryId());
+          }
           receiveMethods.add(cm);
-          connectionFactories
-              .add(cm.getMethod().getAnnotation(MessageReceive.class).connectionFactoryId());
-        });
-    ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageStream.class))
-        .forEach(cm -> {
-          logger.fine(() -> String.format(
-              "Found annotated JMS message stream method %s.%s, for now we do not support it.",
-              beanClass.getName(), cm.getMethod().getName()));
-          streamMethods.add(cm);
-          connectionFactories
-              .add(cm.getMethod().getAnnotation(MessageReceive.class).connectionFactoryId());
         });
   }
 
@@ -130,10 +129,9 @@ public abstract class AbstractJMSExtension implements Extension {
       JMSConnectionFactory cf =
           pip.getInjectionPoint().getAnnotated().getAnnotation(JMSConnectionFactory.class);
       connectionFactories.add(cf.value());// FIXME JNDI
-    } else if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(MessageDispatch.class)) {
-      MessageDispatch md =
-          pip.getInjectionPoint().getAnnotated().getAnnotation(MessageDispatch.class);
-      connectionFactories.add(md.connectionFactoryId());// FIXME JNDI
+    } else if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(MessageSend.class)) {
+      MessageSend md = pip.getInjectionPoint().getAnnotated().getAnnotation(MessageSend.class);
+      connectionFactories.add(md.destination().connectionFactoryId());// FIXME JNDI
     }
   }
 

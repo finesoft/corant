@@ -37,7 +37,6 @@ public abstract class AbstractAggregateMessage implements Message {
     this.metadata = metadata;
   }
 
-  @Override
   public AggregateMessageMetadata getMetadata() {
     return metadata;
   }

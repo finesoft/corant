@@ -84,11 +84,12 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     logger.fine(() -> String.format(
         "Sorted the flushed messages and trigger them if nessuary, store them to the message stroage, before %s completion.",
         transaction.toString()));
-    LinkedList<Message> messages = new LinkedList<>();
+    LinkedList<WrappedMessage> messages = new LinkedList<>();
     extractMessages(messages);
     int cycles = 128;
-    Message msg;
-    while ((msg = messages.poll()) != null) {
+    WrappedMessage wm;
+    while ((wm = messages.poll()) != null) {
+      final Message msg = wm.delegate;
       storedMessages.add(messageStorage.apply(msg));
       sagaService.trigger(msg);// FIXME Is it right to do so?
       if (extractMessages(messages) && --cycles < 0) {

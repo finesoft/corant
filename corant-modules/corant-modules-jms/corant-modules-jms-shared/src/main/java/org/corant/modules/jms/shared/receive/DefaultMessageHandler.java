@@ -23,9 +23,9 @@ import javax.jms.Message;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
-import org.corant.modules.jms.shared.MessagePropertyNames;
+import org.corant.modules.jms.JMSNames;
+import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator;
-import org.corant.modules.jms.shared.context.SerialSchema;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -35,7 +35,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午8:48:45
  *
  */
-public class DefaultMessageHandler implements MessageHandler {
+public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
 
   protected static final Logger logger = Logger.getLogger(DefaultMessageHandler.class.getName());
   final ContextualMethodHandler method;
@@ -64,11 +64,10 @@ public class DefaultMessageHandler implements MessageHandler {
 
   protected Object resolvePayload(Message message) throws JMSException {
     if (!Message.class.isAssignableFrom(messageClass)) {
-      SerialSchema serialSchema = SerialSchema
-          .valueOf(shouldNotBlank(message.getStringProperty(MessagePropertyNames.MSG_SERIAL_SCHAME),
-              "Resolve message payload occurred error, missing [%s] information message header.",
-              MessagePropertyNames.MSG_SERIAL_SCHAME));
-      return mediator.getMessageSerializer(serialSchema).deserialize(message, messageClass);
+      String serialSchema = shouldNotBlank(message.getStringProperty(JMSNames.MSG_MARSHAL_SCHAME),
+          "Resolve message payload occurred error, missing [%s] information message header.",
+          JMSNames.MSG_MARSHAL_SCHAME);
+      return mediator.getMessageMarshaller(serialSchema).deserialize(message, messageClass);
     }
     return message;
   }

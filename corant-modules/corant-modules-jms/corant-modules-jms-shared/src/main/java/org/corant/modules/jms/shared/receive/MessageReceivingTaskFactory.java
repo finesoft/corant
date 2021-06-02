@@ -13,6 +13,8 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
+
 /**
  * corant-modules-jms-shared
  *
@@ -21,6 +23,6 @@ package org.corant.modules.jms.shared.receive;
  */
 public interface MessageReceivingTaskFactory {
 
-  MessageReceivingTask create(MessageReceivingMetaData metaData);
+  ManagedMessageReceivingTask create(MessageReceivingMetaData metaData);
 
 }

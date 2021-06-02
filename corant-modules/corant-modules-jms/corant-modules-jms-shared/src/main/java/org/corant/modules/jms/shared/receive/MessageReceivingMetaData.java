@@ -15,20 +15,22 @@ package org.corant.modules.jms.shared.receive;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNoneBlank;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.corant.config.Configs;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.jms.shared.annotation.MessageReceive;
+import org.corant.modules.jms.metadata.MessageDestinationMetaData;
+import org.corant.modules.jms.metadata.MessageDrivenMetaData;
+import org.corant.modules.jms.metadata.MessageReplyMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.corant.shared.util.Retry.RetryInterval;
@@ -45,12 +47,10 @@ public class MessageReceivingMetaData {
 
   private final ContextualMethodHandler method;
   private final int acknowledge;
-  private final String clientID;
   private final String connectionFactoryId;
   private final String destination;
   private final boolean multicast;
   private final String selector;
-  private final boolean subscriptionDurable;
   private final int cacheLevel;
   private final long receiveTimeout;
   private final int receiveThreshold;
@@ -60,48 +60,47 @@ public class MessageReceivingMetaData {
   private final long loopIntervalMs;
   private final boolean xa;
   private final int txTimeout;
-  private final MessageReplyMetaData[] replies;
+  private final Collection<MessageReplyMetaData> replies;
 
-  MessageReceivingMetaData(ContextualMethodHandler method, String destinationName) {
+  MessageReceivingMetaData(ContextualMethodHandler method, MessageDestinationMetaData dest,
+      MessageDrivenMetaData driven) {
     this.method = method;
-    final MessageReceive ann = method.getMethod().getAnnotation(MessageReceive.class);
-    acknowledge = ann.acknowledge();
-    clientID = Configs.assemblyStringConfigProperty(ann.clientId());
-    connectionFactoryId =
-        Qualifiers.resolveName(Configs.assemblyStringConfigProperty(ann.connectionFactoryId()));
-    destination = Configs.assemblyStringConfigProperty(destinationName);
-    multicast = ann.multicast();
-    selector = Configs.assemblyStringConfigProperty(ann.selector());
-    subscriptionDurable = ann.subscriptionDurable();
-    cacheLevel = ann.cacheLevel();
-    receiveTimeout = ann.receiveTimeout();
-    receiveThreshold = max(1, ann.receiveThreshold());
-    failureThreshold = max(4, ann.failureThreshold());
-    tryThreshold = max(2, ann.tryThreshold());
-    loopIntervalMs = max(500L, ann.loopIntervalMs());
-    String bds = Configs.assemblyStringConfigProperty(ann.brokenDuration());
-    String maxBds = Configs.assemblyStringConfigProperty(ann.maxBrokenDuration());
+    // the destination
+    connectionFactoryId = Qualifiers.resolveName(dest.getConnectionFactoryId());
+    destination = dest.getName();
+    multicast = dest.isMulticast();
+    // the driven
+    acknowledge = driven.getAcknowledge();
+    selector = driven.getSelector();
+    cacheLevel = driven.getCacheLevel();
+    receiveTimeout = driven.getReceiveTimeout();
+    receiveThreshold = max(1, driven.getReceiveThreshold());
+    failureThreshold = max(4, driven.getFailureThreshold());
+    tryThreshold = max(2, driven.getTryThreshold());
+    loopIntervalMs = max(500L, driven.getLoopIntervalMs());
+    String bds = driven.getBrokenDuration();
+    String maxBds = driven.getMaxBrokenDuration();
     Duration brokenDuration =
         max(isBlank(bds) ? Duration.ofMinutes(15) : Duration.parse(bds), Duration.ofSeconds(1L));
-    if (ann.brokenBackoffAlgo() == BackoffAlgorithm.NONE) {
+    if (driven.getBrokenBackoffAlgo() == BackoffAlgorithm.NONE) {
       brokenInterval = RetryInterval.noBackoff(brokenDuration);
-    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO) {
+    } else if (driven.getBrokenBackoffAlgo() == BackoffAlgorithm.EXPO) {
       brokenInterval = RetryInterval.expoBackoff(brokenDuration, Duration.parse(maxBds),
-          ann.brokenBackoffFactor());
-    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
+          driven.getBrokenBackoffFactor());
+    } else if (driven.getBrokenBackoffAlgo() == BackoffAlgorithm.EXPO_DECORR) {
       brokenInterval = RetryInterval.expoBackoffDecorr(brokenDuration, Duration.parse(maxBds),
-          ann.brokenBackoffFactor());
-    } else if (ann.brokenBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
+          driven.getBrokenBackoffFactor());
+    } else if (driven.getBrokenBackoffAlgo() == BackoffAlgorithm.EXPO_EQUAL_JITTER) {
       brokenInterval = RetryInterval.expoBackoffEqualJitter(brokenDuration, Duration.parse(maxBds),
-          ann.brokenBackoffFactor());
+          driven.getBrokenBackoffFactor());
     } else {
       brokenInterval = RetryInterval.expoBackoffFullJitter(brokenDuration, Duration.parse(maxBds),
-          ann.brokenBackoffFactor());
+          driven.getBrokenBackoffFactor());
     }
-    xa = ann.xa();
-    txTimeout = ann.txTimeout();
-    replies = MessageReplyMetaData.from(ann.reply());
-    shouldBeTrue(setOf(replies).size() == replies.length,
+    xa = driven.isXa();
+    txTimeout = driven.getTxTimeout();
+    replies = driven.getReply();
+    shouldBeTrue(setOf(replies).size() == replies.size(),
         "The reply destination in annotation must be unique.");
     for (MessageReplyMetaData r : replies) {
       if (isBlank(r.getDestination()) || r.getDestination().equals(destination)) {
@@ -124,17 +123,19 @@ public class MessageReceivingMetaData {
   }
 
   public static Set<MessageReceivingMetaData> of(ContextualMethodHandler method) {
-    final MessageReceive ann =
-        shouldNotNull(shouldNotNull(method).getMethod().getAnnotation(MessageReceive.class));
-    shouldBeTrue(isNoneBlank(ann.destinations()));
-    Set<String> dests = new LinkedHashSet<>();
-    for (String dest : ann.destinations()) {
-      dests.addAll(Configs.assemblyStringConfigProperties(dest));
+    MessageDrivenMetaData driven =
+        MessageDrivenMetaData.from(method.getMethod(), method.getQualifiers());
+    Set<MessageDestinationMetaData> dests = MessageDestinationMetaData.from(method.getMethod());
+    if (isEmpty(dests)) {
+      dests = MessageDestinationMetaData.from(method.getMethod().getParameterTypes()[0]);
     }
-    Set<MessageReceivingMetaData> beans = new LinkedHashSet<>(dests.size());
-    dests.forEach(d -> shouldBeTrue(beans.add(new MessageReceivingMetaData(method, d)),
-        "The message receive method %s dup!", method.toString()));
-    return beans;
+    shouldNotEmpty(dests);
+    Set<MessageReceivingMetaData> metas = new LinkedHashSet<>(dests.size());
+    for (MessageDestinationMetaData dest : dests) {
+      shouldBeTrue(metas.add(new MessageReceivingMetaData(method, dest, driven)),
+          "The message receive method %s dup!", method.toString());
+    }
+    return metas;
   }
 
   @Override
@@ -188,10 +189,6 @@ public class MessageReceivingMetaData {
     return cacheLevel;
   }
 
-  public String getClientID() {
-    return clientID;
-  }
-
   public String getConnectionFactoryId() {
     return connectionFactoryId;
   }
@@ -220,7 +217,7 @@ public class MessageReceivingMetaData {
     return receiveTimeout;
   }
 
-  public MessageReplyMetaData[] getReplies() {
+  public Collection<MessageReplyMetaData> getReplies() {
     return replies;
   }
 
@@ -251,10 +248,6 @@ public class MessageReceivingMetaData {
     return multicast;
   }
 
-  public boolean isSubscriptionDurable() {
-    return subscriptionDurable;
-  }
-
   public boolean isXa() {
     return xa;
   }
@@ -263,7 +256,7 @@ public class MessageReceivingMetaData {
   public String toString() {
     return "destination=[" + (isBlank(connectionFactoryId) ? "" : connectionFactoryId + "#")
         + destination + "], method=" + method.getMethod().getDeclaringClass().getCanonicalName()
-        + "#" + method.getMethod().getName() + ", clientID=[" + clientID + "]";
+        + "#" + method.getMethod().getName() + "]";
   }
 
 }

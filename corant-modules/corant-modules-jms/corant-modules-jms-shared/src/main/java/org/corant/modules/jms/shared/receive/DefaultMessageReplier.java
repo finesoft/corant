@@ -13,14 +13,17 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.modules.jms.shared.MessagePropertyNames.REPLY_MSG_SERIAL_SCHAME;
-import static org.corant.modules.jms.shared.MessagePropertyNames.SECURITY_CONTEXT_PROPERTY_NAME;
+import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
+import static org.corant.modules.jms.JMSNames.REPLY_MSG_MARSHAL_SCHAME;
+import static org.corant.modules.jms.JMSNames.SECURITY_CONTEXT_PROPERTY_NAME;
+import static org.corant.shared.util.Strings.defaultString;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import org.corant.modules.jms.shared.context.SerialSchema;
+import org.corant.modules.jms.metadata.MessageReplyMetaData;
+import org.corant.modules.jms.receive.ManagedMessageReceiveReplier;
 
 /**
  * corant-modules-jms-shared
@@ -28,7 +31,7 @@ import org.corant.modules.jms.shared.context.SerialSchema;
  * @author bingo 下午11:57:15
  *
  */
-public class DefaultMessageReplier implements MessageReplier {
+public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
 
   final MessageReceivingMetaData meta;
   final MessageReceivingMediator mediator;
@@ -41,39 +44,40 @@ public class DefaultMessageReplier implements MessageReplier {
 
   @Override
   public void reply(Session session, Message originalMessage, Object payload) throws JMSException {
-    String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
-    if (originalMessage != null && originalMessage.getJMSReplyTo() != null) {
-      // FIXME use original message or no?
-      SerialSchema serialSchema = SerialSchema.JAVA_BUILTIN;
-      String desSerialSchema = originalMessage.getStringProperty(REPLY_MSG_SERIAL_SCHAME);
-      if (desSerialSchema != null) {
-        serialSchema = SerialSchema.valueOf(desSerialSchema);
+    if (originalMessage != null) {
+      String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
+      if (originalMessage.getJMSReplyTo() != null) {
+        // FIXME use original message or no?
+        String serialSchema =
+            defaultString(originalMessage.getStringProperty(REPLY_MSG_MARSHAL_SCHAME),
+                MSG_MARSHAL_SCHAME_STD_JAVA);
+        Message msg = mediator.getMessageMarshaller(serialSchema).serialize(session, payload);
+        String clid;
+        if ((clid = originalMessage.getJMSCorrelationID()) != null) {
+          msg.setJMSCorrelationID(clid);
+        }
+        byte[] clids;
+        if ((clids = originalMessage.getJMSCorrelationIDAsBytes()) != null) {
+          msg.setJMSCorrelationIDAsBytes(clids);
+        }
+        if (sctx != null) {
+          msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
+        }
+        session.createProducer(originalMessage.getJMSReplyTo()).send(msg);
+      } else {
+        for (MessageReplyMetaData rd : meta.getReplies()) {
+          Destination dest = rd.isMulticast() ? session.createTopic(rd.getDestination())
+              : session.createQueue(rd.getDestination());
+          Message msg =
+              mediator.getMessageMarshaller(rd.getMarshalledSchema()).serialize(session, payload);
+          if (sctx != null) {
+            msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
+          }
+          MessageProducer producer = session.createProducer(dest);
+          producer.setDeliveryMode(rd.getDeliveryMode());
+          producer.send(msg);
+        }
       }
-      Message msg = mediator.getMessageSerializer(serialSchema).serialize(session, payload);
-      String clid;
-      if ((clid = originalMessage.getJMSCorrelationID()) != null) {
-        msg.setJMSCorrelationID(clid);
-      }
-      byte[] clids;
-      if ((clids = originalMessage.getJMSCorrelationIDAsBytes()) != null) {
-        msg.setJMSCorrelationIDAsBytes(clids);
-      }
-      if (sctx != null) {
-        msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
-      }
-      session.createProducer(originalMessage.getJMSReplyTo()).send(msg);
-    }
-    for (MessageReplyMetaData rd : meta.getReplies()) {
-      Destination dest = rd.isMulticast() ? session.createTopic(rd.getDestination())
-          : session.createQueue(rd.getDestination());
-      Message msg =
-          mediator.getMessageSerializer(rd.getSerialization()).serialize(session, payload);
-      if (sctx != null) {
-        msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
-      }
-      MessageProducer producer = session.createProducer(dest);
-      producer.setDeliveryMode(rd.getDeliveryMode());
-      producer.send(msg);
     }
   }
 

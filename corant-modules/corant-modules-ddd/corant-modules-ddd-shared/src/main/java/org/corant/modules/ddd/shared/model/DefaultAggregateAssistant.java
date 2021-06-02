@@ -29,7 +29,6 @@ import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.AggregateAssistant;
 import org.corant.modules.ddd.Event;
 import org.corant.modules.ddd.Message;
-import org.corant.modules.ddd.MessageUtils;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.shared.unitwork.UnitOfWorks;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -95,7 +94,8 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
       for (Message msg : messages) {
         if (msg != null) {
           logger.fine(() -> String.format(RISE_LOG, msg.toString()));
-          MessageUtils.mergeToQueue(this.messages, msg);
+          // MessageUtils.mergeToQueue(this.messages, msg);
+          this.messages.add(msg);
         }
       }
     }

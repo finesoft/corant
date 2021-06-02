@@ -40,7 +40,7 @@ public @interface ConfigKeyItem {
 
   DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
 
-  String value() default Strings.EMPTY;
+  String name() default Strings.EMPTY;
 
   class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem> implements ConfigKeyItem {
 
@@ -57,7 +57,7 @@ public @interface ConfigKeyItem {
     }
 
     @Override
-    public String value() {
+    public String name() {
       return Strings.EMPTY;
     }
 

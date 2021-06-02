@@ -24,7 +24,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.XAConnectionFactory;
-import org.corant.modules.jms.shared.context.JMSExceptionListener;
+import org.corant.modules.jms.receive.ManagedMessageReceivingExceptionListener;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -141,7 +141,7 @@ public class MessageReceivingConnections {
   protected Connection configureConnection(MessageReceivingMetaData meta, Connection connection) {
     select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
         .forEach(c -> c.configConnection(connection, meta));
-    select(JMSExceptionListener.class).stream().min(Sortable::compare)
+    select(ManagedMessageReceivingExceptionListener.class).stream().min(Sortable::compare)
         .ifPresent(listener -> listener.tryConfig(connection));
     return connection;
   }

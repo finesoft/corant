@@ -75,6 +75,11 @@ public class Aggregates {
   }
 
   public static <X extends Aggregate> List<X> select(Class<X> cls, String namedQuery,
+      Map<Object, Object> params) {
+    return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
+  }
+
+  public static <X extends Aggregate> List<X> select(Class<X> cls, String namedQuery,
       Object... params) {
     return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
   }

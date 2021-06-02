@@ -30,7 +30,7 @@ public class JMSMetaDataPropertyResolver implements MetaDataPropertyResolver {
   @Override
   public <T> T resolve(Object property, Class<T> clazz) {
     if (property != null) {
-      return toObject(Configs.assemblyStringConfigProperties(property.toString()), clazz);
+      return toObject(Configs.assemblyStringConfigProperty(property.toString()), clazz);
     }
     return toObject(property, clazz);
   }

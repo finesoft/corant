@@ -42,8 +42,8 @@ public class MessageDestinationMetaData {
 
   public MessageDestinationMetaData(String connectionFactoryId, String name, boolean multicast,
       Map<String, String> properties) {
-    this.connectionFactoryId = MetaDataPropertyResolver.get(connectionFactoryId);
-    this.name = MetaDataPropertyResolver.get(name);
+    this.connectionFactoryId = MetaDataPropertyResolver.get(connectionFactoryId, String.class);
+    this.name = MetaDataPropertyResolver.get(name, String.class);
     this.multicast = multicast;
     this.properties = Collections.unmodifiableMap(newHashMap(properties));
   }

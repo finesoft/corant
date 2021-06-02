@@ -79,9 +79,9 @@ public @interface MessageSend {
    * Specify a marshal scheme to marshalling the POJO into {@link Message} object, when the message
    * object sent is a POJO
    *
-   * @return marshalledSchema
+   * @return the marshaller name
    */
-  String marshalledSchema() default JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
+  String marshaller() default JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
 
   /**
    * Specifies that messages sent using the JMSProducer will have the specified property set to the

@@ -60,9 +60,9 @@ public class GroupMessageSender implements MessageSender {
   }
 
   @Override
-  public void send(String marshallingSchema, Object... messages) {
+  public void send(String marshallerName, Object... messages) {
     for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(marshallingSchema, messages);
+      dispatcher.send(marshallerName, messages);
     }
   }
 

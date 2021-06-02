@@ -34,7 +34,7 @@ public @interface MessageReply {
 
   String destination();
 
-  String marshalledSchema() default JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
+  String marshaller() default JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
 
   boolean multicast() default false;
 

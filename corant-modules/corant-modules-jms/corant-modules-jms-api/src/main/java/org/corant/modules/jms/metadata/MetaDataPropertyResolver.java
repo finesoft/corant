@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.shared.util.Objects.forceCast;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.ubiquity.Sortable;
@@ -25,13 +26,13 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface MetaDataPropertyResolver extends Sortable {
 
-  static <T> T get(T property) {
+  static <T> T get(Object property, Class<T> clazz) {
     Instance<MetaDataPropertyResolver> inst = CDI.current().select(MetaDataPropertyResolver.class);
     if (!inst.isUnsatisfied()) {
-      return inst.stream().sorted().findFirst().get().resolve(property);
+      return inst.stream().sorted().findFirst().get().resolve(property, clazz);
     }
-    return property;
+    return forceCast(property);
   }
 
-  <T> T resolve(T property);
+  <T> T resolve(Object property, Class<T> clazz);
 }

@@ -44,5 +44,5 @@ public interface MessageSender {
 
   void send(String message);
 
-  void send(String marshallingSchema, Object... messages);
+  void send(String marshallerName, Object... messages);
 }

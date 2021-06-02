@@ -158,10 +158,10 @@ public class DefaultMessageSender implements MessageSender {
     }
   }
 
-  protected void doSend(JMSContext jmsc, String marshallerSchema, Object... messages) {
+  protected void doSend(JMSContext jmsc, String marshallerName, Object... messages) {
     if (isNotEmpty(messages)) {
       try {
-        final MessageMarshaller serializer = marshaller(marshallerSchema);
+        final MessageMarshaller serializer = marshaller(marshallerName);
         Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
         JMSProducer p = jmsc.createProducer();
         configure(jmsc, p);
@@ -174,17 +174,17 @@ public class DefaultMessageSender implements MessageSender {
     }
   }
 
-  protected void doSend(String marshallerSchema, Object... messages) {
+  protected void doSend(String marshallerName, Object... messages) {
     if (isNotEmpty(messages)) {
       final JMSContext jmsc = resolveApply(DefaultJMSContextService.class,
           b -> b.getJMSContext(connectionFactoryId, dupsOkAck));
-      doSend(jmsc, marshallerSchema, messages);
+      doSend(jmsc, marshallerName, messages);
     }
   }
 
-  protected void doStreamingSend(JMSContext jmsc, Stream<?> messages, String marshallerSchema) {
+  protected void doStreamingSend(JMSContext jmsc, Stream<?> messages, String marshallerName) {
     try {
-      final MessageMarshaller serializer = marshaller(marshallerSchema);
+      final MessageMarshaller serializer = marshaller(marshallerName);
       Destination d = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);
       JMSProducer p = jmsc.createProducer();
       configure(jmsc, p);
@@ -194,8 +194,8 @@ public class DefaultMessageSender implements MessageSender {
     }
   }
 
-  protected MessageMarshaller marshaller(String marshallerSchema) {
-    return findNamed(MessageMarshaller.class, marshallerSchema).orElse(null);
+  protected MessageMarshaller marshaller(String marshallerName) {
+    return findNamed(MessageMarshaller.class, marshallerName).orElse(null);
   }
 
 }

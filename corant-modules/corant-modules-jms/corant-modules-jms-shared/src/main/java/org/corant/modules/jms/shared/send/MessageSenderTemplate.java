@@ -147,20 +147,20 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     return this;
   }
 
-  public void streamDispatch(String marshallerSchema, Stream<?> messages) {
+  public void streamSend(String marshallerName, Stream<?> messages) {
     if (txType != null) {
       final XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
       TransactionService.actuator()
           .synchronization(SynchronizationAdapter.afterCompletion(ctx::close)).txType(txType)
           .run(() -> {
             TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
-            doStreamingSend(ctx, messages, marshallerSchema);
+            doStreamingSend(ctx, messages, marshallerName);
           });
     } else {
       JMSContext ctx = null;
       try {
         ctx = connectionFactory().createContext(sessionMode);
-        doStreamingSend(ctx, messages, marshallerSchema);
+        doStreamingSend(ctx, messages, marshallerName);
         afterDispatched(ctx, false);
       } catch (RuntimeException e) {
         afterDispatched(ctx, true);
@@ -222,7 +222,7 @@ public class MessageSenderTemplate extends DefaultMessageSender {
   }
 
   @Override
-  protected void doSend(String marshallerSchema, Object... messages) {
+  protected void doSend(String marshallerName, Object... messages) {
     if (isEmpty(messages)) {
       return;
     }
@@ -233,14 +233,14 @@ public class MessageSenderTemplate extends DefaultMessageSender {
           .synchronization(SynchronizationAdapter.afterCompletion(ctx::close)).txType(txType)
           .run(() -> {
             TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
-            doSend(ctx, marshallerSchema, messages);
+            doSend(ctx, marshallerName, messages);
           });
       // }
     } else {
       JMSContext ctx = null;
       try {
         ctx = connectionFactory().createContext(sessionMode);
-        doSend(ctx, marshallerSchema, messages);
+        doSend(ctx, marshallerName, messages);
         afterDispatched(ctx, false);
       } catch (RuntimeException e) {
         afterDispatched(ctx, true);

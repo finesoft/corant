@@ -29,7 +29,7 @@ public class MessageContextMetaData {
   private final boolean dupsOkAck;
 
   public MessageContextMetaData(String connectionFactoryId, boolean dupsOkAck) {
-    this.connectionFactoryId = MetaDataPropertyResolver.get(connectionFactoryId);
+    this.connectionFactoryId = MetaDataPropertyResolver.get(connectionFactoryId, String.class);
     this.dupsOkAck = dupsOkAck;
   }
 

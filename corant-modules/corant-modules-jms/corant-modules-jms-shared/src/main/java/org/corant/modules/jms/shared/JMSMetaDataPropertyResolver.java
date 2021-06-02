@@ -11,26 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jms.shared.receive;
+package org.corant.modules.jms.shared;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import org.corant.modules.jms.marshaller.MessageMarshaller;
+import static org.corant.shared.util.Conversions.toObject;
+import javax.enterprise.context.ApplicationScoped;
+import org.corant.config.Configs;
+import org.corant.modules.jms.metadata.MetaDataPropertyResolver;
 
 /**
  * corant-modules-jms-shared
  *
- * @author bingo 下午5:23:31
+ * @author bingo 下午8:52:09
  *
  */
-public interface MessageReceivingMediator {
+@ApplicationScoped
+public class JMSMetaDataPropertyResolver implements MetaDataPropertyResolver {
 
-  boolean checkCancelled();
+  @Override
+  public <T> T resolve(Object property, Class<T> clazz) {
+    if (property != null) {
+      return toObject(Configs.assemblyStringConfigProperties(property.toString()), clazz);
+    }
+    return toObject(property, clazz);
+  }
 
-  MessageMarshaller getMessageMarshaller(String name);
-
-  void onPostMessageHandled(Message message, Session session, Object result) throws JMSException;
-
-  void onReceivingException(Exception e);
 }

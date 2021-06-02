@@ -32,15 +32,15 @@ public class MessageReplyMetaData {
 
   private final String destination;
 
-  private final String marshalledSchema;
+  private final String marshaller;
 
   private final boolean multicast;
 
-  public MessageReplyMetaData(int deliveryMode, String destination, String marshalledSchema,
+  public MessageReplyMetaData(int deliveryMode, String destination, String marshaller,
       boolean multicast) {
     this.deliveryMode = deliveryMode;
-    this.destination = MetaDataPropertyResolver.get(destination);
-    this.marshalledSchema = MetaDataPropertyResolver.get(marshalledSchema);
+    this.destination = MetaDataPropertyResolver.get(destination, String.class);
+    this.marshaller = MetaDataPropertyResolver.get(marshaller, String.class);
     this.multicast = multicast;
   }
 
@@ -51,7 +51,7 @@ public class MessageReplyMetaData {
   public static MessageReplyMetaData of(MessageReply annotation) {
     shouldNotNull(annotation);
     return new MessageReplyMetaData(annotation.deliveryMode(), annotation.destination(),
-        annotation.marshalledSchema(), annotation.multicast());
+        annotation.marshaller(), annotation.multicast());
   }
 
   public static Set<MessageReplyMetaData> of(MessageReply[] annotations) {
@@ -96,8 +96,8 @@ public class MessageReplyMetaData {
     return destination;
   }
 
-  public String getMarshalledSchema() {
-    return marshalledSchema;
+  public String getMarshaller() {
+    return marshaller;
   }
 
   @Override

@@ -35,20 +35,20 @@ public class MessageSendMetaData {
 
   private final boolean dupsOkAck;
 
-  private final String marshalledSchema;
+  private final String marshaller;
 
   private final Collection<MessagePropertyMetaData> properties;
 
   private final long timeToLive;
 
   public MessageSendMetaData(long deliveryDelay, int deliveryMode,
-      MessageDestinationMetaData destination, boolean dupsOkAck, String marshalledSchema,
+      MessageDestinationMetaData destination, boolean dupsOkAck, String marshaller,
       Collection<MessagePropertyMetaData> properties, long timeToLive) {
     this.deliveryDelay = deliveryDelay;
     this.deliveryMode = deliveryMode;
-    this.destination = MetaDataPropertyResolver.get(destination);
+    this.destination = destination;
     this.dupsOkAck = dupsOkAck;
-    this.marshalledSchema = MetaDataPropertyResolver.get(marshalledSchema);
+    this.marshaller = MetaDataPropertyResolver.get(marshaller, String.class);
     this.properties = Collections.unmodifiableList(newArrayList(properties));
     this.timeToLive = timeToLive;
   }
@@ -65,8 +65,8 @@ public class MessageSendMetaData {
     return destination;
   }
 
-  public String getMarshalledSchema() {
-    return marshalledSchema;
+  public String getMarshaller() {
+    return marshaller;
   }
 
   public Collection<MessagePropertyMetaData> getProperties() {
@@ -85,7 +85,7 @@ public class MessageSendMetaData {
     shouldNotNull(annotation);
     return new MessageSendMetaData(annotation.deliveryDelay(), annotation.deliveryMode(),
         MessageDestinationMetaData.of(annotation.destination()), annotation.dupsOkAck(),
-        annotation.marshalledSchema(), MessagePropertyMetaData.of(annotation.properties()),
+        annotation.marshaller(), MessagePropertyMetaData.of(annotation.properties()),
         annotation.timeToLive());
   }
 

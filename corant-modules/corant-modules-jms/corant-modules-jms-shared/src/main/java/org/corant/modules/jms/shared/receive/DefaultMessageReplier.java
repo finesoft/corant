@@ -48,10 +48,10 @@ public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
       String sctx = originalMessage.getStringProperty(SECURITY_CONTEXT_PROPERTY_NAME);
       if (originalMessage.getJMSReplyTo() != null) {
         // FIXME use original message or no?
-        String serialSchema =
+        String marshallerName =
             defaultString(originalMessage.getStringProperty(REPLY_MSG_MARSHAL_SCHAME),
                 MSG_MARSHAL_SCHAME_STD_JAVA);
-        Message msg = mediator.getMessageMarshaller(serialSchema).serialize(session, payload);
+        Message msg = mediator.getMessageMarshaller(marshallerName).serialize(session, payload);
         String clid;
         if ((clid = originalMessage.getJMSCorrelationID()) != null) {
           msg.setJMSCorrelationID(clid);
@@ -69,7 +69,7 @@ public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
           Destination dest = rd.isMulticast() ? session.createTopic(rd.getDestination())
               : session.createQueue(rd.getDestination());
           Message msg =
-              mediator.getMessageMarshaller(rd.getMarshalledSchema()).serialize(session, payload);
+              mediator.getMessageMarshaller(rd.getMarshaller()).serialize(session, payload);
           if (sctx != null) {
             msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
           }

@@ -143,7 +143,7 @@ public @interface MessageDriven {
    *
    * @return tryThreshold
    */
-  int tryThreshold() default 4;
+  int tryThreshold() default 2;
 
   /**
    * The value of the timeout in seconds. If the value is zero, the transaction service restores the

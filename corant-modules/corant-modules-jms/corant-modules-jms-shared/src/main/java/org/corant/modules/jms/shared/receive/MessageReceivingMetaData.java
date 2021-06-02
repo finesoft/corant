@@ -75,8 +75,8 @@ public class MessageReceivingMetaData {
     cacheLevel = driven.getCacheLevel();
     receiveTimeout = driven.getReceiveTimeout();
     receiveThreshold = max(1, driven.getReceiveThreshold());
-    failureThreshold = max(4, driven.getFailureThreshold());
-    tryThreshold = max(2, driven.getTryThreshold());
+    failureThreshold = max(2, driven.getFailureThreshold());
+    tryThreshold = max(1, driven.getTryThreshold());
     loopIntervalMs = max(500L, driven.getLoopIntervalMs());
     String bds = driven.getBrokenDuration();
     String maxBds = driven.getMaxBrokenDuration();

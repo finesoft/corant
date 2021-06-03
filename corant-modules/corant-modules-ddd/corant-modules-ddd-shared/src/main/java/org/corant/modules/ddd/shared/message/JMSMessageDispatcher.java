@@ -14,6 +14,7 @@
 package org.corant.modules.ddd.shared.message;
 
 import static org.corant.context.Instances.resolve;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,12 +72,13 @@ public class JMSMessageDispatcher implements MessageDispatcher {
 
   public void send(String broker, boolean multicast, String destination,
       javax.jms.Message message) {
-    obtainJmsProducer(broker).send(createDestination(broker, multicast, destination), message);
+    JMSContext ctx = obtainJmsContext(broker);
+    JMSProducer producer = ctx.createProducer();
+    producer.send(createDestination(ctx, multicast, destination), message);
   }
 
-  protected Destination createDestination(String broker, boolean multicast, String destination) {
-    return multicast ? obtainJmsContext(broker).createTopic(destination)
-        : obtainJmsContext(broker).createQueue(destination);
+  protected Destination createDestination(JMSContext ctx, boolean multicast, String destination) {
+    return multicast ? ctx.createTopic(destination) : ctx.createQueue(destination);
   }
 
   protected Set<MessageDestinationMetaData> from(Class<?> clazz) {
@@ -85,13 +87,9 @@ public class JMSMessageDispatcher implements MessageDispatcher {
 
   protected JMSContext obtainJmsContext(String broker) {
     if (contextService.isResolvable()) {
-      contextService.get().getJMSContext(broker);
+      return shouldNotNull(contextService.get().getJMSContext(broker));
     }
     throw new NotSupportedException();
-  }
-
-  protected JMSProducer obtainJmsProducer(String broker) {
-    return obtainJmsContext(broker).createProducer();
   }
 
   @PostConstruct

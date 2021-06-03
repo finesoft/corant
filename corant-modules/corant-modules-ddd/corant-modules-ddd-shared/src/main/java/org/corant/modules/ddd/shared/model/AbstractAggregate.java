@@ -89,6 +89,15 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
     callAssistant().fireEvent(event, qualifiers);
   }
 
+  /**
+   * Send message as long as the unit of works is completed anyway.
+   *
+   * @param message the message to send
+   */
+  public void raise(Message... message) {
+    raise(true, message);
+  }
+
   @Override
   public void raiseAsync(Event event, Annotation... qualifiers) {
     callAssistant().fireAsyncEvent(event, qualifiers);

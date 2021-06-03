@@ -64,16 +64,16 @@ public final class WrappedMessage implements Comparable<WrappedMessage> {
           break;
         }
       }
-      final MergableMessage order = oldMgbMsg == null ? null : (MergableMessage) oldMgbMsg.delegate;
+      final MergableMessage older = oldMgbMsg == null ? null : (MergableMessage) oldMgbMsg.delegate;
       final MergableMessage newer = (MergableMessage) newMsg.delegate;
-      if (order == null || !newer.canMerge(order)) {
+      if (older == null || !newer.canMerge(older)) {
         logger.fine(() -> String.format("Enqueue message %s.", newer));
         queue.add(newMsg);
       } else {
-        logger.fine(() -> String.format("Remove message %s from queue.", order));
+        logger.fine(() -> String.format("Remove message %s from queue.", older));
         queue.remove(oldMgbMsg);
-        if (newer.merge(order).isValid()) {
-          logger.fine(() -> String.format("Merge message %s to %s and enqueue it.", order, newer));
+        if (newer.merge(older).isValid()) {
+          logger.fine(() -> String.format("Merge message %s to %s and enqueue it.", older, newer));
           queue.add(newMsg);
         }
       }

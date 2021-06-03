@@ -14,15 +14,15 @@
 package org.corant.modules.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
+import static org.corant.context.Instances.findNamed;
 import static org.corant.context.Instances.select;
-import static org.corant.shared.util.Assertions.shouldBeFalse;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.union;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -42,9 +42,12 @@ import org.corant.context.required.Required;
 import org.corant.modules.jms.annotation.MessageContext;
 import org.corant.modules.jms.annotation.MessageDestination;
 import org.corant.modules.jms.annotation.MessageDriven;
+import org.corant.modules.jms.annotation.MessageReply;
 import org.corant.modules.jms.annotation.MessageSend;
+import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-jms-shared
@@ -56,8 +59,9 @@ public abstract class AbstractJMSExtension implements Extension {
 
   protected final Logger logger = Logger.getLogger(getClass().getName());
   protected final Set<String> connectionFactories = newSetFromMap(new ConcurrentHashMap<>());
-  protected final Set<ContextualMethodHandler> receiveMethods =
-      newSetFromMap(new ConcurrentHashMap<>());
+  protected final Set<String> marshallers = newSetFromMap(new ConcurrentHashMap<>());
+  protected final Map<ContextualMethodHandler, Pair<Set<MessageDestination>, Set<MessageDestination>>> receiveMethods =
+      new ConcurrentHashMap<>();
   protected final Set<ContextualMethodHandler> streamMethods =
       newSetFromMap(new ConcurrentHashMap<>());
   protected volatile NamedQualifierObjectManager<? extends AbstractJMSConfig> configManager =
@@ -75,7 +79,7 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   public Set<ContextualMethodHandler> getReceiveMethods() {
-    return Collections.unmodifiableSet(receiveMethods);
+    return Collections.unmodifiableSet(receiveMethods.keySet());
   }
 
   public Set<ContextualMethodHandler> getStreamMethods() {
@@ -100,27 +104,24 @@ public abstract class AbstractJMSExtension implements Extension {
     if (isNotEmpty(mss)) {
       for (MessageSend ms : mss) {
         connectionFactories.add(ms.destination().connectionFactoryId());
+        marshallers.add(ms.marshaller());
       }
     }
-    logger
-        .fine(() -> String.format("Scanning JMS message consumer type: %s.", beanClass.getName()));
+    logger.fine(() -> String.format("Scanning message driven on bean: %s.", beanClass.getName()));
     ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageDriven.class))
         .forEach(cm -> {
           Method method = cm.getMethod();
-          logger.fine(() -> String.format(
-              "Found annotated JMS message consumer method %s.%s, adding for further processing.",
-              beanClass.getName(), method.getName()));
-          shouldBeTrue(cm.getMethod().getParameters().length > 0);
+          logger.fine(() -> String.format("Found message driven method %s.", method.getName()));
+          for (MessageDriven md : method.getAnnotationsByType(MessageDriven.class)) {
+            for (MessageReply mr : md.reply()) {
+              marshallers.add(mr.marshaller());
+            }
+          }
           Set<MessageDestination> mds =
               setOf(method.getAnnotationsByType(MessageDestination.class));
           Set<MessageDestination> pds =
               setOf(method.getParameterTypes()[0].getAnnotationsByType(MessageDestination.class));
-          shouldBeFalse(isNotEmpty(mds) && isNotEmpty(pds));
-          shouldBeFalse(isEmpty(mds) && isEmpty(pds));
-          for (MessageDestination ds : union(mds, pds)) {
-            connectionFactories.add(ds.connectionFactoryId());
-          }
-          receiveMethods.add(cm);
+          receiveMethods.put(cm, Pair.of(mds, pds));
         });
   }
 
@@ -136,12 +137,37 @@ public abstract class AbstractJMSExtension implements Extension {
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    for (String marshaller : marshallers) {
+      if (findNamed(MessageMarshaller.class, marshaller).isEmpty()) {
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "Can not find any message marshaller named [%s]", marshaller));
+      }
+    }
+    receiveMethods.forEach((m, mds) -> {
+      if (m.getMethod().getParameters().length != 1) {
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "The message driven method [%s] must have only one parameter.", m.getMethod()));
+      }
+      if (isNotEmpty(mds.key()) && isNotEmpty(mds.value())) {
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "The message destination either appears on the method or on the first parameter "
+                + "class of the method, and cannot exist at the same time, the method [%s]",
+            m.getMethod()));
+      } else if (isEmpty(mds.key()) && isEmpty(mds.value())) {
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "Can not find any message destinations on the method [%s]", m.getMethod()));
+      }
+      for (MessageDestination ds : union(mds.key(), mds.value())) {
+        connectionFactories.add(ds.connectionFactoryId());
+      }
+    });
     for (String cf : connectionFactories) {
       if (configManager.get(cf) == null) {
         adv.addDeploymentProblem(new CorantRuntimeException(
             "Can not find JMS connection factory config by id [%s]", cf));
       }
     }
+
   }
 
 }

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -95,5 +96,10 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   @PostConstruct
   protected void onPostConstruct() {
     marshaller = resolve(MessageMarshaller.class, NamedLiteral.of(marshallerName));
+  }
+
+  @PreDestroy
+  protected void onPreDestroy() {
+    metas.clear();
   }
 }

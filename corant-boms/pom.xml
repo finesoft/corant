@@ -65,7 +65,7 @@
 		<version.hppc>0.8.2</version.hppc>
 		<version.icu4j>67.1</version.icu4j>
 		<version.jackson>2.12.3</version.jackson>
-		<version.jandex>2.2.3.Final</version.jandex>
+		<version.jandex>2.3.0.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javassist>3.27.0.GA</version.javassist>
 		<version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
@@ -152,7 +152,7 @@
 		<version.swagger>2.0.8</version.swagger>
 
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.2.7.Final</version.undertow>
+		<version.undertow>2.2.8.Final</version.undertow>
 		<version.vertx>3.9.3</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>

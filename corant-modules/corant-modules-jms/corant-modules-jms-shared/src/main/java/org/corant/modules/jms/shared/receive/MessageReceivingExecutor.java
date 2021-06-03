@@ -141,7 +141,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
 
   protected MessageReceivingExecutorConfig getExecutorConfig(AbstractJMSConfig config) {
     return executorConfigs.getOrDefault(config.getConnectionFactoryId(),
-        MessageReceivingExecutorConfig.DEFAULT_INST);
+        MessageReceivingExecutorConfig.DFLT_INST);
   }
 
   protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {

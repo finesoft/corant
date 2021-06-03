@@ -36,7 +36,7 @@ public class MessageReceivingExecutorConfig
 
   private static final long serialVersionUID = -3439136173477457265L;
 
-  public final static MessageReceivingExecutorConfig DEFAULT_INST =
+  public final static MessageReceivingExecutorConfig DFLT_INST =
       new MessageReceivingExecutorConfig();
 
   protected String connectionFactoryId;

@@ -80,9 +80,8 @@ public class ZipBinaryMessageMarshaller implements MessageMarshaller {
   }
 
   protected Message doSerialize(BytesMessage message, Object object) {
-    shouldBeTrue(object instanceof InputStream);
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-      copy((InputStream) object, buffer);
+      copy(shouldInstanceOf(object, InputStream.class), buffer);
       byte[] bytes = compress(buffer.toByteArray());
       message.writeBytes(bytes);
       return resolveSchemaProperty(message, MSG_MARSHAL_SCHAME_ZIP_BINARY);

@@ -31,7 +31,7 @@ public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, Decla
 
   private static final long serialVersionUID = 2263743463205278263L;
 
-  public static final AbstractJMSConfig DFLT_INSTANCE = new AbstractJMSConfig() {
+  public static final AbstractJMSConfig DFLT_INST = new AbstractJMSConfig() {
 
     private static final long serialVersionUID = 5340760550873711017L;
   };

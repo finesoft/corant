@@ -32,7 +32,7 @@ public class DefaultQuerierConfig implements QuerierConfig, DeclarativeConfig {
 
   protected static final Logger logger = Logger.getLogger(DefaultQuerierConfig.class.getName());
 
-  public static final DefaultQuerierConfig DEFAULT =
+  public static final DefaultQuerierConfig DFLT_INST =
       new DefaultQuerierConfig(10000, 128, 10000, 16, 32, true, null);
 
   private static final long serialVersionUID = -2562004354294555255L;

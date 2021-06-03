@@ -70,7 +70,7 @@ public class DefaultQueryHandler implements QueryHandler {
   @Inject
   protected QueryObjectMapper objectMapper;
 
-  protected DefaultQuerierConfig querierConfig = DefaultQuerierConfig.DEFAULT;
+  protected DefaultQuerierConfig querierConfig = DefaultQuerierConfig.DFLT_INST;
 
   @Override
   public QueryObjectMapper getObjectMapper() {

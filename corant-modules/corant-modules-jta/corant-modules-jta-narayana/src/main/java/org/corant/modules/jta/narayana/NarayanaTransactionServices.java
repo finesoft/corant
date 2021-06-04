@@ -13,9 +13,9 @@
  */
 package org.corant.modules.jta.narayana;
 
-import static org.corant.context.Instances.find;
-import static org.corant.context.Instances.resolveApply;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.find;
+import static org.corant.context.Beans.resolveApply;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;

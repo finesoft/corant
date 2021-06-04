@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-import static org.corant.context.Instances.find;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.util.Optional;

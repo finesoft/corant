@@ -32,7 +32,7 @@ public class MessagePropertyMetaData {
   public MessagePropertyMetaData(String name, Class<?> type, String value) {
     this.name = name;
     this.type = type;
-    this.value = value;
+    this.value = MetaDataPropertyResolver.get(value, String.class);
   }
 
   public static MessagePropertyMetaData of(MessageProperty annotation) {

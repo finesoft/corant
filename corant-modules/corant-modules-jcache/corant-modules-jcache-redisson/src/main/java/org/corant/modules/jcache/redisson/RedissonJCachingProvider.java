@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jcache.redisson;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

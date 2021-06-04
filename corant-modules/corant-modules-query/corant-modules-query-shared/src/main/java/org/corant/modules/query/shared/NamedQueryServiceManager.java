@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
@@ -35,7 +35,7 @@ public interface NamedQueryServiceManager {
    */
   static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
     MutableObject<NamedQueryService> ref = new MutableObject<>();
-    Instances.select(NamedQueryServiceManager.class).forEach(nqs -> {
+    Beans.select(NamedQueryServiceManager.class).forEach(nqs -> {
       if (nqs.getType() == queryType) {
         ref.set(nqs.get(qualifier));
       }

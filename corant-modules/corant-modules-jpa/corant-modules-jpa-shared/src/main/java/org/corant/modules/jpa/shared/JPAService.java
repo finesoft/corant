@@ -13,8 +13,8 @@
  */
 package org.corant.modules.jpa.shared;
 
-import static org.corant.context.Instances.resolveApply;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.resolveApply;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;

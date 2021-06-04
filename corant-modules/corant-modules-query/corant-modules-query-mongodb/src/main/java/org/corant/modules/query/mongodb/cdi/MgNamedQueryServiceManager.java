@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.mongodb.cdi;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;

@@ -33,6 +33,11 @@ public class MessageContextMetaData {
     this.dupsOkAck = dupsOkAck;
   }
 
+  public static MessageContextMetaData of(MessageContext ctx) {
+    shouldNotNull(ctx);
+    return new MessageContextMetaData(ctx.connectionFactoryId(), ctx.dupsOkAck());
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -73,11 +78,6 @@ public class MessageContextMetaData {
 
   public boolean isDupsOkAck() {
     return dupsOkAck;
-  }
-
-  public MessageContextMetaData of(MessageContext ctx) {
-    shouldNotNull(ctx);
-    return new MessageContextMetaData(ctx.connectionFactoryId(), ctx.dupsOkAck());
   }
 
 }

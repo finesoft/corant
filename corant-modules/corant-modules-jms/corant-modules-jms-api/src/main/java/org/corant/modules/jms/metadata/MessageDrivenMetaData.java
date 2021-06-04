@@ -15,13 +15,15 @@ package org.corant.modules.jms.metadata;
 
 import static org.corant.shared.util.Annotations.EMPTY_ARRAY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.newArrayList;
+import static org.corant.shared.util.Maps.immutableMapOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import org.corant.modules.jms.annotation.MessageDriven;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 
@@ -63,6 +65,8 @@ public class MessageDrivenMetaData {
 
   private final String selector;
 
+  private final Map<String, String> specifiedSelectors;
+
   private final int tryThreshold;
 
   private final int txTimeout;
@@ -73,8 +77,8 @@ public class MessageDrivenMetaData {
       int acknowledge, BackoffAlgorithm brokenBackoffAlgo, double brokenBackoffFactor,
       String brokenDuration, int cacheLevel, int failureThreshold, long loopIntervalMs,
       String maxBrokenDuration, int receiveThreshold, long receiveTimeout,
-      Collection<MessageReplyMetaData> reply, String selector, int tryThreshold, int txTimeout,
-      boolean xa) {
+      Collection<MessageReplyMetaData> reply, String selector, String[] specifiedSelectors,
+      int tryThreshold, int txTimeout, boolean xa) {
     this.beanClass = beanClass;
     this.beanQualifiers =
         beanQualifiers == null ? EMPTY_ARRAY : Arrays.copyOf(beanQualifiers, beanQualifiers.length);
@@ -91,6 +95,11 @@ public class MessageDrivenMetaData {
     this.receiveTimeout = receiveTimeout;
     this.reply = Collections.unmodifiableList(newArrayList(reply));
     this.selector = MetaDataPropertyResolver.get(selector, String.class);
+    if (isNotEmpty(specifiedSelectors)) {
+      this.specifiedSelectors = immutableMapOf((Object[]) specifiedSelectors);
+    } else {
+      this.specifiedSelectors = Collections.emptyMap();
+    }
     this.tryThreshold = tryThreshold;
     this.txTimeout = txTimeout;
     this.xa = xa;
@@ -99,27 +108,13 @@ public class MessageDrivenMetaData {
   public static MessageDrivenMetaData from(Method method, Annotation... qualifiers) {
     Method beanMethod = shouldNotNull(method);
     MessageDriven annotation = shouldNotNull(method.getAnnotation(MessageDriven.class));
-    Class<?> beanClass = beanMethod.getDeclaringClass();
-    Annotation[] beanQualifiers = qualifiers;
-    int acknowledge = annotation.acknowledge();
-    BackoffAlgorithm brokenBackoffAlgo = annotation.brokenBackoffAlgo();
-    double brokenBackoffFactor = annotation.brokenBackoffFactor();
-    String brokenDuration = annotation.brokenDuration();
-    int cacheLevel = annotation.cacheLevel();
-    int failureThreshold = annotation.failureThreshold();
-    long loopIntervalMs = annotation.loopIntervalMs();
-    String maxBrokenDuration = annotation.maxBrokenDuration();
-    int receiveThreshold = annotation.receiveThreshold();
-    long receiveTimeout = annotation.receiveTimeout();
-    Set<MessageReplyMetaData> reply = MessageReplyMetaData.of(annotation.reply());
-    String selector = annotation.selector();
-    int tryThreshold = annotation.tryThreshold();
-    int txTimeout = annotation.txTimeout();
-    boolean xa = annotation.xa();
-    return new MessageDrivenMetaData(beanClass, beanQualifiers, beanMethod, acknowledge,
-        brokenBackoffAlgo, brokenBackoffFactor, brokenDuration, cacheLevel, failureThreshold,
-        loopIntervalMs, maxBrokenDuration, receiveThreshold, receiveTimeout, reply, selector,
-        tryThreshold, txTimeout, xa);
+    return new MessageDrivenMetaData(beanMethod.getDeclaringClass(), qualifiers, beanMethod,
+        annotation.acknowledge(), annotation.brokenBackoffAlgo(), annotation.brokenBackoffFactor(),
+        annotation.brokenDuration(), annotation.cacheLevel(), annotation.failureThreshold(),
+        annotation.loopIntervalMs(), annotation.maxBrokenDuration(), annotation.receiveThreshold(),
+        annotation.receiveTimeout(), MessageReplyMetaData.of(annotation.reply()),
+        annotation.selector(), annotation.specifiedSelectors(), annotation.tryThreshold(),
+        annotation.txTimeout(), annotation.xa());
   }
 
   public int getAcknowledge() {
@@ -180,6 +175,10 @@ public class MessageDrivenMetaData {
 
   public String getSelector() {
     return selector;
+  }
+
+  public Map<String, String> getSpecifiedSelectors() {
+    return specifiedSelectors;
   }
 
   public int getTryThreshold() {

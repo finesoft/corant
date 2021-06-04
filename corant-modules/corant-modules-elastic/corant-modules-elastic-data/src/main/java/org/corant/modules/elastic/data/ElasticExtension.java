@@ -13,7 +13,7 @@
  */
 package org.corant.modules.elastic.data;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.sizeOf;

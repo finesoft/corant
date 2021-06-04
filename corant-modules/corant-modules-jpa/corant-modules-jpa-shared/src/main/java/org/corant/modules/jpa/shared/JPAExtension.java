@@ -41,7 +41,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
@@ -137,7 +137,7 @@ public class JPAExtension implements Extension {
     dataSourceNames.removeIf(f -> f.startsWith(jndiPrefix) || isEmpty(f));
     if (isNotEmpty(dataSourceNames)) {
       Qualifiers.resolveNameds(dataSourceNames).forEach((k, qs) -> {
-        if (!Instances.select(DataSource.class, qs).isResolvable()) {
+        if (!Beans.select(DataSource.class, qs).isResolvable()) {
           adv.addDeploymentProblem(new CorantRuntimeException(
               "Can't not find data source named %s for JPA persistence unit!", k));
         }

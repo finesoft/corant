@@ -26,7 +26,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 import javax.transaction.Transactional.TxType;
 import javax.transaction.TransactionalException;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Classes;
@@ -86,7 +86,7 @@ public abstract class TransactionalAction<T> {
     }
     final Transaction tx = TransactionService.currentTransaction();
     final Optional<UserTransactionActionHandler> helper =
-        Instances.find(UserTransactionActionHandler.class);
+        Beans.find(UserTransactionActionHandler.class);
     boolean prestatus = false;
     if (helper.isPresent()) {
       prestatus = helper.get().beforeExecute(tx, tm, type, rollbackOn, dontRollbackOn);

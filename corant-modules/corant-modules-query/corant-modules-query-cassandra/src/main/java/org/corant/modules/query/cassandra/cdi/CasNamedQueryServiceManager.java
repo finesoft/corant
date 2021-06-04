@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.cassandra.cdi;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;

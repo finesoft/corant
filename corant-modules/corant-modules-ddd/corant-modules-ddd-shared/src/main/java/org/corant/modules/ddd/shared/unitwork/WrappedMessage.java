@@ -27,7 +27,7 @@ import org.corant.modules.ddd.Message;
  * @author bingo 下午5:00:15
  *
  */
-public final class WrappedMessage implements Comparable<WrappedMessage> {
+final class WrappedMessage implements Comparable<WrappedMessage> {
 
   static final Logger logger = Logger.getLogger(WrappedMessage.class.getName());
 

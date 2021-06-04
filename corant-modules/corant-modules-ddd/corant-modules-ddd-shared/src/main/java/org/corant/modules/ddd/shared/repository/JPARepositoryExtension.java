@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
-import static org.corant.context.Instances.find;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;

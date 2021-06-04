@@ -14,15 +14,17 @@
 package org.corant.modules.jms.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Maps.newHashMap;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.corant.modules.jms.annotation.MessageDestination;
+import org.corant.modules.jms.annotation.MessageProperty;
 
 /**
  * corant-modules-jms-api
@@ -38,10 +40,10 @@ public class MessageDestinationMetaData {
 
   private final boolean multicast;
 
-  private final Map<String, String> properties;
+  private final Map<String, Object> properties;
 
   public MessageDestinationMetaData(String connectionFactoryId, String name, boolean multicast,
-      Map<String, String> properties) {
+      Map<String, Object> properties) {
     this.connectionFactoryId = MetaDataPropertyResolver.get(connectionFactoryId, String.class);
     this.name = MetaDataPropertyResolver.get(name, String.class);
     this.multicast = multicast;
@@ -58,8 +60,12 @@ public class MessageDestinationMetaData {
 
   public static MessageDestinationMetaData of(MessageDestination annotation) {
     shouldNotNull(annotation);
+    Map<String, Object> properties = new HashMap<>();
+    for (MessageProperty mp : annotation.properties()) {
+      properties.put(mp.name(), toObject(mp.value(), mp.type()));
+    }
     return new MessageDestinationMetaData(annotation.connectionFactoryId(), annotation.name(),
-        annotation.multicast(), mapOf((Object[]) annotation.properties()));
+        annotation.multicast(), properties);
   }
 
   @Override
@@ -102,7 +108,7 @@ public class MessageDestinationMetaData {
     return name;
   }
 
-  public Map<String, String> getProperties() {
+  public Map<String, Object> getProperties() {
     return properties;
   }
 

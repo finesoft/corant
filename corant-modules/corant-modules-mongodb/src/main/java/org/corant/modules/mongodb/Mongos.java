@@ -13,7 +13,7 @@
  */
 package org.corant.modules.mongodb;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;

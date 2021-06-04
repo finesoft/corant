@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;

@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.shared.util.Methods.MethodSignature;
 
 /**
@@ -153,7 +153,7 @@ public class ContextualMethodHandler implements Serializable {
 
   public Object invoke(Object... parameters)
       throws IllegalAccessException, InvocationTargetException {
-    return method.invoke(Instances.resolve(clazz, qualifiers), parameters);
+    return method.invoke(Beans.resolve(clazz, qualifiers), parameters);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

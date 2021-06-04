@@ -13,7 +13,7 @@
  */
 package org.corant.modules.elastic.data;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Map;
 import java.util.function.BiConsumer;

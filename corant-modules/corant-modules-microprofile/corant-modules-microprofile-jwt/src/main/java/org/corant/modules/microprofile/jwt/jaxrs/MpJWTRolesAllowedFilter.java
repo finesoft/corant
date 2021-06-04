@@ -13,7 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
 import javax.annotation.Priority;
 import javax.ws.rs.ForbiddenException;

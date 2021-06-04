@@ -13,8 +13,8 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
-import static org.corant.context.Instances.find;
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.find;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashMap;
 import java.util.Map;

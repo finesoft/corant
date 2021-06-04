@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.shared.send;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -131,6 +131,12 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     return this;
   }
 
+  public MessageSenderTemplate queue(String queue) {
+    destination = shouldNotBlank(queue);
+    multicast = false;
+    return this;
+  }
+
   public MessageSenderTemplate replyTo(String destination, boolean multicast) {
     replyTo = destination;
     multicastReplyTo = multicast;
@@ -147,7 +153,7 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     return this;
   }
 
-  public void streamSend(String marshallerName, Stream<?> messages) {
+  public void streamingSend(String marshallerName, Stream<?> messages) {
     if (txType != null) {
       final XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
       TransactionService.actuator()
@@ -178,12 +184,18 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     return this;
   }
 
+  public MessageSenderTemplate topic(String topic) {
+    destination = shouldNotBlank(topic);
+    multicast = true;
+    return this;
+  }
+
   public MessageSenderTemplate txType(TxType txType) {
     this.txType = txType;
     return this;
   }
 
-  public void zippedDispatch(InputStream message) throws IOException {
+  public void zippedAndSend(InputStream message) throws IOException {
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
       Compressors.compress(message, buffer);
       byte[] bytes = buffer.toByteArray();

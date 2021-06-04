@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jta.narayana;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;

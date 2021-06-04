@@ -138,6 +138,11 @@ public @interface MessageDriven {
   String selector() default EMPTY;
 
   /**
+   * The pairs of destination name and selector for consuming multiple destinations
+   */
+  String[] specifiedSelectors() default {};
+
+  /**
    * the try threshold, used to recover from break mode and enter try mode. In try mode, if any
    * error occurs, go straight into break mode.
    *

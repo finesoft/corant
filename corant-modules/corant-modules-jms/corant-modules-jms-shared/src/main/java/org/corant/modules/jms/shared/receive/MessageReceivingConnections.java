@@ -13,8 +13,8 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.select;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;

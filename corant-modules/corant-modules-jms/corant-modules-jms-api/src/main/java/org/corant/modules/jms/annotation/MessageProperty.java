@@ -39,7 +39,7 @@ public @interface MessageProperty {
   /** The value of the property */
   String value();
 
-  class JMSPropertyLiteral extends AnnotationLiteral<MessageProperty>
+  class MessagePropertyLiteral extends AnnotationLiteral<MessageProperty>
       implements MessageProperty {
 
     private static final long serialVersionUID = 7660764550683179095L;
@@ -48,23 +48,23 @@ public @interface MessageProperty {
     final String value;
     final Class<?> type;
 
-    private JMSPropertyLiteral(String name, String value, Class<?> type) {
+    private MessagePropertyLiteral(String name, String value, Class<?> type) {
       this.name = name;
       this.value = value;
       this.type = type;
     }
 
-    public static JMSPropertyLiteral[] from(MessageProperty... properties) {
-      return streamOf(properties).map(JMSPropertyLiteral::of)
-          .toArray(JMSPropertyLiteral[]::new);
+    public static MessagePropertyLiteral[] from(MessageProperty... properties) {
+      return streamOf(properties).map(MessagePropertyLiteral::of)
+          .toArray(MessagePropertyLiteral[]::new);
     }
 
-    public static JMSPropertyLiteral of(MessageProperty p) {
-      return new JMSPropertyLiteral(p.name(), p.value(), p.type());
+    public static MessagePropertyLiteral of(MessageProperty p) {
+      return new MessagePropertyLiteral(p.name(), p.value(), p.type());
     }
 
-    public static JMSPropertyLiteral of(String name, String value, Class<?> type) {
-      return new JMSPropertyLiteral(name, value, type);
+    public static MessagePropertyLiteral of(String name, String value, Class<?> type) {
+      return new MessagePropertyLiteral(name, value, type);
     }
 
     @Override

@@ -13,8 +13,8 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,8 +135,10 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
       try {
         Destination destination = meta.isMulticast() ? session.createTopic(meta.getDestination())
             : session.createQueue(meta.getDestination());
-        if (isNotBlank(meta.getSelector())) {
-          messageConsumer = session.createConsumer(destination, meta.getSelector());
+        String selector =
+            meta.getSpecifiedSelectors().getOrDefault(meta.getDestination(), meta.getSelector());
+        if (isNotBlank(selector)) {
+          messageConsumer = session.createConsumer(destination, selector);
         } else {
           messageConsumer = session.createConsumer(destination);
         }

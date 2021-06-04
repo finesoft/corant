@@ -13,7 +13,7 @@
  */
 package org.corant.context.concurrent.provider;
 
-import static org.corant.context.Instances.tryResolve;
+import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import java.security.AccessController;

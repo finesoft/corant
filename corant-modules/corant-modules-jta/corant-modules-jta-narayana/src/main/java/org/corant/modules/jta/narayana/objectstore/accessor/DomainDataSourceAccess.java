@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jta.narayana.objectstore.accessor;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.sql.Connection;
 import java.sql.SQLException;

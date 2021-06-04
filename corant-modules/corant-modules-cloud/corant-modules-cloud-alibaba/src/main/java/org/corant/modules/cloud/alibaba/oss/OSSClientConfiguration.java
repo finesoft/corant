@@ -13,7 +13,7 @@
  */
 package org.corant.modules.cloud.alibaba.oss;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNoneBlank;

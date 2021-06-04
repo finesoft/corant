@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.shared.repository.JPARepository;
 import org.corant.modules.ddd.shared.repository.JPARepositoryExtension;
@@ -31,6 +31,9 @@ import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
  * corant-modules-ddd-shared
+ *
+ * <p>
+ * A convenient context aggregate instance retrieval class for retrieving aggregate instances
  *
  * @author bingo 下午8:39:07
  *
@@ -92,7 +95,7 @@ public class Aggregates {
   }
 
   static JPARepository resolveRepository(Class<?> cls) {
-    return Instances.resolve(JPARepository.class,
-        Instances.resolve(JPARepositoryExtension.class).resolveQualifiers(cls));
+    return Beans.resolve(JPARepository.class,
+        Beans.resolve(JPARepositoryExtension.class).resolveQualifiers(cls));
   }
 }

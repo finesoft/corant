@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jpa.shared.cdi;
 
-import static org.corant.context.Instances.resolveApply;
+import static org.corant.context.Beans.resolveApply;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.propertiesOf;
 import static org.corant.shared.util.Strings.replace;

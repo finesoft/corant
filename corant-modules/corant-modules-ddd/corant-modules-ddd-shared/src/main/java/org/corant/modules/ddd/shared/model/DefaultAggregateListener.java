@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.persistence.ExcludeDefaultListeners;

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.shared.context;
 
-import static org.corant.context.Instances.find;
+import static org.corant.context.Beans.find;
 import java.io.Serializable;
 import javax.jms.BytesMessage;
 import javax.jms.ConnectionMetaData;

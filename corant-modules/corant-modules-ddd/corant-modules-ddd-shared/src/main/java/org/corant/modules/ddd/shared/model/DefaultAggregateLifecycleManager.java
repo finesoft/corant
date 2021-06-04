@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Objects.asString;
 import java.util.Map;
 import java.util.Optional;

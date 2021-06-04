@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -198,15 +198,16 @@ public class JPAQueries {
    * Create an instance of TypedJPAQuery for executing a native SQL query.
    * <p>
    * Note:
-   *
+   * <p>
    * If the given type is JPA entity class or there is no converter which implements
    * javax.persistence.Tuple To Object conversion, call
-   * {@link EntityManager#createNativeQuery(String, Class)} directly. <br>
+   * {@link EntityManager#createNativeQuery(String, Class)} directly.
    *
-   * If the given is not JPA entity class (etc., SomeDTO) and there is a converter which implements
-   * javax.persistence.Tuple To Object conversion then use javax.persistence.Tuple.class as the
-   * result type and call {@link EntityManager#createNativeQuery(String, Class)} , and then convert
-   * the result to the given type before the result is returned.
+   * <p>
+   * If the given is not JPA entity class (for example: SomeDTO) and there is a converter which
+   * implements javax.persistence.Tuple To Object conversion then use javax.persistence.Tuple.class
+   * as the result type and call {@link EntityManager#createNativeQuery(String, Class)} , and then
+   * convert the result to the given type before the result is returned.
    *
    * @param <T>
    * @param sqlString a native SQL query string

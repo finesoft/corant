@@ -1,6 +1,6 @@
 package org.corant.modules.mail;
 
-import static org.corant.shared.util.Functions.uncheckedComputer;
+import static org.corant.shared.util.Functions.uncheckedFunction;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -71,7 +71,7 @@ public class DefaultMailSender implements MailSender {
     mimeMessage.setContent(multipart);
     mimeMessage.setSubject(subject);
     InternetAddress[] toAddresses = toAddressList.stream()
-        .map(uncheckedComputer(InternetAddress::new)).toArray(InternetAddress[]::new);
+        .map(uncheckedFunction(InternetAddress::new)).toArray(InternetAddress[]::new);
     mimeMessage.setRecipients(Message.RecipientType.TO, toAddresses);
     this.send(mimeMessage);
   }

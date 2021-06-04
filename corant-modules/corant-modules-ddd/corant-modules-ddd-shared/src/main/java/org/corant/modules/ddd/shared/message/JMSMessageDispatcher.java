@@ -13,8 +13,10 @@
  */
 package org.corant.modules.ddd.shared.message;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Functions.uncheckedBiConsumer;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,19 +64,23 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   protected MessageMarshaller marshaller;
 
   @Override
-  public void accept(Message[] t) {
-    for (Message msg : t) {
+  public void accept(Message[] messages) {
+    for (Message msg : messages) {
       for (MessageDestinationMetaData dest : from(msg.getClass())) {
         send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
+            dest.getProperties(),
             marshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), msg));
       }
     }
   }
 
   public void send(String broker, boolean multicast, String destination,
-      javax.jms.Message message) {
+      Map<String, Object> properties, javax.jms.Message message) {
     JMSContext ctx = obtainJmsContext(broker);
     JMSProducer producer = ctx.createProducer();
+    if (isNotEmpty(properties)) {
+      properties.forEach(uncheckedBiConsumer(message::setObjectProperty));
+    }
     producer.send(createDestination(ctx, multicast, destination), message);
   }
 

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jpa.hibernate.ogm;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collections;
 import java.util.HashMap;

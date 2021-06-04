@@ -64,6 +64,6 @@ public @interface MessageDestination {
    *
    * @return The Jakarta Messaging destination properties.
    */
-  String[] properties() default {};
+  MessageProperty[] properties() default {};
 
 }

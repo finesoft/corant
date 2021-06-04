@@ -36,6 +36,9 @@ import org.eclipse.microprofile.config.ConfigProvider;
 /**
  * corant-config
  *
+ * <p>
+ * A convenient configuration instance retrieval class for retrieving configuration instances
+ *
  * @author bingo 下午7:42:56
  *
  */

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.freemarker;
 
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultString;
 import java.io.IOException;

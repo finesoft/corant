@@ -32,7 +32,7 @@ import org.jboss.weld.manager.api.WeldManager;
  * @author bingo 下午11:02:59
  *
  */
-public class UnmanageableInstance<T> implements AutoCloseable {
+public class UnmanageableBean<T> implements AutoCloseable {
 
   private T instance;
   private final CreationalContext<T> creationalContext;
@@ -42,7 +42,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
   private final WeldManager bm;
   private boolean disposed = false;
 
-  public UnmanageableInstance(Class<T> clazz) {
+  public UnmanageableBean(Class<T> clazz) {
     bm = (WeldManager) CDI.current().getBeanManager();
     creationalContext = bm.createCreationalContext(null);
     annotatedType = bm.createAnnotatedType(clazz);
@@ -50,8 +50,8 @@ public class UnmanageableInstance<T> implements AutoCloseable {
     originalInstance = null;
   }
 
-  public UnmanageableInstance(T object) {
-    shouldBeFalse(Instances.isManagedBean(shouldNotNull(object)));
+  public UnmanageableBean(T object) {
+    shouldBeFalse(Beans.isManagedBean(shouldNotNull(object)));
     bm = (WeldManager) CDI.current().getBeanManager();
     creationalContext = bm.createCreationalContext(null);
     annotatedType = bm.createAnnotatedType(forceCast(object.getClass()));
@@ -60,12 +60,12 @@ public class UnmanageableInstance<T> implements AutoCloseable {
     originalInstance = object;
   }
 
-  public static <T> UnmanageableInstance<T> of(Class<T> clazz) {
-    return new UnmanageableInstance<>(clazz);
+  public static <T> UnmanageableBean<T> of(Class<T> clazz) {
+    return new UnmanageableBean<>(clazz);
   }
 
-  public static <T> UnmanageableInstance<T> of(T object) {
-    return new UnmanageableInstance<>(object);
+  public static <T> UnmanageableBean<T> of(T object) {
+    return new UnmanageableBean<>(object);
   }
 
   @Override
@@ -82,7 +82,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
    *         disposed
    * @return self
    */
-  public UnmanageableInstance<T> dispose() {
+  public UnmanageableBean<T> dispose() {
     if (instance == null) {
       throw new IllegalStateException("Trying to call dispose() before produce() was called");
     }
@@ -112,7 +112,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
    *         disposed
    * @return self
    */
-  public UnmanageableInstance<T> inject() {
+  public UnmanageableBean<T> inject() {
     if (instance == null) {
       throw new IllegalStateException("Trying to call inject() before produce() was called");
     }
@@ -131,7 +131,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
    *         disposed
    * @return self
    */
-  public UnmanageableInstance<T> postConstruct() {
+  public UnmanageableBean<T> postConstruct() {
     if (instance == null) {
       throw new IllegalStateException("Trying to call postConstruct() before produce() was called");
     }
@@ -151,7 +151,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
    *         disposed
    * @return self
    */
-  public UnmanageableInstance<T> preDestroy() {
+  public UnmanageableBean<T> preDestroy() {
     if (instance == null) {
       throw new IllegalStateException("Trying to call preDestroy() before produce() was called");
     }
@@ -170,7 +170,7 @@ public class UnmanageableInstance<T> implements AutoCloseable {
    *         disposed
    * @return self
    */
-  public UnmanageableInstance<T> produce() {
+  public UnmanageableBean<T> produce() {
     if (instance != null) {
       throw new IllegalStateException("Trying to call produce() on already constructed instance");
     }

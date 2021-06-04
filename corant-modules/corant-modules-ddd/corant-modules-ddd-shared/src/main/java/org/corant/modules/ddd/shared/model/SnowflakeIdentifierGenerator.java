@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.context.Instances.findAnyway;
+import static org.corant.context.Beans.findAnyway;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;

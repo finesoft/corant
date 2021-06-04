@@ -20,11 +20,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.jms.JMSDestinationDefinition;
-import javax.jms.JMSDestinationDefinitions;
-import javax.jms.JMSSessionMode;
 import org.corant.context.CDIs;
 import org.corant.modules.jms.annotation.MessageSend;
+import org.corant.modules.jms.metadata.MessageSendMetaData;
 import org.corant.modules.jms.send.GroupMessageSender;
 import org.corant.modules.jms.send.MessageSender;
 
@@ -43,21 +41,7 @@ public class MessageSenderProducer {
     List<MessageSender> senders = new ArrayList<>();
     final MessageSend at = CDIs.getAnnotation(ip, MessageSend.class);
     if (at != null) {
-      senders.add(new DefaultMessageSender(at));
-    }
-    // nonstandard
-    final JMSDestinationDefinition jdf = CDIs.getAnnotation(ip, JMSDestinationDefinition.class);
-    final JMSSessionMode jsm = CDIs.getAnnotation(ip, JMSSessionMode.class);
-    if (jdf != null) {
-      senders.add(new DefaultMessageSender(jdf, jsm));
-    }
-    final JMSDestinationDefinitions jdfs = CDIs.getAnnotation(ip, JMSDestinationDefinitions.class);
-    if (jdfs != null) {
-      for (JMSDestinationDefinition d : jdfs.value()) {
-        if (d != null) {
-          senders.add(new DefaultMessageSender(d, jsm));
-        }
-      }
+      senders.add(new DefaultMessageSender(MessageSendMetaData.of(at)));
     }
     return new GroupMessageSender(shouldNotEmpty(senders));
   }

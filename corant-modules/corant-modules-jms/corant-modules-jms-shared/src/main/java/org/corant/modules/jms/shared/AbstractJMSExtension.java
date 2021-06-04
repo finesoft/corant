@@ -14,8 +14,8 @@
 package org.corant.modules.jms.shared;
 
 import static java.util.Collections.newSetFromMap;
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.select;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.union;

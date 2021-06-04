@@ -43,10 +43,13 @@ import org.corant.shared.ubiquity.Sortable;
 /**
  * corant-context
  *
+ * <p>
+ * A convenient context bean object retrieval class for retrieving bean instances
+ *
  * @author bingo 下午2:22:40
  *
  */
-public class Instances {
+public class Beans {
 
   public static <T> T create(Class<T> clazz, Annotation... qualifiers) {
     if (clazz != null && CDIs.isEnabled()) {
@@ -190,7 +193,7 @@ public class Instances {
     if (isManagedBean(obj)) {
       return obj;
     } else if (obj != null) {
-      return UnmanageableInstance.of(obj).produce().inject().postConstruct().get();
+      return UnmanageableBean.of(obj).produce().inject().postConstruct().get();
     }
     return null;
   }

@@ -13,10 +13,8 @@
  */
 package org.corant.modules.jms.shared.send;
 
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.resolveApply;
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.resolveApply;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.copy;
@@ -24,22 +22,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
-import javax.jms.JMSDestinationDefinition;
 import javax.jms.JMSProducer;
-import javax.jms.JMSSessionMode;
 import javax.jms.Message;
-import javax.jms.Queue;
-import org.corant.config.Configs;
-import org.corant.modules.jms.annotation.MessageDestination;
-import org.corant.modules.jms.annotation.MessageSend;
 import org.corant.modules.jms.marshaller.MessageMarshaller;
+import org.corant.modules.jms.metadata.MessageDestinationMetaData;
+import org.corant.modules.jms.metadata.MessageSendMetaData;
 import org.corant.modules.jms.send.MessageSender;
 import org.corant.modules.jms.shared.context.DefaultJMSContextService;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -60,28 +53,18 @@ public class DefaultMessageSender implements MessageSender {
   protected long timeToLive = -1;
   protected Map<String, Object> properties = new HashMap<>();
 
-  public DefaultMessageSender(JMSDestinationDefinition dann, JMSSessionMode sann) {
-    multicast = Queue.class.isAssignableFrom(tryAsClass(dann.description()));
-    destination = shouldNotNull(Configs.assemblyStringConfigProperty(dann.destinationName()));
-    connectionFactoryId = shouldNotNull(Configs.assemblyStringConfigProperty(dann.name()));
-    if (sann.value() == JMSContext.DUPS_OK_ACKNOWLEDGE) {
-      dupsOkAck = true;
-    }
-    deliveryMode = DeliveryMode.PERSISTENT;
-  }
-
-  public DefaultMessageSender(MessageSend annotation) {
-    MessageDestination annDest = annotation.destination();
-    multicast = annDest.multicast();
-    destination = annDest.name();
-    connectionFactoryId = annDest.connectionFactoryId();
-    dupsOkAck = annotation.dupsOkAck();
-    deliveryMode = annotation.deliveryMode();
-    deliveryDelay = annotation.deliveryDelay();
-    timeToLive = annotation.timeToLive();
-    if (isNotEmpty(annotation.properties())) {
-      Arrays.stream(annotation.properties())
-          .forEach(p -> properties.put(p.name(), toObject(p.value(), p.type())));
+  public DefaultMessageSender(MessageSendMetaData annotation) {
+    MessageDestinationMetaData annDest = annotation.getDestination();
+    multicast = annDest.isMulticast();
+    destination = annDest.getName();
+    connectionFactoryId = annDest.getConnectionFactoryId();
+    dupsOkAck = annotation.isDupsOkAck();
+    deliveryMode = annotation.getDeliveryMode();
+    deliveryDelay = annotation.getDeliveryDelay();
+    timeToLive = annotation.getTimeToLive();
+    if (isNotEmpty(annotation.getProperties())) {
+      annotation.getProperties()
+          .forEach(p -> properties.put(p.getName(), toObject(p.getValue(), p.getType())));
     }
   }
 
@@ -137,8 +120,8 @@ public class DefaultMessageSender implements MessageSender {
   }
 
   @SuppressWarnings("unchecked")
-  protected void doSend(JMSContext jmsc, Destination d, JMSProducer p,
-      MessageMarshaller marshaller, Object message) {
+  protected void doSend(JMSContext jmsc, Destination d, JMSProducer p, MessageMarshaller marshaller,
+      Object message) {
     try {
       if (marshaller != null) {
         p.send(d, marshaller.serialize(jmsc, message));

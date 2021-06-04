@@ -13,7 +13,7 @@
  */
 package org.corant.modules.datasource.agroal;
 
-import static org.corant.context.Instances.tryResolve;
+import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;

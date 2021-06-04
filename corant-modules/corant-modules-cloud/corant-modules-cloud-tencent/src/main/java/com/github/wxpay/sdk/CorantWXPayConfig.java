@@ -13,7 +13,7 @@
  */
 package com.github.wxpay.sdk;
 
-import static org.corant.context.Instances.find;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;

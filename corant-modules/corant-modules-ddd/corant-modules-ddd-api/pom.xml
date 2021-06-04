@@ -13,6 +13,7 @@
 			<groupId>org.corant</groupId>
 			<artifactId>corant-shared</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>jakarta.persistence</groupId>
 			<artifactId>jakarta.persistence-api</artifactId>

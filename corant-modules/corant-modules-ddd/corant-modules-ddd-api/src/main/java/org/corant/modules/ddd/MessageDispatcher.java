@@ -29,7 +29,7 @@ public interface MessageDispatcher extends Consumer<Message[]> {
     final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
     @Override
-    public void accept(Message[] t) {
+    public void accept(Message[] messages) {
       logger.fine(
           () -> "The message dispatch is an empty implementation that does not really implement accept");
     }

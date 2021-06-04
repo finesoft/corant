@@ -13,8 +13,8 @@
  */
 package org.corant.modules.query.sql;
 
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Conversions.toObject;

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.shared.context;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
@@ -32,6 +32,7 @@ import javax.jms.XAConnectionFactory;
 import javax.jms.XAJMSContext;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jms.annotation.MessageContext;
+import org.corant.modules.jms.metadata.MessageContextMetaData;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.modules.jta.shared.TransactionService;
@@ -65,9 +66,10 @@ public class JMSContextKey implements Serializable {
 
   public static JMSContextKey of(final InjectionPoint ip) {
     final Annotated annotated = ip.getAnnotated();
-    final MessageContext messageContext = annotated.getAnnotation(MessageContext.class);
-    if (messageContext != null) {
-      return new JMSContextKey(messageContext.connectionFactoryId(), messageContext.dupsOkAck());
+    if (annotated.isAnnotationPresent(MessageContext.class)) {
+      MessageContextMetaData meta =
+          MessageContextMetaData.of(annotated.getAnnotation(MessageContext.class));
+      return new JMSContextKey(meta.getConnectionFactoryId(), meta.isDupsOkAck());
     } else {
       final JMSConnectionFactory factory = annotated.getAnnotation(JMSConnectionFactory.class);
       final JMSSessionMode mode = annotated.getAnnotation(JMSSessionMode.class);

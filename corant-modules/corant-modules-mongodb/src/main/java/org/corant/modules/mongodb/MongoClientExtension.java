@@ -13,9 +13,9 @@
  */
 package org.corant.modules.mongodb;
 
-import static org.corant.context.Instances.find;
-import static org.corant.context.Instances.findNamed;
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.find;
+import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;

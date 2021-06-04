@@ -13,7 +13,7 @@
  */
 package org.corant.modules.datasource.agroal;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import java.time.Duration;
 import java.util.Optional;
 import io.agroal.api.AgroalDataSource;

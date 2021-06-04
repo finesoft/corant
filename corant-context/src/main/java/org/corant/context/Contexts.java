@@ -13,7 +13,7 @@
  */
 package org.corant.context;
 
-import static org.corant.context.Instances.tryResolve;
+import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Annotation;

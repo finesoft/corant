@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;

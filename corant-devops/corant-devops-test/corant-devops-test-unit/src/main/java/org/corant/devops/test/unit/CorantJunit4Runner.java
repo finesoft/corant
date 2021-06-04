@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.Corant;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.corant.shared.util.Strings;
 import org.junit.runners.model.Statement;
 
@@ -128,7 +128,7 @@ public interface CorantJunit4Runner {
     if (TEST_OBJECTS.get() == null) {
       TEST_OBJECTS.set(new HashMap<>());
     }
-    return TEST_OBJECTS.get().computeIfAbsent(clazz, Instances::resolve);
+    return TEST_OBJECTS.get().computeIfAbsent(clazz, Beans::resolve);
     /* cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct() ).get(); */
   }
 

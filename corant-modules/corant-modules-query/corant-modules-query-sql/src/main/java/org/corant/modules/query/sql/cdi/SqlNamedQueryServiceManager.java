@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.sql.cdi;
 
-import static org.corant.context.Instances.findNamed;
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.forceCast;

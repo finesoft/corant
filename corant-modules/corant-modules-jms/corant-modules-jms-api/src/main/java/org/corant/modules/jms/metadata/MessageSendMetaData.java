@@ -53,6 +53,14 @@ public class MessageSendMetaData {
     this.timeToLive = timeToLive;
   }
 
+  public static MessageSendMetaData of(MessageSend annotation) {
+    shouldNotNull(annotation);
+    return new MessageSendMetaData(annotation.deliveryDelay(), annotation.deliveryMode(),
+        MessageDestinationMetaData.of(annotation.destination()), annotation.dupsOkAck(),
+        annotation.marshaller(), MessagePropertyMetaData.of(annotation.properties()),
+        annotation.timeToLive());
+  }
+
   public long getDeliveryDelay() {
     return deliveryDelay;
   }
@@ -79,14 +87,6 @@ public class MessageSendMetaData {
 
   public boolean isDupsOkAck() {
     return dupsOkAck;
-  }
-
-  public MessageSendMetaData of(MessageSend annotation) {
-    shouldNotNull(annotation);
-    return new MessageSendMetaData(annotation.deliveryDelay(), annotation.deliveryMode(),
-        MessageDestinationMetaData.of(annotation.destination()), annotation.dupsOkAck(),
-        annotation.marshaller(), MessagePropertyMetaData.of(annotation.properties()),
-        annotation.timeToLive());
   }
 
 }

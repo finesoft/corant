@@ -14,7 +14,8 @@
 package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -28,6 +29,44 @@ public class Throwing {
   private Throwing() {}
 
   @FunctionalInterface
+  public interface ThrowingBiConsumer<K, V, E extends Throwable> {
+    void accept(K k, V v) throws E;
+
+    default ThrowingBiConsumer<K, V, E> andThen(BiConsumer<? super K, ? super V> after) {
+      shouldNotNull(after);
+      return (l, r) -> {
+        accept(l, r);
+        after.accept(l, r);
+      };
+    }
+  }
+
+  @FunctionalInterface
+  public interface ThrowingBiFunction<T, U, R, E extends Throwable> {
+
+    default <V> ThrowingBiFunction<T, U, V, E> andThen(Function<? super R, ? extends V> after) {
+      shouldNotNull(after);
+      return (T t, U u) -> after.apply(apply(t, u));
+    }
+
+    R apply(T t, U u) throws E;
+
+  }
+
+  @FunctionalInterface
+  public interface ThrowingConsumer<T, E extends Throwable> {
+    void accept(T t) throws E;
+
+    default ThrowingConsumer<T, E> andThen(Consumer<? super T> after) {
+      shouldNotNull(after);
+      return (T t) -> {
+        accept(t);
+        after.accept(t);
+      };
+    }
+  }
+
+  @FunctionalInterface
   public interface ThrowingFunction<T, R, E extends Throwable> {
 
     static <T, E extends Throwable> ThrowingFunction<T, T, E> identity() {
@@ -35,7 +74,7 @@ public class Throwing {
     }
 
     default <V> ThrowingFunction<T, V, E> andThen(Function<? super R, ? extends V> after) {
-      Objects.requireNonNull(after);
+      shouldNotNull(after);
       return (T t) -> after.apply(apply(t));
     }
 

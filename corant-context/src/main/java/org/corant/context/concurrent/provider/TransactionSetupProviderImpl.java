@@ -22,7 +22,7 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import org.corant.context.Instances;
+import org.corant.context.Beans;
 import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
 import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
 
@@ -72,7 +72,7 @@ public class TransactionSetupProviderImpl implements TransactionSetupProvider {
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
-    transactionManager = Instances.resolve(TransactionManager.class);
+    transactionManager = Beans.resolve(TransactionManager.class);
   }
 
 }

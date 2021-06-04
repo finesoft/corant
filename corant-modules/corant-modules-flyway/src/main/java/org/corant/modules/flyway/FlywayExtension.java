@@ -13,7 +13,7 @@
  */
 package org.corant.modules.flyway;
 
-import static org.corant.context.Instances.resolve;
+import static org.corant.context.Beans.resolve;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;

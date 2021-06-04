@@ -24,6 +24,7 @@ import static org.corant.shared.util.Strings.isBlank;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.corant.context.proxy.ContextualMethodHandler;
@@ -51,6 +52,7 @@ public class MessageReceivingMetaData {
   private final String destination;
   private final boolean multicast;
   private final String selector;
+  private final Map<String, String> specifiedSelectors;
   private final int cacheLevel;
   private final long receiveTimeout;
   private final int receiveThreshold;
@@ -72,6 +74,7 @@ public class MessageReceivingMetaData {
     // the driven
     acknowledge = driven.getAcknowledge();
     selector = driven.getSelector();
+    specifiedSelectors = driven.getSpecifiedSelectors();
     cacheLevel = driven.getCacheLevel();
     receiveTimeout = driven.getReceiveTimeout();
     receiveThreshold = max(1, driven.getReceiveThreshold());
@@ -223,6 +226,10 @@ public class MessageReceivingMetaData {
 
   public String getSelector() {
     return selector;
+  }
+
+  public Map<String, String> getSpecifiedSelectors() {
+    return specifiedSelectors;
   }
 
   public int getTryThreshold() {

@@ -77,7 +77,7 @@ final class WrappedMessage implements Comparable<WrappedMessage> {
           queue.add(newMsg);
         }
       }
-    } else if (newMsg != null) {
+    } else {
       logger.fine(() -> String.format("Enqueue message %s.", newMsg.delegate));
       queue.add(newMsg);
     }

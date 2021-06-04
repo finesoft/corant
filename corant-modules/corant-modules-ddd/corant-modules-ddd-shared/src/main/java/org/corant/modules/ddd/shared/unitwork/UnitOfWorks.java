@@ -58,8 +58,8 @@ public class UnitOfWorks {
   protected boolean useJtaXa;
 
   public Optional<AbstractJTAJPAUnitOfWork> currentDefaultUnitOfWork() {
-    Optional<AbstractJTAJPAUnitOfWorksManager> uowm = currentDefaultUnitOfWorksManager();
-    return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
+    return currentDefaultUnitOfWorksManager()
+        .map(AbstractJTAJPAUnitOfWorksManager::getCurrentUnitOfWork);
   }
 
   public Optional<AbstractJTAJPAUnitOfWorksManager> currentDefaultUnitOfWorksManager() {
@@ -67,8 +67,7 @@ public class UnitOfWorks {
   }
 
   public Optional<UnitOfWork> currentUnitOfWork(Annotation... qualifiers) {
-    Optional<UnitOfWorksManager> uowm = currentUnitOfWorksManager(qualifiers);
-    return Optional.ofNullable(uowm.isPresent() ? uowm.get().getCurrentUnitOfWork() : null);
+    return currentUnitOfWorksManager(qualifiers).map(UnitOfWorksManager::getCurrentUnitOfWork);
   }
 
   public Optional<UnitOfWorksManager> currentUnitOfWorksManager(Annotation... qualifiers) {

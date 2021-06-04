@@ -70,7 +70,7 @@ public class MessageReceivingConnections {
 
   public Connection startConnection(MessageReceivingMetaData meta) throws JMSException {
     final Map<String, Connection> useConns = meta.isXa() ? xaconns : conns;
-    Connection conn = null;
+    Connection conn;
     try {
       conn = useConns.computeIfAbsent(meta.getConnectionFactoryId(), cf -> createConnection(meta));
       conn.start();

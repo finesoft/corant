@@ -58,7 +58,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
 
   @Inject
   @ConfigProperty(name = "corant.ddd.message.marshaller",
-      defaultValue = JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA)
+      defaultValue = JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA)
   protected String marshallerName;
 
   protected MessageMarshaller marshaller;

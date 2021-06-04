@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.shared.marshaller;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
@@ -62,8 +62,7 @@ public class KryoMessageMarshaller implements MessageMarshaller {
 
   @Override
   public <T> T deserialize(Message message, Class<T> clazz) {
-    shouldBeTrue(message instanceof BytesMessage);
-    BytesMessage bytMsg = (BytesMessage) message;
+    BytesMessage bytMsg = shouldInstanceOf(message, BytesMessage.class);
     try {
       if (bytMsg.getBodyLength() == 0) {
         return null;

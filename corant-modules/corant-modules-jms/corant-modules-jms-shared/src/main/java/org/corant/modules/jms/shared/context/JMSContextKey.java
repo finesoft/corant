@@ -105,8 +105,7 @@ public class JMSContextKey implements Serializable {
       return false;
     }
     final JMSContextKey key = (JMSContextKey) o;
-    return areEqual(connectionFactoryId, key.connectionFactoryId)
-        && areEqual(dupsOkAck, key.dupsOkAck);
+    return areEqual(connectionFactoryId, key.connectionFactoryId) && dupsOkAck == key.dupsOkAck;
 
   }
 

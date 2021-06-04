@@ -209,7 +209,7 @@ public class JPAQueries {
    * as the result type and call {@link EntityManager#createNativeQuery(String, Class)} , and then
    * convert the result to the given type before the result is returned.
    *
-   * @param <T>
+   * @param <T> the type of the resulting instance(s)
    * @param sqlString a native SQL query string
    * @param type the class of the resulting instance(s)
    * @return nativeQuery
@@ -251,7 +251,6 @@ public class JPAQueries {
    *
    * @param sqlString a native SQL query string
    * @param resultSetMapping the name of the result set mapping
-   * @return
    *
    * @see EntityManager#createNativeQuery(String, String)
    */
@@ -272,9 +271,8 @@ public class JPAQueries {
   /**
    * Create an instance of TypedJPAQuery for executing a criteria query.
    *
-   * @param <T>
+   * @param <T> the type of the resulting instance(s)
    * @param criteriaQuery a criteria query object
-   * @return
    * @see EntityManager#createQuery(CriteriaQuery)
    */
   public static <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
@@ -294,8 +292,8 @@ public class JPAQueries {
   /**
    * Create an instance of JPAQuery for executing a Jakarta Persistence query language statement.
    *
-   * @param qlString
-   * @return query
+   * @param qlString the Jakarta Persistence query language statement
+   * @return query the JPAQuery
    * @see EntityManager#createQuery(String)
    */
   public static JPAQuery query(final String qlString) {
@@ -317,10 +315,9 @@ public class JPAQueries {
    * statement.The select list of the query must contain only a single item, which must be
    * assignable to the type specified by the resultClass argument.
    *
-   * @param <T>
+   * @param <T> the type of the resulting instance(s)
    * @param qlString a Jakarta Persistence query string
    * @param type the type of the query result
-   * @return
    * @see EntityManager#createQuery(String, Class)
    */
   public static <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
@@ -630,8 +627,8 @@ public class JPAQueries {
      * default this method delegates to getResultList().stream(),however persistence provider may
      * choose to override this method to provide additional capabilities.
      *
-     * @param <T>
-     * @return stream
+     * @param <T> the type of the resulting instance(s)
+     * @return a stream of the results
      */
     @SuppressWarnings("unchecked")
     public <T> Stream<T> stream() {
@@ -761,7 +758,7 @@ public class JPAQueries {
      * Execute a SELECT query and return the query results as an typed List.
      *
      *
-     * @return select
+     * @return a list of the results
      */
     @SuppressWarnings("unchecked")
     public List<T> select() {
@@ -777,7 +774,7 @@ public class JPAQueries {
      * default this method delegates to getResultList().stream(),however persistence provider may
      * choose to override this method to provide additional capabilities.
      *
-     * @return stream
+     * @return a stream of the results
      */
     @SuppressWarnings("unchecked")
     public Stream<T> stream() {

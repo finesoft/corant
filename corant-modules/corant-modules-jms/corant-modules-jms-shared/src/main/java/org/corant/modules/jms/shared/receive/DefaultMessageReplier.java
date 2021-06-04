@@ -13,8 +13,8 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
-import static org.corant.modules.jms.JMSNames.REPLY_MSG_MARSHAL_SCHAME;
+import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
+import static org.corant.modules.jms.JMSNames.REPLY_MSG_MARSHAL_SCHEMA;
 import static org.corant.modules.jms.JMSNames.SECURITY_CONTEXT_PROPERTY_NAME;
 import static org.corant.shared.util.Strings.defaultString;
 import javax.jms.Destination;
@@ -49,8 +49,8 @@ public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
       if (originalMessage.getJMSReplyTo() != null) {
         // FIXME use original message or no?
         String marshallerName =
-            defaultString(originalMessage.getStringProperty(REPLY_MSG_MARSHAL_SCHAME),
-                MSG_MARSHAL_SCHAME_STD_JAVA);
+            defaultString(originalMessage.getStringProperty(REPLY_MSG_MARSHAL_SCHEMA),
+                MSG_MARSHAL_SCHEMA_STD_JAVA);
         Message msg = mediator.getMessageMarshaller(marshallerName).serialize(session, payload);
         String clid;
         if ((clid = originalMessage.getJMSCorrelationID()) != null) {

@@ -32,10 +32,10 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
-import org.corant.modules.ddd.shared.repository.JPAQueries.JPAQuery;
-import org.corant.modules.ddd.shared.repository.JPAQueries.TypedJPAQuery;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.Repository;
+import org.corant.modules.ddd.shared.repository.JPAQueries.JPAQuery;
+import org.corant.modules.ddd.shared.repository.JPAQueries.TypedJPAQuery;
 import org.corant.shared.util.Objects;
 
 /**
@@ -118,9 +118,9 @@ public interface JPARepository extends Repository<Query> {
    * identifier and the id of the given identifier .If the entity instance is contained in the
    * persistence context,it is returned from there.
    *
-   * @param <T>
-   * @param identifier
-   * @return get
+   * @param <T> the aggregate instance
+   * @param identifier the aggregate id
+   * @return an aggregate
    */
   @SuppressWarnings("unchecked")
   default <T> T get(AggregateIdentifier identifier) {
@@ -159,7 +159,7 @@ public interface JPARepository extends Repository<Query> {
    * specified class and primary key and version number. If the aggregate instance is contained in
    * the persistence context,it is returned from there.
    *
-   * @param <T>
+   * @param <T> the aggregate type
    * @param entityClass the aggregate class
    * @param id the aggregate id
    * @param vn the aggregate version
@@ -179,9 +179,9 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Retrieves and object by query
    *
-   * @param <T>
-   * @param query
-   * @return get
+   * @param <T> the result type
+   * @param query the JPAQuery
+   * @return the result
    */
   default <T> T get(Query query) {
     query.setMaxResults(1);
@@ -190,15 +190,11 @@ public interface JPARepository extends Repository<Query> {
 
   /**
    * Returns the JPA entity manager used for this repository
-   *
-   * @return getEntityManager
    */
   EntityManager getEntityManager();
 
   /**
    * Returns the JPA entity manager factory used for this repository
-   *
-   * @return getEntityManagerFactory
    */
   default EntityManagerFactory getEntityManagerFactory() {
     return getEntityManager().getEntityManagerFactory();
@@ -237,8 +233,8 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Create name query
    *
-   * @param name
-   * @return namedQuery
+   * @param name the named query name
+   * @return a JPAQuery
    */
   default JPAQuery namedQuery(final String name) {
     return JPAQueries.namedQuery(name).entityManager(this::getEntityManager);
@@ -247,10 +243,9 @@ public interface JPARepository extends Repository<Query> {
   /**
    * {@link JPAQueries#namedQuery(String, Class)}
    *
-   * @param <T>
+   * @param <T> the result type
    * @param name the name of a query defined in metadata
    * @param type the type of the query result
-   * @return namedQuery
    */
   default <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
     return JPAQueries.namedQuery(name, type).entityManager(this::getEntityManager);
@@ -260,7 +255,6 @@ public interface JPARepository extends Repository<Query> {
    * {@link JPAQueries#namedStoredProcedureQuery(String)}
    *
    * @param name name assigned to the stored procedure query in metadata
-   * @return JPAQuery
    */
   default JPAQuery namedStoredProcedureQuery(final String name) {
     return JPAQueries.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
@@ -270,7 +264,6 @@ public interface JPARepository extends Repository<Query> {
    * {@link JPAQueries#nativeQuery(String)}
    *
    * @param sqlString a native SQL query string
-   * @return JPAQuery
    */
   default JPAQuery nativeQuery(final String sqlString) {
     return JPAQueries.nativeQuery(sqlString).entityManager(this::getEntityManager);
@@ -279,10 +272,9 @@ public interface JPARepository extends Repository<Query> {
   /**
    * {@link JPAQueries#nativeQuery(String, Class)}
    *
-   * @param <T>
+   * @param <T> the result type
    * @param sqlString a native SQL query string
    * @param type the class of the resulting instance(s)
-   * @return TypedJPAQuery
    */
   default <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
     return JPAQueries.nativeQuery(sqlString, type).entityManager(this::getEntityManager);
@@ -293,7 +285,6 @@ public interface JPARepository extends Repository<Query> {
    *
    * @param sqlString a native SQL query string
    * @param resultSetMapping the name of the result set mapping
-   * @return JPAQuery
    */
   default JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
     return JPAQueries.nativeQuery(sqlString, resultSetMapping)
@@ -309,9 +300,8 @@ public interface JPARepository extends Repository<Query> {
   /**
    * {@link JPAQueries#query(CriteriaQuery)}
    *
-   * @param <T>
+   * @param <T> the result type
    * @param criteriaQuery a criteria query object
-   * @return TypedJPAQuery
    */
   default <T> TypedJPAQuery<T> query(CriteriaQuery<T> criteriaQuery) {
     return JPAQueries.query(criteriaQuery).entityManager(this::getEntityManager);
@@ -321,7 +311,6 @@ public interface JPARepository extends Repository<Query> {
    * {@link JPAQueries#query(String)}
    *
    * @param qlString a Jakarta Persistence query string
-   * @return JPAQuery
    */
   default JPAQuery query(final String qlString) {
     return JPAQueries.query(qlString).entityManager(this::getEntityManager);
@@ -351,7 +340,7 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Retrieves the entities by primary keys
    *
-   * @param <T>
+   * @param <T> the result type
    * @param entityClass the entity class
    * @param ids the entity primary keys
    * @return entity list

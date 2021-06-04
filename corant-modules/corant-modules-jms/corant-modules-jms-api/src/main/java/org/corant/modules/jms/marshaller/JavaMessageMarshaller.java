@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.marshaller;
 
-import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
+import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import java.io.Serializable;
 import javax.enterprise.context.ApplicationScoped;
@@ -32,7 +32,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  */
 @ApplicationScoped
-@Named(MSG_MARSHAL_SCHAME_STD_JAVA)
+@Named(MSG_MARSHAL_SCHEMA_STD_JAVA)
 public class JavaMessageMarshaller implements MessageMarshaller {
 
   @SuppressWarnings("unchecked")
@@ -56,7 +56,7 @@ public class JavaMessageMarshaller implements MessageMarshaller {
         throw new CorantRuntimeException(e);
       }
     }
-    return resolveSchemaProperty(msg, MSG_MARSHAL_SCHAME_STD_JAVA);
+    return resolveSchemaProperty(msg, MSG_MARSHAL_SCHEMA_STD_JAVA);
   }
 
   @Override
@@ -66,7 +66,7 @@ public class JavaMessageMarshaller implements MessageMarshaller {
       if (object != null) {
         msg.setObject(shouldInstanceOf(object, Serializable.class));
       }
-      return resolveSchemaProperty(msg, MSG_MARSHAL_SCHAME_STD_JAVA);
+      return resolveSchemaProperty(msg, MSG_MARSHAL_SCHEMA_STD_JAVA);
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);
     }

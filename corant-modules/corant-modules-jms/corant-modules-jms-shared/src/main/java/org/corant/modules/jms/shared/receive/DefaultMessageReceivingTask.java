@@ -146,7 +146,7 @@ public class DefaultMessageReceivingTask
   @Override
   public MessageMarshaller getMessageMarshaller(String schema) {
     return resolve(MessageMarshaller.class,
-        NamedLiteral.of(defaultObject(schema, JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA)));
+        NamedLiteral.of(defaultObject(schema, JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA)));
   }
 
   public boolean isInProgress() {

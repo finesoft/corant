@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.marshaller;
 
-import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHAME_ZIP_BINARY;
+import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHEMA_ZIP_BINARY;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Compressors.compress;
@@ -44,7 +44,7 @@ import org.corant.shared.util.Resources.InputStreamResource;
  *
  */
 @ApplicationScoped
-@Named(MSG_MARSHAL_SCHAME_ZIP_BINARY)
+@Named(MSG_MARSHAL_SCHEMA_ZIP_BINARY)
 public class ZipBinaryMessageMarshaller implements MessageMarshaller {
   @SuppressWarnings("unchecked")
   @Override
@@ -84,7 +84,7 @@ public class ZipBinaryMessageMarshaller implements MessageMarshaller {
       copy(shouldInstanceOf(object, InputStream.class), buffer);
       byte[] bytes = compress(buffer.toByteArray());
       message.writeBytes(bytes);
-      return resolveSchemaProperty(message, MSG_MARSHAL_SCHAME_ZIP_BINARY);
+      return resolveSchemaProperty(message, MSG_MARSHAL_SCHEMA_ZIP_BINARY);
     } catch (JMSException | IOException e) {
       throw new MessageFormatRuntimeException(e.getMessage());
     }

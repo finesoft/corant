@@ -38,15 +38,11 @@ public interface UnitOfWork {
 
   /**
    * Deregister an object from this unit of works
-   *
-   * @param obj
    */
   default void deregister(Object obj) {}
 
   /**
    * The unit of works id
-   *
-   * @return
    */
   Object getId();
 
@@ -60,8 +56,6 @@ public interface UnitOfWork {
    *
    * <p>
    * The object could be an aggregate or a message or a named object (represented by Pair<?,?>).
-   *
-   * @param obj
    */
   void register(Object obj);
 

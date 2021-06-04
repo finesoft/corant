@@ -40,8 +40,8 @@ public class AggregateMessageMetadata implements MessageMetadata {
   }
 
   /**
-   * @param source
-   * @param versionNumber
+   * @param source the message source
+   * @param versionNumber the message source version
    */
   public AggregateMessageMetadata(AggregateIdentifier source, long versionNumber) {
     this.versionNumber = versionNumber;

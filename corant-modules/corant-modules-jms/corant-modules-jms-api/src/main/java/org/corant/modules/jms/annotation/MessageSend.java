@@ -67,8 +67,8 @@ public @interface MessageSend {
    * In the Jakarta EE web or EJB container, when there is no active JTA transaction in progress:
    * The argument acknowledgeMode must be set to either of JMSContext.AUTO_ACKNOWLEDGE or
    * JMSContext.DUPS_OK_ACKNOWLEDGE. The session will be non-transacted and messages received by
-   * this session willbe acknowledged automatically according to the value of acknowledgeMode. For a
-   * definition of the meaning ofthese acknowledgement modes see the links below. The values
+   * this session will be acknowledged automatically according to the value of acknowledgeMode. For
+   * a definition of the meaning of these acknowledgement modes see the links below. The values
    * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
    *
    * @return sessionMode
@@ -81,7 +81,7 @@ public @interface MessageSend {
    *
    * @return the marshaller name
    */
-  String marshaller() default JMSNames.MSG_MARSHAL_SCHAME_STD_JAVA;
+  String marshaller() default JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
 
   /**
    * Specifies that messages sent using the JMSProducer will have the specified property set to the

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd;
 
+import static org.corant.shared.util.Maps.newHashMap;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
@@ -58,11 +59,7 @@ public interface Value extends Serializable {
     private final int hash;
 
     protected SimpleValueMap(Map<String, Object> contents) {
-      if (contents != null) {
-        this.contents = Collections.unmodifiableMap(new HashMap<>(contents));
-      } else {
-        this.contents = Collections.emptyMap();
-      }
+      this.contents = Collections.unmodifiableMap(newHashMap(contents));
       hash = 31 + (contents == null ? 0 : contents.hashCode());
     }
 

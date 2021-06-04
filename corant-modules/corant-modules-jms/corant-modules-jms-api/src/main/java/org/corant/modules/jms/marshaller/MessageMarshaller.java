@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.marshaller;
 
-import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHAME;
+import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHEMA;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -33,7 +33,7 @@ public interface MessageMarshaller {
 
   default <T extends Message> T resolveSchemaProperty(T message, String schema) {
     try {
-      message.setStringProperty(MSG_MARSHAL_SCHAME, schema);
+      message.setStringProperty(MSG_MARSHAL_SCHEMA, schema);
       return message;
     } catch (JMSException e) {
       throw new CorantRuntimeException(e);

@@ -90,9 +90,9 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   final TsJMSContextManager txCtxManager;
 
   /**
-   * @param key
-   * @param reqCtxManager
-   * @param txCtxManager
+   * @param key the JMS context key
+   * @param reqCtxManager the request scoped JMS context manager
+   * @param txCtxManager the transaction scoped JMS context manager
    */
   public ExtendedJMSContext(JMSContextKey key, RsJMSContextManager reqCtxManager,
       TsJMSContextManager txCtxManager) {

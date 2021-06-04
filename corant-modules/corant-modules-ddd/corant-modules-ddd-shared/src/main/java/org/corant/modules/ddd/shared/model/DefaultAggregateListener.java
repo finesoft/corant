@@ -45,7 +45,7 @@ public class DefaultAggregateListener {
 
   protected void handlePostLoad(AbstractAggregate o) {
     if (o.callAssistant().dequeueMessages(false).size() > 0) {
-      logger.warning(() -> String.format("The message holded by aggregate %s will be clear.", o));
+      logger.warning(() -> String.format("The message held by aggregate %s will be clear.", o));
     }
     o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
     registerToUnitOfWork(o);

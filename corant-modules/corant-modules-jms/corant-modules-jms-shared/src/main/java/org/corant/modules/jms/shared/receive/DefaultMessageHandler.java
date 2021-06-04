@@ -64,9 +64,9 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
 
   protected Object resolvePayload(Message message) throws JMSException {
     if (!Message.class.isAssignableFrom(messageClass)) {
-      String marshallerName = shouldNotBlank(message.getStringProperty(JMSNames.MSG_MARSHAL_SCHAME),
+      String marshallerName = shouldNotBlank(message.getStringProperty(JMSNames.MSG_MARSHAL_SCHEMA),
           "Resolve message payload occurred error, missing [%s] information message header.",
-          JMSNames.MSG_MARSHAL_SCHAME);
+          JMSNames.MSG_MARSHAL_SCHEMA);
       return mediator.getMessageMarshaller(marshallerName).deserialize(message, messageClass);
     }
     return message;

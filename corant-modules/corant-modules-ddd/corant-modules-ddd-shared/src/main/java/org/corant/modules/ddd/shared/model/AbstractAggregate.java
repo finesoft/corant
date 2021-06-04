@@ -208,7 +208,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    *
    * Raise Lifecycle.POST_REMOVED event by default.
    *
-   * @param lifecycle
+   * @param lifecycle the life cycle to change
    */
   protected synchronized AbstractAggregate setLifecycle(Lifecycle lifecycle) {
     if (this.lifecycle != lifecycle) {

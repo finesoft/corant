@@ -112,9 +112,6 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     final AtomicReference<XAConnection> connection = new AtomicReference<>();
     final AtomicReference<XASession> session = new AtomicReference<>();
 
-    /**
-     * @param config
-     */
     protected JMSRecoveryXAResource(AbstractJMSConfig config) {
       this.config = config;
       factory = findNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).orElseThrow(

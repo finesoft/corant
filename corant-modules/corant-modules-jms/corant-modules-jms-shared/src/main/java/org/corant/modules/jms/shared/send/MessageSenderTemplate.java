@@ -54,8 +54,8 @@ public class MessageSenderTemplate extends DefaultMessageSender {
   protected int priority = -1;
   protected CompletionListener completionListener;
   protected int sessionMode;
-  protected boolean disableMessageID;
-  protected boolean disableMessageTimestamp;
+  protected Boolean disableMessageID;
+  protected Boolean disableMessageTimestamp;
   protected String jmsType;
   protected String clientId;
   protected ExceptionListener exceptionListener;
@@ -215,10 +215,10 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     if (completionListener != null) {
       producer.setAsync(completionListener);
     }
-    if (disableMessageID) {
+    if (disableMessageID != null) {
       producer.setDisableMessageID(disableMessageID);
     }
-    if (disableMessageTimestamp) {
+    if (disableMessageTimestamp != null) {
       producer.setDisableMessageTimestamp(disableMessageTimestamp);
     }
     if (isNotBlank(jmsType)) {

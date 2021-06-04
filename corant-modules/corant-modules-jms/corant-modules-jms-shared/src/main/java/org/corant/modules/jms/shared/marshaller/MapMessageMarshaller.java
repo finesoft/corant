@@ -14,6 +14,7 @@
 package org.corant.modules.jms.shared.marshaller;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -41,9 +42,8 @@ public class MapMessageMarshaller implements MessageMarshaller {
   @SuppressWarnings("rawtypes")
   @Override
   public <T> T deserialize(Message message, Class<T> clazz) {
-    shouldBeTrue(message instanceof MapMessage);
     shouldBeTrue(Map.class.isAssignableFrom(clazz));
-    MapMessage mapMsg = (MapMessage) message;
+    MapMessage mapMsg = shouldInstanceOf(message, MapMessage.class);
     Map<String, Object> result = new HashMap<>();
     try {
       Enumeration en = mapMsg.getMapNames();
@@ -57,13 +57,12 @@ public class MapMessageMarshaller implements MessageMarshaller {
     return forceCast(result);
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public Message serialize(JMSContext jmsContext, Object object) {
     MapMessage mapMsg = jmsContext.createMapMessage();
     if (object != null) {
-      shouldBeTrue(object instanceof Map);
-      ((Map) object).forEach((t, u) -> {
+      shouldInstanceOf(object, Map.class).forEach((t, u) -> {
         try {
           mapMsg.setObject(t.toString(), u);
         } catch (JMSException e) {
@@ -74,14 +73,13 @@ public class MapMessageMarshaller implements MessageMarshaller {
     return resolveSchemaProperty(mapMsg, "MAP");
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked"})
   @Override
   public Message serialize(Session session, Object object) {
     try {
       MapMessage mapMsg = session.createMapMessage();
       if (object != null) {
-        shouldBeTrue(object instanceof Map);
-        ((Map) object).forEach((t, u) -> {
+        shouldInstanceOf(object, Map.class).forEach((t, u) -> {
           try {
             mapMsg.setObject(t.toString(), u);
           } catch (JMSException e) {

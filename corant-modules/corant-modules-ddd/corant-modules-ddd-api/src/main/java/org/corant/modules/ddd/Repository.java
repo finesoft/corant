@@ -27,36 +27,35 @@ public interface Repository<Q> {
   /**
    * Retrieve object from repository by id and object class
    *
-   * @param <T>
-   * @param cls
-   * @param id
-   * @return get
+   * @param <T> the entity type
+   * @param cls the entity class
+   * @param id the entity i
+   * @return the entity
    */
   <T> T get(Class<T> cls, Serializable id);
 
   /**
    * Merge the state of the given object into repository.
    *
-   * @param <T>
-   * @param obj
-   * @return merge
+   * @param <T> the entity type
+   * @param obj the entity instance
+   * @return the merged entity
    */
   <T> T merge(T obj);
 
   /**
    * Save the state of the given object into repository
    *
-   * @param <T>
-   * @param obj
-   * @return persist
+   * @param <T> the entity type
+   * @param obj the entity instance
    */
   <T> boolean persist(T obj);
 
   /**
    * Remove the object from repository
    *
-   * @param <T>
-   * @param obj
+   * @param <T> the entity type
+   * @param obj the entity instance
    * @return true means successfully
    */
   <T> boolean remove(T obj);
@@ -64,8 +63,8 @@ public interface Repository<Q> {
   /**
    * Retrieve objects from repository by query object
    *
-   * @param <T>
-   * @param q
+   * @param <T> the entity type
+   * @param q the query object
    * @return object list
    */
   <T> List<T> select(Q q);

@@ -35,7 +35,6 @@ import java.util.List;
  * Generally the aggregate is the DDD aggregate root entity.
  *
  * @author bingo 下午4:23:02
- * @since
  */
 public interface Aggregate extends Entity {
 

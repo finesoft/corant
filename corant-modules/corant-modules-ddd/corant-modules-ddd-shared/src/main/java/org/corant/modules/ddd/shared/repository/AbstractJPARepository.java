@@ -13,7 +13,6 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
-import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Objects.defaultObject;
 import javax.annotation.PostConstruct;
@@ -47,9 +46,11 @@ public abstract class AbstractJPARepository implements JPARepository {
     if (persistenceContext == null) {
       synchronized (this) {
         if (persistenceContext == null) {
-          Named name = defaultObject(findAnnotation(getUserClass(this.getClass()), Named.class),
-              NamedLiteral.INSTANCE);
-          persistenceContext = PersistenceContextLiteral.of(name.value());
+          Class<?> thisClass = getUserClass(this.getClass());
+          if ((persistenceContext = thisClass.getAnnotation(PersistenceContext.class)) == null) {
+            Named name = defaultObject(thisClass.getAnnotation(Named.class), NamedLiteral.INSTANCE);
+            persistenceContext = PersistenceContextLiteral.of(name.value());
+          }
         }
       }
     }

@@ -13,7 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
-import static org.corant.shared.util.Chars.isDecimalNumber;
+import static org.corant.shared.util.Strings.isDecimalNumber;
 import static org.corant.shared.util.Strings.split;
 import java.time.Instant;
 import java.time.LocalDate;

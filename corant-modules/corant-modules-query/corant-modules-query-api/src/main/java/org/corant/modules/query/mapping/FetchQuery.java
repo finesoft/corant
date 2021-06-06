@@ -274,6 +274,7 @@ public class FetchQuery implements Serializable {
     private Class<?> type;
     private boolean distinct = true;
     private boolean singleAsList = false;
+    private Script script;
 
     public FetchQueryParameter() {}
 
@@ -283,11 +284,12 @@ public class FetchQuery implements Serializable {
      * @param source
      * @param value
      * @param type
+     * @param script
      * @param distinct
      * @param singleAsList
      */
     public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
-        String value, Class<?> type, boolean distinct, boolean singleAsList) {
+        String value, Class<?> type, Script script, boolean distinct, boolean singleAsList) {
       setName(name);
       setSourceName(sourceName);
       setSource(source);
@@ -302,6 +304,10 @@ public class FetchQuery implements Serializable {
      */
     public String getName() {
       return name;
+    }
+
+    public Script getScript() {
+      return script;
     }
 
     /**
@@ -358,6 +364,10 @@ public class FetchQuery implements Serializable {
       this.name = name;
     }
 
+    protected void setScript(Script script) {
+      this.script = script;
+    }
+
     protected void setSingleAsList(boolean singleAsList) {
       this.singleAsList = singleAsList;
     }
@@ -382,7 +392,7 @@ public class FetchQuery implements Serializable {
   }
 
   public enum FetchQueryParameterSource {
-    P, R, C
+    P, R, C, S
   }
 
 }

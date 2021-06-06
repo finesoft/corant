@@ -43,8 +43,8 @@ import org.corant.context.service.ConversionService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
@@ -197,6 +197,13 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       } else if (source == FetchQueryParameterSource.P) {
         String sourceName = parameter.getSourceName();
         fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
+      } else if (source == FetchQueryParameterSource.S) {
+        // the parameter script handling
+        Function<Object[], Object> fun = QueryScriptEngines.resolveFetchParameter(parameter);
+        List<Object> parentReuslt = result instanceof List ? (List) result : listOf(result);
+        Object resultValue = fun.apply(new Object[] {criteria, parentReuslt});
+        resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
+        fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
       } else if (result != null) {
         String[] namePath = parameter.getSourceNamePath();
         try {
@@ -215,13 +222,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
           } else {
             // handle single results
             Object resultValue = resolveFetchQueryCriteriaValue(result, namePath);
-            if (resultValue instanceof Collection) {
-              if (distinct && !(resultValue instanceof Set)) {
-                resultValue = new LinkedHashSet<>((Collection) resultValue);
-              }
-            } else if (singleAsList && resultValue != null) {
-              resultValue = distinct ? setOf(resultValue) : listOf(resultValue);
-            }
+            resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
             fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
           }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -246,6 +247,19 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     } else {
       return BeanUtils.getProperty(result, String.join(".", sourceNamePath));
     }
+  }
+
+  protected Object resolveFetchQueryCriteriaValueResult(Object resultValue, boolean distinct,
+      boolean singleAsList) {
+    Object theValue = resultValue;
+    if (theValue instanceof Collection) {
+      if (distinct && !(theValue instanceof Set)) {
+        theValue = new LinkedHashSet<>((Collection) theValue);
+      }
+    } else if (singleAsList && theValue != null) {
+      theValue = distinct ? setOf(theValue) : listOf(theValue);
+    }
+    return theValue;
   }
 
 }

@@ -29,6 +29,7 @@ import javax.script.SimpleBindings;
 import org.corant.modules.lang.javascript.NashornScriptEngines;
 import org.corant.modules.lang.kotlin.KotlinScriptEngines;
 import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -68,6 +69,21 @@ public class QueryScriptEngines {
       return complieFunction(fetchQuery.getInjectionScript().getId(),
           () -> Pair.of(fetchQuery.getInjectionScript(),
               new String[] {RESULTS_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME}));
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * NOTE: Don't share the complied function in multi threads.
+   *
+   * @param fetchQuery
+   * @return resolveFetchInjections
+   */
+  public static Function<Object[], Object> resolveFetchParameter(FetchQueryParameter parameter) {
+    if (parameter.getScript().isValid()) {
+      return complieFunction(parameter.getScript().getId(), () -> Pair.of(parameter.getScript(),
+          new String[] {PARAMETER_FUNC_PARAMETER_NAME, RESULTS_FUNC_PARAMETER_NAME}));
     } else {
       return null;
     }

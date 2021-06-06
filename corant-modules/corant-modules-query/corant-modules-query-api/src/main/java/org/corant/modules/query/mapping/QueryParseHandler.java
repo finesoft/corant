@@ -492,6 +492,14 @@ public class QueryParseHandler extends DefaultHandler {
                 url);
           }
           q.setScript(obj);
+        } else if (this.currentObject() instanceof FetchQueryParameter) {
+          FetchQueryParameter p = this.currentObject();
+          if (p == null || p.getSource() != FetchQueryParameterSource.S) {
+            throw new QueryRuntimeException(
+                "Parse %s error the fetch query parameter script must be in parameter element and the source must be 'S'!",
+                url);
+          }
+          p.setScript(obj);
         }
       } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_PREDICATE_SCRIPT)) {
         if (this.currentObject() instanceof FetchQuery) {

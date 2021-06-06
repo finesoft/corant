@@ -276,6 +276,28 @@
         <xsd:annotation>
             <xsd:documentation><![CDATA[The fetch query parameters]]></xsd:documentation>
         </xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="script" type="nqms:script"
+				maxOccurs="1" minOccurs="0" nillable="false">
+				<xsd:annotation>
+					<xsd:documentation>
+                    	<![CDATA[
+							The parameter processing script, used to receive the parent query 
+							result set and parent query parameters and process and return a value, 
+							which is the parameter value of the query condition.
+	                        The default script type is Java Script. 
+	                        Example: 
+	                         (function(p,rs){ 
+									return p.criteria.get("key");
+							 })(p,rs);
+							 the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
+							 the parameter 'rs' is the parent query result record, usually is List<java util.Map>;
+							 the function must return a value.
+						 ]]>
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>        
         <xsd:attribute name="name" type="xsd:string" use="required">
             <xsd:annotation>
                  <xsd:documentation>
@@ -363,6 +385,11 @@
                     <xsd:documentation><![CDATA[Parameter value is constant.]]></xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+            <xsd:enumeration value="S">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[Parameter value is script.]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>            
         </xsd:restriction>
     </xsd:simpleType>
 

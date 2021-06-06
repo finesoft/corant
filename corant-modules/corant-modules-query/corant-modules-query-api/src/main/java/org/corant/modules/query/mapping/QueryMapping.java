@@ -164,8 +164,8 @@ public class QueryMapping {
             brokens.add(String.format(
                 "The 'source' attribute of 'parameter' in fetch query [%s] in query element [%s] in query file [%s] can not null!",
                 fq.getReferenceQuery(), q.getName(), getUrl()));
-          } else if (fqp.getSource() != FetchQueryParameterSource.C
-              && isBlank(fqp.getSourceName())) {
+          } else if ((fqp.getSource() == FetchQueryParameterSource.R
+              || fqp.getSource() == FetchQueryParameterSource.P) && isBlank(fqp.getSourceName())) {
             brokens.add(String.format(
                 "The 'source-name' attribute of 'parameter' in fetch query [%s] in query element [%s] in query file [%s] can not null!",
                 fq.getReferenceQuery(), q.getName(), getUrl()));

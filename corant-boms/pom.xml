@@ -1015,6 +1015,12 @@
 				<groupId>io.agroal</groupId>
 				<artifactId>agroal-narayana</artifactId>
 				<version>${version.agroal}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss</groupId>
+						<artifactId>jboss-transaction-spi</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- MSG/JMS -->

@@ -176,18 +176,31 @@ public class CorantConfigResolver {
     return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
   }
 
+  /**
+   * Returns resolved value, if the given value contains an expression, it will be expanded and the
+   * result after the expansion will be returned, otherwise the given value will be returned
+   * directly.
+   *
+   * @param value the value to resolve
+   * @param provider the raw configuration properties provider
+   * @return the expanded value or the original given value if it can't expand
+   */
   public static String resolveValue(String value, CorantConfigRawValueProvider provider) {
-    if (value != null) {
-      List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
-      if (value.contains(EXP_PREFIX)) {
-        value = expandValue(true, value, provider, stacks);
-        value = replace(value, EXP_REP, EXP_PREFIX);
+    if (isNotBlank(value) && provider != null) {
+      boolean exps = value.contains(EXP_PREFIX);
+      boolean vars = value.contains(VAR_PREFIX);
+      if (exps || vars) {
+        List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
+        if (exps) {
+          value = expandValue(true, value, provider, stacks);
+          value = replace(value, EXP_REP, EXP_PREFIX);
+        }
+        if (vars) {
+          value = expandValue(false, value, provider, stacks);
+          value = replace(value, VAR_REP, VAR_PREFIX);
+        }
+        stacks.clear();
       }
-      if (value.contains(VAR_PREFIX)) {
-        value = expandValue(false, value, provider, stacks);
-        value = replace(value, VAR_REP, VAR_PREFIX);
-      }
-      stacks.clear();
     }
     return value;
   }
@@ -227,6 +240,7 @@ public class CorantConfigResolver {
               extracted =
                   defaultString(resolveValue(eval, extracted, provider, stacks), defaultValue);
             } else if (extracted.endsWith(VAR_DEFAULT) && extracted.length() > 1) {
+              // default value not exist return Strings.EMPTY
               extracted =
                   defaultString(resolveValue(eval, extracted, provider, stacks), Strings.EMPTY);
             }

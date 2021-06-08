@@ -13,12 +13,12 @@
  */
 package org.corant.config;
 
-import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -40,27 +40,19 @@ public class Configs {
    *
    * NOTE: This function only supports at most one variable
    *
-   * @param key
-   * @return assemblyStringConfigProperties
+   * @param value the configuration property key or the original value
+   * @return the assembled values or the original given values if it can't expand
    */
-  public static Set<String> assemblyStringConfigProperties(String key) {
-    if (isNotBlank(key)) {
-      int s;
-      int e;
-      if ((s = key.indexOf("${")) != -1 && (e = key.indexOf('}')) != -1 && e - s > 2) {
-        String proKey = key.substring(s + 2, e);
-        if (proKey.length() > 0) {
-          Set<String> set = new LinkedHashSet<>();
-          String proVals = getConfig().getOptionalValue(proKey, String.class).orElse(null);
-          for (String proVal : CorantConfigResolver.splitValue(proVals)) {
-            set.add(new StringBuilder(key.substring(0, s)).append(proVal)
-                .append(key.substring(e + 1)).toString());
-          }
-          return set;
-        }
+  public static List<String> assemblyStringConfigProperties(String value) {
+    String useKey = assemblyStringConfigProperty(value);
+    if (isNotBlank(useKey)) {
+      List<String> list = new ArrayList<>();
+      for (String proVal : CorantConfigResolver.splitValue(useKey)) {
+        list.add(proVal);
       }
+      return list;
     }
-    return linkedHashSetOf(key);
+    return listOf(value);
   }
 
   /**
@@ -70,14 +62,16 @@ public class Configs {
    * value, If there is no property name variable, it doesn't change the passed value and directly
    * return it. This is use for enhance some annotated configuration flexibility.
    *
-   * @param value
-   * @return assemblyStringConfigProperty
+   * @param value the configuration property key or the original value
+   * @return the assembled value or the original given value if it can't expand
    */
   public static String assemblyStringConfigProperty(String value) {
-    if (isNotBlank(value)) {
+    CorantConfigSources cs = ((CorantConfig) ConfigProvider.getConfig()).getCorantConfigSources();
+    if (cs.isExpressionsEnabled()) {
+      return cs.resolveValue(value);
+    } else {
       return resolveVariable(value);
     }
-    return value;
   }
 
   /**

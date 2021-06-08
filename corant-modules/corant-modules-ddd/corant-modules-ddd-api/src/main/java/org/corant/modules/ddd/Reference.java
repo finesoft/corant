@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd;
 
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -31,15 +32,17 @@ import java.util.function.Supplier;
 public interface Reference<T> extends Supplier<T>, Serializable {
 
   @Override
+  @Transient
+  @javax.persistence.Transient
   default T get() {
     return retrieve();
   }
 
   /**
    * Retrieve the object to which the reference refers, and throws an exception if it is not found.
-   *
-   * @return
    */
+  @Transient
+  @javax.persistence.Transient
   T retrieve();
 
   /**
@@ -47,6 +50,8 @@ public interface Reference<T> extends Supplier<T>, Serializable {
    *
    * @return tryRetrieve
    */
+  @Transient
+  @javax.persistence.Transient
   default Optional<T> tryRetrieve() {
     return Optional.empty();
   }

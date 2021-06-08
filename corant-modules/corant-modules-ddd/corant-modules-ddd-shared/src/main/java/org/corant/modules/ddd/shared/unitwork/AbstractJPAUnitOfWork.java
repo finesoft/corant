@@ -131,11 +131,13 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    */
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
-    shouldBeTrue(
-        pc != null && pc.type() == PersistenceContextType.TRANSACTION
-            && pc.synchronization() == SynchronizationType.SYNCHRONIZED,
-        "Can't get entity manager, only accept non null and TRANSACTION and SYNCHRONIZED persistence context!");
-    return entityManagers.computeIfAbsent(pc, manager::getEntityManager);
+    return entityManagers.computeIfAbsent(pc, k -> {
+      shouldBeTrue(
+          k != null && k.type() == PersistenceContextType.TRANSACTION
+              && k.synchronization() == SynchronizationType.SYNCHRONIZED,
+          "Can't get entity manager, only accept non null and TRANSACTION and SYNCHRONIZED persistence context!");
+      return manager.getEntityManager(k);
+    });
   }
 
   /**

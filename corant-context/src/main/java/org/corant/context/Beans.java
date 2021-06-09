@@ -14,16 +14,11 @@
 package org.corant.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Objects.forceCast;
 import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Optional;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,6 +33,7 @@ import javax.enterprise.inject.spi.CDI;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Services;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -166,16 +162,7 @@ public class Beans {
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> findService(Class<T> instanceClass) {
-    List<T> list = listOf(ServiceLoader.load(instanceClass, defaultClassLoader()));
-    if (isNotEmpty(list)) {
-      if (list.size() == 1) {
-        return Optional.of(list.get(0));
-      } else if (Sortable.class.isAssignableFrom(instanceClass)) {
-        return Optional.ofNullable(
-            forceCast(list.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
-      }
-    }
-    return Optional.empty();
+    return Services.find(instanceClass);
   }
 
   public static boolean isManagedBean(Object object, Annotation... qualifiers) {

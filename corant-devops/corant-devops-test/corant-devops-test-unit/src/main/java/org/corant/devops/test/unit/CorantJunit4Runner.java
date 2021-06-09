@@ -120,8 +120,8 @@ public interface CorantJunit4Runner {
         ARGS.set(rc.arguments());
       }
       AUTO_DISPOSES.set(rc.autoDispose());
-      BEAN_CLASSES.set(classes.toArray(new Class<?>[classes.size()]));
     }
+    BEAN_CLASSES.set(classes.toArray(new Class<?>[classes.size()]));
   }
 
   default Object createTestWithCorant(Class<?> clazz) {

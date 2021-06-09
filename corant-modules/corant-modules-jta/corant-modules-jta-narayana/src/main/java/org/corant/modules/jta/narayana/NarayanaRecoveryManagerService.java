@@ -106,7 +106,9 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
 
   protected void unInitialize() throws Exception {
     if (ready) {
-      stop();
+      if (extension.getConfig().isAutoRecovery()) {
+        stop();
+      }
       helpers.forEach(helper -> {
         XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
         helper.destory();
@@ -114,8 +116,6 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
       helpers.clear();
       if (extension.getConfig().isAutoRecovery()) {
         logger.info(() -> "JTA automatic recovery processes has been stopped.");
-      } else {
-        logger.info(() -> "JTA manual recovery processes has been stopped.");
       }
     }
   }

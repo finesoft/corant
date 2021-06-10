@@ -13,16 +13,20 @@
  */
 package org.corant.modules.ddd.shared.message;
 
-import java.util.function.Function;
-import org.corant.modules.ddd.Message;
+import java.util.function.Consumer;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-ddd-shared
+ *
+ * <p>
+ * The message pre-dispatch hander use to configure the message properties purpose for message
+ * consumer to select messages.
  *
  * @author bingo 下午5:57:40
  *
  */
 @FunctionalInterface
-public interface JMSMessageConverter extends Function<Message, javax.jms.Message> {
+public interface JMSMessagePreDispatchHandler extends Consumer<javax.jms.Message>, Sortable {
 
 }

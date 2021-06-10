@@ -42,6 +42,7 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.modules.jms.metadata.MessageDestinationMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -61,6 +62,10 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   protected Instance<JMSContextService> contextService;
 
   @Inject
+  @Any
+  protected Instance<JMSMessagePreDispatchHandler> preDispatchHandlers;
+
+  @Inject
   @ConfigProperty(name = "corant.ddd.message.marshaller",
       defaultValue = JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA)
   protected String marshallerName;
@@ -78,31 +83,34 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   public void accept(Message[] messages) {
     for (Message msg : messages) {
       for (MessageDestinationMetaData dest : from(msg.getClass())) {
-        if (msg instanceof BinaryMessage) {
-          try (InputStream is = ((BinaryMessage) msg).openStream()) {
-            send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
-                dest.getProperties(),
-                binaryMarshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), is));
-          } catch (IOException e) {
-            throw new CorantRuntimeException(e);
-          }
-        } else {
-          send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
-              dest.getProperties(),
-              marshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), msg));
-        }
+        send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
+            dest.getProperties(), msg);
       }
     }
   }
 
   public void send(String broker, boolean multicast, String destination,
-      Map<String, Object> properties, javax.jms.Message message) {
+      Map<String, Object> properties, Message message) {
     JMSContext ctx = obtainJmsContext(broker);
+    javax.jms.Message jmsMsg = null;
+    if (message instanceof BinaryMessage) {
+      try (InputStream is = ((BinaryMessage) message).openStream()) {
+        jmsMsg = binaryMarshaller.serialize(ctx, is);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    } else {
+      jmsMsg = marshaller.serialize(ctx, message);
+    }
     JMSProducer producer = ctx.createProducer();
     if (isNotEmpty(properties)) {
-      properties.forEach(uncheckedBiConsumer(message::setObjectProperty));
+      properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
     }
-    producer.send(createDestination(ctx, multicast, destination), message);
+    final javax.jms.Message theMsg = jmsMsg;
+    if (!preDispatchHandlers.isUnsatisfied()) {
+      preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(theMsg));
+    }
+    producer.send(createDestination(ctx, multicast, destination), theMsg);
   }
 
   protected Destination createDestination(JMSContext ctx, boolean multicast, String destination) {

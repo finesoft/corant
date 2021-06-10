@@ -1,4 +1,4 @@
-package org.corant.modules.lang.groovy;
+package org.corant.modules.lang.javascript;
 
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import org.graalvm.polyglot.Context;
@@ -7,12 +7,12 @@ import org.graalvm.polyglot.HostAccess;
 import javax.script.ScriptEngine;
 
 /**
- * my-app <br>
+ *  <br>
  *
  * @author sushuaihao 2021/6/10
- * @since
+ * @since 1.7.0
  */
-public class GraalScriptEngines {
+public class GraalJSScriptEngines {
   public static ScriptEngine createEngine() {
     return GraalJSScriptEngine.create(
         null,

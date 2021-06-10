@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
+import javax.inject.Named;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Strings;
 
@@ -43,31 +44,43 @@ public class Qualifiers {
     return Strings.defaultString(named);
   }
 
-  public static Annotation[] resolveNamedQualifiers(String name) {
-    return resolveName(name).isEmpty() ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
-        : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
-  }
-
   public static Map<String, Annotation[]> resolveNameds(Set<String> names) {
     if (isNotEmpty(names)) {
-      Map<String, Annotation[]> nameds = new HashMap<>(names.size());
+      Map<String, Annotation[]> anns = new HashMap<>(names.size());
       Set<String> tNames = names.stream().map(Qualifiers::resolveName).collect(Collectors.toSet());
       if (tNames.size() == 1) {
         String name = tNames.iterator().next();
         if (name.isEmpty()) {
-          nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
+          anns.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE});
         } else {
-          nameds.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
+          anns.put(name, new Annotation[] {Default.Literal.INSTANCE, Any.Literal.INSTANCE,
               NamedLiteral.of(name)});
         }
       } else {
         for (String name : tNames) {
-          nameds.put(name, resolveNamedQualifiers(name));
+          anns.put(name, resolveNamedQualifiers(name));
         }
       }
-      return nameds;
+      return anns;
     }
     return new HashMap<>(0);
+  }
+
+  /**
+   * Returns an annotations for multiple names resolution.
+   * <p>
+   * Note: According to CDI-spec2.0-3.9, if an injected field declares a {@link Named} annotation
+   * that does not specify the value member, the name of the field is assumed; this way is not very
+   * convenient, so for this situation we use {@link Unnamed} annotation.
+   * <p>
+   * This solution is not good, it may be changed in future and may introduce a new custom qualifier
+   * type to resolve multiple names qualifier.
+   *
+   * @param name the one of multiple names
+   */
+  static Annotation[] resolveNamedQualifiers(String name) {
+    return name.isEmpty() ? new Annotation[] {Unnamed.INST, Any.Literal.INSTANCE}
+        : new Annotation[] {NamedLiteral.of(name), Any.Literal.INSTANCE, Default.Literal.INSTANCE};
   }
 
   public static class DefaultNamedQualifierObjectManager<T extends NamedObject>

@@ -17,6 +17,8 @@ import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.uncheckedBiConsumer;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,11 +34,13 @@ import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.transaction.Transactional;
 import org.corant.modules.ddd.Message;
+import org.corant.modules.ddd.Message.BinaryMessage;
 import org.corant.modules.ddd.MessageDispatcher;
 import org.corant.modules.jms.JMSNames;
 import org.corant.modules.jms.context.JMSContextService;
 import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.modules.jms.metadata.MessageDestinationMetaData;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -61,15 +65,32 @@ public class JMSMessageDispatcher implements MessageDispatcher {
       defaultValue = JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA)
   protected String marshallerName;
 
+  @Inject
+  @ConfigProperty(name = "corant.ddd.message.binary-marshaller",
+      defaultValue = JMSNames.MSG_MARSHAL_SCHEMA_ZIP_BINARY)
+  protected String binaryMarshallerName;
+
   protected MessageMarshaller marshaller;
+
+  protected MessageMarshaller binaryMarshaller;
 
   @Override
   public void accept(Message[] messages) {
     for (Message msg : messages) {
       for (MessageDestinationMetaData dest : from(msg.getClass())) {
-        send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
-            dest.getProperties(),
-            marshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), msg));
+        if (msg instanceof BinaryMessage) {
+          try (InputStream is = ((BinaryMessage) msg).openStream()) {
+            send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
+                dest.getProperties(),
+                binaryMarshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), is));
+          } catch (IOException e) {
+            throw new CorantRuntimeException(e);
+          }
+        } else {
+          send(dest.getConnectionFactoryId(), dest.isMulticast(), dest.getName(),
+              dest.getProperties(),
+              marshaller.serialize(obtainJmsContext(dest.getConnectionFactoryId()), msg));
+        }
       }
     }
   }
@@ -102,6 +123,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   @PostConstruct
   protected void onPostConstruct() {
     marshaller = resolve(MessageMarshaller.class, NamedLiteral.of(marshallerName));
+    binaryMarshaller = resolve(MessageMarshaller.class, NamedLiteral.of(binaryMarshallerName));
   }
 
   @PreDestroy

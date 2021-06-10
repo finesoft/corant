@@ -13,6 +13,8 @@
  */
 package org.corant.modules.ddd;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -22,6 +24,10 @@ import java.time.Instant;
  * @author bingo 上午10:41:55
  */
 public interface Message extends Serializable {
+
+  interface BinaryMessage extends Message {
+    InputStream openStream() throws IOException;
+  }
 
   interface ExchangedMessage extends Message {
 

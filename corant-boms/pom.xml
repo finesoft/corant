@@ -134,7 +134,7 @@
 		<version.org.osgi.service.cdi>1.0.0</version.org.osgi.service.cdi>
 		<version.osgi.annotation>7.0.0</version.osgi.annotation>
 		<version.pinyin4j>2.5.1</version.pinyin4j>
-    <version.prometheus>0.15.0</version.prometheus>
+    	<version.prometheus>0.15.0</version.prometheus>
 		<version.quartz>2.3.2</version.quartz>
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.13.4</version.redisson>

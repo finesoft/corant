@@ -34,12 +34,14 @@ import org.corant.shared.util.Classes;
 public class Services {
 
   /**
-   * Returns an {@link Optional} service instance that matches the given service class from
-   * ServiceLoader and {@link Classes#defaultClassLoader()} or return an empty {@link Optional} if
-   * not found.
+   * Returns an {@link Optional} service instance that matches the given service class and
+   * {@link Classes#defaultClassLoader()} from {@link ServiceLoader} or return an empty
+   * {@link Optional} if not found.
    *
-   * Note: If there are multiple service instances found by ServiceLoader and given service class is
-   * {@link Sortable} then return the highest priority service instance.
+   * Note: If there are multiple service instances found by the {@link ServiceLoader} and given
+   * service class is {@link Sortable} or {@link Comparable} then return the highest priority
+   * service instance, for some services that are implemented {@link Sortable} and
+   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
@@ -47,50 +49,55 @@ public class Services {
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> find(Class<T> serviceClass) {
-    List<T> list = listOf(ServiceLoader.load(serviceClass, defaultClassLoader()));
-    if (isNotEmpty(list)) {
-      if (list.size() == 1) {
-        return Optional.of(list.get(0));
-      } else if (Sortable.class.isAssignableFrom(serviceClass)) {
-        return Optional.ofNullable(
-            forceCast(list.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
-      }
-    }
-    return Optional.empty();
+    return findFirst(serviceClass, listOf(ServiceLoader.load(serviceClass, defaultClassLoader())));
   }
 
   /**
-   * Returns an {@link Optional} service instance that matches the given service class from
-   * ServiceLoader and the given class loader or return an empty {@link Optional} if not found.
+   * Returns an {@link Optional} service instance that matches the given service class and the given
+   * class loader from {@link ServiceLoader} or return an empty {@link Optional} if not found.
    *
-   * Note: If there are multiple service instances found by ServiceLoader and the given service
-   * class is {@link Sortable} then return the highest priority service instance.
+   * Note: If there are multiple service instances found by the {@link ServiceLoader} and the given
+   * service class is {@link Sortable} or {@link Comparable} then return the highest priority
+   * service instance, for some services that are implemented {@link Sortable} and
+   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    * @param classLoader The class loader to be used to load provider-configuration files and
    *        provider classes, or null if the system class loader (or, failing that, the bootstrap
-   *        class loader) is to beused
+   *        class loader) is to be used
    */
   public static <T> Optional<T> find(Class<T> serviceClass, ClassLoader classLoader) {
-    List<T> list = listOf(ServiceLoader.load(serviceClass, classLoader));
-    if (isNotEmpty(list)) {
-      if (list.size() == 1) {
-        return Optional.of(list.get(0));
-      } else if (Sortable.class.isAssignableFrom(serviceClass)) {
-        return Optional.ofNullable(
-            forceCast(list.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
-      }
-    }
-    return Optional.empty();
+    return findFirst(serviceClass, listOf(ServiceLoader.load(serviceClass, classLoader)));
   }
 
   /**
-   * Returns a service instance that matches the given service class from ServiceLoader and
-   * {@link Classes#defaultClassLoader()} or throws exception if the service not found.
+   * Returns an {@link Optional} service instance that matches the given service class and the given
+   * module layer and its ancestors from the {@link ServiceLoader} or return an empty
+   * {@link Optional} if not found.
    *
-   * Note: If there are multiple service instances found by ServiceLoader and given service class is
-   * {@link Sortable} then return the highest priority service instance.
+   * Note: If there are multiple service instances found by ServiceLoader and the given service
+   * class is {@link Sortable} or {@link Comparable} then return the highest priority service
+   * instance, for some services that are implemented {@link Sortable} and {@link Comparable}, the
+   * {@link Sortable} will be used for sorting preferred.
+   *
+   * @param <T> the service type to be resolved
+   * @param serviceClass the service instance class to be resolved
+   * @param layer the module layer
+   */
+  public static <T> Optional<T> find(ModuleLayer layer, Class<T> serviceClass) {
+    return findFirst(serviceClass, listOf(ServiceLoader.load(layer, serviceClass)));
+  }
+
+  /**
+   * Returns a service instance that matches the given service class and
+   * {@link Classes#defaultClassLoader()} from {@link ServiceLoader} or throws exception if the
+   * service not found.
+   *
+   * Note: If there are multiple service instances found by {@link ServiceLoader} and given service
+   * class is {@link Sortable} or {@link Comparable} then return the highest priority service
+   * instance, for some services that are implemented {@link Sortable} and {@link Comparable}, the
+   * {@link Sortable} will be used for sorting preferred.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
@@ -104,11 +111,14 @@ public class Services {
   }
 
   /**
-   * Returns a service instance that matches the given service class from ServiceLoader and
-   * {@link Classes#defaultClassLoader()} or throws exception if the service not found.
+   * Returns a service instance that matches the given service class and
+   * {@link Classes#defaultClassLoader()} from {@link ServiceLoader} or throws exception if the
+   * service not found.
    *
-   * Note: If there are multiple service instances found by ServiceLoader and the given service
-   * class is {@link Sortable} then return the highest priority service instance.
+   * Note: If there are multiple service instances found by {@link ServiceLoader} and the given
+   * service class is {@link Sortable} or {@link Comparable} then return the highest priority
+   * service instance, for some services that are implemented {@link Sortable} and
+   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
@@ -123,8 +133,8 @@ public class Services {
   }
 
   /**
-   * Returns a service instance stream that matches the given service class from ServiceLoader and
-   * {@link Classes#defaultClassLoader()}
+   * Returns a service instance stream that matches the given service class and
+   * {@link Classes#defaultClassLoader()} from {@link ServiceLoader}.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
@@ -134,8 +144,8 @@ public class Services {
   }
 
   /**
-   * Returns a service instance stream that matches the given service class from ServiceLoader and
-   * the given class loader.
+   * Returns a service instance stream that matches the given service class and the given class
+   * loader from {@link ServiceLoader}.
    *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
@@ -145,5 +155,19 @@ public class Services {
    */
   public static <T> Stream<T> select(Class<T> serviceClass, ClassLoader classLoader) {
     return streamOf(ServiceLoader.load(serviceClass, classLoader));
+  }
+
+  static <T> Optional<T> findFirst(Class<T> serviceClass, List<T> services) {
+    if (isNotEmpty(services)) {
+      if (services.size() == 1) {
+        return Optional.of(services.get(0));
+      } else if (Sortable.class.isAssignableFrom(serviceClass)) {
+        return Optional.ofNullable(forceCast(
+            services.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
+      } else if (Comparable.class.isAssignableFrom(serviceClass)) {
+        return Optional.ofNullable(forceCast(services.stream().sorted().findFirst().orElse(null)));
+      }
+    }
+    return Optional.empty();
   }
 }

@@ -92,7 +92,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   public void send(String broker, boolean multicast, String destination,
       Map<String, Object> properties, Message message) {
     JMSContext ctx = obtainJmsContext(broker);
-    javax.jms.Message jmsMsg = null;
+    final javax.jms.Message jmsMsg;
     if (message instanceof BinaryMessage) {
       try (InputStream is = ((BinaryMessage) message).openStream()) {
         jmsMsg = binaryMarshaller.serialize(ctx, is);
@@ -106,11 +106,10 @@ public class JMSMessageDispatcher implements MessageDispatcher {
     if (isNotEmpty(properties)) {
       properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
     }
-    final javax.jms.Message theMsg = jmsMsg;
     if (!preDispatchHandlers.isUnsatisfied()) {
-      preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(theMsg));
+      preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(jmsMsg));
     }
-    producer.send(createDestination(ctx, multicast, destination), theMsg);
+    producer.send(createDestination(ctx, multicast, destination), jmsMsg);
   }
 
   protected Destination createDestination(JMSContext ctx, boolean multicast, String destination) {

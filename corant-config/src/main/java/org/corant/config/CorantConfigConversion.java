@@ -341,33 +341,34 @@ public class CorantConfigConversion implements Serializable {
 
   public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
     // TODO MP 2.0
-    Converter<?> converter = null;
+    Converter<?> converter;
     if (forType == String.class || forType == Object.class) {
       converter = s -> s;
+      return Optional.of(forceCast(converter));
     }
-    if (forType.isArray()) {
-      converter = v -> convertArray(v, forType.getComponentType());
+    if (forType.isArray()
+        && (converter = v -> convertArray(v, forType.getComponentType())) != null) {
+      return Optional.of(forceCast(converter));
     }
-    if (null == converter) {
-      converter = converters.get().get(wrap(forType));
-    }
-
-    if (null == converter) {
-      converter = OptionalsConverters.of(forType, this).orElse(null);
+    if ((converter = converters.get().get(wrap(forType))) != null) {
+      return Optional.of(forceCast(converter));
     }
 
-    if (null == converter) {
-      converter = ImplicitConverters.of(forType).orElse(null);
+    if ((converter = OptionalsConverters.of(forType, this).orElse(null)) != null) {
+      return Optional.of(forceCast(converter));
     }
 
-    if (null == converter) {
-      Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
-          Converters.lookup(String.class, forType);
-      if (corantConverter.isPresent()) {
-        converter = s -> corantConverter.get().apply(s, null);
-      }
+    if ((converter = ImplicitConverters.of(forType).orElse(null)) != null) {
+      return Optional.of(forceCast(converter));
     }
-    return Optional.ofNullable(forceCast(converter));
+
+    Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
+        Converters.lookup(String.class, forType);
+    if (corantConverter.isPresent()) {
+      converter = s -> corantConverter.get().apply(s, null);
+      return Optional.of(forceCast(converter));
+    }
+    return Optional.empty();
   }
 
   /**

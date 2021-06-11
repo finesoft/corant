@@ -20,8 +20,10 @@ import static org.corant.shared.util.Functions.uncheckedBiConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -31,7 +33,6 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
-import javax.jms.JMSProducer;
 import javax.transaction.Transactional;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.Message.BinaryMessage;
@@ -57,6 +58,8 @@ public class JMSMessageDispatcher implements MessageDispatcher {
 
   protected final Map<Class<?>, Set<MessageDestinationMetaData>> metas = new ConcurrentHashMap<>();
 
+  protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
+
   @Inject
   @Any
   protected Instance<JMSContextService> contextService;
@@ -64,6 +67,10 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   @Inject
   @Any
   protected Instance<JMSMessagePreDispatchHandler> preDispatchHandlers;
+
+  @Inject
+  @Any
+  protected Instance<JMSMessageDestinationResolver> destinationResolvers;
 
   @Inject
   @ConfigProperty(name = "corant.ddd.message.marshaller",
@@ -92,28 +99,39 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   public void send(String broker, boolean multicast, String destination,
       Map<String, Object> properties, Message message) {
     JMSContext ctx = obtainJmsContext(broker);
+    final Destination dest = resolveDestination(message, ctx, multicast, destination);
+    logger.finer(() -> String.format("Resolved JMS message destination %s for domain message %",
+        dest, message.getClass()));
+    final javax.jms.Message jmsMsg = createJMSMessage(ctx, message);
+    if (isNotEmpty(properties)) {
+      properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
+    }
+    onPreDispatch(jmsMsg);
+    ctx.createProducer().send(dest, jmsMsg);
+  }
+
+  protected Destination createDestination(JMSContext ctx, boolean multicast, String destination) {
+    return multicast ? ctx.createTopic(destination) : ctx.createQueue(destination);
+  }
+
+  protected javax.jms.Message createJMSMessage(JMSContext ctx, Message message) {
     final javax.jms.Message jmsMsg;
     if (message instanceof BinaryMessage) {
       try (InputStream is = ((BinaryMessage) message).openStream()) {
         jmsMsg = binaryMarshaller.serialize(ctx, is);
+        logger.finer(() -> String.format(
+            "Convert the domain message %s to binary JMS message, serialize schema %s.",
+            message.getClass(), binaryMarshallerName));
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
     } else {
       jmsMsg = marshaller.serialize(ctx, message);
+      logger.finer(
+          () -> String.format("Convert the domain message %s to JMS message, serialize schema %s",
+              message.getClass(), marshallerName));
     }
-    JMSProducer producer = ctx.createProducer();
-    if (isNotEmpty(properties)) {
-      properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
-    }
-    if (!preDispatchHandlers.isUnsatisfied()) {
-      preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(jmsMsg));
-    }
-    producer.send(createDestination(ctx, multicast, destination), jmsMsg);
-  }
-
-  protected Destination createDestination(JMSContext ctx, boolean multicast, String destination) {
-    return multicast ? ctx.createTopic(destination) : ctx.createQueue(destination);
+    return jmsMsg;
   }
 
   protected Set<MessageDestinationMetaData> from(Class<?> clazz) {
@@ -136,5 +154,27 @@ public class JMSMessageDispatcher implements MessageDispatcher {
   @PreDestroy
   protected void onPreDestroy() {
     metas.clear();
+  }
+
+  protected void onPreDispatch(javax.jms.Message jmsMsg) {
+    if (!preDispatchHandlers.isUnsatisfied()) {
+      preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(jmsMsg));
+      logger.finer(() -> "Complete the preprocessing before dispatching the message.");
+    }
+  }
+
+  protected Destination resolveDestination(Message message, JMSContext ctx, boolean multicast,
+      String destination) {
+    if (!destinationResolvers.isUnsatisfied()) {
+      Optional<JMSMessageDestinationResolver> destResolver = destinationResolvers.stream()
+          .filter(r -> r.canResolve(message)).sorted(Sortable::compare).findFirst();
+      if (destResolver.isPresent()) {
+        Destination dest = destResolver.get().apply(ctx, message);
+        if (dest != null) {
+          return dest;
+        }
+      }
+    }
+    return createDestination(ctx, multicast, destination);
   }
 }

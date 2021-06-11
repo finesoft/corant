@@ -27,6 +27,8 @@ import org.corant.modules.jms.shared.context.JMSContextManager.TsJMSContextManag
 /**
  * corant-modules-jms-shared
  *
+ * TODO: Use pooled connection
+ *
  * @author bingo 下午5:36:38
  *
  */

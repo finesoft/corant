@@ -15,9 +15,10 @@ package org.corant.modules.ddd.shared.message;
 
 import org.corant.modules.ddd.AbstractAggregateMessage;
 import org.corant.modules.ddd.Aggregate;
-import org.corant.modules.ddd.MergableMessage;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
+import org.corant.modules.ddd.MergableMessage;
 import org.corant.modules.ddd.Value.SimpleValueMap;
+import org.corant.modules.jms.annotation.MessageDestination;
 
 /**
  * corant-modules-ddd-shared
@@ -25,6 +26,8 @@ import org.corant.modules.ddd.Value.SimpleValueMap;
  * @author bingo 下午5:48:49
  *
  */
+@MessageDestination(connectionFactoryId = "${corant.ddd.aggregate-lifecycle-message.broker:}",
+    name = "${corant.ddd.aggregate-lifecycle-message.queue:}", multicast = true)
 public class AggregateLifecycleMessage extends AbstractAggregateMessage implements MergableMessage {
 
   private static final long serialVersionUID = -5988315884617833263L;

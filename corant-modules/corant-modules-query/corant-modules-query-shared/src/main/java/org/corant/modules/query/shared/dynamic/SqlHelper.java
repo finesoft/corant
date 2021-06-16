@@ -13,11 +13,20 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-shared
@@ -52,6 +61,11 @@ public class SqlHelper {
   public static final Pattern OFFSET_PATTERN = SqlHelper.buildShallowIndexPattern(OFFSET, true);
   public static final Pattern LIMIT_PATTERN = SqlHelper.buildShallowIndexPattern(LIMIT, true);
   public static final Pattern FETCH_PATTERN = SqlHelper.buildShallowIndexPattern(FETCH, true);
+
+  public static final String SQL_PARAM_PH = "?";
+  public static final char SQL_PARAM_PH_C = SQL_PARAM_PH.charAt(0);
+  public static final char SQL_PARAM_ESC_C = '\'';
+  public static final String SQL_PARAM_SP = ",";
 
   private SqlHelper() {}
 
@@ -100,32 +114,86 @@ public class SqlHelper {
     return null;
   }
 
-  // public static void main(String... regex) {
-  // String sql = "SELECT distinct a.*,basd,asd as aa ,asdasd,"
-  // + "(selectr top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
-  // + "WHERE " + "XXXX IN (SELECT TOP 1 X FROM XX ORDER BY XX) "
-  // + "order \t \n by ss asc,sss desc,assss asc";
-  // System.out.println(sql);
-  // System.out.println("========================Remove Order By==========================");
-  // System.out.println(removeOrderBy(sql));
-  // System.out.println("========================Remove Select==========================");
-  // System.out.println(removeSelect(sql));
-  // System.out.println("========================Get Select==========================");
-  // System.out.println(getSelectColumns(sql));
-  // System.out.println("========================Get Order By==========================");
-  // System.out.println(getOrderBy(sql));
-  // }
+  /**
+   * Return a pre-processed SQL statement containing place holders according to the given SQL and
+   * parameter array. If the parameter is an array or list, it will be automatically expanded into
+   * multiple place holders.
+   *
+   * FIXME: Need another implementation
+   *
+   * @param sql the SQL statement may containing place holders
+   * @param parameters the parameters
+   */
+  public static Pair<String, Object[]> getPrepared(String sql, Object... parameters) {
+    if (isEmpty(parameters) || isBlank(sql)
+        || streamOf(parameters).noneMatch(p -> p instanceof Collection || p.getClass().isArray())) {
+      return Pair.of(sql, parameters);
+    }
+    LinkedList<Object> orginalParams = linkedListOf(parameters);
+    List<Object> fixedParams = new ArrayList<>();
+    StringBuilder fixedSql = new StringBuilder();
+    int escapes = 0;
+    for (int i = 0; i < sql.length(); i++) {
+      char c = sql.charAt(i);
+      if (c == SQL_PARAM_ESC_C) {
+        fixedSql.append(c);
+        escapes++;
+      } else if (c == SQL_PARAM_PH_C && escapes % 2 == 0) {
+        Object param = orginalParams.remove();
+        if (param instanceof Iterable) {
+          Iterable<?> iterableParam = (Iterable<?>) param;
+          if (isNotEmpty(iterableParam)) {
+            for (Object p : iterableParam) {
+              fixedParams.add(p);
+              fixedSql.append(SQL_PARAM_PH).append(SQL_PARAM_SP);
+            }
+            fixedSql.deleteCharAt(fixedSql.length() - 1);
+          }
+        } else if (param != null && param.getClass().isArray()) {
+          Object[] arrayParam = (Object[]) param;
+          if (isNotEmpty(arrayParam)) {
+            for (Object p : arrayParam) {
+              fixedParams.add(p);
+              fixedSql.append(SQL_PARAM_PH).append(SQL_PARAM_SP);
+            }
+            fixedSql.deleteCharAt(fixedSql.length() - 1);
+          }
+        } else {
+          fixedParams.add(param);
+          fixedSql.append(c);
+        }
+      } else {
+        fixedSql.append(c);
+      }
+    }
+    if (escapes % 2 != 0 || !orginalParams.isEmpty()) {
+      throw new QueryRuntimeException("Parameters and sql statements not match!");
+    }
+    return Pair.of(fixedSql.toString(), fixedParams.toArray());
+  }
 
   public static String getSelectColumns(String sql) {
     return sql.substring(getSelectColumnsStartPosition(sql),
         shallowIndexOfPattern(sql, FROM_PATTERN, 0));
   }
 
+  public static void main(String... regex) {
+    String sql = "SELECT distinct a.*,basd,asd as aa ,asdasd,"
+        + "(selectr top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
+        + "WHERE " + "XXXX IN (SELECT TOP 1 X FROM XX ORDER BY XX) "
+        + "order \t \n by ss asc,sss desc,assss asc";
+    System.out.println("ORIGINAL:\n" + sql);
+    System.out.println("REMOVE_ORDER_BY:\n" + removeOrderBy(sql));
+    System.out.println("REMOVE_SELECT:\n" + removeSelect(sql));
+    System.out.println("SELECT_COLUMNS:\n" + getSelectColumns(sql));
+    System.out.println("ORDER_BY:\n" + getOrderBy(sql));
+  }
+
   public static String removeOrderBy(String sql) {
     if (sql != null) {
       int pos = shallowIndexOfPattern(sql, ORDER_BY_PATTERN, 0);
       if (pos > 0 && sql.indexOf('?', pos) == -1) {
-        // Some database allow prepare statment use place holder FIXME
+        // Some database allow prepare statement use place holder FIXME
         return sql.substring(0, pos);
       }
     }

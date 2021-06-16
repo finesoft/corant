@@ -27,8 +27,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.QueryObjectMapper;
-import org.corant.modules.query.QueryService;
 import org.corant.modules.query.QueryParameter.StreamQueryParameter;
+import org.corant.modules.query.QueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.util.Retry.RetryInterval;
 import org.corant.shared.util.Streams;
@@ -47,8 +47,11 @@ public class StreamNamedQueryServices {
   private StreamQueryParameter parameter = new StreamQueryParameter();
 
   /**
-   * @param queryName
-   * @param qualifier
+   * Construct a stream named query service with the name of named query and the qualifier of named
+   * query service.
+   *
+   * @param queryName the name of named query
+   * @param qualifier the qualifier for named query service resolving
    */
   protected StreamNamedQueryServices(String queryName, Annotation qualifier) {
     this.queryName = shouldNotBlank(queryName);
@@ -56,18 +59,35 @@ public class StreamNamedQueryServices {
   }
 
   /**
-   * @param queryName
-   * @param namedQueryService
+   * Construct a stream named query service with the name of named query and the named query
+   * service.
+   *
+   * @param queryName the name of named query
+   * @param namedQueryService the named query service for streaming
    */
   protected StreamNamedQueryServices(String queryName, NamedQueryService namedQueryService) {
     this.queryName = shouldNotBlank(queryName);
     this.namedQueryService = shouldNotNull(namedQueryService);
   }
 
+  /**
+   * Returns a stream named query service with the given query name and the given named query
+   * service.
+   *
+   * @param namedQueryService the named query service for streaming
+   * @param queryName the query name
+   */
   public static StreamNamedQueryServices of(NamedQueryService namedQueryService, String queryName) {
     return new StreamNamedQueryServices(queryName, namedQueryService);
   }
 
+  /**
+   * Returns a stream named query service with the given query name and the given qualifier, the
+   * given qualifier may use to resolve the named query service that use for streaming.
+   *
+   * @param queryName the query name
+   * @param qualifier the qualifier for named query service resolving
+   */
   public static StreamNamedQueryServices of(String queryName, Annotation qualifier) {
     return new StreamNamedQueryServices(queryName, qualifier);
   }

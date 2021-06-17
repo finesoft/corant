@@ -37,6 +37,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -59,6 +60,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Retry;
 import org.corant.shared.util.Retry.RetryInterval;
+import org.corant.shared.util.Retry.Retryer;
 
 /**
  * corant-modules-query-sql
@@ -79,7 +81,7 @@ public class SqlQueryTemplate {
   protected final Dialect dialect;
   protected final DataSource datasource;
   protected String sql;
-  protected Object[] parameters = Objects.EMPTY_ARRAY;
+  protected Object[] ordinaryParameters = Objects.EMPTY_ARRAY;
   protected Map<String, Object> namedParameters = new HashMap<>();
   protected boolean useNamedParameter = false;
   protected int limit = 16;
@@ -167,9 +169,14 @@ public class SqlQueryTemplate {
     return new SqlQueryTemplate(DBMS.SQLSERVER2012, dataSourceName);
   }
 
+  /**
+   * Execute the query according to the {@link #offset} and {@link #limit} to return the result set
+   * and return the mark of whether there are more records in this query. It is generally used to
+   * iteratively query all the records that meet the conditions.
+   */
   public Forwarding<Map<String, Object>> forward() {
-    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalized(namedParameters, sql)
-        : SqlStatements.normalized(sql, parameters);
+    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+        : SqlStatements.normalize(sql, ordinaryParameters);
     String limitSql = dialect.getLimitSql(ps.getLeft(), offset, limit + 1);
     final Object[] params = ps.getRight();
     Forwarding<Map<String, Object>> result = Forwarding.inst();
@@ -193,8 +200,8 @@ public class SqlQueryTemplate {
   }
 
   public Map<?, ?> get() {
-    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalized(namedParameters, sql)
-        : SqlStatements.normalized(sql, parameters);
+    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+        : SqlStatements.normalize(sql, ordinaryParameters);
     return get(ps.getLeft(), ps.getRight());
   }
 
@@ -212,9 +219,6 @@ public class SqlQueryTemplate {
    * iteration of the streaming query
    *
    * @see QueryParameter#getLimit()
-   *
-   * @param limit
-   * @return limit
    */
   public SqlQueryTemplate limit(int limit) {
     this.limit = Objects.max(limit, 1);
@@ -232,8 +236,8 @@ public class SqlQueryTemplate {
   }
 
   public Paging<Map<String, Object>> page() {
-    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalized(namedParameters, sql)
-        : SqlStatements.normalized(sql, parameters);
+    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+        : SqlStatements.normalize(sql, ordinaryParameters);
     String useSql = ps.getLeft();
     Object[] params = ps.getRight();
     String limitSql = dialect.getLimitSql(useSql, offset, limit);
@@ -277,15 +281,15 @@ public class SqlQueryTemplate {
   }
 
   public SqlQueryTemplate parameters(Object... parameters) {
-    this.parameters = new Object[parameters.length];
-    System.arraycopy(parameters, 0, this.parameters, 0, parameters.length);
+    ordinaryParameters = new Object[parameters.length];
+    System.arraycopy(parameters, 0, ordinaryParameters, 0, parameters.length);
     useNamedParameter = false;
     return this;
   }
 
   public List<Map<String, Object>> select() {
-    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalized(namedParameters, sql)
-        : SqlStatements.normalized(sql, parameters);
+    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+        : SqlStatements.normalize(sql, ordinaryParameters);
     return query(ps.key(), ps.value());
   }
 
@@ -318,11 +322,24 @@ public class SqlQueryTemplate {
     return stream(StreamConfig.DFLT_INST);
   }
 
+  /**
+   * Use a specific configuration for streaming query, the query is through continuous
+   * {@link #forward()} query and output result set, which means that the query is executed
+   * continuously in batches according to the size set by {@link #limit}. If an exception occurs
+   * during the query, may retry according to the configuration, and may modify the query parameters
+   * during each query.
+   *
+   * @param config the stream query configuration
+   */
   public Stream<Map<String, Object>> stream(StreamConfig config) {
     return streamOf(new Iterator<Map<String, Object>>() {
       Forwarding<Map<String, Object>> buffer = null;
       int counter = 0;
       Map<String, Object> next = null;
+      Retryer retryer = config.needRetry()
+          ? Retry.retryer().times(config.retryTimes).interval(config.retryInterval).thrower(
+              isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
+          : null;
 
       @Override
       public boolean hasNext() {
@@ -331,7 +348,7 @@ public class SqlQueryTemplate {
           if (!buffer.hasResults()) {
             if (buffer.hasNext()) {
               revise(next, config);
-              buffer.with(fetch(config));
+              buffer.with(fetch());
               return buffer.hasResults();
             }
           } else {
@@ -352,12 +369,9 @@ public class SqlQueryTemplate {
         return next;
       }
 
-      private Forwarding<Map<String, Object>> fetch(StreamConfig config) {
-        if (config.needRetry()) {
-          return Retry.retryer().times(config.retryTimes).interval(config.retryInterval)
-              .thrower(
-                  isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
-              .execute(() -> forward());
+      private Forwarding<Map<String, Object>> fetch() {
+        if (retryer != null) {
+          return retryer.execute(() -> forward());
         } else {
           return forward();
         }
@@ -365,7 +379,7 @@ public class SqlQueryTemplate {
 
       private void initialize() {
         if (buffer == null) {
-          buffer = defaultObject(fetch(config), Forwarding::inst);
+          buffer = defaultObject(fetch(), Forwarding::inst);
           counter = buffer.hasResults() ? 1 : 0;
         }
       }
@@ -374,12 +388,12 @@ public class SqlQueryTemplate {
         boolean revise = false;
         if (useNamedParameter) {
           if (config.namedParameterReviser != null) {
-            config.namedParameterReviser.accept(next, namedParameters);
+            offset = config.namedParameterReviser.apply(next, namedParameters);
             revise = true;
           }
         } else {
-          if (config.parameterReviser != null) {
-            config.parameterReviser.accept(next, parameters);
+          if (config.ordinaryParameterReviser != null) {
+            offset = config.ordinaryParameterReviser.apply(next, ordinaryParameters);
             revise = true;
           }
         }
@@ -418,27 +432,68 @@ public class SqlQueryTemplate {
     }
   }
 
+  /**
+   * corant-modules-query-sql
+   *
+   * <p>
+   * Used to adjust the streaming query process. For example: when an exception occurs, can set a
+   * retry rule to make the query regain; because the {@link SqlQueryTemplate#forward()} query
+   * method adopted by the streaming query will execute multiple consecutive forward queries, this
+   * configuration can modify its query parameters during each {@link SqlQueryTemplate#forward()}
+   * query, especially It is suitable for streaming queries with unique keys and sorting of unique
+   * keys, which can improve certain performance.
+   *
+   * @author bingo 上午10:04:25
+   *
+   */
   public static class StreamConfig {
 
-    static final Duration defRtyItl = Duration.ofSeconds(1L);
+    static final Duration one_second = Duration.ofSeconds(1L);
 
     static final StreamConfig DFLT_INST = new StreamConfig();
 
     protected int retryTimes = 0;
 
-    protected RetryInterval retryInterval = RetryInterval.noBackoff(defRtyItl);
+    protected RetryInterval retryInterval = RetryInterval.noBackoff(one_second);
 
-    protected BiPredicate<Integer, Object> terminater;
+    protected BiPredicate<Integer, Map<String, Object>> terminater;
 
-    protected BiConsumer<Map<String, Object>, Object[]> parameterReviser;
+    protected BiFunction<Map<String, Object>, Object[], Integer> ordinaryParameterReviser;
 
-    protected BiConsumer<Map<String, Object>, Map<String, Object>> namedParameterReviser;
+    protected BiFunction<Map<String, Object>, Map<String, Object>, Integer> namedParameterReviser;
 
     protected Set<Class<?>> stopOn;
 
+    /**
+     * Set up a named query parameter adjustment consumer, where the first parameter of
+     * {@code parameterReviser} is the last record of the result set of the previous batch of
+     * queries; the second parameter is the query parameter, user can modify it according to the
+     * last record and other conditions, the modified parameters can be used for the next batch of
+     * queries.
+     *
+     * @param parameterReviser the parameter reviser
+     */
+    public StreamConfig namedParameterRevise(
+        BiConsumer<Map<String, Object>, Map<String, Object>> parameterReviser) {
+      return namedParameterReviser((r, p) -> {
+        parameterReviser.accept(r, p);
+        return 0;
+      });
+    }
+
+    /**
+     * Set up a named query parameter adjustment function, where the first parameter of
+     * {@code parameterReviser} is the last record of the result set of the previous batch of
+     * queries; the second parameter is the query parameter, user can modify it according to the
+     * last record and other conditions, the modified parameters can be used for the next batch of
+     * queries; the function return value will be used to update the {@link SqlQueryTemplate#offset}
+     * for the next batch of queries.
+     *
+     * @param parameterReviser the parameter reviser
+     */
     public StreamConfig namedParameterReviser(
-        BiConsumer<Map<String, Object>, Map<String, Object>> namedParameterReviser) {
-      this.namedParameterReviser = namedParameterReviser;
+        BiFunction<Map<String, Object>, Map<String, Object>, Integer> parameterReviser) {
+      namedParameterReviser = parameterReviser;
       return this;
     }
 
@@ -446,34 +501,97 @@ public class SqlQueryTemplate {
       return retryTimes > 0;
     }
 
-    public StreamConfig parameterReviser(
+    /**
+     * Set up a ordinary query parameter adjustment consumer, where the first parameter of
+     * {@code parameterReviser} is the last record of the result set of the previous batch of
+     * queries; the second parameter is the query parameter, user can modify it according to the
+     * last record and other conditions, the modified parameters can be used for the next batch of
+     * queries.
+     */
+    public StreamConfig ordinaryParameterRevise(
         BiConsumer<Map<String, Object>, Object[]> parameterReviser) {
-      this.parameterReviser = parameterReviser;
+      return ordinaryParameterReviser((r, p) -> {
+        parameterReviser.accept(r, p);
+        return 0;
+      });
+    }
+
+    /**
+     * Set up a ordinary query parameter adjustment function, where the first parameter of
+     * {@code parameterReviser} is the last record of the result set of the previous batch of
+     * queries; the second parameter is the query parameter, user can modify it according to the
+     * last record and other conditions, the modified parameters can be used for the next batch of
+     * queries; the function return value will be used to update the {@link SqlQueryTemplate#offset}
+     * for the next batch of queries.
+     *
+     * @param parameterReviser the parameter reviser
+     */
+    public StreamConfig ordinaryParameterReviser(
+        BiFunction<Map<String, Object>, Object[], Integer> parameterReviser) {
+      ordinaryParameterReviser = parameterReviser;
       return this;
     }
 
+    /**
+     * Set up a retry interval for query retrying, only the {@link #retryTimes} >0 this retry
+     * interval can take effect.
+     *
+     * @param retryInterval the retry interval, default is one second
+     *
+     * @see Retry
+     * @see Retryer
+     * @see RetryInterval
+     */
     public StreamConfig retryInterval(RetryInterval retryInterval) {
       this.retryInterval =
           defaultObject(retryInterval, RetryInterval.noBackoff(Duration.ofMillis(2000L)));
       return this;
     }
 
+    /**
+     * Set up a retry time for query retrying. If the given retry times <=0 means that don't retry
+     * during the query exception occurred.
+     *
+     * @param retryTimes the retry times must be greater then 0
+     *
+     * @see Retry
+     * @see Retryer
+     * @see RetryInterval
+     */
     public StreamConfig retryTimes(int retryTimes) {
       this.retryTimes = max(retryTimes, 0);
       return this;
     }
 
+    /**
+     * Set some exception types, when a given type of exception occurs during the query retry
+     * process, it is forced to interrupt and throw an exception, only the {@link #retryTimes} >0
+     * this can take effect.
+     *
+     * @param throwables the exception types
+     * @see Retry
+     * @see Retryer#thrower(BiConsumer)
+     */
     @SuppressWarnings("unchecked")
     public StreamConfig stopOn(Class<? extends Throwable>... throwables) {
       stopOn = linkedHashSetOf(throwables);
       return this;
     }
 
-    public boolean terminateIf(Integer counter, Object current) {
+    public boolean terminateIf(Integer counter, Map<String, Object> current) {
       return terminater != null && !terminater.test(counter, current);
     }
 
-    public StreamConfig terminater(BiPredicate<Integer, Object> terminater) {
+    /**
+     * Set the interruption condition of a streaming query. When the condition is met, the output
+     * will be interrupted. The first parameter of the given {@code terminater} is the number of
+     * result set records that have been output, and the second parameter is the last record of the
+     * result set of the current batch query, user can use those parameters to decide whether to
+     * interrupt the stream.
+     *
+     * @param terminater the terminate predicate
+     */
+    public StreamConfig terminater(BiPredicate<Integer, Map<String, Object>> terminater) {
       this.terminater = terminater;
       return this;
     }

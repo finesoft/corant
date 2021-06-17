@@ -30,6 +30,12 @@ public class OracleDialect implements Dialect {
   public static final String ORDER_SIBLINGS_BY = "order\\s+siblings\\s+by";
   public static final Pattern ORDER_SIBLINGS_BY_PATTERN =
       SqlHelper.buildShallowIndexPattern(ORDER_SIBLINGS_BY, true);
+  
+  @Override
+  public String getCountSql(String sql) {
+    return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
+        .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) tmp_count_").toString();
+  }
 
   @Override
   public String getLimitSql(String sql, int offset, int limit) {

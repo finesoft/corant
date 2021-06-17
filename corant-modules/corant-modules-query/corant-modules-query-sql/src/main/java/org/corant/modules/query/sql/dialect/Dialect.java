@@ -23,7 +23,7 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  */
 public interface Dialect {
 
-  String COUNT_FIELD_NAME = "_total";
+  String COUNT_FIELD_NAME = "total_";
 
   String H2_JDBC_URL_PREFIX = "jdbc:h2";
   String HSQL_JDBC_URL_PREFIX = "jdbc:hsqldb";

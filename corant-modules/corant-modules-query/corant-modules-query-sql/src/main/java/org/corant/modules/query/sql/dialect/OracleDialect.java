@@ -52,10 +52,10 @@ public class OracleDialect implements Dialect {
     pagingSelect.append(sqlToUse);
 
     if (offset >= 0) {
-      pagingSelect.append(" ) row_ ) WHERE rownum_ < ").append(offset + limit)
-          .append(" AND rownum_ >= ").append(offset);
+      pagingSelect.append(" ) row_ ) WHERE rownum_ <= ").append(offset + limit)
+          .append(" AND rownum_ > ").append(offset);
     } else {
-      pagingSelect.append(" ) WHERE ROWNUM < ").append(limit);
+      pagingSelect.append(" ) WHERE ROWNUM <= ").append(limit);
     }
 
     if (isForUpdate) {

@@ -18,11 +18,15 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -291,6 +295,33 @@ public class Classes {
       clazz = Object.class;
     }
     return getUserClass(clazz);
+  }
+
+  public static <T> Constructor<? extends T> getDeclaredConstructor(Class<T> clazz,
+      Class<?>... paramTypes) throws NoSuchMethodException {
+    if (System.getSecurityManager() == null) {
+      return clazz.getDeclaredConstructor(paramTypes);
+    } else {
+      try {
+        return AccessController
+            .doPrivileged((PrivilegedExceptionAction<Constructor<? extends T>>) () -> {
+              Constructor<? extends T> constructor = null;
+              try {
+                constructor = clazz.getDeclaredConstructor(paramTypes);
+              } catch (SecurityException ex) {
+                // Noop!
+              }
+              return constructor;
+            });
+      } catch (PrivilegedActionException e) {
+        Exception ex = e.getException();
+        if (ex instanceof NoSuchMethodException) {
+          throw (NoSuchMethodException) ex;
+        } else {
+          throw new CorantRuntimeException(ex);
+        }
+      }
+    }
   }
 
   public static String getPackageName(String fullClassName) {

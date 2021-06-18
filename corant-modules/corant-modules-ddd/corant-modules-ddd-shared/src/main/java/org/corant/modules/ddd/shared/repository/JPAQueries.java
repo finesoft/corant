@@ -51,6 +51,7 @@ import javax.persistence.TupleElement;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.ManagedType;
+import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.Converters;
 
 /**
@@ -62,22 +63,22 @@ import org.corant.shared.conversion.Converters;
 public class JPAQueries {
 
   static final Logger logger = Logger.getLogger(JPAQueries.class.getName());
-  static final boolean useTuple = Converters.lookup(Tuple.class, Object.class).isPresent();// FIXME
 
   static final Set<Class<?>> persistenceClasses =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
 
   private JPAQueries() {}
 
-  public static <T> T convertTuple(Tuple tuple, Class<T> type) {
+  public static <T> T convertTuple(Converter<Tuple, T> converter, Tuple tuple, Class<T> type) {
     List<TupleElement<?>> eles = tuple.getElements();
     if (sizeOf(eles) == 1 && simpleClass(type)) {
       return toObject(tuple.get(0), type);
     }
-    return toObject(tuple, type);
+    return converter.apply(tuple, null);
   }
 
-  public static <T> List<T> convertTuples(List<Tuple> tuples, Class<T> type) {
+  public static <T> List<T> convertTuples(Converter<Tuple, T> converter, List<Tuple> tuples,
+      Class<T> type) {
     List<T> results = null;
     if (isNotEmpty(tuples)) {
       results = new ArrayList<>(tuples.size());
@@ -88,7 +89,7 @@ public class JPAQueries {
         }
       } else {
         for (Tuple tuple : tuples) {
-          results.add(toObject(tuple, type));
+          results.add(converter.apply(tuple, null));
         }
       }
     }
@@ -217,7 +218,7 @@ public class JPAQueries {
    * @see EntityManager#createNativeQuery(String, Class)
    */
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
-    if (isPersistenceClass(type) || !useTuple) {
+    if (isPersistenceClass(type) || Converters.lookup(Tuple.class, type).isEmpty()) {
       return new TypedJPAQuery<>() {
         @Override
         public String toString() {
@@ -230,7 +231,7 @@ public class JPAQueries {
         }
       };
     } else {
-      return new TypedJPAQuery<>(type) {
+      return new TypedJPAQuery<>(type, Converters.lookup(Tuple.class, type).get()) {
 
         @Override
         public String toString() {
@@ -652,13 +653,16 @@ public class JPAQueries {
   public static abstract class TypedJPAQuery<T> extends AbstractQuery {
 
     final Class<T> resultType;
+    final Converter<Tuple, T> converter;
 
     protected TypedJPAQuery() {
       resultType = null;
+      converter = null;
     }
 
-    protected TypedJPAQuery(Class<T> resultType) {
+    protected TypedJPAQuery(Class<T> resultType, Converter<Tuple, T> converter) {
       this.resultType = resultType;
+      this.converter = converter;
     }
 
     /**
@@ -762,10 +766,10 @@ public class JPAQueries {
      */
     @SuppressWarnings("unchecked")
     public List<T> select() {
-      if (resultType == null || !useTuple) {
+      if (resultType == null || converter == null) {
         return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
       } else {
-        return convertTuples(populateQuery(createQuery()).getResultList(), resultType);
+        return convertTuples(converter, populateQuery(createQuery()).getResultList(), resultType);
       }
     }
 
@@ -778,11 +782,11 @@ public class JPAQueries {
      */
     @SuppressWarnings("unchecked")
     public Stream<T> stream() {
-      if (resultType == null || !useTuple) {
+      if (resultType == null || converter == null) {
         return populateQuery(createQuery()).getResultStream();
       } else {
         Stream<Tuple> results = populateQuery(createQuery()).getResultStream();
-        return results != null ? results.map(result -> convertTuple(result, resultType))
+        return results != null ? results.map(result -> convertTuple(converter, result, resultType))
             : Stream.empty();
       }
     }

@@ -101,7 +101,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     XADataSource xads;
     try {
       xads = cfg.getDriver().asSubclass(XADataSource.class).getDeclaredConstructor().newInstance();
-      PropertyInjector pi = new PropertyInjector(xads);
+      PropertyInjector pi = new PropertyInjector(true, xads);
       if (isNotEmpty(cfg.getJdbcProperties())) {
         pi.inject(cfg.getJdbcProperties());
       }

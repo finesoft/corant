@@ -79,7 +79,7 @@ public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenc
         .equals(HibernatePersistenceProvider.class.getName())) {
       final PersistenceUnitInfoMetaData thePui =
           pui.with(pui.getProperties(), pui.getPersistenceUnitTransactionType());
-      find(DataSourceService.class).ifPresent(ds -> thePui.configDataSource(ds::tryGet));
+      find(DataSourceService.class).ifPresent(ds -> thePui.configDataSource(ds::tryResolve));
       Map thePros = new HashMap<>(map);
       thePros.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
           defaultString(pui.getPersistenceUnitName()));

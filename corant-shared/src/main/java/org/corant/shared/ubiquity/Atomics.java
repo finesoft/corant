@@ -87,7 +87,7 @@ public class Atomics {
    * @param supplier the actual instance construction
    * @return the atomic instance supplier
    */
-  public static <T> Supplier<T> atomicOneOffInitializer(final Supplier<T> supplier) {
+  public static <T> Supplier<T> strictAtomicInitializer(final Supplier<T> supplier) {
     shouldNotNull(supplier);
     return new Supplier<T>() {
       final AtomicReference<Supplier<T>> factory = new AtomicReference<>();

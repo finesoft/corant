@@ -94,7 +94,7 @@ public class SqlQueryTemplate {
   }
 
   public SqlQueryTemplate(DBMS dbms, String dataSourceName) {
-    datasource = resolve(DataSourceService.class).get(dataSourceName);
+    datasource = resolve(DataSourceService.class).resolve(dataSourceName);
     dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
     runner = new QueryRunner(datasource);
   }

@@ -13,7 +13,7 @@
  */
 package org.corant.shared.exception;
 
-import static org.corant.shared.ubiquity.Atomics.atomicOneOffInitializer;
+import static org.corant.shared.ubiquity.Atomics.strictAtomicInitializer;
 import static org.corant.shared.util.Conversions.tryConvert;
 import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -60,7 +60,7 @@ public interface ExceptionMessageResolver extends Sortable {
         Names.CORANT_PREFIX + "exception-message-source-path";
     static final String DEFAULT_SOURCE_PATH = "META-INF/**Messages_*.properties";
     static final Supplier<Map<Locale, Map<String, MessageFormat>>> source =
-        atomicOneOffInitializer(SimpleExceptionMessageResolver::collect);
+        strictAtomicInitializer(SimpleExceptionMessageResolver::collect);
 
     static Map<Locale, Map<String, MessageFormat>> collect() {
       Map<Locale, Map<String, MessageFormat>> source = new HashMap<>();

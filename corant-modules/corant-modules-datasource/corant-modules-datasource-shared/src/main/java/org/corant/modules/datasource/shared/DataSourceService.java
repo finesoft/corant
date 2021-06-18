@@ -14,6 +14,7 @@
 package org.corant.modules.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.util.Properties;
 import javax.sql.DataSource;
 
 /**
@@ -25,12 +26,82 @@ import javax.sql.DataSource;
 public interface DataSourceService {
 
   /**
+   * Returns a data source for given jdbc-url.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   */
+  default DataSource get(String jdbcUrl) {
+    return new DriverManagerDataSource(jdbcUrl);
+  }
+
+  /**
+   * Returns a data source for given jdbc-url and properties.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   * @param properties a list of arbitrary string tag/value pairs as connection arguments. Normally
+   *        at least a "user" and "password" property should be included.
+   */
+  default DataSource get(String jdbcUrl, Properties properties) {
+    return new DriverManagerDataSource(jdbcUrl, properties);
+  }
+
+  /**
+   * Returns a data source for given jdbc-url and driver class name and properties.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   * @param driverClassName the driver class name use to java.sql.Driver
+   * @param properties a list of arbitrary string tag/value pairs as connection arguments. Normally
+   *        at least a "user" and "password" property should be included.
+   */
+  default DataSource get(String jdbcUrl, String driverClassName, Properties properties) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, null, null);
+  }
+
+  /**
+   * Returns a data source for given jdbc-url and driver class name and properties.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   * @param driverClassName the driver class name use to java.sql.Driver
+   * @param properties a list of arbitrary string tag/value pairs as connection arguments. Normally
+   *        at least a "user" and "password" property should be included.
+   * @param catalog the data base catalog use to get connection
+   * @param schema the data base schema use to get connection
+   */
+  default DataSource get(String jdbcUrl, String driverClassName, Properties properties,
+      String catalog, String schema) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, properties, catalog, schema);
+  }
+
+  /**
+   * Returns a data source for given jdbc-url and user name and password.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   * @param username the user name use to access the data base
+   * @param password the password use to access the data base
+   */
+  default DataSource get(String jdbcUrl, String username, String password) {
+    return new DriverManagerDataSource(jdbcUrl, username, password);
+  }
+
+  /**
+   * Returns a data source for given jdbc-url and driver class name and user name and password.
+   *
+   * @param jdbcUrl the jdbc-url use to build data source
+   * @param driverClassName the driver class name use to java.sql.Driver
+   * @param username the user name use to access the data base
+   * @param password the password use to access the data base
+   */
+  default DataSource get(String jdbcUrl, String driverClassName, String username, String password) {
+    return new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
+  }
+
+  /**
    * Returns a data source instance that matches the given name or throws exception if none matches.
    *
    * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
    */
-  default DataSource get(String name) {
-    return shouldNotNull(tryGet(name), "Can't get data source by name %s", name);
+  default DataSource resolve(String name) {
+    return shouldNotNull(tryResolve(name), "Can't get data source by name %s", name);
   }
 
   /**
@@ -39,5 +110,5 @@ public interface DataSourceService {
    *
    * @param name the named qualifier value for CDI bean lookup or the name use for JNDI lookup
    */
-  DataSource tryGet(String name);
+  DataSource tryResolve(String name);
 }

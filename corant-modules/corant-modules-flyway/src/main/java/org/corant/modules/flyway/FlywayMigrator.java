@@ -182,7 +182,7 @@ public class FlywayMigrator {
         throw new CorantRuntimeException(ex);
       }
     } else if (dataSourceService.isResolvable()) {
-      return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().get(name));
+      return DefaultFlywayConfigProvider.of(getLocation(name), dataSourceService.get().resolve(name));
     }
     throw new CorantRuntimeException("Can not found any data source named %s.", name);
   }

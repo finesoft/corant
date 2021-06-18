@@ -32,13 +32,15 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class PropertyInjector {
 
+  private final boolean nameUpperCase;
   private final Object instance;
   private final Class<?> instanceClass;
   private final Map<String, Method> propertySetters;
 
-  public PropertyInjector(Object instance) {
+  public PropertyInjector(boolean nameUpperCase, Object instance) {
     this.instance = shouldNotNull(instance, "The object to inject can't null");
     instanceClass = getUserClass(instance);
+    this.nameUpperCase = nameUpperCase;
     Map<String, Method> setters = new HashMap<>();
     for (Method method : instanceClass.getMethods()) {
       String name = method.getName();
@@ -69,8 +71,12 @@ public class PropertyInjector {
 
   public void inject(String propertyName, Object propertyValue)
       throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-    String realName =
-        propertyName.substring(0, 1).toUpperCase(Locale.ROOT) + propertyName.substring(1);
+    String realName;
+    if (nameUpperCase) {
+      realName = propertyName.substring(0, 1).toUpperCase(Locale.ROOT) + propertyName.substring(1);
+    } else {
+      realName = propertyName.substring(0, 1).toLowerCase(Locale.ROOT) + propertyName.substring(1);
+    }
     if (propertySetters.containsKey(realName)) {
       Method method = propertySetters.get(realName);
       method.invoke(instance, toObject(propertyValue, method.getParameterTypes()[0]));

@@ -15,7 +15,10 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Streams.streamOf;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationTargetException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
@@ -277,6 +280,21 @@ public class Objects {
 
   public static <T> Optional<T> optionalCast(Object o, Class<T> cls) {
     return Optional.ofNullable(tryCast(o, cls));
+  }
+
+  public static void setAccessible(AccessibleObject object, boolean flag) {
+    if (System.getSecurityManager() == null) {
+      object.setAccessible(flag);
+    } else {
+      AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+        try {
+          object.setAccessible(flag);
+        } catch (SecurityException ex) {
+          // Noop!
+        }
+        return null;
+      });
+    }
   }
 
   public static <T> T tryCast(Object o, Class<T> cls) {

@@ -22,6 +22,7 @@ import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Strings.NULL;
 import java.lang.reflect.Array;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -182,7 +183,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    */
   protected boolean isSimpleType(Class<?> cls) {
     return isPrimitiveOrWrapper(cls) || String.class.equals(cls)
-        || Number.class.isAssignableFrom(cls) || Boolean.class.isAssignableFrom(cls)
+        || Number.class.isAssignableFrom(cls) || TemporalAmount.class.isAssignableFrom(cls)
         || Temporal.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls)
         || Enum.class.isAssignableFrom(cls);
   }

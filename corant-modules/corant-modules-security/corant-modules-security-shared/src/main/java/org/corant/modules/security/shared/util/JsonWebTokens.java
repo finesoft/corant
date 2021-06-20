@@ -27,11 +27,13 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.ReservedClaimNames;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -100,20 +102,28 @@ public class JsonWebTokens {
           c.setAudience(shouldNotNull(v).toString());
         } else if (areEqual(k, ReservedClaimNames.JWT_ID)) {
           c.setJwtId(shouldNotNull(v).toString());
+        } else if (v instanceof Collection) {
+          c.setStringListClaim(k, toList(v, String.class));
+        } else if (v instanceof Object[]) {
+          c.setStringListClaim(k, toArray(v, String.class));
+        } else if (v instanceof String) {
+          c.setStringClaim(k, (String) v);
         } else {
-          c.setIssuedAtToNow();
-          if (v instanceof Collection) {
-            c.setStringListClaim(k, toList(v, String.class));
-          } else if (v instanceof Object[]) {
-            c.setStringListClaim(k, toArray(v, String.class));
-          } else if (v instanceof String) {
-            c.setStringClaim(k, (String) v);
-          } else {
-            c.setClaim(k, v);
-          }
+          c.setClaim(k, v);
         }
       });
+      try {
+        if (c.getIssuedAt() == null) {
+          c.setIssuedAtToNow();
+        }
+        if (c.getExpirationTime() == null || c.getNotBefore() == null) {
+          c.setExpirationTimeMinutesInTheFuture(30f);
+        }
+      } catch (MalformedClaimException e) {
+        throw new CorantRuntimeException(e);
+      }
     });
+
   }
 
   public static JwtClaims getJWTClaims(Key key, String jwt) throws InvalidJwtException {

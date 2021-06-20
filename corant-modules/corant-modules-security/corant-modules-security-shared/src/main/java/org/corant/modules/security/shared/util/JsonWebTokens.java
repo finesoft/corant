@@ -13,15 +13,27 @@
  */
 package org.corant.modules.security.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Conversions.toArray;
+import static org.corant.shared.util.Conversions.toFloat;
+import static org.corant.shared.util.Conversions.toList;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.areEqual;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.ReservedClaimNames;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
@@ -62,6 +74,46 @@ public class JsonWebTokens {
       throws JoseException, GeneralSecurityException {
     return generateJWT(createRSASHA256JsonWebKey(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId),
         setting, AlgorithmIdentifiers.RSA_USING_SHA256);
+  }
+
+  public static String generateRSASHA256JWT(String rsaPublicKeyPem, String rsaPrivateKeyPem,
+      String sha256keyId, Object... claimKeyValues) throws JoseException, GeneralSecurityException {
+    Map<String, Object> claims = mapOf(claimKeyValues);
+    return generateRSASHA256JWT(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId, c -> {
+      claims.forEach((k, v) -> {
+        if (areEqual(k, ReservedClaimNames.ISSUER)) {
+          c.setIssuer(shouldNotNull(v).toString());
+        } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME)) {
+          c.setExpirationTime(NumericDate
+              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+        } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME + "-mins")) {
+          c.setExpirationTimeMinutesInTheFuture(shouldNotNull(toFloat(v)));
+        } else if (areEqual(k, ReservedClaimNames.ISSUED_AT)) {
+          c.setIssuedAt(NumericDate
+              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+        } else if (areEqual(k, ReservedClaimNames.NOT_BEFORE)) {
+          c.setNotBefore(NumericDate
+              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+        } else if (areEqual(k, ReservedClaimNames.SUBJECT)) {
+          c.setSubject(shouldNotNull(v).toString());
+        } else if (areEqual(k, ReservedClaimNames.AUDIENCE)) {
+          c.setAudience(shouldNotNull(v).toString());
+        } else if (areEqual(k, ReservedClaimNames.JWT_ID)) {
+          c.setJwtId(shouldNotNull(v).toString());
+        } else {
+          c.setIssuedAtToNow();
+          if (v instanceof Collection) {
+            c.setStringListClaim(k, toList(v, String.class));
+          } else if (v instanceof Object[]) {
+            c.setStringListClaim(k, toArray(v, String.class));
+          } else if (v instanceof String) {
+            c.setStringClaim(k, (String) v);
+          } else {
+            c.setClaim(k, v);
+          }
+        }
+      });
+    });
   }
 
   public static JwtClaims getJWTClaims(Key key, String jwt) throws InvalidJwtException {

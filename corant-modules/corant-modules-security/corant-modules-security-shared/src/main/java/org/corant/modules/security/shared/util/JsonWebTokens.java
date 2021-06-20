@@ -79,50 +79,54 @@ public class JsonWebTokens {
   }
 
   public static String generateRSASHA256JWT(String rsaPublicKeyPem, String rsaPrivateKeyPem,
-      String sha256keyId, Object... claimKeyValues) throws JoseException, GeneralSecurityException {
+      String sha256keyId, Object... claimKeyValues) {
     Map<String, Object> claims = mapOf(claimKeyValues);
-    return generateRSASHA256JWT(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId, c -> {
-      claims.forEach((k, v) -> {
-        if (areEqual(k, ReservedClaimNames.ISSUER)) {
-          c.setIssuer(shouldNotNull(v).toString());
-        } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME)) {
-          c.setExpirationTime(NumericDate
-              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
-        } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME + "-mins")) {
-          c.setExpirationTimeMinutesInTheFuture(shouldNotNull(toFloat(v)));
-        } else if (areEqual(k, ReservedClaimNames.ISSUED_AT)) {
-          c.setIssuedAt(NumericDate
-              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
-        } else if (areEqual(k, ReservedClaimNames.NOT_BEFORE)) {
-          c.setNotBefore(NumericDate
-              .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
-        } else if (areEqual(k, ReservedClaimNames.SUBJECT)) {
-          c.setSubject(shouldNotNull(v).toString());
-        } else if (areEqual(k, ReservedClaimNames.AUDIENCE)) {
-          c.setAudience(shouldNotNull(v).toString());
-        } else if (areEqual(k, ReservedClaimNames.JWT_ID)) {
-          c.setJwtId(shouldNotNull(v).toString());
-        } else if (v instanceof Collection) {
-          c.setStringListClaim(k, toList(v, String.class));
-        } else if (v instanceof Object[]) {
-          c.setStringListClaim(k, toArray(v, String.class));
-        } else if (v instanceof String) {
-          c.setStringClaim(k, (String) v);
-        } else {
-          c.setClaim(k, v);
+    try {
+      return generateRSASHA256JWT(rsaPublicKeyPem, rsaPrivateKeyPem, sha256keyId, c -> {
+        claims.forEach((k, v) -> {
+          if (areEqual(k, ReservedClaimNames.ISSUER)) {
+            c.setIssuer(shouldNotNull(v).toString());
+          } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME)) {
+            c.setExpirationTime(NumericDate
+                .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+          } else if (areEqual(k, ReservedClaimNames.EXPIRATION_TIME + "-mins")) {
+            c.setExpirationTimeMinutesInTheFuture(shouldNotNull(toFloat(v)));
+          } else if (areEqual(k, ReservedClaimNames.ISSUED_AT)) {
+            c.setIssuedAt(NumericDate
+                .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+          } else if (areEqual(k, ReservedClaimNames.NOT_BEFORE)) {
+            c.setNotBefore(NumericDate
+                .fromMilliseconds(shouldNotNull(toObject(v, Instant.class)).toEpochMilli()));
+          } else if (areEqual(k, ReservedClaimNames.SUBJECT)) {
+            c.setSubject(shouldNotNull(v).toString());
+          } else if (areEqual(k, ReservedClaimNames.AUDIENCE)) {
+            c.setAudience(shouldNotNull(v).toString());
+          } else if (areEqual(k, ReservedClaimNames.JWT_ID)) {
+            c.setJwtId(shouldNotNull(v).toString());
+          } else if (v instanceof Collection) {
+            c.setStringListClaim(k, toList(v, String.class));
+          } else if (v instanceof Object[]) {
+            c.setStringListClaim(k, toArray(v, String.class));
+          } else if (v instanceof String) {
+            c.setStringClaim(k, (String) v);
+          } else {
+            c.setClaim(k, v);
+          }
+        });
+        try {
+          if (c.getIssuedAt() == null) {
+            c.setIssuedAtToNow();
+          }
+          if (c.getExpirationTime() == null || c.getNotBefore() == null) {
+            c.setExpirationTimeMinutesInTheFuture(30f);
+          }
+        } catch (MalformedClaimException e) {
+          throw new CorantRuntimeException(e);
         }
       });
-      try {
-        if (c.getIssuedAt() == null) {
-          c.setIssuedAtToNow();
-        }
-        if (c.getExpirationTime() == null || c.getNotBefore() == null) {
-          c.setExpirationTimeMinutesInTheFuture(30f);
-        }
-      } catch (MalformedClaimException e) {
-        throw new CorantRuntimeException(e);
-      }
-    });
+    } catch (JoseException | GeneralSecurityException e) {
+      throw new CorantRuntimeException(e);
+    }
 
   }
 

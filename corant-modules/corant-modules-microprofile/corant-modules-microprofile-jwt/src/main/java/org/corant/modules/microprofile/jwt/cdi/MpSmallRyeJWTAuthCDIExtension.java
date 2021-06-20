@@ -25,7 +25,9 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
 import io.smallrye.jwt.auth.cdi.CommonJwtProducer;
+import io.smallrye.jwt.auth.cdi.JWTCallerPrincipalFactoryProducer;
 import io.smallrye.jwt.auth.cdi.JsonValueProducer;
+import io.smallrye.jwt.auth.cdi.OptionalClaimTypeProducer;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.cdi.RawClaimTypeProducer;
 import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
@@ -58,6 +60,10 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
             .orElse(false);
   }
 
+  protected boolean registerOptionalClaimTypeProducer() {
+    return false;
+  }
+
   void addAnnotatedType(BeforeBeanDiscovery event, BeanManager beanManager, Class<?> type) {
     final String id = "SmallRye" + type.getSimpleName();
     event.addAnnotatedType(beanManager.createAnnotatedType(type), id);
@@ -70,21 +76,26 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     // TODO: Do not add CDI beans unless @LoginConfig (or other trigger) is configured
     addAnnotatedType(event, beanManager, ClaimValueProducer.class);
     addAnnotatedType(event, beanManager, CommonJwtProducer.class);
+    addAnnotatedType(event, beanManager, DefaultJWTParser.class);
+    addAnnotatedType(event, beanManager, JWTCallerPrincipalFactoryProducer.class);
     addAnnotatedType(event, beanManager, JsonValueProducer.class);
     addAnnotatedType(event, beanManager, JWTAuthContextInfoProvider.class);
-    addAnnotatedType(event, beanManager, MpJWTAuthenticationFilter.class);
     addAnnotatedType(event, beanManager, PrincipalProducer.class);
     addAnnotatedType(event, beanManager, RawClaimTypeProducer.class);
-    addAnnotatedType(event, beanManager, MpJWTAuthJaxRsFeature.class);
-    addAnnotatedType(event, beanManager, DefaultJWTParser.class);
+    if (registerOptionalClaimTypeProducer()) {
+      addAnnotatedType(event, beanManager, OptionalClaimTypeProducer.class);
+    }
 
     if (isEESecurityAvailable()) {
       addAnnotatedType(event, beanManager, JWTHttpAuthenticationMechanism.class);
       logger.debugf("EE Security is available, JWTHttpAuthenticationMechanism has been registered");
     } else {
       // EE Security is not available, register the JAX-RS authentication filter.
+      addAnnotatedType(event, beanManager, MpJWTAuthJaxRsFeature.class);
+      addAnnotatedType(event, beanManager, MpJWTAuthenticationFilter.class);
       logger.infof(
           "EE Security is not available, JWTHttpAuthenticationMechanism will not be registered");
     }
   }
+
 }

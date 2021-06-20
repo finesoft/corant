@@ -21,7 +21,6 @@ import javax.ws.rs.ext.Provider;
 import org.corant.modules.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension;
 import org.eclipse.microprofile.auth.LoginConfig;
 import org.jboss.logging.Logger;
-import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
 
 /**
  * corant-modules-microprofile-jwt
@@ -46,7 +45,7 @@ public class MpJWTAuthJaxRsFeature implements Feature {
       if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
         context.register(MpJWTAuthenticationFilter.class);
         logger.debugf("EE Security is not in use, %s has been registered",
-            JWTAuthenticationFilter.class.getSimpleName());
+            MpJWTAuthenticationFilter.class.getSimpleName());
       }
       logger.debugf("MP-JWT LoginConfig present, %s is enabled", getClass().getSimpleName());
     } else {

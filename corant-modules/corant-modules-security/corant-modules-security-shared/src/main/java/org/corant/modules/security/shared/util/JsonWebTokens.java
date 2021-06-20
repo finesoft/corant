@@ -118,7 +118,7 @@ public class JsonWebTokens {
             c.setIssuedAtToNow();
           }
           if (c.getExpirationTime() == null || c.getNotBefore() == null) {
-            c.setExpirationTimeMinutesInTheFuture(30f);
+            c.setExpirationTime(NumericDate.fromSeconds(c.getIssuedAt().getValue() + 30 * 60));
           }
         } catch (MalformedClaimException e) {
           throw new CorantRuntimeException(e);

@@ -14,6 +14,7 @@
 package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.compare;
 import java.beans.Transient;
 import java.io.Serializable;
@@ -30,12 +31,36 @@ import org.corant.shared.util.Objects;
 public interface Tuple {
 
   /**
+   * Returns true if this tuple contains the specified element. More formally, returns true if and
+   * only if this tuple contains at least one element e such that Objects.equals(o, e).
+   *
+   * @param o element whose presence in this tuple is to be tested
+   * @return {@code true} if this tuple contains the specified element
+   */
+  boolean contains(Object o);
+
+  /**
+   * Returns {@code true} if and only if all the elements of tuple are null.
+   *
+   * @return isEmpty
+   */
+  boolean isEmpty();
+
+  /**
+   * Returns an array containing all of the elements in this tuple in proper sequence (from left to
+   * right element or from min to max).
+   *
+   * @return toArray
+   */
+  Object[] toArray();
+
+  /**
    * corant-shared
    *
    * @author bingo 上午10:37:41
    *
    */
-  class Pair<L, R> implements Map.Entry<L, R>, Serializable {
+  class Pair<L, R> implements Tuple, Map.Entry<L, R>, Serializable {
 
     private static final long serialVersionUID = -474294448204498274L;
 
@@ -67,8 +92,21 @@ public interface Tuple {
       return new Pair<>(entry.getKey(), entry.getValue());
     }
 
+    public static <L, R> Pair<L, R> pairOf(final L left, final R right) {
+      return of(left, right);
+    }
+
+    public static <L, R> Pair<L, R> pairOf(final Map.Entry<L, R> entry) {
+      return of(entry.getKey(), entry.getValue());
+    }
+
     public String asString(final String format) {
       return String.format(format, left, right);
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return areEqual(o, left) || areEqual(o, right);
     }
 
     @Override
@@ -112,6 +150,7 @@ public interface Tuple {
       return result;
     }
 
+    @Override
     public boolean isEmpty() {
       return left == null && right == null;
     }
@@ -131,6 +170,11 @@ public interface Tuple {
     @Override
     public R setValue(R value) {
       throw new NotSupportedException();
+    }
+
+    @Override
+    public Object[] toArray() {
+      return new Object[] {left, right};
     }
 
     @Override
@@ -165,7 +209,7 @@ public interface Tuple {
    * @author bingo 20:26:59
    *
    */
-  class Range<T extends Comparable<T>> {
+  class Range<T extends Comparable<T>> implements Tuple {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     static final Range emptyInstance = new Range(null, null);
@@ -188,6 +232,10 @@ public interface Tuple {
       return new Range<>(min, max);
     }
 
+    public static <T extends Comparable<T>> Range<T> rangeOf(T min, T max) {
+      return of(min, max);
+    }
+
     public String asString(final String format) {
       return String.format(format, min, max);
     }
@@ -200,6 +248,11 @@ public interface Tuple {
       } else {
         return compare(min, other.min) == 0 && compare(max, other.max) == 0;
       }
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return areEqual(o, min) || areEqual(o, max);
     }
 
     public boolean cover(Range<T> other) {
@@ -260,6 +313,7 @@ public interface Tuple {
           || gae(max, other.min) && lae(max, other.max);
     }
 
+    @Override
     public boolean isEmpty() {
       return min == null && max == null;
     }
@@ -270,6 +324,11 @@ public interface Tuple {
 
     public T min() {
       return min;
+    }
+
+    @Override
+    public Object[] toArray() {
+      return new Object[] {min, max};
     }
 
     public Pair<T, T> toPair() {
@@ -305,7 +364,7 @@ public interface Tuple {
    * @author bingo 上午10:37:46
    *
    */
-  class Triple<L, M, R> implements Serializable {
+  class Triple<L, M, R> implements Tuple, Serializable {
 
     private static final long serialVersionUID = 6441751980847755625L;
 
@@ -335,8 +394,17 @@ public interface Tuple {
       return new Triple<>(left, middle, right);
     }
 
+    public static <L, M, R> Triple<L, M, R> tripleOf(final L left, final M middle, final R right) {
+      return of(left, middle, right);
+    }
+
     public String asString(final String format) {
       return String.format(format, left, middle, right);
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return areEqual(o, left) || areEqual(o, middle) || areEqual(o, right);
     }
 
     @Override
@@ -374,6 +442,7 @@ public interface Tuple {
       return result;
     }
 
+    @Override
     public boolean isEmpty() {
       return left == null && middle == null && right == null;
     }
@@ -388,6 +457,11 @@ public interface Tuple {
 
     public R right() {
       return right;
+    }
+
+    @Override
+    public Object[] toArray() {
+      return new Object[] {left, middle, right};
     }
 
     @Override

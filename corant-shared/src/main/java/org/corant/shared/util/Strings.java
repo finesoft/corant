@@ -993,6 +993,68 @@ public class Strings {
   }
 
   /**
+   * Returns a string that is a substring of this string. The substring begins with the character at
+   * the specified index and extends to the end of this string.
+   * <p>
+   * Note: If the given from index < 0 it represents the reverse order index position of the given
+   * string.
+   *
+   * <pre>
+   * Strings.substring(null, 2)             = null
+   * Strings.substring("", 0)               = ""
+   * Strings.substring("abc", 1)            = "bc"
+   * Strings.substring("abc", 2)            = "c"
+   * Strings.substring("abc", -1)           = "c"
+   * Strings.substring("abc", -2)           = "bc"
+   * </pre>
+   *
+   * @param str the string to gain the substring
+   * @param fromIndex the beginning index, inclusive
+   * @see String#substring(int)
+   */
+  public static String substring(final String str, final int fromIndex) {
+    if (str == null || fromIndex == 0) {
+      return str;
+    }
+    return fromIndex < 0 ? str.substring(str.length() + fromIndex) : str.substring(fromIndex);
+  }
+
+  /**
+   *
+   *
+   * Returns a string that is a substring of this string. The substring begins at the specified
+   * beginIndex and extends to the character at index endIndex - 1. Thus the length of the substring
+   * is endIndex-beginIndex.
+   *
+   * <p>
+   * Note: If the given index < 0 it represents the reverse order index position of the given
+   * string.
+   *
+   * <pre>
+   * Strings.substring(null, *, *)                  = null
+   * Strings.substring("abcefg", 0, 1)              = "a"
+   * Strings.substring("abcefg", 0, -1)             = "abcef"
+   * Strings.substring("abcefg", 3, 6)              = "efg"
+   * Strings.substring("abcefg", 3, -1)             = "ef""
+   * Strings.substring("abcefg", 2, -2)             = "ce"
+   * </pre>
+   *
+   * @param str the string to gain the substring
+   * @param fromIndex the beginning index, inclusive.
+   * @param toIndex the ending index, exclusive.
+   * @see String#substring(int, int)
+   */
+  public static String substring(final String str, final int fromIndex, final int toIndex) {
+    if (str == null) {
+      return str;
+    }
+    int length = str.length();
+    int beginIndex = fromIndex < 0 ? length + fromIndex : fromIndex;
+    int endIndex = toIndex < 0 ? length + toIndex : toIndex;
+    return str.substring(beginIndex, endIndex);
+  }
+
+  /**
    * <pre>
    * Strings.trim(null)          = null
    * Strings.trim("")            = ""
@@ -1001,8 +1063,7 @@ public class Strings {
    * Strings.trim("    abc    ") = "abc"
    * </pre>
    *
-   * @param str
-   * @return trim
+   * @param str the string to trim
    */
   public static String trim(String str) {
     return str == null ? null : str.trim();

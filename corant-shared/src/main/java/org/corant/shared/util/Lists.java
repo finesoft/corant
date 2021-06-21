@@ -72,6 +72,28 @@ public class Lists {
   }
 
   /**
+   * Expand the {@link Arrays#copyOfRange(Object[], int, int)}, add convenient reverse index
+   * support. When the given index>=0, the processing process is the same as
+   * {@link Arrays#copyOfRange(Object[], int, int)}, when the index<0, the reverse index is used.
+   *
+   * @param <E> the element type
+   * @param original the array from which a range is to be copied
+   * @param from the initial index of the range to be copied, inclusive
+   * @param to the final index of the range to be copied, exclusive.(This index may lie outside the
+   *        array.)
+   * @see Arrays#copyOfRange(Object[], int, int)
+   */
+  public static <E> E[] copyOfRange(E[] original, int from, int to) {
+    if (original == null) {
+      return original;
+    }
+    int length = original.length;
+    int beginIndex = from < 0 ? length + from : from;
+    int endIndex = to < 0 ? length + to : to;
+    return Arrays.copyOfRange(original, beginIndex, endIndex);
+  }
+
+  /**
    * Returns the element at the specified position in the list. If the passing index is negative
    * means that search element from last to first position.
    *
@@ -258,6 +280,28 @@ public class Lists {
       }
     }
     return Arrays.copyOf(removedArray, j);
+  }
+
+  /**
+   * Expand the {@link List#subList(int, int)}, add convenient reverse index support. When the given
+   * index>=0, the processing process is the same as {@link List#subList(int, int)}, when the
+   * index<0, the reverse index is used.
+   *
+   * @param <E> the element type
+   * @param list the list to gain the sub list
+   * @param fromIndex low end point (inclusive) of the subList
+   * @param toIndex high end point (exclusive) of the subList
+   *
+   * @see List#subList(int, int)
+   */
+  public static <E> List<E> subList(List<E> list, int fromIndex, int toIndex) {
+    if (list == null) {
+      return list;
+    }
+    int size = list.size();
+    int beginIndex = fromIndex < 0 ? size + fromIndex : fromIndex;
+    int endIndex = toIndex < 0 ? size + toIndex : toIndex;
+    return list.subList(beginIndex, endIndex);
   }
 
   /**

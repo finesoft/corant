@@ -20,6 +20,8 @@ import static org.corant.shared.util.Functions.emptyConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -158,6 +160,25 @@ public class Streams {
     int n;
     for (count = 0L; -1 != (n = input.read(buffer)); count += n) {
       output.write(buffer, 0, n);
+    }
+    return count;
+  }
+
+  /**
+   * Copy character streams from the given reader to the given writer without closing them.
+   *
+   * @param reader the character streams reader
+   * @param writer the character streams writer
+   * @return the char length
+   * @throws IOException If I/O errors occur
+   */
+  public static long copy(Reader reader, Writer writer) throws IOException {
+    char[] buffer = new char[2048];
+    long count = 0;
+    int n;
+    while ((n = reader.read(buffer)) != -1) {
+      writer.write(buffer, 0, n);
+      count += n;
     }
     return count;
   }

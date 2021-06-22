@@ -100,6 +100,7 @@ public class DefaultMgNamedQuerier
               if (x instanceof Collection) {
                 script.put(mgo, Bsons.toBsons((Collection<?>) x));
               } else if (x instanceof Object[]) {
+                // FIXME support primitive types
                 script.put(mgo, Bsons.toBsons((Object[]) x));
               } else {
                 script.put(mgo, Bsons.toBson(x));

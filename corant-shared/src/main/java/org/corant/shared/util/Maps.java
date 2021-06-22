@@ -300,7 +300,7 @@ public class Maps {
     } else if (obj instanceof Object[]) {
       return Conversion.convert((Object[]) obj, collectionFactory, elementClazz, hints);
     } else if (obj != null) {
-      return Conversion.convert(obj, elementClazz, () -> collectionFactory.apply(10), hints);
+      return Conversion.convert(obj, elementClazz, collectionFactory, hints);
     } else {
       return null;
     }

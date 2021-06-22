@@ -18,13 +18,13 @@ import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.tryCast;
 import static org.corant.shared.util.Primitives.wrap;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Objects;
@@ -159,9 +159,9 @@ public class Conversion {
    */
   public static <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClass,
       Class<T> targetClass, Map<String, ?> hints) {
-    return convert(value, targetClass, () -> {
+    return convert(value, targetClass, t -> {
       try {
-        return collectionClass.getDeclaredConstructor().newInstance();
+        return collectionClass.getDeclaredConstructor(int.class).newInstance(t);
       } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
           | InvocationTargetException | NoSuchMethodException | SecurityException e) {
         throw new NotSupportedException();
@@ -180,6 +180,59 @@ public class Conversion {
    */
   public static <T> T convert(Object value, Class<T> targetClass) {
     return convert(value, targetClass, null);
+  }
+
+  /**
+   * Convert an value object to a collection objects, use for converting the
+   * iterable/array/iterator/enumeration objects to collection objects.
+   *
+   * if the value object not belong to above then regard the value object as the first item of
+   * collection and convert it.
+   *
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
+   * @param value the value to convert, may be an iterable/array/iterator/enumeration typed object
+   * @param targetItemClass the target class of item of the collection
+   * @param collectionFactory the constructor of collection
+   * @param hints the converter hints use for intervening converters
+   * @return A collection of items converted according to the target type
+   */
+  public static <T, C extends Collection<T>> C convert(Object value, Class<T> targetItemClass,
+      IntFunction<C> collectionFactory, Map<String, ?> hints) {
+    Iterable<T> it = null;
+    int size = 10;
+    if (value instanceof Iterable) {
+      if (value instanceof Collection<?>) {
+        size = ((Collection<?>) value).size();
+      }
+      it = convert(tryCast(value, Iterable.class), targetItemClass, hints);
+    } else if (value instanceof Object[]) {
+      Object[] array = (Object[]) value;
+      size = array.length;
+      it = convert(iterableOf(array), targetItemClass, hints);
+    } else if (value instanceof Iterator) {
+      it = convert(() -> ((Iterator) value), targetItemClass, hints);
+    } else if (value instanceof Enumeration) {
+      it = convert(iterableOf((Enumeration) value), targetItemClass, hints);
+    } else if (value != null) {
+      if (value.getClass().isArray()) {
+        size = Array.getLength(value);
+        Object[] array = new Object[size];
+        for (int i = 0; i < size; i++) {
+          array[i] = Array.get(value, i);
+        }
+        it = convert(iterableOf(array), targetItemClass, hints);
+      } else {
+        it = convert(iterableOf(value), targetItemClass, hints);
+      }
+    }
+    final C collection = collectionFactory.apply(size);
+    if (it != null) {
+      for (T item : it) {
+        collection.add(item);
+      }
+    }
+    return collection;
   }
 
   /**
@@ -214,44 +267,6 @@ public class Conversion {
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s.", sourceClass,
         targetClass);
-  }
-
-  /**
-   * Convert an value object to a collection objects, use for converting the
-   * iterable/array/iterator/enumeration objects to collection objects.
-   *
-   * if the value object not belong to above then regard the value object as the first item of
-   * collection and convert it.
-   *
-   * @param <T> the target class of item of the collection
-   * @param <C> the target collection class
-   * @param value the value to convert, may be an iterable/array/iterator/enumeration typed object
-   * @param targetItemClass the target class of item of the collection
-   * @param collectionFactory the constructor of collection
-   * @param hints the converter hints use for intervening converters
-   * @return A collection of items converted according to the target type
-   */
-  public static <T, C extends Collection<T>> C convert(Object value, Class<T> targetItemClass,
-      Supplier<C> collectionFactory, Map<String, ?> hints) {
-    Iterable<T> it = null;
-    if (value instanceof Iterable) {
-      it = convert(tryCast(value, Iterable.class), targetItemClass, hints);
-    } else if (value instanceof Object[]) {
-      it = convert(iterableOf((Object[]) value), targetItemClass, hints);
-    } else if (value instanceof Iterator) {
-      it = convert(() -> ((Iterator) value), targetItemClass, hints);
-    } else if (value instanceof Enumeration) {
-      it = convert(iterableOf((Enumeration) value), targetItemClass, hints);
-    } else if (value != null) {
-      it = convert(iterableOf(value), targetItemClass, hints);
-    }
-    final C collection = collectionFactory.get();
-    if (it != null) {
-      for (T item : it) {
-        collection.add(item);
-      }
-    }
-    return collection;
   }
 
   /**

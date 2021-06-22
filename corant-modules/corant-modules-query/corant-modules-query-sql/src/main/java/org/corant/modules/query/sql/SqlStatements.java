@@ -14,8 +14,10 @@
 package org.corant.modules.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.substring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,6 +40,16 @@ import net.sf.jsqlparser.util.deparser.SelectDeParser;
  *
  */
 public class SqlStatements {
+
+  public static void main(String... s) {
+    int[] arr = new int[] {};
+    Object object = arr;
+    if (object instanceof int[]) {
+      System.out.println("true");
+    } else {
+      System.out.println("false");
+    }
+  }
 
   public static Pair<String, Object[]> normalize(String sql, Map<String, Object> namedParameters) {
     try {
@@ -106,25 +118,10 @@ public class SqlStatements {
       shouldBeTrue(namedParameters.containsKey(name),
           "The named parameter [%s] in SQL does not match the given parameter!", name);
       Object parameter = namedParameters.get(name);
-      List<Object> tempParams = new ArrayList<>();
-      int size = 0;
-      if (parameter instanceof Collection) {
-        for (Object obj : (Collection<?>) parameter) {
-          tempParams.add(obj);
-          size++;
-        }
-      } else if (parameter != null && parameter.getClass().isArray()) {
-        for (Object obj : (Object[]) parameter) {
-          tempParams.add(obj);
-          size++;
-        }
-      } else {
-        tempParams.add(parameter);
-        size++;
-      }
+      List<Object> tempParams = resolveParameter(parameter);
+      int size = sizeOf(tempParams);
       if (size > 1) {
-        buffer.append("?,".repeat(size));
-        buffer.deleteCharAt(buffer.length() - 1);
+        buffer.append(substring("?,".repeat(size), 0, -1));
       } else {
         buffer.append("?");
       }
@@ -141,29 +138,30 @@ public class SqlStatements {
         throw new QueryRuntimeException("SQL placeholder does not match the given parameter!");
       }
       Object parameter = ordinaryParameters[jdbcParameter.getIndex() - 1];
-      List<Object> tempParams = new ArrayList<>();
-      int size = 0;
-      if (parameter instanceof Collection) {
-        for (Object obj : (Collection<?>) parameter) {
-          tempParams.add(obj);
-          size++;
-        }
-      } else if (parameter != null && parameter.getClass().isArray()) {
-        for (Object obj : (Object[]) parameter) {
-          tempParams.add(obj);
-          size++;
-        }
-      } else {
-        tempParams.add(parameter);
-        size++;
-      }
+      List<Object> tempParams = resolveParameter(parameter);
+      int size = sizeOf(tempParams);
       if (size > 1) {
-        buffer.append("?,".repeat(size));
-        buffer.deleteCharAt(buffer.length() - 1);
+        buffer.append(substring("?,".repeat(size), 0, -1));
       } else {
         buffer.append("?");
       }
       useParams.addAll(tempParams);
+    }
+
+    protected List<Object> resolveParameter(Object parameter) {
+      List<Object> params = new ArrayList<>();
+      if (parameter instanceof Collection) {
+        for (Object obj : (Collection<?>) parameter) {
+          params.add(obj);
+        }
+      } else if (parameter instanceof Object[]) {
+        for (Object obj : (Object[]) parameter) {
+          params.add(obj);
+        }
+      } else {
+        params.add(parameter);
+      }
+      return params;
     }
   }
 }

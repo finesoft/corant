@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
@@ -295,7 +296,7 @@ public class Conversions {
    * @see Conversion#convert(Object, Class, Supplier, Map)
    */
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
-      Supplier<C> collectionFactory) {
+      IntFunction<C> collectionFactory) {
     return Conversion.convert(obj, itemClass, collectionFactory, null);
   }
 
@@ -552,7 +553,7 @@ public class Conversions {
    * @see ConverterFactory
    */
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (clazz != null && clazz.isArray()
+    if (clazz != null && clazz.isArray() && !clazz.getComponentType().isPrimitive()
         && (obj instanceof Object[] || obj instanceof Collection)) {
       return forceCast(toArray(obj, clazz.getComponentType(), hints));
     }

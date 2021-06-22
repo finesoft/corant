@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.conversion.converter.factory.ObjectPrimitiveArrayConverterFactories;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Resources;
@@ -231,6 +232,7 @@ public class ConverterRegistry {
   }
 
   static synchronized void load() {
+    ObjectPrimitiveArrayConverterFactories.FACTORIES.forEach(ConverterRegistry::register);
     streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
         .sorted(Sortable::reverseCompare).forEach(ConverterRegistry::register);
     streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))

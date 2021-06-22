@@ -29,6 +29,7 @@ import org.corant.shared.util.Objects;
 /**
  * corant-shared
  *
+ * <p>
  * Implicit String to Object converter factory (in order)
  *
  * <ul>
@@ -39,7 +40,7 @@ import org.corant.shared.util.Objects;
  * <li>the target type {@code T} has a {@code public static T parse(String)} method, or</li>
  * <li>the target type {@code T} has a {@code public static T parse(CharSequence)} method</li>
  * <li>the target type {@code T} has a public Constructor with a String parameter, or</li>
- * <li>the target type {@code T} has a public Constructor with a CharSequence parameter, or</li>
+ * <li>the target type {@code T} has a public Constructor with a CharSequence parameter</li>
  * </ul>
  *
  *

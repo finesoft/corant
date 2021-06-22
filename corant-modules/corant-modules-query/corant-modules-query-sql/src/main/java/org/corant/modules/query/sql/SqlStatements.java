@@ -41,16 +41,6 @@ import net.sf.jsqlparser.util.deparser.SelectDeParser;
  */
 public class SqlStatements {
 
-  public static void main(String... s) {
-    int[] arr = new int[] {};
-    Object object = arr;
-    if (object instanceof int[]) {
-      System.out.println("true");
-    } else {
-      System.out.println("false");
-    }
-  }
-
   public static Pair<String, Object[]> normalize(String sql, Map<String, Object> namedParameters) {
     try {
       StringBuilder statement = new StringBuilder();

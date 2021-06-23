@@ -162,6 +162,15 @@ public class NarayanaExtension implements TransactionExtension {
       logger.info(() -> "Registered narayana environment beans to MBean server.");
     }
 
+    logger.info(() -> String.format("JTA default transaction timeout %ss",
+        coordinatorBean.getDefaultTimeout()));
+    if (config.isAutoRecovery()) {
+      logger.info(() -> String.format(
+          "JTA recovery settings: init-offset: %ss, period: %ss, back-off: %ss, expiry-scan-interval: %sh.",
+          recoveryBean.getPeriodicRecoveryInitilizationOffset(),
+          recoveryBean.getPeriodicRecoveryPeriod(), recoveryBean.getRecoveryBackoffPeriod(),
+          recoveryBean.getExpiryScanInterval(), recoveryBean.getExpiryScanInterval()));
+    }
   }
 
   void preContainerStopEvent(@Observes final PreContainerStopEvent event) {

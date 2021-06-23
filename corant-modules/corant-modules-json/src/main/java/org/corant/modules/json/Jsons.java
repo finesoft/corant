@@ -35,9 +35,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -53,9 +55,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
  */
 public class Jsons {
 
-  static final ObjectMapper objectMapper = new ObjectMapper();
   static final Logger logger = Logger.getLogger(Jsons.class.getName());
-
+  static final ObjectMapper objectMapper = new ObjectMapper();
   static {
     SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
         .addDeserializer(Pair.class, new PairDeserializer())
@@ -75,6 +76,8 @@ public class Jsons {
     objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
+  static final JavaType mapType = objectMapper.constructType(Map.class);
+  static final ObjectReader mapReader = objectMapper.readerFor(mapType);
 
   private Jsons() {}
 
@@ -151,9 +154,12 @@ public class Jsons {
    *
    * @param jsonString the JSON string to be convert
    */
-  @SuppressWarnings("unchecked")
   public static <K, V> Map<K, V> fromString(String jsonString) {
-    return fromString(jsonString, Map.class);
+    try {
+      return mapReader.readValue(jsonString);
+    } catch (JsonProcessingException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   /**

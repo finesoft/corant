@@ -26,9 +26,13 @@ import java.util.Map;
  */
 public interface Principal extends java.security.Principal, Serializable {
 
-  Map<String, ? extends Serializable> getProperties();
+  default Map<String, ? extends Serializable> getProperties() {
+    return Collections.emptyMap();
+  }
 
-  <T> T getProperty(String propertyName, Class<T> propertyType);
+  default <T> T getProperty(String propertyName, Class<T> propertyType) {
+    return null;
+  }
 
   class DefaultPrincipal implements Principal, Serializable {
 

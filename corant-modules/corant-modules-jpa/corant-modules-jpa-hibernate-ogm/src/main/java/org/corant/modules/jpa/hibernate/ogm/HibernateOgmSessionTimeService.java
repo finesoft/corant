@@ -29,14 +29,12 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
  */
 public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeService {
 
+  static final Document timeBson =
+      new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
+
   @Override
   public boolean accept(Class<?> provider) {
     return provider.equals(org.hibernate.ogm.jpa.HibernateOgmPersistence.class);
-  }
-
-  @Override
-  public int getPriority() {
-    return Priorities.APPLICATION_LOWER;
   }
 
   @Override
@@ -44,14 +42,17 @@ public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeServi
       Object object) {
     MongoDBDatastoreProvider mp = resolveMongoDBDatastoreProvider(sessionFactory);
     if (mp != null) {
-      final Document timeBson =
-          new Document(mapOf("serverStatus", 1, "repl", 0, "metrics", 0, "locks", 0));
       final long epochMillis =
           getMapInstant(mp.getDatabase().runCommand(timeBson), "localTime").toEpochMilli();
       return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
     } else {
       return super.get(useEpochSeconds, sessionFactory, object);
     }
+  }
+
+  @Override
+  public int getPriority() {
+    return Priorities.APPLICATION_LOWER;
   }
 
   MongoDBDatastoreProvider resolveMongoDBDatastoreProvider(

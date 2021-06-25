@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
+
 /**
  * corant-modules-query-sql
  *
@@ -22,7 +24,7 @@ package org.corant.modules.query.sql.dialect;
 public class CalciteDialect implements Dialect {
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
     StringBuilder sbd = new StringBuilder(50 + sql.length());
     sbd.append(sql).append(" ");
     sbd.append(" OFFSET ").append(offset).append(" ROWS");

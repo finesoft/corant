@@ -63,7 +63,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Duration timeout = querier.resolveTimeout();
-    String limitSql = getDialect().getLimitSql(sql, offset, limit + 1);
+    Map<String, String> properties = querier.getQuery().getProperties();
+    String limitSql = getDialect().getLimitSql(sql, offset, limit + 1, properties);
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
@@ -100,7 +101,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Duration timeout = querier.resolveTimeout();
-    String limitSql = getDialect().getLimitSql(sql, offset, limit);
+    Map<String, String> properties = querier.getQuery().getProperties();
+    String limitSql = getDialect().getLimitSql(sql, offset, limit, properties);
     log(queryName, scriptParameter, sql, "Limit: " + limitSql);
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
@@ -109,7 +111,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       if (size < limit) {
         result.withTotal(offset + size);
       } else {
-        String totalSql = getDialect().getCountSql(sql);
+        String totalSql = getDialect().getCountSql(sql, properties);
         log("total-> " + queryName, scriptParameter, totalSql);
         result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
             Dialect.COUNT_FIELD_NAME));

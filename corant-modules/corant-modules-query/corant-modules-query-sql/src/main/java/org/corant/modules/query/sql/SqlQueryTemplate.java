@@ -21,6 +21,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
@@ -86,6 +87,7 @@ public class SqlQueryTemplate {
   protected boolean useNamedParameter = false;
   protected int limit = 16;
   protected int offset = 0;
+  protected Map<String, Object> hints = new HashMap<>();
 
   public SqlQueryTemplate(DataSource dataSource, DBMS dbms) {
     datasource = dataSource;
@@ -177,7 +179,7 @@ public class SqlQueryTemplate {
   public Forwarding<Map<String, Object>> forward() {
     Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
         : SqlStatements.normalize(sql, ordinaryParameters);
-    String limitSql = dialect.getLimitSql(ps.getLeft(), offset, limit + 1);
+    String limitSql = dialect.getLimitSql(ps.getLeft(), offset, limit + 1, hints);
     final Object[] params = ps.getRight();
     Forwarding<Map<String, Object>> result = Forwarding.inst();
     List<Map<String, Object>> list = query(limitSql, params);
@@ -214,6 +216,12 @@ public class SqlQueryTemplate {
     return r == null ? null : converter.apply(r);
   }
 
+  public SqlQueryTemplate hints(Object... hints) {
+    this.hints.clear();
+    this.hints.putAll(mapOf(hints));
+    return this;
+  }
+
   /**
    * The expected number of query result set or the expected size of the result set of each
    * iteration of the streaming query
@@ -240,7 +248,7 @@ public class SqlQueryTemplate {
         : SqlStatements.normalize(sql, ordinaryParameters);
     String useSql = ps.getLeft();
     Object[] params = ps.getRight();
-    String limitSql = dialect.getLimitSql(useSql, offset, limit);
+    String limitSql = dialect.getLimitSql(useSql, offset, limit, hints);
     try {
       List<Map<String, Object>> list = query(limitSql, params);
       Paging<Map<String, Object>> result = Paging.of(offset, limit);
@@ -249,7 +257,7 @@ public class SqlQueryTemplate {
         if (size < limit) {
           result.withTotal(offset + size);
         } else {
-          String totalSql = dialect.getCountSql(useSql);
+          String totalSql = dialect.getCountSql(useSql, hints);
           result.withTotal(getMapInteger(get(totalSql, params), Dialect.COUNT_FIELD_NAME));
         }
       }

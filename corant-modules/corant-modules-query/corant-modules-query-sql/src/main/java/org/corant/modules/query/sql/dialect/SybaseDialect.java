@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
+
 /**
  * corant-modules-query-sql
  *
@@ -24,18 +26,18 @@ public class SybaseDialect implements Dialect {
   public static final Dialect INSTANCE = new SybaseDialect();
 
   @Override
-  public String getCountSql(String sql) {
+  public String getCountSql(String sql, Map<String, ?> hints) {
     return new StringBuilder(sql.length() + 64).append("select count(1) from ( ")
         .append(getNonOrderByPart(sql)).append(" ) as tmp_count").toString();
   }
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
     throw new UnsupportedOperationException("The database Sybase limit script not supported");
   }
 
   public String getLimitString(String sql, int offset, String offsetPlaceholder, int limit,
-      String limitPlaceholder) {
+      String limitPlaceholder, Map<String, ?> hints) {
     throw new UnsupportedOperationException("The database Sybase limit script not supported");
   }
 

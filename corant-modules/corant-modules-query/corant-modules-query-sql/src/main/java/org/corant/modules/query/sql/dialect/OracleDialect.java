@@ -14,6 +14,7 @@
 package org.corant.modules.query.sql.dialect;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
@@ -30,19 +31,19 @@ public class OracleDialect implements Dialect {
   public static final String ORDER_SIBLINGS_BY = "order\\s+siblings\\s+by";
   public static final Pattern ORDER_SIBLINGS_BY_PATTERN =
       SqlHelper.buildShallowIndexPattern(ORDER_SIBLINGS_BY, true);
-  
+
   @Override
-  public String getCountSql(String sql) {
+  public String getCountSql(String sql, Map<String, ?> hints) {
     return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
         .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) tmp_count_").toString();
   }
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, limit);
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
+    return getLimitString(sql, offset, limit, hints);
   }
 
-  public String getLimitString(String sql, int offset, int limit) {
+  public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     String sqlToUse = sql.trim();
     boolean isForUpdate = false;
     if (sqlToUse.toUpperCase(Locale.getDefault()).endsWith(" FOR UPDATE")) {

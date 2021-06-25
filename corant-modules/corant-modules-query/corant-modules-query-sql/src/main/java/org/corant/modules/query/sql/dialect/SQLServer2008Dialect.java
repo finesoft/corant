@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
+
 /**
  * corant-modules-query-sql
  *
@@ -22,5 +24,22 @@ package org.corant.modules.query.sql.dialect;
 public class SQLServer2008Dialect extends SQLServer2005Dialect {
 
   public static final Dialect INSTANCE = new SQLServer2008Dialect();
+
+  @Override
+  public boolean supportsLimit() {
+    return true;
+  }
+
+  @Override
+  protected String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
+    int pos = getInsertPosition(sql);
+    StringBuilder tsql = new StringBuilder(sql.length() + 50).append(sql.substring(0, pos));
+    tsql.append(" OFFSET ").append(offset).append(" ROWS FETCH NEXT ").append(limit)
+        .append(" ROWS ONLY");
+    if (pos > sql.length()) {
+      tsql.append(sql.substring(pos - 1));
+    }
+    return tsql.toString();
+  }
 
 }

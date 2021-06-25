@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -26,12 +27,11 @@ public class DB2Dialect implements Dialect {
   public static final Dialect INSTANCE = new DB2Dialect();
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, limit);
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
+    return getLimitString(sql, offset, limit, hints);
   }
 
-
-  public String getLimitString(String sql, int offset, int limit) {
+  public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     int startOfSelect = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0);
     StringBuilder sqlToUse =
         new StringBuilder(sql.length() + 128).append(sql.substring(0, startOfSelect))

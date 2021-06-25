@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -26,8 +27,8 @@ public class HSQLDialect implements Dialect {
   public static final Dialect INSTANCE = new HSQLDialect();
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, limit);
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
+    return getLimitString(sql, offset, limit, hints);
   }
 
   /**
@@ -36,7 +37,7 @@ public class HSQLDialect implements Dialect {
    * select limit :offset :limit * from user
    * </pre>
    */
-  public String getLimitString(String sql, int offset, int limit) {
+  public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     boolean hasOffset = offset > 0;
     return new StringBuffer(sql.length() + 10).append(sql)
         .insert(SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0) + 7,

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -43,22 +44,12 @@ public interface Dialect {
    * Convert SQL statement to Count SQL statement
    *
    * @param sql to convert SQL
+   * @param hints the hints use to improve the execution process
    * @return Count SQL statement
    */
-  default String getCountSql(String sql) {
+  default String getCountSql(String sql, Map<String, ?> hints) {
     return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
         .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) AS tmp_count_").toString();
-  }
-
-  /**
-   * Convert SQL statement to Limit SQL default offset is 0
-   *
-   * @param sql
-   * @param limit
-   * @return getLimitSql
-   */
-  default String getLimitSql(String sql, int limit) {
-    return getLimitSql(sql, 0, limit);
   }
 
   /**
@@ -66,10 +57,23 @@ public interface Dialect {
    *
    * @param sql to convert SQL
    * @param offset begin offset
-   * @param limit page size
+   * @param limit the fetched size
+   * @param hints the hints use to improve the execution process
    * @return Paging SQL statement
    */
-  String getLimitSql(String sql, int offset, int limit);
+  String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints);
+
+  /**
+   * Convert SQL statement to Limit SQL default offset is 0
+   *
+   * @param sql to convert SQL
+   * @param limit the fetched size
+   * @param hints the hints use to improve the execution process
+   * @return getLimitSql
+   */
+  default String getLimitSql(String sql, int limit, Map<String, ?> hints) {
+    return getLimitSql(sql, 0, limit, hints);
+  }
 
   default String getNonOrderByPart(String sql) {
     return SqlHelper.removeOrderBy(sql);

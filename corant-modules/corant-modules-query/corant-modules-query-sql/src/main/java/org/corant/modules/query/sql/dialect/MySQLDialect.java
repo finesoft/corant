@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -28,8 +29,8 @@ public class MySQLDialect implements Dialect {
   public static final Dialect INSTANCE = new MySQLDialect();
 
   @Override
-  public String getLimitSql(String sql, int offset, int limit) {
-    return getLimitString(sql, offset, limit);
+  public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
+    return getLimitString(sql, offset, limit, hints);
   }
 
   /**
@@ -61,7 +62,7 @@ public class MySQLDialect implements Dialect {
    *    [PROCEDURE procedure_name(argument_list)]
    *    [into_option]
    *    [FOR UPDATE | LOCK IN SHARE MODE]
-
+  
    * into_option: {
    *    INTO OUTFILE 'file_name'
    *    * [CHARACTER SET charset_name]
@@ -71,7 +72,7 @@ public class MySQLDialect implements Dialect {
    * }
    * </pre>
    */
-  public String getLimitString(String sql, int offset, int limit) {
+  public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     if (offset > 0) {
       return new StringBuilder(sql.length() + 32).append(sql).append(" LIMIT ").append(offset)
           .append(",").append(limit).toString();

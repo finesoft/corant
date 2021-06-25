@@ -98,7 +98,7 @@ public class SQLServer2012Dialect extends SQLServer2005Dialect {
       return super.getLimitString(sql, offset, limit, hints);
     }
     int pos = getInsertPosition(sql);
-    StringBuilder tsql = new StringBuilder(sql.length() + 50).append(sql.substring(0, pos));
+    StringBuilder tsql = new StringBuilder(sql.length() + 50).append(sql, 0, pos);
     tsql.append(" OFFSET ").append(offset).append(" ROWS FETCH NEXT ").append(limit)
         .append(" ROWS ONLY");
     if (pos > sql.length()) {

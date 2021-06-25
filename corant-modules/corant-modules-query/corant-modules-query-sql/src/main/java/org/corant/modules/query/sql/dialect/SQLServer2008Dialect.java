@@ -33,7 +33,7 @@ public class SQLServer2008Dialect extends SQLServer2005Dialect {
   @Override
   protected String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     int pos = getInsertPosition(sql);
-    StringBuilder tsql = new StringBuilder(sql.length() + 50).append(sql.substring(0, pos));
+    StringBuilder tsql = new StringBuilder(sql.length() + 50).append(sql, 0, pos);
     tsql.append(" OFFSET ").append(offset).append(" ROWS FETCH NEXT ").append(limit)
         .append(" ROWS ONLY");
     if (pos > sql.length()) {

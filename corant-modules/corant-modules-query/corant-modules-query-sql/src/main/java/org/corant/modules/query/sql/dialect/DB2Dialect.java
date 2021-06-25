@@ -33,9 +33,8 @@ public class DB2Dialect implements Dialect {
 
   public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     int startOfSelect = SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0);
-    StringBuilder sqlToUse =
-        new StringBuilder(sql.length() + 128).append(sql.substring(0, startOfSelect))
-            .append("SELECT * FROM ( SELECT ").append(getRowNumber(sql));
+    StringBuilder sqlToUse = new StringBuilder(sql.length() + 128).append(sql, 0, startOfSelect)
+        .append("SELECT * FROM ( SELECT ").append(getRowNumber(sql));
     if (SqlHelper.containDistinct(sql)) {
       sqlToUse.append(" row_.* FROM ( ").append(sql.substring(startOfSelect)).append(" ) AS row_");
     } else {

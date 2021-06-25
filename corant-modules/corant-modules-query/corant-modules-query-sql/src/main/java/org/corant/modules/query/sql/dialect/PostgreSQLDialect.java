@@ -38,7 +38,7 @@ public class PostgreSQLDialect implements Dialect {
    * </pre>
    */
   public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
-    StringBuilder pageSql = new StringBuilder().append(sql);
+    StringBuilder pageSql = new StringBuilder(sql.length() + 40).append(sql);
     pageSql = offset <= 0 ? pageSql.append(" LIMIT ").append(limit)
         : pageSql.append(" LIMIT ").append(limit).append(" OFFSET ").append(offset);
     return pageSql.toString();

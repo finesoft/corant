@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.sql.dialect;
 
-import java.sql.PreparedStatement;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,8 +62,7 @@ public class SQLServer2005Dialect extends SQLServerDialect {
   }
 
   /**
-   * Adds {@code TOP} expression. Parameter value is bind in
-   * {@link #bindLimitParametersAtStartOfQuery(RowSelection, PreparedStatement, int)} method.
+   * Adds {@code TOP} expression
    *
    * @param sb SQL query.
    * @param offset the offset where top expression pattern matching should begin.

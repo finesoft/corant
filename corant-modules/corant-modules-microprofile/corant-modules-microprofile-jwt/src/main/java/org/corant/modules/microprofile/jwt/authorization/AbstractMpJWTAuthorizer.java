@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
-import org.corant.modules.security.shared.authorization.AuthorizationException;
-import org.corant.modules.security.shared.authorization.Authorizer;
+import org.corant.modules.security.AuthorizationException;
+import org.corant.modules.security.Authorizer;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings.WildcardMatcher;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -42,7 +42,11 @@ public abstract class AbstractMpJWTAuthorizer
 
   @Override
   public void check(ContainerRequestContext principal, String[] roleOrPermit)
-      throws AuthorizationException {}
+      throws AuthorizationException {
+    if (!isAllowed(principal, roleOrPermit)) {
+      throw new AuthorizationException();
+    }
+  }
 
   @Override
   public boolean isAllowed(ContainerRequestContext principal, String[] roleOrPermit) {

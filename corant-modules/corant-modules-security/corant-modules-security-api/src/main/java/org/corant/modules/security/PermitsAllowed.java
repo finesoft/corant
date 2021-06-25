@@ -11,10 +11,25 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.security;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  *
- * @author bingo 9:58:27
+ * @author bingo 12:12:00
  *
  */
-package org.corant.modules.security.shared.authentication;
+@Documented
+@Retention(RUNTIME)
+@Target({TYPE, METHOD})
+public @interface PermitsAllowed {
+
+  String[] value();
+}

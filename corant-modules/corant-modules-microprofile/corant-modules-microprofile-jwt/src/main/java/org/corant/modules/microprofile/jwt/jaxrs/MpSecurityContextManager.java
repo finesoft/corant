@@ -13,6 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,10 +27,10 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.ws.rs.core.SecurityContext;
-import org.corant.context.security.Principal.DefaultPrincipal;
-import org.corant.context.security.SecurityContext.DefaultSecurityContext;
 import org.corant.context.security.SecurityContexts;
-import org.corant.context.security.Subject.DefaultSubject;
+import org.corant.modules.security.SecurityContextManager;
+import org.corant.modules.security.shared.DefaultPrincipal;
+import org.corant.modules.security.shared.DefaultSecurityContext;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -39,14 +40,16 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  *
  */
 @RequestScoped
-public class MpSecurityContextManager {
+public class MpSecurityContextManager implements SecurityContextManager<SecurityContext> {
   static final Logger logger = Logger.getLogger(MpSecurityContextManager.class.getName());
 
-  void bind(SecurityContext securityContext, JsonWebToken principal) {
-    if (securityContext != null && principal != null) {
+  @Override
+  public void bind(SecurityContext securityContext) {
+    if (securityContext != null && securityContext.getUserPrincipal() != null) {
       logger.fine(() -> "Bind current microprofile-JWT principal to SecurityContexts.");
+      JsonWebToken principal =
+          shouldInstanceOf(securityContext.getUserPrincipal(), JsonWebToken.class);
       Map<String, Serializable> map = new HashMap<>();
-      String subject = principal.getSubject();
       for (String cn : principal.getClaimNames()) {
         Object co = principal.getClaim(cn);
         if (!cn.equals("raw_token")) {
@@ -55,17 +58,22 @@ public class MpSecurityContextManager {
       }
       SecurityContexts
           .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
-              new DefaultSubject(subject), new DefaultPrincipal(principal.getName(), map)));
+              new DefaultPrincipal(principal.getName(), map)));
     } else {
       logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);
     }
   }
 
-  @PreDestroy
-  void onPreDestroy() {
+  @Override
+  public void unBind() {
     logger.fine(() -> "Unbind current security context from SecurityContexts.");
     SecurityContexts.setCurrent(null);
+  }
+
+  @PreDestroy
+  void onPreDestroy() {
+    unBind();
   }
 
   private Serializable convert(Object claimValue) {

@@ -33,7 +33,7 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import org.corant.modules.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
-import org.corant.modules.security.shared.authorization.PermitsAllowed;
+import org.corant.modules.security.PermitsAllowed;
 import org.corant.shared.exception.CorantRuntimeException;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
 

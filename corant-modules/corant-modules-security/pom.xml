@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-modules-security-shared</module>
+  	<module>corant-modules-security-api</module>
   </modules>
 </project>

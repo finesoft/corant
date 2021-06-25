@@ -13,6 +13,8 @@
  */
 package org.corant.context.security;
 
+import java.io.Serializable;
+
 public class SecurityContexts {
 
   static final InheritableThreadLocal<SecurityContext> currentSecCtx =
@@ -26,12 +28,12 @@ public class SecurityContexts {
     return sc;
   }
 
-  public static Principal getCurrentPrincipal() {
+  public static Serializable getCurrentPrincipal() {
     return getCurrent().getPrincipal();
   }
 
-  public static Subject getCurrentSubject() {
-    return getCurrent().getSubject();
+  public static <T> T getCurrentPrincipal(Class<T> cls) {
+    return getCurrent().getPrincipal(cls);
   }
 
   public static boolean hasCurrentContext() {

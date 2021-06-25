@@ -11,39 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context.security;
+package org.corant.modules.security;
 
 import java.io.Serializable;
 
 /**
- * corant-context
+ * corant-modules-security-api
  *
- * @author bingo 下午12:07:08
+ * @author bingo 下午7:24:54
  *
  */
-public interface Subject extends Serializable {
+public interface Permission extends Serializable {
 
-  Serializable getId();
-
-  class DefaultSubject implements Subject {
-
-    private static final long serialVersionUID = 3435651508945136478L;
-
-    private Serializable id;
-
-    public DefaultSubject(Serializable id) {
-      this.id = id;
-    }
-
-    @Override
-    public Serializable getId() {
-      return id;
-    }
-
-    @Override
-    public String toString() {
-      return "DefaultSubject [id=" + id + "]";
-    }
-
-  }
+  <T> T unwrap(Class<T> cls);
 }

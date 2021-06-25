@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,10 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.security;
+
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  *
- * @author bingo 9:57:17
+ * @author bingo 下午2:28:25
  *
  */
-package org.corant.modules.security.shared.authorization;
+public interface SecurityContextManager<C> {
+
+  void bind(C outerContext);
+
+  void unBind();
+
+}

@@ -26,49 +26,38 @@ import java.io.Serializable;
  */
 public interface SecurityContext extends Serializable {
 
-  DefaultSecurityContext EMPTY_INST = new DefaultSecurityContext(null, null, null);
+  SecurityContext EMPTY_INST = new SecurityContext() {
 
-  String getAuthenticationScheme();
-
-  Principal getPrincipal();
-
-  Subject getSubject();
-
-  class DefaultSecurityContext implements SecurityContext {
-
-    private static final long serialVersionUID = 4329263253208902621L;
-
-    protected final String authenticationScheme;
-    protected final Principal principal;
-    protected final Subject subject;
-
-    public DefaultSecurityContext(String authenticationScheme, Subject subject,
-        Principal principal) {
-      this.authenticationScheme = authenticationScheme;
-      this.principal = principal;
-      this.subject = subject;
-    }
+    private static final long serialVersionUID = -2636803453765182930L;
 
     @Override
     public String getAuthenticationScheme() {
-      return authenticationScheme;
+      return null;
     }
 
     @Override
-    public Principal getPrincipal() {
-      return principal;
+    public Serializable getPrincipal() {
+      return null;
     }
 
     @Override
-    public Subject getSubject() {
-      return subject;
+    public <T> T getPrincipal(Class<T> cls) {
+      return null;
     }
 
     @Override
-    public String toString() {
-      return "DefaultSecurityContext [authenticationScheme=" + authenticationScheme + ", principal="
-          + principal + ", subject=" + subject + "]";
+    public <T> T unwrap(Class<T> cls) {
+      return null;
     }
 
-  }
+  };
+
+  String getAuthenticationScheme();
+
+  Serializable getPrincipal();
+
+  <T> T getPrincipal(Class<T> cls);
+
+  <T> T unwrap(Class<T> cls);
+
 }

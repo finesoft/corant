@@ -40,7 +40,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.Converter;
@@ -180,7 +179,7 @@ public class Conversions {
    * @param obj the object that to be converted
    * @return the converted object list
    *
-   * @see Conversion#convert(Object, Class, Supplier, Map)
+   * @see Conversion#convert(Collection, IntFunction, Class, Map)
    */
   public static List<BigDecimal> toBigDecimalList(Object obj) {
     return toList(obj, BigDecimal.class);
@@ -293,7 +292,7 @@ public class Conversions {
    * @param collectionFactory the collection factory use to create Collection
    * @return toCollection
    *
-   * @see Conversion#convert(Object, Class, Supplier, Map)
+   * @see Conversion#convert(Collection, IntFunction, Class, Map)
    */
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
       IntFunction<C> collectionFactory) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,18 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.authorization;
+package org.corant.modules.security;
+
+import java.io.Serializable;
 
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  *
- * @author bingo 12:24:41
+ * @author bingo 下午7:24:11
  *
  */
-public interface Authorizer<P, T> {
+public interface Role extends Serializable {
 
-  void check(P principal, T t) throws AuthorizationException;
+  String getName();
 
-  boolean isAllowed(P principal, T roleOrPermit);
+  <T> T unwrap(Class<T> cls);
 
 }

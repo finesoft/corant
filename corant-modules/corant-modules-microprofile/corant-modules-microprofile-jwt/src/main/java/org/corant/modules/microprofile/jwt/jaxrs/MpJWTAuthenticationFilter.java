@@ -71,7 +71,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));
-          securityManager.bind(securityContext, jwtPrincipal);
+          securityManager.bind(requestContext.getSecurityContext());
           logger.debugf("JWT authentication filter handle successfully");
         } catch (Exception e) {
           if (debugLogging) {

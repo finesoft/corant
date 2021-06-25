@@ -23,7 +23,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import org.corant.modules.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
 import org.corant.modules.microprofile.jwt.authorization.MpJWTRolesAuthorizer;
-import org.corant.modules.security.shared.authorization.Authorizer;
+import org.corant.modules.security.Authorizer;
 
 /**
  * corant-modules-microprofile-jwt

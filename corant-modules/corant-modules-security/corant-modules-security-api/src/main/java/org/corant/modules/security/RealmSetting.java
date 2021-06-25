@@ -11,10 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.security;
+
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  * 
- * @author bingo 下午6:14:03
+ * @author bingo 下午3:12:09
  *
  */
-package org.corant.modules.security.shared.encryption;
+public interface RealmSetting {
+
+}

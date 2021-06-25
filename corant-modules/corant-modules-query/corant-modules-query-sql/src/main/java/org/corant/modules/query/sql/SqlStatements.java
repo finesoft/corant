@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.substring;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -147,6 +148,11 @@ public class SqlStatements {
       } else if (parameter instanceof Object[]) {
         for (Object obj : (Object[]) parameter) {
           params.add(obj);
+        }
+      } else if (parameter != null && parameter.getClass().isArray()) {
+        int length = Array.getLength(parameter);
+        for (int i = 0; i < length; i++) {
+          params.add(Array.get(parameter, i));
         }
       } else {
         params.add(parameter);

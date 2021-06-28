@@ -66,14 +66,14 @@ public class MpSecurityContextManager implements SecurityContextManager<Security
   }
 
   @Override
-  public void unBind() {
+  public void unbind() {
     logger.fine(() -> "Unbind current security context from SecurityContexts.");
     SecurityContexts.setCurrent(null);
   }
 
   @PreDestroy
   void onPreDestroy() {
-    unBind();
+    unbind();
   }
 
   private Serializable convert(Object claimValue) {

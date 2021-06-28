@@ -23,6 +23,6 @@ public interface SecurityContextManager<C> {
 
   void bind(C outerContext);
 
-  void unBind();
+  void unbind();
 
 }

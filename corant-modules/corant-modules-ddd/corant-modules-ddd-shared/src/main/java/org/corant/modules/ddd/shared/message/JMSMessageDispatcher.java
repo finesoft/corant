@@ -34,6 +34,8 @@ import javax.inject.Inject;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.transaction.Transactional;
+import org.corant.context.required.RequiredConfiguration;
+import org.corant.context.required.RequiredConfiguration.ValuePredicate;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.Message.BinaryMessage;
 import org.corant.modules.ddd.MessageDispatcher;
@@ -54,6 +56,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 @Transactional
+@RequiredConfiguration(key = "corant.ddd.message.disable-jms-dispatcher",
+    predicate = ValuePredicate.EQ, type = Boolean.class, value = "false")
 public class JMSMessageDispatcher implements MessageDispatcher {
 
   protected final Map<Class<?>, Set<MessageDestinationMetaData>> metas = new ConcurrentHashMap<>();

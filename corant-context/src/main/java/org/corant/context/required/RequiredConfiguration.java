@@ -41,6 +41,6 @@ public @interface RequiredConfiguration {
   String value() default EMPTY;
 
   enum ValuePredicate {
-    NULL, BLANK, EMPTY, NO_EMPTY, NO_NULL, NO_BLANK, EQ, GTE, GT, LT, LTE,
+    NULL, BLANK, EMPTY, NO_EMPTY, NO_NULL, NO_BLANK, EQ, NO_EQ, GTE, GT, LT, LTE
   }
 }

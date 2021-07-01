@@ -43,8 +43,8 @@ public class Conversion {
   /**
    * Convert collection value to target collection value
    *
-   * @param <T>
-   * @param <C>
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
    * @param value the collection value to convert
    * @param collectionFactory the constructor of collection
    * @param targetItemClass the target item class of the converted collection
@@ -67,7 +67,7 @@ public class Conversion {
   /**
    * Convert iterable values with knowed source class and target class
    *
-   * @param <T>
+   * @param <T> the target class of item
    * @param value the value to convert
    * @param sourceClass the knowed item source class
    * @param targetClass the item target class that will be convertted
@@ -93,11 +93,11 @@ public class Conversion {
   }
 
   /**
-   * Convert iterable values with unknowed source class and target class
+   * Convert iterable values with unknown source class and target class
    *
-   * @param <T>
+   * @param <T> the target class of item
    * @param value the value to convert
-   * @param targetClass the item target class that will be convertted
+   * @param targetClass the item target class that will be converted
    * @param hints the converter hints use for intervening converters
    * @return An iterable of items converted according to the target type
    */
@@ -149,8 +149,8 @@ public class Conversion {
    * Convert objects to certain item types and collection types, use the default collection
    * constructor.
    *
-   * @param <C>
-   * @param <T>
+   * @param <C> the target collection class
+   * @param <T> the target class of item of the collection
    * @param value the value to convert
    * @param collectionClass the collection class
    * @param targetClass the item class
@@ -272,7 +272,7 @@ public class Conversion {
   /**
    * Convert an array value to target array
    *
-   * @param <T>
+   * @param <T> the target class of element of the array
    * @param value the array value to convert
    * @param targetItemClass the target element class of array
    * @param arrayFactory the constructor of array
@@ -297,8 +297,8 @@ public class Conversion {
   /**
    * Convert array value to target collection value
    *
-   * @param <T>
-   * @param <C>
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
    * @param value the array value to convert
    * @param collectionFactory the constructor of collection
    * @param targetItemClass the target class of item of the collection
@@ -321,8 +321,8 @@ public class Conversion {
   /**
    * Use source class and target class to find out the right converter
    *
-   * @param sourceClass
-   * @param targetClass
+   * @param sourceClass the source object class
+   * @param targetClass the specified converted type
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass) {
     return Converters.lookup(wrap(sourceClass), wrap(targetClass)).orElse(null);

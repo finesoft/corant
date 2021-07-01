@@ -31,8 +31,8 @@ public class ConverterType<S, T> implements Serializable {
   private final int hash;
 
   /**
-   * @param sourceClass
-   * @param targetClass
+   * @param sourceClass the source object class
+   * @param targetClass the specified converted type
    */
   public ConverterType(Class<S> sourceClass, Class<T> targetClass) {
     this.sourceClass = shouldNotNull(sourceClass);

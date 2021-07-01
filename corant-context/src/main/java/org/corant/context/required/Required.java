@@ -19,6 +19,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.compare;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNotNull;
 import static org.corant.shared.util.Objects.isNull;
 import static org.corant.shared.util.Streams.streamOf;
@@ -95,8 +96,14 @@ public class Required {
           return true;
       }
     } else {
+      final Object defaultNullValue =
+          requiredValueType.equals(Boolean.class) || requiredValueType.equals(Boolean.TYPE)
+              ? Boolean.FALSE
+              : null;
       for (String k : keys) {
-        Object configValue = ConfigProvider.getConfig().getValue(k, requiredValueType);
+        Object configValue = defaultObject(
+            ConfigProvider.getConfig().getOptionalValue(k, requiredValueType).orElse(null),
+            () -> defaultNullValue);
         Object value = toObject(requiredValue, requiredValueType);
         boolean match = false;
         switch (requiredValuePredicate) {
@@ -129,6 +136,9 @@ public class Required {
             break;
           case LTE:
             match = compare((Comparable) configValue, (Comparable) value) >= 0;
+            break;
+          case NO_EQ:
+            match = areEqual(value, configValue);
             break;
           default:
             match = !areEqual(value, configValue);

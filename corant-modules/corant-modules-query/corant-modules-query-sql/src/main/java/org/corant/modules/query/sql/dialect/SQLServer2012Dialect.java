@@ -48,19 +48,6 @@ public class SQLServer2012Dialect extends SQLServer2005Dialect {
    * <p>
    * SELET XXX FROM T OFFSET offset FETCH NEXT limit ROWS ONLY;
    * <p>
-   * To achieve stable results between query requests using OFFSET and FETCH, the following
-   * conditions must be met:
-   *
-   * 1.The underlying data that is used by the query must not change. That is, either the rows
-   * touched by the query are not updated or all requests for pages from the query are executed in a
-   * single transaction using either snapshot or serializable transaction isolation. For more
-   * information about these transaction isolation levels, see SET TRANSACTION ISOLATION LEVEL
-   * (Transact-SQL).
-   *
-   * 2.The ORDER BY clause contains a column or combination of columns that are guaranteed to be
-   * unique.
-   *
-   * <p>
    *
    * <pre>
    * -- Syntax for SQL Server and Azure SQL Database
@@ -84,6 +71,30 @@ public class SQLServer2012Dialect extends SQLServer2005Dialect {
    *    [ WHERE $search_condition$ ]
    *    [ $GROUP BY$ ]
    *    [ HAVING $ search_condition $ ]
+   * </pre>
+   *
+   * <p>
+   *
+   * <pre>
+   * <b>Note:
+   * To achieve stable results between query requests using OFFSET and FETCH, the
+   * following conditions must be met:
+   *
+   * 1.The underlying data that is used by the query must not change. That is, either the rows
+   * touched by the query are not updated or all requests for pages from the query are executed in a
+   * single transaction using either snapshot or serializable transaction isolation. For more
+   * information about these transaction isolation levels, see SET TRANSACTION ISOLATION LEVEL
+   * (Transact-SQL).
+   *
+   * 2.The ORDER BY clause contains a column or combination of columns that are guaranteed to be
+   * unique.
+   *
+   * 3.If the query SQL statement contains ORDER BYclause, this method use OFFSET FETCH NEXT
+   * ways to execute the query by default, so caller must care whether the ORDER BY clause contains
+   * a column or combination of columns that are guaranteed to be unique. If caller want to use
+   * ROW_NUMBER ways (like SQLServer2005), the caller must specify the value of key
+   * {@code useRowNumber} in the hint to be {@code true}.
+   * </b>
    * </pre>
    *
    * @param sql The SQL statement to base the limit script off of.

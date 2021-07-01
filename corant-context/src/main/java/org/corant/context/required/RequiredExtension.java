@@ -15,6 +15,7 @@ package org.corant.context.required;
 
 import static org.corant.shared.util.Sets.newConcurrentHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -31,19 +32,23 @@ import org.corant.shared.normal.Priorities;
  */
 public class RequiredExtension implements Extension {
 
+  static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
+
   private static final Set<Class<?>> vetoes = newConcurrentHashSet();
 
   public static boolean isVetoed(Class<?> beanType) {
     return beanType != null && vetoes.contains(beanType);
   }
 
-  public <T> void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
+  public void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       RequiredClassNotPresent.class, RequiredClassPresent.class,
-      RequiredConfiguration.class}) ProcessAnnotatedType<T> event) {
+      RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
     if (Required.shouldVeto(type)) {
       vetoes.add(event.getAnnotatedType().getJavaClass());
       event.veto();
+      logger.info(() -> String.format("The bean type %s was ignored!",
+          event.getAnnotatedType().getJavaClass().getName()));
     }
   }
 }

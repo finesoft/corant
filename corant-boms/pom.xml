@@ -48,7 +48,7 @@
 		<version.datastax.cassandra>3.7.1</version.datastax.cassandra>
 		<version.eclipse.yasson>1.0.8</version.eclipse.yasson>
 		<version.ehcache>3.9.0</version.ehcache>
-		<version.elasticsearch>6.5.4</version.elasticsearch>
+		<version.elasticsearch>6.8.15</version.elasticsearch>
 		<version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
 		<version.feign>11.0</version.feign>
 		<version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>

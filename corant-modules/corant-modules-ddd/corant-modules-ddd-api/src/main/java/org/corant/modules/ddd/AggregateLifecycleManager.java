@@ -13,9 +13,6 @@
  */
 package org.corant.modules.ddd;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 /**
  * corant-modules-ddd-api
  *
@@ -27,11 +24,7 @@ import javax.persistence.PersistenceContext;
  */
 public interface AggregateLifecycleManager {
 
-  EntityManager getEntityManager(Class<?> cls);
-
-  PersistenceContext getPersistenceContext(Class<?> cls);
-
-  void on(AggregateLifecycleManageEvent e);
+  void handle(AggregateLifecycleManageEvent e);
 
   enum LifecycleAction {
     PERSIST, RECOVER, REMOVE

@@ -143,7 +143,7 @@ public interface JPARepository extends Repository<Query> {
    * {@link EntityManager#find(Class, Object, LockModeType)}
    */
   default <T> T get(Class<T> entityClass, Serializable id, LockModeType lockMode) {
-    return getEntityManager().find(entityClass, id, lockMode);
+    return id != null ? getEntityManager().find(entityClass, id, lockMode) : null;
   }
 
   /**
@@ -151,7 +151,7 @@ public interface JPARepository extends Repository<Query> {
    */
   default <T> T get(Class<T> entityClass, Serializable id, LockModeType lockMode,
       Map<String, Object> properties) {
-    return getEntityManager().find(entityClass, id, lockMode, properties);
+    return id != null ? getEntityManager().find(entityClass, id, lockMode, properties) : null;
   }
 
   /**

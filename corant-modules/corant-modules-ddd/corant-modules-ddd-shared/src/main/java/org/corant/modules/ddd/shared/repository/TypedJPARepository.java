@@ -244,7 +244,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
       final ParameterizedType parameterizedType = (ParameterizedType) type;
       final Type argType = parameterizedType.getActualTypeArguments()[0];
       final Class<T> entityClass = (Class<T>) argType;
-      return new TypedJPARepositoryTemple<T>(entityClass);
+      return new TypedJPARepositoryTempale<T>(entityClass);
     }
   }
 
@@ -254,7 +254,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @author bingo 下午9:15:00
    *
    */
-  public static class TypedJPARepositoryTemple<T extends Entity> implements TypedJPARepository<T> {
+  public static class TypedJPARepositoryTempale<T extends Entity> implements TypedJPARepository<T> {
 
     private final Class<T> entityClass;
     private final PersistenceContext context;
@@ -262,7 +262,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
     /**
      * @param entityClass
      */
-    protected TypedJPARepositoryTemple(Class<T> entityClass) {
+    protected TypedJPARepositoryTempale(Class<T> entityClass) {
       this.entityClass = entityClass;
       this.context = resolve(EntityManagers.class).getPersistenceContext(entityClass);
     }

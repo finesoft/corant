@@ -254,7 +254,8 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @author bingo 下午9:15:00
    *
    */
-  public static class TypedJPARepositoryTemplate<T extends Entity> implements TypedJPARepository<T> {
+  public static class TypedJPARepositoryTemplate<T extends Entity>
+      implements TypedJPARepository<T> {
 
     private final Class<T> entityClass;
     private final PersistenceContext context;
@@ -290,17 +291,17 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
 
     @Override
     public T get(Serializable id, LockModeType lockMode) {
-      return getEntityManager().find(entityClass, id, lockMode);
+      return id != null ? getEntityManager().find(entityClass, id, lockMode) : null;
     }
 
     @Override
     public T get(Serializable id, LockModeType lockMode, Map<String, Object> properties) {
-      return getEntityManager().find(entityClass, id, lockMode, properties);
+      return id != null ? getEntityManager().find(entityClass, id, lockMode, properties) : null;
     }
 
     @Override
     public T get(Serializable id, Map<String, Object> properties) {
-      return getEntityManager().find(entityClass, id, properties);
+      return id != null ? getEntityManager().find(entityClass, id, properties) : null;
     }
 
     @Override

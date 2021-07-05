@@ -34,8 +34,9 @@ import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.Repository;
-import org.corant.modules.ddd.shared.repository.JPAQueries.JPAQuery;
-import org.corant.modules.ddd.shared.repository.JPAQueries.TypedJPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries;
+import org.corant.modules.jpa.shared.JPAQueries.JPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 import org.corant.shared.util.Objects;
 
 /**

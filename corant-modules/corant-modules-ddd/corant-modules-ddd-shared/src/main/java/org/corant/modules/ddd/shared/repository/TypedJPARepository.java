@@ -31,9 +31,11 @@ import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
+import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
-import org.corant.modules.ddd.shared.repository.JPAQueries.TypedJPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries;
+import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 
 /**
  * corant-modules-ddd-shared
@@ -239,6 +241,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
     @SuppressWarnings("unchecked")
     @Produces
     @Dependent
+    @AutoCreated
     <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
       final Type type = ip.getType();
       final ParameterizedType parameterizedType = (ParameterizedType) type;

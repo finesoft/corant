@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.repository;
+package org.corant.modules.jpa.shared;
 
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -24,7 +24,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 /**
- * corant-modules-ddd-shared
+ * corant-modules-jpa-shared
  *
  * @author bingo 下午9:43:04
  *

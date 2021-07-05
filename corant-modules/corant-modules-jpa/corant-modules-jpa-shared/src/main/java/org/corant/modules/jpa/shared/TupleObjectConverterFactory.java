@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.repository;
+package org.corant.modules.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
@@ -50,9 +50,8 @@ import org.corant.shared.util.Systems;
  */
 public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 
-  static final int priority =
-      Systems.getSystemProperty("corant.ddd.repository.tuple-object-converter.priority",
-          Integer.class, Priorities.FRAMEWORK_LOWER + 1);
+  static final int priority = Systems.getSystemProperty(
+      "corant.jpa.tuple-object-converter.priority", Integer.class, Priorities.FRAMEWORK_LOWER + 1);
   static final int maxSize = 1024;
   static final ConcurrentHashMap<Class<?>, Injector> map = new ConcurrentHashMap<>(512, 0.8f, 4);
 

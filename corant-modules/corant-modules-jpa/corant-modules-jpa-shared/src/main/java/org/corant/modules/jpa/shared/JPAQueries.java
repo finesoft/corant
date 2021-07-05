@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.repository;
+package org.corant.modules.jpa.shared;
 
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -55,7 +55,7 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.Converters;
 
 /**
- * corant-modules-ddd-shared
+ * corant-modules-jpa-shared
  *
  * @author bingo 下午4:07:53
  *
@@ -399,6 +399,12 @@ public class JPAQueries {
         || Enum.class.isAssignableFrom(type);
   }
 
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午6:05:36
+   *
+   */
   public static abstract class AbstractQuery {
 
     protected ParameterBuilder parameterBuilder;
@@ -516,7 +522,24 @@ public class JPAQueries {
 
   }
 
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午6:05:43
+   *
+   */
   public static abstract class JPAQuery extends AbstractQuery {
+
+    public JPAQuery entityManager(final EntityManager entityManager) {
+      setEntityManagerSupplier(
+          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
+      return this;
+    }
+
+    public JPAQuery entityManager(final Supplier<EntityManager> entityManagerSupplier) {
+      setEntityManagerSupplier(entityManagerSupplier);
+      return this;
+    }
 
     /**
      * {@link Query#setFirstResult(int)}
@@ -637,19 +660,14 @@ public class JPAQueries {
     }
 
     protected abstract Query createQuery();
-
-    protected JPAQuery entityManager(final EntityManager entityManager) {
-      setEntityManagerSupplier(
-          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
-      return this;
-    }
-
-    protected JPAQuery entityManager(final Supplier<EntityManager> entityManagerSupplier) {
-      setEntityManagerSupplier(entityManagerSupplier);
-      return this;
-    }
   }
 
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午6:05:50
+   *
+   */
   public static abstract class TypedJPAQuery<T> extends AbstractQuery {
 
     final Class<T> resultType;
@@ -663,6 +681,17 @@ public class JPAQueries {
     protected TypedJPAQuery(Class<T> resultType, Converter<Tuple, T> converter) {
       this.resultType = resultType;
       this.converter = converter;
+    }
+
+    public TypedJPAQuery<T> entityManager(final EntityManager entityManager) {
+      setEntityManagerSupplier(
+          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
+      return this;
+    }
+
+    public TypedJPAQuery<T> entityManager(final Supplier<EntityManager> entityManagerSupplier) {
+      setEntityManagerSupplier(entityManagerSupplier);
+      return this;
     }
 
     /**
@@ -792,17 +821,6 @@ public class JPAQueries {
     }
 
     protected abstract Query createQuery();
-
-    protected TypedJPAQuery<T> entityManager(final EntityManager entityManager) {
-      setEntityManagerSupplier(
-          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
-      return this;
-    }
-
-    protected TypedJPAQuery<T> entityManager(final Supplier<EntityManager> entityManagerSupplier) {
-      setEntityManagerSupplier(entityManagerSupplier);
-      return this;
-    }
   }
 
   abstract static class ParameterBuilder {

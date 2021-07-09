@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -45,13 +46,11 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   protected final DefaultQueryRunner runner;
   protected final Dialect dialect;
 
-  @SuppressWarnings("deprecation")
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
     this.confiuration = confiuration;
     runner = new DefaultQueryRunner(confiuration.getDataSource(),
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
-            confiuration.getMaxFieldSize(), confiuration.getMaxRows(),
-            confiuration.getQueryTimeout()));
+            confiuration.getMaxFieldSize(), null, null));
     dialect = confiuration.getDialect();
   }
 
@@ -103,10 +102,11 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public Stream<Map<String, Object>> stream(String sql, Duration timeout, Object... args) {
+  public Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminater,
+      Duration timeout, Object... args) {
     try {
-      return new StreamableQueryRunner(confiuration)
-          .streamQuery(confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, args);
+      return new StreamableQueryRunner(confiuration, timeout).streamQuery(
+          confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, terminater, args);
     } catch (SQLException e) {
       throw new CorantRuntimeException(e);
     }

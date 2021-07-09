@@ -13,18 +13,16 @@
  */
 package org.corant.modules.query.sql;
 
-import static org.corant.shared.util.Functions.emptyConsumer;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.max;
+import java.lang.ref.Cleaner;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
+import java.time.Duration;
 import java.util.Spliterator;
 import java.util.Spliterators.AbstractSpliterator;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -33,6 +31,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
  * corant-modules-query-sql
@@ -42,180 +41,41 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class StreamableQueryRunner extends QueryRunner {
 
-  final int defaultBatchSize;
+  public StreamableQueryRunner() {}
 
-  public StreamableQueryRunner() {
-    defaultBatchSize = 16;
+  public StreamableQueryRunner(Integer fetchDirection, Integer batchSize, Integer maxFieldSize,
+      Integer maxRows, Integer queryTimeout) {
+    super(new StatementConfiguration(fetchDirection, max(batchSize, 1), maxFieldSize, maxRows,
+        queryTimeout));
   }
 
-  @SuppressWarnings("deprecation")
-  public StreamableQueryRunner(SqlQueryConfiguration confiuration) {
-    super(new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
-        confiuration.getMaxFieldSize(), confiuration.getMaxRows(), confiuration.getQueryTimeout()));
-    defaultBatchSize = max(confiuration.getFetchSize(), 16);
+  public StreamableQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
+    super(new StatementConfiguration(confiuration.getFetchDirection(),
+        max(confiuration.getFetchSize(), 1), confiuration.getMaxFieldSize(), null,
+        timeout == null ? null : (int) timeout.getSeconds()));
   }
 
-  static void release(ResultSet rs, PreparedStatement stmt, Connection conn, boolean closeConn) {
-    try {
-      DbUtils.close(rs);
-    } catch (SQLException e) {
-      // Noop!
-    } finally {
-      try {
-        DbUtils.close(stmt);
-      } catch (SQLException e) {
-        // Noop!
-      }
-      if (closeConn) {
-        try {
-          DbUtils.close(conn);
-        } catch (SQLException e) {
-          // Noop!
-        }
-      }
-    }
-  }
-
-  void streamBatch(Connection conn, boolean closeConn, String sql, int batchSubmitSize,
-      Stream<Iterable<?>> params, Consumer<int[]> consumer) throws SQLException {
-    preCondition(conn, closeConn, sql);
-    if (params == null) {
-      if (closeConn) {
-        close(conn);
-      }
-      throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
-    }
-    PreparedStatement stmt = null;
-    final Consumer<int[]> useConsumer = consumer != null ? consumer : ia -> {
-    };
-    try {
-      final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
-      final AtomicInteger counter = new AtomicInteger();
-      final AtomicInteger batchCounter = new AtomicInteger();
-      final int submitSize = max(batchSubmitSize, defaultBatchSize);
-      params.forEach(it -> {
-        try {
-          completeStatement(stmtx, it).addBatch();
-          if (counter.incrementAndGet() % submitSize == 0) {
-            useConsumer.accept(stmtx.executeBatch());
-            batchCounter.set(counter.get());
-          }
-        } catch (SQLException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-      if (counter.get() > batchCounter.get()) {
-        useConsumer.accept(stmt.executeBatch());
-      }
-    } catch (SQLException e) {
-      rethrow(e, sql, params);
-    } finally {
-      release(null, stmt, conn, closeConn);
-    }
-  }
-
-  int[] streamBatch(Connection conn, boolean closeConn, String sql, Stream<Iterable<?>> params)
-      throws SQLException {
-    preCondition(conn, closeConn, sql);
-    if (params == null) {
-      if (closeConn) {
-        close(conn);
-      }
-      throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
-    }
-    PreparedStatement stmt = null;
-    int[] rows = null;
-    try {
-      final PreparedStatement stmtx = stmt = this.prepareStatement(conn, sql);
-      params.forEach(it -> {
-        try {
-          completeStatement(stmtx, it).addBatch();
-        } catch (SQLException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-      rows = stmt.executeBatch();
-    } catch (SQLException e) {
-      rethrow(e, sql, params);
-    } finally {
-      release(null, stmt, conn, closeConn);
-    }
-    return rows;
-  }
-
-  <T> void streamInsertBatch(Connection conn, boolean closeConn, String sql, int batchSubmitSize,
-      ResultSetHandler<T> rsh, Stream<Iterable<?>> params, Consumer<T> consumer)
-      throws SQLException {
-    preCondition(conn, closeConn, sql);
-    if (params == null) {
-      if (closeConn) {
-        close(conn);
-      }
-      throw new SQLException("Null parameters. If parameters aren't need, pass an empty stream.");
-    }
-    PreparedStatement stmt = null;
-    final Consumer<T> useConsumer = consumer == null ? emptyConsumer() : consumer;
-    try {
-      final PreparedStatement stmtx =
-          stmt = this.prepareStatement(conn, sql, Statement.RETURN_GENERATED_KEYS);
-      final AtomicInteger counter = new AtomicInteger();
-      final AtomicInteger batchCounter = new AtomicInteger();
-      final int submitSize = max(batchSubmitSize, defaultBatchSize);
-      params.forEach(it -> {
-        try {
-          completeStatement(stmtx, it).addBatch();
-          if (counter.incrementAndGet() % submitSize == 0) {
-            stmtx.executeBatch();
-            ResultSet rs = stmtx.getGeneratedKeys();
-            useConsumer.accept(rsh.handle(rs));
-            batchCounter.set(counter.get());
-          }
-        } catch (SQLException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-      if (counter.get() > batchCounter.get()) {
-        stmt.executeBatch();
-        ResultSet rs = stmt.getGeneratedKeys();
-        useConsumer.accept(rsh.handle(rs));
-      }
-    } catch (Exception e) {
-      rethrow(e, sql);
-    } finally {
-      release(null, stmt, conn, closeConn);
-    }
-  }
-
-  <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql, ResultSetHandler<T> rsh,
+  <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
+      ResultSetHandler<T> resultSetHandler, BiPredicate<Integer, Object> terminater,
       Object... params) throws SQLException {
-    preCondition(conn, closeConn, sql);
-    if (rsh == null) {
-      if (closeConn) {
-        DbUtils.close(conn);
-      }
-      throw new SQLException("Null ResultSetHandler");
-    }
-    Gadget g = null;
+    preCondition(conn, closeConn, sql, resultSetHandler);
+    Releaser releaser = null;
     try {
-      PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
-      ResultSet rs = wrap(stmt.executeQuery());
-      g = new Gadget(conn, stmt, rs, closeConn);
-      final ResultSetSpliterator<T> spliterator = new ResultSetSpliterator<>(g, rsh);
-      return StreamSupport.stream(spliterator, false).onClose(g);
+      PreparedStatement statement = completeStatement(prepareStatement(conn, sql), params);
+      ResultSet resultSet = wrap(statement.executeQuery());
+      releaser = new Releaser(conn, statement, resultSet, closeConn);
+      Stream<T> stream = StreamSupport
+          .stream(new ResultSetSpliterator<>(releaser, resultSetHandler, terminater), false)
+          .onClose(releaser);
+      Cleaner.create().register(resultSet, releaser::run);// JDK9+
+      return stream;
     } catch (Exception e) {
-      if (g != null) {
-        g.run();
+      if (releaser != null) {
+        releaser.run();
       }
       rethrow(e, sql, params);
     }
     return Stream.empty();
-  }
-
-  private PreparedStatement completeStatement(PreparedStatement stmt, Iterable<?> params)
-      throws SQLException {
-    List<?> list = listOf(params);
-    fillStatement(stmt, list.toArray(new Object[list.size()]));
-    return stmt;
   }
 
   private PreparedStatement completeStatement(PreparedStatement stmt, Object... params)
@@ -224,7 +84,8 @@ public class StreamableQueryRunner extends QueryRunner {
     return stmt;
   }
 
-  private void preCondition(Connection conn, boolean closeConn, String sql) throws SQLException {
+  private void preCondition(Connection conn, boolean closeConn, String sql,
+      ResultSetHandler<?> resultSetHandler) throws SQLException {
     if (conn == null) {
       throw new SQLException("Null connection");
     }
@@ -233,6 +94,12 @@ public class StreamableQueryRunner extends QueryRunner {
         DbUtils.close(conn);
       }
       throw new SQLException("Null SQL statement");
+    }
+    if (resultSetHandler == null) {
+      if (closeConn) {
+        DbUtils.close(conn);
+      }
+      throw new SQLException("Null ResultSetHandler");
     }
   }
 
@@ -244,50 +111,78 @@ public class StreamableQueryRunner extends QueryRunner {
     }
   }
 
-  static class Gadget implements Runnable {
-    final Connection conn;
-    final PreparedStatement stmt;
-    final ResultSet rs;
+  static class Releaser implements Runnable {
+    final Connection connection;
+    final PreparedStatement statement;
+    final ResultSet resultSet;
     final boolean closeConn;
 
-    Gadget(Connection conn, PreparedStatement stmt, ResultSet rs, boolean closeConn) {
-      this.conn = conn;
-      this.stmt = stmt;
-      this.rs = rs;
+    Releaser(Connection conn, PreparedStatement stmt, ResultSet rs, boolean closeConn) {
+      connection = conn;
+      statement = stmt;
+      resultSet = rs;
       this.closeConn = closeConn;
+    }
+
+    static void release(ResultSet rs, PreparedStatement stmt, Connection conn, boolean closeConn) {
+      try {
+        DbUtils.close(rs);
+      } catch (SQLException e) {
+        // Noop!
+      } finally {
+        try {
+          DbUtils.close(stmt);
+        } catch (SQLException e) {
+          // Noop!
+        }
+        if (closeConn) {
+          try {
+            DbUtils.close(conn);
+          } catch (SQLException e) {
+            // Noop!
+          }
+        }
+      }
     }
 
     @Override
     public void run() {
-      release(rs, stmt, conn, closeConn);
+      release(resultSet, statement, connection, closeConn);
     }
-
   }
 
   static class ResultSetSpliterator<T> extends AbstractSpliterator<T> {
     static final int CHARACTERISTICS = Spliterator.NONNULL | Spliterator.IMMUTABLE;
     private final Runnable releaser;
-    private final ResultSet rs;
-    private final ResultSetHandler<T> rsh;
+    private final ResultSet resultSet;
+    private final ResultSetHandler<T> resultSetHandler;
+    private final BiPredicate<Integer, Object> terminater;
+    private final MutableInteger counter = MutableInteger.of(0);
 
-    public ResultSetSpliterator(ResultSet rs, ResultSetHandler<T> rsh, Runnable releaser) {
+    public ResultSetSpliterator(ResultSet resultSet, ResultSetHandler<T> resultSetHandler,
+        BiPredicate<Integer, Object> terminater, Runnable releaser) {
       super(Long.MAX_VALUE, CHARACTERISTICS);
+      this.terminater = terminater;
       this.releaser = releaser;
-      this.rs = rs;
-      this.rsh = rsh;
+      this.resultSet = resultSet;
+      this.resultSetHandler = resultSetHandler;
     }
 
-    ResultSetSpliterator(Gadget obj, ResultSetHandler<T> rsh) {
-      this(obj.rs, rsh, obj);
+    ResultSetSpliterator(Releaser obj, ResultSetHandler<T> resultSetHandler,
+        BiPredicate<Integer, Object> terminater) {
+      this(obj.resultSet, resultSetHandler, terminater, obj);
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
       try {
-        T obj = rsh.handle(rs);
-        boolean hasMore = obj != null;
+        T object = resultSetHandler.handle(resultSet);
+        boolean hasMore = object != null;
         if (hasMore) {
-          action.accept(obj);
+          hasMore = terminater == null || terminater.test(counter.incrementAndGet(), object);
+        }
+        if (hasMore) {
+          action.accept(object);
         } else {
           releaser.run();
         }

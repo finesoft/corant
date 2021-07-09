@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import org.corant.modules.query.sql.dialect.Dialect;
 
@@ -40,6 +41,7 @@ public interface SqlQueryExecutor {
   List<Map<String, Object>> select(String sql, int expectRows, Duration timeout, Object... args)
       throws SQLException;
 
-  Stream<Map<String, Object>> stream(String sql, Duration timeout, Object... args);
+  Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminater,
+      Duration timeout, Object... args);
 
 }

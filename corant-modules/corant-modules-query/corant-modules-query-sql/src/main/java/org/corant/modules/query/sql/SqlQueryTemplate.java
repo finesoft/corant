@@ -57,6 +57,7 @@ import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.sql.dialect.Dialect;
 import org.corant.modules.query.sql.dialect.Dialect.DBMS;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Retry;
@@ -80,7 +81,7 @@ public class SqlQueryTemplate {
 
   protected final QueryRunner runner;
   protected final Dialect dialect;
-  protected final DataSource datasource;
+  protected final DataSource dataSource;
   protected String sql;
   protected Object[] ordinaryParameters = Objects.EMPTY_ARRAY;
   protected Map<String, Object> namedParameters = new HashMap<>();
@@ -90,15 +91,15 @@ public class SqlQueryTemplate {
   protected Map<String, Object> hints = new HashMap<>();
 
   public SqlQueryTemplate(DataSource dataSource, DBMS dbms) {
-    datasource = dataSource;
+    this.dataSource = dataSource;
     dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
     runner = new QueryRunner(dataSource);
   }
 
   public SqlQueryTemplate(DBMS dbms, String dataSourceName) {
-    datasource = resolve(DataSourceService.class).resolve(dataSourceName);
+    dataSource = resolve(DataSourceService.class).resolve(dataSourceName);
     dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
-    runner = new QueryRunner(datasource);
+    runner = new QueryRunner(dataSource);
   }
 
   public static SqlQueryTemplate mysql(DataSource dataSource) {
@@ -331,85 +332,33 @@ public class SqlQueryTemplate {
   }
 
   /**
-   * Use a specific configuration for streaming query, the query is through continuous
-   * {@link #forward()} query and output result set, which means that the query is executed
-   * continuously in batches according to the size set by {@link #limit}. If an exception occurs
-   * during the query, may retry according to the configuration, and may modify the query parameters
-   * during each query.
+   * Use a specific configuration for streaming query.
+   * <p>
+   * If the value of offset > 0 or the value of retry time > 0 or the query parameter reviser is not
+   * null then the query is through continuous {@link #forward()} query and output result set, which
+   * means that the query is executed continuously in batches according to the size set by
+   * {@link #limit}, otherwise, perform a complete query.
+   *
+   * If an exception occurs during the query, may retry according to the configuration, and may
+   * modify the query parameters during each query.
    *
    * @param config the stream query configuration
    */
   public Stream<Map<String, Object>> stream(StreamConfig config) {
-    return streamOf(new Iterator<Map<String, Object>>() {
-      Forwarding<Map<String, Object>> buffer = null;
-      int counter = 0;
-      Map<String, Object> next = null;
-      Retryer retryer = config.needRetry()
-          ? Retry.retryer().times(config.retryTimes).interval(config.retryInterval).thrower(
-              isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
-          : null;
-
-      @Override
-      public boolean hasNext() {
-        initialize();
-        if (!config.terminateIf(counter, next)) {
-          if (!buffer.hasResults()) {
-            if (buffer.hasNext()) {
-              revise(next, config);
-              buffer.with(fetch());
-              return buffer.hasResults();
-            }
-          } else {
-            return true;
-          }
-        }
-        return false;
+    if (offset > 0 || config.retryTimes > 0 || config.ordinaryParameterReviser != null
+        || config.namedParameterReviser != null) {
+      return streamOf(new ForwardIterator(this, config));
+    } else {
+      final Pair<String, Object[]> ps =
+          useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+              : SqlStatements.normalize(sql, ordinaryParameters);
+      try {
+        return new StreamableQueryRunner(null, limit, null, null, null).streamQuery(
+            dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater, ps.value());
+      } catch (SQLException e) {
+        throw new CorantRuntimeException(e);
       }
-
-      @Override
-      public Map<String, Object> next() {
-        initialize();
-        if (!buffer.hasResults()) {
-          throw new NoSuchElementException();
-        }
-        counter++;
-        next = buffer.getResults().remove(0);
-        return next;
-      }
-
-      private Forwarding<Map<String, Object>> fetch() {
-        if (retryer != null) {
-          return retryer.execute(() -> forward());
-        } else {
-          return forward();
-        }
-      }
-
-      private void initialize() {
-        if (buffer == null) {
-          buffer = defaultObject(fetch(), Forwarding::inst);
-          counter = buffer.hasResults() ? 1 : 0;
-        }
-      }
-
-      private void revise(Map<String, Object> next, StreamConfig config) {
-        boolean revise = false;
-        if (useNamedParameter) {
-          if (config.namedParameterReviser != null) {
-            offset = config.namedParameterReviser.apply(next, namedParameters);
-            revise = true;
-          }
-        } else {
-          if (config.ordinaryParameterReviser != null) {
-            offset = config.ordinaryParameterReviser.apply(next, ordinaryParameters);
-            revise = true;
-          }
-        }
-        if (!revise) {
-          offset += limit;
-        }
-      }
-    });
+    }
   }
 
   public <T> Stream<T> streamAs(final Class<T> clazz) {
@@ -464,7 +413,7 @@ public class SqlQueryTemplate {
 
     protected RetryInterval retryInterval = RetryInterval.noBackoff(one_second);
 
-    protected BiPredicate<Integer, Map<String, Object>> terminater;
+    protected BiPredicate<Integer, Object> terminater;
 
     protected BiFunction<Map<String, Object>, Object[], Integer> ordinaryParameterReviser;
 
@@ -503,10 +452,6 @@ public class SqlQueryTemplate {
         BiFunction<Map<String, Object>, Map<String, Object>, Integer> parameterReviser) {
       namedParameterReviser = parameterReviser;
       return this;
-    }
-
-    public boolean needRetry() {
-      return retryTimes > 0;
     }
 
     /**
@@ -599,9 +544,94 @@ public class SqlQueryTemplate {
      *
      * @param terminater the terminate predicate
      */
-    public StreamConfig terminater(BiPredicate<Integer, Map<String, Object>> terminater) {
+    public StreamConfig terminater(BiPredicate<Integer, Object> terminater) {
       this.terminater = terminater;
       return this;
+    }
+  }
+
+  /**
+   * corant-modules-query-sql
+   *
+   * @author bingo 下午7:01:30
+   *
+   */
+  static class ForwardIterator implements Iterator<Map<String, Object>> {
+    private final SqlQueryTemplate tpl;
+    private final StreamConfig config;
+    Forwarding<Map<String, Object>> buffer = null;
+    int counter = 0;
+    Map<String, Object> next = null;
+    Retryer retryer;
+
+    ForwardIterator(SqlQueryTemplate tpl, StreamConfig config) {
+      this.tpl = tpl;
+      this.config = config;
+      retryer = config.retryTimes > 0
+          ? Retry.retryer().times(config.retryTimes).interval(config.retryInterval).thrower(
+              isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
+          : null;
+    }
+
+    @Override
+    public boolean hasNext() {
+      initialize();
+      if (!config.terminateIf(counter, next)) {
+        if (!buffer.hasResults()) {
+          if (buffer.hasNext()) {
+            revise(next, config);
+            buffer.with(fetch());
+            return buffer.hasResults();
+          }
+        } else {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    @Override
+    public Map<String, Object> next() {
+      initialize();
+      if (!buffer.hasResults()) {
+        throw new NoSuchElementException();
+      }
+      counter++;
+      next = buffer.getResults().remove(0);
+      return next;
+    }
+
+    private Forwarding<Map<String, Object>> fetch() {
+      if (retryer != null) {
+        return retryer.execute(tpl::forward);
+      } else {
+        return tpl.forward();
+      }
+    }
+
+    private void initialize() {
+      if (buffer == null) {
+        buffer = defaultObject(fetch(), Forwarding::inst);
+        counter = buffer.hasResults() ? 1 : 0;
+      }
+    }
+
+    private void revise(Map<String, Object> next, StreamConfig config) {
+      boolean revise = false;
+      if (tpl.useNamedParameter) {
+        if (config.namedParameterReviser != null) {
+          tpl.offset = config.namedParameterReviser.apply(next, tpl.namedParameters);
+          revise = true;
+        }
+      } else {
+        if (config.ordinaryParameterReviser != null) {
+          tpl.offset = config.ordinaryParameterReviser.apply(next, tpl.ordinaryParameters);
+          revise = true;
+        }
+      }
+      if (!revise) {
+        tpl.offset += tpl.limit;
+      }
     }
   }
 }

@@ -11,7 +11,7 @@
 	<artifactId>corant-boms</artifactId>
 	<properties>
 
-		<version.agroal>1.11</version.agroal>
+		<version.agroal>1.12</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.1</version.aliyun-java-sdk-core>
 		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
 		<version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
@@ -30,7 +30,7 @@
 		<version.atomikos>5.0.8</version.atomikos>
 		<version.bouncycastle>1.68</version.bouncycastle>
 		<version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
-		<version.caffeine>3.0.2</version.caffeine>
+		<version.caffeine>3.0.3</version.caffeine>
 		<version.calcite>1.25.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.4</version.commons-cli>
@@ -64,7 +64,7 @@
 		<version.hikariCP>3.4.5</version.hikariCP>
 		<version.hppc>0.8.2</version.hppc>
 		<version.icu4j>67.1</version.icu4j>
-		<version.jackson>2.12.3</version.jackson>
+		<version.jackson>2.12.4</version.jackson>
 		<version.jandex>2.3.0.Final</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javassist>3.27.0.GA</version.javassist>
@@ -139,7 +139,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.13.4</version.redisson>
 		<version.rest-assured>4.3.1</version.rest-assured>
-		<version.resteasy>4.6.1.Final</version.resteasy>
+		<version.resteasy>4.6.2.Final</version.resteasy>
 		<version.rsocket>1.0.2</version.rsocket>
 		<version.shiro-all>1.6.0</version.shiro-all>
 		<version.smallrye-config>1.7.0</version.smallrye-config>

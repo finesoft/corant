@@ -207,7 +207,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   TypedJPAQuery<T> query(final String qlString);
 
   /**
-   * Remove the object from repository
+   * Remove the entity from repository
    *
    *
    * @param obj the entity instance
@@ -220,6 +220,16 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
       return true;
     }
     return false;
+  }
+
+  /**
+   * Remove the entity by id
+   *
+   * @param id the entity id
+   * @return true means successfully
+   */
+  default boolean removeById(Serializable id) {
+    return remove(get(id));
   }
 
   /**
@@ -263,9 +273,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
     private final Class<T> entityClass;
     private final PersistenceContext context;
 
-    /**
-     * @param entityClass
-     */
     protected TypedJPARepositoryTemplate(Class<T> entityClass) {
       this.entityClass = entityClass;
       this.context = resolve(EntityManagers.class).getPersistenceContext(entityClass);

@@ -40,6 +40,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 public interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
 
   Map<Pair<Class<?>, Class<?>>, Constructor<?>> constructors = new ConcurrentHashMap<>();
+  Map<Class<?>, Class<?>> classes = new ConcurrentHashMap<>();
 
   static <X> X invokeExactConstructor(Class<X> cls, Class<?> paramClasses, Object paramValue)
       throws InstantiationException, IllegalAccessException, IllegalArgumentException,
@@ -81,35 +82,42 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
         .orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
   }
 
+  @SuppressWarnings("unchecked")
+  static <A extends Aggregate, R extends AggregateReference<A>> Class<A> resolveType(
+      Class<R> refCls) {
+    return (Class<A>) classes.computeIfAbsent(refCls, rc -> {
+      Class<A> resolvedClass = null;
+      Class<?> referenceClass = rc;
+      do {
+        if (referenceClass.getGenericSuperclass() instanceof ParameterizedType) {
+          resolvedClass = (Class<A>) ((ParameterizedType) referenceClass.getGenericSuperclass())
+              .getActualTypeArguments()[0];
+          break;
+        } else {
+          Type[] genericInterfaces = referenceClass.getGenericInterfaces();
+          for (Type type : genericInterfaces) {
+            if (type instanceof ParameterizedType) {
+              ParameterizedType parameterizedType = (ParameterizedType) type;
+              if (AggregateReference.class
+                  .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+                resolvedClass = (Class<A>) parameterizedType.getActualTypeArguments()[0];
+                break;
+              }
+            }
+          }
+        }
+      } while (resolvedClass == null && (referenceClass = referenceClass.getSuperclass()) != null);
+      return resolvedClass;
+    });
+  }
+
   @Override
   default T retrieve() {
     return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   default Optional<T> tryRetrieve() {
-    Class<T> resolvedClass = null;
-    Class<?> referenceClass = getClass();
-    do {
-      if (referenceClass.getGenericSuperclass() instanceof ParameterizedType) {
-        resolvedClass = (Class<T>) ((ParameterizedType) referenceClass.getGenericSuperclass())
-            .getActualTypeArguments()[0];
-        break;
-      } else {
-        Type[] genericInterfaces = referenceClass.getGenericInterfaces();
-        for (Type type : genericInterfaces) {
-          if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            if (AggregateReference.class
-                .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-              resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
-              break;
-            }
-          }
-        }
-      }
-    } while (resolvedClass == null && (referenceClass = referenceClass.getSuperclass()) != null);
-    return Aggregates.tryResolve(resolvedClass, getId());
+    return Aggregates.tryResolve(resolveType(getClass()), getId());
   }
 }

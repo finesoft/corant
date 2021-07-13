@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 import org.corant.modules.bundle.GlobalMessageCodes;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.shared.ubiquity.Services;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
@@ -75,6 +77,8 @@ public class Jsons {
     objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
     objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    Services.select(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
+        .forEach(c -> c.configure(objectMapper));
   }
   static final JavaType mapType = objectMapper.constructType(Map.class);
   static final ObjectReader mapReader = objectMapper.readerFor(mapType);

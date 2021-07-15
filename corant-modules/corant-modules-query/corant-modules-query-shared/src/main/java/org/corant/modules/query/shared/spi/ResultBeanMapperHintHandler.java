@@ -167,7 +167,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   }
 
   protected Map<String, Object> resolveExtraParams(QueryHint qh) {
-    extraParams.computeIfAbsent(qh, h -> {
+    return extraParams.computeIfAbsent(qh, h -> {
       Map<String, List<QueryHintParameter>> params = newHashMap(qh.getParameters());
       params.remove(HINT_PARA_BEAN_NME);
       Map<String, Object> map = new HashMap<>();
@@ -176,17 +176,16 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
         int size = sizeOf(v);
         if (size == 1) {
           if (v.get(0) != null) {
-            value = toObject(v.get(0).getValue(), v.get(0).getClass());
+            value = toObject(v.get(0).getValue(), v.get(0).getType());
           }
         } else if (size > 0) {
-          value = v.stream().map(e -> toObject(e.getValue(), e.getClass()))
-              .collect(Collectors.toList());
+          value =
+              v.stream().map(e -> toObject(e.getValue(), e.getType())).collect(Collectors.toList());
         }
         map.put(k, value);
       });
       return Collections.unmodifiableMap(map);
     });
-    return Collections.emptyMap();
   }
 
   /**

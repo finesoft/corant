@@ -402,8 +402,8 @@ public class QueryParseHandler extends DefaultHandler {
             qhp.setName(atv);
           } else if (SchemaNames.X_VALUE.equalsIgnoreCase(aqn)) {
             qhp.setValue(atv);
-          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
-            qhp.setType(atv);
+          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn) && isNotBlank(atv)) {
+            qhp.setType(asClass(atv));
           }
         }
       }

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.mapping;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -129,19 +130,14 @@ public class QueryHint implements Serializable {
 
     private String name;
     private String value;
-    private String type;
+    private Class<?> type = Object.class;
 
     public QueryHintParameter() {}
 
-    /**
-     * @param name
-     * @param value
-     * @param type
-     */
-    public QueryHintParameter(String name, String value, String type) {
-      this.name = name;
-      this.value = value;
-      this.type = type;
+    public QueryHintParameter(String name, String value, Class<?> type) {
+      setName(name);
+      setValue(value);
+      setType(type);
     }
 
     /**
@@ -156,7 +152,7 @@ public class QueryHint implements Serializable {
      *
      * @return the type
      */
-    public String getType() {
+    public Class<?> getType() {
       return type;
     }
 
@@ -173,15 +169,15 @@ public class QueryHint implements Serializable {
      * @param name the name to set
      */
     protected void setName(String name) {
-      this.name = name;
+      this.name = shouldNotNull(name);
     }
 
     /**
      *
      * @param type the type to set
      */
-    protected void setType(String type) {
-      this.type = type;
+    protected void setType(Class<?> type) {
+      this.type = defaultObject(type, Object.class);
     }
 
     /**

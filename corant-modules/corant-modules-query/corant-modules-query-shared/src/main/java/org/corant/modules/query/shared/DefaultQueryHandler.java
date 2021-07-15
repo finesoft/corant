@@ -40,7 +40,6 @@ import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -82,30 +81,26 @@ public class DefaultQueryHandler implements QueryHandler {
     return querierConfig;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public <T> T handleResult(Object result, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter) {
-    if (result == null) {
-      return null;
-    } else {
-      handleResultHints(result, resultClass, hints, parameter);
-      return Map.class.isAssignableFrom(resultClass) ? (T) result
-          : convertRecord(result, resultClass);
+  public <T> T handleResult(Object result, Query query, QueryParameter parameter) {
+    if (result != null) {
+      return forceCast(Map.class.isAssignableFrom(query.getResultClass()) ? result
+          : convertRecord(result, query.getResultClass()));
     }
+    return null;
   }
 
   @Override
-  public void handleResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+  public void handleResultHints(Object result, Class<?> originalResultClass, Query query,
       QueryParameter parameter) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      hints.forEach(qh -> {
+      query.getHints().forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(resultClass, qh))
+        resultHintHandlers.stream().filter(h -> h.canHandle(originalResultClass, qh))
             .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
               if (!exclusive.get()) {
                 try {
-                  h.handle(qh, parameter, result);
+                  h.handle(qh, query, parameter, result);
                   exclusive.set(h.exclusive());
                 } catch (Exception e) {
                   throw new CorantRuntimeException(e);
@@ -117,11 +112,9 @@ public class DefaultQueryHandler implements QueryHandler {
   }
 
   @Override
-  public <T> List<T> handleResults(List<Object> results, Class<T> resultClass,
-      List<QueryHint> hints, QueryParameter parameter) {
+  public <T> List<T> handleResults(List<Object> results, Query query, QueryParameter parameter) {
     if (!isEmpty(results)) {
-      handleResultHints(results, resultClass, hints, parameter);
-      return convertRecords(results, resultClass);
+      return convertRecords(results, forceCast(query.getResultClass()));
     }
     return forceCast(results);
   }
@@ -171,11 +164,11 @@ public class DefaultQueryHandler implements QueryHandler {
    * Convert single record to expected class object.
    *
    * @param <T> the expected type
-   * @param record the record to be converted
+   * @param result the result to be converted
    * @param expectedClass the excepted class
    */
-  protected <T> T convertRecord(Object record, Class<T> expectedClass) {
-    return objectMapper.toObject(record, expectedClass);
+  protected <T> T convertRecord(Object result, Class<T> expectedClass) {
+    return objectMapper.toObject(result, expectedClass);
   }
 
   /**

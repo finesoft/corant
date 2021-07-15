@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared.dynamic;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -94,21 +95,27 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   @Override
   public <T> T handleResult(Object result) {
-    return queryHandler.handleResult(result, forceCast(getQuery().getResultClass()),
-        getQuery().getHints(), getQueryParameter());
+    if (result == null) {
+      return null;
+    } else {
+      handleResultHints(result);
+      return queryHandler.handleResult(result, getQuery(), getQueryParameter());
+    }
   }
 
   @Override
   public void handleResultHints(Object result) {
     // FIXME map class
-    queryHandler.handleResultHints(result, Map.class, getQuery().getHints(), getQueryParameter());
+    queryHandler.handleResultHints(result, Map.class, getQuery(), getQueryParameter());
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> handleResults(List<?> results) {
-    return queryHandler.handleResults((List<Object>) results,
-        forceCast(getQuery().getResultClass()), getQuery().getHints(), getQueryParameter());
+    if (isNotEmpty(results)) {
+      handleResultHints(results);
+    }
+    return queryHandler.handleResults((List<Object>) results, getQuery(), getQueryParameter());
   }
 
   @Override

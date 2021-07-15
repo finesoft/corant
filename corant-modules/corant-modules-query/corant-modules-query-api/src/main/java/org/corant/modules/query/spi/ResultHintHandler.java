@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.spi;
 
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 
 /**
@@ -43,7 +44,7 @@ public interface ResultHintHandler extends AutoCloseable {
     return 0;
   }
 
-  void handle(QueryHint qh, Object parameter, Object result) throws Exception;
+  void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception;
 
   default void validate(QueryHint qh) {}
 

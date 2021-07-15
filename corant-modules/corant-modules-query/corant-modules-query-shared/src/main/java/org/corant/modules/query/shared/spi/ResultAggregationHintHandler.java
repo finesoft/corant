@@ -36,6 +36,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.modules.query.spi.ResultHintHandler;
@@ -115,7 +116,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
+  public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
     Consumer<List<Map<?, ?>>> handler;
     if (brokens.contains(qh.getId()) || (handler = resolveHint(qh)) == null) {
       return;

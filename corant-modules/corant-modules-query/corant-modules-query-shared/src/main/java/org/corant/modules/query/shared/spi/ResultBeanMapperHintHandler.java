@@ -13,17 +13,22 @@
  */
 package org.corant.modules.query.shared.spi;
 
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.newHashMap;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -33,6 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.modules.query.spi.ResultHintHandler;
@@ -68,7 +74,7 @@ import org.corant.modules.query.spi.ResultHintHandler;
  * &#64;ApplicationScope
  * &#64;Named("theName")
  * public class MyResultBeanMapper implement ResultBeanMapper{
- *   public void accept(Object parameter,List<Map<?,?> result){
+ *   public void accept(Object queryParameter,List<Map<?,?> result){
  *     //TODO
  *   }
  * }
@@ -84,9 +90,10 @@ import org.corant.modules.query.spi.ResultHintHandler;
 public class ResultBeanMapperHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-bean-mapper";
-  public static final String HNIT_PARA_BEAN_NME = "named";
+  public static final String HINT_PARA_BEAN_NME = "named";
 
   protected final Map<QueryHint, Named> nameds = new ConcurrentHashMap<>();
+  protected final Map<QueryHint, Map<String, Object>> extraParams = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -107,7 +114,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
-  public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
+  public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
     ResultBeanMapper func = resolveBeanMapper(resolveBeanNamed(qh));
     if (func == null) {
       return;
@@ -125,13 +132,14 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
       }
     }
     if (!isEmpty(list)) {
-      func.accept(parameter, list);
+      func.accept(query, parameter, resolveExtraParams(qh), list);
     }
   }
 
   @PreDestroy
   protected synchronized void onPreDestroy() {
     nameds.clear();
+    extraParams.clear();
     logger.fine(() -> "Clear result bean mapper hint handler caches.");
   }
 
@@ -149,13 +157,36 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
 
   protected Named resolveBeanNamed(QueryHint qh) {
     return nameds.computeIfAbsent(qh, k -> {
-      List<QueryHintParameter> nameds = qh.getParameters(HNIT_PARA_BEAN_NME);
+      List<QueryHintParameter> nameds = qh.getParameters(HINT_PARA_BEAN_NME);
       String named = null;
       if (isNotEmpty(nameds)) {
         named = defaultString(nameds.get(0).getValue(), null);
       }
       return named != null ? NamedLiteral.of(named) : null;
     });
+  }
+
+  protected Map<String, Object> resolveExtraParams(QueryHint qh) {
+    extraParams.computeIfAbsent(qh, h -> {
+      Map<String, List<QueryHintParameter>> params = newHashMap(qh.getParameters());
+      params.remove(HINT_PARA_BEAN_NME);
+      Map<String, Object> map = new HashMap<>();
+      params.forEach((k, v) -> {
+        Object value = null;
+        int size = sizeOf(v);
+        if (size == 1) {
+          if (v.get(0) != null) {
+            value = toObject(v.get(0).getValue(), v.get(0).getClass());
+          }
+        } else if (size > 0) {
+          value = v.stream().map(e -> toObject(e.getValue(), e.getClass()))
+              .collect(Collectors.toList());
+        }
+        map.put(k, value);
+      });
+      return Collections.unmodifiableMap(map);
+    });
+    return Collections.emptyMap();
   }
 
   /**
@@ -165,15 +196,19 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
    *
    */
   @FunctionalInterface
-  public interface ResultBeanMapper extends BiConsumer<Object, List<Map<Object, Object>>> {
+  public interface ResultBeanMapper {
 
     /**
+     * Handle query result hint
+     *
+     * @param query the query object
      * @param queryParmeter the parameters of the query corresponding to hint when executing the
      *        query
+     * @param extraParameters the extra parameters from query configuration
      * @param queryResult query result set of query corresponding to hint
      **/
-    @Override
-    void accept(Object queryParmeter, List<Map<Object, Object>> queryResult);
+    void accept(Query query, Object queryParmeter, Map<String, Object> extraParameters,
+        List<Map<Object, Object>> queryResult);
 
   }
 

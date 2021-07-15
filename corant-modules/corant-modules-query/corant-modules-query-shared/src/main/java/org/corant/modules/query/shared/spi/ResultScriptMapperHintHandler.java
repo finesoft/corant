@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.shared.QueryScriptEngines;
 import org.corant.modules.query.spi.ResultHintHandler;
@@ -95,7 +96,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void handle(QueryHint qh, Object parameter, Object result) throws Exception {
+  public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
     Consumer<Object[]> func;
     if (brokens.contains(qh.getId()) || (func = resolve(qh)) == null) {
       return;

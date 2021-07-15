@@ -49,31 +49,28 @@ public interface QueryHandler {
    *
    * @param <T> the result type
    * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>
-   * @param resultClass the result class
-   * @param hints the query hints
+   * @param query the query object
    * @param parameter the query parameter
    *
-   * @see #handleResultHints(Object, Class, List, QueryParameter)
-   * @see #handleResults(List, Class, List, QueryParameter)
+   * @see #handleResultHints(Object, Class, Query, QueryParameter)
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
    */
-  <T> T handleResult(Object result, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter);
+  <T> T handleResult(Object result, Query query, QueryParameter parameter);
 
   /**
    * Handle query hints, in this step the result set may be adjusted or inserted with certain
    * values.
    *
    * @param result the result may be single object or list objects
-   * @param resultClass the query result class
-   * @param hints the query hints
+   * @param originalResultClass the query result class
+   * @param query the query object
    * @param parameter the query parameter
    *
    * @see ResultHintHandler
    */
-  void handleResultHints(Object result, Class<?> resultClass, List<QueryHint> hints,
+  void handleResultHints(Object result, Class<?> originalResultClass, Query query,
       QueryParameter parameter);
 
   /**
@@ -88,19 +85,16 @@ public interface QueryHandler {
    *
    * @param <T> the result class
    * @param results the original results, currently is <b> List&lt;Map&lt;String,Object&gt;&gt;</b>
-   * @param resultClass the query result class
-   * @param hints the query hints
+   * @param query the query object
    * @param parameter the query parameter
    *
    *
-   * @see #handleResultHints(Object, Class, List, QueryParameter)
-   * @see #handleResults(List, Class, List, QueryParameter)
+   * @see #handleResultHints(Object, Class, Query, QueryParameter)
    * @see QueryHint
    * @see Query
    * @see ResultHintHandler
    */
-  <T> List<T> handleResults(List<Object> results, Class<T> resultClass, List<QueryHint> hints,
-      QueryParameter parameter);
+  <T> List<T> handleResults(List<Object> results, Query query, QueryParameter parameter);
 
   /**
    * Resolve query parameter. If QueryParameterReviser exists, the given parameter may be adjusted.

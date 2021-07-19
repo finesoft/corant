@@ -351,13 +351,25 @@ public class Texts {
    * @return lines
    */
   public static Stream<String> lines(final File file) {
+    return lines(file, -1, -1);
+  }
+
+  /**
+   * String lines from file, use for read text line by line.
+   *
+   *
+   * @param file the file to read
+   * @param offset use to skip lines, the offset start from 0
+   * @param limit the number of lines returned
+   */
+  public static Stream<String> lines(final File file, int offset, int limit) {
     final FileInputStream fis;
     try {
       fis = new FileInputStream(shouldNotNull(file));
     } catch (FileNotFoundException e1) {
       throw new CorantRuntimeException(e1);
     }
-    return lines(fis, -1, -1).onClose(() -> {
+    return lines(fis, offset, limit).onClose(() -> {
       try {
         fis.close();
       } catch (IOException e) {

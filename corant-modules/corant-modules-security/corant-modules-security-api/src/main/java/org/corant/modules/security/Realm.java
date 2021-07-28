@@ -21,9 +21,9 @@ package org.corant.modules.security;
  */
 public interface Realm {
 
-  AuthenticationData getAuthenticationContext(Token token);
+  AuthenticationData getAuthenticationData(Token token);
 
-  AuthorizationData getAuthorizationContext(AuthenticationData authenticationContext);
+  AuthorizationData getAuthorizationData(AuthenticationData authenticationData);
 
   String getName();
 

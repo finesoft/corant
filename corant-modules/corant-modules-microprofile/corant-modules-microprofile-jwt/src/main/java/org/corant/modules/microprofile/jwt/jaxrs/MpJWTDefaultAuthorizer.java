@@ -38,8 +38,7 @@ public class MpJWTDefaultAuthorizer implements Authorizer {
 
   public static final SimpleRole ALL_ROLES = new SimpleRole("*");
   public static final SimplePermission ALL_PERMS = new SimplePermission("*");
-
-  public static final MpJWTDefaultAuthorizer DEFALUT_INST = new MpJWTDefaultAuthorizer();
+  public static final MpJWTDefaultAuthorizer DFLT_INST = new MpJWTDefaultAuthorizer();
 
   @Override
   public void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {

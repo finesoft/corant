@@ -66,7 +66,7 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
     if (authorizer == null) {
       synchronized (this) {
         if (authorizer == null) {
-          authorizer = find(Authorizer.class).orElse(MpJWTDefaultAuthorizer.DEFALUT_INST);
+          authorizer = find(Authorizer.class).orElse(MpJWTDefaultAuthorizer.DFLT_INST);
         }
       }
     }

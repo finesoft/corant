@@ -16,7 +16,6 @@ package org.corant.modules.jpa.shared;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
@@ -45,6 +44,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TupleElement;
@@ -564,10 +564,13 @@ public class JPAQueries {
      * @return get
      */
     public <T> T get() {
-      setMaxResults(1);
+      setMaxResults(2);
       List<T> result = this.select();
-      if (!isEmpty(result)) {
+      int size = sizeOf(result);
+      if (size == 1) {
         return result.get(0);
+      } else if (size > 1) {
+        throw new NonUniqueResultException("The query return multiple results");
       }
       return null;
     }
@@ -716,10 +719,13 @@ public class JPAQueries {
      * @return the result object
      */
     public T get() {
-      setMaxResults(1);
+      setMaxResults(2);
       List<T> results = this.select();
-      if (!isEmpty(results)) {
+      int size = sizeOf(results);
+      if (size == 1) {
         return results.get(0);
+      } else if (size > 1) {
+        throw new NonUniqueResultException("The query return multiple results");
       }
       return null;
     }

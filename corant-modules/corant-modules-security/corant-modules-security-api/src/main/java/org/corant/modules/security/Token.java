@@ -24,6 +24,52 @@ import java.util.Arrays;
  */
 public interface Token extends Serializable {
 
+  class JsonWebToken implements Token {
+
+    private static final long serialVersionUID = -8729528213796543219L;
+
+    private final String data;
+
+    public JsonWebToken(String data) {
+      this.data = data;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      JsonWebToken other = (JsonWebToken) obj;
+      if (data == null) {
+        if (other.data != null) {
+          return false;
+        }
+      } else if (!data.equals(other.data)) {
+        return false;
+      }
+      return true;
+    }
+
+    public String getData() {
+      return data;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (data == null ? 0 : data.hashCode());
+      return result;
+    }
+
+  }
+
   class UsernamePasswordToken implements Token {
 
     private static final long serialVersionUID = 8043690813970431112L;

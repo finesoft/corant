@@ -23,5 +23,7 @@ import java.io.Serializable;
  */
 public interface Permission extends Serializable {
 
+  boolean implies(Permission permission);
+
   <T> T unwrap(Class<T> cls);
 }

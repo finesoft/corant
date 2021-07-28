@@ -14,20 +14,21 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import org.corant.modules.security.Principal;
 import org.corant.shared.exception.NotSupportedException;
 
-public class DefaultPrincipal implements Principal, Serializable {
+public class SimplePrincipal implements Principal, Serializable {
 
   private static final long serialVersionUID = 282297555381317944L;
 
   protected String name;
   protected Map<String, ? extends Serializable> properties = Collections.emptyMap();
 
-  public DefaultPrincipal(String name, Map<String, ? extends Serializable> properties) {
+  public SimplePrincipal(String name, Map<String, ? extends Serializable> properties) {
     this.name = name;
     if (properties != null) {
       this.properties = Collections.unmodifiableMap(properties);
@@ -51,6 +52,14 @@ public class DefaultPrincipal implements Principal, Serializable {
     return null;
   }
 
+  public <T> T getProperty(String name, Class<T> type, T alt) {
+    Object property;
+    if (properties != null && (property = properties.get(name)) != null) {
+      return defaultObject(toObject(property, type), alt);
+    }
+    return null;
+  }
+
   @Override
   public String toString() {
     return "DefaultPrincipal [name=" + name + ", properties=" + properties + "]";
@@ -62,7 +71,7 @@ public class DefaultPrincipal implements Principal, Serializable {
     if (Principal.class.isAssignableFrom(cls)) {
       return (T) this;
     }
-    if (DefaultPrincipal.class.isAssignableFrom(cls)) {
+    if (SimplePrincipal.class.isAssignableFrom(cls)) {
       return (T) this;
     }
     throw new NotSupportedException("Can't unwrap %s", cls);

@@ -23,4 +23,6 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface Authenticator extends Sortable {
 
+  AuthenticationData authenticate(Token token) throws AuthenticationException;
+
 }

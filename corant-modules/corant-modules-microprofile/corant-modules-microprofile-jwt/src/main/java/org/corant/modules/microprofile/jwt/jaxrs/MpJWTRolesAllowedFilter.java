@@ -13,7 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import static org.corant.context.Beans.resolve;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Empties.isEmpty;
 import javax.annotation.Priority;
 import javax.ws.rs.ForbiddenException;
@@ -21,9 +21,8 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import org.corant.modules.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
-import org.corant.modules.microprofile.jwt.authorization.MpJWTRolesAuthorizer;
 import org.corant.modules.security.Authorizer;
+import org.corant.modules.security.shared.SimpleRoles;
 
 /**
  * corant-modules-microprofile-jwt
@@ -34,21 +33,21 @@ import org.corant.modules.security.Authorizer;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
 
-  private final String[] allowedRoles;
+  private final SimpleRoles allowedRoles;
 
-  volatile MpJWTRolesAuthorizer authorizer;
+  volatile Authorizer authorizer;
 
   public MpJWTRolesAllowedFilter(String... allowedRoles) {
     if (isEmpty(allowedRoles)) {
-      this.allowedRoles = new String[] {AbstractMpJWTAuthorizer.PERMIT_ALL};
+      this.allowedRoles = SimpleRoles.of(MpJWTDefaultAuthorizer.ALL_ROLES);
     } else {
-      this.allowedRoles = allowedRoles;
+      this.allowedRoles = SimpleRoles.of(allowedRoles);
     }
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    if (!authorizer().isAllowed(requestContext, allowedRoles)) {
+    if (!authorizer().testAccess(requestContext, allowedRoles)) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
         if (ex instanceof Exception) {
@@ -63,11 +62,11 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
     }
   }
 
-  protected Authorizer<ContainerRequestContext, String[]> authorizer() {
+  protected Authorizer authorizer() {
     if (authorizer == null) {
       synchronized (this) {
         if (authorizer == null) {
-          authorizer = resolve(MpJWTRolesAuthorizer.class);
+          authorizer = find(Authorizer.class).orElse(MpJWTDefaultAuthorizer.DEFALUT_INST);
         }
       }
     }

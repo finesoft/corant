@@ -13,16 +13,21 @@
  */
 package org.corant.modules.security;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * corant-modules-security-api
  *
- * @author bingo 下午7:35:16
+ * @author bingo 上午10:19:23
  *
  */
-public interface SecurityManager extends Authenticator, Authorizer {
+public interface AuthorizationData {
 
-  Subject login(Token token);
+  default Collection<? extends Permission> getPermissions() {
+    return Collections.emptySet();
+  }
 
-  void logout(Subject subject);
+  Collection<? extends Role> getRoles();
 
 }

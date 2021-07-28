@@ -32,9 +32,9 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
-import org.corant.modules.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
 import org.corant.modules.security.PermitsAllowed;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Strings;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
 
 /**
@@ -84,7 +84,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       } else if (mpJwtAnnotation instanceof PermitsAllowed) {
         registration = new MpJWTPermitsAllowedFilter(((PermitsAllowed) mpJwtAnnotation).value());
       } else if (mpJwtAnnotation instanceof PermitAll) {
-        registration = new MpJWTRolesAllowedFilter(AbstractMpJWTAuthorizer.PERMIT_ALL);
+        registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       }
     } else {
       if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import static org.corant.context.Beans.resolve;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Empties.isEmpty;
 import javax.annotation.Priority;
 import javax.ws.rs.ForbiddenException;
@@ -21,9 +21,8 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import org.corant.modules.microprofile.jwt.authorization.AbstractMpJWTAuthorizer;
-import org.corant.modules.microprofile.jwt.authorization.MpJWTPermitsAuthorizer;
 import org.corant.modules.security.Authorizer;
+import org.corant.modules.security.shared.SimplePermissions;
 
 /**
  * corant-modules-microprofile-jwt
@@ -34,21 +33,21 @@ import org.corant.modules.security.Authorizer;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
 
-  private final String[] allowedPermits;
+  private final SimplePermissions allowedPermits;
 
-  volatile MpJWTPermitsAuthorizer authorizer;
+  volatile Authorizer authorizer;
 
   public MpJWTPermitsAllowedFilter(String... allowedPermits) {
     if (isEmpty(allowedPermits)) {
-      this.allowedPermits = new String[] {AbstractMpJWTAuthorizer.PERMIT_ALL};
+      this.allowedPermits = SimplePermissions.of(MpJWTDefaultAuthorizer.ALL_PERMS);
     } else {
-      this.allowedPermits = allowedPermits;
+      this.allowedPermits = SimplePermissions.of(allowedPermits);
     }
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    if (!authorizer().isAllowed(requestContext, allowedPermits)) {
+    if (!authorizer().testAccess(requestContext, allowedPermits)) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
         if (ex instanceof Exception) {
@@ -63,11 +62,11 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
     }
   }
 
-  protected Authorizer<ContainerRequestContext, String[]> authorizer() {
+  protected Authorizer authorizer() {
     if (authorizer == null) {
       synchronized (this) {
         if (authorizer == null) {
-          authorizer = resolve(MpJWTPermitsAuthorizer.class);
+          authorizer = find(Authorizer.class).orElse(MpJWTDefaultAuthorizer.DEFALUT_INST);
         }
       }
     }

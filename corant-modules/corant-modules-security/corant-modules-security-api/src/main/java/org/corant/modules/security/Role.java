@@ -25,6 +25,8 @@ public interface Role extends Serializable {
 
   String getName();
 
+  boolean implies(Role role);
+
   <T> T unwrap(Class<T> cls);
 
 }

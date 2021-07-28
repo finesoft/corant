@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.util;
+package org.corant.modules.security.shared.jose;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toArray;
@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.corant.modules.security.shared.crypto.Keys;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;

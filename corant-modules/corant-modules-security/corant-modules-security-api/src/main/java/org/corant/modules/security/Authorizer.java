@@ -21,10 +21,10 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 12:24:41
  *
  */
-public interface Authorizer<C, T> extends Sortable {
+public interface Authorizer extends Sortable {
 
-  void check(C context, T t) throws AuthorizationException;
+  void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException;
 
-  boolean isAllowed(C context, T roleOrPermit);
+  boolean testAccess(Object context, Object roleOrPermit);
 
 }

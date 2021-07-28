@@ -11,18 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
+package org.corant.modules.security.shared;
 
-/**
- * corant-modules-security-api
- *
- * @author bingo 下午7:35:16
- *
- */
-public interface SecurityManager extends Authenticator, Authorizer {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
-  Subject login(Token token);
+public class SimplePrincipals implements Iterable<SimplePrincipal> {
 
-  void logout(Subject subject);
+  final Collection<SimplePrincipal> principals;
 
+  public SimplePrincipals(Collection<SimplePrincipal> principals) {
+    this.principals = Collections.unmodifiableCollection(principals);
+  }
+
+  @Override
+  public Iterator<SimplePrincipal> iterator() {
+    return principals.iterator();
+  }
 }

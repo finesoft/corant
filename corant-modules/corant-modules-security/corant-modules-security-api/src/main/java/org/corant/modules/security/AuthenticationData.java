@@ -13,16 +13,22 @@
  */
 package org.corant.modules.security;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 /**
  * corant-modules-security-api
  *
- * @author bingo 下午7:35:16
+ * @author bingo 上午10:18:25
  *
  */
-public interface SecurityManager extends Authenticator, Authorizer {
+public interface AuthenticationData {
 
-  Subject login(Token token);
+  Object getCredentials();
 
-  void logout(Subject subject);
+  default Serializable getIdentifier() {
+    return null;
+  }
 
+  Collection<? extends Principal> getPrincipals();
 }

@@ -11,10 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.security.shared.util;
+
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Strings.strip;
+import java.util.function.Predicate;
+import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings.WildcardMatcher;
+
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午6:13:04
+ * @author bingo 上午10:57:31
  *
  */
-package org.corant.modules.security.shared;
+public class StringPredicates {
+
+  public static Predicate<String> predicateOf(String t) {
+    String use = strip(t);
+    if (isEmpty(use)) {
+      return s -> true;
+    } else if (WildcardMatcher.hasWildcard(use)) {
+      return WildcardMatcher.of(false, use);
+    } else {
+      return s -> Objects.areEqual(s, use);
+    }
+  }
+}

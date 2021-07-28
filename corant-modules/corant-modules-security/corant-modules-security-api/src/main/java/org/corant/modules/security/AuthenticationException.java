@@ -16,7 +16,7 @@ package org.corant.modules.security;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  *
  * @author bingo 9:55:50
  *
@@ -25,51 +25,23 @@ public class AuthenticationException extends CorantRuntimeException {
 
   private static final long serialVersionUID = -9200294304935728465L;
 
-  /**
-   *
-   */
-  public AuthenticationException() {
-    // TODO Auto-generated constructor stub
-  }
+  public AuthenticationException() {}
 
-  /**
-   * @param msgOrFormat
-   * @param args
-   */
   public AuthenticationException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @param cause
-   */
   public AuthenticationException(Throwable cause) {
     super(cause);
-    // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   * @param msgOrFormat
-   * @param args
-   */
   public AuthenticationException(Throwable cause, boolean enableSuppression,
       boolean writableStackTrace, String msgOrFormat, Object... args) {
     super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @param cause
-   * @param msgOrFormat
-   * @param args
-   */
   public AuthenticationException(Throwable cause, String msgOrFormat, Object... args) {
     super(cause, msgOrFormat, args);
-    // TODO Auto-generated constructor stub
   }
 
 }

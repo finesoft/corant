@@ -30,6 +30,7 @@ import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -359,6 +360,36 @@ public class Iterables {
         return fromEnums.nextElement();
       }
     };
+  }
+
+  /**
+   * @see #range(int, int)
+   * @param length
+   * @return range
+   */
+  public static int[] range(int length) {
+    return range(0, length);
+  }
+
+  /**
+   * Returns a {@code int[] } from {@code startInclusive} (inclusive) to {@code endExclusive}
+   * (exclusive) by an incremental step of {@code 1}, close to the python keyword 'range'. If you
+   * have higher requirements for memory usage, please use {@link IntStream#range(int, int)}.
+   *
+   * @param startInclusive the (inclusive) initial value
+   * @param endExclusive the exclusive upper bound
+   * @return a sequential {@code int[] } for the range of {@code int} elements
+   */
+  public static int[] range(int startInclusive, int endExclusive) {
+    // return IntStream.range(startInclusive, endExclusive).toArray();
+    if (endExclusive <= startInclusive) {
+      return Primitives.EMPTY_INTEGER_ARRAY;
+    }
+    int[] array = new int[endExclusive - startInclusive];
+    for (int x = 0, i = startInclusive; i < endExclusive; i++, x++) {
+      array[x] = i;
+    }
+    return array;
   }
 
   /**

@@ -22,7 +22,7 @@ import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;
 import org.corant.shared.exception.NotSupportedException;
 
-public class DefaultSubject implements Subject {
+public class SimpleSubject implements Subject {
 
   private static final long serialVersionUID = 3435651508945136478L;
 
@@ -30,7 +30,7 @@ public class DefaultSubject implements Subject {
 
   private Set<Principal> principals = new LinkedHashSet<>();
 
-  public DefaultSubject(Serializable id, Principal... principals) {
+  public SimpleSubject(Serializable id, Principal... principals) {
     this.id = id;
     for (Principal principal : principals) {
       this.principals.add(principal);
@@ -63,7 +63,7 @@ public class DefaultSubject implements Subject {
     if (Subject.class.isAssignableFrom(cls)) {
       return (T) this;
     }
-    if (DefaultSubject.class.isAssignableFrom(cls)) {
+    if (SimpleSubject.class.isAssignableFrom(cls)) {
       return (T) this;
     }
     throw new NotSupportedException("Can't unwrap %s", cls);

@@ -21,11 +21,15 @@ package org.corant.modules.security;
  */
 public interface Realm {
 
+  AuthenticationData getAuthenticationContext(Token token);
+
+  AuthorizationData getAuthorizationContext(AuthenticationData authenticationContext);
+
   String getName();
 
   RealmSetting getSetting();
 
-  boolean isEnabled();
+  boolean isEnabledFor(Token token);
 
   <T> T unwrap(Class<T> cls);
 }

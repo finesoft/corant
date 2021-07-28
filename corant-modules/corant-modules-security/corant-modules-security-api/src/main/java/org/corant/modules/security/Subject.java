@@ -14,6 +14,7 @@
 package org.corant.modules.security;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public interface Subject extends Serializable {
     return p != null ? p.unwrap(c) : null;
   }
 
-  Set<Principal> getPrincipals();
+  Collection<? extends Principal> getPrincipals();
 
   default <T> Set<T> getPrincipals(Class<T> c) {
     return getPrincipals().stream().map(p -> p.unwrap(c)).collect(Collectors.toSet());

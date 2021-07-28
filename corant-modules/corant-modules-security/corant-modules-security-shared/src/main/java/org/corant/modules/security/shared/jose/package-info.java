@@ -11,18 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
-
 /**
- * corant-modules-security-api
- *
- * @author bingo 下午7:35:16
+ * corant-modules-security-shared
+ * 
+ * @author bingo 下午4:47:44
  *
  */
-public interface SecurityManager extends Authenticator, Authorizer {
-
-  Subject login(Token token);
-
-  void logout(Subject subject);
-
-}
+package org.corant.modules.security.shared.jose;

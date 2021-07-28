@@ -136,7 +136,8 @@ public class HibernateOrmDeveloperKits {
     try (Corant corant = prepare()) {
       out(false);
       SessionFactoryImplementor sf =
-          SessionFactoryImplementor.class.cast(createMetadataImplementor(pu, integrations));
+          (SessionFactoryImplementor) createEntityManagerFactoryBuilderImpl(pu, integrations)
+              .build();
       sf.getNamedQueryRepository().checkNamedQueries(sf.getQueryPlanCache());
       out(true);
     } catch (Exception e) {
@@ -152,7 +153,7 @@ public class HibernateOrmDeveloperKits {
     }
   }
 
-  protected static MetadataImplementor createMetadataImplementor(String pu,
+  protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
       String... integrations) {
     Properties props = propertiesOf(integrations);
     props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
@@ -167,10 +168,16 @@ public class HibernateOrmDeveloperKits {
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource(dsn -> dataSourceService.tryResolve(dsn));
     props.putAll(usePum.getProperties());
-    EntityManagerFactoryBuilderImpl emfb = EntityManagerFactoryBuilderImpl.class
+    return EntityManagerFactoryBuilderImpl.class
         .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
-    emfb.build();
-    return emfb.getMetadata();
+  }
+
+  protected static MetadataImplementor createMetadataImplementor(String pu,
+      String... integrations) {
+    EntityManagerFactoryBuilderImpl entityManagerFactoryBuilderImpl =
+        createEntityManagerFactoryBuilderImpl(pu, integrations);
+    entityManagerFactoryBuilderImpl.build();
+    return entityManagerFactoryBuilderImpl.getMetadata();
   }
 
   protected static void out(boolean end) {

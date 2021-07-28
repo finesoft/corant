@@ -13,6 +13,9 @@
  */
 package org.corant.modules.security.shared;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.function.Predicate;
 import org.corant.modules.security.Permission;
 import org.corant.modules.security.shared.util.StringPredicates;
@@ -29,7 +32,7 @@ public class SimplePermission implements Permission {
   private static final long serialVersionUID = 3701989330265355350L;
 
   private final String name;
-  private final Predicate<String> predicate;
+  private Predicate<String> predicate;
 
   public SimplePermission(String name) {
     this.name = name;
@@ -97,6 +100,15 @@ public class SimplePermission implements Permission {
       return (T) this;
     }
     throw new NotSupportedException("Can't unwrap %s", cls);
+  }
+
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    predicate = StringPredicates.predicateOf(name);
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
   }
 
 }

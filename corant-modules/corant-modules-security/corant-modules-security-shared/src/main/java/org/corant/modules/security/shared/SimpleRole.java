@@ -13,6 +13,9 @@
  */
 package org.corant.modules.security.shared;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.function.Predicate;
 import org.corant.modules.security.Role;
 import org.corant.modules.security.shared.util.StringPredicates;
@@ -29,7 +32,7 @@ public class SimpleRole implements Role {
   private static final long serialVersionUID = 1585708942349545935L;
 
   private final String name;
-  private final Predicate<String> predicate;
+  private Predicate<String> predicate;
 
   public SimpleRole(String name) {
     this.name = name;
@@ -100,4 +103,12 @@ public class SimpleRole implements Role {
     throw new NotSupportedException("Can't unwrap %s", cls);
   }
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    predicate = StringPredicates.predicateOf(name);
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

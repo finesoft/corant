@@ -18,6 +18,9 @@ import org.corant.shared.ubiquity.Sortable;
 /**
  * corant-modules-security-api
  *
+ * <p>
+ * An Authenticator is responsible for authenticating accounts in an application.
+ *
  * @author bingo 12:25:41
  *
  */

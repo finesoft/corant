@@ -54,7 +54,7 @@ public class SimpleSubject implements Subject {
 
   @Override
   public String toString() {
-    return "DefaultSubject [id=" + id + "]";
+    return "SimpleSubject [id=" + id + "]";
   }
 
   @SuppressWarnings("unchecked")

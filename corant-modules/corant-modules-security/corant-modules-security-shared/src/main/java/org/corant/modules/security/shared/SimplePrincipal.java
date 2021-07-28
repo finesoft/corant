@@ -62,7 +62,7 @@ public class SimplePrincipal implements Principal, Serializable {
 
   @Override
   public String toString() {
-    return "DefaultPrincipal [name=" + name + ", properties=" + properties + "]";
+    return "SimplePrincipal [name=" + name + ", properties=" + properties + "]";
   }
 
   @SuppressWarnings("unchecked")

@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.URLResource;
 
@@ -55,6 +56,15 @@ public class Keys {
   }
 
   static final Logger LOGGER = Logger.getLogger(Keys.class.getName());
+
+  public static Triple<String, String, String> createJsonWebKeySet()
+      throws GeneralSecurityException {
+    KeyPair keyPair = generateKeyPair(2048, "RSA");
+    String pubKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+    String priKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+    String keyId = createKeyId(keyPair.getPrivate(), "SHA-256");
+    return Triple.of(pubKey, priKey, keyId);
+  }
 
   public static String createKeyId(Key key, String algo) throws GeneralSecurityException {
     return Base64.getEncoder().encodeToString(

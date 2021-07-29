@@ -26,7 +26,7 @@ public interface AuthenticationData {
 
   Object getCredentials();
 
-  default Serializable getIdentifier() {
+  default Serializable getId() {
     return null;
   }
 

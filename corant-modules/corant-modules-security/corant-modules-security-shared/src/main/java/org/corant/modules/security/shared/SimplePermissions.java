@@ -20,9 +20,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
+/**
+ * corant-modules-security-shared
+ *
+ * @author bingo 下午4:22:11
+ *
+ */
 public class SimplePermissions implements Iterable<SimplePermission> {
 
-  final Collection<SimplePermission> perms;
+  protected final Collection<SimplePermission> perms;
 
   public SimplePermissions(Collection<SimplePermission> perms) {
     this.perms = Collections.unmodifiableCollection(perms);

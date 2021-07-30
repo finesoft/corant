@@ -11,28 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared;
+package org.corant.modules.microprofile.jwt;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import org.corant.modules.security.Token.JsonWebToken;
 
 /**
- * corant-modules-security-shared
+ * corant-modules-microprofile-jwt
  *
- * @author bingo 下午4:22:22
+ * @author bingo 上午11:53:40
  *
  */
-public class SimplePrincipals implements Iterable<SimplePrincipal> {
+public class MpJWTJsonWebToken extends JsonWebToken {
 
-  protected final Collection<SimplePrincipal> principals;
+  private static final long serialVersionUID = 8645607501689631137L;
 
-  public SimplePrincipals(Collection<SimplePrincipal> principals) {
-    this.principals = Collections.unmodifiableCollection(principals);
+  public MpJWTJsonWebToken(String data) {
+    super(data);
   }
 
-  @Override
-  public Iterator<SimplePrincipal> iterator() {
-    return principals.iterator();
-  }
 }

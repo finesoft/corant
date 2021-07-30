@@ -21,6 +21,7 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import org.corant.modules.microprofile.jwt.MpJWTAuthorizer;
 import org.corant.modules.security.Authorizer;
 import org.corant.modules.security.shared.SimplePermissions;
 
@@ -39,7 +40,7 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
 
   public MpJWTPermitsAllowedFilter(String... allowedPermits) {
     if (isEmpty(allowedPermits)) {
-      this.allowedPermits = SimplePermissions.of(MpJWTDefaultAuthorizer.ALL_PERMS);
+      this.allowedPermits = SimplePermissions.of(MpJWTAuthorizer.ALL_PERMS);
     } else {
       this.allowedPermits = SimplePermissions.of(allowedPermits);
     }
@@ -66,7 +67,7 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter {
     if (authorizer == null) {
       synchronized (this) {
         if (authorizer == null) {
-          authorizer = find(Authorizer.class).orElse(MpJWTDefaultAuthorizer.DFLT_INST);
+          authorizer = find(Authorizer.class).orElse(MpJWTAuthorizer.DFLT_INST);
         }
       }
     }

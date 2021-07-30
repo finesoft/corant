@@ -13,38 +13,39 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.listOf;
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
- *
  * corant-modules-security-shared
  *
- * @author bingo 下午4:22:28
+ * @author bingo 下午4:11:00
  *
  */
-public class SimpleRoles implements Iterable<SimpleRole> {
+public class UserAuthzData extends SimpleAuthzData {
 
-  protected final Collection<SimpleRole> roles;
+  protected Serializable userId;
 
-  public SimpleRoles(Collection<SimpleRole> roles) {
-    this.roles = Collections.unmodifiableCollection(roles);
+  public UserAuthzData(Serializable userId, Collection<String> roles) {
+    super(roles);
+    this.userId = userId;
   }
 
-  public static SimpleRoles of(SimpleRole... role) {
-    return new SimpleRoles(listOf(role));
+  public UserAuthzData(Serializable userId, List<SimpleRole> roles) {
+    super(roles);
+    this.userId = userId;
   }
 
-  public static SimpleRoles of(String... name) {
-    return new SimpleRoles(Arrays.stream(name).map(SimpleRole::new).collect(Collectors.toList()));
+  public UserAuthzData(Serializable userId, String... roles) {
+    super(roles);
+    this.userId = userId;
   }
 
-  @Override
-  public Iterator<SimpleRole> iterator() {
-    return roles.iterator();
+  protected UserAuthzData() {}
+
+  public Serializable getUserId() {
+    return userId;
   }
+
 }

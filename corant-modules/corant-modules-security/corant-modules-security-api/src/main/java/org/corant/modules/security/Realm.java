@@ -13,7 +13,7 @@
  */
 package org.corant.modules.security;
 
-import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * corant-modules-security-api
@@ -25,13 +25,13 @@ public interface Realm {
 
   AuthenticationData getAuthenticationData(Token token);
 
-  AuthorizationData getAuthorizationData(Serializable id);
+  AuthorizationData getAuthorizationData(Collection<? extends Principal> principals);
 
   String getName();
 
   RealmSetting getSetting();
 
-  boolean isEnabledFor(Token token);
+  boolean supports(Token token);
 
   <T> T unwrap(Class<T> cls);
 }

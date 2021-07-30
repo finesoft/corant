@@ -21,6 +21,12 @@ import java.util.Map;
 import org.corant.modules.security.Principal;
 import org.corant.shared.exception.NotSupportedException;
 
+/**
+ * corant-modules-security-shared
+ *
+ * @author bingo 下午4:22:17
+ *
+ */
 public class SimplePrincipal implements Principal, Serializable {
 
   private static final long serialVersionUID = 282297555381317944L;
@@ -28,12 +34,18 @@ public class SimplePrincipal implements Principal, Serializable {
   protected String name;
   protected Map<String, ? extends Serializable> properties = Collections.emptyMap();
 
+  public SimplePrincipal(String name) {
+    this(name, null);
+  }
+
   public SimplePrincipal(String name, Map<String, ? extends Serializable> properties) {
     this.name = name;
     if (properties != null) {
       this.properties = Collections.unmodifiableMap(properties);
     }
   }
+
+  protected SimplePrincipal() {}
 
   @Override
   public String getName() {

@@ -13,29 +13,35 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Lists.newArrayList;
 import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;
 import org.corant.shared.exception.NotSupportedException;
 
+/**
+ * corant-modules-security-shared
+ *
+ * @author bingo 下午4:22:33
+ *
+ */
 public class SimpleSubject implements Subject {
 
   private static final long serialVersionUID = 3435651508945136478L;
 
-  private Serializable id;
+  protected Serializable id;
 
-  private Set<Principal> principals = new LinkedHashSet<>();
+  protected Collection<Principal> principals;
 
-  public SimpleSubject(Serializable id, Principal... principals) {
+  public SimpleSubject(Serializable id, Collection<? extends Principal> principals) {
     this.id = id;
-    for (Principal principal : principals) {
-      this.principals.add(principal);
-    }
+    this.principals = Collections.unmodifiableCollection(newArrayList(principals));
   }
+
+  protected SimpleSubject() {}
 
   @Override
   public Serializable getId() {
@@ -48,8 +54,8 @@ public class SimpleSubject implements Subject {
   }
 
   @Override
-  public Set<Principal> getPrincipals() {
-    return Collections.unmodifiableSet(principals);
+  public Collection<? extends Principal> getPrincipals() {
+    return principals;
   }
 
   @Override

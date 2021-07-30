@@ -13,26 +13,30 @@
  */
 package org.corant.modules.security.shared;
 
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import org.corant.modules.security.Principal;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午4:22:22
+ * @author bingo 下午3:56:13
  *
  */
-public class SimplePrincipals implements Iterable<SimplePrincipal> {
+public class UserAuthcData extends SimpleAuthcData {
 
-  protected final Collection<SimplePrincipal> principals;
+  protected Serializable userId;
 
-  public SimplePrincipals(Collection<SimplePrincipal> principals) {
-    this.principals = Collections.unmodifiableCollection(principals);
+  public UserAuthcData(Serializable userId, Object credentials,
+      Collection<? extends Principal> principals) {
+    super(credentials, principals);
+    this.userId = userId;
   }
 
-  @Override
-  public Iterator<SimplePrincipal> iterator() {
-    return principals.iterator();
+  protected UserAuthcData() {}
+
+  public Serializable getUserId() {
+    return userId;
   }
+
 }

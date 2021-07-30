@@ -31,13 +31,15 @@ public class SimpleRole implements Role {
 
   private static final long serialVersionUID = 1585708942349545935L;
 
-  private final String name;
-  private Predicate<String> predicate;
+  protected String name;
+  protected Predicate<String> predicate;
 
   public SimpleRole(String name) {
     this.name = name;
     predicate = StringPredicates.predicateOf(name);
   }
+
+  protected SimpleRole() {}
 
   public static SimpleRole of(String name) {
     return new SimpleRole(name);

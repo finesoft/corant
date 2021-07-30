@@ -31,13 +31,15 @@ public class SimplePermission implements Permission {
 
   private static final long serialVersionUID = 3701989330265355350L;
 
-  private final String name;
-  private Predicate<String> predicate;
+  protected String name;
+  protected Predicate<String> predicate;
 
   public SimplePermission(String name) {
     this.name = name;
     predicate = StringPredicates.predicateOf(name);
   }
+
+  protected SimplePermission() {}
 
   public static SimplePermission of(String name) {
     return new SimplePermission(name);

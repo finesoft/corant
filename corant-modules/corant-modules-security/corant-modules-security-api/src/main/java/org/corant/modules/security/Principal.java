@@ -23,5 +23,12 @@ import java.io.Serializable;
  */
 public interface Principal extends java.security.Principal, Serializable {
 
+  default boolean implies(Subject subject) {
+    if (subject == null) {
+      return false;
+    }
+    return subject.getPrincipals().contains(this);
+  }
+
   <T> T unwrap(Class<T> cls);
 }

@@ -13,38 +13,39 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.listOf;
-import java.util.Arrays;
+import static org.corant.shared.util.Lists.newArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.stream.Collectors;
+import org.corant.modules.security.AuthenticationData;
+import org.corant.modules.security.Principal;
 
 /**
- *
  * corant-modules-security-shared
  *
- * @author bingo 下午4:22:28
+ * @author bingo 下午3:14:35
  *
  */
-public class SimpleRoles implements Iterable<SimpleRole> {
+public class SimpleAuthcData implements AuthenticationData {
 
-  protected final Collection<SimpleRole> roles;
+  protected Object credentials;
 
-  public SimpleRoles(Collection<SimpleRole> roles) {
-    this.roles = Collections.unmodifiableCollection(roles);
+  protected Collection<Principal> principals;
+
+  public SimpleAuthcData(Object credentials, Collection<? extends Principal> principals) {
+    this.credentials = credentials;
+    this.principals = Collections.unmodifiableCollection(newArrayList(principals));
   }
 
-  public static SimpleRoles of(SimpleRole... role) {
-    return new SimpleRoles(listOf(role));
-  }
+  protected SimpleAuthcData() {}
 
-  public static SimpleRoles of(String... name) {
-    return new SimpleRoles(Arrays.stream(name).map(SimpleRole::new).collect(Collectors.toList()));
+  @Override
+  public Object getCredentials() {
+    return credentials;
   }
 
   @Override
-  public Iterator<SimpleRole> iterator() {
-    return roles.iterator();
+  public Collection<? extends Principal> getPrincipals() {
+    return principals;
   }
+
 }

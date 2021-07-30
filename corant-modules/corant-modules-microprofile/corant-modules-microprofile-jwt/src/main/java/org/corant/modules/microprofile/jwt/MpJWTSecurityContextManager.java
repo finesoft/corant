@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.microprofile.jwt.jaxrs;
+package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import java.io.Serializable;
@@ -29,8 +29,8 @@ import javax.json.JsonValue;
 import javax.ws.rs.core.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.SecurityContextManager;
-import org.corant.modules.security.shared.SimplePrincipal;
 import org.corant.modules.security.shared.DefaultSecurityContext;
+import org.corant.modules.security.shared.UserPrincipal;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -40,8 +40,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  *
  */
 @RequestScoped
-public class MpSecurityContextManager implements SecurityContextManager<SecurityContext> {
-  static final Logger logger = Logger.getLogger(MpSecurityContextManager.class.getName());
+public class MpJWTSecurityContextManager implements SecurityContextManager<SecurityContext> {
+  static final Logger logger = Logger.getLogger(MpJWTSecurityContextManager.class.getName());
 
   @Override
   public void bind(SecurityContext securityContext) {
@@ -58,7 +58,7 @@ public class MpSecurityContextManager implements SecurityContextManager<Security
       }
       SecurityContexts
           .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
-              new SimplePrincipal(principal.getName(), map)));
+              new UserPrincipal(principal.getSubject(), principal.getName(), map)));
     } else {
       logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);

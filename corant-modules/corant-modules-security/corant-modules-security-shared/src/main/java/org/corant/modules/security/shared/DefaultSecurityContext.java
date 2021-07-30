@@ -17,6 +17,12 @@ import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.Principal;
 import org.corant.shared.exception.NotSupportedException;
 
+/**
+ * corant-modules-security-shared
+ *
+ * @author bingo 下午3:14:35
+ *
+ */
 public class DefaultSecurityContext implements SecurityContext {
 
   private static final long serialVersionUID = 4329263253208902621L;

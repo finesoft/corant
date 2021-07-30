@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -26,9 +25,6 @@ public interface AuthenticationData {
 
   Object getCredentials();
 
-  default Serializable getId() {
-    return null;
-  }
-
   Collection<? extends Principal> getPrincipals();
+
 }

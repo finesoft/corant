@@ -13,6 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
+import static org.corant.context.Beans.find;
 import java.io.IOException;
 import java.security.Principal;
 import javax.annotation.Priority;
@@ -22,13 +23,17 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.SecurityContext;
+import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
+import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
+import org.corant.modules.microprofile.jwt.MpJWTSecurityContextManager;
+import org.corant.modules.security.AuthenticationData;
+import org.corant.modules.security.Authenticator;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.AbstractBearerTokenExtractor;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.jaxrs.JWTAuthenticationFilter;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
-import io.smallrye.jwt.auth.principal.JWTParser;
 
 /**
  * corant-modules-microprofile-jwt
@@ -46,16 +51,13 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   private static boolean debugLogging = logger.isDebugEnabled();
 
   @Inject
-  private JWTParser jwtParser;
-
-  @Inject
   private JWTAuthContextInfo authContextInfo;
 
   @Inject
   private PrincipalProducer producer;
 
   @Inject
-  private MpSecurityContextManager securityManager;
+  private MpJWTSecurityContextManager securityManager;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -67,7 +69,11 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
       String bearerToken = extractor.getBearerToken();
       if (bearerToken != null) {
         try {
-          JsonWebToken jwtPrincipal = jwtParser.parse(bearerToken);
+          AuthenticationData authcData =
+              find(Authenticator.class).orElse(MpJWTAuthenticator.DFLT_INST)
+                  .authenticate(new MpJWTJsonWebToken(bearerToken));
+          JsonWebToken jwtPrincipal =
+              authcData.getPrincipals().iterator().next().unwrap(JsonWebToken.class);
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           requestContext.setSecurityContext(new JWTSecurityContext(securityContext, jwtPrincipal));

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.microprofile.jwt.jaxrs;
+package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -34,11 +34,11 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * @author bingo 上午10:23:37
  *
  */
-public class MpJWTDefaultAuthorizer implements Authorizer {
+public class MpJWTAuthorizer implements Authorizer {
 
   public static final SimpleRole ALL_ROLES = new SimpleRole("*");
   public static final SimplePermission ALL_PERMS = new SimplePermission("*");
-  public static final MpJWTDefaultAuthorizer DFLT_INST = new MpJWTDefaultAuthorizer();
+  public static final MpJWTAuthorizer DFLT_INST = new MpJWTAuthorizer();
 
   @Override
   public void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {

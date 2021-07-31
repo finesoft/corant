@@ -33,8 +33,7 @@ public class SimpleAuthzData implements AuthorizationData {
   protected List<Role> roles;
 
   public SimpleAuthzData(Collection<String> roles) {
-    this.roles = Collections
-        .unmodifiableList(roles.stream().map(SimpleRole::of).collect(Collectors.toList()));
+    this.roles = roles.stream().map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
   }
 
   public SimpleAuthzData(List<SimpleRole> roles) {
@@ -42,8 +41,7 @@ public class SimpleAuthzData implements AuthorizationData {
   }
 
   public SimpleAuthzData(String... roles) {
-    this.roles = Collections
-        .unmodifiableList(Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toList()));
+    this.roles = Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
   }
 
   protected SimpleAuthzData() {}

@@ -65,11 +65,7 @@ public class SimplePrincipal implements Principal, Serializable {
   }
 
   public <T> T getProperty(String name, Class<T> type, T alt) {
-    Object property;
-    if (properties != null && (property = properties.get(name)) != null) {
-      return defaultObject(toObject(property, type), alt);
-    }
-    return null;
+    return defaultObject(getProperty(name, type), alt);
   }
 
   @Override

@@ -36,7 +36,7 @@
 		<version.commons-cli>1.4</version.commons-cli>
 		<version.commons-codec>1.15</version.commons-codec>
 		<version.commons-collections4>4.4</version.commons-collections4>
-		<version.commons-compress>1.20</version.commons-compress>
+		<version.commons-compress>1.21</version.commons-compress>
 		<version.commons-dbcp2>2.8.0</version.commons-dbcp2>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
 		<version.commons-io>2.8.0</version.commons-io>

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -150,7 +151,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
       try {
         String value = defaultString(sources.getValue(name));
         sortMap.put(name, Desensitizer.desensitize(name, value));
-        if (value.isBlank() || value.startsWith(SPACE) || value.endsWith(SPACE)) {
+        if (isNotBlank(value) && (value.startsWith(SPACE) || value.endsWith(SPACE))) {
           logger.warning(() -> String
               .format("The value of config property [%s] may be a problem, please check!", name));
         }

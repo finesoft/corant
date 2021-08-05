@@ -140,7 +140,7 @@
     <version.rest-assured>4.3.1</version.rest-assured>
     <version.resteasy>4.6.2.Final</version.resteasy>
     <version.rsocket>1.0.2</version.rsocket>
-    <version.shiro-all>1.6.0</version.shiro-all>
+    <version.shiro-all>1.7.1</version.shiro-all>
     <version.smallrye-config>1.7.0</version.smallrye-config>
     <version.smallrye-fault-tolerance>5.2.1</version.smallrye-fault-tolerance>
     <version.smallrye-open-api>2.1.9</version.smallrye-open-api>

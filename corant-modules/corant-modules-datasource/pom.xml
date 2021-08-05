@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.corant</groupId>
@@ -9,9 +11,9 @@
   <packaging>pom</packaging>
   <description>The Corant data source modules, which contains connection pool involved in enterprise development.</description>
   <modules>
-  	<module>corant-modules-datasource-shared</module>
-  	<module>corant-modules-datasource-agroal</module>
-  	<module>corant-modules-datasource-dbcp</module>
-  	<module>corant-modules-datasource-hikari</module>
+    <module>corant-modules-datasource-shared</module>
+    <module>corant-modules-datasource-agroal</module>
+    <module>corant-modules-datasource-dbcp</module>
+    <module>corant-modules-datasource-hikari</module>
   </modules>
 </project>

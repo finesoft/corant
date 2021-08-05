@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.corant</groupId>
@@ -8,14 +10,14 @@
   <artifactId>corant-modules-microprofile</artifactId>
   <packaging>pom</packaging>
   <modules>
-  	<module>corant-modules-microprofile-config</module>
-  	<module>corant-modules-microprofile-faulttolerance</module>
-  	<module>corant-modules-microprofile-healthcheck</module>
-  	<module>corant-modules-microprofile-jwt</module>
-  	<module>corant-modules-microprofile-lra</module>
-  	<module>corant-modules-microprofile-metrics</module>
-  	<module>corant-modules-microprofile-openapi</module>
-  	<module>corant-modules-microprofile-opentracing</module>
-  	<module>corant-modules-microprofile-restclient</module>
+    <module>corant-modules-microprofile-config</module>
+    <module>corant-modules-microprofile-faulttolerance</module>
+    <module>corant-modules-microprofile-healthcheck</module>
+    <module>corant-modules-microprofile-jwt</module>
+    <module>corant-modules-microprofile-lra</module>
+    <module>corant-modules-microprofile-metrics</module>
+    <module>corant-modules-microprofile-openapi</module>
+    <module>corant-modules-microprofile-opentracing</module>
+    <module>corant-modules-microprofile-restclient</module>
   </modules>
 </project>

@@ -1,19 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.corant</groupId>
-		<artifactId>corant-modules</artifactId>
-		<version>${revision}</version>
-	</parent>
-	<artifactId>corant-modules-cloud</artifactId>
-	<packaging>pom</packaging>
-	<modules>
-		<module>corant-modules-cloud-alibaba</module>
-		<module>corant-modules-cloud-tencent</module>
-	</modules>
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.corant</groupId>
+    <artifactId>corant-modules</artifactId>
+    <version>${revision}</version>
+  </parent>
+  <artifactId>corant-modules-cloud</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+    <module>corant-modules-cloud-alibaba</module>
+    <module>corant-modules-cloud-tencent</module>
+  </modules>
 
-	<description>The Corant service provider integration.</description>
+  <description>The Corant service provider integration.</description>
 
 </project>

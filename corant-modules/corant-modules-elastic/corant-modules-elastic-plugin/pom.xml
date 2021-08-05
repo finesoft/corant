@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.corant</groupId>
@@ -6,43 +8,19 @@
     <version>${revision}</version>
   </parent>
   <artifactId>corant-modules-elastic-plugin</artifactId>
-	<dependencies>
-		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
-		</dependency>
-	</dependencies>
-	<!-- use maven package modify artifact version name
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<appendAssemblyId>false</appendAssemblyId>
-					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
-					<descriptors>
-						<descriptor>src/main/resources/plugin.xml</descriptor>
-					</descriptors>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	-->  
+  <dependencies>
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+    </dependency>
+  </dependencies>
+  <!-- use maven package modify artifact version name <build> <plugins> <plugin> 
+    <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId> 
+    <configuration> <appendAssemblyId>false</appendAssemblyId> <outputDirectory>${project.build.directory}/releases/</outputDirectory> 
+    <descriptors> <descriptor>src/main/resources/plugin.xml</descriptor> </descriptors> 
+    </configuration> <executions> <execution> <phase>package</phase> <goals> 
+    <goal>single</goal> </goals> </execution> </executions> </plugin> <plugin> 
+    <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
+    <configuration> <source>1.8</source> <target>1.8</target> </configuration> 
+    </plugin> </plugins> </build> -->
 </project>

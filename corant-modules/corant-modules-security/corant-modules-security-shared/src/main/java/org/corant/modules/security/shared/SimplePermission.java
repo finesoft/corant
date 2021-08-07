@@ -32,7 +32,7 @@ public class SimplePermission implements Permission {
   private static final long serialVersionUID = 3701989330265355350L;
 
   protected String name;
-  protected Predicate<String> predicate;
+  protected transient Predicate<String> predicate;
 
   public SimplePermission(String name) {
     this.name = name;

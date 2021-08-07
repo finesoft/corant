@@ -32,7 +32,7 @@ public class SimpleRole implements Role {
   private static final long serialVersionUID = 1585708942349545935L;
 
   protected String name;
-  protected Predicate<String> predicate;
+  protected transient Predicate<String> predicate;
 
   public SimpleRole(String name) {
     this.name = name;

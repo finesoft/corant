@@ -27,8 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.context.SingleInstance;
 import org.corant.shared.util.Serializations.ObjectInputStreamWithLoader;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.undertow.servlet.UndertowServletLogger;
@@ -40,7 +40,7 @@ import io.undertow.servlet.api.SessionPersistenceManager;
  * @author bingo 下午3:51:19
  *
  */
-@ApplicationScoped
+@SingleInstance
 public class FileSystemSessionPersistenceManager implements SessionPersistenceManager {
 
   @Inject

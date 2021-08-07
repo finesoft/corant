@@ -14,10 +14,13 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Maps.getMapCollection;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.IntFunction;
 import org.corant.modules.security.Principal;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -66,6 +69,11 @@ public class SimplePrincipal implements Principal, Serializable {
 
   public <T> T getProperty(String name, Class<T> type, T alt) {
     return defaultObject(getProperty(name, type), alt);
+  }
+
+  public <T, C extends Collection<T>> C getProperty(String name, IntFunction<C> collectionFactory,
+      Class<T> itemType) {
+    return getMapCollection(properties, name, collectionFactory, itemType, null);
   }
 
   @Override

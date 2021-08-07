@@ -30,6 +30,7 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -57,18 +58,27 @@ public class Keys {
 
   static final Logger LOGGER = Logger.getLogger(Keys.class.getName());
 
-  public static Triple<String, String, String> createJsonWebKeySet()
-      throws GeneralSecurityException {
-    KeyPair keyPair = generateKeyPair(2048, "RSA");
+  public static String createKeyId(Key key, String algo) throws GeneralSecurityException {
+    return Base64.getEncoder().encodeToString(
+        MessageDigest.getInstance(defaultString(algo, "SHA-256")).digest(key.getEncoded()));
+  }
+
+  public static Triple<String, String, String> createKeySet(AlgorithmParameterSpec spec,
+      String algo) throws GeneralSecurityException {
+    KeyPair keyPair = generateKeyPair(spec, algo);
     String pubKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
     String priKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
     String keyId = createKeyId(keyPair.getPrivate(), "SHA-256");
     return Triple.of(pubKey, priKey, keyId);
   }
 
-  public static String createKeyId(Key key, String algo) throws GeneralSecurityException {
-    return Base64.getEncoder().encodeToString(
-        MessageDigest.getInstance(defaultString(algo, "SHA-256")).digest(key.getEncoded()));
+  public static Triple<String, String, String> createKeySet(int bits, String algo)
+      throws GeneralSecurityException {
+    KeyPair keyPair = generateKeyPair(bits, algo);
+    String pubKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+    String priKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+    String keyId = createKeyId(keyPair.getPrivate(), "SHA-256");
+    return Triple.of(pubKey, priKey, keyId);
   }
 
   public static PrivateKey decodePrivateKey(byte[] der, String algo)
@@ -122,6 +132,14 @@ public class Keys {
       throws GeneralSecurityException {
     CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
     return (X509Certificate) cf.generateCertificate(is);
+  }
+
+  public static KeyPair generateKeyPair(AlgorithmParameterSpec spec, String algo)
+      throws GeneralSecurityException {
+    KeyPairGenerator keyPairGenerator =
+        KeyPairGenerator.getInstance(defaultString(algo, "RSA"), "BC");
+    keyPairGenerator.initialize(spec);
+    return keyPairGenerator.genKeyPair();
   }
 
   public static KeyPair generateKeyPair(int keySize, String algo) throws GeneralSecurityException {

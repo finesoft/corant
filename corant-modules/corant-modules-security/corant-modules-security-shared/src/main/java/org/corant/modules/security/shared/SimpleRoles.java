@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
+import org.corant.shared.util.Strings;
 
 /**
  *
@@ -32,7 +34,16 @@ public class SimpleRoles implements Iterable<SimpleRole> {
   protected final Collection<SimpleRole> roles;
 
   public SimpleRoles(Collection<SimpleRole> roles) {
-    this.roles = Collections.unmodifiableCollection(roles);
+    this.roles =
+        roles == null ? Collections.emptyList() : Collections.unmodifiableCollection(roles);
+  }
+
+  public static SimpleRoles of(Collection<String> names) {
+    if (names != null) {
+      return new SimpleRoles(names.stream().filter(Strings::isNotBlank).map(SimpleRole::new)
+          .collect(Collectors.toList()));
+    }
+    return new SimpleRoles((Collection<SimpleRole>) null);
   }
 
   public static SimpleRoles of(SimpleRole... role) {
@@ -46,5 +57,9 @@ public class SimpleRoles implements Iterable<SimpleRole> {
   @Override
   public Iterator<SimpleRole> iterator() {
     return roles.iterator();
+  }
+
+  public List<SimpleRole> toList() {
+    return listOf(this);
   }
 }

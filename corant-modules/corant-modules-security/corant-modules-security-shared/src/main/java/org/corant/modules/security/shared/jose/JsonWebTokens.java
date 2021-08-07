@@ -20,6 +20,7 @@ import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.defaultString;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
@@ -29,6 +30,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import org.corant.modules.security.shared.crypto.Keys;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.jose4j.jwa.AlgorithmConstraints;
+import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
+import org.jose4j.jwk.EllipticCurveJsonWebKey;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -56,6 +63,65 @@ public class JsonWebTokens {
     rsaJsonWebKey.setKeyId(sha256keyId);
     rsaJsonWebKey.setPrivateKey(Keys.decodePrivateKey(rsaPrivateKeyPem, "RSA"));
     return rsaJsonWebKey;
+  }
+
+  /**
+   * Producing a nested (signed and encrypted) JWT
+   *
+   * @param signKey the signature key(sender key) that will be used for signing and verification of
+   *        the JWT, wrapped in a JWK
+   * @param signAlgo the signature algorithm on the JWT/JWS that will integrity protect the claims,
+   *        default is 'ES256'
+   * @param decryptKey the decryption key(receiver key) that will be used for encryption and
+   *        decryption of the JWT'
+   * @param keyEncryptAlgo the key encryption algorithm for the output of the ECDH-ES key agreement
+   *        will encrypt a randomly generated content encryption key, default is 'ECDH-ES+A256KW'
+   * @param payloadEncryptAlgo the payload encryption algorithm is used to encrypt the payload,
+   *        default is 'A128CBC-HS256'
+   * @param setting the claims setting
+   * @throws JoseException generateECJWT
+   */
+  public static String generateECJWT(EllipticCurveJsonWebKey signKey, String signAlgo,
+      EllipticCurveJsonWebKey decryptKey, String keyEncryptAlgo, String payloadEncryptAlgo,
+      Consumer<JwtClaims> setting) throws JoseException {
+    JwtClaims claims = new JwtClaims();
+    if (setting != null) {
+      setting.accept(claims);
+    }
+    // A JWT is a JWS and/or a JWE with JSON claims as the payload.
+    // In this method it is a JWS nested inside a JWE So we first create a JsonWebSignature object.
+    JsonWebSignature jws = new JsonWebSignature();
+    jws.setPayload(claims.toJson()); // The payload of the JWS is JSON content of the JWT Claims
+    jws.setKey(signKey.getPrivateKey());// The JWT is signed using the sender's private key
+    jws.setKeyIdHeaderValue(signKey.getKeyId());
+    // Set the signature algorithm on the JWT/JWS that will integrity protect the claims
+    jws.setAlgorithmHeaderValue(
+        defaultString(signAlgo, AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256));
+    // Sign the JWS and produce the compact serialization, which will be the inner JWT/JWS
+    // representation, which is a string consisting of three dot ('.') separated
+    // base64url-encoded parts in the form Header.Payload.Signature
+    String innerJwt = jws.getCompactSerialization();
+    // The outer JWT is a JWE
+    JsonWebEncryption jwe = new JsonWebEncryption();
+    // The output of the ECDH-ES key agreement will encrypt a randomly generated content encryption
+    // key
+    jwe.setAlgorithmHeaderValue(
+        defaultString(keyEncryptAlgo, KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW));
+    // The content encryption key is used to encrypt the payload with a composite AES-CBC / HMAC
+    // SHA2 encryption algorithm
+    jwe.setEncryptionMethodHeaderParameter(defaultString(payloadEncryptAlgo,
+        ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256));
+    // We encrypt to the receiver using their public key
+    jwe.setKey(decryptKey.getPublicKey());
+    jwe.setKeyIdHeaderValue(decryptKey.getKeyId());
+    // A nested JWT requires that the cty (Content Type) header be set to "JWT" in the outer JWT
+    jwe.setContentTypeHeaderValue("JWT");
+    // The inner JWT is the payload of the outer JWT
+    jwe.setPayload(innerJwt);
+    // Produce the JWE compact serialization, which is the complete JWT/JWE representation,
+    // which is a string consisting of five dot ('.') separated
+    // base64url-encoded parts in the form Header.EncryptedKey.IV.Ciphertext.AuthenticationTag
+    return jwe.getCompactSerialization();
   }
 
   public static String generateJWT(PublicJsonWebKey key, Consumer<JwtClaims> setting, String algo)
@@ -129,6 +195,59 @@ public class JsonWebTokens {
       throw new CorantRuntimeException(e);
     }
 
+  }
+
+  /**
+   * Producing a nested (signed and encrypted) JWT
+   *
+   * @param ecJWT the elliptic curve encrypt JWT to parse
+   *
+   * @param signKey the signature key(sender key) that will be used for signing and verification of
+   *        the JWT, wrapped in a JWK
+   * @param signAlgo the signature algorithm on the JWT/JWS that will integrity protect the claims,
+   *        default is 'ES256'
+   * @param decryptKey the decryption key(receiver key) that will be used for encryption and
+   *        decryption of the JWT'
+   * @param keyEncryptAlgo the key encryption algorithm for the output of the ECDH-ES key agreement
+   *        will encrypt a randomly generated content encryption key, default is 'ECDH-ES+A256KW'
+   * @param payloadEncryptAlgo the payload encryption algorithm is used to encrypt the payload,
+   *        default is 'A128CBC-HS256'
+   * @param builderSetter the claims consumer setting
+   * @throws InvalidJwtException
+   */
+  public static JwtClaims getECJWTClaims(String ecJWT, EllipticCurveJsonWebKey signKey,
+      String signAlgo, EllipticCurveJsonWebKey decryptKey, String keyEncryptAlgo,
+      String payloadEncryptAlgo, Consumer<JwtConsumerBuilder> builderSetter)
+      throws InvalidJwtException {
+    // Use JwtConsumerBuilder to construct an appropriate JwtConsumer, which will
+    // be used to validate and process the JWT.
+    // The specific validation requirements for a JWT are context dependent, however,
+    // it typically advisable to require a (reasonable) expiration time, a trusted issuer, and
+    // and audience that identifies your system as the intended recipient.
+    // It is also typically good to allow only the expected algorithm(s) in the given context
+    AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.PERMIT,
+        defaultString(signAlgo, AlgorithmIdentifiers.ECDSA_USING_P256_CURVE_AND_SHA256));
+
+    AlgorithmConstraints jweAlgConstraints = new AlgorithmConstraints(ConstraintType.PERMIT,
+        defaultString(keyEncryptAlgo, KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW));
+
+    AlgorithmConstraints jweEncConstraints =
+        new AlgorithmConstraints(ConstraintType.PERMIT, defaultString(payloadEncryptAlgo,
+            ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256));
+    JwtConsumerBuilder builder =
+        new JwtConsumerBuilder().setDecryptionKey(decryptKey.getPrivateKey())
+            // verify the signature with the public key
+            .setVerificationKey(signKey.getPublicKey())
+            // limits the acceptable signature algorithm
+            .setJwsAlgorithmConstraints(jwsAlgConstraints)
+            // limits acceptable encryption key establishment algorithm(s)
+            .setJweAlgorithmConstraints(jweAlgConstraints)
+            // limits acceptable content encryption algorithm(s)
+            .setJweContentEncryptionAlgorithmConstraints(jweEncConstraints);
+    if (builderSetter != null) {
+      builderSetter.accept(builder);
+    }
+    return builder.build().processToClaims(ecJWT);
   }
 
   public static JwtClaims getJWTClaims(Key key, String jwt) throws InvalidJwtException {

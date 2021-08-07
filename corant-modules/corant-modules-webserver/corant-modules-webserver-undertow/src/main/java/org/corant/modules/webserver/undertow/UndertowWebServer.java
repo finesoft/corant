@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import org.corant.context.SingleInstance;
 import org.corant.modules.servlet.metadata.HttpConstraintMetaData;
 import org.corant.modules.servlet.metadata.HttpMethodConstraintMetaData;
 import org.corant.modules.servlet.metadata.ServletSecurityMetaData;
@@ -81,7 +81,7 @@ import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
  * @author bingo 下午3:00:15
  *
  */
-@ApplicationScoped
+@SingleInstance
 public class UndertowWebServer extends AbstractWebServer {
 
   public static final String HANDLERS_CONF = "META-INF/undertow-handlers.conf";

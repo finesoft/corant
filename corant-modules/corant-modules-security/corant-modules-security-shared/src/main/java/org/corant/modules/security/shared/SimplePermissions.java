@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-security-shared
@@ -31,7 +33,16 @@ public class SimplePermissions implements Iterable<SimplePermission> {
   protected final Collection<SimplePermission> perms;
 
   public SimplePermissions(Collection<SimplePermission> perms) {
-    this.perms = Collections.unmodifiableCollection(perms);
+    this.perms =
+        perms == null ? Collections.emptyList() : Collections.unmodifiableCollection(perms);
+  }
+
+  public static SimplePermissions of(Collection<String> names) {
+    if (names != null) {
+      return new SimplePermissions(names.stream().filter(Strings::isNotBlank)
+          .map(SimplePermission::new).collect(Collectors.toList()));
+    }
+    return new SimplePermissions((Collection<SimplePermission>) null);
   }
 
   public static SimplePermissions of(SimplePermission... perms) {
@@ -46,6 +57,10 @@ public class SimplePermissions implements Iterable<SimplePermission> {
   @Override
   public Iterator<SimplePermission> iterator() {
     return perms.iterator();
+  }
+
+  public List<SimplePermission> toList() {
+    return listOf(this);
   }
 
 }

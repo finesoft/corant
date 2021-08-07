@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security;
 
+import static org.corant.shared.util.Conversions.toObject;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -24,15 +25,69 @@ import java.util.Arrays;
  */
 public interface Token extends Serializable {
 
+  class IdentifierToken implements Token {
+
+    private static final long serialVersionUID = 4564497446521891392L;
+
+    protected Serializable id;
+
+    public IdentifierToken(Serializable id) {
+      this.id = id;
+    }
+
+    protected IdentifierToken() {}
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      IdentifierToken other = (IdentifierToken) obj;
+      if (id == null) {
+        if (other.id != null) {
+          return false;
+        }
+      } else if (!id.equals(other.id)) {
+        return false;
+      }
+      return true;
+    }
+
+    public Serializable getId() {
+      return id;
+    }
+
+    public <T extends Serializable> T getId(Class<T> cls) {
+      return toObject(id, cls);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (id == null ? 0 : id.hashCode());
+      return result;
+    }
+
+  }
+
   class JsonWebToken implements Token {
 
     private static final long serialVersionUID = -8729528213796543219L;
 
-    private final String data;
+    protected String data;
 
     public JsonWebToken(String data) {
       this.data = data;
     }
+
+    protected JsonWebToken() {}
 
     @Override
     public boolean equals(Object obj) {
@@ -70,16 +125,61 @@ public interface Token extends Serializable {
 
   }
 
-  class UsernamePasswordToken implements Token {
+  class UsernamePasswordToken extends UsernameToken {
 
     private static final long serialVersionUID = 8043690813970431112L;
 
-    private final String username;
-    private final char[] password;
+    protected char[] password;
 
     public UsernamePasswordToken(String username, String password) {
-      this.username = username;
+      super(username);
       this.password = password == null ? null : password.toCharArray();
+    }
+
+    protected UsernamePasswordToken() {}
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      UsernamePasswordToken other = (UsernamePasswordToken) obj;
+      if (!Arrays.equals(password, other.password)) {
+        return false;
+      }
+      return true;
+    }
+
+    public char[] getPassword() {
+      return password == null ? null : Arrays.copyOf(password, password.length);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + Arrays.hashCode(password);
+      return result;
+    }
+
+  }
+
+  class UsernameToken implements Token {
+
+    private static final long serialVersionUID = 3261086381812525002L;
+
+    protected String username;
+
+    protected UsernameToken() {}
+
+    protected UsernameToken(String username) {
+      this.username = username;
     }
 
     @Override
@@ -93,10 +193,7 @@ public interface Token extends Serializable {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      UsernamePasswordToken other = (UsernamePasswordToken) obj;
-      if (!Arrays.equals(password, other.password)) {
-        return false;
-      }
+      UsernameToken other = (UsernameToken) obj;
       if (username == null) {
         if (other.username != null) {
           return false;
@@ -107,10 +204,6 @@ public interface Token extends Serializable {
       return true;
     }
 
-    public char[] getPassword() {
-      return password == null ? null : Arrays.copyOf(password, password.length);
-    }
-
     public String getUsername() {
       return username;
     }
@@ -119,7 +212,6 @@ public interface Token extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + Arrays.hashCode(password);
       result = prime * result + (username == null ? 0 : username.hashCode());
       return result;
     }

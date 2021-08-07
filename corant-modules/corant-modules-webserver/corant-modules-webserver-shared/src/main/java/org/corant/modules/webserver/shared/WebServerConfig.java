@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.context.SingleInstance;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -30,7 +30,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午7:58:27
  *
  */
-@ApplicationScoped
+@SingleInstance
 public class WebServerConfig {
 
   @Inject

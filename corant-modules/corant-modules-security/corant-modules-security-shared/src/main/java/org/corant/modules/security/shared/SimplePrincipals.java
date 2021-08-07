@@ -13,9 +13,11 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Lists.listOf;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * corant-modules-security-shared
@@ -28,11 +30,16 @@ public class SimplePrincipals implements Iterable<SimplePrincipal> {
   protected final Collection<SimplePrincipal> principals;
 
   public SimplePrincipals(Collection<SimplePrincipal> principals) {
-    this.principals = Collections.unmodifiableCollection(principals);
+    this.principals = principals == null ? Collections.emptyList()
+        : Collections.unmodifiableCollection(principals);
   }
 
   @Override
   public Iterator<SimplePrincipal> iterator() {
     return principals.iterator();
+  }
+
+  public List<SimplePrincipal> toList() {
+    return listOf(this);
   }
 }

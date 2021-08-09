@@ -131,10 +131,13 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   public String getLocalizedMessage(Locale locale) {
     if (messageResolver != null) {
-      return messageResolver.getMessage(this, defaultObject(locale, Locale::getDefault));
-    } else {
-      return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
+      try {
+        return messageResolver.getMessage(this, defaultObject(locale, Locale::getDefault));
+      } catch (Exception e) {
+        addSuppressed(e);
+      }
     }
+    return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
   }
 
   @Override

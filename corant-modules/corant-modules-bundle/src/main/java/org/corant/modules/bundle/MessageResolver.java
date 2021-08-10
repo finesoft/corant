@@ -16,6 +16,7 @@ package org.corant.modules.bundle;
 import static org.corant.shared.util.Objects.EMPTY_ARRAY;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Locale;
+import java.util.function.Function;
 import org.corant.shared.normal.Names;
 
 /**
@@ -41,12 +42,18 @@ public interface MessageResolver {
 
   String getMessage(Locale locale, Object codes, Object... params);
 
+  String getMessage(Locale locale, Object codes, Object[] params, Function<Locale, String> dfltMsg);
+
   interface MessageParameter {
 
     String UNKNOW_INF_CODE = "INF.message.unknow";
     String UNKNOW_ERR_CODE = "ERR.message.unknow";
 
     Object getCodes();
+
+    default String getDefaultMessage(Locale locale) {
+      return String.format("Can't find any message for %s.", getCodes());
+    }
 
     MessageSeverity getMessageSeverity();
 

@@ -13,19 +13,12 @@
  */
 package org.corant.modules.bundle;
 
-import static org.corant.modules.bundle.MessageResolver.MessageParameter.UNKNOW_ERR_CODE;
-import static org.corant.modules.bundle.MessageResolver.MessageParameter.UNKNOW_INF_CODE;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Function;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -33,7 +26,7 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import org.corant.shared.ubiquity.Mutable.MutableString;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
@@ -48,85 +41,63 @@ import org.corant.shared.util.Strings;
 @ApplicationScoped
 public class DefaultMessageResolver implements MessageResolver {
 
-  protected static final DateTimeFormatter DATE_TIME_FMT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withLocale(Locale.getDefault())
-          .withZone(ZoneId.systemDefault());
-
   @Inject
   @Any
   protected Instance<MessageSource> messageSources;
 
   @Inject
   @Any
-  protected Instance<EnumerationSource> enumerationSources;
+  protected Instance<MessageParameterResolver> parameterResolver;
 
   public Object[] genParameters(Locale locale, Object[] parameters) {
-    if (parameters.length > 0) {
+    if (parameters != null && parameters.length > 0) {
       return Arrays.stream(parameters).map(p -> handleParameter(locale, p)).toArray();
     }
     return Objects.EMPTY_ARRAY;
   }
 
   @Override
-  public String getMessage(Locale locale, MessageParameter messageParameter) {
-    if (messageParameter == null) {
-      return null;
+  public String getMessage(Locale locale, MessageParameter parameter) {
+    if (parameter == null) {
+      throw new NoSuchMessageException("Can't find any message.");
     }
-    String codes = asDefaultString(messageParameter.getCodes());
-    Locale useLocale = defaultObject(locale, Locale::getDefault);
-    Object[] parameters = genParameters(useLocale, messageParameter.getParameters());
-    MutableString ms = MutableString.of(null);
-    if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::compare)
-          .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
-          .findFirst().ifPresent(ms::set);
-    }
-    return defaultObject(ms.get(),
-        () -> getUnknowMessage(useLocale, messageParameter.getMessageSeverity(), codes));
+    return getMessage(locale, parameter.getCodes(), parameter.getParameters(),
+        parameter::getDefaultMessage);
   }
 
   @Override
   public String getMessage(Locale locale, Object codes, Object... params) {
+    return getMessage(locale, codes, params, null);
+  }
+
+  @Override
+  public String getMessage(Locale locale, Object codes, Object[] params,
+      Function<Locale, String> dfltMsgResolver) {
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = genParameters(useLocale, params);
-    MutableString ms = MutableString.of(null);
+    String msg = null;
     if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::compare)
-          .map(b -> b.getMessage(useLocale, codes, parameters)).filter(Strings::isNotBlank)
-          .findFirst().ifPresent(ms::set);
+      msg = messageSources.stream().sorted(Sortable::compare)
+          .map(b -> b.getMessage(useLocale, codes, parameters, s -> null))
+          .filter(Strings::isNotBlank).findFirst().orElse(null);
     }
-    return defaultObject(ms.get(), () -> String.format("Can't find any message for %s.", codes));
-  }
-
-  public String getUnknowMessage(Locale locale, MessageSeverity ser, Object code) {
-    String unknow = ser == MessageSeverity.INF ? UNKNOW_INF_CODE : UNKNOW_ERR_CODE;
-
-    MutableString ms = MutableString.of(null);
-    if (!messageSources.isUnsatisfied()) {
-      messageSources.stream().sorted(Sortable::compare)
-          .map(b -> b.getMessage(locale, unknow, new Object[] {code})).filter(Strings::isNotBlank)
-          .findFirst().ifPresent(ms::set);
-    }
-    return defaultObject(ms.get(), () -> String.format("Can't find any message for %s.", code));
-  }
-
-  @SuppressWarnings("rawtypes")
-  protected Object handleParameter(Locale locale, Object obj) {
-    if (obj instanceof Enum) {
-      MutableString ms = MutableString.of(null);
-      if (!enumerationSources.isUnsatisfied()) {
-        enumerationSources.stream().sorted(Sortable::compare)
-            .map(b -> b.getEnumItemLiteral((Enum) obj, locale)).filter(Strings::isNotBlank)
-            .findFirst().ifPresent(ms::set);
+    if (msg == null) {
+      if (dfltMsgResolver != null) {
+        msg = dfltMsgResolver.apply(locale);
+      } else {
+        throw new NoSuchMessageException("Can't find any message for %s.", codes);
       }
-      String literal = ms.get();
-      return literal == null ? obj : literal;
-    } else if (obj instanceof Instant || obj instanceof ZonedDateTime) {
-      return DATE_TIME_FMT.format((TemporalAccessor) obj);
-    } else if (obj instanceof Readable) {
-      return ((Readable) obj).toHumanReader(locale);
     }
-    return obj;
+    return msg;
+  }
+
+  protected Object handleParameter(Locale locale, Object obj) {
+    MutableObject<Object> mo = new MutableObject<>(obj);
+    if (!parameterResolver.isUnsatisfied()) {
+      parameterResolver.stream().filter(h -> h.supprots(obj)).sorted(Sortable::compare)
+          .forEach(h -> mo.apply(o -> h.handle(locale, o)));
+    }
+    return mo.get();
   }
 
   @Produces
@@ -135,6 +106,7 @@ public class DefaultMessageResolver implements MessageResolver {
   protected String produce(InjectionPoint ip) {
     String codes = null;
     Locale locale = Locale.getDefault();
+    Object[] parameters = Objects.EMPTY_ARRAY;
     for (Annotation ann : ip.getQualifiers()) {
       if (ann instanceof MessageCodes) {
         MessageCodes mc = (MessageCodes) ann;
@@ -142,12 +114,14 @@ public class DefaultMessageResolver implements MessageResolver {
         if (isNotBlank(mc.locale())) {
           locale = LocaleUtils.langToLocale(mc.locale(), PropertyResourceBundle.LOCALE_SPT_CHAR);
         }
+        parameters = mc.parameters();
+        break;
       }
     }
     if (isNotBlank(codes)) {
-      return getMessage(locale, codes, Objects.EMPTY_ARRAY);
+      return getMessage(locale, codes, parameters);
     }
-    return null;
+    throw new NoSuchMessageException("Can't find any message");
   }
 
 }

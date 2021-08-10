@@ -30,7 +30,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.FileUtils;
@@ -69,6 +68,7 @@ public class PropertyResourceBundle extends ResourceBundle {
         InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
       properties.load(isr);
     }
+    logger.fine(() -> String.format("Load property resource from %s.", fo.getLocation()));
     lookup = new HashMap(properties);
   }
 
@@ -80,13 +80,13 @@ public class PropertyResourceBundle extends ResourceBundle {
         try {
           map.putIfAbsent(fo.getURL().getPath(), new PropertyResourceBundle(fo));
         } catch (IOException e) {
-          logger.log(Level.WARNING, e, () -> String
-              .format("Can not load property resource bundle %s.", fo.getURL().getPath()));
+          throw new NoSuchBundleException(e, "Can not load property resource bundle %s.",
+              fo.getURL().getPath());
         }
       });
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can not load property resource bundles from paths %s.", path));
+      throw new NoSuchBundleException(e, "Can not load property resource bundles from paths %s.",
+          path);
     }
     return map;
   }

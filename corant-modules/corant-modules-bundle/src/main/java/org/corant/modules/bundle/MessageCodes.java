@@ -14,10 +14,13 @@
 package org.corant.modules.bundle;
 
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Locale;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
@@ -31,9 +34,45 @@ import javax.inject.Qualifier;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface MessageCodes {
+
   @Nonbinding
   String locale() default "zh_CN";
 
   @Nonbinding
+  String[] parameters() default {};
+
+  @Nonbinding
   String value() default EMPTY;
+
+  class MessageCodesLiteral extends AnnotationLiteral<MessageCodes> implements MessageCodes {
+
+    private static final long serialVersionUID = -5766940942537035511L;
+
+    final Locale locale;
+    final String code;
+    final String[] parameters;
+
+    public MessageCodesLiteral(Locale locale, String code, String... parameters) {
+      this.locale = locale;
+      this.code = code;
+      this.parameters = parameters;
+    }
+
+    @Override
+    public String locale() {
+      return locale == null ? "zh_CN" : locale.toString();
+    }
+
+    @Override
+    public String[] parameters() {
+      return parameters;
+    }
+
+    @Override
+    public String value() {
+      return defaultString(code, EMPTY);
+    }
+
+  }
+
 }

@@ -65,6 +65,16 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
     }
 
     @Override
+    public String getDefaultMessage(Locale locale) {
+      Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
+      if (inst.isResolvable()) {
+        return inst.get().getMessage(locale, UNKNOW_ERR_CODE, new Object[] {getCodes()},
+            MessageParameter.super::getDefaultMessage);
+      }
+      return MessageParameter.super.getDefaultMessage(locale);
+    }
+
+    @Override
     public MessageSeverity getMessageSeverity() {
       return MessageSeverity.ERR;
     }

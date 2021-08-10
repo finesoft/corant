@@ -53,20 +53,20 @@ public class PropertyMessageSource implements MessageSource {
   protected String bundleFilePaths;
 
   @Override
-  public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException {
+  public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchMessageException {
     load();
     if (key == null) {
-      throw new NoSuchBundleException("The message property key can't null");
+      throw new NoSuchMessageException("The message property key can't null");
     } else {
       Locale useLocale = defaultObject(locale, Locale::getDefault);
       Map<String, MessageFormat> mfMap = holder.get(useLocale);
       if (mfMap == null) {
-        throw new NoSuchBundleException("Can't find message for %s with locale %s.", key.toString(),
-            useLocale.toString());
+        throw new NoSuchMessageException("Can't find message for %s with locale %s.",
+            key.toString(), useLocale.toString());
       } else {
         MessageFormat mf = mfMap.get(key);
         if (mf == null) {
-          throw new NoSuchBundleException("Can't find message for %s with locale %s.",
+          throw new NoSuchMessageException("Can't find message for %s with locale %s.",
               key.toString(), useLocale.toString());
         } else {
           return mf.format(args);

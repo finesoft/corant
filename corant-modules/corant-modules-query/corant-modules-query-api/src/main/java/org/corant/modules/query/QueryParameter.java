@@ -209,7 +209,7 @@ public interface QueryParameter extends Serializable {
     }
 
     @Override
-    public DefaultQueryParameter offset(Integer offset) {
+    public GenericQueryParameter<T> offset(Integer offset) {
       super.offset(limit);
       return this;
     }

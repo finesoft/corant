@@ -90,6 +90,7 @@
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
     <version.jose4j>0.7.8</version.jose4j>
     <version.jsqlparser>4.0</version.jsqlparser>
+    <version.jsoup>1.14.1</version.jsoup>
     <version.junit>4.13.1</version.junit>
     <version.jython>2.7.2</version.jython>
     <version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
@@ -1779,6 +1780,12 @@
         <version>${version.wxpay-sdk}</version>
       </dependency>
 
+      <!-- HTML -->
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>${version.jsoup}</version>
+      </dependency>
 
       <!-- Testing -->
       <dependency>

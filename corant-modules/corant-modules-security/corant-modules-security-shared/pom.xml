@@ -33,6 +33,8 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
     </dependency>
+    <!-- <dependency> <groupId>org.jsoup</groupId> <artifactId>jsoup</artifactId> 
+      </dependency> -->
     <dependency>
       <groupId>jakarta.security.enterprise</groupId>
       <artifactId>jakarta.security.enterprise-api</artifactId>

@@ -24,9 +24,9 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.corant.context.ContainerEvents.PostContainerStartedEvent;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.context.SingleInstance;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -36,7 +36,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午3:13:36
  *
  */
-@SingleInstance
+@Singleton
 public class WebServerBootstrapper {
 
   @Inject

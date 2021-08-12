@@ -53,6 +53,8 @@ import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.ubiquity.Configurator;
+import org.corant.shared.ubiquity.Services;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
@@ -656,8 +658,8 @@ public class Corant implements AutoCloseable {
       StopWatch stopWatch) {
     try {
       stopWatch.start();
-      // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString());
-      SeContainerInitializer initializer = SeContainerInitializer.newInstance();// new Weld(id);
+      // String id = APP_NAME.concat("-weld-").concat(UUID.randomUUID().toString()); new Weld(id);
+      SeContainerInitializer initializer = SeContainerInitializer.newInstance();
       initializer.setClassLoader(classLoader);
       initializer.addExtensions(new CorantExtension());
       if (beanClasses != null) {
@@ -666,6 +668,9 @@ public class Corant implements AutoCloseable {
       if (preInitializer != null) {
         preInitializer.accept(initializer);
       }
+      // Get an additional configurator from SPI to configure the initializer
+      Services.select(Configurator.class, classLoader).filter(c -> c.supports(initializer))
+          .forEach(c -> c.accept(initializer));
       container = initializer.initialize();
       stopWatch
           .stop(t -> logInfo("The container has been initialized, takes %ss.", t.getTimeSeconds()));

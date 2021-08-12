@@ -16,7 +16,7 @@ package org.corant.modules.webserver.undertow;
 import static org.corant.shared.util.Objects.max;
 import java.util.Optional;
 import javax.inject.Inject;
-import org.corant.context.SingleInstance;
+import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -25,7 +25,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午3:08:00
  *
  */
-@SingleInstance
+@Singleton
 public class UndertowWebServerConfig {
 
   @Inject

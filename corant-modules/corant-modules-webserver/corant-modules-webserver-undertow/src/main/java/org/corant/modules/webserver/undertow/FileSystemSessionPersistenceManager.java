@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Inject;
-import org.corant.context.SingleInstance;
+import javax.inject.Singleton;
 import org.corant.shared.util.Serializations.ObjectInputStreamWithLoader;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.undertow.servlet.UndertowServletLogger;
@@ -40,7 +40,7 @@ import io.undertow.servlet.api.SessionPersistenceManager;
  * @author bingo 下午3:51:19
  *
  */
-@SingleInstance
+@Singleton
 public class FileSystemSessionPersistenceManager implements SessionPersistenceManager {
 
   @Inject

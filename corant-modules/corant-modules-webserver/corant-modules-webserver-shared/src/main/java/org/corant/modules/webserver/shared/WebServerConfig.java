@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
-import org.corant.context.SingleInstance;
+import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -30,7 +30,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午7:58:27
  *
  */
-@SingleInstance
+@Singleton
 public class WebServerConfig {
 
   @Inject

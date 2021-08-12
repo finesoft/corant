@@ -35,10 +35,5 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.corant</groupId>
-      <artifactId>corant-kernel</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>

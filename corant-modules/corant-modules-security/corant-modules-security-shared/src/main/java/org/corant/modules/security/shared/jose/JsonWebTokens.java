@@ -45,6 +45,7 @@ import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.ReservedClaimNames;
 import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
 
@@ -219,6 +220,14 @@ public class JsonWebTokens {
       String signAlgo, EllipticCurveJsonWebKey decryptKey, String keyEncryptAlgo,
       String payloadEncryptAlgo, Consumer<JwtConsumerBuilder> builderSetter)
       throws InvalidJwtException {
+
+    return getECJWTConsumer(signKey, signAlgo, decryptKey, keyEncryptAlgo, payloadEncryptAlgo,
+        builderSetter).processToClaims(ecJWT);
+  }
+
+  public static JwtConsumer getECJWTConsumer(EllipticCurveJsonWebKey signKey, String signAlgo,
+      EllipticCurveJsonWebKey decryptKey, String keyEncryptAlgo, String payloadEncryptAlgo,
+      Consumer<JwtConsumerBuilder> builderSetter) throws InvalidJwtException {
     // Use JwtConsumerBuilder to construct an appropriate JwtConsumer, which will
     // be used to validate and process the JWT.
     // The specific validation requirements for a JWT are context dependent, however,
@@ -247,7 +256,7 @@ public class JsonWebTokens {
     if (builderSetter != null) {
       builderSetter.accept(builder);
     }
-    return builder.build().processToClaims(ecJWT);
+    return builder.build();
   }
 
   public static JwtClaims getJWTClaims(Key key, String jwt) throws InvalidJwtException {

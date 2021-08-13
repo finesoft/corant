@@ -24,7 +24,6 @@ import java.util.Arrays;
  * Note: The event observation is in accordance with the CDI specification, which means that if one
  * of the observation methods throws an exception, the other observation methods after that may not
  * be able to continue processing.
- * </pre>
  *
  * @author bingo 上午10:59:20
  *

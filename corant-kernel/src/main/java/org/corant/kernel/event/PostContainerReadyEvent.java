@@ -14,13 +14,18 @@
 package org.corant.kernel.event;
 
 import java.util.Arrays;
+import org.corant.kernel.spi.CorantBootHandler;
 
 /**
  * corant-kernel
  *
- * <pre>
+ * <p>
  * CDI container started, embedded server started, ready for service.
- * </pre>
+ * <p>
+ * Note: The event observation is in accordance with the CDI specification, which means that if one
+ * of the observation methods throws an exception, the other observation methods after that and the
+ * SPI {@link CorantBootHandler#handleAfterStarted(org.corant.Corant, String...)} may not be able to
+ * continue processing.
  *
  * @author bingo 上午10:59:20
  *
@@ -32,7 +37,6 @@ public class PostContainerReadyEvent implements CorantLifecycleEvent {
    * @param args
    */
   public PostContainerReadyEvent(String[] args) {
-    super();
     this.args = Arrays.copyOf(args, args.length);
   }
 

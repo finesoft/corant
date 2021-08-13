@@ -266,9 +266,6 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
    * @throws JMSException postConsume
    */
   protected void postConsume(Message message) throws JMSException {
-    if (message == null && mediator.checkCancelled()) {
-      return;
-    }
     try {
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {

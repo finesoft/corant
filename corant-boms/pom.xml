@@ -129,6 +129,7 @@
     <version.narayana>5.12.0.Final</version.narayana>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
+    <version.opencv>3.4.2-2</version.opencv>
     <version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>
     <version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
     <version.org.osgi.service.cdi>1.0.0</version.org.osgi.service.cdi>
@@ -1785,6 +1786,13 @@
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
         <version>${version.jsoup}</version>
+      </dependency>
+
+      <!-- Native -->
+      <dependency>
+        <groupId>org.openpnp</groupId>
+        <artifactId>opencv</artifactId>
+        <version>${version.opencv}</version>
       </dependency>
 
       <!-- Testing -->

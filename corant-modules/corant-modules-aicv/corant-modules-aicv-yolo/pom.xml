@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.corant</groupId>
+    <artifactId>corant-modules-aicv</artifactId>
+    <version>${revision}</version>
+  </parent>
+  <artifactId>corant-modules-aicv-yolo</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.openpnp</groupId>
+      <artifactId>opencv</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-kernel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-shared</artifactId>
+    </dependency>
+  </dependencies>
+</project>

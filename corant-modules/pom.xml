@@ -53,6 +53,7 @@
     <module>corant-modules-vertx</module>
     <module>corant-modules-webserver</module>
     <module>corant-modules-websocket</module>
+    <module>corant-modules-aicv</module>
   </modules>
   <description>The Corant integration modules, which contains various components involved in enterprise development.</description>
 </project>

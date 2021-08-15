@@ -77,11 +77,14 @@ public class Test {
 
     VideoCapture cap = new VideoCapture(filePath);
     Mat frame = new Mat();
-    while (running.get()) {
-      if (cap.read(frame) && running.get()) {
+    begin: while (running.get()) {
+      if (running.get() && cap.read(frame)) {
         Mat blob = Dnn.blobFromImage(frame, 1 / 255.0, sz, new Scalar(0), true, false);
         net.setInput(blob);
         for (String name : outBlobNames) {
+          if (!running.get()) {
+            break begin;
+          }
           net.forward(result, name);
           float confThreshold = 0.8f;
           IntArrayList clsIds = new IntArrayList();
@@ -90,6 +93,9 @@ public class Test {
           for (int i = 0; i < result.size(); ++i) {
             Mat level = result.get(i);
             for (int j = 0; j < level.rows(); ++j) {
+              if (!running.get()) {
+                break begin;
+              }
               Mat row = level.row(j);
               Mat scores = row.colRange(5, level.cols());
               Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
@@ -122,9 +128,13 @@ public class Test {
             }
           }
         }
-        if (vidpanel != null) {
-          vidpanel.getGraphics().drawImage(Mats.toBufferedImage(frame, null), 0, 0,
-              vidpanel.getWidth(), vidpanel.getHeight(), null);
+        if (vidpanel != null && running.get()) {
+          try {
+            vidpanel.getGraphics().drawImage(Mats.toBufferedImage(frame, null), 0, 0,
+                vidpanel.getWidth(), vidpanel.getHeight(), null);
+          } catch (Exception e) {
+
+          }
         }
       }
     }

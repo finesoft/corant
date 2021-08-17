@@ -31,7 +31,8 @@ import org.corant.shared.util.Systems;
 public class Desensitizer {
 
   static final Set<String> sensitives = setOf("password", "username", "credential", ".pwd", ".user",
-      "secret-key", "secretkey", "secret-access");
+      "secret-key", "secretkey", "secret-access", "public-key", "private-key", "key-id",
+      "publickey", "privatekey", "keyid");
 
   static final boolean enable =
       Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES_ENABLE, Boolean.class, true);
@@ -45,6 +46,9 @@ public class Desensitizer {
     if (enable && isNoneBlank(propertyName, propertyValue)) {
       for (String s : sensitives) {
         if (propertyName.toLowerCase().contains(s)) {
+          if (propertyValue.length() > 128) {
+            return Strings.ASTERISK.repeat(32).concat("......");
+          }
           return Strings.ASTERISK.repeat(propertyValue.length());
         }
       }

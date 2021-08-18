@@ -64,7 +64,6 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeySize);
     try {
       byte[] key = getSecretKeyFactory(algorithm).generateSecret(spec).getEncoded();
-      System.out.println("ENCRYPT: \t" + Base64.getEncoder().encodeToString(key));
       return key;
     } catch (InvalidKeySpecException e) {
       throw new CorantRuntimeException(e, "Input could not be encoded");
@@ -155,7 +154,6 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected byte[] getSalt() {
     byte[] buffer = new byte[saltSize];
     secureRandom.nextBytes(buffer);
-    System.out.println("SALT:\t" + Base64.getEncoder().encodeToString(buffer));
     return buffer;
   }
 

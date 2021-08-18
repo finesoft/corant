@@ -38,6 +38,8 @@ import org.corant.shared.util.Bytes;
 public abstract class PBKDF2HashProvider implements HashProvider {
 
   public static final int DEFAULT_DERIVED_KEY_SIZE = 512;
+  public static final int DEFAULT_SALT_SIZE = 16;
+  public static final int DEFAULT_ITERATIONS = 1024;
 
   protected static final SecureRandom secureRandom = new SecureRandom();
   protected final String algorithm;
@@ -52,9 +54,9 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected PBKDF2HashProvider(String algorithm, int iterations, int derivedKeySize,
       int defaultSaltSize) {
     this.algorithm = shouldNotBlank(algorithm);
-    this.iterations = max(1024, iterations);
+    this.iterations = max(DEFAULT_ITERATIONS, iterations);
     this.derivedKeySize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeySize);
-    saltSize = max(16, defaultSaltSize);
+    saltSize = max(DEFAULT_SALT_SIZE, defaultSaltSize);
     shouldBeTrue(derivedKeySize % 8 == 0 && defaultSaltSize % 8 == 0);
     shouldNotNull(getSecretKeyFactory(algorithm));// for checking
   }
@@ -116,13 +118,14 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     byte[] algoNameBytes = algorithm.getBytes();
     byte[] bytes = new byte[4 * 4 + algoNameBytes.length + salt.length + digested.length];
     // header length info
-    System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, 0, 4);
-    System.arraycopy(Bytes.toBytes(iterations), 0, bytes, 4, 4);
-    System.arraycopy(Bytes.toBytes(salt.length), 0, bytes, 8, 4);
-    System.arraycopy(Bytes.toBytes(digested.length), 0, bytes, 12, 4);
-    System.arraycopy(algoNameBytes, 0, bytes, 16, algoNameBytes.length);
-    System.arraycopy(salt, 0, bytes, 16 + algoNameBytes.length, salt.length);
-    System.arraycopy(digested, 0, bytes, 16 + algoNameBytes.length + salt.length, digested.length);
+    int next = 0;
+    System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, next, 4);
+    System.arraycopy(Bytes.toBytes(iterations), 0, bytes, next += 4, 4);
+    System.arraycopy(Bytes.toBytes(salt.length), 0, bytes, next += 4, 4);
+    System.arraycopy(Bytes.toBytes(digested.length), 0, bytes, next += 4, 4);
+    System.arraycopy(algoNameBytes, 0, bytes, next += 4, algoNameBytes.length);
+    System.arraycopy(salt, 0, bytes, next += algoNameBytes.length, salt.length);
+    System.arraycopy(digested, 0, bytes, next += salt.length, digested.length);
     return Base64.getEncoder().encodeToString(bytes);
   }
 

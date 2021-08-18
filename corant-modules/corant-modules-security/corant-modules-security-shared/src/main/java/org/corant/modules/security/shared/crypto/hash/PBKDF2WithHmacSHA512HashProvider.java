@@ -11,18 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
+package org.corant.modules.security.shared.crypto.hash;
 
 /**
- * corant-modules-security-api
+ * corant-modules-security-shared
  *
- * @author bingo 下午3:12:09
+ * @author bingo 下午6:07:56
  *
  */
-public interface RealmSetting {
+public class PBKDF2WithHmacSHA512HashProvider extends PBKDF2HashProvider {
 
-  CredentialUpdater getCredentialUpdater(Object type);
+  public PBKDF2WithHmacSHA512HashProvider() {
+    super("PBKDF2WithHmacSHA512", 30000);
+  }
 
-  CredentialValidator getCredentialValidator(Object type);
+  public PBKDF2WithHmacSHA512HashProvider(int iterations) {
+    super("PBKDF2WithHmacSHA512", iterations);
+  }
 
 }

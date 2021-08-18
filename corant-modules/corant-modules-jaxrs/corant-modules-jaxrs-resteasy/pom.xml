@@ -32,6 +32,12 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxb-provider</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.glassfish.jaxb</groupId>
+          <artifactId>jaxb-runtime</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -49,6 +55,10 @@
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
     </dependency>
   </dependencies>
 </project>

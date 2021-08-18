@@ -13,16 +13,16 @@
  */
 package org.corant.modules.security;
 
+import java.util.function.Function;
+
 /**
  * corant-modules-security-api
  *
- * @author bingo 下午3:12:09
+ * @author bingo 上午10:17:44
  *
  */
-public interface RealmSetting {
+public interface CredentialUpdater {
 
-  CredentialUpdater getCredentialUpdater(Object type);
-
-  CredentialValidator getCredentialValidator(Object type);
+  boolean update(Object input, Function<Object, Boolean> application);
 
 }

@@ -1486,6 +1486,11 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${version.jakarta.jaxb-api}</version>
+      </dependency>
+      <dependency>
         <groupId>jakarta.json.bind</groupId>
         <artifactId>jakarta.json.bind-api</artifactId>
         <version>${version.jakarta.json.bind-api}</version>

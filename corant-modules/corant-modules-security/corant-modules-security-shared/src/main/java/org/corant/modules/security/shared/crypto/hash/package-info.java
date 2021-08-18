@@ -11,18 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
-
 /**
- * corant-modules-security-api
- *
- * @author bingo 下午3:12:09
+ * corant-modules-security-shared
+ * 
+ * @author bingo 下午4:48:43
  *
  */
-public interface RealmSetting {
-
-  CredentialUpdater getCredentialUpdater(Object type);
-
-  CredentialValidator getCredentialValidator(Object type);
-
-}
+package org.corant.modules.security.shared.crypto.hash;

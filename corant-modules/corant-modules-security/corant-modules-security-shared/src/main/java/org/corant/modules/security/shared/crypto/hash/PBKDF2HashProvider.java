@@ -23,10 +23,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import org.bouncycastle.util.Arrays;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Bytes;
 

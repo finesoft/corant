@@ -39,5 +39,10 @@
       <groupId>jakarta.security.enterprise</groupId>
       <artifactId>jakarta.security.enterprise-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

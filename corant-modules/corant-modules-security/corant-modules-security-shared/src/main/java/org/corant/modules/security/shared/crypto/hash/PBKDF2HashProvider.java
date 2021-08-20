@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared.crypto.hash;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areDeepEqual;
@@ -37,9 +38,9 @@ import org.corant.shared.util.Bytes;
  */
 public abstract class PBKDF2HashProvider implements HashProvider {
 
-  public static final int DEFAULT_DERIVED_KEY_SIZE = 512;
-  public static final int DEFAULT_SALT_SIZE = 16;
   public static final int DEFAULT_ITERATIONS = 1024;
+  public static final int DEFAULT_SALT_SIZE = 128;
+  public static final int DEFAULT_DERIVED_KEY_SIZE = 512;
 
   protected static final SecureRandom secureRandom = new SecureRandom();
   protected final String algorithm;
@@ -47,21 +48,47 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected final int derivedKeySize;
   protected final int saltSize;
 
+  /**
+   * Specify the secret-key algorithm name and the number of hash iterations times to create an
+   * instance.
+   *
+   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't not empty
+   * @param iterations the iterations times, the minimum value is 1024
+   */
   protected PBKDF2HashProvider(String algorithm, int iterations) {
     this(algorithm, iterations, 0, 0);
   }
 
-  protected PBKDF2HashProvider(String algorithm, int iterations, int derivedKeySize,
-      int defaultSaltSize) {
+  /**
+   * Specify the secret-key algorithm name and the number of hash iterations times and salt bits
+   * size and derived key bits size to create an instance.
+   *
+   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't not empty
+   * @param iterations the iterations times, the minimum value is 1024
+   * @param saltSize the salt bits size, the minimum value is 128
+   * @param derivedKeySize the derived key bits size, the minimum value is 512
+   */
+  protected PBKDF2HashProvider(String algorithm, int iterations, int saltSize, int derivedKeySize) {
     this.algorithm = shouldNotBlank(algorithm);
     this.iterations = max(DEFAULT_ITERATIONS, iterations);
+    this.saltSize = max(DEFAULT_SALT_SIZE, saltSize);
     this.derivedKeySize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeySize);
-    saltSize = max(DEFAULT_SALT_SIZE, defaultSaltSize);
-    shouldBeTrue(derivedKeySize % 8 == 0 && defaultSaltSize % 8 == 0);
+    shouldBeTrue(derivedKeySize % 8 == 0 && saltSize % 8 == 0,
+        "The derived key or salt bits size error must be divisible by 8.");
     shouldNotNull(getSecretKeyFactory(algorithm));// for checking
   }
 
-  protected static byte[] encode(String algorithm, String input, int iterations, byte[] salt,
+  /**
+   * Encode the given input string to hash digested bytes.
+   *
+   * @param input the input string that will be encoded
+   * @param algorithm the standard secret-key algorithm name, can't not empty
+   * @param iterations the iterations times
+   * @param salt the salt bytes
+   * @param derivedKeySize the derived key bits size
+   * @return encode
+   */
+  protected static byte[] encode(String input, String algorithm, int iterations, byte[] salt,
       int derivedKeySize) {
     KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeySize);
     try {
@@ -77,8 +104,9 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   /**
    * Parse Base64 string to HashInfo
    *
-   * @param b64
+   * @param b64 the bytes
    * @return fromMergedB64
+   * @see #toMergedB64(String, int, byte[], byte[])
    */
   protected static HashInfo fromMergedB64(String b64) {
     byte[] bytes = Base64.getDecoder().decode(b64);
@@ -86,12 +114,12 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     int next = 0;
     int algoSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
     info.iterations = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.saltSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
+    info.saltSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4)) << 3;
     int digestSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
     info.algorithm = new String(Arrays.copyOfRange(bytes, next, next += algoSize));
-    info.salt = Arrays.copyOfRange(bytes, next, next += info.saltSize);
+    info.salt = Arrays.copyOfRange(bytes, next, next += info.saltSize >>> 3);
     info.digested = Arrays.copyOfRange(bytes, next, next += digestSize);
-    info.derivedKeySize = digestSize * 8;
+    info.derivedKeySize = digestSize << 3;
     return info;
   }
 
@@ -104,8 +132,23 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   }
 
   /**
-   * Merge iterations & bytes size of salt & bytes size of digested & salt bytes & digested bytes to
-   * Base64 String
+   * Compares two byte arrays in length-constant time. This comparison method is used so that
+   * password hashes cannot be extracted from on-line systems using a timing attack and then
+   * attacked off-line.
+   *
+   * @param a
+   * @param b
+   */
+  protected static boolean slowEquals(byte[] a, byte[] b) {
+    int diff = a.length ^ b.length;
+    for (int i = 0; i < a.length && i < b.length; i++) {
+      diff |= a[i] ^ b[i];
+    }
+    return diff == 0;
+  }
+
+  /**
+   * Merge algorithm and iterations and salt and digested to Base64 String
    *
    * @param algorithm the algorithm name
    * @param iterations the hash iterations
@@ -123,6 +166,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     System.arraycopy(Bytes.toBytes(iterations), 0, bytes, next += 4, 4);
     System.arraycopy(Bytes.toBytes(salt.length), 0, bytes, next += 4, 4);
     System.arraycopy(Bytes.toBytes(digested.length), 0, bytes, next += 4, 4);
+    // body content info
     System.arraycopy(algoNameBytes, 0, bytes, next += 4, algoNameBytes.length);
     System.arraycopy(salt, 0, bytes, next += algoNameBytes.length, salt.length);
     System.arraycopy(digested, 0, bytes, next += salt.length, digested.length);
@@ -132,7 +176,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   @Override
   public Object encode(Object data) {
     byte[] salt = getSalt();
-    byte[] digested = encode(algorithm, data.toString(), iterations, salt, derivedKeySize);
+    byte[] digested = encode(data.toString(), algorithm, iterations, salt, derivedKeySize);
     return toMergedB64(algorithm, iterations, salt, digested);
   }
 
@@ -143,19 +187,35 @@ public abstract class PBKDF2HashProvider implements HashProvider {
 
   @Override
   public boolean validate(Object input, Object criterion) {
+    shouldNoneNull(input, criterion);
     HashInfo criterionHash = fromMergedB64(criterion.toString());
     if (algorithm.equalsIgnoreCase(criterionHash.algorithm)
         && criterionHash.derivedKeySize == derivedKeySize && criterionHash.iterations == iterations
         && criterionHash.saltSize == saltSize) {
-      return areDeepEqual(
-          encode(algorithm, input.toString(), iterations, criterionHash.salt, derivedKeySize),
+      return compare(
+          encode(input.toString(), algorithm, iterations, criterionHash.salt, derivedKeySize),
           criterionHash.digested);
     }
     return false;
   }
 
+  /**
+   * Check whether the byte arrays are the same. Subclasses can modify this method to use algorithms
+   * (such {@link #slowEquals(byte[], byte[])}) that slow down the CPU operation speed and increase
+   * the difficulty of brute force cracking, default use
+   * {@link java.util.Objects#deepEquals(Object, Object)}
+   *
+   * @param encoded the encoded input
+   * @param criterion the criterion
+   *
+   * @see #slowEquals(byte[], byte[])
+   */
+  protected boolean compare(byte[] encoded, byte[] criterion) {
+    return areDeepEqual(encoded, criterion);
+  }
+
   protected byte[] getSalt() {
-    byte[] buffer = new byte[saltSize];
+    byte[] buffer = new byte[saltSize >>> 3];
     secureRandom.nextBytes(buffer);
     return buffer;
   }

@@ -21,12 +21,36 @@ package org.corant.modules.security.shared.crypto.hash;
  */
 public class PBKDF2WithHmacSHA1HashProvider extends PBKDF2HashProvider {
 
+  public static final String ALGORITHM = "PBKDF2WithHmacSHA1";
+
+  /**
+   * Use {@code 'PBKDF2WithHmacSHA1'} as the secret-key algorithm and 20000 iterations times to
+   * create an instance.
+   */
   public PBKDF2WithHmacSHA1HashProvider() {
-    super("PBKDF2WithHmacSHA1", 20000);
+    super(ALGORITHM, 20000);
   }
 
+  /**
+   * Use {@code 'PBKDF2WithHmacSHA1'} as the secret-key algorithm and the given iterations times to
+   * create an instance.
+   *
+   * @param iterations the iterations times, the minimum value is 1024
+   */
   public PBKDF2WithHmacSHA1HashProvider(int iterations) {
-    super("PBKDF2WithHmacSHA1", iterations);
+    super(ALGORITHM, iterations);
+  }
+
+  /**
+   * Use {@code 'PBKDF2WithHmacSHA1'} as the secret-key algorithm and the given iterations times and
+   * salt bits size and derived key bits size to create an instance.
+   *
+   * @param iterations the iterations times, the minimum value is 1024
+   * @param saltSize the salt bits size, the minimum value is 128
+   * @param derivedKeySize the derived key bits size, the minimum value is 512
+   */
+  public PBKDF2WithHmacSHA1HashProvider(int iterations, int saltSize, int derivedKeySize) {
+    super(ALGORITHM, iterations, saltSize, derivedKeySize);
   }
 
 }

@@ -51,8 +51,8 @@ public class Test {
 
   public static void main(String[] args) throws InterruptedException {
     OpenCV.loadShared();
-    String modelWeights = "d:/model/yolov3.weights";
-    String modelConfiguration = "d:/model/yolov3.cfg";
+    String modelWeights = "E:/AiModelRepo/yolov3.weights";
+    String modelConfiguration = "E:/AiModelRepo/yolov3.cfg";
     String filePath = "D:\\VID_20210815_113215.mp4";
 
     AtomicBoolean running = new AtomicBoolean(true);
@@ -86,7 +86,7 @@ public class Test {
             break begin;
           }
           net.forward(result, name);
-          float confThreshold = 0.8f;
+          float confThreshold = 0.6f;
           IntArrayList clsIds = new IntArrayList();
           FloatArrayList confs = new FloatArrayList();
           List<Rect> rects = new ArrayList<>();

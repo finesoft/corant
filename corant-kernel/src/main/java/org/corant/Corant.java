@@ -55,6 +55,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.ubiquity.Configurator;
 import org.corant.shared.ubiquity.Services;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.StopWatch;
@@ -669,8 +670,8 @@ public class Corant implements AutoCloseable {
         preInitializer.accept(initializer);
       }
       // Get an additional configurator from SPI to configure the initializer
-      Services.select(Configurator.class, classLoader).filter(c -> c.supports(initializer))
-          .forEach(c -> c.accept(initializer));
+      Services.select(Configurator.class, classLoader).sorted(Sortable::compare)
+          .filter(c -> c.supports(initializer)).forEach(c -> c.accept(initializer));
       container = initializer.initialize();
       stopWatch
           .stop(t -> logInfo("The container has been initialized, takes %ss.", t.getTimeSeconds()));

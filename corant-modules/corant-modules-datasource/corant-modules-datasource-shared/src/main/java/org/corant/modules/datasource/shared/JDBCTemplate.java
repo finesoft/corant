@@ -202,16 +202,15 @@ public class JDBCTemplate {
     }
   }
 
-  public static Stream<Map<String, Object>> stream(Connection conn, String sql, int fetchSize,
+  public static Stream<Map<String, Object>> stream(Connection conn, String sql, Integer fetchSize,
       Object... params) throws SQLException {
     return stream(conn, sql, fetchSize, MAP_HANDLER, params);
   }
 
-  public static <T> Stream<T> stream(Connection conn, String sql, int fetchSize,
+  public static <T> Stream<T> stream(Connection conn, String sql, Integer fetchSize,
       ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    return new StreamableQueryRunner(
-        new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
-            .streamQuery(conn, false, sql, rsh, params);
+    return new StreamableQueryRunner(new StatementConfiguration(null, fetchSize, null, null, null))
+        .streamQuery(conn, false, sql, rsh, params);
   }
 
   public static void tryBatch(Connection conn, String sql, int batchSubmitSize,
@@ -506,7 +505,7 @@ public class JDBCTemplate {
    * @return
    * @throws SQLException stream
    */
-  public Stream<Map<String, Object>> stream(String sql, int fetchSize, Object... params)
+  public Stream<Map<String, Object>> stream(String sql, Integer fetchSize, Object... params)
       throws SQLException {
     return stream(sql, fetchSize, MAP_HANDLER, params);
   }
@@ -533,11 +532,10 @@ public class JDBCTemplate {
    * @return
    * @throws SQLException stream
    */
-  public <T> Stream<T> stream(String sql, int fetchSize, ResultSetHandler<T> rsh, Object... params)
-      throws SQLException {
-    return new StreamableQueryRunner(
-        new StatementConfiguration(null, max(fetchSize, DFLT_FETCH_SIZE), null, null, null))
-            .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
+  public <T> Stream<T> stream(String sql, Integer fetchSize, ResultSetHandler<T> rsh,
+      Object... params) throws SQLException {
+    return new StreamableQueryRunner(new StatementConfiguration(null, fetchSize, null, null, null))
+        .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
   }
 
   public int[] tryBatch(String sql, Object[][] params) {
@@ -646,7 +644,7 @@ public class JDBCTemplate {
     }
   }
 
-  public Stream<Map<String, Object>> tryStream(String sql, int fetchSize, Object... params) {
+  public Stream<Map<String, Object>> tryStream(String sql, Integer fetchSize, Object... params) {
     try {
       return stream(sql, fetchSize, params);
     } catch (SQLException e) {
@@ -654,7 +652,7 @@ public class JDBCTemplate {
     }
   }
 
-  public <T> Stream<T> tryStream(String sql, int fetchSize, ResultSetHandler<T> rsh,
+  public <T> Stream<T> tryStream(String sql, Integer fetchSize, ResultSetHandler<T> rsh,
       Object... params) {
     try {
       return stream(sql, fetchSize, rsh, params);

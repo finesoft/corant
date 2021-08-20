@@ -60,7 +60,7 @@ Learn how to create a Hello World app quickly and efficiently.
 * Define the version of corant in `pom.xml`.Use the latest version(required jdk 11+).Jdk 8 for the version: [1.3](https://github.com/finesoft/corant/tree/1.3)
 ```
 <properties>
-     <version.corant>9999-SNAPSHOT</version.corant>
+     <version.corant>XXXX-SNAPSHOT</version.corant>
 </properties>
 ```
 * Now add `corant-kernel` dependency. Initialize the application and container.

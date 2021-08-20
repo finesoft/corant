@@ -92,8 +92,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
       int derivedKeySize) {
     KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeySize);
     try {
-      byte[] key = getSecretKeyFactory(algorithm).generateSecret(spec).getEncoded();
-      return key;
+      return getSecretKeyFactory(algorithm).generateSecret(spec).getEncoded();
     } catch (InvalidKeySpecException e) {
       throw new CorantRuntimeException(e, "Input could not be encoded");
     } catch (Exception e) {
@@ -159,7 +158,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected static String toMergedB64(String algorithm, int iterations, byte[] salt,
       byte[] digested) {
     byte[] algoNameBytes = algorithm.getBytes();
-    byte[] bytes = new byte[4 * 4 + algoNameBytes.length + salt.length + digested.length];
+    byte[] bytes = new byte[4 << 2 + algoNameBytes.length + salt.length + digested.length];
     // header length info
     int next = 0;
     System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, next, 4);
@@ -233,7 +232,5 @@ public abstract class PBKDF2HashProvider implements HashProvider {
       return "HashInfo [algorithm=" + algorithm + ", iterations=" + iterations + ", derivedKeySize="
           + derivedKeySize + ", saltSize=" + saltSize + "]";
     }
-
   }
-
 }

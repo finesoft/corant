@@ -32,7 +32,6 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.config.cdi.ConfigExtension20;
 import org.corant.modules.ddd.CommandHandler;
 import org.corant.modules.ddd.Commands;
 import org.corant.modules.ddd.annotation.CommandHandlers;
@@ -49,7 +48,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class CommanderExtension implements Extension {
 
-  private static final Logger logger = Logger.getLogger(ConfigExtension20.class.getName());
+  private static final Logger logger = Logger.getLogger(CommanderExtension.class.getName());
 
   static final Map<Class<?>, Set<Class<?>>> commandAndHandler = new ConcurrentHashMap<>();
 

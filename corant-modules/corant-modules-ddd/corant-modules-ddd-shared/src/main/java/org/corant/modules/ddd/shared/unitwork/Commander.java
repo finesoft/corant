@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.util.TypeLiteral;
+import org.corant.modules.ddd.CommandHandler;
+import org.corant.modules.ddd.Commands;
 import org.corant.modules.ddd.shared.annotation.CMDS.CMDSLiteral;
 
 /**

@@ -13,14 +13,11 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-/**
- * corant-modules-ddd-shared
- *
- * @author bingo 下午9:04:41
- *
- */
-public interface CommandHandler<C extends Commands> {
+import org.corant.modules.ddd.CommandHandler;
+import org.corant.modules.ddd.Commands;
+import org.corant.modules.ddd.annotation.CommandHandlers;
 
-  Object handle(C command);
+@CommandHandlers
+public abstract class AbstractCommandHandler<C extends Commands> implements CommandHandler<C> {
 
 }

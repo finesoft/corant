@@ -11,16 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.unitwork;
-
-import java.io.Serializable;
+package org.corant.modules.ddd;
 
 /**
- * corant-modules-ddd-shared
+ * corant-modules-ddd-api
  *
- * @author bingo 下午9:04:10
+ * @author bingo 下午9:04:41
  *
  */
-public interface Commands extends Serializable {
+public interface CommandHandler<C extends Commands> {
 
+  Object handle(C command);
 }

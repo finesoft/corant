@@ -17,7 +17,7 @@ import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.append;
 import java.lang.annotation.Annotation;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.util.TypeLiteral;
 import org.corant.modules.ddd.CommandHandler;
@@ -39,18 +39,20 @@ public class Commander {
     handler.handle(cmd);
   }
 
-  public static <C extends Commands> Consumer<Annotation[]> acceptAsync(C cmd,
-      Annotation... qualifiers) {
-    return t -> resolve(ManagedExecutorService.class, t)
-        .execute(() -> Commander.accept(cmd, qualifiers));
-  }
-
   @SuppressWarnings("unchecked")
   public static <R, C extends Commands> R apply(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
         append(qualifiers, CMDSLiteral.of(cmd.getClass())));
     return (R) shouldNotNull(handler).handle(cmd);
+  }
+
+  public static <C extends Commands> BiConsumer<C, Annotation[]> async(
+      Annotation... executorQualifiers) {
+    return (c, a) -> {
+      resolve(ManagedExecutorService.class, executorQualifiers)
+          .execute(() -> Commander.accept(c, a));
+    };
   }
 
 }

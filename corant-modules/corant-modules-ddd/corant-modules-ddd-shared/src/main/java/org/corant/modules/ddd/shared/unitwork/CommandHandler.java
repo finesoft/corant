@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,22 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd;
-
-import java.lang.annotation.Annotation;
+package org.corant.modules.ddd.shared.unitwork;
 
 /**
- * corant-modules-ddd-api
+ * corant-modules-ddd-shared
  *
- * @author bingo 下午3:26:37
+ * @author bingo 下午9:04:41
  *
  */
-public interface Commands {
+public interface CommandHandler<C extends Commands> {
 
-  static <C> void accept(C command, Annotation... annotations) {}
-
-  static <C, R> R apply(C command, Annotation... annotations) {
-    return null;
-  }
+  Object handle(C command);
 
 }

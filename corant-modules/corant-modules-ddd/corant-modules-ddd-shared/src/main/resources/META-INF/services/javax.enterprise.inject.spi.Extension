@@ -1,1 +1,2 @@
 org.corant.modules.ddd.shared.repository.JPARepositoryExtension
+org.corant.modules.ddd.shared.unitwork.CommanderExtension

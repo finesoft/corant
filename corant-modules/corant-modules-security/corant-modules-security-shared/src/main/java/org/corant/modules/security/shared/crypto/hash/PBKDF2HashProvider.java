@@ -158,7 +158,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected static String toMergedB64(String algorithm, int iterations, byte[] salt,
       byte[] digested) {
     byte[] algoNameBytes = algorithm.getBytes();
-    byte[] bytes = new byte[4 << 2 + algoNameBytes.length + salt.length + digested.length];
+    byte[] bytes = new byte[(4 << 2) + algoNameBytes.length + salt.length + digested.length];
     // header length info
     int next = 0;
     System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, next, 4);

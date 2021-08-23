@@ -52,7 +52,7 @@ public class Lists {
    */
   @SuppressWarnings("unchecked")
   public static <E> E[] append(E[] src, E... ts) {
-    if (src == null) {
+    if (src == null || src.length == 0) {
       return ts.clone();
     }
     final Class<?> st = src.getClass().getComponentType();

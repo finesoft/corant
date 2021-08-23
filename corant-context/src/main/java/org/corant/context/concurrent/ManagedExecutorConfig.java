@@ -39,7 +39,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
-  public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT);
+  public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT).concat("(ES)");
   public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(DFLT_NAME);
 
   protected boolean longRunningTasks = false;

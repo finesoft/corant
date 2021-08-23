@@ -17,6 +17,18 @@ import org.corant.modules.ddd.CommandHandler;
 import org.corant.modules.ddd.Commands;
 import org.corant.modules.ddd.annotation.CommandHandlers;
 
+/**
+ * corant-modules-ddd-shared
+ *
+ * Generic command handler abstract class, subclasses can inherit this abstract class to implement
+ * command handling. If skip this type and directly implement the
+ * {@link org.corant.modules.ddd.CommandHandler} interface, you need to mark the
+ * {@link org.corant.modules.ddd.annotation.CommandHandlers} annotation on the implementation type
+ * so that it can be automatically processed when the CDI container starts.
+ *
+ * @author bingo 下午1:13:52
+ *
+ */
 @CommandHandlers
 public abstract class AbstractCommandHandler<C extends Commands> implements CommandHandler<C> {
 

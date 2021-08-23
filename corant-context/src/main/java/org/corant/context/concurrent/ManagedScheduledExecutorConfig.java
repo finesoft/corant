@@ -13,7 +13,10 @@
  */
 package org.corant.context.concurrent;
 
+import static org.corant.shared.util.Strings.defaultString;
+import java.util.Locale;
 import org.corant.config.declarative.ConfigKeyRoot;
+import org.corant.shared.normal.Names;
 
 /**
  * corant-context
@@ -24,6 +27,21 @@ import org.corant.config.declarative.ConfigKeyRoot;
 @ConfigKeyRoot(value = "concurrent.scheduled.executor", ignoreNoAnnotatedItem = false, keyIndex = 3)
 public class ManagedScheduledExecutorConfig extends ManagedExecutorConfig {
 
+  public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT).concat("(SES)");
+  public static final ManagedScheduledExecutorConfig DFLT_INST =
+      new ManagedScheduledExecutorConfig(DFLT_NAME);
+
   private static final long serialVersionUID = 7985921715758101731L;
+
+  public ManagedScheduledExecutorConfig() {}
+
+  private ManagedScheduledExecutorConfig(String name) {
+    setName(name);
+  }
+
+  @Override
+  public String getThreadName() {
+    return defaultString(threadName, defaultString(name, DFLT_NAME));
+  }
 
 }

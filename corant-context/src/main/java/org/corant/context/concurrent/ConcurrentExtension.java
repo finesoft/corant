@@ -34,6 +34,7 @@ import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
+import org.corant.context.concurrent.annotation.Scheduled;
 import org.corant.context.concurrent.executor.DefaultContextService;
 import org.corant.context.concurrent.executor.DefaultManagedExecutorService;
 import org.corant.context.concurrent.executor.DefaultManagedScheduledExecutorService;
@@ -109,18 +110,37 @@ public class ConcurrentExtension implements Extension {
             });
       }
 
-      scheduledExecutorConfigs.getAllWithQualifiers()
-          .forEach((cfg, esn) -> event.<ManagedScheduledExecutorService>addBean().addQualifiers(esn)
-              .addTransitiveTypeClosure(ScheduledExecutorService.class)
-              .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
-              .beanClass(ManagedScheduledExecutorServiceAdapter.class)
-              .scope(ApplicationScoped.class).produceWith(beans -> {
-                try {
-                  return register(beans, produce(beans, cfg), cfg);
-                } catch (NamingException e) {
-                  throw new CorantRuntimeException(e);
-                }
-              }));
+      if (scheduledExecutorConfigs.isEmpty()) {
+        // FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService, so
+        // we must append Scheduled qualifier
+        event.<ManagedScheduledExecutorService>addBean()
+            .addTransitiveTypeClosure(ScheduledExecutorService.class)
+            .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
+            .addQualifiers(Any.Literal.INSTANCE, Scheduled.INSTANCE)
+            .beanClass(ManagedScheduledExecutorServiceAdapter.class).scope(ApplicationScoped.class)
+            .produceWith(beans -> {
+              try {
+                return register(beans, produce(beans, ManagedScheduledExecutorConfig.DFLT_INST),
+                    ManagedScheduledExecutorConfig.DFLT_INST);
+              } catch (NamingException e) {
+                throw new CorantRuntimeException(e);
+              }
+            });
+      } else {
+        // TODO FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService
+        scheduledExecutorConfigs.getAllWithQualifiers()
+            .forEach((cfg, esn) -> event.<ManagedScheduledExecutorService>addBean()
+                .addQualifiers(esn).addTransitiveTypeClosure(ScheduledExecutorService.class)
+                .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
+                .beanClass(ManagedScheduledExecutorServiceAdapter.class)
+                .scope(ApplicationScoped.class).produceWith(beans -> {
+                  try {
+                    return register(beans, produce(beans, cfg), cfg);
+                  } catch (NamingException e) {
+                    throw new CorantRuntimeException(e);
+                  }
+                }));
+      }
     }
   }
 

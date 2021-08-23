@@ -63,7 +63,8 @@ public class CommanderExtension implements Extension {
       if (!handlerCls.isInterface() && !Modifier.isAbstract(handlerCls.getModifiers())
           && CommandHandler.class.isAssignableFrom(handlerCls)) {
         Class<?> cmdCls = resolveCommandType(handlerCls);
-        if (cmdCls != null) {
+        if (cmdCls != null && !cmdCls.isInterface()
+            && !Modifier.isAbstract(cmdCls.getModifiers())) {
           event.configureAnnotatedType().add(CMDSLiteral.of(cmdCls));
           commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
           logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
@@ -89,12 +90,12 @@ public class CommanderExtension implements Extension {
       }
     });
     if (errs.size() > 0) {
-      StringBuilder errMsg = new StringBuilder("The command & handler mismatching: ");
+      StringBuilder errMsg = new StringBuilder("The command & handler mismatching:");
       errs.forEach(e -> {
-        errMsg.append(e.key().getName()).append("->")
+        errMsg.append("\n").append(e.key().getName()).append(" -> ")
             .append(String.join(",",
                 e.getValue().stream().map(Class::getName).collect(Collectors.toList())))
-            .append("; ");
+            .append(";");
       });
       errs.clear();
       logger.warning(() -> errMsg.toString());

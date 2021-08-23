@@ -36,15 +36,17 @@ import org.corant.modules.ddd.shared.annotation.CMDS.CMDSLiteral;
 /**
  * corant-modules-ddd-shared
  * <p>
- * The class is the realization of a simple command bus. To use this, you need a commands that
- * implements the {@link org.corant.modules.ddd.Commands} interface and one or more command handler
- * that use this commands type as generic parameter type and inherit the abstract class
- * {@link org.corant.modules.ddd.shared.unitwork.AbstractCommandHandler}. The Commander class method
- * is used to automatically invoke command handler synchronously or asynchronously according to the
- * given command object type.
+ * The class is the realization of a simple command bus. This class method is used to automatically
+ * invoke the command handler synchronously or asynchronously according to the given command object
+ * type. To use this, you need a commands that implements the
+ * {@link org.corant.modules.ddd.Commands} interface and one or more command handlers that use this
+ * commands type as generic parameter type and inherit the abstract class
+ * {@link org.corant.modules.ddd.shared.unitwork.AbstractCommandHandler}.
  * <p>
- * Note: If a command corresponds to multiple handlers, the handler and call logic must comply with
- * the CDI Bean Resolve rules.
+ * Note: If a command has multiple handlers, follow CDI Type Safe Resolution calls one of the
+ * handlers that meet the context requirements for handling, and throws an exception when the
+ * handler that meets the context requirements cannot be resolved, for example, more than one is
+ * found or not found.
  *
  * <p>
  * <b>The commands:</b>

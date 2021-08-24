@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.unitwork;
+package org.corant.context.command;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -33,15 +33,13 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
-import org.corant.modules.ddd.CommandHandler;
-import org.corant.modules.ddd.Commands;
-import org.corant.modules.ddd.annotation.CommandHandlers;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.ubiquity.Commands;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
- * corant-modules-ddd-shared
+ * corant-context
  *
  * @author bingo 下午10:08:26
  *
@@ -53,7 +51,7 @@ public class CommanderExtension implements Extension {
   static final Map<Class<?>, Set<Class<?>>> commandAndHandler = new ConcurrentHashMap<>();
 
   static final boolean USE_COMMAND_PATTERN = ConfigProvider.getConfig()
-      .getOptionalValue("corant.ddd.unitofwork.command-pattern.enable", Boolean.class)
+      .getOptionalValue("corant.context.command-pattern.enable", Boolean.class)
       .orElse(Boolean.TRUE);
 
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({

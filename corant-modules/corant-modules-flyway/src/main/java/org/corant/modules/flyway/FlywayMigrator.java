@@ -34,7 +34,6 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.transaction.Transactional;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -85,7 +84,7 @@ public class FlywayMigrator {
 
   protected FlywayConfig globalFlywayConfig;
 
-  @Transactional // FIXME use JTA XA, the flyway migration schema history will be rollback
+  // @Transactional // FIXME use JTA XA, the flyway migration schema history will be rollback
   public void migrate() {
     if (globalFlywayConfig.isEnable()) {
       logger.info(() -> "Perform migrate process if necessary...");

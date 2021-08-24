@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.unitwork;
+package org.corant.context.command;
 
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Lists.appendIfAbsent;
@@ -27,18 +27,17 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.util.TypeLiteral;
 import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
-import org.corant.modules.ddd.CommandHandler;
-import org.corant.modules.ddd.Commands;
+import org.corant.shared.ubiquity.Commands;
 
 /**
- * corant-modules-ddd-shared
+ * corant-context
  * <p>
  * The class is the realization of a simple command bus. This class method is used to automatically
  * invoke the command handler synchronously or asynchronously according to the given command object
  * type. To use this, you need a commands that implements the
- * {@link org.corant.modules.ddd.Commands} interface and one or more command handlers that use this
- * commands type as generic parameter type and inherit the abstract class
- * {@link org.corant.modules.ddd.shared.unitwork.AbstractCommandHandler}.
+ * {@link org.corant.shared.ubiquity.Commands} interface and one or more command handlers that use
+ * this commands type as generic parameter type and inherit the abstract class
+ * {@link org.corant.context.command.AbstractCommandHandler}.
  * <p>
  * Note: If a command has multiple handlers, follow CDI Type Safe Resolution calls one of the
  * handlers that meet the context requirements for handling, and throws an exception when the

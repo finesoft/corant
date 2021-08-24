@@ -11,10 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd;
+package org.corant.context.command;
+
+import org.corant.shared.ubiquity.Commands;
 
 /**
- * corant-modules-ddd-api
+ * corant-context
  *
  * @author bingo 下午9:04:41
  *

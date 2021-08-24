@@ -11,12 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd;
+package org.corant.shared.ubiquity;
 
 import java.io.Serializable;
 
 /**
- * corant-modules-ddd-api
+ * corant-shared
  *
  * @author bingo 下午9:04:10
  *

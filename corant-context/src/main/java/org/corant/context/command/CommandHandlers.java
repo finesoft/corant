@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.annotation;
+package org.corant.context.command;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -23,7 +23,7 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * corant-modules-ddd-api
+ * corant-context
  *
  * @author bingo 下午4:21:15
  */

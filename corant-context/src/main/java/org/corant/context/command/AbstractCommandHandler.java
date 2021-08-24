@@ -11,20 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.unitwork;
+package org.corant.context.command;
 
-import org.corant.modules.ddd.CommandHandler;
-import org.corant.modules.ddd.Commands;
-import org.corant.modules.ddd.annotation.CommandHandlers;
+import org.corant.shared.ubiquity.Commands;
 
 /**
- * corant-modules-ddd-shared
+ * corant-context
  *
  * Generic command handler abstract class, subclasses can inherit this abstract class to implement
  * command handling. If skip this type and directly implement the
- * {@link org.corant.modules.ddd.CommandHandler} interface, you need to mark the
- * {@link org.corant.modules.ddd.annotation.CommandHandlers} annotation on the implementation type
- * so that it can be automatically processed when the CDI container starts.
+ * {@link org.corant.context.command.CommandHandler} interface, you need to mark the
+ * {@link org.corant.context.command.CommandHandlers} annotation on the implementation type so that
+ * it can be automatically processed when the CDI container starts.
  *
  * @author bingo 下午1:13:52
  *

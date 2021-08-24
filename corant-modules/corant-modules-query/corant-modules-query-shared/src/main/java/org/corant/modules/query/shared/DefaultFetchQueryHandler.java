@@ -137,7 +137,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     MutableObject<QueryParameter> resolved = new MutableObject<>(
         new DefaultQueryParameter().context(parentQueryparameter.getContext()).criteria(
             resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter))));
-    select(QueryParameterReviser.class).stream().filter(r -> r.canHandle(query))
+    select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
         .sorted(Sortable::compare).forEach(resolved::apply);
     return resolved.get();
   }

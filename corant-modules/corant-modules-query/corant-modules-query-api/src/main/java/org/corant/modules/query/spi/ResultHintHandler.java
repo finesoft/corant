@@ -29,7 +29,7 @@ public interface ResultHintHandler extends AutoCloseable {
     return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
   }
 
-  default boolean canHandle(Class<?> resultClass, QueryHint qh) {
+  default boolean supports(Class<?> resultClass, QueryHint qh) {
     return false;
   }
 

@@ -103,7 +103,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   protected Instance<ResultBeanMapper> instances;
 
   @Override
-  public boolean canHandle(Class<?> resultClass, QueryHint hint) {
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
     boolean can = hint != null && areEqual(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
     if (can) {
       Named named = resolveBeanNamed(hint);

@@ -64,7 +64,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   protected Logger logger;
 
   @Override
-  public boolean canHandle(Class<?> resultClass, QueryHint hint) {
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
     return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
         && areEqual(hint.getKey(), HINT_NAME);
   }

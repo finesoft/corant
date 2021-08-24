@@ -32,7 +32,7 @@ import org.corant.shared.ubiquity.Sortable;
 public interface JMSMessageDestinationResolver
     extends BiFunction<JMSContext, Message, javax.jms.Destination>, Sortable {
 
-  default boolean canResolve(Message message) {
+  default boolean supports(Message message) {
     return false;
   }
 }

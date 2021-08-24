@@ -89,7 +89,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   protected Logger logger;
 
   @Override
-  public boolean canHandle(Class<?> resultClass, QueryHint hint) {
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
     return hint != null && areEqual(hint.getKey(), HINT_NAME)
         && isNotBlank(hint.getScript().getCode());
   }

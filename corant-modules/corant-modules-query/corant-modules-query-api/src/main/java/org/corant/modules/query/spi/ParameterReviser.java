@@ -28,7 +28,7 @@ import org.corant.modules.query.mapping.Query;
 @Deprecated
 public interface ParameterReviser extends Supplier<Map<String, Object>> {
 
-  default boolean canHandle(Query query) {
+  default boolean supports(Query query) {
     return true;
   }
 

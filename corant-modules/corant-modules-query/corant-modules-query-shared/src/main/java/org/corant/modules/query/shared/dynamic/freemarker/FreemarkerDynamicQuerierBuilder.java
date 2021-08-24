@@ -143,7 +143,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
 
   @Deprecated
   protected void setEnvironmentVariables(Environment env, ObjectWrapper ow) {
-    select(ParameterReviser.class).stream().filter(r -> r.canHandle(getQuery()))
+    select(ParameterReviser.class).stream().filter(r -> r.supports(getQuery()))
         .sorted((x, y) -> Integer.compare(x.getPriority(), y.getPriority()) * -1).forEach(r -> {
           Map<String, Object> vars = r.get();
           if (vars != null) {

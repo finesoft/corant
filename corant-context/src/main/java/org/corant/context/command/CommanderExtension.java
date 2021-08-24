@@ -51,6 +51,9 @@ public class CommanderExtension implements Extension {
 
   static final boolean USE_COMMAND_PATTERN = ConfigProvider.getConfig()
       .getOptionalValue("corant.context.command.enable", Boolean.class).orElse(Boolean.TRUE);
+  static final boolean SUPPORT_ABSTRACT_COMMAND = ConfigProvider.getConfig()
+      .getOptionalValue("corant.context.command.support-abstract-command", Boolean.class)
+      .orElse(Boolean.FALSE);
 
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       Commands.class}) ProcessAnnotatedType<?> event) {
@@ -68,6 +71,11 @@ public class CommanderExtension implements Extension {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
             logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
                 handlerCls));
+          } else if (SUPPORT_ABSTRACT_COMMAND) {
+            event.configureAnnotatedType().add(TypeArgumentLiteral.of(cmdCls));
+            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
+            logger.fine(() -> String.format("Resolved the abstract command [%s] with handler [%s]",
+                cmdCls, handlerCls));
           } else {
             logger.warning(() -> String.format(
                 "The command class [%s] extract from handler [%s] must be a concrete class", cmdCls,

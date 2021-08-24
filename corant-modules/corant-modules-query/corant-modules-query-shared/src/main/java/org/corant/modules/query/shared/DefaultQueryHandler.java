@@ -96,7 +96,7 @@ public class DefaultQueryHandler implements QueryHandler {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
       query.getHints().forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
-        resultHintHandlers.stream().filter(h -> h.canHandle(originalResultClass, qh))
+        resultHintHandlers.stream().filter(h -> h.supports(originalResultClass, qh))
             .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
               if (!exclusive.get()) {
                 try {
@@ -139,7 +139,7 @@ public class DefaultQueryHandler implements QueryHandler {
     } else {
       resolved.set(new DefaultQueryParameter());
     }
-    select(QueryParameterReviser.class).stream().filter(r -> r.canHandle(query))
+    select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
         .sorted(Sortable::compare).forEach(resolved::apply);
     return resolved.get();
   }

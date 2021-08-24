@@ -171,7 +171,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
       String destination) {
     if (!destinationResolvers.isUnsatisfied()) {
       Optional<JMSMessageDestinationResolver> destResolver = destinationResolvers.stream()
-          .filter(r -> r.canResolve(message)).sorted(Sortable::compare).findFirst();
+          .filter(r -> r.supports(message)).sorted(Sortable::compare).findFirst();
       if (destResolver.isPresent()) {
         Destination dest = destResolver.get().apply(ctx, message);
         if (dest != null) {

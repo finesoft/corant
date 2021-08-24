@@ -41,7 +41,7 @@ public interface QueryParameterReviser extends UnaryOperator<QueryParameter>, So
    * @param query the query object may be Query or FetchQuery
    * @return whether the reviser can perform query parameter revision
    */
-  default boolean canHandle(Object query) {
+  default boolean supports(Object query) {
     return query instanceof Query;
   }
 

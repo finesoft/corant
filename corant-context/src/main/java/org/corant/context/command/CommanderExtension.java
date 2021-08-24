@@ -34,7 +34,6 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
 import org.corant.shared.normal.Priorities;
-import org.corant.shared.ubiquity.Commands;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -51,11 +50,10 @@ public class CommanderExtension implements Extension {
   static final Map<Class<?>, Set<Class<?>>> commandAndHandler = new ConcurrentHashMap<>();
 
   static final boolean USE_COMMAND_PATTERN = ConfigProvider.getConfig()
-      .getOptionalValue("corant.context.command-pattern.enable", Boolean.class)
-      .orElse(Boolean.TRUE);
+      .getOptionalValue("corant.context.command.enable", Boolean.class).orElse(Boolean.TRUE);
 
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
-      CommandHandlers.class}) ProcessAnnotatedType<?> event) {
+      Commands.class}) ProcessAnnotatedType<?> event) {
     if (USE_COMMAND_PATTERN) {
       Class<?> handlerCls = event.getAnnotatedType().getJavaClass();
       if (!handlerCls.isInterface() && !Modifier.isAbstract(handlerCls.getModifiers())
@@ -111,13 +109,12 @@ public class CommanderExtension implements Extension {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private <C extends Commands> Class<C> resolveCommandType(Class<?> refCls) {
-    Class<C> resolvedClass = null;
+  private Class<?> resolveCommandType(Class<?> refCls) {
+    Class<?> resolvedClass = null;
     Class<?> referenceClass = refCls;
     do {
       if (referenceClass.getGenericSuperclass() instanceof ParameterizedType) {
-        resolvedClass = (Class<C>) ((ParameterizedType) referenceClass.getGenericSuperclass())
+        resolvedClass = (Class<?>) ((ParameterizedType) referenceClass.getGenericSuperclass())
             .getActualTypeArguments()[0];
         break;
       } else {
@@ -125,8 +122,8 @@ public class CommanderExtension implements Extension {
         for (Type type : genericInterfaces) {
           if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            if (Commands.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-              resolvedClass = (Class<C>) parameterizedType.getActualTypeArguments()[0];
+            if (parameterizedType.getRawType() instanceof Class) {
+              resolvedClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
               break;
             }
           }

@@ -27,7 +27,6 @@ import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.util.TypeLiteral;
 import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
-import org.corant.shared.ubiquity.Commands;
 
 /**
  * corant-context
@@ -100,7 +99,7 @@ public class Commander {
    * @param cmd the commands object
    * @param qualifiers the command handler bean additional qualifiers
    */
-  public static <C extends Commands> void accept(C cmd, Annotation... qualifiers) {
+  public static <C> void accept(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"unchecked", "serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
         appendIfAbsent(qualifiers, TypeArgumentLiteral.of(cmd.getClass())));
@@ -115,7 +114,7 @@ public class Commander {
    * @param qualifiers the command handler bean additional qualifiers
    */
   @SuppressWarnings("unchecked")
-  public static <R, C extends Commands> R apply(C cmd, Annotation... qualifiers) {
+  public static <R, C> R apply(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
         appendIfAbsent(qualifiers, TypeArgumentLiteral.of(cmd.getClass())));
@@ -171,7 +170,7 @@ public class Commander {
   }
 
   /**
-   * corant-modules-ddd-shared
+   * corant-context
    *
    * @author bingo 下午2:03:36
    *
@@ -191,7 +190,7 @@ public class Commander {
      * @param cmd the commands object
      * @param qualifiers the command handler bean additional qualifiers
      */
-    public <C extends Commands> void accept(C cmd, Annotation... qualifiers) {
+    public <C> void accept(C cmd, Annotation... qualifiers) {
       es.execute(() -> Commander.accept(cmd, qualifiers));
     }
 
@@ -202,13 +201,13 @@ public class Commander {
      * @param cmd the commands object
      * @param qualifiers the command handler bean additional qualifiers
      */
-    public <R, C extends Commands> Future<R> apply(C cmd, Annotation... qualifiers) {
+    public <R, C> Future<R> apply(C cmd, Annotation... qualifiers) {
       return es.submit(() -> Commander.apply(cmd, qualifiers));
     }
   }
 
   /**
-   * corant-modules-ddd-shared
+   * corant-context
    *
    * @author bingo 下午2:03:40
    *
@@ -232,7 +231,7 @@ public class Commander {
      * @param cmd the commands object
      * @param qualifiers the command handler bean additional qualifiers
      */
-    public <C extends Commands> void accept(C cmd, Annotation... qualifiers) {
+    public <C> void accept(C cmd, Annotation... qualifiers) {
       es.schedule(() -> Commander.accept(cmd, qualifiers), delay, unit);
     }
 
@@ -243,7 +242,7 @@ public class Commander {
      * @param cmd the commands object
      * @param qualifiers the command handler bean additional qualifiers
      */
-    public <R, C extends Commands> ScheduledFuture<R> apply(C cmd, Annotation... qualifiers) {
+    public <R, C> ScheduledFuture<R> apply(C cmd, Annotation... qualifiers) {
       return es.schedule(() -> Commander.apply(cmd, qualifiers), delay, unit);
     }
   }

@@ -32,11 +32,11 @@ import javax.enterprise.util.AnnotationLiteral;
 @Target({TYPE})
 @Stereotype
 @Inherited
-public @interface CommandHandlers {
+public @interface Commands {
 
-  CommandHandlersLiteral INST = new CommandHandlersLiteral();
+  CommandsLiteral INST = new CommandsLiteral();
 
-  class CommandHandlersLiteral extends AnnotationLiteral<CommandHandlers> {
+  class CommandsLiteral extends AnnotationLiteral<Commands> {
     private static final long serialVersionUID = -7622269300418055785L;
   }
 }

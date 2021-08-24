@@ -13,15 +13,14 @@
  */
 package org.corant.context.command;
 
-import org.corant.shared.ubiquity.Commands;
-
 /**
  * corant-context
  *
  * @author bingo 下午9:04:41
  *
  */
-public interface CommandHandler<C extends Commands> {
+@FunctionalInterface
+public interface CommandHandler<C> {
 
   Object handle(C command);
 }

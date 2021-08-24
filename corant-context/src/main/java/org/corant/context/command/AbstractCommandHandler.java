@@ -13,21 +13,19 @@
  */
 package org.corant.context.command;
 
-import org.corant.shared.ubiquity.Commands;
-
 /**
  * corant-context
  *
  * Generic command handler abstract class, subclasses can inherit this abstract class to implement
  * command handling. If skip this type and directly implement the
  * {@link org.corant.context.command.CommandHandler} interface, you need to mark the
- * {@link org.corant.context.command.CommandHandlers} annotation on the implementation type so that
- * it can be automatically processed when the CDI container starts.
+ * {@link org.corant.context.command.Commands} annotation on the implementation type so that it can
+ * be automatically processed when the CDI container starts.
  *
  * @author bingo 下午1:13:52
  *
  */
-@CommandHandlers
-public abstract class AbstractCommandHandler<C extends Commands> implements CommandHandler<C> {
+@Commands
+public abstract class AbstractCommandHandler<C> implements CommandHandler<C> {
 
 }

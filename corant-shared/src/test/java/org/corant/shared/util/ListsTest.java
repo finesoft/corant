@@ -14,6 +14,8 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.append;
+import static org.corant.shared.util.Lists.appendIfAbsent;
+import static org.corant.shared.util.Lists.distinct;
 import static org.corant.shared.util.Lists.removeIf;
 import static org.junit.Assert.assertArrayEquals;
 import java.time.Instant;
@@ -30,21 +32,44 @@ import junit.framework.TestCase;
  */
 public class ListsTest extends TestCase {
 
-  public static void main(String... obj) {
-    SnowflakeIpv4L2sUUIDGenerator _16384 = new SnowflakeIpv4L2sUUIDGenerator(16384);
-    for (int i = 0; i < 10000; i++) {
-      if (i % 2000 == 0) {
-        Threads.tryThreadSleep(2000L);
-      }
-      System.out.println(_16384.generate(Instant.now()::getEpochSecond));
-    }
-  }
-
   @Test
   public void testArrayAppend() {
     String[] array = new String[] {"a", "b", "c"};
     String[] appendArray = new String[] {"a", "b", "c", "d"};
     assertArrayEquals(append(array, "d"), appendArray);
+    array = Strings.EMPTY_ARRAY;
+    assertArrayEquals(append(array, "a"), new String[] {"a"});
+    array = new String[] {"a"};
+    assertArrayEquals(append(array), array);
+    array = Strings.EMPTY_ARRAY;
+    appendArray = Strings.EMPTY_ARRAY;
+    assertArrayEquals(append(array), appendArray);
+    assertArrayEquals(append(null), appendArray);
+  }
+
+  @Test
+  public void testArrayAppendIfAbsent() {
+    String[] array = new String[] {"a", "b", "c"};
+    String[] appendArray = new String[] {"a", "b", "c", "d"};
+    assertArrayEquals(appendIfAbsent(array, "d", "d", "d"), appendArray);
+    assertArrayEquals(appendIfAbsent(array, "a", "c", "b"), array);
+    assertArrayEquals(appendIfAbsent(array), array);
+    array = new String[] {"a"};
+    assertArrayEquals(appendIfAbsent(array, "a"), array);
+    array = Strings.EMPTY_ARRAY;
+    appendArray = Strings.EMPTY_ARRAY;
+    assertArrayEquals(appendIfAbsent(array), appendArray);
+  }
+
+  @Test
+  public void testArrayDistinct() {
+    String[] array = new String[] {"a", "b", "c"};
+    assertArrayEquals(distinct(array), array);
+    array = new String[0];
+    assertArrayEquals(distinct(array), array);
+    assertArrayEquals(distinct(null), null);
+    array = new String[] {"a", "b", "c", "a", "b"};
+    assertArrayEquals(distinct(array), new String[] {"a", "b", "c"});
   }
 
   @Test

@@ -16,7 +16,7 @@ package org.corant.devops.maven.plugin.packaging;
 import org.apache.maven.plugin.logging.Log;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午3:04:36
  *

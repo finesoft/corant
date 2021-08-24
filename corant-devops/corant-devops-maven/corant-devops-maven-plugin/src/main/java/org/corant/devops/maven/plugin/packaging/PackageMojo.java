@@ -25,7 +25,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午2:36:26
  *
@@ -34,6 +34,8 @@ import org.apache.maven.project.MavenProjectHelper;
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class PackageMojo extends AbstractMojo {
+
+  public static final String DIRECT_RUNNER = "org.corant.kernel.boot.DirectRunner";
 
   @Component
   MavenProjectHelper projectHelper;
@@ -141,7 +143,8 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public String getMainClass() {
-    return mainClass == null ? "" : mainClass;
+    return mainClass == null || mainClass.isBlank() ? useDirectRunner ? DIRECT_RUNNER : ""
+        : mainClass;
   }
 
   public MavenProject getProject() {

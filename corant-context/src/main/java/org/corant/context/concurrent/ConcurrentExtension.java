@@ -34,7 +34,6 @@ import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
-import org.corant.context.concurrent.annotation.Scheduled;
 import org.corant.context.concurrent.executor.DefaultContextService;
 import org.corant.context.concurrent.executor.DefaultManagedExecutorService;
 import org.corant.context.concurrent.executor.DefaultManagedScheduledExecutorService;
@@ -68,10 +67,12 @@ public class ConcurrentExtension implements Extension {
       NamedQualifierObjectManager.empty();
 
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
+    // Don't use transitive type closure, the CDI can't differentiate, since the
+    // ScheduledExecutorService extends ExecutorService
     if (event != null) {
       if (executorConfigs.isEmpty()) {
-        event.<ManagedExecutorService>addBean().addTransitiveTypeClosure(ExecutorService.class)
-            .addTransitiveTypeClosure(ManagedExecutorService.class)
+        event.<ManagedExecutorService>addBean().addType(ExecutorService.class)
+            .addType(ManagedExecutorService.class)
             .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
             .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
@@ -85,8 +86,7 @@ public class ConcurrentExtension implements Extension {
       } else {
         executorConfigs.getAllWithQualifiers()
             .forEach((cfg, esn) -> event.<ManagedExecutorService>addBean().addQualifiers(esn)
-                .addTransitiveTypeClosure(ManagedExecutorService.class)
-                .addTransitiveTypeClosure(ExecutorService.class)
+                .addType(ManagedExecutorService.class).addType(ExecutorService.class)
                 .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
                 .produceWith(beans -> {
                   try {
@@ -111,12 +111,9 @@ public class ConcurrentExtension implements Extension {
       }
 
       if (scheduledExecutorConfigs.isEmpty()) {
-        // FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService, so
-        // we must append Scheduled qualifier
-        event.<ManagedScheduledExecutorService>addBean()
-            .addTransitiveTypeClosure(ScheduledExecutorService.class)
-            .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
-            .addQualifiers(Any.Literal.INSTANCE, Scheduled.INSTANCE)
+        event.<ManagedScheduledExecutorService>addBean().addType(ScheduledExecutorService.class)
+            .addType(ManagedScheduledExecutorService.class)
+            .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
             .beanClass(ManagedScheduledExecutorServiceAdapter.class).scope(ApplicationScoped.class)
             .produceWith(beans -> {
               try {
@@ -130,8 +127,8 @@ public class ConcurrentExtension implements Extension {
         // TODO FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService
         scheduledExecutorConfigs.getAllWithQualifiers()
             .forEach((cfg, esn) -> event.<ManagedScheduledExecutorService>addBean()
-                .addQualifiers(esn).addTransitiveTypeClosure(ScheduledExecutorService.class)
-                .addTransitiveTypeClosure(ManagedScheduledExecutorService.class)
+                .addQualifiers(esn).addType(ScheduledExecutorService.class)
+                .addType(ManagedScheduledExecutorService.class)
                 .beanClass(ManagedScheduledExecutorServiceAdapter.class)
                 .scope(ApplicationScoped.class).produceWith(beans -> {
                   try {

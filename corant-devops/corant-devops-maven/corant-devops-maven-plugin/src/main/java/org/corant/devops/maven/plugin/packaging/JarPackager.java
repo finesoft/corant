@@ -38,7 +38,7 @@ import org.corant.devops.maven.plugin.archive.ManifestEntry;
 import bin.JarLauncher;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午4:33:08
  *

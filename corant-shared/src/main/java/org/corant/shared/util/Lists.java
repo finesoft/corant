@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Iterables.collectionOf;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ public class Lists {
   public static <E> E[] append(E[] src, E... ts) {
     if (src == null || src.length == 0) {
       return ts.clone();
+    } else if (ts == null || ts.length == 0) {
+      return src.clone();
     }
     final Class<?> st = src.getClass().getComponentType();
     final E[] appendArray = (E[]) Array.newInstance(st, src.length + ts.length);
@@ -69,6 +72,56 @@ public class Lists {
       throw e;
     }
     return appendArray;
+  }
+
+  /**
+   * <p>
+   * Appends all the elements of the given arrays which the given source array not contains into a
+   * new array.
+   * <p>
+   * The new array contains all of the element of {@code src} followed by all of the {@code ts}
+   * elements that not contains in the {@code src}. When an array is returned, it is always a new
+   * array.
+   *
+   * @param <E> the element type
+   * @param src the first array whose elements are added to the new array
+   * @param ts the second array whose elements are added to the new array
+   * @return append
+   */
+  @SuppressWarnings("unchecked")
+  public static <E> E[] appendIfAbsent(E[] src, E... ts) {
+    if (src == null || src.length == 0) {
+      return ts.clone();
+    } else if (ts == null || ts.length == 0) {
+      return src.clone();
+    }
+    final Class<?> st = src.getClass().getComponentType();
+    final E[] appendArray = (E[]) Array.newInstance(st, src.length + ts.length);
+    System.arraycopy(src, 0, appendArray, 0, src.length);
+    int length = src.length;
+    try {
+      for (E e : ts) {
+        boolean contains = false;
+        for (E s : appendArray) {
+          if (areEqual(e, s)) {
+            contains = true;
+            break;
+          }
+        }
+        if (!contains) {
+          appendArray[length] = e;
+          length++;
+        }
+      }
+    } catch (ArrayStoreException e) {
+      Class<?> tt = ts.getClass().getComponentType();
+      if (!st.isAssignableFrom(tt)) {
+        throw new IllegalArgumentException(
+            "Cannot append " + tt.getName() + " in an array of " + st.getName(), e);
+      }
+      throw e;
+    }
+    return Arrays.copyOf(appendArray, length);
   }
 
   /**
@@ -91,6 +144,43 @@ public class Lists {
     int beginIndex = from < 0 ? length + from : from;
     int endIndex = to < 0 ? length + to : to;
     return Arrays.copyOfRange(original, beginIndex, endIndex);
+  }
+
+  /**
+   * Remove duplicate elements of the array and return a new array of unique elements sorted in the
+   * original order. Return null if the given {@code src} array is null, return a empty new array if
+   * the given {@code src} array is empty.
+   *
+   * @param <E> the element type
+   * @param src the original array
+   */
+  @SuppressWarnings("unchecked")
+  public static <E> E[] distinct(E[] src) {
+    if (src == null) {
+      return null;
+    } else {
+      final int len = src.length;
+      final E[] distinct = (E[]) Array.newInstance(src.getClass().getComponentType(), len);
+      if (len == 0) {
+        return distinct;
+      } else {
+        int index = 0;
+        for (int i = 0; i < len; i++) {
+          boolean contains = false;
+          for (int j = 0; j < i; j++) {
+            if (areEqual(src[i], src[j])) {
+              contains = true;
+              break;
+            }
+          }
+          if (!contains) {
+            distinct[index] = src[i];
+            index++;
+          }
+        }
+        return Arrays.copyOf(distinct, index);
+      }
+    }
   }
 
   /**

@@ -23,7 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import bin.JarLauncher;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午12:00:22
  *

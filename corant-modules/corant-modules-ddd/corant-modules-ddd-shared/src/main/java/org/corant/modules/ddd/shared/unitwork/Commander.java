@@ -15,8 +15,7 @@ package org.corant.modules.ddd.shared.unitwork;
 
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Lists.append;
+import static org.corant.shared.util.Lists.appendIfAbsent;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import java.lang.annotation.Annotation;
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.util.TypeLiteral;
-import org.corant.context.concurrent.annotation.Scheduled;
 import org.corant.modules.ddd.CommandHandler;
 import org.corant.modules.ddd.Commands;
 import org.corant.modules.ddd.shared.annotation.CMDS.CMDSLiteral;
@@ -107,7 +105,7 @@ public class Commander {
   public static <C extends Commands> void accept(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"unchecked", "serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
-        append(qualifiers, CMDSLiteral.of(cmd.getClass())));
+        appendIfAbsent(qualifiers, CMDSLiteral.of(cmd.getClass())));
     handler.handle(cmd);
   }
 
@@ -122,7 +120,7 @@ public class Commander {
   public static <R, C extends Commands> R apply(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
-        append(qualifiers, CMDSLiteral.of(cmd.getClass())));
+        appendIfAbsent(qualifiers, CMDSLiteral.of(cmd.getClass())));
     return (R) shouldNotNull(handler).handle(cmd);
   }
 
@@ -156,10 +154,8 @@ public class Commander {
    */
   public static ScheduledCommandExecutor schedule(long delay, TimeUnit unit,
       Annotation... executorQualifiers) {
-    return schedule(resolve(ManagedScheduledExecutorService.class,
-        isEmpty(executorQualifiers) ? append(executorQualifiers, Scheduled.INSTANCE)
-            : executorQualifiers),
-        delay, unit); // FIXME See org.corant.context.concurrent.ConcurrentExtension
+    return schedule(resolve(ManagedScheduledExecutorService.class, executorQualifiers), delay,
+        unit);
   }
 
   /**

@@ -66,7 +66,7 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   @Override
   public String toString() {
-    return "ContextServiceConfig [contextInfos=" + contextInfos + "]";
+    return "[contextInfos=" + contextInfos + "]";
   }
 
   protected void setContextInfos(Set<ContextInfo> contextInfos) {

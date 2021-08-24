@@ -14,7 +14,6 @@
 package org.corant.modules.ddd.shared.unitwork;
 
 import static org.corant.context.Beans.resolve;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.appendIfAbsent;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
@@ -27,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.util.TypeLiteral;
+import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
 import org.corant.modules.ddd.CommandHandler;
 import org.corant.modules.ddd.Commands;
-import org.corant.modules.ddd.shared.annotation.CMDS.CMDSLiteral;
 
 /**
  * corant-modules-ddd-shared
@@ -105,7 +104,7 @@ public class Commander {
   public static <C extends Commands> void accept(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"unchecked", "serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
-        appendIfAbsent(qualifiers, CMDSLiteral.of(cmd.getClass())));
+        appendIfAbsent(qualifiers, TypeArgumentLiteral.of(cmd.getClass())));
     handler.handle(cmd);
   }
 
@@ -120,8 +119,8 @@ public class Commander {
   public static <R, C extends Commands> R apply(C cmd, Annotation... qualifiers) {
     @SuppressWarnings({"serial"})
     CommandHandler<C> handler = (CommandHandler<C>) resolve(new TypeLiteral<CommandHandler<?>>() {},
-        appendIfAbsent(qualifiers, CMDSLiteral.of(cmd.getClass())));
-    return (R) shouldNotNull(handler).handle(cmd);
+        appendIfAbsent(qualifiers, TypeArgumentLiteral.of(cmd.getClass())));
+    return (R) handler.handle(cmd);
   }
 
   /**

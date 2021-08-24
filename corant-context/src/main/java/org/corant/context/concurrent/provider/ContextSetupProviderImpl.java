@@ -67,8 +67,8 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
       Map<String, String> contextObjectProperties) {
     ContextHandleImpl contextHandle = new ContextHandleImpl();
     saveApplicationContext(contextHandle, contextService, contextObjectProperties);
-    saveCDIContext(contextHandle, contextService, contextObjectProperties);
     saveSecurityContext(contextHandle, contextService, contextObjectProperties);
+    saveCDIContext(contextHandle, contextService, contextObjectProperties);
     return contextHandle;
   }
 

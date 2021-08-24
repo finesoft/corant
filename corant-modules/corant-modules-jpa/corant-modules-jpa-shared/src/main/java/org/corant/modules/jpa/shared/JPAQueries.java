@@ -120,8 +120,8 @@ public class JPAQueries {
 
   /**
    * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language named
-   * query.The select list of the query must contain only a single item, which must be assignable to
-   * the type specified by the resultClass argument.
+   * query. The record of the result list of the query must be assignable to the type specifiedby
+   * the resultClass argument.
    *
    *
    * @param name the name of a query defined in metadata
@@ -313,8 +313,8 @@ public class JPAQueries {
 
   /**
    * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language
-   * statement.The select list of the query must contain only a single item, which must be
-   * assignable to the type specified by the resultClass argument.
+   * statement. The record of the result list of the querymust be assignable to the type specified
+   * by the resultClass argument.
    *
    * @param <T> the type of the resulting instance(s)
    * @param qlString a Jakarta Persistence query string

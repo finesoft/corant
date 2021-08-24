@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.annotation;
+package org.corant.context.qualifier;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -26,9 +26,7 @@ import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
 /**
- * corant-modules-ddd-shared
- *
- * Mark the use of XA resources
+ * corant-context
  *
  * @author bingo 下午9:05:13
  */
@@ -36,28 +34,28 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 @Qualifier
-public @interface CMDS {
+public @interface TypeArgument {
 
   @Nonbinding
-  Class<?> value();
+  Class<?>[] value();
 
-  class CMDSLiteral extends AnnotationLiteral<CMDS> implements CMDS {
+  class TypeArgumentLiteral extends AnnotationLiteral<TypeArgument> implements TypeArgument {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
-    private final Class<?> type;
+    private final Class<?>[] types;
 
-    public CMDSLiteral(Class<?> type) {
-      this.type = type;
+    public TypeArgumentLiteral(Class<?>... types) {
+      this.types = types;
     }
 
-    public static CMDSLiteral of(Class<?> type) {
-      return new CMDSLiteral(type);
+    public static TypeArgumentLiteral of(Class<?>... types) {
+      return new TypeArgumentLiteral(types);
     }
 
     @Override
-    public Class<?> value() {
-      return type;
+    public Class<?>[] value() {
+      return types;// FIXME immutable
     }
   }
 }

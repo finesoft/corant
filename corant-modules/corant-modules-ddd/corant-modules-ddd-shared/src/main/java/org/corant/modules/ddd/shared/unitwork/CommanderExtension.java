@@ -32,10 +32,10 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
 import org.corant.modules.ddd.CommandHandler;
 import org.corant.modules.ddd.Commands;
 import org.corant.modules.ddd.annotation.CommandHandlers;
-import org.corant.modules.ddd.shared.annotation.CMDS.CMDSLiteral;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -54,7 +54,7 @@ public class CommanderExtension implements Extension {
 
   static final boolean USE_COMMAND_PATTERN = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.command-pattern.enable", Boolean.class)
-      .orElse(Boolean.FALSE);
+      .orElse(Boolean.TRUE);
 
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       CommandHandlers.class}) ProcessAnnotatedType<?> event) {
@@ -63,15 +63,20 @@ public class CommanderExtension implements Extension {
       if (!handlerCls.isInterface() && !Modifier.isAbstract(handlerCls.getModifiers())
           && CommandHandler.class.isAssignableFrom(handlerCls)) {
         Class<?> cmdCls = resolveCommandType(handlerCls);
-        if (cmdCls != null && !cmdCls.isInterface()
-            && !Modifier.isAbstract(cmdCls.getModifiers())) {
-          event.configureAnnotatedType().add(CMDSLiteral.of(cmdCls));
-          commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
-          logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
-              handlerCls));
-        } else {
+        if (cmdCls == null) {
           logger.warning(() -> String
               .format("Can not find any command type parameter for handler [%s]", handlerCls));
+        } else {
+          if (!cmdCls.isInterface() && !Modifier.isAbstract(cmdCls.getModifiers())) {
+            event.configureAnnotatedType().add(TypeArgumentLiteral.of(cmdCls));
+            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
+            logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
+                handlerCls));
+          } else {
+            logger.warning(() -> String.format(
+                "The command class [%s] extract from handler [%s] must be a concrete class", cmdCls,
+                handlerCls));
+          }
         }
       }
     }
@@ -80,6 +85,7 @@ public class CommanderExtension implements Extension {
   synchronized void onBeforeShutdown(
       @Observes @Priority(Priorities.FRAMEWORK_LOWER) BeforeShutdown bs) {
     commandAndHandler.clear();
+    logger.fine(() -> "Clear command & handlers cache.");
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
@@ -92,7 +98,7 @@ public class CommanderExtension implements Extension {
     if (errs.size() > 0) {
       StringBuilder errMsg = new StringBuilder("The command & handler mismatching:");
       errs.forEach(e -> {
-        errMsg.append("\n").append(e.key().getName()).append(" -> ")
+        errMsg.append("\n  ").append(e.key().getName()).append(" -> ")
             .append(String.join(",",
                 e.getValue().stream().map(Class::getName).collect(Collectors.toList())))
             .append(";");
@@ -101,6 +107,9 @@ public class CommanderExtension implements Extension {
       logger.warning(() -> errMsg.toString());
       // TODO FIXME since we are using CDI, so the command hander bean may have qualifiers
       // adv.addDeploymentProblem(new CorantRuntimeException(errMsg.toString()));
+    }
+    if (!commandAndHandler.isEmpty()) {
+      logger.fine(() -> String.format("Found %s command handlers", commandAndHandler.size()));
     }
   }
 

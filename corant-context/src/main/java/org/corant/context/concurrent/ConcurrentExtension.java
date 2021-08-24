@@ -83,18 +83,23 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
+        logger.info(() -> String.format("Use default managed executor %s",
+            ManagedExecutorConfig.DFLT_INST.toString()));
       } else {
-        executorConfigs.getAllWithQualifiers()
-            .forEach((cfg, esn) -> event.<ManagedExecutorService>addBean().addQualifiers(esn)
-                .addType(ManagedExecutorService.class).addType(ExecutorService.class)
-                .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
-                .produceWith(beans -> {
-                  try {
-                    return register(beans, produce(beans, cfg), cfg);
-                  } catch (NamingException e) {
-                    throw new CorantRuntimeException(e);
-                  }
-                }));
+        executorConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
+          event.<ManagedExecutorService>addBean().addQualifiers(esn)
+              .addType(ManagedExecutorService.class).addType(ExecutorService.class)
+              .beanClass(ManagedExecutorServiceAdapter.class).scope(ApplicationScoped.class)
+              .produceWith(beans -> {
+                try {
+                  return register(beans, produce(beans, cfg), cfg);
+                } catch (NamingException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              });
+          logger.info(() -> String.format("Resolved managed executor %s %s", cfg.getName(),
+              cfg.toString()));
+        });
       }
 
       if (contextServiceConfigs.isEmpty()) {
@@ -108,6 +113,22 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
+        logger.info(() -> String.format("Use default context service %s",
+            ContextServiceConfig.DFLT_INST.toString()));
+      } else {
+        contextServiceConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
+          event.<ContextService>addBean().addTransitiveTypeClosure(ContextService.class)
+              .addQualifiers(esn).beanClass(DefaultContextService.class)
+              .scope(ApplicationScoped.class).produceWith(beans -> {
+                try {
+                  return produce(beans, cfg);
+                } catch (NamingException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              });
+          logger.info(
+              () -> String.format("Resolved context service %s %s", cfg.getName(), cfg.toString()));
+        });
       }
 
       if (scheduledExecutorConfigs.isEmpty()) {
@@ -123,20 +144,25 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
+        logger.info(() -> String.format("Use default managed scheduled executor %s",
+            ManagedScheduledExecutorConfig.DFLT_INST.toString()));
       } else {
         // TODO FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService
-        scheduledExecutorConfigs.getAllWithQualifiers()
-            .forEach((cfg, esn) -> event.<ManagedScheduledExecutorService>addBean()
-                .addQualifiers(esn).addType(ScheduledExecutorService.class)
-                .addType(ManagedScheduledExecutorService.class)
-                .beanClass(ManagedScheduledExecutorServiceAdapter.class)
-                .scope(ApplicationScoped.class).produceWith(beans -> {
-                  try {
-                    return register(beans, produce(beans, cfg), cfg);
-                  } catch (NamingException e) {
-                    throw new CorantRuntimeException(e);
-                  }
-                }));
+        scheduledExecutorConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
+          event.<ManagedScheduledExecutorService>addBean().addQualifiers(esn)
+              .addType(ScheduledExecutorService.class)
+              .addType(ManagedScheduledExecutorService.class)
+              .beanClass(ManagedScheduledExecutorServiceAdapter.class)
+              .scope(ApplicationScoped.class).produceWith(beans -> {
+                try {
+                  return register(beans, produce(beans, cfg), cfg);
+                } catch (NamingException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              });
+          logger.info(() -> String.format("Resolved managed scheduled executor %s %s",
+              cfg.getName(), cfg.toString()));
+        });
       }
     }
   }
@@ -144,28 +170,10 @@ public class ConcurrentExtension implements Extension {
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     executorConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ManagedExecutorConfig.class).values());
-    if (executorConfigs.isEmpty()) {
-      logger.info(() -> "Use default managed executor config.");
-    } else {
-      logger.fine(() -> String.format("Found %s managed executor configs named [%s].",
-          executorConfigs.size(), String.join(", ", executorConfigs.getAllDisplayNames())));
-    }
     scheduledExecutorConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ManagedScheduledExecutorConfig.class).values());
-    if (!scheduledExecutorConfigs.isEmpty()) {
-      logger.fine(() -> String.format("Found %s managed scheduled executor configs named [%s].",
-          scheduledExecutorConfigs.size(),
-          String.join(", ", scheduledExecutorConfigs.getAllDisplayNames())));
-    }
     contextServiceConfigs = new DefaultNamedQualifierObjectManager<>(
         ConfigInstances.resolveMulti(ContextServiceConfig.class).values());
-    if (contextServiceConfigs.isEmpty()) {
-      logger.info(() -> "Use default context service config.");
-    } else {
-      logger.fine(() -> String.format("Found %s context service configs named [%s].",
-          contextServiceConfigs.size(),
-          String.join(", ", contextServiceConfigs.getAllDisplayNames())));
-    }
   }
 
   protected DefaultContextService produce(Instance<Object> instance, ContextServiceConfig cfg)

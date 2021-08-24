@@ -163,17 +163,36 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   }
 
   /**
-   * {@link JPAQueries#namedQuery(String, Class)}
+   * Returns a typed JPA query with generic type Argument.
+   *
+   * @param name the name of a query defined in metadata
    */
   TypedJPAQuery<T> namedQuery(final String name);
 
   /**
-   * {@link JPAQueries#nativeQuery(String, Class)}
+   * {@link JPAQueries#namedQuery(String, Class)}
    *
-   * @param sqlString a native SQL query string
-   * @param type the class of the resulting instance(s)
+   * @param name the name of a query defined in metadata
+   * @param type the result record type
+   */
+  <X> TypedJPAQuery<X> namedQuery(final String name, Class<X> type);
+
+  /**
+   * Returns a typed JPA query with generic type Argument.
+   *
+   * @param sqlString the native SQL query statement
+   * @return TypedJPAQuery
    */
   TypedJPAQuery<T> nativeQuery(final String sqlString);
+
+  /**
+   * {@link JPAQueries#query(String, Class)}
+   *
+   * @param sqlString a native SQL query string
+   * @param type the type of the query result
+   * @return TypedJPAQuery
+   */
+  <X> TypedJPAQuery<X> nativeQuery(final String sqlString, Class<X> type);
 
   /**
    * Save the state of the given object into repository
@@ -197,14 +216,21 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   }
 
   /**
+   * Returns a typed JPA query with generic type Argument.
+   *
+   * @param qlString the Jakarta Persistence query string
+   * @return TypedJPAQuery
+   */
+  TypedJPAQuery<T> query(final String qlString);
+
+  /**
    * {@link JPAQueries#query(String, Class)}
    *
    * @param qlString a Jakarta Persistence query string
    * @param type the type of the query result
    * @return TypedJPAQuery
    */
-
-  TypedJPAQuery<T> query(final String qlString);
+  <X> TypedJPAQuery<X> query(final String qlString, Class<X> type);
 
   /**
    * Remove the entity from repository
@@ -325,13 +351,28 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
     }
 
     @Override
+    public <X> TypedJPAQuery<X> namedQuery(String name, Class<X> type) {
+      return JPAQueries.namedQuery(name, type).entityManager(this::getEntityManager);
+    }
+
+    @Override
     public TypedJPAQuery<T> nativeQuery(String sqlString) {
       return JPAQueries.nativeQuery(sqlString, entityClass).entityManager(this::getEntityManager);
     }
 
     @Override
+    public <X> TypedJPAQuery<X> nativeQuery(String sqlString, Class<X> type) {
+      return JPAQueries.nativeQuery(sqlString, type).entityManager(this::getEntityManager);
+    }
+
+    @Override
     public TypedJPAQuery<T> query(String qlString) {
       return JPAQueries.query(qlString, entityClass).entityManager(this::getEntityManager);
+    }
+
+    @Override
+    public <X> TypedJPAQuery<X> query(String qlString, Class<X> type) {
+      return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
     }
   }
 }

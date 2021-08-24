@@ -30,9 +30,8 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
  * <p>
  * The class is the realization of a simple command bus. This class method is used to automatically
  * invoke the command handler synchronously or asynchronously according to the given command object
- * type. To use this, you need a commands that implements the
- * {@link org.corant.shared.ubiquity.Commands} interface and one or more command handlers that use
- * this commands type as generic parameter type and inherit the abstract class
+ * type. To use this, you need a commands and one or more command handlers that use this commands
+ * type as generic parameter type and inherit the abstract class
  * {@link org.corant.context.command.AbstractCommandHandler}.
  * <p>
  * Note: If a command has multiple handlers, follow CDI Type Safe Resolution calls one of the

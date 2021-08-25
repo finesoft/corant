@@ -22,7 +22,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
-import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
 /**
@@ -36,26 +35,25 @@ import javax.inject.Qualifier;
 @Qualifier
 public @interface TypeArgument {
 
-  @Nonbinding
-  Class<?>[] value();
+  Class<?> value();
 
   class TypeArgumentLiteral extends AnnotationLiteral<TypeArgument> implements TypeArgument {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
-    private final Class<?>[] types;
+    private final Class<?> value;
 
-    public TypeArgumentLiteral(Class<?>... types) {
-      this.types = types;
+    public TypeArgumentLiteral(Class<?> types) {
+      value = types;
     }
 
-    public static TypeArgumentLiteral of(Class<?>... types) {
+    public static TypeArgumentLiteral of(Class<?> types) {
       return new TypeArgumentLiteral(types);
     }
 
     @Override
-    public Class<?>[] value() {
-      return types;// FIXME immutable
+    public Class<?> value() {
+      return value;// FIXME immutable
     }
   }
 }

@@ -43,7 +43,7 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
  * <b>The commands:</b>
  *
  * <pre>
- * public class MyCommand implements Commands {
+ * public class MyCommand {
  *   String data;
  *
  *   public MyCommand(String data) {

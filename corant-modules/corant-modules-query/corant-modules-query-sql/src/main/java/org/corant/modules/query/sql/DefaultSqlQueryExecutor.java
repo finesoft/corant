@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.sql.dialect.Dialect;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -39,8 +40,9 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
-  public static final MapHandler MAP_HANDLER = new MapHandler();
-  public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+  public static final MapHandler MAP_HANDLER = new MapHandler(DbUtilBasicRowProcessor.INST);
+  public static final MapListHandler MAP_LIST_HANDLER =
+      new MapListHandler(DbUtilBasicRowProcessor.INST);
 
   protected final SqlQueryConfiguration confiuration;
   protected final DefaultQueryRunner runner;

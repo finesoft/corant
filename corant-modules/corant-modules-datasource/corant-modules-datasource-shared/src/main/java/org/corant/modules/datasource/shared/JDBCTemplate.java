@@ -45,6 +45,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
@@ -61,8 +62,9 @@ public class JDBCTemplate {
   public static final char SQL_PARAM_ESC_C = '\'';
   public static final String SQL_PARAM_SP = ",";
   public static final QueryRunner SIMPLE_RUNNER = new QueryRunner();
-  public static final MapHandler MAP_HANDLER = new MapHandler();
-  public static final MapListHandler MAP_LIST_HANDLER = new MapListHandler();
+  public static final MapHandler MAP_HANDLER = new MapHandler(DbUtilBasicRowProcessor.INST);
+  public static final MapListHandler MAP_LIST_HANDLER =
+      new MapListHandler(DbUtilBasicRowProcessor.INST);
   public static final int DFLT_FETCH_SIZE = 32;
   protected static final StreamableQueryRunner SIMPLE_STREAM_RUNNER = new StreamableQueryRunner();
 

@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * corant-modules-servlet
  *
- * Code base from springframework
+ * Code base from springframework, if there is infringement, please inform me(finesoft@gmail.com).
  *
  * @author bingo 下午2:09:49
  *
@@ -48,7 +48,7 @@ public class ContentDispositions {
     Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
     shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
         "Charset should be UTF-8 or ISO-8859-1");
-    byte[] value = input.substring(secondQuoteIndex + 1, input.length()).getBytes(charset);
+    byte[] value = input.substring(secondQuoteIndex + 1).getBytes(charset);
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     int index = 0;
     while (index < value.length) {
@@ -118,7 +118,7 @@ public class ContentDispositions {
         String attribute = part.substring(0, eqIndex);
         String value = part.startsWith("\"", eqIndex + 1) && part.endsWith("\"")
             ? part.substring(eqIndex + 2, part.length() - 1)
-            : part.substring(eqIndex + 1, part.length());
+            : part.substring(eqIndex + 1);
         if ("name".equals(attribute)) {
           name = value;
         } else if ("filename*".equals(attribute)) {

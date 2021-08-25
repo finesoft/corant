@@ -1,0 +1,3 @@
+org.corant.modules.datasource.shared.util.DbUtilBlobFieldProcessor
+org.corant.modules.datasource.shared.util.DbUtilClobFieldProcessor
+org.corant.modules.datasource.shared.util.DbUtilNClobFieldProcessor

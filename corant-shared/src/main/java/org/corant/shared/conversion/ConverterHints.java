@@ -56,7 +56,11 @@ public class ConverterHints {
 
   public static final String CVT_LOCAL_KEY = "converter.local";
 
+  public static final String CVT_CHARSET = "converter.charset";
+
   public static final String CVT_CLS_LOADER_KEY = "converter.class-loader";
+
+  public static final String CVT_FREE_AFTER_CONVERTED = "converter.free-after-converted";
 
   private static final Map<String, ?> sys_hints = Collections.unmodifiableMap(resolveSysProHints());// static?
 

@@ -50,6 +50,7 @@ import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.datasource.shared.DriverManagerDataSource;
+import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
@@ -76,7 +77,7 @@ import org.corant.shared.util.Retry.Retryer;
 public class SqlQueryTemplate {
 
   protected static final Logger logger = Logger.getLogger(SqlQueryTemplate.class.getName());
-  protected static final MapHandler mapHandler = new MapHandler();
+  protected static final MapHandler mapHandler = new MapHandler(DbUtilBasicRowProcessor.INST);
   protected static final MapListHandler mapListHander = new MapListHandler();
 
   protected final QueryRunner runner;

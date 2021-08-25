@@ -13,6 +13,7 @@
  */
 package org.corant.context.command;
 
+import static org.corant.config.Configs.getValue;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -35,7 +36,6 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-context
@@ -49,11 +49,10 @@ public class CommanderExtension implements Extension {
 
   static final Map<Class<?>, Set<Class<?>>> commandAndHandler = new ConcurrentHashMap<>();
 
-  static final boolean USE_COMMAND_PATTERN = ConfigProvider.getConfig()
-      .getOptionalValue("corant.context.command.enable", Boolean.class).orElse(Boolean.TRUE);
-  static final boolean SUPPORT_ABSTRACT_COMMAND = ConfigProvider.getConfig()
-      .getOptionalValue("corant.context.command.support-abstract-command", Boolean.class)
-      .orElse(Boolean.FALSE);
+  static final boolean USE_COMMAND_PATTERN =
+      getValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
+  static final boolean SUPPORT_ABSTRACT_COMMAND =
+      getValue("corant.context.command.support-abstract-command", Boolean.class, Boolean.FALSE);
 
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       Commands.class}) ProcessAnnotatedType<?> event) {
@@ -93,23 +92,20 @@ public class CommanderExtension implements Extension {
   }
 
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
-    List<Pair<Class<?>, Set<Class<?>>>> errs = new ArrayList<>();
+    List<Pair<Class<?>, Set<Class<?>>>> warnings = new ArrayList<>();
     commandAndHandler.forEach((k, v) -> {
       if (v.size() > 1) {
-        errs.add(Pair.of(k, v));
+        warnings.add(Pair.of(k, v));
       }
     });
-    if (errs.size() > 0) {
+    if (warnings.size() > 0) {
       StringBuilder errMsg = new StringBuilder("The command & handler mismatching:");
-      errs.forEach(e -> {
-        errMsg.append("\n  ").append(e.key().getName()).append(" -> ")
-            .append(String.join(",",
-                e.getValue().stream().map(Class::getName).collect(Collectors.toList())))
-            .append(";");
-      });
-      errs.clear();
-      logger.warning(() -> errMsg.toString());
-      // TODO FIXME since we are using CDI, so the command hander bean may have qualifiers
+      warnings.forEach(e -> errMsg.append("\n  ").append(e.key().getName()).append(" -> ")
+          .append(e.value().stream().map(Class::getName).collect(Collectors.joining(",")))
+          .append(";"));
+      warnings.clear();
+      logger.warning(errMsg::toString);
+      // TODO FIXME since we are using CDI, so the command handler bean may have qualifiers
       // adv.addDeploymentProblem(new CorantRuntimeException(errMsg.toString()));
     }
     if (!commandAndHandler.isEmpty()) {
@@ -119,14 +115,14 @@ public class CommanderExtension implements Extension {
 
   private Class<?> resolveCommandType(Class<?> refCls) {
     Class<?> resolvedClass = null;
-    Class<?> referenceClass = refCls;
+    Class<?> clazz = refCls;
     do {
-      if (referenceClass.getGenericSuperclass() instanceof ParameterizedType) {
-        resolvedClass = (Class<?>) ((ParameterizedType) referenceClass.getGenericSuperclass())
+      if (clazz.getGenericSuperclass() instanceof ParameterizedType) {
+        resolvedClass = (Class<?>) ((ParameterizedType) clazz.getGenericSuperclass())
             .getActualTypeArguments()[0];
         break;
       } else {
-        Type[] genericInterfaces = referenceClass.getGenericInterfaces();
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
         for (Type type : genericInterfaces) {
           if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -137,7 +133,7 @@ public class CommanderExtension implements Extension {
           }
         }
       }
-    } while (resolvedClass == null && (referenceClass = referenceClass.getSuperclass()) != null);
+    } while (resolvedClass == null && (clazz = clazz.getSuperclass()) != null);
     return resolvedClass;
   }
 }

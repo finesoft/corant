@@ -28,13 +28,15 @@ import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
  * corant-context
  *
  * <p>
- * The command handler resolver is use to resolve the appropriate command hander with the given
+ * The command handler resolver is use for resolve the appropriate command handler with the given
  * command and handler qualifiers.
  * <p>
  * Note: User can use CDI {@link Specializes} to replace and inherit this class by themselves, and
  * re-implement the {@link #resolve(Object, Annotation...)} method to enable it to face more complex
  * application scenarios, for example, it can support the inheritance relationship of command object
  * types, etc.
+ *
+ * @see CommanderExtension#arrange(javax.enterprise.inject.spi.ProcessAnnotatedType)
  *
  * @author bingo 下午10:01:33
  *

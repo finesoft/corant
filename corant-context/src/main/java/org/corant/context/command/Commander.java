@@ -135,8 +135,8 @@ public class Commander {
    * Returns an AsyncCommandExecutor that use managed executor service to accept or apply a
    * commands.
    *
-   * @param delay the commands execution delay time
-   * @param unit the commands execution delay time unit
+   * @param delay the commands' execution delay time
+   * @param unit the commands' execution delay time unit
    * @param executorQualifiers the managed scheduled executor service additional qualifiers
    */
   public static ScheduledCommandExecutor schedule(long delay, TimeUnit unit,
@@ -151,8 +151,8 @@ public class Commander {
    *
    * @param scheduledExecutorService the scheduled executor service use to accept or apply a
    *        commands.
-   * @param delay the commands execution delay time
-   * @param unit the commands execution delay time unit
+   * @param delay the commands' execution delay time
+   * @param unit the commands' execution delay time unit
    */
   public static ScheduledCommandExecutor schedule(ScheduledExecutorService scheduledExecutorService,
       long delay, TimeUnit unit) {

@@ -24,7 +24,8 @@ import org.corant.shared.normal.Names;
  * @author bingo 下午7:57:40
  *
  */
-@ConfigKeyRoot(value = "concurrent.scheduled.executor", ignoreNoAnnotatedItem = false, keyIndex = 3)
+@ConfigKeyRoot(value = "corant.concurrent.scheduled.executor", ignoreNoAnnotatedItem = false,
+    keyIndex = 4)
 public class ManagedScheduledExecutorConfig extends ManagedExecutorConfig {
 
   public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT).concat("(SES)");

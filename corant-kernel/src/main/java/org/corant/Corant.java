@@ -402,7 +402,7 @@ public class Corant implements AutoCloseable {
    * CorantLifecycleEvent listeners.
    *
    * @param configClass The synthetic bean class
-   * @param arguments
+   * @param arguments the application arguments use for boot handler
    * @return The Corant instance
    */
   public static synchronized Corant startup(Class<?> configClass, String[] arguments) {
@@ -471,7 +471,7 @@ public class Corant implements AutoCloseable {
    * Run a supplier program in the CDI environment. This method will try to start the Corant
    * application and automatically close the Corant application after execution.
    *
-   * @param <T>
+   * @param <T> the type of results supplied by the given supplier
    * @param supplier The supplier that will be invoked after Corant started
    * @param arguments The application arguments
    * @return The result

@@ -34,15 +34,14 @@ public class PostContainerReadyEvent implements CorantLifecycleEvent {
   private final String[] args;
 
   /**
-   * @param args
+   * @param args The application arguments
    */
   public PostContainerReadyEvent(String[] args) {
     this.args = Arrays.copyOf(args, args.length);
   }
 
   /**
-   *
-   * @return the args
+   * Returns The application arguments
    */
   public String[] getArgs() {
     return Arrays.copyOf(args, args.length);

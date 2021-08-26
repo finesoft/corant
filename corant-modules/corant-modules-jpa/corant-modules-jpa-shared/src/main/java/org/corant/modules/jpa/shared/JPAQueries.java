@@ -120,7 +120,7 @@ public class JPAQueries {
 
   /**
    * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language named
-   * query. The record of the result list of the query must be assignable to the type specifiedby
+   * query. The record of the result list of the query must be assignable to the type specified by
    * the resultClass argument.
    *
    *
@@ -205,7 +205,7 @@ public class JPAQueries {
    * {@link EntityManager#createNativeQuery(String, Class)} directly.
    *
    * <p>
-   * If the given is not JPA entity class (for example: SomeDTO) and there is a converter which
+   * If the given type is not JPA entity class (for example: SomeDTO) and there is a converter which
    * implements javax.persistence.Tuple To Object conversion then use javax.persistence.Tuple.class
    * as the result type and call {@link EntityManager#createNativeQuery(String, Class)} , and then
    * convert the result to the given type before the result is returned.
@@ -426,7 +426,7 @@ public class JPAQueries {
       if (parameterBuilder == null) {
         return EMPTY;
       } else {
-        return SPACE + parameterBuilder.toString();
+        return SPACE + parameterBuilder;
       }
     }
 
@@ -560,7 +560,7 @@ public class JPAQueries {
     /**
      * Execute a SELECT query that returns a single result.
      *
-     * @param <T>
+     * @param <T> the single result type
      * @return get
      */
     public <T> T get() {
@@ -641,7 +641,7 @@ public class JPAQueries {
     /**
      * Execute a SELECT query and return the query results as List.
      *
-     * @param <T>
+     * @param <T> the result record type
      * @return select
      */
     @SuppressWarnings("unchecked")

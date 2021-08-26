@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -67,7 +68,7 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
 
   @Override
   public String getValue(String s) {
-    return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(s));
+    return Systems.getSystemProperty(s);
   }
 
 }

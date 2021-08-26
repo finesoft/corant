@@ -91,11 +91,10 @@ public class ClassPaths {
   public static final String FILE_SCHEMA = "file";
   public static final String JAR_SCHEMA = "jar";
   public static final String JRT_SCHEMA = "jrt";// from JDK9
-  public static final String SYS_PATH_SEPARATOR =
-      Pattern.quote(System.getProperty("path.separator"));
-  public static final String SYS_CLASS_PATH = System.getProperty("java.class.path");
-  public static final String SYS_BOOT_CLASS_PATH = System.getProperty("sun.boot.class.path");
-  public static final String SYS_EXT_DIRS = System.getProperty("java.ext.dirs");
+  public static final String SYS_PATH_SEPARATOR = Pattern.quote(Systems.getPathSeparator());
+  public static final String SYS_CLASS_PATH = Systems.getSystemProperty("java.class.path");
+  public static final String SYS_BOOT_CLASS_PATH = Systems.getSystemProperty("sun.boot.class.path");
+  public static final String SYS_EXT_DIRS = Systems.getSystemProperty("java.ext.dirs");
 
   protected static final Set<String> sysLibs =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",

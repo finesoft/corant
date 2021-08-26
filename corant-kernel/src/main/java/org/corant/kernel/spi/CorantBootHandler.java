@@ -14,6 +14,7 @@
 package org.corant.kernel.spi;
 
 import static org.corant.shared.util.Streams.streamOf;
+import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import org.corant.Corant;
@@ -40,12 +41,19 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
    * mechanism to load.
    *
    * @param classLoader the class loader use for load the CorantBootHandler
+   * @param excludeClassNames the excluded handler class names
    *
    * @see Sortable#compare(Sortable, Sortable)
    */
-  static Stream<CorantBootHandler> load(ClassLoader classLoader) {
-    return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-        .sorted(Sortable::compare);
+  static Stream<CorantBootHandler> load(ClassLoader classLoader, String... excludeClassNames) {
+    if (excludeClassNames.length == 0) {
+      return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+          .sorted(Sortable::compare);
+    } else {
+      return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
+          .filter(h -> Arrays.binarySearch(excludeClassNames, h.getClass().getName()) == -1)
+          .sorted(Sortable::compare);
+    }
   }
 
   @Override

@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Properties;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.ClassPathResource;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
@@ -51,7 +52,7 @@ public interface Defaults {
   Optional<String> CORANT_VERSION = getCorantVersion();
 
   static Path corantUserDir(String suffix) {
-    return Paths.get(System.getProperty("user.home"))
+    return Paths.get(Systems.getUserHome())
         .resolve("." + Names.applicationName() + defaultString(suffix));
   }
 

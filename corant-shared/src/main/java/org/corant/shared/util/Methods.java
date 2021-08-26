@@ -15,11 +15,15 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -142,6 +146,81 @@ public class Methods {
       }
     }
     return answer;
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午5:14:56
+   *
+   */
+  public static class InvokerBuilder {
+    Class<?> clazz;
+    String methodName;
+    Class<?>[] parameterTypes;
+    Object object;
+    boolean forceAccess;
+
+    private InvokerBuilder(Class<?> clazz) {
+      this.clazz = clazz;
+    }
+
+    private InvokerBuilder(Object object) {
+      clazz = shouldNotNull(object).getClass();
+      this.object = object;
+    }
+
+    public static InvokerBuilder from(Object object) {
+      return new InvokerBuilder(object);
+    }
+
+    public static InvokerBuilder of(Class<?> clazz) {
+      return new InvokerBuilder(clazz);
+    }
+
+    public static InvokerBuilder of(String className) {
+      return of(tryAsClass(className));
+    }
+
+    public InvokerBuilder forceAccess(boolean forceAccess) {
+      this.forceAccess = forceAccess;
+      return this;
+    }
+
+    public Object invoke(Object... parameters)
+        throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+      Method method = getMatchingMethod(clazz, methodName, parameterTypes);
+      if (forceAccess) {
+        AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
+          method.setAccessible(true);
+          return null;
+        });
+      }
+      return method.invoke(object, parameters);
+    }
+
+    public InvokerBuilder methodName(String methodName) {
+      this.methodName = methodName;
+      return this;
+    }
+
+    public InvokerBuilder on(Object object) {
+      this.object = object;
+      return this;
+    }
+
+    public InvokerBuilder parameterTypes(Class<?>... parameterTypes) {
+      this.parameterTypes = parameterTypes;
+      return this;
+    }
+
+    public Object tryInvoke(Object... parameters) {
+      try {
+        return invoke(parameters);
+      } catch (Exception e) {
+        return null;
+      }
+    }
   }
 
   public static class MethodSignature implements Serializable {

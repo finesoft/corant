@@ -15,6 +15,7 @@ package org.corant.modules.datasource.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.toProperties;
+import java.sql.Driver;
 import java.util.Properties;
 import javax.sql.DataSource;
 
@@ -28,8 +29,14 @@ public interface DataSourceService {
 
   default DataSource get(DataSourceConfig config) {
     shouldNotNull(config);
-    return new DriverManagerDataSource(config.getConnectionUrl(), config.getDriver().getName(),
-        toProperties(config.getJdbcProperties()), config.getUsername(), config.getPassword());
+    if (Driver.class.isAssignableFrom(config.getDriver())) {
+      return new DriverManagerDataSource(config.getConnectionUrl(), config.getDriver().getName(),
+          toProperties(config.getJdbcProperties()), config.getUsername(), config.getPassword());
+    } else {
+      return new DriverManagerDataSource(config.getConnectionUrl(), null,
+          toProperties(config.getJdbcProperties()), config.getUsername(), config.getPassword());
+    }
+
   }
 
   /**

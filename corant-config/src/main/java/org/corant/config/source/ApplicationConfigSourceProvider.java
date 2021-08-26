@@ -34,6 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
 
@@ -55,7 +56,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
   static String getLocation() {
-    String location = System.getProperty(CFG_LOCATION_KEY);
+    String location = Systems.getSystemProperty(CFG_LOCATION_KEY);
     if (isBlank(location)) {
       location = resolveSysEnvValue(
           AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
@@ -65,7 +66,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   }
 
   static Predicate<URL> resolveExPattern() {
-    String cfgUrlExPattern = System.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
+    String cfgUrlExPattern = Systems.getSystemProperty(CFG_LOCATION_EXCLUDE_PATTERN);
     return u -> isBlank(cfgUrlExPattern)
         || !PathMatcher.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
   }

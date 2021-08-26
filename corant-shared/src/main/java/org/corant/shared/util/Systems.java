@@ -18,7 +18,6 @@ import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Conversions.toLong;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.split;
 import static org.corant.shared.util.Validates.isValidMacAddress;
 import java.io.File;
@@ -251,17 +250,16 @@ public class Systems {
 
   public static String getSystemProperty(final String name, final String defaultValue) {
     shouldNotNull(name);
-    String value = null;
     try {
       if (System.getSecurityManager() == null) {
-        value = System.getProperty(name);
+        return defaultObject(System.getProperty(name), defaultValue);
       } else {
-        value = AccessController
-            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
+        return defaultObject(AccessController
+            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name)), defaultValue);
       }
     } catch (final Exception ignore) {
     }
-    return defaultString(value, defaultValue);
+    return defaultValue;
   }
 
   public static String getTempDir() {
@@ -384,6 +382,25 @@ public class Systems {
 
   public static boolean isWindowsXP() {
     return detectOS("Windows", "5.1");
+  }
+
+  public static String setSystemProperty(final String name, final String value) {
+    String preValue = null;
+    try {
+      if (System.getSecurityManager() == null) {
+        preValue = System.getProperty(name);
+        System.setProperty(name, value);
+      } else {
+        preValue = AccessController
+            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+          System.setProperty(name, value);
+          return null;
+        });
+      }
+    } catch (final Exception ignore) {
+    }
+    return preValue;
   }
 
   static boolean detectOS(final String osNamePrefix) {

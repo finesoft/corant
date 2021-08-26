@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.corant.shared.util.Serializations.ObjectInputStreamWithLoader;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.undertow.servlet.UndertowServletLogger;
 import io.undertow.servlet.api.SessionPersistenceManager;
@@ -103,8 +104,8 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
     if (path.isPresent()) {
       file = new File(path.get(), "session");
     } else {
-      file = new File(Paths.get(System.getProperty("user.home"))
-          .resolve("." + deploymentName + "-session").resolve("session").toUri());
+      file = new File(Paths.get(Systems.getUserHome()).resolve("." + deploymentName + "-session")
+          .resolve("session").toUri());
     }
     final String path = file.getAbsolutePath();
     if (!file.exists()) {

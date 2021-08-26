@@ -142,7 +142,7 @@ public class FileUtils {
           logger.fine(() -> String.format("Created temp dir %s!", tempDir.getAbsolutePath()));
         } else {
           throw new CorantRuntimeException("Unable to create tempDir. java.io.tmpdir is set to %s."
-              + System.getProperty("java.io.tmpdir"));
+              + Systems.getSystemProperty("java.io.tmpdir"));
         }
       }
       tempDir.deleteOnExit();

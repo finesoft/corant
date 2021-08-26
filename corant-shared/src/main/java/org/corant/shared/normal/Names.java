@@ -13,7 +13,7 @@
  */
 package org.corant.shared.normal;
 
-import static org.corant.shared.util.Strings.defaultString;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
@@ -44,7 +44,7 @@ public interface Names {
   String CORANT_CFG_PREFIX = CORANT_PREFIX + "config";
 
   static String applicationName() {
-    return defaultString(System.getProperty(CORANT_APP_NAME_KEY), CORANT);
+    return Systems.getSystemProperty(CORANT_APP_NAME_KEY, CORANT);
   }
 
   interface ConfigNames {

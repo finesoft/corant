@@ -15,7 +15,7 @@ package org.corant.modules.logging;
 
 import org.corant.Corant;
 import org.corant.kernel.spi.CorantBootHandler;
-import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-modules-logging
@@ -25,9 +25,13 @@ import org.corant.shared.normal.Priorities;
  */
 public class Log4jProvider implements CorantBootHandler {
 
+  public static final String LOGMANAER_KEY = "java.util.logging.manager";
+  public static final String JBOSS_LOGGER_KEY = "org.jboss.logging.provider";
+  public static final String JUL_LOGMANAGER = "org.apache.logging.log4j.jul.LogManager";
+
   @Override
   public int getPriority() {
-    return Priorities.FRAMEWORK_HIGHER;
+    return 0;
   }
 
   @Override
@@ -35,10 +39,12 @@ public class Log4jProvider implements CorantBootHandler {
 
   @Override
   public void handleBeforeStart(ClassLoader classLoader, String... args) {
-    System.clearProperty("java.util.logging.manager");
-    System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
-    System.clearProperty("org.jboss.logging.provider");
-    System.setProperty("org.jboss.logging.provider", "log4j"); // FIXME
+    if (!JUL_LOGMANAGER.equals(Systems.getSystemProperty(LOGMANAER_KEY))) {
+      Systems.setSystemProperty(LOGMANAER_KEY, JUL_LOGMANAGER);
+    }
+    if (!"log4j2".equals(Systems.getSystemProperty(JBOSS_LOGGER_KEY))) {
+      Systems.setSystemProperty(JBOSS_LOGGER_KEY, "log4j2"); // FIXME
+    }
   }
 
 }

@@ -22,6 +22,7 @@ import javax.enterprise.inject.spi.Extension;
 import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
 
@@ -65,23 +66,24 @@ public class CaffeineJCacheExtension implements Extension {
    * @param e onBeforeBeanDiscovery
    */
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
-    if (isEmpty(System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
-      System.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
-    } else if (!System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+    if (isEmpty(Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      Systems.setSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
         .equals(CACHE_PROVIDER_NAME)) {
       throw new CorantRuntimeException(
           "Found another caching provider %s, the caching provider in current implementation is exclusive!",
-          System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
+          Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
     String configSource;
     if (isNotBlank(configSource = Configs.getValue(CACHE_CONFIG_RESOURCE_KEY, String.class))) {
-      System.setProperty("config.resource", configSource);
+      Systems.setSystemProperty("config.resource", configSource);
     } else {
       for (String name : ConfigProvider.getConfig().getPropertyNames()) {
         if (name.startsWith(CACHE_CONFIG_KEY_PREFIX)) {
-          System.setProperty(name, Configs.getValue(name, String.class));
+          Systems.setSystemProperty(name, Configs.getValue(name, String.class));
         } else if (name.startsWith(CORANT_CAFFE_PREFIX)) {
-          System.setProperty(CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
+          Systems.setSystemProperty(
+              CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
               Configs.getValue(name, String.class));
         }
       }

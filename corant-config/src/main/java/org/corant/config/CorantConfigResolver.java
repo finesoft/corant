@@ -39,6 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.corant.shared.ubiquity.Mutable.MutableInteger;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -80,7 +81,7 @@ public class CorantConfigResolver {
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
-    map.forEach((k, v) -> System.setProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
+    map.forEach((k, v) -> Systems.setSystemProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
   }
 
   public static String concatKey(String... keys) {

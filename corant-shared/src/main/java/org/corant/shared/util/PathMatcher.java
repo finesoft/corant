@@ -96,7 +96,7 @@ public interface PathMatcher extends Predicate<String> {
   }
 
   static boolean isDos() {
-    return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window");
+    return Systems.getOsName().toLowerCase(Locale.getDefault()).startsWith("window");
   }
 
   static boolean matchClassPath(String path, String globExpress) {
@@ -104,7 +104,7 @@ public interface PathMatcher extends Predicate<String> {
   }
 
   static boolean matchPath(String path, String globExpress) {
-    return System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")
+    return Systems.getOsName().toLowerCase(Locale.getDefault()).startsWith("window")
         ? matchWinPath(path, globExpress)
         : matchUnixPath(path, globExpress);
   }

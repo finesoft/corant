@@ -19,6 +19,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-modules-jcache-redisson
@@ -30,13 +31,13 @@ public class RedissonJCacheExtension implements Extension {
   public static final String CACHE_PROVIDER_NAME = RedissonJCachingProvider.class.getName();
 
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
-    if (isEmpty(System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
-      System.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
-    } else if (!System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+    if (isEmpty(Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      Systems.setSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
         .equals(CACHE_PROVIDER_NAME)) {
       throw new CorantRuntimeException(
           "Found another caching provider %s, the caching provider in current implementation is exclusive!",
-          System.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
+          Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
   }
 }

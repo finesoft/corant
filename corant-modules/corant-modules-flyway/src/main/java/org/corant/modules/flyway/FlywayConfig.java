@@ -37,6 +37,9 @@ public class FlywayConfig extends ClassicConfiguration implements DeclarativeCon
   @ConfigKeyItem(defaultValue = "META-INF/dbmigration")
   protected String locationPrefix;
 
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean useDriverManagerDataSource;
+
   public FlywayConfig() {
 
   }
@@ -64,6 +67,10 @@ public class FlywayConfig extends ClassicConfiguration implements DeclarativeCon
    */
   public boolean isEnable() {
     return enable;
+  }
+
+  public boolean isUseDriverManagerDataSource() {
+    return useDriverManagerDataSource;
   }
 
 }

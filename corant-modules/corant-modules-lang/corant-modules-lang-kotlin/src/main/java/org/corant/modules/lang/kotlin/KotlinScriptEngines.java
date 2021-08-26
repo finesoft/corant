@@ -23,6 +23,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-modules-lang-kotlin
@@ -33,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class KotlinScriptEngines {
 
   static {
-    System.setProperty("idea.use.native.fs.for.win", "false");
+    Systems.setSystemProperty("idea.use.native.fs.for.win", "false");
   }
 
   public static final ScriptEngineManager ENGINE_MANAGER =

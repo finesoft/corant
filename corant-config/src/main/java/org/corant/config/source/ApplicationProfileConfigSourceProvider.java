@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -57,7 +58,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   }
 
   static String[] resolveProfiles() {
-    String pfs = System.getProperty(CFG_PROFILE_KEY);
+    String pfs = Systems.getSystemProperty(CFG_PROFILE_KEY);
     if (isBlank(pfs)) {
       pfs = resolveSysEnvValue(
           AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
@@ -76,8 +77,9 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
         String[] locations = resolveProfileLocations(profiles);
         if (isNotEmpty(locations)) {
           // first find locations that designated in system properties or system environment
-          logger.fine(() -> String.format("Load profile config source from designated locations %s.",
-              String.join(",", locations)));
+          logger
+              .fine(() -> String.format("Load profile config source from designated locations %s.",
+                  String.join(",", locations)));
           list.addAll(ConfigSourceLoader.load(APPLICATION_PROFILE_ORDINAL, filter, locations));
         }
         // else {

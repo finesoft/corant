@@ -18,7 +18,6 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.MBeans.deregisterFromMBean;
 import static org.corant.shared.util.MBeans.registerToMBean;
-import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.NEWLINE;
@@ -50,6 +49,7 @@ import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.jmx.Power;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
+import org.corant.kernel.util.CommandLine;
 import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
@@ -148,6 +148,7 @@ public class Corant implements AutoCloseable {
   public static final String ENABLE_ACCESS_WARNINGS = "-enable_access_warnings";
   public static final String DISABLE_BEFORE_START_HANDLER_CMD = "-disable_before_start_handler";
   public static final String DISABLE_AFTER_STARTED_HANDLER_CMD = "-disable_after_started_handler";
+  public static final String DISABLE_AFTER_STOPPED_HANDLER_CMD = "-disable_after_stopped_handler";
   public static final String REGISTER_TO_MBEAN_CMD = "-register_to_mbean";
   public static final String APP_NAME = applicationName();
   public static final String POWER_MBEAN_NAME = APP_NAME + ":type=kernel,name=Power";
@@ -639,7 +640,7 @@ public class Corant implements AutoCloseable {
   void doBeforeStart(StopWatch stopWatch) {
     try {
       stopWatch.start();
-      if (!hasCommandArgument(ENABLE_ACCESS_WARNINGS)) {
+      if (CommandLine.parse(ENABLE_ACCESS_WARNINGS, arguments) != null) {
         LoggerFactory.disableAccessWarnings();
       }
       invokeBootHandlerBeforeStart();
@@ -682,7 +683,7 @@ public class Corant implements AutoCloseable {
   }
 
   void registerMBean() {
-    if (!hasCommandArgument(REGISTER_TO_MBEAN_CMD)) {
+    if (CommandLine.parse(REGISTER_TO_MBEAN_CMD, arguments) != null) {
       return;
     }
     synchronized (this) {
@@ -699,41 +700,55 @@ public class Corant implements AutoCloseable {
   }
 
   private String boostLine(String separator) {
-    if (!hasCommandArgument(DISABLE_BOOST_LINE_CMD)) {
+    if (CommandLine.parse(DISABLE_BOOST_LINE_CMD, arguments) != null) {
       return NEWLINE.concat(separator.repeat(100));
     }
     return EMPTY;
   }
 
-  private boolean hasCommandArgument(String cmd) {
-    for (String argument : arguments) {
-      if (areEqual(argument, cmd)) {
-        return true;
+  private void invokeBootHandlerAfterStarted() {
+    CommandLine cmd = CommandLine.parse(DISABLE_AFTER_STARTED_HANDLER_CMD, arguments);
+    if (cmd == null) {
+      CorantBootHandler.load(classLoader)
+          .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
+    } else {
+      if (cmd.hasArguments()) {
+        CorantBootHandler.load(classLoader, cmd.getArguments())
+            .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
+      } else {
+        logInfo("The after start boot handlers are disabled!");
       }
     }
-    return false;
-  }
-
-  private void invokeBootHandlerAfterStarted() {
-    if (hasCommandArgument(DISABLE_AFTER_STARTED_HANDLER_CMD)) {
-      logInfo("The after start boot handlers are disabled!");
-    }
-    CorantBootHandler.load(classLoader)
-        .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
   }
 
   private void invokeBootHandlerAfterStopped() {
-    CorantBootHandler.load(classLoader).forEach(
-        h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    CommandLine cmd = CommandLine.parse(DISABLE_AFTER_STOPPED_HANDLER_CMD, arguments);
+    if (cmd == null) {
+      CorantBootHandler.load(classLoader).forEach(
+          h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    } else {
+      if (cmd.hasArguments()) {
+        CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
+            h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
+      } else {
+        logInfo("The after stopped handlers are disabled!");
+      }
+    }
   }
 
   private void invokeBootHandlerBeforeStart() {
-    if (hasCommandArgument(DISABLE_BEFORE_START_HANDLER_CMD)) {
-      logInfo("The before start boot handlers are disabled!");
-      return;
+    CommandLine cmd = CommandLine.parse(DISABLE_BEFORE_START_HANDLER_CMD, arguments);
+    if (cmd == null) {
+      CorantBootHandler.load(classLoader).forEach(
+          h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    } else {
+      if (cmd.hasArguments()) {
+        CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
+            h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
+      } else {
+        logInfo("The before start boot handlers are disabled!");
+      }
     }
-    CorantBootHandler.load(classLoader)
-        .forEach(h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
   }
 
   private Power power() {

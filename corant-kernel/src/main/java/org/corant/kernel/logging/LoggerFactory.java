@@ -15,6 +15,7 @@ package org.corant.kernel.logging;
 
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Methods.getMatchingMethod;
 import static org.corant.shared.util.Objects.tryNewInstance;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,14 +25,12 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.shared.util.Methods;
 import org.corant.shared.util.UnsafeAccessors;
 
 /**
  * @author bingo 下午7:37:00
  *
  */
-// @ApplicationScoped
 public class LoggerFactory {
 
   public static void disableAccessWarnings() {
@@ -50,6 +49,7 @@ public class LoggerFactory {
   }
 
   public static void disableLogger() {
+    // JDK logger
     LogManager.getLogManager().reset();
     Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     globalLogger.setLevel(java.util.logging.Level.OFF);// FIXME openJDK weak reference
@@ -58,15 +58,25 @@ public class LoggerFactory {
       globalLogger.removeHandler(handler);
     }
     try {
-      Class<?> loggerCfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
-      if (loggerCfgCls != null) {
-        Method method = Methods.getMatchingMethod(loggerCfgCls, "initialize",
+      // Log4j2 logger
+      Class<?> log4j2CfgCls = tryAsClass("org.apache.logging.log4j.core.config.Configurator");
+      if (log4j2CfgCls != null) {
+        Method method;
+        // set root level OFF
+        Class<?> log4j2LevelCls = tryAsClass("org.apache.logging.log4j.Level");
+        Object off = getMatchingMethod(log4j2LevelCls, "toLevel", String.class).invoke(null, "OFF");
+        method = getMatchingMethod(log4j2CfgCls, "setRootLevel", log4j2LevelCls);
+        method.invoke(null, off);
+        method = getMatchingMethod(log4j2CfgCls, "setAllLevels", String.class, log4j2LevelCls);
+        method.invoke(null, "", off);
+        // initialize NullConfiguration
+        method = getMatchingMethod(log4j2CfgCls, "initialize",
             tryAsClass("org.apache.logging.log4j.core.config.Configuration"));
         method.invoke(null,
             tryNewInstance("org.apache.logging.log4j.core.config.NullConfiguration"));
       }
     } catch (Exception ignore) {
-      // Noop
+      // NOOP
     }
   }
 

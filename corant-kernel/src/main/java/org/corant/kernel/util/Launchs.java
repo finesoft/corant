@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
@@ -63,8 +64,8 @@ public class Launchs {
   }
 
   public static List<String> getClassPaths() {
-    return Arrays.stream(split(System.getProperty("java.class.path"), File.pathSeparator))
-        .filter(Strings::isNotBlank).collect(Collectors.toList());
+    return Arrays.stream(Systems.getSystemClasspath()).filter(Strings::isNotBlank)
+        .collect(Collectors.toList());
   }
 
   public static String getDebugArgs() {
@@ -76,11 +77,11 @@ public class Launchs {
   }
 
   public static String getJavaHome() {
-    return Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java").toString();
+    return Paths.get(Systems.getJavaHomeDir()).resolve("bin").resolve("java").toString();
   }
 
   public static String getJavaVersion() {
-    return System.getProperty("java.version");
+    return Systems.getJavaVersion();
   }
 
   public static List<String> getJvmArgs() {
@@ -88,7 +89,7 @@ public class Launchs {
   }
 
   public static List<String> getMainCommands() {
-    return Arrays.stream(split(System.getProperty("sun.java.command"), SPACE))
+    return Arrays.stream(split(Systems.getSystemProperty("sun.java.command"), SPACE))
         .filter(Strings::isNotBlank).collect(Collectors.toList());
   }
 

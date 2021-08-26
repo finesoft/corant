@@ -47,6 +47,7 @@ import org.corant.modules.elastic.data.service.ElasticDocumentService;
 import org.corant.modules.elastic.data.service.ElasticIndicesService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Systems;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
@@ -64,7 +65,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 public class ElasticExtension implements Extension, Function<String, TransportClient> {
 
   static {
-    System.setProperty("es.set.netty.runtime.available.processors", "false");
+    Systems.setSystemProperty("es.set.netty.runtime.available.processors", "false");
   }
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());

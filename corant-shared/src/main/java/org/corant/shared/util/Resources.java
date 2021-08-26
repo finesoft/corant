@@ -483,7 +483,7 @@ public class Resources {
     @Override
     public final InputStream openStream() throws IOException {
       URLConnection conn = getURL().openConnection();
-      if (System.getProperty("os.name").toLowerCase(Locale.getDefault()).startsWith("window")) {
+      if (Systems.getOsName().toLowerCase(Locale.getDefault()).startsWith("window")) {
         conn.setUseCaches(false);
       }
       return conn.getInputStream();

@@ -25,6 +25,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.util.CommandLine;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.JPAUtils;
@@ -195,7 +196,9 @@ public class HibernateOrmDeveloperKits {
     CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
         "corant.flyway.migrate.enable", "false");
     return Corant.startup(HibernateOrmDeveloperKits.class,
-        new String[] {Corant.DISABLE_BOOST_LINE_CMD});
+        new String[] {Corant.DISABLE_BOOST_LINE_CMD,
+            new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,
+                "org.corant.modules.logging.Log4jProvider").toString()});
   }
 
 }

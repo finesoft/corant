@@ -48,17 +48,18 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-    if (!authorizer().testAccess(requestContext, allowedRoles)) {
+    try {
+      authorizer().checkAccess(requestContext, allowedRoles);
+    } catch (Exception e) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
         if (ex instanceof Exception) {
           requestContext.removeProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
-          throw new NotAuthorizedException((Exception) ex, "Bearer");
-        } else {
-          throw new NotAuthorizedException("Bearer");
+          e.addSuppressed((Exception) ex);
         }
+        throw new NotAuthorizedException(e, "Bearer");
       } else {
-        throw new ForbiddenException();
+        throw new ForbiddenException(e);
       }
     }
   }

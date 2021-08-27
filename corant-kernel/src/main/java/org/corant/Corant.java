@@ -683,7 +683,7 @@ public class Corant implements AutoCloseable {
   }
 
   void registerMBean() {
-    if (CommandLine.parse(REGISTER_TO_MBEAN_CMD, arguments) != null) {
+    if (CommandLine.parse(REGISTER_TO_MBEAN_CMD, arguments) == null) {
       return;
     }
     synchronized (this) {
@@ -700,7 +700,7 @@ public class Corant implements AutoCloseable {
   }
 
   private String boostLine(String separator) {
-    if (CommandLine.parse(DISABLE_BOOST_LINE_CMD, arguments) != null) {
+    if (CommandLine.parse(DISABLE_BOOST_LINE_CMD, arguments) == null) {
       return NEWLINE.concat(separator.repeat(100));
     }
     return EMPTY;

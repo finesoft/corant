@@ -13,7 +13,8 @@
  */
 package org.corant.modules.security;
 
-import org.corant.shared.exception.CorantRuntimeException;
+import java.util.Map;
+import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
  * corant-modules-security-api
@@ -21,27 +22,50 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 9:55:50
  *
  */
-public class AuthenticationException extends CorantRuntimeException {
+public class AuthenticationException extends GeneralRuntimeException {
 
   private static final long serialVersionUID = -9200294304935728465L;
 
   public AuthenticationException() {}
 
-  public AuthenticationException(String msgOrFormat, Object... args) {
-    super(msgOrFormat, args);
+  public AuthenticationException(Object code) {
+    super(code);
+  }
+
+  public AuthenticationException(Object code, Object... variants) {
+    super(code, variants);
+  }
+
+  public AuthenticationException(Object code, Object subCode, Map<Object, Object> attributes,
+      Object... parameters) {
+    super(code, subCode, attributes, parameters);
   }
 
   public AuthenticationException(Throwable cause) {
     super(cause);
   }
 
-  public AuthenticationException(Throwable cause, boolean enableSuppression,
-      boolean writableStackTrace, String msgOrFormat, Object... args) {
-    super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
+  public AuthenticationException(Throwable cause, Object code) {
+    super(cause, code);
   }
 
-  public AuthenticationException(Throwable cause, String msgOrFormat, Object... args) {
-    super(cause, msgOrFormat, args);
+  public AuthenticationException(Throwable cause, Object code, Object... parameters) {
+    super(cause, code, parameters);
   }
 
+  protected AuthenticationException(String message) {
+    super(message);
+  }
+
+  protected AuthenticationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public static AuthenticationException of(String message) {
+    return new AuthenticationException(message);
+  }
+
+  public static AuthenticationException of(Throwable cause, String message) {
+    return new AuthenticationException(message, cause);
+  }
 }

@@ -40,6 +40,8 @@ import org.corant.shared.util.Objects;
  */
 public class GeneralRuntimeException extends CorantRuntimeException {
 
+  protected static final String UN_KNOW_EXMSG = "An unknown exception has occurred!";
+
   protected static final ExceptionMessageResolver messageResolver =
       streamOf(ServiceLoader.load(ExceptionMessageResolver.class, defaultClassLoader()))
           .min(Sortable::compare).orElseGet(SimpleExceptionMessageResolver::new);
@@ -95,7 +97,23 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   }
 
   protected GeneralRuntimeException() {
-    super("An unknown error has occurred!");
+    this(UN_KNOW_EXMSG);
+  }
+
+  protected GeneralRuntimeException(String message) {
+    super(message);
+  }
+
+  protected GeneralRuntimeException(String message, Throwable cause) {
+    super(cause, message);
+  }
+
+  public static GeneralRuntimeException of(String message) {
+    return new GeneralRuntimeException(message);
+  }
+
+  public static GeneralRuntimeException of(Throwable cause, String message) {
+    return new GeneralRuntimeException(message, cause);
   }
 
   public GeneralRuntimeException attribute(Object name, Object value) {

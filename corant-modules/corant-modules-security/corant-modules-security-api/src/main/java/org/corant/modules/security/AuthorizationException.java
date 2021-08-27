@@ -13,7 +13,8 @@
  */
 package org.corant.modules.security;
 
-import org.corant.shared.exception.CorantRuntimeException;
+import java.util.Map;
+import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
  * corant-modules-security-api
@@ -21,27 +22,50 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 12:31:25
  *
  */
-public class AuthorizationException extends CorantRuntimeException {
+public class AuthorizationException extends GeneralRuntimeException {
 
   private static final long serialVersionUID = -4436947908543556229L;
 
   public AuthorizationException() {}
 
-  public AuthorizationException(String msgOrFormat, Object... args) {
-    super(msgOrFormat, args);
+  public AuthorizationException(Object code) {
+    super(code);
+  }
+
+  public AuthorizationException(Object code, Object... variants) {
+    super(code, variants);
+  }
+
+  public AuthorizationException(Object code, Object subCode, Map<Object, Object> attributes,
+      Object... parameters) {
+    super(code, subCode, attributes, parameters);
   }
 
   public AuthorizationException(Throwable cause) {
     super(cause);
   }
 
-  public AuthorizationException(Throwable cause, boolean enableSuppression,
-      boolean writableStackTrace, String msgOrFormat, Object... args) {
-    super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
+  public AuthorizationException(Throwable cause, Object code) {
+    super(cause, code);
   }
 
-  public AuthorizationException(Throwable cause, String msgOrFormat, Object... args) {
-    super(cause, msgOrFormat, args);
+  public AuthorizationException(Throwable cause, Object code, Object... parameters) {
+    super(cause, code, parameters);
   }
 
+  protected AuthorizationException(String message) {
+    super(message);
+  }
+
+  protected AuthorizationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public static AuthorizationException of(String message) {
+    return new AuthorizationException(message);
+  }
+
+  public static AuthorizationException of(Throwable cause, String message) {
+    return new AuthorizationException(message, cause);
+  }
 }

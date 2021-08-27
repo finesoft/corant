@@ -193,7 +193,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     return this;
   }
 
-  public GeneralRuntimeException serverity(GeneralExceptionSeverity severity) {
+  public GeneralRuntimeException severity(GeneralExceptionSeverity severity) {
     setSeverity(severity);
     return this;
   }

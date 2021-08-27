@@ -52,7 +52,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   private Object subCode;
 
-  private GeneralExceptionSeverity serverity = GeneralExceptionSeverity.ERROR;
+  private GeneralExceptionSeverity severity = GeneralExceptionSeverity.ERROR;
 
   private Object[] parameters = Objects.EMPTY_ARRAY;
 
@@ -171,8 +171,8 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     return Arrays.copyOf(parameters, parameters.length);
   }
 
-  public GeneralExceptionSeverity getServerity() {
-    return serverity;
+  public GeneralExceptionSeverity getSeverity() {
+    return severity;
   }
 
   /**
@@ -193,8 +193,8 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     return this;
   }
 
-  public GeneralRuntimeException serverity(GeneralExceptionSeverity serverity) {
-    setServerity(serverity);
+  public GeneralRuntimeException serverity(GeneralExceptionSeverity severity) {
+    setSeverity(severity);
     return this;
   }
 
@@ -238,8 +238,8 @@ public class GeneralRuntimeException extends CorantRuntimeException {
         parameters == null ? Objects.EMPTY_ARRAY : Arrays.copyOf(parameters, parameters.length);
   }
 
-  protected void setServerity(GeneralExceptionSeverity serverity) {
-    this.serverity = serverity == null ? GeneralExceptionSeverity.ERROR : serverity;
+  protected void setSeverity(GeneralExceptionSeverity severity) {
+    this.severity = severity == null ? GeneralExceptionSeverity.ERROR : severity;
   }
 
   protected void setSubCode(Object subCode) {

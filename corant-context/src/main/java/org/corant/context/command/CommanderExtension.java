@@ -14,10 +14,12 @@
 package org.corant.context.command;
 
 import static org.corant.config.Configs.getValue;
+import static org.corant.shared.util.Sets.newHashSet;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,6 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.context.qualifier.TypeArgument.TypeArgumentLiteral;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
@@ -47,13 +48,20 @@ public class CommanderExtension implements Extension {
 
   private static final Logger logger = Logger.getLogger(CommanderExtension.class.getName());
 
-  static final Map<Class<?>, Set<Class<?>>> commandAndHandler = new ConcurrentHashMap<>();
-
   static final boolean USE_COMMAND_PATTERN =
       getValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
+
   static final boolean SUPPORT_ABSTRACT_COMMAND =
       getValue("corant.context.command.support-abstract-command", Boolean.class, Boolean.FALSE);
 
+  final Map<Class<?>, Set<Class<? extends CommandHandler<?>>>> commandAndHandler =
+      new ConcurrentHashMap<>();
+
+  public Set<Class<? extends CommandHandler<?>>> getCommandHandlerTypes(Class<?> commandClass) {
+    return commandAndHandler.get(commandClass);
+  }
+
+  @SuppressWarnings("unchecked")
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       Commands.class}) ProcessAnnotatedType<?> event) {
     if (USE_COMMAND_PATTERN) {
@@ -66,13 +74,13 @@ public class CommanderExtension implements Extension {
               .format("Can not find any command type parameter for handler [%s]", handlerCls));
         } else {
           if (!cmdCls.isInterface() && !Modifier.isAbstract(cmdCls.getModifiers())) {
-            event.configureAnnotatedType().add(TypeArgumentLiteral.of(cmdCls));
-            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
+            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
+                .add((Class<? extends CommandHandler<?>>) handlerCls);
             logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
                 handlerCls));
           } else if (SUPPORT_ABSTRACT_COMMAND) {
-            event.configureAnnotatedType().add(TypeArgumentLiteral.of(cmdCls));
-            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>()).add(handlerCls);
+            commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
+                .add((Class<? extends CommandHandler<?>>) handlerCls);
             logger.fine(() -> String.format("Resolved the abstract command [%s] with handler [%s]",
                 cmdCls, handlerCls));
           } else {
@@ -91,8 +99,8 @@ public class CommanderExtension implements Extension {
     logger.fine(() -> "Clear command & handlers cache.");
   }
 
-  void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
-    List<Pair<Class<?>, Set<Class<?>>>> warnings = new ArrayList<>();
+  synchronized void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    List<Pair<Class<?>, Set<Class<? extends CommandHandler<?>>>>> warnings = new ArrayList<>();
     commandAndHandler.forEach((k, v) -> {
       if (v.size() > 1) {
         warnings.add(Pair.of(k, v));
@@ -110,6 +118,10 @@ public class CommanderExtension implements Extension {
     }
     if (!commandAndHandler.isEmpty()) {
       logger.fine(() -> String.format("Found %s command handlers", commandAndHandler.size()));
+    }
+    // Make immutable
+    for (Class<?> cls : newHashSet(commandAndHandler.keySet())) {
+      commandAndHandler.put(cls, Collections.unmodifiableSet(commandAndHandler.get(cls)));
     }
   }
 

@@ -45,16 +45,16 @@ public @interface Secured {
   String[] allowed() default {};
 
   @Nonbinding
-  SecuredType type() default SecuredType.ROLE;
+  String runAs() default EMPTY;
 
   @Nonbinding
-  String runAs() default EMPTY;
+  SecuredType type() default SecuredType.ROLE;
 
   class SecureLiteral extends AnnotationLiteral<Secured> implements Secured {
 
     private static final long serialVersionUID = -2874685620910996061L;
 
-    String allowed[];
+    String[] allowed;
 
     SecuredType type;
 
@@ -72,13 +72,13 @@ public @interface Secured {
     }
 
     @Override
-    public SecuredType type() {
-      return type;
+    public String runAs() {
+      return runAs;
     }
 
     @Override
-    public String runAs() {
-      return runAs;
+    public SecuredType type() {
+      return type;
     }
 
   }

@@ -50,8 +50,8 @@ public interface QueryParameter extends Serializable {
   }
 
   /**
-   * Return query criteria. The criteria can be Map or POJO that used to construct query conditions
-   * or specifications for construct query conditions or specifications.
+   * Return query criteria. The criteria can be Map or POJO that are used to construct query
+   * conditions or specifications for construct query conditions or specifications.
    *
    * @return getCriteria
    */

@@ -32,10 +32,10 @@ import javax.inject.Singleton;
  * corant-context
  *
  * <p>
- * The command handler resolver is use for resolve the appropriate command handler with the given
- * command and handler qualifiers.
+ * The command handler resolver is used to resolve the appropriate command handler with the given
+ * command and handler qualifiers
  * <p>
- * Note: User can use CDI {@link Specializes} to replace and inherit this class by themselves, and
+ * Note: Users can use CDI {@link Specializes} to replace and inherit this class by themselves, and
  * re-implement the {@link #resolve(Object, Annotation...)} method to enable it to face more complex
  * application scenarios, for example, it can support the inheritance relationship of command object
  * types, etc.

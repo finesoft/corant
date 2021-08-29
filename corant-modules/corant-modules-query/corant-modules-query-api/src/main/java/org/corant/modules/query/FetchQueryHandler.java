@@ -30,7 +30,7 @@ public interface FetchQueryHandler {
 
   /**
    * Decide whether to fetch, generally, the given parameter 'result' is a single result record. If
-   * the fetch query predicate script not set, this method must return true.
+   * the fetch query predicate script is not set, this method must return true.
    *
    * @param result the query result use for decide whether to need fetch
    * @param queryParameter the query parameter use for decide whether to need fetch
@@ -46,7 +46,7 @@ public interface FetchQueryHandler {
   QueryObjectMapper getObjectMapper();
 
   /**
-   * Inject fetch query result in to single parent query result, the parameter 'fetchResult' may be
+   * Inject fetch query result into single parent query result, the parameter 'fetchResult' may be
    * modified.
    *
    * @param result the parent query result
@@ -56,7 +56,7 @@ public interface FetchQueryHandler {
   void handleFetchedResult(Object result, List<?> fetchResults, FetchQuery fetchQuery);
 
   /**
-   * Inject fetch query result in to parent query result list, the parameter 'fetchResult' may be
+   * Inject fetch query result into parent query result list, the parameter 'fetchResult' may be
    * modified.
    *
    * @param results the parent query result list

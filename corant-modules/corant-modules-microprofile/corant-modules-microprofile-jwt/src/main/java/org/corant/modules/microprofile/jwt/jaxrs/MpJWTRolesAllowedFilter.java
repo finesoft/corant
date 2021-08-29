@@ -21,6 +21,7 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import org.corant.context.security.SecurityContexts;
 import org.corant.modules.microprofile.jwt.MpJWTAuthorizer;
 import org.corant.modules.security.Authorizer;
 import org.corant.modules.security.shared.SimpleRoles;
@@ -49,7 +50,7 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) {
     try {
-      authorizer().checkAccess(requestContext, allowedRoles);
+      authorizer().checkAccess(SecurityContexts.getCurrent(), allowedRoles);
     } catch (Exception e) {
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
         Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);

@@ -45,7 +45,8 @@ public interface QueryHandler {
   QuerierConfig getQuerierConfig();
 
   /**
-   * Handle single result, perform the hint handler and convert the result to expected typed object.
+   * Handle a single result, perform the hint handler and convert the result to the expected typed
+   * object.
    *
    * @param <T> the result type
    * @param result the original results, currently is <b> Map&lt;String,Object&gt;</b>

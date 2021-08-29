@@ -47,6 +47,8 @@ import org.jboss.weld.manager.api.WeldManager;
  */
 public class Contexts {
 
+  public static final String WELD_INTERCEPTOR_BINDINGS_KEY = "org.jboss.weld.interceptor.bindings";
+
   static final boolean propagateStrictly =
       Configs.getValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
 

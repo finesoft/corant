@@ -37,7 +37,7 @@ public interface Querier {
   boolean decideFetch(Object result, FetchQuery fetchQuery);
 
   /**
-   * Returns the query object that this querier bind, the Query object define execution plan.
+   * Returns the query object that this querier binds, the Query object defines the execution plan.
    */
   Query getQuery();
 

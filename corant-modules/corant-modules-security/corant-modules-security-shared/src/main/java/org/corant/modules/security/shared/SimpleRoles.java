@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.corant.shared.util.Strings;
 
 /**
@@ -57,6 +58,10 @@ public class SimpleRoles implements Iterable<SimpleRole> {
   @Override
   public Iterator<SimpleRole> iterator() {
     return roles.iterator();
+  }
+
+  public Stream<SimpleRole> stream() {
+    return roles.stream();
   }
 
   public List<SimpleRole> toList() {

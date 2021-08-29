@@ -15,18 +15,16 @@ package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.SecurityContext;
+import java.util.ArrayList;
+import java.util.Collection;
+import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.Authorizer;
 import org.corant.modules.security.shared.SimplePermission;
 import org.corant.modules.security.shared.SimplePermissions;
+import org.corant.modules.security.shared.SimplePrincipal;
 import org.corant.modules.security.shared.SimpleRole;
 import org.corant.modules.security.shared.SimpleRoles;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
  * corant-modules-microprofile-jwt
@@ -49,38 +47,45 @@ public class MpJWTAuthorizer implements Authorizer {
 
   @Override
   public boolean testAccess(Object context, Object roleOrPermit) {
-    SecurityContext securityContext = ((ContainerRequestContext) context).getSecurityContext();
-    if (isEmpty(roleOrPermit)) {
-      return securityContext.getUserPrincipal() != null;
+    if (context instanceof SecurityContext) {
+      SecurityContext sctx = (SecurityContext) context;
+      if (isEmpty(roleOrPermit)) {
+        return sctx.getPrincipal() != null;
+      } else if (roleOrPermit instanceof SimpleRoles) {
+        return testAccessRole(sctx, (SimpleRoles) roleOrPermit);
+      } else if (roleOrPermit instanceof SimplePermissions) {
+        return testAccessPerm(sctx, (SimplePermissions) roleOrPermit);
+      }
     }
-    JsonWebToken jwt = JsonWebToken.class.cast(securityContext.getUserPrincipal());
-    if (roleOrPermit instanceof SimpleRoles) {
-      return hasRole(jwt, (SimpleRoles) roleOrPermit);
-    } else {
-      return hasPerm(jwt, (SimplePermissions) roleOrPermit);
-    }
+    return false;
   }
 
-  boolean hasPerm(JsonWebToken jwt, SimplePermissions perms) {
-    List<SimplePermission> jwtPerms = jwt != null && isNotEmpty(jwt.getGroups())
-        ? jwt.getGroups().stream().map(SimplePermission::of).collect(Collectors.toList())
-        : Collections.emptyList();// FIXME extract permission from ?
+  protected boolean testAccessPerm(SecurityContext sctx, SimplePermissions perms) {
+    SimplePrincipal principal = null;
+    Collection<SimplePermission> sctxPerms = null;
+    if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
+      principal = (SimplePrincipal) sctx.getPrincipal();
+      sctxPerms = principal.getProperty("permits", ArrayList::new, SimplePermission.class);
+    }
     for (SimplePermission perm : perms) {
-      if (perm.equals(ALL_PERMS) && jwt != null
-          || isNotEmpty(jwtPerms) && jwtPerms.stream().anyMatch(perm::implies)) {
+      if (perm.equals(ALL_PERMS) && principal != null
+          || isNotEmpty(sctxPerms) && sctxPerms.stream().anyMatch(perm::implies)) {
         return true;
       }
     }
     return false;
   }
 
-  boolean hasRole(JsonWebToken jwt, SimpleRoles roles) {
-    List<SimpleRole> jwtRoles = jwt != null && isNotEmpty(jwt.getGroups())
-        ? jwt.getGroups().stream().map(SimpleRole::of).collect(Collectors.toList())
-        : Collections.emptyList();
+  protected boolean testAccessRole(SecurityContext sctx, SimpleRoles roles) {
+    SimplePrincipal principal = null;
+    Collection<SimpleRole> sctxRoles = null;
+    if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
+      principal = (SimplePrincipal) sctx.getPrincipal();
+      sctxRoles = principal.getProperty("groups", ArrayList::new, SimpleRole.class);
+    }
     for (SimpleRole role : roles) {
-      if (role.equals(ALL_ROLES) && jwt != null
-          || isNotEmpty(jwtRoles) && jwtRoles.stream().anyMatch(role::implies)) {
+      if (role.equals(ALL_ROLES) && principal != null
+          || isNotEmpty(sctxRoles) && sctxRoles.stream().anyMatch(role::implies)) {
         return true;
       }
     }

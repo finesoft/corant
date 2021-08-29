@@ -30,11 +30,12 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
  * <p>
  * The class is the realization of a simple command bus. This class method is used to automatically
  * invoke the command handler synchronously or asynchronously according to the given command object
- * type. To use this, you need a commands and one or more command handlers that use this commands
+ * type. To use this, you need a command and one or more command handlers that use this commands
  * type as generic parameter type and inherit the abstract class
- * {@link org.corant.context.command.AbstractCommandHandler}.
+ * {@link org.corant.context.command.AbstractCommandHandler}. The Commanders use
+ * {@link CommandHandlerResolver} to resolve the appropriate command handler essentially.
  * <p>
- * Note: If a command has multiple handlers, follow CDI Type Safe Resolution calls one of the
+ * Note: If a command has multiple handlers, following CDI Type Safe Resolution calls one of the
  * handlers that meet the context requirements for handling, and throws an exception when the
  * handler that meets the context requirements cannot be resolved, for example, more than one is
  * found or not found.
@@ -82,6 +83,7 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
  *
  * @see CommandHandler
  * @see AbstractCommandHandler
+ * @see CommandHandlerResolver
  * @see Commands
  * @author bingo 下午9:05:28
  *

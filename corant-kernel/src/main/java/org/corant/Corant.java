@@ -69,14 +69,14 @@ import org.corant.shared.util.Threads;
  * Class that can be used to bootstrap and launch a Corant application from a Java main method. By
  * default class will perform the following steps to bootstrap your application:
  * <ul>
- * <li>Execute the boot preprocessor to handle some works before CDI container start, the works like
- * set some appropriate configuration properties to intervene system running.</li>
+ * <li>Execute the boot preprocessor to handle some work before CDI container start, the works like
+ * setting some appropriate configuration properties to intervene system running.</li>
  * <li>Configure appropriate class loader to the current thread context class loader and CDI
- * container class loader and add configuration classes to the set of bean classes for the synthetic
- * bean archive if necessary.</li>
+ * container class loaders and add configuration classes to the set of bean classes for the
+ * synthetic bean archive if necessary.</li>
  * <li>Construct the CDI container and initialize it, after the CDI container initialized then fire
- * PostContainerReadyEvent to listeners, those listeners may be use to configure some components
- * after CDI initialized such as web server.</li>
+ * PostContainerReadyEvent to listeners, those listeners may be used to configure some components
+ * after CDI initialization such as web server.</li>
  * <li>After the above execution was completed, fire PostCorantReadyEvent to listeners.</li>
  * </ul>
  *
@@ -170,10 +170,10 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use given config class(synthetic bean class) and arguments to construct Corant instance. If the
-   * given config class is not null then the class loader of the current thread context and the CDI
-   * container will be set with the given config class class loader. The given arguments will be
-   * propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
+   * Use the given config class(synthetic bean class) and arguments to construct Corant instances.
+   * If the given config class is not null then the class loader of the current thread context and
+   * the CDI container will be set with the class loader of the given config class. The given
+   * arguments will be propagated to all CorantBootHandler and all CorantLifecycleEvent listeners.
    *
    * @see #Corant(Class[], ClassLoader, String...)
    * @param configClass the additional synthetic bean class
@@ -189,7 +189,7 @@ public class Corant implements AutoCloseable {
    * arguments. If the given bean classes are not null then they will be added to the set of bean
    * classes for the synthetic bean archive. If the given class loader is not null then it will be
    * set to the context ClassLoader for current Thread and the CDI container class loader else we
-   * use Corant.class class loader. The given arguments will be propagate to all CorantBootHandler
+   * use Corant.class class loader. The given arguments will be propagated to all CorantBootHandler
    * and all CorantLifecycleEvent listeners.
    *
    * @param beanClasses the additional synthetic bean classes
@@ -210,10 +210,10 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use given class loader and arguments to construct Corant instance. If the given class loader is
-   * not null then the class loader of the current thread context and the CDI container will be set
-   * with the given class loader.The given arguments will be propagate to all CorantBootHandler and
-   * all CorantLifecycleEvent listeners.
+   * Use the given class loader and arguments to construct a Corant instance. If the given class
+   * loader is not null then the class loader of the current thread context and the CDI container
+   * will be set with the given class loader.The given arguments will be propagated to all
+   * CorantBootHandler and all CorantLifecycleEvent listeners.
    *
    * @param classLoader the class loader for current thread and CDI container
    * @param arguments the application arguments use for boot handler
@@ -223,8 +223,9 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use given arguments and the class loader of Corant.class to construct Corant instance.The given
-   * arguments will be propagate to all CorantBootHandler and all CorantLifecycleEvent listeners.
+   * Use the given arguments and the class loader of Corant.class to construct a Corant instance.The
+   * given arguments will be propagate to all CorantBootHandler and all CorantLifecycleEvent
+   * listeners.
    *
    * @param arguments the application arguments use for boot handler
    */
@@ -296,7 +297,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Run a runnable program in the CDI environment. This method will try to start the Corant
-   * application and automatically close it after the runnable executed.
+   * application and automatically close it after the runnable is executed.
    *
    * @param runnable the runnable program to be ran in CDI environment
    * @param arguments the application arguments use for boot handler
@@ -334,7 +335,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Shutdown the Corant application, if an error occurs, allow multiple attempts to shutdown. If
+   * Shutdown the Corant application. If an error occurs, allow multiple attempts to shutdown. If
    * you want to start it again, you can only start it through the {@link #startup()} method, or
    * instantiate Corant and call the {@link #start(Consumer)} method.
    *
@@ -387,7 +388,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use the specified synthetic bean classes to construct Corant instance and start it.
+   * Use the specified synthetic bean classes to construct a Corant instance and start it.
    *
    * @param beanClasses The synthetic bean classes
    * @return The Corant instance
@@ -397,8 +398,8 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use the specified synthetic config class and arguments to construct Corant instance and start
-   * it, the incoming arguments will be propagate to all CorantBootHandler and all
+   * Use the specified synthetic config class and arguments to construct a Corant instance and start
+   * it, the incoming arguments will be propagated to all CorantBootHandler and all
    * CorantLifecycleEvent listeners.
    *
    * @param configClass The synthetic bean class
@@ -411,9 +412,9 @@ public class Corant implements AutoCloseable {
 
   /**
    * The complete startup method, this method will use incoming bean classes(synthetic) and class
-   * loader and arguments to construct Corant instance and start it, before start this method also
-   * provide a pre-initializer callback to handle before the CDI container initialize. The
-   * pre-initializer can use for configure the CDI container before initialize it.
+   * loader and arguments to construct Corant instance and start it, before starting this method
+   * also provide a pre-initializer callback to handle before the CDI container initializes. The
+   * pre-initializer can be used to configure the CDI container before initializing it.
    *
    * @param beanClasses The synthetic bean class
    * @param classLoader The class loader use for the current thread context and the CDI container
@@ -429,8 +430,8 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use the specified synthetic bean classes and arguments to construct Corant instance and start
-   * it, the incoming arguments will be propagate to all CorantBootHandler and
+   * Use the specified synthetic bean classes and arguments to construct a Corant instance and start
+   * it, the incoming arguments will be propagated to all CorantBootHandler and
    * allCorantLifecycleEvent listeners.
    *
    * @param beanClasses The synthetic bean class
@@ -444,8 +445,8 @@ public class Corant implements AutoCloseable {
 
   /**
    * Use the specified arguments to construct Corant instance and start it, the incoming arguments
-   * will be propagate to all CorantBootHandler and all CorantLifecycle Event listeners, The
-   * incoming pre-initializer can use for configure the CDI container before initialize it.
+   * will be propagated to all CorantBootHandler and all CorantLifecycle Event listeners, The
+   * incoming pre-initializer can be used to configure the CDI container before initializing it.
    *
    * @param preInitializer The pre-initializer callback use for configure CDI container
    * @param arguments The application arguments can be propagated to related processors
@@ -457,8 +458,8 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Use the specified arguments to construct Corant instance and start it, the incoming arguments
-   * will be propagate to all CorantBootHandler and allCorantLifecycleEvent listeners.
+   * Use the specified arguments to construct a Corant instance and start it, the incoming arguments
+   * will be propagated to all CorantBootHandler and allCorantLifecycleEvent listeners.
    *
    * @param arguments The application arguments can be propagated to related processors
    * @return The Corant instance

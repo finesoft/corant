@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * corant-modules-security-shared
@@ -37,6 +38,10 @@ public class SimplePrincipals implements Iterable<SimplePrincipal> {
   @Override
   public Iterator<SimplePrincipal> iterator() {
     return principals.iterator();
+  }
+
+  public Stream<SimplePrincipal> stream() {
+    return principals.stream();
   }
 
   public List<SimplePrincipal> toList() {

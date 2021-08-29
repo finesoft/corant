@@ -13,6 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -32,7 +33,8 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
-import org.corant.modules.security.PermitsAllowed;
+import org.corant.modules.security.annotation.SecuredType;
+import org.corant.modules.security.annotation.Secured;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
@@ -49,7 +51,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
   private static final Map<ResourceInfo, Consumer<FeatureContext>> handlers =
       new ConcurrentHashMap<>();// static?
   private static final Set<Class<? extends Annotation>> mpJwtAnnotations =
-      setOf(DenyAll.class, PermitAll.class, RolesAllowed.class, PermitsAllowed.class);
+      setOf(DenyAll.class, PermitAll.class, RolesAllowed.class, Secured.class);
 
   @Override
   public void configure(ResourceInfo resourceInfo, FeatureContext context) {
@@ -81,8 +83,11 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
         registration = denyAllFilter;
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
         registration = new MpJWTRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
-      } else if (mpJwtAnnotation instanceof PermitsAllowed) {
-        registration = new MpJWTPermitsAllowedFilter(((PermitsAllowed) mpJwtAnnotation).value());
+      } else if (mpJwtAnnotation instanceof Secured) {
+        Secured secure = (Secured) mpJwtAnnotation;
+        if (secure.type() == SecuredType.PERMIT && isNotEmpty(secure.allowed())) {
+          registration = new MpJWTPermitsAllowedFilter(secure.allowed());
+        }
       } else if (mpJwtAnnotation instanceof PermitAll) {
         registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       }

@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.corant.shared.util.Strings;
 
 /**
@@ -57,6 +58,10 @@ public class SimplePermissions implements Iterable<SimplePermission> {
   @Override
   public Iterator<SimplePermission> iterator() {
     return perms.iterator();
+  }
+
+  public Stream<SimplePermission> stream() {
+    return perms.stream();
   }
 
   public List<SimplePermission> toList() {

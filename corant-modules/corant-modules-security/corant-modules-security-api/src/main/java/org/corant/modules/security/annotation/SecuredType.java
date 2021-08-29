@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,25 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package org.corant.modules.security.annotation;
 
 /**
  * corant-modules-security-api
  *
- * @author bingo 12:12:00
+ * @author bingo 上午11:47:49
  *
  */
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface PermitsAllowed {
-
-  String[] value();
+public enum SecuredType {
+  ROLE, PERMIT
 }

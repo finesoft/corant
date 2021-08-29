@@ -48,7 +48,7 @@ public class CommanderExtension implements Extension {
 
   private static final Logger logger = Logger.getLogger(CommanderExtension.class.getName());
 
-  static final boolean USE_COMMAND_PATTERN =
+  static final boolean ENABLED_COMMANDS =
       getValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
 
   static final boolean SUPPORT_ABSTRACT_COMMAND =
@@ -64,7 +64,7 @@ public class CommanderExtension implements Extension {
   @SuppressWarnings("unchecked")
   void arrange(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       Commands.class}) ProcessAnnotatedType<?> event) {
-    if (USE_COMMAND_PATTERN) {
+    if (ENABLED_COMMANDS) {
       Class<?> handlerCls = event.getAnnotatedType().getJavaClass();
       if (!handlerCls.isInterface() && !Modifier.isAbstract(handlerCls.getModifiers())
           && CommandHandler.class.isAssignableFrom(handlerCls)) {

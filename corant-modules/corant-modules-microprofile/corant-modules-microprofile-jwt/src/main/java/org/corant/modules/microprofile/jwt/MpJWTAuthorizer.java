@@ -52,15 +52,15 @@ public class MpJWTAuthorizer implements Authorizer {
       if (isEmpty(roleOrPermit)) {
         return sctx.getPrincipal() != null;
       } else if (roleOrPermit instanceof SimpleRoles) {
-        return testAccessRole(sctx, (SimpleRoles) roleOrPermit);
+        return testRoleAccess(sctx, (SimpleRoles) roleOrPermit);
       } else if (roleOrPermit instanceof SimplePermissions) {
-        return testAccessPerm(sctx, (SimplePermissions) roleOrPermit);
+        return testPermAccess(sctx, (SimplePermissions) roleOrPermit);
       }
     }
     return false;
   }
 
-  protected boolean testAccessPerm(SecurityContext sctx, SimplePermissions perms) {
+  protected boolean testPermAccess(SecurityContext sctx, SimplePermissions perms) {
     SimplePrincipal principal = null;
     Collection<SimplePermission> sctxPerms = null;
     if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
@@ -76,7 +76,7 @@ public class MpJWTAuthorizer implements Authorizer {
     return false;
   }
 
-  protected boolean testAccessRole(SecurityContext sctx, SimpleRoles roles) {
+  protected boolean testRoleAccess(SecurityContext sctx, SimpleRoles roles) {
     SimplePrincipal principal = null;
     Collection<SimpleRole> sctxRoles = null;
     if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {

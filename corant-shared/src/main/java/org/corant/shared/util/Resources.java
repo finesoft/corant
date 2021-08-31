@@ -62,8 +62,8 @@ public class Resources {
    * resources from file system.</li>
    * <li>The incoming path start with 'classpath:' ({@link SourceType#CLASS_PATH}) means that get
    * resources from class path.</li>
-   * <li>The incoming path start with 'url:' ({@link SourceType#CLASS_PATH}) means that get
-   * resources from URL.</li>
+   * <li>The incoming path start with 'url:' ({@link SourceType#URL}) means that get resources from
+   * URL.</li>
    * </ul>
    * Note: If the incoming path non start with {@link SourceType} that means not specified schema
    * then use class path.

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2008 Google Inc.
+/*
+ * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -43,8 +43,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  * Static methods for working with types.
  *
- * @author Bob Lee
- * @author Jesse Wilson
  */
 public class Types {
 

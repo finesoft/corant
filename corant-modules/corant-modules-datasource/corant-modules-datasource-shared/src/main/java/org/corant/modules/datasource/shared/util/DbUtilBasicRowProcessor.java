@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.dbutils.BasicRowProcessor;
-import org.corant.shared.ubiquity.Services;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-datasource-shared

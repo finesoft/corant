@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.shared.ubiquity;
+package org.corant.shared.util;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Classes;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-shared

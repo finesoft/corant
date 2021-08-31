@@ -41,20 +41,63 @@ import org.corant.shared.util.Chars;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Services;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
+ * <p>
+ * The interface use to resolve the message of exception. This interface inherits the
+ * {@link Sortable} interface, and the implementer can easily specify the priority to replace the
+ * default implementation.
+ *
+ * @see Sortable
+ * @see Services
  *
  * @author bingo 上午11:48:24
  *
  */
 public interface ExceptionMessageResolver extends Sortable {
 
+  /**
+   * Use the given exception object and locale to construct and return the message corresponding to
+   * the exception. The implementation may use {@link GeneralRuntimeException#getCode()},
+   * {@link GeneralRuntimeException#getSubCode()}, and
+   * {@link GeneralRuntimeException#getParameters()} to construct a localized message.
+   *
+   * @param exception the exception to extract message
+   * @param locale the message locale
+   *
+   * @see GeneralRuntimeException#getCode()
+   * @see GeneralRuntimeException#getSubCode()
+   * @see GeneralRuntimeException#getLocalizedMessage(Locale)
+   * @see GeneralRuntimeException#getParameters()
+   */
   String getMessage(GeneralRuntimeException exception, Locale locale);
 
-  static class SimpleExceptionMessageResolver implements ExceptionMessageResolver {
+  /**
+   * corant-shared
+   * <p>
+   * The simple exception message resolver, resolve the message from the class path
+   * {@link #DEFAULT_SOURCE_PATH} property files, or user may specify the other property files path
+   * by system properties with key {@link #SPEC_SOURCE_PATH_KEY}, multiple path use {@code ','}
+   * commas to separate.
+   * <p>
+   * Note: The property file name must end with the locale tag, for example:
+   *
+   * <pre>
+   * Message_zh_CN.properties, means this properties file is used for {@link Locale#CHINA}.
+   * Message_en_US.properties, means this properties file is used for {@link Locale#US}.
+   * </pre>
+   *
+   * @see Resources#from(String)
+   * @see Resources.SourceType
+   *
+   * @author bingo 上午11:19:31
+   *
+   */
+  class SimpleExceptionMessageResolver implements ExceptionMessageResolver {
 
     public static final String SPEC_SOURCE_PATH_KEY =
         Names.CORANT_PREFIX + "exception-message-source-path";
@@ -82,7 +125,7 @@ public interface ExceptionMessageResolver extends Sortable {
     static Pair<Locale, Map<String, MessageFormat>> parse(Resource resource) {
       MutableObject<Locale> locales = new MutableObject<>(null);
       String name;
-      int pos = -1;
+      int pos;
       if (isNotBlank(name = FileUtils.getFileBaseName(resource.getName()))
           && (pos = name.indexOf(Chars.UNDERSCORE)) > 0) {
         tryConvert(name.substring(pos + 1).replace(Chars.UNDERSCORE, Chars.DASH), Locale.class)

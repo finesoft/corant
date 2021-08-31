@@ -263,7 +263,7 @@ public class Objects {
   }
 
   /**
-   * Returns a new instance of the given class, use {@link Class#getDeclaredConstructor()}.
+   * Returns a new instance of the given class, use {@link Class#getDeclaredConstructor(Class...)}.
    *
    * @param <T> the instance type
    * @param cls the instance class

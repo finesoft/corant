@@ -37,7 +37,7 @@ public class NumberBigIntegerConverter extends AbstractConverter<Number, BigInte
   }
 
   /**
-   * @see AbstractConverter#AbstractConverter(Objet,boolean)
+   * @see AbstractConverter#AbstractConverter(Object, boolean)
    */
   public NumberBigIntegerConverter(BigInteger defaultValue, boolean throwException) {
     super(defaultValue, throwException);

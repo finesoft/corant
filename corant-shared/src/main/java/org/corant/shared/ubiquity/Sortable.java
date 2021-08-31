@@ -20,6 +20,7 @@ import org.corant.shared.util.Classes;
 /**
  * corant-shared
  *
+ * <p>
  * Interface that can be used for sorting, note that in general, the smaller the priority number
  * {@link #getPriority()}, the more preferred, for the instances with the same priority value, the
  * name of instance class will be used for sorting according to string sorting criteria.

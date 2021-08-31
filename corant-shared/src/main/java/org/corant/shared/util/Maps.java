@@ -287,7 +287,7 @@ public class Maps {
    * @param hints the lastConverter hints use for intervening converters
    * @return the mapped expected collection value
    *
-   * @see Conversion#convert(Object, Class, java.util.function.Supplier, Map)
+   * @see Conversion#convert(Object, Class, IntFunction, Map)
    * @see Conversion#convert(Collection, IntFunction, Class, Map)
    * @see Conversion#convert(Object[], IntFunction, Class, Map)
    */

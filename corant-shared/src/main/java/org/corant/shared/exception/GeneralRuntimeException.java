@@ -35,6 +35,17 @@ import org.corant.shared.util.Objects;
 /**
  * corant-shared
  *
+ * <p>
+ * Exception class that can carry more business-significant information. In general, this class
+ * doesn't specify the concrete detailed message, it is used with the
+ * {@link ExceptionMessageResolver} to resolve the exception message. The
+ * {@link ExceptionMessageResolver} may use {@link #getCode()}, {@link #getSubCode()},
+ * {@link #getParameters()} to resolve the message and may specify some attributes
+ * {@link #getAttributes()} to the catcher to do some action.
+ *
+ * @see ExceptionMessageResolver
+ * @see GeneralRuntimeExceptionWrapper
+ *
  * @author bingo 下午6:19:52
  *
  */
@@ -58,14 +69,35 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   private Map<Object, Object> attributes = new HashMap<>();
 
+  /**
+   * Constructs a general runtime exception with the given code
+   *
+   * @param code the exception code use for message resolving or checking
+   */
   public GeneralRuntimeException(Object code) {
     this(code, null, new HashMap<>(), Objects.EMPTY_ARRAY);
   }
 
+  /**
+   * Constructs a general runtime exception with the given code and message parameters
+   *
+   * @param code the the exception code use for message resolving or checking
+   * @param variants the message parameters
+   */
   public GeneralRuntimeException(Object code, Object... variants) {
     this(code, null, new HashMap<>(), variants);
   }
 
+  /**
+   * Constructs a general runtime exception with the given codes and message parameters and
+   * additional attributes.
+   *
+   * @param code the the exception code use for message resolving or checking
+   * @param subCode the the exception sub-code use for message resolving or checking
+   * @param attributes the additional business-significant attributes for the catcher to do more
+   *        action
+   * @param parameters the message parameters
+   */
   public GeneralRuntimeException(Object code, Object subCode, Map<Object, Object> attributes,
       Object... parameters) {
     setCode(code);
@@ -74,6 +106,12 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     setAttributes(attributes);
   }
 
+  /**
+   * Use cause to construct a new runtime exception.
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   */
   public GeneralRuntimeException(Throwable cause) {
     super(cause);
     if (cause instanceof GeneralRuntimeException) {
@@ -85,11 +123,26 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     }
   }
 
+  /**
+   * Use cause and code to construct a new runtime exception.
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   * @param code the the exception code use for message resolving or checking
+   */
   public GeneralRuntimeException(Throwable cause, Object code) {
     super(cause);
     setCode(code);
   }
 
+  /**
+   * Use cause and code and message parameters to construct a new runtime exception.
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   * @param code the the exception code use for message resolving or checking
+   * @param parameters the message parameters
+   */
   public GeneralRuntimeException(Throwable cause, Object code, Object... parameters) {
     super(cause);
     setCode(code);

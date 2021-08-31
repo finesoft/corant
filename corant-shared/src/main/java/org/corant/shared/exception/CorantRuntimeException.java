@@ -23,34 +23,42 @@ public class CorantRuntimeException extends RuntimeException {
 
   private static final long serialVersionUID = 5315201175867072341L;
 
-  /**
-   *
-   */
-  public CorantRuntimeException() {
-    super();
-  }
+  public CorantRuntimeException() {}
 
   /**
-   * @param msgOrFormat
-   * @param args
+   * Use message or message format and parameters to construct a new runtime exception.
+   *
+   * @param msgOrFormat the message or message format
+   * @param args the message format parameter
+   *
+   * @see String#format(String, Object...)
    */
   public CorantRuntimeException(String msgOrFormat, Object... args) {
     super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args));
   }
 
   /**
-   * @param cause
+   * Use cause to construct a new runtime exception.
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
    */
   public CorantRuntimeException(Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   * @param msgOrFormat
-   * @param args
+   * Constructs a new runtime exception with cause, suppression enabled or disabled, and writable
+   * stack trace enabled or disabled and the specified detail message or message format and
+   * parameters.
+   *
+   *
+   * @param cause the cause. (A {@code null} value is permitted, and indicates that the cause is
+   *        nonexistent or unknown.)
+   * @param enableSuppression whether or not suppression is enabled or disabled
+   * @param writableStackTrace whether or not the stack trace should be writable
+   * @param msgOrFormat the detail message or message format
+   * @param args the detail message format parameters
    */
   public CorantRuntimeException(Throwable cause, boolean enableSuppression,
       boolean writableStackTrace, String msgOrFormat, Object... args) {
@@ -59,9 +67,16 @@ public class CorantRuntimeException extends RuntimeException {
   }
 
   /**
-   * @param cause
-   * @param msgOrFormat
-   * @param args
+   * Constructs a new runtime exception with the specified detail message and cause.
+   *
+   * Note: the detail message associated with cause is not automatically incorporated in this
+   * runtime exception's detail message.
+   *
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
+   * @param msgOrFormat the message or message format
+   * @param args the message format parameter
    */
   public CorantRuntimeException(Throwable cause, String msgOrFormat, Object... args) {
     super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args), cause);

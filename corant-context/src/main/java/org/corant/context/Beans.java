@@ -34,8 +34,8 @@ import javax.enterprise.util.TypeLiteral;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Services;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 
 /**
  * corant-context

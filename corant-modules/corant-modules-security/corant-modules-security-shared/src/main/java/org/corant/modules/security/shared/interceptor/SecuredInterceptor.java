@@ -14,15 +14,13 @@
 package org.corant.modules.security.shared.interceptor;
 
 import static org.corant.shared.util.Empties.isEmpty;
-import java.lang.annotation.Annotation;
-import java.util.Set;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import org.corant.context.Contexts;
+import org.corant.context.AbstractInterceptor;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.SecurityManager;
 import org.corant.modules.security.annotation.Secured;
@@ -38,7 +36,7 @@ import org.corant.modules.security.shared.SimpleRoles;
  */
 @Interceptor
 @Secured
-public class SecuredInterceptor {
+public class SecuredInterceptor extends AbstractInterceptor {
 
   @Inject
   @Any
@@ -51,7 +49,7 @@ public class SecuredInterceptor {
   }
 
   protected void check(InvocationContext invocationContext) throws Exception {
-    Secured secured = extract(invocationContext);
+    Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
     if (secured != null) {
       SecurityManager sm = securityManagers.get();
       if (isEmpty(secured.allowed())) {
@@ -64,17 +62,4 @@ public class SecuredInterceptor {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  protected Secured extract(InvocationContext ic) {
-    if (ic.getContextData().containsKey(Contexts.WELD_INTERCEPTOR_BINDINGS_KEY)) {
-      Set<Annotation> annotationBindings =
-          (Set<Annotation>) ic.getContextData().get(Contexts.WELD_INTERCEPTOR_BINDINGS_KEY);
-      for (Annotation annotation : annotationBindings) {
-        if (annotation.annotationType() == Secured.class) {
-          return (Secured) annotation;
-        }
-      }
-    }
-    return null;
-  }
 }

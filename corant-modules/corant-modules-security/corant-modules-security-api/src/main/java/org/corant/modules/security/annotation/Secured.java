@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.annotation;
 
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -36,7 +37,7 @@ import org.corant.shared.util.Strings;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
+@Target({TYPE, METHOD, CONSTRUCTOR})
 @InterceptorBinding
 @Inherited
 public @interface Secured {

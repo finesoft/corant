@@ -20,7 +20,7 @@ import java.util.function.Function;
 import org.corant.shared.normal.Names;
 
 /**
- * corant-kernel
+ * corant-modules-bundle
  *
  * @author bingo 下午9:28:49
  *

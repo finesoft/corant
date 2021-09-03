@@ -31,6 +31,8 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -92,6 +94,10 @@ public class PropertyEnumerationSource implements EnumerationSource {
     load();
   }
 
+  protected boolean accept(Resource resource) {
+    return true;
+  }
+
   protected synchronized void clear() {
     holder.forEach((k, v) -> {
       v.classLiteral.clear();
@@ -114,34 +120,35 @@ public class PropertyEnumerationSource implements EnumerationSource {
             clear();
             logger.fine(() -> "Clear property enumerations bundle holder for initializing.");
             Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(Strings::isNotBlank).forEach(path -> {
-              PropertyResourceBundle.getBundles(path, r -> true).forEach((s, res) -> {
-                logger.fine(() -> String.format("Found enumeration resource from %s.", s));
-                Locale locale = res.getLocale();
-                EnumLiteralsObject obj =
-                    holder.computeIfAbsent(locale, k -> new EnumLiteralsObject());
-                res.dump().forEach((k, v) -> {
-                  int i = k.lastIndexOf('.');
-                  String enumClsName = k.substring(0, i);
-                  String enumItemKey = null;
-                  Class enumCls = null;
-                  try {
-                    enumCls = Class.forName(enumClsName);
-                    enumItemKey = k.substring(i + 1);
-                  } catch (ClassNotFoundException e) {
-                    enumCls = tryAsClass(k);
-                    if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
-                      obj.putEnumClass(enumCls, v);
-                    } else {
-                      throw new CorantRuntimeException("enum class %s error", s);
+            paths.stream().filter(Strings::isNotBlank)
+                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, this::accept).stream())
+                .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
+                  logger.fine(
+                      () -> String.format("Found enumeration resource from %s.", res.getUri()));
+                  Locale locale = res.getLocale();
+                  EnumLiteralsObject obj =
+                      holder.computeIfAbsent(locale, k -> new EnumLiteralsObject());
+                  res.dump().forEach((k, v) -> {
+                    int i = k.lastIndexOf('.');
+                    String enumClsName = k.substring(0, i);
+                    String enumItemKey = null;
+                    Class enumCls = null;
+                    try {
+                      enumCls = Class.forName(enumClsName);
+                      enumItemKey = k.substring(i + 1);
+                    } catch (ClassNotFoundException e) {
+                      enumCls = tryAsClass(k);
+                      if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
+                        obj.putEnumClass(enumCls, v);
+                      } else {
+                        throw new CorantRuntimeException("enum class %s error", res.getUri());
+                      }
                     }
-                  }
-                  if (enumItemKey != null) {
-                    obj.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
-                  }
+                    if (enumItemKey != null) {
+                      obj.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
+                    }
+                  });
                 });
-              });
-            });
             // TODO validate
           } finally {
             initialized = true;

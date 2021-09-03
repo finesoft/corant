@@ -28,7 +28,11 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -51,6 +55,10 @@ public class PropertyMessageSource implements MessageSource {
   @ConfigProperty(name = "corant.bundle.message-file.paths",
       defaultValue = "META-INF/**Messages_*.properties")
   protected String bundleFilePaths;
+
+  @Inject
+  @Any
+  protected Instance<MessageSourceAdjuster> adjusters;
 
   @Override
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchMessageException {
@@ -101,6 +109,10 @@ public class PropertyMessageSource implements MessageSource {
     load();
   }
 
+  protected boolean accept(Resource resource) {
+    return true;
+  }
+
   protected synchronized void clear() {
     holder.forEach((k, v) -> v.clear());
     holder.clear();
@@ -119,19 +131,21 @@ public class PropertyMessageSource implements MessageSource {
             clear();
             logger.fine(() -> "Clear property message bundle holder for initializing.");
             Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(Strings::isNotBlank).forEach(pkg -> {
-              PropertyResourceBundle.getBundles(pkg, r -> true).forEach((s, res) -> {
-                logger.fine(() -> String.format("Found message resource from %s.", s));
-                Map<String, MessageFormat> localeMap =
-                    res.dump().entrySet().stream().collect(Collectors.toMap(Entry::getKey,
-                        v -> new MessageFormat(v.getValue(), res.getLocale())));
-                holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())
-                    .putAll(localeMap);
-                logger.fine(() -> String.format("Found %s %s message keys from %s.",
-                    localeMap.size(), res.getLocale(), s));
-              });
-            });
-
+            paths.stream().filter(Strings::isNotBlank)
+                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, this::accept).stream())
+                .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
+                  logger.fine(() -> String.format("Found message resource from %s.", res.getUri()));
+                  Map<String, MessageFormat> localeMap =
+                      res.dump().entrySet().stream().collect(Collectors.toMap(Entry::getKey,
+                          v -> new MessageFormat(v.getValue(), res.getLocale())));
+                  holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())
+                      .putAll(localeMap);
+                  logger.fine(() -> String.format("Found %s %s message keys from %s.",
+                      localeMap.size(), res.getLocale(), res.getUri()));
+                });
+            if (!adjusters.isUnsatisfied()) {
+              adjusters.stream().sorted(Sortable::compare).forEach(sa -> sa.adjust(holder));
+            }
           } finally {
             initialized = true;
             logger.fine(() -> String.format("Found %s message keys from %s.",

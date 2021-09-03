@@ -54,7 +54,7 @@ public class StringLongConverter extends AbstractNumberConverter<String, Long> {
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {
-      String val = value.trim();
+      String val = stripTrailingZeros(value);
       if (hasPrefix(val)) {
         return Long.decode(val);
       } else {

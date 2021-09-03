@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.right;
@@ -20,9 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -32,9 +36,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.util.Resources.URLResource;
 
 /**
  * corant-modules-bundle
@@ -42,7 +48,9 @@ import org.corant.shared.util.Resources.Resource;
  * @author bingo 下午3:47:37
  *
  */
-public class PropertyResourceBundle extends ResourceBundle {
+public class PropertyResourceBundle extends ResourceBundle implements Sortable {
+
+  public static final String PRIORITY_KEY = "corant.bundle.priority";
 
   public static final String LOCALE_SPT = "_";
 
@@ -58,8 +66,11 @@ public class PropertyResourceBundle extends ResourceBundle {
 
   private String baseBundleName;
 
+  private String uri;
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   public PropertyResourceBundle(Resource fo) throws IOException {
+    uri = fo instanceof URLResource ? ((URLResource) fo).getURI().toString() : fo.getName();
     baseBundleName = fo.getName();
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
@@ -72,13 +83,12 @@ public class PropertyResourceBundle extends ResourceBundle {
     lookup = new HashMap(properties);
   }
 
-  public static Map<String, PropertyResourceBundle> getBundles(String path,
-      Predicate<Resource> fs) {
-    Map<String, PropertyResourceBundle> map = new HashMap<>();
+  public static List<PropertyResourceBundle> getBundles(String path, Predicate<Resource> fs) {
+    List<PropertyResourceBundle> list = new ArrayList<>();
     try {
       Resources.from(path).filter(fs).forEach(fo -> {
         try {
-          map.putIfAbsent(fo.getURL().getPath(), new PropertyResourceBundle(fo));
+          list.add(new PropertyResourceBundle(fo));
         } catch (IOException e) {
           throw new NoSuchBundleException(e, "Can not load property resource bundle %s.",
               fo.getURL().getPath());
@@ -88,7 +98,8 @@ public class PropertyResourceBundle extends ResourceBundle {
       throw new NoSuchBundleException(e, "Can not load property resource bundles from paths %s.",
           path);
     }
-    return map;
+    Collections.sort(list, Sortable::compare);
+    return list;
   }
 
   protected static Locale detectLocaleByName(String name) {
@@ -129,6 +140,15 @@ public class PropertyResourceBundle extends ResourceBundle {
   @Override
   public Locale getLocale() {
     return locale;
+  }
+
+  @Override
+  public int getPriority() {
+    return getMapInteger(lookup, PRIORITY_KEY, Sortable.super.getPriority());
+  }
+
+  public String getUri() {
+    return uri;
   }
 
   @Override

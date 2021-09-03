@@ -13,7 +13,7 @@
  */
 package org.corant.modules.security;
 
-import org.corant.context.security.SecurityContexts;
+import org.corant.context.security.SecurityContext;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -29,13 +29,14 @@ public interface Authenticator extends Sortable {
 
   AuthenticationData authenticate(Token token) throws AuthenticationException;
 
-  default boolean authenticated() {
-    return SecurityContexts.getCurrentPrincipal() != null;
+  default boolean authenticated(Object object) {
+    return object instanceof SecurityContext && object != null
+        && ((SecurityContext) object).getPrincipal() != null;
   }
 
-  default void checkAuthenticated() throws AuthenticationException {
-    if (!authenticated()) {
-      throw new AuthenticationException();
+  default void checkAuthenticated(Object object) throws AuthenticationException {
+    if (!authenticated(object)) {
+      throw new AuthenticationException(SecurityMessageCodes.UNAUTHC_ACCESS);
     }
   }
 }

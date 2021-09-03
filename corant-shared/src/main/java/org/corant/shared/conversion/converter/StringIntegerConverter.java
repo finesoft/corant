@@ -54,7 +54,7 @@ public class StringIntegerConverter extends AbstractNumberConverter<String, Inte
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {
-      String val = value.trim();
+      String val = stripTrailingZeros(value);
       if (hasPrefix(val)) {
         return Integer.decode(val);
       } else {

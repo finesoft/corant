@@ -15,6 +15,7 @@ package org.corant.shared.conversion.converter;
 
 import java.util.Map;
 import org.corant.shared.conversion.ConverterHints;
+import org.corant.shared.util.Chars;
 
 /**
  * corant-shared
@@ -87,5 +88,22 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
    */
   protected static boolean isHintsUnsigned(Map<String, ?> hints) {
     return ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_UNSIGNED_KEY, false);
+  }
+
+  /**
+   * Returns a stripped decimal point and trailing zero string for integer type conversion. If it
+   * cannot be stripped or it is empty after stripping, the original string is returned.
+   *
+   * @param value the value to strip
+   */
+  protected static String stripTrailingZeros(String value) {
+    String sval = value.strip();
+    String rval = sval;
+    int di;
+    if ((di = rval.indexOf(Chars.DOT)) != -1
+        && rval.substring(di + 1).chars().allMatch(c -> c == Chars.ZERO)) {
+      rval = rval.substring(0, di);
+    }
+    return rval.isEmpty() ? sval : rval;
   }
 }

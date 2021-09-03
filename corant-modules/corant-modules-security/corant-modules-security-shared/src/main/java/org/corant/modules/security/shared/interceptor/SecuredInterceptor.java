@@ -14,17 +14,22 @@
 package org.corant.modules.security.shared.interceptor;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import java.util.function.Function;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
 import org.corant.context.security.SecurityContexts;
+import org.corant.modules.security.AuthorizationException;
+import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.SecurityManager;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredType;
+import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
 
@@ -43,6 +48,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
   protected Instance<SecurityManager> securityManagers;
 
   @AroundInvoke
+  @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
     check(invocationContext);
     return invocationContext.proceed();
@@ -51,13 +57,52 @@ public class SecuredInterceptor extends AbstractInterceptor {
   protected void check(InvocationContext invocationContext) throws Exception {
     Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
     if (secured != null) {
-      SecurityManager sm = securityManagers.get();
+      if (securityManagers.isUnsatisfied()) {
+        if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
+          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+        } else {
+          return;
+        }
+      }
       if (isEmpty(secured.allowed())) {
-        sm.checkAuthenticated();
+        checkAuthenticated();
       } else if (secured.type() == SecuredType.ROLE) {
-        sm.checkAccess(SecurityContexts.getCurrent(), SimpleRoles.of(secured.allowed()));
+        checkAccess(secured, SimpleRoles::of);
       } else {
-        sm.checkAccess(SecurityContexts.getCurrent(), SimplePermissions.of(secured.allowed()));
+        checkAccess(secured, SimplePermissions::of);
+      }
+    }
+  }
+
+  protected void checkAccess(Secured secured, Function<String[], Object> predicate) {
+    if (securityManagers.isResolvable()) {
+      securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
+          predicate.apply(secured.allowed()));
+    } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
+      if (securityManagers.stream().noneMatch(
+          sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
+        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      }
+    } else {
+      if (!securityManagers.stream().allMatch(
+          sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
+        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      }
+    }
+  }
+
+  protected void checkAuthenticated() {
+    if (securityManagers.isResolvable()) {
+      securityManagers.get().checkAuthenticated(SecurityContexts.getCurrent());
+    } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
+      if (securityManagers.stream()
+          .noneMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
+        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      }
+    } else {
+      if (!securityManagers.stream()
+          .allMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
+        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
     }
   }

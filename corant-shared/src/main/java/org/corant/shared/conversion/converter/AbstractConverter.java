@@ -86,7 +86,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
       result = value == null ? null : convert(value, hints);
     } catch (Exception e) {
       if (isThrowException()) {
-        throw new ConversionException(e);
+        throw new ConversionException(e, "Can not convert %s.", asString(value));
       } else {
         logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(value)));
       }

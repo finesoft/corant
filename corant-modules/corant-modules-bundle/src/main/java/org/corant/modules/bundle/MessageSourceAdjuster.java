@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,18 +13,19 @@
  */
 package org.corant.modules.bundle;
 
+import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.Map;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-bundle
  *
- * @author bingo 下午8:16:35
+ * @author bingo 下午8:06:14
  *
  */
-public interface Readable<T> {
+public interface MessageSourceAdjuster extends Sortable {
 
-  default String toHumanReader(Locale locale) {
-    return toString();
-  }
+  void adjust(Map<Locale, Map<String, MessageFormat>> sources);
 
 }

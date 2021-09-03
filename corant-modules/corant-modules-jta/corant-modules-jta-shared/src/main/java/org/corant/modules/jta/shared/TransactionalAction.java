@@ -352,22 +352,52 @@ public abstract class TransactionalAction<T> {
       }
     }
 
+    /**
+     * Specify TxType as TxType.MANDATORY, which is equivalent to using annotation
+     * {@code @Transactional(TxType.MANDATORY)}
+     *
+     * @see TxType#MANDATORY
+     */
     public TransactionalActuator<T> mandatory() {
       return txType(TxType.MANDATORY);
     }
 
+    /**
+     * Specify TxType as TxType.NEVER, which is equivalent to using annotation
+     * {@code @Transactional(TxType.NEVER)}
+     *
+     * @see TxType#NEVER
+     */
     public TransactionalActuator<T> never() {
       return txType(TxType.NEVER);
     }
 
+    /**
+     * Specify TxType as TxType.NOT_SUPPORTED, which is equivalent to using annotation
+     * {@code @Transactional(TxType.NOT_SUPPORTED)}
+     *
+     * @see TxType#NOT_SUPPORTED
+     */
     public TransactionalActuator<T> notSupported() {
       return txType(TxType.NOT_SUPPORTED);
     }
 
+    /**
+     * Specify TxType as TxType.REQUIRED, which is equivalent to using annotation
+     * {@code @Transactional(TxType.REQUIRED)}
+     *
+     * @see TxType#REQUIRED
+     */
     public TransactionalActuator<T> required() {
       return txType(TxType.REQUIRED);
     }
 
+    /**
+     * Specify TxType as TxType.REQUIRES_NEW, which is equivalent to using annotation
+     * {@code @Transactional(TxType.REQUIRES_NEW)}
+     *
+     * @see TxType#REQUIRES_NEW
+     */
     public TransactionalActuator<T> requiresNew() {
       return txType(TxType.REQUIRES_NEW);
     }
@@ -394,6 +424,12 @@ public abstract class TransactionalAction<T> {
       }
     }
 
+    /**
+     * Specify TxType as TxType.SUPPORTS, which is equivalent to using annotation
+     * {@code @Transactional(TxType.SUPPORTS)}
+     *
+     * @see TxType#SUPPORTS
+     */
     public TransactionalActuator<T> supports() {
       return txType(TxType.SUPPORTS);
     }
@@ -407,11 +443,25 @@ public abstract class TransactionalAction<T> {
       return this;
     }
 
+    /**
+     * Set the timeout value(in seconds) that is associated with transactions started by this
+     * actuator.
+     *
+     * @param timeout The value of the timeout in seconds. If the value is zero,the transaction
+     *        service restores the default value. If the value is negative a SystemException is
+     *        thrown.
+     */
     public TransactionalActuator<T> timeout(final int timeout) {
       this.timeout = timeout;
       return this;
     }
 
+    /**
+     * Specify the {@link TxType} value of this actuator, so that the actuator can execute
+     * corresponding actions within the transaction context according to the given TxType value
+     *
+     * @param txType the value of TxType
+     */
     public TransactionalActuator<T> txType(final TxType txType) {
       if (synchronization != null && (txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED)) {
         throw new NotSupportedException(

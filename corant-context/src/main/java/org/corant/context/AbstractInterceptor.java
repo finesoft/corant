@@ -82,7 +82,7 @@ public abstract class AbstractInterceptor {
               break;
             }
           }
-        } else {
+        } else if (ic.getConstructor() != null) {
           for (AnnotatedConstructor<?> constructorInSearch : currentAnnotatedType
               .getConstructors()) {
             if (constructorInSearch.getJavaMember().equals(ic.getConstructor())) {
@@ -111,11 +111,11 @@ public abstract class AbstractInterceptor {
       } else {
         // for EE components
         if (targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR)) {
-          if ((interceptorAnnotation =
+          if (ic.getMethod() != null && (interceptorAnnotation =
               ic.getMethod().getAnnotation(interceptorAnnotationType)) != null) {
             return interceptorAnnotation;
           }
-          if ((interceptorAnnotation =
+          if (ic.getConstructor() != null && (interceptorAnnotation =
               ic.getConstructor().getAnnotation(interceptorAnnotationType)) != null) {
             return interceptorAnnotation;
           }

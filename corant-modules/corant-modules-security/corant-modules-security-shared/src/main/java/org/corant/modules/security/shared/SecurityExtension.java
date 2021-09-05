@@ -43,6 +43,8 @@ import org.corant.shared.util.Strings;
  */
 public class SecurityExtension implements Extension {
 
+  public static final boolean CACHE_FILTER_HANDLERS =
+      Configs.getValue("corant.security.filter.cache-handler", Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_INTERCEPTOR =
       Configs.getValue("corant.security.interceptor.enable", Boolean.class, Boolean.FALSE);
   public static final boolean ENABLE_INTERCEPTOR_COMPATIBILITY = Configs

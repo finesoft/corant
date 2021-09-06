@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import org.corant.context.ContainerEvents.PostContainerStartedEvent;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.concurrent.ConcurrentExtension;
 import org.corant.context.concurrent.ManagedExecutorConfig;
@@ -59,15 +58,17 @@ public class ExecutorServiceManager {
 
   public void register(DefaultManagedExecutorService service) {
     executorService.add(service);
+    initializeHungLoggerIfNecessary();
   }
 
   public void register(DefaultManagedScheduledExecutorService service) {
     scheduledExecutorService.add(service);
+    initializeHungLoggerIfNecessary();
   }
 
-  protected synchronized void postContainerStartedEvent(
-      @Observes final PostContainerStartedEvent event) {
-    if (logger.getLevel() == Level.OFF || !ConcurrentExtension.ENABLE_HUNG_TASK_LOGGER) {
+  protected synchronized void initializeHungLoggerIfNecessary() {
+    if (logger.getLevel() == Level.OFF || !ConcurrentExtension.ENABLE_HUNG_TASK_LOGGER
+        || hungLogger != null) {
       return;
     }
     long checkPeriod = Stream

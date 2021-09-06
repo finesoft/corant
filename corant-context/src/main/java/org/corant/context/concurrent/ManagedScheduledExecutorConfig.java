@@ -36,13 +36,13 @@ public class ManagedScheduledExecutorConfig extends ManagedExecutorConfig {
 
   public ManagedScheduledExecutorConfig() {}
 
-  private ManagedScheduledExecutorConfig(String name) {
-    setName(name);
+  private ManagedScheduledExecutorConfig(String threadName) {
+    setThreadName(threadName);
   }
 
   @Override
   public String getThreadName() {
-    return defaultString(threadName, defaultString(name, DFLT_NAME));
+    return defaultString(threadName, defaultString(getName(), DFLT_NAME));
   }
 
 }

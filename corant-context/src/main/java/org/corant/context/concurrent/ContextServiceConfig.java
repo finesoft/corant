@@ -19,7 +19,6 @@ import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
-import org.corant.shared.normal.Names;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -34,7 +33,7 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   private static final long serialVersionUID = -5306010134920490346L;
 
-  public static final ContextServiceConfig DFLT_INST = new ContextServiceConfig(Names.CORANT);
+  public static final ContextServiceConfig DFLT_INST = new ContextServiceConfig(null);
 
   protected Set<ContextInfo> contextInfos = immutableSetOf(ContextInfo.values());
 

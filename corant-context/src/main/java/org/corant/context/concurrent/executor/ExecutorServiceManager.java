@@ -13,12 +13,29 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.max;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import org.corant.context.ContainerEvents.PostContainerStartedEvent;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
+import org.corant.context.concurrent.ConcurrentExtension;
+import org.corant.context.concurrent.ManagedExecutorConfig;
+import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings;
+import org.corant.shared.util.Threads;
+import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService;
+import org.glassfish.enterprise.concurrent.AbstractManagedThread;
 
 /**
  * corant-context
@@ -31,31 +48,132 @@ public class ExecutorServiceManager {
 
   protected static final Logger logger = Logger.getLogger(ExecutorServiceManager.class.getName());
 
-  protected static final List<DefaultManagedExecutorService> managedExecutorService = new ArrayList<>();
-  protected static final List<DefaultManagedScheduledExecutorService> managedSecheduledExecutorService =
+  protected static final List<DefaultManagedExecutorService> executorService = new ArrayList<>();
+  protected static final List<DefaultManagedScheduledExecutorService> scheduledExecutorService =
       new ArrayList<>();
 
+  protected HungLogger hungLogger;
+
+  @Inject
+  protected ConcurrentExtension extension;
+
   public void register(DefaultManagedExecutorService service) {
-    managedExecutorService.add(service);
+    executorService.add(service);
   }
 
   public void register(DefaultManagedScheduledExecutorService service) {
-    managedSecheduledExecutorService.add(service);
+    scheduledExecutorService.add(service);
   }
 
-  protected void beforeShutdown(@Observes final PreContainerStopEvent event) {
-    for (DefaultManagedExecutorService service : managedExecutorService) {
+  protected synchronized void postContainerStartedEvent(
+      @Observes final PostContainerStartedEvent event) {
+    if (logger.getLevel() == Level.OFF || !ConcurrentExtension.ENABLE_HUNG_TASK_LOGGER) {
+      return;
+    }
+    long checkPeriod = Stream
+        .concat(extension.getExecutorConfigs().getAllWithNames().values().stream(),
+            extension.getScheduledExecutorConfigs().getAllWithNames().values().stream())
+        .filter(c -> !c.isLongRunningTasks() && c.isValid())
+        .map(ManagedExecutorConfig::getHungTaskThreshold).min(Long::compare).orElse(0L);
+    if (checkPeriod > 0) {
+      checkPeriod = checkPeriod / 2;
+      hungLogger = new HungLogger(max(checkPeriod, 16000L));
+      hungLogger.start();
+    }
+  }
+
+  protected synchronized void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
+    if (hungLogger != null) {
+      hungLogger.terminate();
+    }
+    for (DefaultManagedExecutorService service : executorService) {
       logger.info(() -> String.format("The managed executor service %s will be shutdown!",
           service.getName()));
       service.stop();
     }
-    for (DefaultManagedScheduledExecutorService service : managedSecheduledExecutorService) {
+    for (DefaultManagedScheduledExecutorService service : scheduledExecutorService) {
       logger.info(() -> String.format("The managed scheduled executor service %s will be shutdown!",
           service.getName()));
       service.stop();
     }
-    managedExecutorService.clear();
-    managedSecheduledExecutorService.clear();
+    executorService.clear();
+    scheduledExecutorService.clear();
   }
 
+  /**
+   * corant-context
+   *
+   * @author bingo 下午5:25:42
+   *
+   */
+  public static class HungLogger extends Thread {
+
+    private final Logger logger = Logger.getLogger(HungLogger.class.getName());
+    private final boolean dumpStack = logger.isLoggable(Level.FINE);
+    private final long checkPeriod;
+    private volatile boolean running = true;
+
+    public HungLogger(long checkPeriod) {
+      super("corant-es-hung");
+      this.checkPeriod = checkPeriod;
+      setDaemon(true);
+    }
+
+    @Override
+    public void run() {
+      while (running) {
+        Threads.tryThreadSleep(checkPeriod);
+        if (!executorService.isEmpty()) {
+          for (AbstractManagedExecutorService es : executorService) {
+            if (!running) {
+              break;
+            }
+            log(es);
+          }
+        }
+        if (!scheduledExecutorService.isEmpty()) {
+          for (AbstractManagedExecutorService es : scheduledExecutorService) {
+            if (!running) {
+              break;
+            }
+            log(es);
+          }
+        }
+      }
+    }
+
+    void log(AbstractManagedExecutorService es) {
+      if (!es.isTerminated() && !es.isShutdown()) {
+        final long now = System.currentTimeMillis();
+        Collection<AbstractManagedThread> hungThreads = es.getHungThreads();
+        if (isNotEmpty(hungThreads)) {
+          for (AbstractManagedThread thread : hungThreads) {
+            log(es.getName(), thread, now);
+          }
+        }
+      }
+    }
+
+    void log(String esname, AbstractManagedThread t, long now) {
+      if (dumpStack) {
+        logger.warning(() -> String.format(
+            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %s, the stack:%n\t%s.",
+            t.getName(), t.getId(),
+            areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
+            esname, Instant.ofEpochMilli(t.getThreadStartTime()), t.getTaskRunTime(now),
+            String.join(Strings.NEWLINE.concat(Strings.TAB),
+                Arrays.stream(t.getStackTrace()).map(Objects::asString).toArray(String[]::new))));
+      } else {
+        logger.warning(() -> String.format(
+            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %s.",
+            t.getName(), t.getId(),
+            areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
+            esname, Instant.ofEpochMilli(t.getThreadStartTime()), t.getTaskRunTime(now)));
+      }
+    }
+
+    void terminate() {
+      running = false;
+    }
+  }
 }

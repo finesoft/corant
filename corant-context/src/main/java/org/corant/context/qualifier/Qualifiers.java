@@ -203,7 +203,7 @@ public class Qualifiers {
 
     abstract class AbstractNamedObject implements NamedObject {
 
-      protected String name;
+      String name = EMPTY_NAME;
 
       @Override
       public boolean equals(Object obj) {

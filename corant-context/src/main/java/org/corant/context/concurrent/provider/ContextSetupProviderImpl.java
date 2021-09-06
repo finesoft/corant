@@ -84,7 +84,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   }
 
   protected void resetApplicationContext(ContextHandleImpl contextHandle) {
-    logger.fine(() -> "Reset application context if necessary!");
+    logger.fine(() -> "Reset application context if necessary.");
     if (contextInfos.contains(ContextInfo.APPLICATION)
         && contextHandle.getContextClassLoader() != null) {
       logger.fine(
@@ -105,7 +105,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   }
 
   protected void resetCDIContext(ContextHandleImpl contextHandle) {
-    logger.fine(() -> "Reset CDI context if necessary!");
+    logger.fine(() -> "Reset CDI context if necessary.");
     if (contextInfos.contains(ContextInfo.CDI) && contextHandle.getCDIContextRestorer() != null) {
       try {
         contextHandle.getCDIContextRestorer().restore();
@@ -118,7 +118,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
   }
 
   protected void resetSecurityContext(ContextHandleImpl contextHandle) {
-    logger.fine(() -> "Reset Security context if necessary!");
+    logger.fine(() -> "Reset Security context if necessary.");
     if (contextInfos.contains(ContextInfo.SECURITY)) {
       SecurityContexts.setCurrent(contextHandle.getSecurityContext());
     }
@@ -126,7 +126,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void saveApplicationContext(ContextHandleImpl contextHandle,
       ContextService contextService, Map<String, String> contextObjectProperties) {
-    logger.fine(() -> "Save application context if necessary!");
+    logger.fine(() -> "Save application context if necessary.");
     if (contextInfos.contains(ContextInfo.APPLICATION)) {
       final ClassLoader contextClassloader;
       if (Thread.currentThread().getContextClassLoader() != null) {
@@ -141,7 +141,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void saveCDIContext(ContextHandleImpl contextHandle, ContextService contextService,
       Map<String, String> contextObjectProperties) {
-    logger.fine(() -> "Save CDI context if necessary!");
+    logger.fine(() -> "Save CDI context if necessary.");
     if (contextInfos.contains(ContextInfo.CDI)) {
       contextHandle
           .setCDIContextInstaller(new ContextInstaller(true, tryResolve(WeldManager.class)));
@@ -150,7 +150,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void saveSecurityContext(ContextHandleImpl contextHandle, ContextService contextService,
       Map<String, String> contextObjectProperties) {
-    logger.fine(() -> "Save security context if necessary!");
+    logger.fine(() -> "Save security context if necessary.");
     if (contextInfos.contains(ContextInfo.SECURITY)) {
       contextHandle.setSecurityContext(SecurityContexts.getCurrent());
     }
@@ -158,7 +158,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void setupApplication(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
-    logger.fine(() -> "Setup application context if necessary!");
+    logger.fine(() -> "Setup application context if necessary.");
     if (contextInfos.contains(ContextInfo.APPLICATION)
         && preContextHandle.getContextClassLoader() != null) {
       final ClassLoader classLoaderToSet = preContextHandle.getContextClassLoader();
@@ -181,7 +181,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void setupCDIContext(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
-    logger.fine(() -> "Setup CDI context if necessary!");
+    logger.fine(() -> "Setup CDI context if necessary.");
     if (contextInfos.contains(ContextInfo.CDI)
         && preContextHandle.getCDIContextInstaller() != null) {
       resetContextHandle.setCDIContextRestorer(preContextHandle.getCDIContextInstaller().install());
@@ -190,7 +190,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
 
   protected void setupSecurityContext(ContextHandleImpl preContextHandle,
       ContextHandleImpl resetContextHandle) {
-    logger.fine(() -> "Setup Security context if necessary!");
+    logger.fine(() -> "Setup Security context if necessary.");
     if (contextInfos.contains(ContextInfo.SECURITY)) {
       resetContextHandle.setSecurityContext(SecurityContexts.getCurrent());
       SecurityContexts.setCurrent(preContextHandle.getSecurityContext());

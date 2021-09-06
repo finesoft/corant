@@ -39,11 +39,12 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
+  public static final long DFLT_HUNG_TAK_THRESHOLD = 60000L;
   public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT).concat("(ES)");
   public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(DFLT_NAME);
 
   protected boolean longRunningTasks = false;
-  protected long hungTaskThreshold = 60000L;// millis
+  protected long hungTaskThreshold = DFLT_HUNG_TAK_THRESHOLD;// millis
   protected int corePoolSize = Systems.getCPUs() << 1;
   protected int maxPoolSize = Systems.getCPUs() << 2;
   protected Duration keepAliveTime = Duration.ofSeconds(5L);
@@ -59,27 +60,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   public ManagedExecutorConfig() {}
 
-  private ManagedExecutorConfig(String name) {
-    setName(name);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ManagedExecutorConfig other = (ManagedExecutorConfig) obj;
-    if (name == null) {
-      return other.name == null;
-    } else {
-      return name.equals(other.name);
-    }
+  private ManagedExecutorConfig(String threadName) {
+    setThreadName(threadName);
   }
 
   /**
@@ -99,7 +81,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   }
 
   public long getHungTaskThreshold() {
-    return hungTaskThreshold <= 0 ? 60000L : hungTaskThreshold;
+    return hungTaskThreshold <= 0 ? DFLT_HUNG_TAK_THRESHOLD : hungTaskThreshold;
   }
 
   public Duration getKeepAliveTime() {
@@ -108,11 +90,6 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   public int getMaxPoolSize() {
     return maxPoolSize <= getCorePoolSize() ? getCorePoolSize() : maxPoolSize;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   public int getQueueCapacity() {
@@ -132,19 +109,11 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   }
 
   public String getThreadName() {
-    return defaultString(threadName, defaultString(name, DFLT_NAME));
+    return defaultString(threadName, defaultString(getName(), DFLT_NAME));
   }
 
   public int getThreadPriority() {
     return threadPriority <= 0 ? Thread.NORM_PRIORITY : threadPriority;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (name == null ? 0 : name.hashCode());
-    return result;
   }
 
   /**

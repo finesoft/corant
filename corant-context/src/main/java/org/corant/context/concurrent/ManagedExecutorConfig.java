@@ -135,8 +135,8 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   @Override
   public String toString() {
-    return "[longRunningTasks=" + longRunningTasks + "ms, hungTaskThreshold=" + hungTaskThreshold
-        + ", corePoolSize=" + corePoolSize + ", maxPoolSize=" + maxPoolSize + ", keepAliveTime="
+    return "[longRunningTasks=" + longRunningTasks + ", hungTaskThreshold=" + hungTaskThreshold
+        + "ms, corePoolSize=" + corePoolSize + ", maxPoolSize=" + maxPoolSize + ", keepAliveTime="
         + keepAliveTime + ", threadLifeTime=" + threadLifeTime + ", awaitTermination="
         + awaitTermination + ", rejectPolicy=" + rejectPolicy + ", threadPriority=" + threadPriority
         + ", threadName=" + threadName + ", queueCapacity=" + queueCapacity + ", contextInfos="

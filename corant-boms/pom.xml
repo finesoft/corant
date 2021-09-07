@@ -55,7 +55,7 @@
     <version.freemarker>2.3.31</version.freemarker>
     <version.graalvm>21.1.0</version.graalvm>
     <version.groovy>3.0.7</version.groovy>
-    <version.grpc>1.32.1</version.grpc>
+    <version.grpc>1.40.1</version.grpc>
     <version.hanlp>portable-1.7.8</version.hanlp>
     <version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
     <version.hibernate-orm-core>5.3.6.Final</version.hibernate-orm-core>
@@ -63,8 +63,8 @@
     <version.hikariCP>3.4.5</version.hikariCP>
     <version.hppc>0.8.2</version.hppc>
     <version.icu4j>67.1</version.icu4j>
-    <version.jackson>2.12.4</version.jackson>
-    <version.jandex>2.3.0.Final</version.jandex>
+    <version.jackson>2.12.5</version.jackson>
+    <version.jandex>2.3.1.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javassist>3.27.0.GA</version.javassist>
     <version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
@@ -88,8 +88,8 @@
     <version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
     <version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
-    <version.jose4j>0.7.8</version.jose4j>
-    <version.jsqlparser>4.0</version.jsqlparser>
+    <version.jose4j>0.7.9</version.jose4j>
+    <version.jsqlparser>4.1</version.jsqlparser>
     <version.jsoup>1.14.2</version.jsoup>
     <version.junit>4.13.1</version.junit>
     <version.jython>2.7.2</version.jython>
@@ -140,8 +140,8 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.13.4</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.6.2.Final</version.resteasy>
-    <version.rsocket>1.0.2</version.rsocket>
+    <version.resteasy>4.7.1.Final</version.resteasy>
+    <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.smallrye-config>1.7.0</version.smallrye-config>
     <version.smallrye-fault-tolerance>5.2.1</version.smallrye-fault-tolerance>
@@ -158,15 +158,15 @@
     <version.swagger>2.0.8</version.swagger>
 
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.9.Final</version.undertow>
-    <version.vertx>3.9.3</version.vertx>
+    <version.undertow>2.2.10.Final</version.undertow>
+    <version.vertx>4.1.3</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
     <version.weld>3.1.8.Final</version.weld>
     <version.weld-api>3.1.SP4</version.weld-api>
     <version.wxpay-sdk>3.0.9</version.wxpay-sdk>
     <version.xadisk>1.2.2</version.xadisk>
-    <version.xnio>3.8.2.Final</version.xnio>
+    <version.xnio>3.8.4.Final</version.xnio>
     <version.zxing>3.4.1</version.zxing>
 
   </properties>

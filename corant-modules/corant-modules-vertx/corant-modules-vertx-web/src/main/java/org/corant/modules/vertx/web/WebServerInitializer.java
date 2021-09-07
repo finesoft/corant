@@ -34,6 +34,6 @@ public class WebServerInitializer {
   void init(@Observes Vertx vertx, BeanManager beanManager, Config config) {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
-    httpServer = vertx.createHttpServer().requestHandler(router).listen();
+    httpServer = vertx.createHttpServer().requestHandler(router).listen().result();
   }
 }

@@ -78,8 +78,12 @@ public class ExecutorServiceManager {
         .map(ManagedExecutorConfig::getHungTaskThreshold).min(Long::compare).orElse(0L);
     if (checkPeriod > 0) {
       checkPeriod = checkPeriod / 2;
-      hungLogger = new HungLogger(max(checkPeriod, 16000L));
+      final long useCheckPeriod = max(checkPeriod, 16000L);
+      hungLogger = new HungLogger(useCheckPeriod);
       hungLogger.start();
+      logger.info(() -> String.format(
+          "Initialized the hung threads logger for all managed executor services, check period %sms.",
+          useCheckPeriod));
     }
   }
 
@@ -158,7 +162,7 @@ public class ExecutorServiceManager {
     void log(String esname, AbstractManagedThread t, long now) {
       if (dumpStack) {
         logger.warning(() -> String.format(
-            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %s, the stack:%n\t%s.",
+            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms, the stack:%n\t%s.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
             esname, Instant.ofEpochMilli(t.getThreadStartTime()), t.getTaskRunTime(now),
@@ -166,7 +170,7 @@ public class ExecutorServiceManager {
                 Arrays.stream(t.getStackTrace()).map(Objects::asString).toArray(String[]::new))));
       } else {
         logger.warning(() -> String.format(
-            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %s.",
+            "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
             esname, Instant.ofEpochMilli(t.getThreadStartTime()), t.getTaskRunTime(now)));

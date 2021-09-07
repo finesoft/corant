@@ -42,6 +42,8 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
   protected Class<? extends Annotation> scope = ApplicationScoped.class;
 
   /**
+   * The CDI bean manager
+   *
    * @param beanManager
    */
   protected AbstractBean(BeanManager beanManager) {

@@ -93,7 +93,7 @@ public class FlywayMigrator {
     } else {
       logger.fine(() -> String.format(
           "Disable migrate process, If you want to migrate, set %s in the configuration file!",
-          "flyway.migrate.enable=true"));
+          "corant.flyway.migrate.enable=true"));
     }
   }
 

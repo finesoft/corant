@@ -106,8 +106,16 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
     // transaction
     if (cfg.isXa() && !XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-      logger.warning(() -> "When using XA, the driver should be a XADataSource.");
+      logger.warning(() -> String.format(
+          "When using XA, the driver of data source [%s] should be a XADataSource.",
+          cfg.getName()));
     }
+    if (cfg.isJta() && !XADataSource.class.isAssignableFrom(cfg.getDriver())) {
+      logger.info(() -> String.format(
+          "Use resource local transaction for the data source [%s] if it used in transactional scenario.",
+          cfg.getName()));
+    }
+
     transactionIntegration(cfg, cfgs);
 
     // metrics

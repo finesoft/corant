@@ -16,6 +16,7 @@ package org.corant.modules.datasource.shared;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -39,6 +40,89 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   private static final long serialVersionUID = -7623266774880311110L;
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/Datasources";
   public static final String EMPTY_NAME = Qualifiers.EMPTY_NAME;
+  protected static final Logger logger = Logger.getLogger(DataSourceConfig.class.getName());
+
+  @ConfigKeyItem
+  protected Class<?> driver;
+
+  @ConfigKeyItem
+  protected String username;
+
+  @ConfigKeyItem
+  protected String password;
+
+  @ConfigKeyItem
+  protected String initialSql;
+
+  @ConfigKeyItem
+  protected String connectionUrl;
+
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean jta = true;
+
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean autoCommit = true;
+
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean xa = true;
+
+  @ConfigKeyItem(defaultValue = "0")
+  protected int initialSize = 0;
+
+  @ConfigKeyItem(defaultValue = "8")
+  protected int minSize = 8;
+
+  @ConfigKeyItem(defaultValue = "64")
+  protected int maxSize = 64;
+
+  @ConfigKeyItem(defaultValue = "PT0S")
+  protected Duration leakTimeout = Duration.ofSeconds(0);
+
+  @ConfigKeyItem(defaultValue = "PT0M")
+  protected Duration maxLifetime = Duration.ofMinutes(0);
+
+  @ConfigKeyItem(defaultValue = "PT3M")
+  protected Duration validationTimeout = Duration.ofMinutes(3);
+
+  @ConfigKeyItem(defaultValue = "PT30M")
+  protected Duration idleValidationTimeout = Duration.ofMinutes(30);
+
+  @ConfigKeyItem(defaultValue = "PT16S")
+  protected Duration reapTimeout = Duration.ofSeconds(16L);
+
+  @ConfigKeyItem(defaultValue = "PT4S")
+  protected Duration acquisitionTimeout = Duration.ofSeconds(4L);
+
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean enableMetrics = false;
+
+  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
+  protected Map<String, String> jdbcProperties = new HashMap<>();
+
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean enableTrackJdbcResources = true;
+
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean bindToJndi = false;
+
+  @ConfigKeyItem(defaultValue = "true")
+  protected boolean enable = true;
+
+  /**
+   * The maximum amount of time a thread may be blocked waiting for a connection. If this time
+   * expires and still no connection is available, an exception is thrown. A duration of
+   * {@link Duration#ZERO} means that a thread will wait indefinitely. Default is 4 seconds.
+   */
+  public Duration getAcquisitionTimeout() {
+    return acquisitionTimeout;
+  }
+
+  /**
+   * The database URL to connect to.
+   */
+  public String getConnectionUrl() {
+    return connectionUrl;
+  }
 
   /**
    * JDBC driver class to use as a supplier of connections. Must be an implementation of
@@ -46,319 +130,172 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    * null, in which case the driver will be obtained from the URL (using the
    * {@link java.sql.DriverManager#getDriver(String)} mechanism).
    */
-  @ConfigKeyItem
-  protected Class<?> driver;
-
-  /**
-   * The principal to be authenticated in the database. Default is to don't perform authentication.
-   */
-  @ConfigKeyItem
-  protected String username;
-
-  /**
-   * The credentials to use in order to authenticate to the database. Default is to don't provide
-   * any credentials.
-   */
-  @ConfigKeyItem
-  protected String password;
-
-  /**
-   * A SQL command to be executed when a connection is created.
-   */
-  @ConfigKeyItem
-  protected String initialSql;
-
-  /**
-   * The database URL to connect to.
-   */
-  @ConfigKeyItem
-  protected String connectionUrl;
-
-  /**
-   * Auto judge from Driver class
-   */
-  @ConfigKeyItem(defaultValue = "true")
-  protected boolean jta = true;
-
-  /**
-   * If connections should have the auto-commit mode on by default. The transaction integration may
-   * disable auto-commit when a connection in enrolled in a transaction.
-   */
-  @ConfigKeyItem(defaultValue = "true")
-  protected boolean autoCommit = true;
-
-  /**
-   * Auto judge from Driver class
-   */
-  @ConfigKeyItem(defaultValue = "true")
-  protected boolean xa = true;
-
-  /**
-   * The number of connections to be created when the pool starts. Can be smaller than min or bigger
-   * than max.
-   */
-  @ConfigKeyItem(defaultValue = "0")
-  protected int initialSize = 0;
-
-  /**
-   * The minimum number of connections on the pool. If the pool has to flush connections it may
-   * create connections to keep this amount.
-   */
-  @ConfigKeyItem(defaultValue = "8")
-  protected int minSize = 8;
-
-  /**
-   * The maximum number of connections on the pool. When the number of acquired connections is equal
-   * to this value, further requests will block.
-   */
-  @ConfigKeyItem(defaultValue = "64")
-  protected int maxSize = 64;
-
-  /**
-   * Connections acquired for longer than this time period may be reported as leaking. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled.
-   */
-  @ConfigKeyItem(defaultValue = "PT0S")
-  protected Duration leakTimeout = Duration.ofSeconds(0);
-
-  /**
-   * Connections that are older than this time period are flushed from the pool. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled.
-   */
-  @ConfigKeyItem(defaultValue = "PT0M")
-  protected Duration maxLifetime = Duration.ofMinutes(0);
-
-  /**
-   * Sets the duration of background validation interval. Default is {@link Duration#ZERO} meaning
-   * that this feature is disabled.
-   */
-  @ConfigKeyItem(defaultValue = "PT3M")
-  protected Duration validationTimeout = Duration.ofMinutes(3);
-
-  /**
-   * Connections idle for longer than this time period are validated before being acquired
-   * (foreground validation). A duration of {@link Duration#ZERO} means that a this feature is
-   * disabled.
-   */
-  @ConfigKeyItem(defaultValue = "PT30M")
-  protected Duration idleValidationTimeout = Duration.ofMinutes(30);
-
-  /**
-   * Connections idle for longer than this time period are flushed from the pool. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled.
-   */
-  @ConfigKeyItem(defaultValue = "PT16S")
-  protected Duration reapTimeout = Duration.ofSeconds(16L);
-
-  /**
-   * The maximum amount of time a thread may be blocked waiting for a connection. If this time
-   * expires and still no connection is available, an exception is thrown. A duration of
-   * {@link Duration#ZERO} means that a thread will wait indefinitely.
-   */
-  @ConfigKeyItem(defaultValue = "PT4S")
-  protected Duration acquisitionTimeout = Duration.ofSeconds(4L);
-
-  /**
-   * Enable collects metrics
-   */
-  @ConfigKeyItem(defaultValue = "false")
-  protected boolean enableMetrics = false;
-
-  /**
-   * Other unspecified properties to be passed into the JDBC driver when creating new connections.
-   * NOTE: username and password properties are not allowed, these have to be set using the
-   * principal / credentials mechanism.
-   */
-  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
-  protected Map<String, String> jdbcProperties = new HashMap<>();
-
-  /**
-   * If JDBC resources ({@link java.sql.Statement} and {@link java.sql.ResultSet}) should be tracked
-   * to be closed if leaked.
-   */
-  @ConfigKeyItem(defaultValue = "true")
-  protected boolean enableTrackJdbcResources = true;
-
-  /**
-   * Whether this data source bind to jndi
-   */
-  @ConfigKeyItem(defaultValue = "false")
-  protected boolean bindToJndi = false;
-
-  /**
-   * Whether enable this data source config
-   */
-  @ConfigKeyItem(defaultValue = "true")
-  protected boolean enable = true;
-
-  /**
-   *
-   * @return the acquisitionTimeout
-   */
-  public Duration getAcquisitionTimeout() {
-    return acquisitionTimeout;
-  }
-
-  /**
-   *
-   * @return the connectionUrl
-   */
-  public String getConnectionUrl() {
-    return connectionUrl;
-  }
-
-  /**
-   *
-   * @return the driver
-   */
   public Class<?> getDriver() {
     return driver;
   }
 
   /**
-   *
-   * @return the idleValidationTimeout
+   * Connections idle for longer than this time period are validated before being acquired
+   * (foreground validation). A duration of {@link Duration#ZERO} means that a this feature is
+   * disabled. Default is 30 minutes.
    */
   public Duration getIdleValidationTimeout() {
     return idleValidationTimeout;
   }
 
   /**
-   *
-   * @return the initialSize
+   * The number of connections to be created when the pool starts. Can be smaller than min or bigger
+   * than max. Default is 0.
    */
   public int getInitialSize() {
     return initialSize;
   }
 
   /**
-   *
-   * @return the initialSql
+   * A SQL command to be executed when a connection is created.
    */
   public String getInitialSql() {
     return initialSql;
   }
 
   /**
-   *
-   * @return the jdbcProperties
+   * Other unspecified properties to be passed into the JDBC driver when creating new connections.
+   * NOTE: username and password properties are not allowed, these have to be set using the
+   * principal / credentials mechanism.
    */
   public Map<String, String> getJdbcProperties() {
     return jdbcProperties;
   }
 
   /**
-   *
-   * @return the leakTimeout
+   * Connections acquired for longer than this time period may be reported as leaking. A duration of
+   * {@link Duration#ZERO} means that a this feature is disabled. Default is disabled.
    */
   public Duration getLeakTimeout() {
     return leakTimeout;
   }
 
   /**
-   *
-   * @return the maxLifetime
+   * Connections that are older than this time period are flushed from the pool. A duration of
+   * {@link Duration#ZERO} means that a this feature is disabled. Default is disabled.
    */
   public Duration getMaxLifetime() {
     return maxLifetime;
   }
 
   /**
-   *
-   * @return the maxSize
+   * The maximum number of connections on the pool. When the number of acquired connections is equal
+   * to this value, further requests will block. Default is 64.
    */
   public int getMaxSize() {
     return maxSize;
   }
 
   /**
-   *
-   * @return the minSize
+   * The minimum number of connections on the pool. If the pool has to flush connections it may
+   * create connections to keep this amount, default is 8.
    */
   public int getMinSize() {
     return minSize;
   }
 
   /**
-   *
-   * @return the password
+   * The credentials to use in order to authenticate to the database. Default is to don't provide
+   * any credentials.
    */
   public String getPassword() {
     return password;
   }
 
   /**
-   *
-   * @return the reapTimeout
+   * Connections idle for longer than this time period are flushed from the pool. A duration of
+   * {@link Duration#ZERO} means that a this feature is disabled. Default is 16 seconds.
    */
   public Duration getReapTimeout() {
     return reapTimeout;
   }
 
   /**
-   *
-   * @return the username
+   * The principal to be authenticated in the database. Default is to don't perform authentication.
    */
   public String getUsername() {
     return username;
   }
 
   /**
-   *
-   * @return the validationTimeout
+   * Sets the duration of background validation interval. Default is {@link Duration#ZERO} meaning
+   * that this feature is disabled. Default is 3 minutes.
    */
   public Duration getValidationTimeout() {
     return validationTimeout;
   }
 
   /**
-   *
-   * @return the autoCommit
+   * If connections should have the auto-commit mode on by default. The transaction integration may
+   * disable auto-commit when a connection in enrolled in a transaction. Default is true.
    */
   public boolean isAutoCommit() {
     return autoCommit;
   }
 
   /**
-   *
-   * @return the bindToJndi
+   * Whether this data source bind to JNDI, default is false.
    */
   public boolean isBindToJndi() {
     return bindToJndi;
   }
 
   /**
-   *
-   * @return the enableMetrics
+   * Enable collects metrics, default is false.
    */
   public boolean isEnableMetrics() {
     return enableMetrics;
   }
 
   /**
-   *
-   * @return the enableTrackJdbcResources
+   * If JDBC resources ({@link java.sql.Statement} and {@link java.sql.ResultSet}) should be tracked
+   * to be closed if leaked, default is true.
    */
   public boolean isEnableTrackJdbcResources() {
     return enableTrackJdbcResources;
   }
 
   /**
+   * Since the mainstream JTA implementations support Resource Local, if the main purpose of the
+   * data source corresponding to the configuration is write operation, it is necessary to set this
+   * attribute to true to meet the write operation transactionally. Default is true.
    *
-   * @return the jta
+   * <p>
+   * In general, for Resource Local transaction management, the mainstream JTA coordinator approach
+   * is to share a disguised(Wrapped) XAResource in a thread, the XAResource contain a Resource
+   * Local related database connection. Set the auto commit of Connection to false
+   * {@code Connection.setAutoCommit(true)} in the {@code XAResource.start(xid, int)} method,
+   * perform {@code Connection.commit()} directly in the first stage of XA submission.
+   *
+   * <p>
+   * NOTE: In general, the judgment of whether the transaction is Resource Local or full JTA depends
+   * on whether the object of the {@link #getDriver()} returns implements the XADataSource
+   * interface.
    */
   public boolean isJta() {
     return jta;
   }
 
+  /**
+   * Whether enable this data source configuration.
+   */
   @Override
   public boolean isValid() {
     return driver != null && enable;
   }
 
   /**
+   * Indicates that this data source configuration for the data source supports the XA protocol, so
+   * the corresponding {@link #getDriver()} should implement {@code XADataSource}. If this
+   * configuration returns true and the JTA coordinator supports Recovery operations, the data
+   * source corresponding to this configuration will be added to recovery process. Default is true.
    *
-   * @return the xa
+   * @see JDBCTransactionIntegration
    */
   public boolean isXa() {
     return xa;
@@ -367,5 +304,11 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @Override
   public void onPostConstruct(Config config, String key) {
     setName(key);
+    if (xa && !jta) {
+      jta = true;
+      logger.warning(() -> String.format(
+          "The XA attribute of the data source [%s] is True, and the JTA attribute will be forced from the False originally configured to True!",
+          getName()));
+    }
   }
 }

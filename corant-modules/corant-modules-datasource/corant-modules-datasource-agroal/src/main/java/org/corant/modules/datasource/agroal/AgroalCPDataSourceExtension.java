@@ -40,6 +40,7 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
+import org.corant.modules.datasource.agroal.patch.MyNarayanaTransactionIntegration;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -195,8 +196,14 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     if (cfg.isJta() || cfg.isXa()) {
       TransactionManager tm = tryResolve(TransactionManager.class);
       TransactionSynchronizationRegistry tsr = tryResolve(TransactionSynchronizationRegistry.class);
-      cfgs.connectionPoolConfiguration()
-          .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr));
+      if (cfg.isEnableCustomTransactionIntegration()) {
+        cfgs.connectionPoolConfiguration().transactionIntegration(
+            new MyNarayanaTransactionIntegration(tm, tsr, null, false, null));
+      } else {
+        cfgs.connectionPoolConfiguration()
+            .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, null, false, null));
+      }
+
     }
   }
 

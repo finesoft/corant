@@ -108,6 +108,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "true")
   protected boolean enable = true;
 
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean enableCustomTransactionIntegration;
+
   /**
    * The maximum amount of time a thread may be blocked waiting for a connection. If this time
    * expires and still no connection is available, an exception is thrown. A duration of
@@ -243,6 +246,14 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public boolean isBindToJndi() {
     return bindToJndi;
+  }
+
+  public boolean isEnable() {
+    return enable;
+  }
+
+  public boolean isEnableCustomTransactionIntegration() {
+    return enableCustomTransactionIntegration;
   }
 
   /**

@@ -122,7 +122,13 @@ public class JPAQueries {
    * Create an instance of TypedJPAQuery for executing a Jakarta Persistence query language named
    * query. The record of the result list of the query must be assignable to the type specified by
    * the resultClass argument.
-   *
+   * <p>
+   * Note: If the given type class is not a persistence class and there exists a Tuple to Object
+   * converter, this method will use Tuple as the type of the query result and before return the
+   * result to caller, the result will be converted to the given type through the converter. This is
+   * very useful if the named query is a native query, but may throw exception if the named query is
+   * not a native query. We recommend that use a persistence class as result class when the named
+   * query is not a native query.
    *
    * @param name the name of a query defined in metadata
    * @param type the type of the query result
@@ -130,17 +136,32 @@ public class JPAQueries {
    * @see EntityManager#createNamedQuery(String,Class)
    */
   public static <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
-    return new TypedJPAQuery<>() {
-      @Override
-      public String toString() {
-        return "Named: " + name + getParameterDescription();
-      }
+    if (isPersistenceClass(type) || Converters.lookup(Tuple.class, type).isEmpty()) {
+      return new TypedJPAQuery<>() {
+        @Override
+        public String toString() {
+          return "Named: " + name + getParameterDescription();
+        }
 
-      @Override
-      protected TypedQuery<T> createQuery() {
-        return entityManagerSupplier.get().createNamedQuery(name, type);
-      }
-    };
+        @Override
+        protected TypedQuery<T> createQuery() {
+          return entityManagerSupplier.get().createNamedQuery(name, type);
+        }
+      };
+    } else {
+      return new TypedJPAQuery<>(type, Converters.lookup(Tuple.class, type).get()) {
+
+        @Override
+        public String toString() {
+          return "Named: " + name + getParameterDescription();
+        }
+
+        @Override
+        protected Query createQuery() {
+          return entityManagerSupplier.get().createNamedQuery(name, Tuple.class);
+        }
+      };
+    }
   }
 
   /**

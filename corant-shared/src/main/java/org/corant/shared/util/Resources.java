@@ -13,17 +13,8 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Maps.getMapString;
-import static org.corant.shared.util.Maps.immutableMapOf;
-import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Objects.forceCast;
-import static org.corant.shared.util.Streams.streamOf;
-import static org.corant.shared.util.Strings.EMPTY;
-import static org.corant.shared.util.Strings.SLASH;
-import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
+import org.corant.shared.exception.CorantRuntimeException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -42,7 +33,18 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.corant.shared.exception.CorantRuntimeException;
+
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.SLASH;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 
 /**
  * corant-shared
@@ -630,7 +632,7 @@ public class Resources {
       return immutableMapOf("location", getLocation(), "sourceType", SourceType.FILE_SYSTEM.name(),
           "path", file.getPath(), "fileName", getName(), META_LAST_MODIFIED, file.lastModified(),
           META_CONTENT_LENGTH, file.length(), META_CONTENT_TYPE,
-          FileUtils.getFileNameExtension(getName()));
+          FileUtils.getContentType(getLocation()));
     }
 
     @Override

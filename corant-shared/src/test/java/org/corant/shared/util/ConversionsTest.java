@@ -55,9 +55,10 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
+import org.corant.shared.resource.SourceType;
+import org.corant.shared.resource.TemporaryResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Resources.SourceType;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.junit.Test;
 import junit.framework.TestCase;
@@ -367,5 +368,12 @@ public class ConversionsTest extends TestCase {
     assertTrue(toShort(int_1).compareTo((short) 12) == 0);
     assertTrue(toShort(int_2).compareTo((short) 12) == 0);
     assertTrue(toShort(int_3).compareTo((short) -12) == 0);
+  }
+
+  public static class TTT extends TemporaryResource {
+
+    public TTT() {
+
+    }
   }
 }

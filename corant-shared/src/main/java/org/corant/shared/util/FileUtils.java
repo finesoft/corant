@@ -16,13 +16,11 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,11 +33,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -47,9 +41,6 @@ import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
-import org.corant.shared.util.PathMatcher.GlobMatcher;
-import org.corant.shared.util.PathMatcher.RegexMatcher;
-import org.corant.shared.util.Resources.SourceType;
 
 /**
  * corant-shared
@@ -196,6 +187,23 @@ public class FileUtils {
     }
   }
 
+  public static void forceMkdir(final File directory) throws IOException {
+    if (directory.exists()) {
+      if (!directory.isDirectory()) {
+        final String message = "File " + directory + " exists and is "
+            + "not a directory. Unable to create directory.";
+        throw new IOException(message);
+      }
+    } else {
+      // Double-check that some other thread or process hasn't made
+      // the directory in the background
+      if (!directory.mkdirs() && !directory.isDirectory()) {
+        final String message = "Unable to create directory " + directory;
+        throw new IOException(message);
+      }
+    }
+  }
+
   /**
    * Returns the file content type corresponding to the path.
    *
@@ -310,61 +318,4 @@ public class FileUtils {
     return true;
   }
 
-  /**
-   * Search for files by file path or path expression, only return files without directories;
-   * case-insensitive, support Glob and Regex file name expression search, if it is not a path
-   * expression, return all files under the specified file or directory.
-   *
-   * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
-   * @see GlobMatcher
-   * @see RegexMatcher
-   * @param pathExpress
-   * @return searchFiles
-   */
-  public static List<File> searchFiles(String pathExpress) {
-    String pathExp = SourceType.FILE_SYSTEM.resolve(pathExpress);
-    pathExp = isNotBlank(pathExp) ? pathExp.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR) : pathExp;
-    Optional<PathMatcher> matcher = PathMatcher.decidePathMatcher(pathExp, false, true);
-    if (matcher.isPresent()) {
-      final PathMatcher useMatcher = matcher.get();
-      return selectFiles(useMatcher.getPlainParent(UNIX_SEPARATOR_STR), f -> {
-        try {
-          return useMatcher.test(f.getCanonicalPath().replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR));
-        } catch (IOException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-    } else {
-      return selectFiles(pathExp, null);
-    }
-  }
-
-  /**
-   * Select file by file path and filter.
-   *
-   * @param path
-   * @param filter
-   * @return selectFiles
-   */
-  public static List<File> selectFiles(String path, Predicate<File> filter) {
-    final File root = new File(path);
-    final Predicate<File> predicate = defaultObject(filter, Functions.emptyPredicate(true));
-    List<File> files = new ArrayList<>();
-    if (root.exists()) {
-      LinkedList<File> candidates = linkedListOf(root);
-      File candidate;
-      while ((candidate = candidates.poll()) != null) {
-        if (candidate.isFile()) {
-          if (predicate.test(candidate)) {
-            files.add(candidate);
-          }
-        } else {
-          for (File file : defaultObject(candidate.listFiles(), EMPTY_ARRAY)) {
-            candidates.offer(file);
-          }
-        }
-      }
-    }
-    return files;
-  }
 }

@@ -39,9 +39,9 @@ import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.SourceType;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.SourceType;
-import org.corant.shared.util.Resources.URLResource;
 import org.corant.shared.util.Texts;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -532,7 +532,7 @@ public class QueryParseHandler extends DefaultHandler {
       try {
         Optional<URLResource> or = Resources.from(strip(src)).findFirst();
         if (or.isPresent()) {
-          try (InputStream is = or.get().openStream()) {
+          try (InputStream is = or.get().openInputStream()) {
             return Texts.fromInputStream(is);
           }
         }

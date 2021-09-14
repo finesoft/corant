@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.corant.config.CorantConfig;
-import org.corant.shared.util.ClassPaths;
+import org.corant.shared.resource.ClassPathResourceLoader;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -50,10 +50,12 @@ public class MicroprofileConfigSources {
       ordinal = DEFAULT_ORDINAL;
     }
     try {
-      ClassPaths.from(classLoader, META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix, false)
-          .stream().map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
-      ClassPaths.from(classLoader, WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix, false)
-          .stream().map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+      new ClassPathResourceLoader(classLoader, false)
+          .load(META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream()
+          .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+      new ClassPathResourceLoader(classLoader, false)
+          .load(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream()
+          .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
     } catch (IOException e) {
       // Noop
     }

@@ -126,7 +126,7 @@ public class CorantWXPayConfig extends WXPayConfig implements DeclarativeConfig 
         return Resources.from(certUri).findFirst()
             .orElseThrow(
                 () -> new CorantRuntimeException("Can't find cert resource from %s!", certUri))
-            .openStream();
+            .openInputStream();
       }
       return null;
     } catch (IOException e) {

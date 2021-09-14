@@ -35,8 +35,8 @@ import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 import org.corant.modules.jaxrs.shared.AbstractJaxrsResource;
 import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
-import org.corant.shared.util.Resources.SourceType;
-import org.corant.shared.util.Resources.WrappedResource;
+import org.corant.shared.resource.SourceType;
+import org.corant.shared.resource.WrappedResource;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 
 /**
@@ -97,11 +97,11 @@ public class ResteasyResource extends AbstractJaxrsResource {
    */
   public static class InputPartResource implements WrappedResource {
 
-    private InputPart inputPart;
+    protected InputPart inputPart;
 
-    private String filename;
+    protected String filename;
 
-    private Map<String, Object> metaData;
+    protected Map<String, Object> metaData;
 
     public InputPartResource(InputPart inputPart) {
       this(shouldNotNull(inputPart), parse(inputPart.getHeaders().getFirst(CONTENT_DISPOSITION)));
@@ -154,7 +154,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
     }
 
     @Override
-    public InputStream openStream() throws IOException {
+    public InputStream openInputStream() throws IOException {
       return inputPart.getBody(InputStream.class, null);
     }
 

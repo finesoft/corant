@@ -69,8 +69,8 @@ import org.corant.modules.elastic.data.metadata.annotation.EsPercolator;
 import org.corant.modules.elastic.data.metadata.annotation.EsRange;
 import org.corant.modules.elastic.data.metadata.annotation.EsText;
 import org.corant.modules.elastic.data.metadata.annotation.EsTokenCount;
+import org.corant.shared.resource.ClassResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassResource;
 import org.elasticsearch.index.VersionType;
 
 /**

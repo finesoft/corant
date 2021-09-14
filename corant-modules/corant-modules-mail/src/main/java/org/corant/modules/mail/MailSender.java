@@ -18,7 +18,7 @@ import java.util.function.Function;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import org.corant.shared.util.Resources;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-modules-mail
@@ -30,7 +30,7 @@ public interface MailSender {
   void send(Function<Session, MimeMessage> messageProvider) throws MessagingException;
 
   void send(String subject, String message, List<String> toAddressList,
-      Resources.Resource... resources) throws MessagingException;
+      Resource... resources) throws MessagingException;
 
   void send(String subject, String htmlMessage, String toAddress, String ccAddress)
       throws MessagingException;

@@ -34,13 +34,14 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.normal.Names;
+import org.corant.shared.resource.Resource;
+import org.corant.shared.resource.SourceType;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Chars;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Services;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
@@ -92,7 +93,7 @@ public interface ExceptionMessageResolver extends Sortable {
    * </pre>
    *
    * @see Resources#from(String)
-   * @see Resources.SourceType
+   * @see SourceType
    *
    * @author bingo 上午11:19:31
    *
@@ -133,7 +134,7 @@ public interface ExceptionMessageResolver extends Sortable {
       }
       Map<String, MessageFormat> source = new HashMap<>();
       final Locale locale = locales.orElseGet(Locale::getDefault);
-      try (InputStream is = resource.openStream();
+      try (InputStream is = resource.openInputStream();
           InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
         Properties properties = new Properties();
         properties.load(isr);

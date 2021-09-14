@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.URLResource;
 
 /**
  * corant-modules-security-shared
@@ -153,7 +153,7 @@ public class Keys {
       String keyPassword, String keyAlias, String algo) throws GeneralSecurityException {
     Optional<URLResource> resource = Resources.tryFrom(shouldNotBlank(path)).findAny();
     if (resource.isPresent()) {
-      try (InputStream is = resource.get().openStream()) {
+      try (InputStream is = resource.get().openInputStream()) {
         KeyStore keyStore = KeyStore.getInstance(defaultString(algo, "PKCS12"), "BC");
         keyStore.load(is, storePassword.toCharArray());
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyPassword.toCharArray());
@@ -174,7 +174,7 @@ public class Keys {
     Optional<URLResource> resource = Resources.tryFrom(shouldNotBlank(path)).findAny();
     if (resource.isPresent()) {
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      try (InputStream is = resource.get().openStream()) {
+      try (InputStream is = resource.get().openInputStream()) {
         trustStore.load(is, password.toCharArray());
       }
       return trustStore;

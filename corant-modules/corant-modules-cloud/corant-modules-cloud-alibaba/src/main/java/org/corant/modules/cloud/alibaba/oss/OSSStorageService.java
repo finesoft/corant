@@ -30,10 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
+import org.corant.shared.resource.SourceType;
+import org.corant.shared.resource.WrappedResource;
 import org.corant.shared.util.FileUtils;
-import org.corant.shared.util.Resources.Resource;
-import org.corant.shared.util.Resources.SourceType;
-import org.corant.shared.util.Resources.WrappedResource;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.internal.OSSHeaders;
@@ -102,7 +102,7 @@ public class OSSStorageService {
         null, getMapZonedDateTime(meta, Resource.META_LAST_MODIFIED), null).toString());
     Map<String, String> userMetadataMap = mapOf((Object[]) userMetadata);
     userMetadataMap.forEach(ossMeta::addUserMetadata);
-    try (InputStream is = resource.openStream()) {
+    try (InputStream is = resource.openInputStream()) {
       oss.putObject(new PutObjectRequest(bucketName, id, is, ossMeta));
       return id;
     } catch (IOException e) {
@@ -122,8 +122,8 @@ public class OSSStorageService {
    */
   public static class OSSResource implements WrappedResource {
 
-    private final OSSObject object;
-    private final String location;
+    protected OSSObject object;
+    protected String location;
 
     /**
      * @param object
@@ -167,7 +167,7 @@ public class OSSStorageService {
     }
 
     @Override
-    public InputStream openStream() throws IOException {
+    public InputStream openInputStream() throws IOException {
       return object.getObjectContent();
     }
 

@@ -19,7 +19,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.corant.config.declarative.ConfigInstances;
-import org.corant.shared.util.Resources.Resource;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-modules-mail

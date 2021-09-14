@@ -29,8 +29,8 @@ import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativePattern;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.AbstractNamedObject;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Streams;
 import org.eclipse.microprofile.config.Config;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -150,7 +150,7 @@ public class ElasticConfig extends AbstractNamedObject implements DeclarativeCon
       ClassPathResource setting = Resources.tryFromClassPath(path).findFirst().orElse(null);
       if (setting != null) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream();
-            InputStream is = setting.openStream()) {
+            InputStream is = setting.openInputStream()) {
           Streams.copy(is, os);
           this.setting.putAll(XContentHelper
               .convertToMap(new BytesArray(os.toByteArray()), true, XContentType.JSON).v2());

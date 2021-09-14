@@ -30,9 +30,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.URLResource;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -72,7 +72,7 @@ public class ConfigSourceLoader {
       int ordinal) {
     if (resource != null && filter.test(resource.getURL())) {
       String location = resource.getURL().getPath();
-      try (InputStream is = resource.openStream()) {
+      try (InputStream is = resource.openInputStream()) {
         if (location.endsWith(".properties")) {
           return Optional.of(new PropertiesConfigSource(location, ordinal, is));
         } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {

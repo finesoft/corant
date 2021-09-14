@@ -30,8 +30,8 @@ import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.modules.jpa.shared.metadata.PersistenceXmlParser;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
+import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.eclipse.microprofile.config.Config;
 
 /**

@@ -23,8 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
+import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.corant.shared.util.Systems;
 
 /**
@@ -43,7 +43,9 @@ public interface Defaults {
 
   int ONE_KB = 1024;
 
-  int SIXTEEN_KBS = ONE_KB << 4;
+  int FOUR_KB = ONE_KB << 2;
+
+  int SIXTEEN_KBS = FOUR_KB << 2;
 
   long ONE_MB = ONE_KB * (long) ONE_KB;
 
@@ -64,7 +66,7 @@ public interface Defaults {
         Optional<ClassPathResource> res = Resources
             .fromClassPath("META-INF/maven/org.corant/corant-shared/pom.properties").findFirst();
         if (res.isPresent()) {
-          try (InputStream is = res.get().openStream();
+          try (InputStream is = res.get().openInputStream();
               InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
             Properties properties = new Properties();
             properties.load(isr);

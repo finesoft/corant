@@ -111,7 +111,7 @@ public class KeycloakAuthzClient {
         logger.fine(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
       } else {
         authzClient =
-            AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openStream());
+            AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openInputStream());
         logger.fine(
             () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       }

@@ -35,7 +35,7 @@ import javax.jms.Message;
 import javax.jms.MessageFormatRuntimeException;
 import javax.jms.Session;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Resources.InputStreamResource;
+import org.corant.shared.resource.InputStreamResource;
 
 /**
  * corant-modules-jms-api

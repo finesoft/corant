@@ -36,10 +36,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.converter.AbstractConverter;
 import org.corant.shared.conversion.converter.factory.ObjectPrimitiveArrayConverterFactories;
+import org.corant.shared.resource.ClassResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassResource;
 import org.corant.shared.util.Types;
 
 /**

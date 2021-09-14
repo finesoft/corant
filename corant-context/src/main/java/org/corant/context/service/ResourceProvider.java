@@ -25,8 +25,8 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.SURI;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.URLResource;
 
 /**
  * corant-context

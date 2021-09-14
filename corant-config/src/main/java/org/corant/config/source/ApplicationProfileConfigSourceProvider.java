@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Resources.SourceType;
+import org.corant.shared.resource.SourceType;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.spi.ConfigSource;

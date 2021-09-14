@@ -33,9 +33,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceUnit;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.PersistenceNames;
+import org.corant.shared.resource.ClassPathResource;
+import org.corant.shared.resource.ClassResource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.Resources.ClassResource;
 
 /**
  *

@@ -31,8 +31,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import org.corant.shared.resource.Resource;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

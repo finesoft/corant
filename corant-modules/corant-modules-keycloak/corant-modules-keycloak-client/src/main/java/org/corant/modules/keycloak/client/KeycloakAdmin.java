@@ -27,8 +27,8 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.Resource;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.keycloak.OAuth2Constants;
@@ -96,7 +96,7 @@ public class KeycloakAdmin {
           if (resource != null) {
             logger.fine(() -> String.format("Found keycloak admin client config json %s.",
                 keycloakJsonLocation.get()));
-            try (InputStream is = resource.openStream()) {
+            try (InputStream is = resource.openInputStream()) {
               adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);
             }
           }

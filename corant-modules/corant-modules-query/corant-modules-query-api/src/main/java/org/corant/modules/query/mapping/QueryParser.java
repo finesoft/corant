@@ -28,9 +28,9 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.shared.resource.ClassPathResource;
+import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
-import org.corant.shared.util.Resources.Resource;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,7 +55,7 @@ public class QueryParser {
     final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpresses);
     fileMap.entrySet().stream().parallel().forEach(entry -> {
       logger.fine(() -> String.format("Parse query mapping file %s.", entry.getKey()));
-      try (InputStream is = entry.getValue().openStream()) {
+      try (InputStream is = entry.getValue().openInputStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
         XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setErrorHandler(new QueryParserErrorHandler(entry.getValue().getLocation()));

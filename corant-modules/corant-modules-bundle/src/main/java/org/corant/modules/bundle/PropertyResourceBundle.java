@@ -36,11 +36,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.resource.Resource;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.Resource;
-import org.corant.shared.util.Resources.URLResource;
 
 /**
  * corant-modules-bundle
@@ -75,7 +75,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
     Properties properties = new Properties();
-    try (InputStream is = fo.openStream();
+    try (InputStream is = fo.openInputStream();
         InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
       properties.load(isr);
     }

@@ -31,8 +31,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 import org.corant.shared.util.FileUtils;
-import org.corant.shared.util.Resources.Resource;
 import org.corant.shared.util.Streams;
 
 /**
@@ -76,7 +76,7 @@ public class StreamOutputBuilder {
       contentType = defaultObject(contentType, MediaType.APPLICATION_OCTET_STREAM);
     }
     StreamingOutput stm = output -> {
-      try (InputStream input = resource.openStream()) {
+      try (InputStream input = resource.openInputStream()) {
         Streams.copy(input, output);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);

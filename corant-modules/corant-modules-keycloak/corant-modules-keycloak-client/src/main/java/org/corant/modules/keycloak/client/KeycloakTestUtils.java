@@ -27,9 +27,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Resources.ClassPathResource;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.representations.adapters.config.AdapterConfig;
@@ -90,7 +90,7 @@ public class KeycloakTestUtils {
         .orElseGet(() -> "META-INF/keycloak.json");
     ClassPathResource cpr = Resources.tryFromClassPath(path).findFirst().orElseGet(null);
     if (cpr != null) {
-      try (InputStream is = cpr.openStream()) {
+      try (InputStream is = cpr.openInputStream()) {
         return KeycloakDeploymentBuilder.loadAdapterConfig(is);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);

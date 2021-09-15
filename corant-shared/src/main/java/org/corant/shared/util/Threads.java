@@ -16,6 +16,8 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Functions.uncheckedRunner;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
 
 /**
@@ -25,6 +27,9 @@ import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
  *
  */
 public class Threads {
+
+  public static final String DAEMON_THREAD_NAME_PREFIX = Names.CORANT.concat("-daemon-");
+  static final AtomicLong DAEMON_THREAD_ID = new AtomicLong(0);
 
   public static <E extends Throwable> void delayRunInDaemon(Duration delay,
       ThrowingRunnable<E> runner) {
@@ -37,7 +42,17 @@ public class Threads {
         }
       }
       uncheckedRunner(runner).run();
-    });
+    }, DAEMON_THREAD_NAME_PREFIX + DAEMON_THREAD_ID);
+    daemonThread.setDaemon(true);
+    daemonThread.start();
+  }
+
+  public static void runDaemon(Runnable runner) {
+    runDaemon(DAEMON_THREAD_NAME_PREFIX + DAEMON_THREAD_ID.incrementAndGet(), runner);
+  }
+
+  public static void runDaemon(String threadName, Runnable runner) {
+    Thread daemonThread = new Thread(runner, threadName);
     daemonThread.setDaemon(true);
     daemonThread.start();
   }

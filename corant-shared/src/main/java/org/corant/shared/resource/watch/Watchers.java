@@ -16,7 +16,6 @@ package org.corant.shared.resource.watch;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import org.corant.shared.normal.Names;
@@ -31,12 +30,6 @@ import org.corant.shared.util.Threads;
 public class Watchers {
 
   public static final String DAEMON_THREAD_PREFIX = Names.CORANT.concat("-fsw-dae-");
-
-  public static void main(String... listeners) throws IOException {
-    try (Watcher w = watchInDaemon(new File("d:/temp"), System.out::println)) {
-      Threads.tryThreadSleep(10000);
-    }
-  }
 
   public static Watcher watchDirectoryInDaemon(File fileDir, boolean recursive,
       Predicate<Path> filter, FileChangeListener listeners) {

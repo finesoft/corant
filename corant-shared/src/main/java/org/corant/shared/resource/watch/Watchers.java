@@ -16,7 +16,9 @@ package org.corant.shared.resource.watch;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.function.Predicate;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Threads;
 
@@ -28,30 +30,46 @@ import org.corant.shared.util.Threads;
  */
 public class Watchers {
 
-  public static final String DAEMON_THREAD_PERFIX = Names.CORANT.concat("-fsw-dae-");
+  public static final String DAEMON_THREAD_PREFIX = Names.CORANT.concat("-fsw-dae-");
+
+  public static void main(String... listeners) throws IOException {
+    try (Watcher w = watchInDaemon(new File("d:/temp"), System.out::println)) {
+      Threads.tryThreadSleep(10000);
+    }
+  }
 
   public static Watcher watchDirectoryInDaemon(File fileDir, boolean recursive,
-      FileChangeListener... listeners) {
-    shouldBeTrue(fileDir != null && fileDir.exists() && fileDir.isDirectory());
-    final Watcher watcher = new DirectoryWatcher(fileDir, recursive, listeners);
-    Threads.runDaemon(DAEMON_THREAD_PERFIX.concat(fileDir.getName()), watcher);
+      Predicate<Path> filter, FileChangeListener listeners) {
+    shouldBeTrue(fileDir != null && fileDir.exists() && fileDir.isDirectory(),
+        "The file dir to be watched can't null and must be a directory.");
+    final Watcher watcher = new DirectoryWatcher(fileDir, recursive, filter, listeners);
+    Threads.runInDaemon(DAEMON_THREAD_PREFIX.concat(fileDir.getName()), watcher);
     return watcher;
   }
 
-  public static Watcher watchInDaemon(File fileDir, FileChangeListener... listeners) {
-    shouldBeTrue(fileDir != null && fileDir.exists());
-    final Watcher watcher = fileDir.isFile() ? new FileWatcher(fileDir, -1, listeners)
-        : new DirectoryWatcher(fileDir, true, listeners);
-    Threads.runDaemon(DAEMON_THREAD_PERFIX.concat(fileDir.getName()), watcher);
+  public static Watcher watchFileInDaemon(File file, long pollingIntervalMs,
+      FileChangeListener listeners) {
+    shouldBeTrue(file != null && file.exists() && file.isFile(),
+        "The file to be watched can't null and must not a directory.");
+    final Watcher watcher = new FileWatcher(file, pollingIntervalMs, listeners);
+    Threads.runInDaemon(DAEMON_THREAD_PREFIX.concat(file.getName()), watcher);
     return watcher;
   }
 
-  public static Watcher watchInDaemon(Path dir, FileChangeListener... listeners) {
-    Path path = shouldNotNull(dir).normalize();
+  public static Watcher watchInDaemon(File fileOrDir, FileChangeListener listeners) {
+    shouldBeTrue(fileOrDir != null && fileOrDir.exists(), "The file dir to be watched can't null.");
+    final Watcher watcher = fileOrDir.isFile() ? new FileWatcher(fileOrDir, -1, listeners)
+        : new DirectoryWatcher(fileOrDir, true, null, listeners);
+    Threads.runInDaemon(DAEMON_THREAD_PREFIX.concat(fileOrDir.getName()), watcher);
+    return watcher;
+  }
+
+  public static Watcher watchInDaemon(Path dir, FileChangeListener listeners) {
+    Path path = shouldNotNull(dir, "The file dir to be watched can't null.").normalize();
     final Watcher watcher = dir.toFile().isFile() ? new FileWatcher(dir.toFile(), -1, listeners)
-        : new DirectoryWatcher(dir, true, listeners);
+        : new DirectoryWatcher(dir, true, null, listeners);
     final String name = path.getName(path.getNameCount() - 1).toString();
-    Threads.runDaemon(DAEMON_THREAD_PERFIX.concat(name), watcher);
+    Threads.runInDaemon(DAEMON_THREAD_PREFIX.concat(name), watcher);
     return watcher;
   }
 

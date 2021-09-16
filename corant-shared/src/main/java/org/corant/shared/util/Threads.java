@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Functions.uncheckedRunner;
 import java.time.Duration;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.corant.shared.normal.Names;
@@ -28,12 +29,25 @@ import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
  */
 public class Threads {
 
-  public static final String DAEMON_THREAD_NAME_PREFIX = Names.CORANT.concat("-daemon-");
+  public static final String DAEMON_THREAD_NAME_PREFIX = Names.CORANT.concat("-daemon");
   static final AtomicLong DAEMON_THREAD_ID = new AtomicLong(0);
 
-  public static <E extends Throwable> void delayRunInDaemon(Duration delay,
-      ThrowingRunnable<E> runner) {
-    Thread daemonThread = new Thread(() -> {
+  public static ThreadFactory daemonThreadFactory(final String threadName) {
+    return daemonThreadFactory(threadName, Thread.NORM_PRIORITY);
+  }
+
+  public static ThreadFactory daemonThreadFactory(final String threadName, final int priority) {
+    return r -> {
+      Thread thread = new Thread(r);
+      thread.setName(threadName + '-' + DAEMON_THREAD_ID.incrementAndGet());
+      thread.setDaemon(true);
+      thread.setPriority(priority);
+      return thread;
+    };
+  }
+
+  public static void delayRunInDaemon(String threadName, Duration delay, Runnable runner) {
+    daemonThreadFactory(threadName).newThread(() -> {
       if (delay != null) {
         try {
           TimeUnit.MILLISECONDS.sleep(delay.toMillis());
@@ -41,24 +55,35 @@ public class Threads {
           Thread.currentThread().interrupt();
         }
       }
-      uncheckedRunner(runner).run();
-    }, DAEMON_THREAD_NAME_PREFIX + DAEMON_THREAD_ID);
-    daemonThread.setDaemon(true);
-    daemonThread.start();
+      runner.run();
+    }).start();
   }
 
-  public static void runDaemon(Runnable runner) {
-    runDaemon(DAEMON_THREAD_NAME_PREFIX + DAEMON_THREAD_ID.incrementAndGet(), runner);
+  public static <E extends Throwable> void delayRunInDaemonx(Duration delay,
+      ThrowingRunnable<E> runner) {
+    delayRunInDaemonx(DAEMON_THREAD_NAME_PREFIX, delay, runner);
   }
 
-  public static void runDaemon(String threadName, Runnable runner) {
-    Thread daemonThread = new Thread(runner, threadName);
-    daemonThread.setDaemon(true);
-    daemonThread.start();
+  public static <E extends Throwable> void delayRunInDaemonx(String threadName, Duration delay,
+      ThrowingRunnable<E> runner) {
+    delayRunInDaemon(threadName, delay, uncheckedRunner(runner));
   }
 
-  public static <E extends Throwable> void runInDaemon(ThrowingRunnable<E> runner) {
-    delayRunInDaemon(null, runner);
+  public static void runInDaemon(Runnable runner) {
+    runInDaemon(DAEMON_THREAD_NAME_PREFIX, runner);
+  }
+
+  public static void runInDaemon(String threadName, Runnable runner) {
+    delayRunInDaemon(threadName, null, runner);
+  }
+
+  public static <E extends Throwable> void runInDaemonx(String threadName,
+      ThrowingRunnable<E> runner) {
+    delayRunInDaemonx(threadName, null, runner);
+  }
+
+  public static <E extends Throwable> void runInDaemonx(ThrowingRunnable<E> runner) {
+    delayRunInDaemonx(null, runner);
   }
 
   public static void tryThreadSleep(long ms) {

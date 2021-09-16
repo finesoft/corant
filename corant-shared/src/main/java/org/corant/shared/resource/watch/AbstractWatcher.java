@@ -54,7 +54,9 @@ public abstract class AbstractWatcher implements Watcher {
   public boolean registerListener(FileChangeListener... listeners) {
     boolean registered = false;
     for (FileChangeListener listener : listeners) {
-      registered |= this.listeners.add(listener);
+      if (listener != null) {
+        registered |= this.listeners.add(listener);
+      }
     }
     return registered;
   }
@@ -65,14 +67,12 @@ public abstract class AbstractWatcher implements Watcher {
   }
 
   protected void fire(WatchEvent.Kind<?> kind, File file, File prev) {
-    final File eventFile = file;
-    final File eventPrevFile = prev;
     for (FileChangeListener listener : listeners) {
       try {
         if (prev == null) {
-          listener.onChange(new FileChangeEvent(kind, eventFile));
+          listener.onChange(new FileChangeEvent(kind, file));
         } else {
-          listener.onChange(new PathUpdateEvent(ENTRY_MODIFY, eventFile, eventPrevFile));
+          listener.onChange(new PathUpdateEvent(ENTRY_MODIFY, file, prev));
         }
       } catch (Exception e) {
         logger.log(Level.WARNING, e, () -> "Occurred error on fire file change event!");

@@ -49,7 +49,7 @@ public class RetryAbortHandler implements RejectedExecutionHandler {
       logger.info(() -> String.format(
           "The task %s was rejected from the executor %s in the executor service %s for the first time and needs to be tried once after %s.",
           r.toString(), executor.toString(), name, retryDelay));
-      Threads.runInDaemon(() -> {
+      Threads.runInDaemonx(() -> {
         if (executor.getQueue().offer(r, retryDelay.toMillis(), TimeUnit.MILLISECONDS)) {
           logger.info(() -> String.format(
               "Succeeded in adding the task %s back to the queue of the executor %s in the executor service %s",

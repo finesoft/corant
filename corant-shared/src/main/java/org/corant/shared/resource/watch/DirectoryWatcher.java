@@ -19,6 +19,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -49,18 +51,23 @@ public class DirectoryWatcher extends AbstractWatcher {
   protected final WatchService service;
   protected final Map<WatchKey, Path> keys;
   protected final boolean recursive;
+  protected final Predicate<Path> filter;
   protected Path path;
-  protected volatile boolean trace = false;
+  protected volatile boolean trace;
 
-  protected DirectoryWatcher(File fileDir, boolean recursive, FileChangeListener... listeners) {
-    this(shouldNotNull(fileDir.toPath()), recursive, listeners);
+  public DirectoryWatcher(File fileDir, boolean recursive, Predicate<Path> filter,
+      FileChangeListener... listeners) {
+    this(shouldNotNull(fileDir, "The file dir to be watched can't null!").toPath(), recursive,
+        filter, listeners);
   }
 
-  protected DirectoryWatcher(Path dir, boolean recursive, FileChangeListener... listeners) {
+  public DirectoryWatcher(Path dir, boolean recursive, Predicate<Path> pathFilter,
+      FileChangeListener... listeners) {
     try {
-      path = shouldNotNull(dir, "The path to be watched must exist!", dir).normalize();
+      path = shouldNotNull(dir, "The path to be watched can't null!", dir).normalize();
+      filter = defaultObject(pathFilter, p -> true);
       service = FileSystems.getDefault().newWatchService();
-      keys = new HashMap<WatchKey, Path>();
+      keys = new HashMap<>();
       Collections.addAll(this.listeners, listeners);
       if (path.toFile().isFile()) {
         this.recursive = true;
@@ -81,14 +88,16 @@ public class DirectoryWatcher extends AbstractWatcher {
 
   @Override
   public void close() throws IOException {
-    super.close();
     try {
       if (service != null) {
         service.close();
       }
     } catch (Throwable t) {
-      logger.log(Level.WARNING, t, () -> "Close watcher service occurred error!");
+      logger.log(Level.WARNING, t, () -> "Close watch service occurred error!");
+    } finally {
+      logger.info("Close the watcher!");
     }
+    super.close();
   }
 
   /**
@@ -116,7 +125,9 @@ public class DirectoryWatcher extends AbstractWatcher {
           Path name = ev.context();
           Path child = dir.resolve(name);
           // fire the events
-          fire(event.kind(), child.toFile(), null);
+          if (filter.test(child)) {
+            fire(event.kind(), child.toFile(), null);
+          }
           // if directory is created, and watching recursively, then register it and its
           // sub-directories
           if (recursive && kind == ENTRY_CREATE) {
@@ -144,7 +155,7 @@ public class DirectoryWatcher extends AbstractWatcher {
         logger.log(Level.WARNING, e, () -> "Watch service was interrupted!");
         break;
       } catch (ClosedWatchServiceException cwse) {
-        logger.log(Level.WARNING, cwse, () -> "Watch service was closed!");
+        logger.warning(() -> "Watch service was closed!");
         break;
       }
     }
@@ -174,7 +185,7 @@ public class DirectoryWatcher extends AbstractWatcher {
    * Register the given directory, and all its sub-directories, with the WatchService.
    */
   protected void registerAll(final Path start) throws IOException {
-    Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+    Files.walkFileTree(start, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
           throws IOException {

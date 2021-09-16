@@ -33,8 +33,8 @@ public class FileWatcher extends AbstractWatcher {
   protected final AtomicLong modifiedTimeStemp;
   protected final long pollingIntervalMs;
 
-  protected FileWatcher(File file, long pollingIntervalMs, FileChangeListener... listeners) {
-    shouldBeTrue(file != null && file.isFile());
+  public FileWatcher(File file, long pollingIntervalMs, FileChangeListener... listeners) {
+    shouldBeTrue(file != null && file.isFile(), "The file to be watched must be a non null file.");
     this.pollingIntervalMs = pollingIntervalMs < 0 ? 64 : pollingIntervalMs;
     Collections.addAll(this.listeners, listeners);
     this.file = file;

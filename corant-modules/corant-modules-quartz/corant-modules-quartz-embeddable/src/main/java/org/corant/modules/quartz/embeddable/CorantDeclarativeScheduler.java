@@ -87,7 +87,7 @@ public class CorantDeclarativeScheduler {
         if (delay == null) {
           getQuartzScheduler().start();
         } else {
-          Threads.delayRunInDaemon(delay, getQuartzScheduler()::start);
+          Threads.delayRunInDaemonx(delay, getQuartzScheduler()::start);
         }
         logger.info(() -> "Start the bulit-in declarative job scheduler!");
       }

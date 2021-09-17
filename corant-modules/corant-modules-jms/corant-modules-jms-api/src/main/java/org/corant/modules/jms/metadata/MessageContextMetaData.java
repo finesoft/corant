@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getBoolean;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import org.corant.modules.jms.annotation.MessageContext;
 
@@ -35,7 +36,7 @@ public class MessageContextMetaData {
 
   public static MessageContextMetaData of(MessageContext ctx) {
     shouldNotNull(ctx);
-    return new MessageContextMetaData(ctx.connectionFactoryId(), ctx.dupsOkAck());
+    return new MessageContextMetaData(ctx.connectionFactoryId(), getBoolean(ctx.dupsOkAck()));
   }
 
   @Override

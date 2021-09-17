@@ -36,7 +36,12 @@ public @interface MessageProperty {
 
   Class<?> type() default String.class;
 
-  /** The value of the property */
+  /**
+   * The value of the property
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
+   */
   String value();
 
   class MessagePropertyLiteral extends AnnotationLiteral<MessageProperty>

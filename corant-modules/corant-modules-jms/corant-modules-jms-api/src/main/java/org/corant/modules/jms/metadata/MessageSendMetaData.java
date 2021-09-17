@@ -13,6 +13,10 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getBoolean;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getInt;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getLong;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getString;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.newArrayList;
 import java.util.Collection;
@@ -55,10 +59,10 @@ public class MessageSendMetaData {
 
   public static MessageSendMetaData of(MessageSend annotation) {
     shouldNotNull(annotation);
-    return new MessageSendMetaData(annotation.deliveryDelay(), annotation.deliveryMode(),
-        MessageDestinationMetaData.of(annotation.destination()), annotation.dupsOkAck(),
-        annotation.marshaller(), MessagePropertyMetaData.of(annotation.properties()),
-        annotation.timeToLive());
+    return new MessageSendMetaData(getLong(annotation.deliveryDelay()),
+        getInt(annotation.deliveryMode()), MessageDestinationMetaData.of(annotation.destination()),
+        getBoolean(annotation.dupsOkAck()), getString(annotation.marshaller()),
+        MessagePropertyMetaData.of(annotation.properties()), getLong(annotation.timeToLive()));
   }
 
   public long getDeliveryDelay() {

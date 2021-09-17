@@ -27,7 +27,8 @@ import org.corant.modules.jms.annotation.MessageDestination;
  *
  */
 @MessageDestination(connectionFactoryId = "${corant.ddd.aggregate-lifecycle-message.broker:}",
-    name = "${corant.ddd.aggregate-lifecycle-message.queue:}", multicast = true)
+    name = "${corant.ddd.aggregate-lifecycle-message.destination:}",
+    multicast = "${corant.ddd.aggregate-lifecycle-message.multicast:true}")
 public class AggregateLifecycleMessage extends AbstractAggregateMessage implements MergableMessage {
 
   private static final long serialVersionUID = -5988315884617833263L;

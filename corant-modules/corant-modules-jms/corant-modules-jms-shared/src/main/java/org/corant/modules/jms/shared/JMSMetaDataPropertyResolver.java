@@ -28,7 +28,7 @@ import org.corant.modules.jms.metadata.MetaDataPropertyResolver;
 public class JMSMetaDataPropertyResolver implements MetaDataPropertyResolver {
 
   @Override
-  public <T> T resolve(Object property, Class<T> clazz) {
+  public <T> T resolve(String property, Class<T> clazz) {
     if (property != null && clazz != null) {
       return toObject(Configs.assemblyStringConfigProperty(property.toString()), clazz);
     }

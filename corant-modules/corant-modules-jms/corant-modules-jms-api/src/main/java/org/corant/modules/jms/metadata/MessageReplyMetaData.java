@@ -13,6 +13,9 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getBoolean;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getInt;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getString;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import java.lang.reflect.AnnotatedElement;
@@ -50,8 +53,9 @@ public class MessageReplyMetaData {
 
   public static MessageReplyMetaData of(MessageReply annotation) {
     shouldNotNull(annotation);
-    return new MessageReplyMetaData(annotation.deliveryMode(), annotation.destination(),
-        annotation.marshaller(), annotation.multicast());
+    return new MessageReplyMetaData(getInt(annotation.deliveryMode()),
+        getString(annotation.destination()), getString(annotation.marshaller()),
+        getBoolean(annotation.multicast()));
   }
 
   public static Set<MessageReplyMetaData> of(MessageReply[] annotations) {

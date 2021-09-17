@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import javax.jms.JMSContext;
 
 /**
  * corant-modules-jms-api
@@ -34,18 +35,33 @@ public @interface MessageContext {
   /**
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
    * configuration file.
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
    */
   String connectionFactoryId() default EMPTY;
 
   /**
    * In the Jakarta EE web or EJB container, when there is no active JTA transaction in progress:
+   * <p>
    * The argument acknowledgeMode must be set to either of JMSContext.AUTO_ACKNOWLEDGE or
    * JMSContext.DUPS_OK_ACKNOWLEDGE. The session will be non-transacted and messages received by
-   * this session willbe acknowledged automatically according to the value of acknowledgeMode. For a
-   * definition of the meaning ofthese acknowledgement modes see the links below. The values
+   * this session will be acknowledged automatically according to the value of acknowledgeMode. For
+   * a definition of the meaning of these acknowledgement modes see the links below. The values
    * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
+   * <p>
+   * Note: The final value type is <b>boolean</b> type; in order to support configurability, the
+   * string is used as the value type of annotation property, and the value will eventually be
+   * converted to boolean type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to boolean value.
+   *
+   * @see JMSContext#AUTO_ACKNOWLEDGE
+   * @see JMSContext#CLIENT_ACKNOWLEDGE
+   * @see JMSContext#SESSION_TRANSACTED
+   * @see JMSContext#DUPS_OK_ACKNOWLEDGE
    *
    * @return sessionMode
    */
-  boolean dupsOkAck() default false;
+  String dupsOkAck() default "false";
 }

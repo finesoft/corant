@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.jms.annotation.MessageDestination;
+import org.corant.modules.jms.annotation.MessageDriven;
 import org.corant.modules.jms.metadata.MessageDestinationMetaData;
 import org.corant.modules.jms.metadata.MessageDrivenMetaData;
 import org.corant.modules.jms.metadata.MessageReplyMetaData;
@@ -125,6 +127,18 @@ public class MessageReceivingMetaData {
     }
   }
 
+  /**
+   * Resolve and return the message receiving meta data from the given method.
+   *
+   * <p>
+   * Note: The given method must have an {@link MessageDriven} annotation, and the given method or
+   * the first parameter of the given method, one of them must have the {@link MessageDestination}
+   * annotation; if the method and the first parameter of the method both have the
+   * {@link MessageDestination} annotation, the method annotation is used by default.
+   *
+   *
+   * @param method the method to be resolved
+   */
   public static Set<MessageReceivingMetaData> of(ContextualMethodHandler method) {
     MessageDrivenMetaData driven =
         MessageDrivenMetaData.from(method.getMethod(), method.getQualifiers());
@@ -132,11 +146,13 @@ public class MessageReceivingMetaData {
     if (isEmpty(dests)) {
       dests = MessageDestinationMetaData.from(method.getMethod().getParameterTypes()[0]);
     }
-    shouldNotEmpty(dests);
+    shouldNotEmpty(dests,
+        "Can't find any message destination from the message receiving method %s.",
+        method.getMethod());
     Set<MessageReceivingMetaData> metas = new LinkedHashSet<>(dests.size());
     for (MessageDestinationMetaData dest : dests) {
       shouldBeTrue(metas.add(new MessageReceivingMetaData(method, dest, driven)),
-          "The message receive method %s dup!", method.toString());
+          "The message receive method %s dup!", method.getMethod());
     }
     return metas;
   }

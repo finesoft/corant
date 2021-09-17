@@ -13,10 +13,11 @@
  */
 package org.corant.modules.jms.metadata;
 
-import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Conversions.toObject;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-modules-jms-api
@@ -26,13 +27,77 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface MetaDataPropertyResolver extends Sortable {
 
-  static <T> T get(Object property, Class<T> clazz) {
-    Instance<MetaDataPropertyResolver> inst = CDI.current().select(MetaDataPropertyResolver.class);
-    if (!inst.isUnsatisfied()) {
-      return inst.stream().sorted().findFirst().get().resolve(property, clazz);
+  String VAR_PREFIX = "${";
+  String VAR_SUFFIX = "}";
+
+  static <T> T get(String property, Class<T> clazz) {
+    if (property == null) {
+      return null;
     }
-    return forceCast(property);
+    MetaDataPropertyResolver resolver = null;
+    try {
+      Instance<MetaDataPropertyResolver> inst =
+          CDI.current().select(MetaDataPropertyResolver.class);
+      if (!inst.isUnsatisfied()) {
+        resolver = inst.stream().sorted(Sortable::compare).findFirst().get();
+      }
+    } catch (Exception ex) {
+      resolver = null;
+    }
+    if (resolver != null) {
+      return resolver.resolve(property, clazz);
+    }
+    if (property.contains(VAR_PREFIX) && property.contains(VAR_SUFFIX)) {
+      return toObject(resolveVariable(property), clazz);
+    }
+    return toObject(property, clazz);
   }
 
-  <T> T resolve(Object property, Class<T> clazz);
+  static boolean getBoolean(String property) {
+    return get(property, Boolean.class);
+  }
+
+  static double getDouble(String property) {
+    return get(property, Double.class);
+  }
+
+  static double getFloat(String property) {
+    return get(property, Float.class);
+  }
+
+  static int getInt(String property) {
+    return get(property, Integer.class);
+  }
+
+  static long getLong(String property) {
+    return get(property, Long.class);
+  }
+
+  static String getString(String property) {
+    return get(property, String.class);
+  }
+
+  static String resolveVariable(String propertyName) {
+    int startVar = 0;
+    String resolvedValue = propertyName;
+    while ((startVar = resolvedValue.indexOf(VAR_PREFIX, startVar)) >= 0) {
+      int endVar = resolvedValue.indexOf(VAR_SUFFIX, startVar);
+      if (endVar <= 0) {
+        break;
+      }
+      String varName = resolvedValue.substring(startVar + 2, endVar);
+      if (varName.isEmpty()) {
+        break;
+      }
+      String varVal = Systems.getSystemProperty(varName);
+      if (varVal != null) {
+        resolvedValue =
+            resolveVariable(resolvedValue.replace(VAR_PREFIX + varName + VAR_SUFFIX, varVal));
+      }
+      startVar++;
+    }
+    return resolvedValue;
+  }
+
+  <T> T resolve(String property, Class<T> clazz);
 }

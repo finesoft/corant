@@ -13,6 +13,12 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.get;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getBoolean;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getDouble;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getInt;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getLong;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getString;
 import static org.corant.shared.util.Annotations.EMPTY_ARRAY;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -109,12 +115,15 @@ public class MessageDrivenMetaData {
     Method beanMethod = shouldNotNull(method);
     MessageDriven annotation = shouldNotNull(method.getAnnotation(MessageDriven.class));
     return new MessageDrivenMetaData(beanMethod.getDeclaringClass(), qualifiers, beanMethod,
-        annotation.acknowledge(), annotation.brokenBackoffAlgo(), annotation.brokenBackoffFactor(),
-        annotation.brokenDuration(), annotation.cacheLevel(), annotation.failureThreshold(),
-        annotation.loopIntervalMs(), annotation.maxBrokenDuration(), annotation.receiveThreshold(),
-        annotation.receiveTimeout(), MessageReplyMetaData.of(annotation.reply()),
-        annotation.selector(), annotation.specifiedSelectors(), annotation.tryThreshold(),
-        annotation.txTimeout(), annotation.xa());
+        getInt(annotation.acknowledge()),
+        get(annotation.brokenBackoffAlgo(), BackoffAlgorithm.class),
+        getDouble(annotation.brokenBackoffFactor()), getString(annotation.brokenDuration()),
+        getInt(annotation.cacheLevel()), getInt(annotation.failureThreshold()),
+        getLong(annotation.loopIntervalMs()), getString(annotation.maxBrokenDuration()),
+        getInt(annotation.receiveThreshold()), getLong(annotation.receiveTimeout()),
+        MessageReplyMetaData.of(annotation.reply()), getString(annotation.selector()),
+        annotation.specifiedSelectors(), getInt(annotation.tryThreshold()),
+        getInt(annotation.txTimeout()), getBoolean(annotation.xa()));
   }
 
   public int getAcknowledge() {

@@ -13,8 +13,9 @@
  */
 package org.corant.modules.jms.metadata;
 
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.get;
+import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getBoolean;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.newHashMap;
 import java.lang.reflect.AnnotatedElement;
@@ -62,10 +63,10 @@ public class MessageDestinationMetaData {
     shouldNotNull(annotation);
     Map<String, Object> properties = new HashMap<>();
     for (MessageProperty mp : annotation.properties()) {
-      properties.put(mp.name(), toObject(mp.value(), mp.type()));
+      properties.put(mp.name(), get(mp.value(), mp.type()));
     }
     return new MessageDestinationMetaData(annotation.connectionFactoryId(), annotation.name(),
-        annotation.multicast(), properties);
+        getBoolean(annotation.multicast()), properties);
   }
 
   @Override

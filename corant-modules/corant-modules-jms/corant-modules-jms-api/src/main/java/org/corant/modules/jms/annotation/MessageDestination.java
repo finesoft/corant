@@ -36,23 +36,31 @@ public @interface MessageDestination {
 
   /**
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
-   * configuration file, can use '${config property name}' to retrieve the connection factory id
-   * from microprofile config source.
+   * configuration file, if the value uses the <b>"${...}"</b> expression, the specific value can be
+   * obtained from the system property or configuration..
    */
   String connectionFactoryId() default EMPTY;
 
   /**
    * Marks whether a queue or topic.
-   *
+   * <p>
    * Value of true represents Topic, Value of false represents Queue, default is false.
+   * <p>
+   * <b>Note:</b> The final value type is <b>boolean</b> type; in order to support configurability,
+   * the string is used as the value type of annotation property, and the value will eventually be
+   * converted to boolean type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to boolean value.
    *
    * @return multicast
    */
-  boolean multicast() default false;
+  String multicast() default "false";
 
   /**
-   * The destination name, can use '${config property name}' to retrieve the destination name from
-   * microprofile config source.
+   * The destination name
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
    */
   String name();
 

@@ -17,7 +17,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.jms.DeliveryMode;
+import javax.jms.JMSProducer;
+import javax.jms.Message;
 import org.corant.modules.jms.JMSNames;
 
 /**
@@ -29,13 +30,53 @@ import org.corant.modules.jms.JMSNames;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface MessageReply {
+  /**
+   * This delivery mode instructs the Jakarta Messaging provider to log the message to stable
+   * storage as part of the client's send operation, delivery mode is set to PERSISTENT by default.
+   *
+   * <p>
+   * <b>Note:</b> The final value type is <b>integer</b> type; in order to support configurability,
+   * the string is used as the value type of annotation property, and the value will eventually be
+   * converted to integer type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to integer value.
+   *
+   * @see JMSProducer#setDeliveryMode(int)
+   */
+  String deliveryMode() default "2";// DeliveryMode.PERSISTENT;
 
-  int deliveryMode() default DeliveryMode.PERSISTENT;
-
+  /**
+   * The destination name
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
+   */
   String destination();
 
+  /**
+   * Specify a marshal scheme to marshaling the POJO into {@link Message} object, when the message
+   * object sent is a POJO, default is "STD_JAVA".
+   *
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
+   *
+   * @return the marshaler name
+   */
   String marshaller() default JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
 
-  boolean multicast() default false;
+  /**
+   * Marks whether a queue or topic.
+   * <p>
+   * Value of true represents Topic, Value of false represents Queue, default is false.
+   * <p>
+   * <b>Note:</b> The final value type is <b>boolean</b> type; in order to support configurability,
+   * the string is used as the value type of annotation property, and the value will eventually be
+   * converted to boolean type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to boolean value.
+   *
+   */
+  String multicast() default "false";
 
 }

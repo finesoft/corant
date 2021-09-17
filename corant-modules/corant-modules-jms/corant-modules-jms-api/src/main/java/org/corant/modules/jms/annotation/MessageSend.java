@@ -18,7 +18,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.jms.DeliveryMode;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.modules.jms.JMSNames;
@@ -46,15 +45,22 @@ public @interface MessageSend {
    * @return deliveryDelay
    * @see JMSProducer#setDeliveryDelay(long)
    */
-  long deliveryDelay() default -1;
+  String deliveryDelay() default "-1";
 
   /**
    * This delivery mode instructs the Jakarta Messaging provider to log the message to stable
-   * storage as part of the client's send operation, Delivery mode is set to PERSISTENT by default.
+   * storage as part of the client's send operation, delivery mode is set to PERSISTENT by default.
+   *
+   * <p>
+   * <b>Note:</b> The final value type is <b>integer</b> type; in order to support configurability,
+   * the string is used as the value type of annotation property, and the value will eventually be
+   * converted to integer type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to integer value.
    *
    * @see JMSProducer#setDeliveryMode(int)
    */
-  int deliveryMode() default DeliveryMode.PERSISTENT;
+  String deliveryMode() default "2";// DeliveryMode.PERSISTENT;
 
   /**
    * The message destination
@@ -71,13 +77,24 @@ public @interface MessageSend {
    * a definition of the meaning of these acknowledgement modes see the links below. The values
    * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
    *
+   * <p>
+   * Note: The final value type is <b>boolean</b> type; in order to support configurability, the
+   * string is used as the value type of annotation property, and the value will eventually be
+   * converted to boolean type. If the value of this property uses the <b>"${...}"</b> expression,
+   * the specific value can be obtained from the system property or configuration, and then convert
+   * it to boolean value.
+   *
    * @return sessionMode
    */
-  boolean dupsOkAck() default false;
+  String dupsOkAck() default "false";
 
   /**
-   * Specify a marshal scheme to marshalling the POJO into {@link Message} object, when the message
-   * object sent is a POJO
+   * Specify a marshal scheme to marshaling the POJO into {@link Message} object, when the message
+   * object sent is a POJO, default is "STD_JAVA".
+   *
+   * <p>
+   * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
+   * be obtained from the system property or configuration.
    *
    * @return the marshaller name
    */
@@ -87,6 +104,7 @@ public @interface MessageSend {
    * Specifies that messages sent using the JMSProducer will have the specified property set to the
    * specified Java object value.
    *
+   * <p>
    * Note that this method works only for the objectified primitive object types (Integer, Double,
    * Long ...) and String objects.
    *
@@ -106,10 +124,16 @@ public @interface MessageSend {
    *
    * Time to live is set to zero by default, which means a message never expires.
    *
-   * @return timeToLive
+   * <p>
+   * <b>Note:</b> The final value type is <b>long</b> type; in order to support configurability, the
+   * string is used as the value type of annotation property, and the value will eventually be
+   * converted to long type. If the value of this property uses the <b>"${...}"</b> expression, the
+   * specific value can be obtained from the system property or configuration, and then convert it
+   * to long value.
    *
+   * @return timeToLive
    * @see JMSProducer#setTimeToLive(long)
    */
-  long timeToLive() default -1;
+  String timeToLive() default "-1";
 
 }

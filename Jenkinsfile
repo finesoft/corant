@@ -1,8 +1,8 @@
-def REVISION = 'none'
+def VERSION = 'none'
 pipeline {
   agent any
   parameters {
-    choice(name: 'repo', choices: ['-SNAPSHOT', '.RELEASE'])
+    choice(name: 'changelist', choices: ['-SNAPSHOT', '.RELEASE'])
   }
   stages {
     stage('Build') {
@@ -14,10 +14,12 @@ pipeline {
       }
       steps {
         script {
-          def pom = readMavenPom file: 'pom.xml'
-          revision = pom.properties['revision'].replace('-SNAPSHOT','')
-          revision = revision + params.repo
-          sh "mvn clean deploy -Dmaven.test.skip=true -Drevision=${revision}"
+          //def pom = readMavenPom file: 'pom.xml'
+          //revision = pom.properties['revision'].replace('-SNAPSHOT','')
+          //revision = revision + params.repo
+          sh "mvn clean deploy -Dmaven.test.skip=true -Dchangelist=${params.changelist}"
+          def flattened = readMavenPom file: '.flattened-pom.xml'
+          VERSION = flattened.version
         }
       }
     }
@@ -27,7 +29,11 @@ pipeline {
       script {
         wrap([$class: 'BuildUser']) {
           slackSend channel: '#jenkins',color: 'good',
-            message: "successfully @${env.BUILD_USER}\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n revision: ${revision} \n ${env.BUILD_URL}"
+            message:
+            """successfully @${env.BUILD_USER}
+            ${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}
+            version: ${VERSION}
+            ${env.BUILD_URL}"""
         }
       }
     }
@@ -35,7 +41,11 @@ pipeline {
       script {
         wrap([$class: 'BuildUser']) {
           slackSend channel: '#jenkins',color: '#EA4335',
-        	message: "failed!!! @${env.BUILD_USER} @here\n${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} \n revision: ${revision} \n ${env.BUILD_URL}"
+        	message:
+        	"""failed!!! @${env.BUILD_USER} @here
+        	${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}
+        	version: ${revision}
+        	${env.BUILD_URL}"""
         }
       }
     }

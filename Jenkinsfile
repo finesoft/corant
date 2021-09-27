@@ -14,11 +14,8 @@ pipeline {
       }
       steps {
         script {
-          //def pom = readMavenPom file: 'pom.xml'
-          //revision = pom.properties['revision'].replace('-SNAPSHOT','')
-          //revision = revision + params.repo
           sh "mvn clean deploy -Dmaven.test.skip=true -Dchangelist=${params.changelist}"
-          def flattened = readMavenPom file: '.flattened-pom.xml'
+          def flattened = readMavenPom file: 'corant-boms/.flattened-pom.xml'
           VERSION = flattened.version
         }
       }

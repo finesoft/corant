@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,26 +14,34 @@
 package org.corant.modules.vertx.web;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeanManager;
-import org.eclipse.microprofile.config.Config;
+import javax.inject.Singleton;
+import org.corant.Corant;
+import org.corant.context.ContainerEvents.PreContainerStopEvent;
+import org.corant.kernel.event.PostCorantReadyEvent;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 
 /**
  * corant-modules-vertx-web
  *
- * @author bingo 下午12:13:35
+ * @author bingo 下午3:54:43
  *
  */
-public class WebServerInitializer {
+@Singleton
+public class WebVertxServer {
 
-  HttpServer httpServer;
+  Vertx vertx = Vertx.vertx();
+  Verticle verticle = new WebVerticle();
 
-  void init(@Observes Vertx vertx, BeanManager beanManager, Config config) {
-    Router router = Router.router(vertx);
-    router.route().handler(BodyHandler.create());
-    httpServer = vertx.createHttpServer().requestHandler(router).listen().result();
+  public static void main(String... args) {
+    Corant.startup();
+  }
+
+  void onPostCorantReady(@Observes PostCorantReadyEvent e) {
+    vertx.deployVerticle(verticle);
+  }
+
+  void onPreContainerStopEvent(@Observes PreContainerStopEvent event) {
+    vertx.close();
   }
 }

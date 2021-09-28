@@ -44,9 +44,9 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * @author bingo 下午10:08:26
  *
  */
-public class CommanderExtension implements Extension {
+public class CommandExtension implements Extension {
 
-  private static final Logger logger = Logger.getLogger(CommanderExtension.class.getName());
+  private static final Logger logger = Logger.getLogger(CommandExtension.class.getName());
 
   static final boolean ENABLED_COMMANDS =
       getValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
@@ -59,6 +59,10 @@ public class CommanderExtension implements Extension {
 
   public Set<Class<? extends CommandHandler<?>>> getCommandHandlerTypes(Class<?> commandClass) {
     return commandAndHandler.get(commandClass);
+  }
+
+  public Set<Class<?>> getCommands() {
+    return new HashSet<>(commandAndHandler.keySet());
   }
 
   @SuppressWarnings("unchecked")

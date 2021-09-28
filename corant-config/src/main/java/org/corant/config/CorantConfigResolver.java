@@ -182,11 +182,12 @@ public class CorantConfigResolver {
    * result after the expansion will be returned, otherwise the given value will be returned
    * directly.
    *
-   * @param value the value to resolve
+   * @param configValue the value to resolve
    * @param provider the raw configuration properties provider
    * @return the expanded value or the original given value if it can't expand
    */
-  public static String resolveValue(String value, CorantConfigRawValueProvider provider) {
+  public static String resolveValue(String configValue, CorantConfigRawValueProvider provider) {
+    String value = configValue;
     if (isNotBlank(value) && provider != null) {
       boolean exps = value.contains(EXP_PREFIX);
       boolean vars = value.contains(VAR_PREFIX);

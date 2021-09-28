@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.LETTERS;
 import static org.corant.shared.util.Strings.LOWER_CASE_LETTERS;
 import static org.corant.shared.util.Strings.NUMBERS;
@@ -42,93 +43,164 @@ public class Randoms {
   }
 
   public static byte[] randomBytes(final int count) {
+    return randomBytes(count, RANDOM);
+  }
+
+  public static byte[] randomBytes(final int count, final Random random) {
     shouldBeTrue(count >= 0, "Count cannot be negative.");
+    final Random theRandom = defaultObject(random, RANDOM);
     final byte[] result = new byte[count];
-    RANDOM.nextBytes(result);
+    theRandom.nextBytes(result);
     return result;
   }
 
   public static char[] randomChars(final char[] sourceChar, final int length) {
+    return randomChars(sourceChar, length, RANDOM);
+  }
+
+  public static char[] randomChars(final char[] sourceChar, final int length, final Random random) {
     shouldBeTrue(sourceChar != null && sourceChar.length > 0 && length > 0);
-    int sLen = sourceChar.length;
-    char[] chars = new char[length];
+    final Random theRandom = defaultObject(random, RANDOM);
+    final int sLen = sourceChar.length;
+    final char[] chars = new char[length];
     for (int i = 0; i < length; i++) {
-      chars[i] = sourceChar[RANDOM.nextInt(sLen)];
+      chars[i] = sourceChar[theRandom.nextInt(sLen)];
     }
     return chars;
   }
 
   public static double randomDouble(final double max) {
-    return randomDouble(0, max);
+    return randomDouble(max, RANDOM);
   }
 
   public static double randomDouble(final double min, final double max) {
+    return randomDouble(min, max, RANDOM);
+  }
+
+  public static double randomDouble(final double min, final double max, final Random random) {
     shouldBeFalse(min > max);
-    return min == max ? min : min + (max - min) * RANDOM.nextDouble();
+    return min == max ? min : min + (max - min) * defaultObject(random, RANDOM).nextDouble();
+  }
+
+  public static double randomDouble(final double max, final Random random) {
+    return randomDouble(0, max, random);
   }
 
   public static float randomFloat(final float max) {
-    return randomFloat(0, max);
+    return randomFloat(max, RANDOM);
   }
 
-  public static float randomFloat(final float min, final float max) {
+  public static double randomFloat(final float min, final float max) {
+    return randomFloat(min, max, RANDOM);
+  }
+
+  public static float randomFloat(final float min, final float max, final Random random) {
     shouldBeFalse(min > max);
-    return min == max ? min : min + (max - min) * RANDOM.nextFloat();
+    return min == max ? min : min + (max - min) * defaultObject(random, RANDOM).nextFloat();
+  }
+
+  public static float randomFloat(final float max, final Random random) {
+    return randomFloat(0, max, random);
   }
 
   public static int randomInt(final int max) {
-    return randomInt(0, max);
+    return randomInt(max, RANDOM);
   }
 
   public static int randomInt(final int min, final int max) {
+    return randomInt(min, max, RANDOM);
+  }
+
+  public static int randomInt(final int min, final int max, final Random random) {
     shouldBeFalse(min > max);
-    return min == max ? min : min + RANDOM.nextInt(max - min);
+    return min == max ? min : min + defaultObject(random, RANDOM).nextInt(max - min);
+  }
+
+  public static int randomInt(final int max, final Random random) {
+    return randomInt(0, max, random);
   }
 
   public static String randomLetters(final int length) {
-    return randomString(LETTERS, length);
+    return randomString(LETTERS, length, RANDOM);
+  }
+
+  public static String randomLetters(final int length, final Random random) {
+    return randomString(LETTERS, length, random);
   }
 
   public static long randomLong(final long max) {
-    return randomLong(0L, max);
+    return randomLong(max, RANDOM);
   }
 
   public static long randomLong(final long min, final long max) {
-    return (long) randomDouble(min, max);
+    return randomLong(min, max, RANDOM);
+  }
+
+  public static long randomLong(final long min, final long max, final Random random) {
+    return (long) randomDouble(min, max, random);
+  }
+
+  public static long randomLong(final long max, final Random random) {
+    return randomLong(0L, max, random);
   }
 
   public static String randomLowerCaseLetters(final int length) {
-    return randomString(LOWER_CASE_LETTERS, length);
+    return randomLowerCaseLetters(length, RANDOM);
+  }
+
+  public static String randomLowerCaseLetters(final int length, final Random random) {
+    return randomString(LOWER_CASE_LETTERS, length, random);
   }
 
   public static String randomNumbers(final int length) {
-    return randomString(NUMBERS, length);
+    return randomNumbers(length, RANDOM);
+  }
+
+  public static String randomNumbers(final int length, final Random random) {
+    return randomString(NUMBERS, length, random);
   }
 
   public static String randomNumbersAndLcLetters(final int length) {
-    return randomString(NUMBERS_AND_LOWER_CASE_LETTERS, length);
+    return randomNumbersAndLcLetters(length, RANDOM);
+  }
+
+  public static String randomNumbersAndLcLetters(final int length, final Random random) {
+    return randomString(NUMBERS_AND_LOWER_CASE_LETTERS, length, random);
   }
 
   public static String randomNumbersAndLetters(final int length) {
-    return randomString(NUMBERS_AND_LETTERS, length);
+    return randomNumbersAndLetters(length, RANDOM);
+  }
+
+  public static String randomNumbersAndLetters(final int length, final Random random) {
+    return randomString(NUMBERS_AND_LETTERS, length, random);
   }
 
   public static String randomNumbersAndUcLetters(final int length) {
-    return randomString(NUMBERS_AND_UPPER_CASE_LETTERS, length);
+    return randomNumbersAndUcLetters(length, RANDOM);
   }
 
-  public static String randomString(final String source, final int length) {
+  public static String randomNumbersAndUcLetters(final int length, final Random random) {
+    return randomString(NUMBERS_AND_UPPER_CASE_LETTERS, length, random);
+  }
+
+  public static String randomString(final String source, final int length, final Random random) {
     shouldBeTrue(source != null && source.length() > 0 && length > 0);
     StringBuilder sb = new StringBuilder(length);
-    char[] sourceChar = source.toCharArray();
-    int sLen = sourceChar.length;
+    final char[] sourceChar = source.toCharArray();
+    final int sLen = sourceChar.length;
+    final Random theRandom = defaultObject(random, RANDOM);
     for (int i = 0; i < length; i++) {
-      sb.append(sourceChar[RANDOM.nextInt(sLen)]);
+      sb.append(sourceChar[theRandom.nextInt(sLen)]);
     }
     return sb.toString();
   }
 
   public static String randomUpperCaseLetters(final int length) {
-    return randomString(UPPER_CASE_LETTERS, length);
+    return randomUpperCaseLetters(length, RANDOM);
+  }
+
+  public static String randomUpperCaseLetters(final int length, final Random random) {
+    return randomString(UPPER_CASE_LETTERS, length, random);
   }
 }

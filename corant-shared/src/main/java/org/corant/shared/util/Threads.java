@@ -38,6 +38,7 @@ public class Threads {
 
   public static ThreadFactory daemonThreadFactory(final String threadName, final int priority) {
     return r -> {
+      // FIXME context propagation
       Thread thread = new Thread(r);
       thread.setName(threadName + '-' + DAEMON_THREAD_ID.incrementAndGet());
       thread.setDaemon(true);

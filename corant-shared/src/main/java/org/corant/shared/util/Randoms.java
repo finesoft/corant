@@ -184,6 +184,10 @@ public class Randoms {
     return randomString(NUMBERS_AND_UPPER_CASE_LETTERS, length, random);
   }
 
+  public static String randomString(final String source, final int length) {
+    return randomString(source, length, RANDOM);
+  }
+
   public static String randomString(final String source, final int length, final Random random) {
     shouldBeTrue(source != null && source.length() > 0 && length > 0);
     StringBuilder sb = new StringBuilder(length);

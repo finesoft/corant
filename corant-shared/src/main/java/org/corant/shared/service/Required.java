@@ -11,10 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context.required;
+package org.corant.shared.service;
 
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
@@ -25,15 +24,14 @@ import static org.corant.shared.util.Objects.isNull;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.enterprise.inject.spi.AnnotatedType;
-import org.corant.shared.service.RequiredClassNotPresent;
-import org.corant.shared.service.RequiredClassPresent;
-import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.conversion.converter.factory.StringObjectConverterFactory;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.util.Strings.WildcardMatcher;
-import org.eclipse.microprofile.config.ConfigProvider;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-context
@@ -43,28 +41,27 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class Required {
 
-  public static boolean shouldVeto(AnnotatedType<?> type) {
-    return shouldVeto(type.getAnnotations(RequiredClassPresent.class),
-        type.getAnnotations(RequiredClassNotPresent.class),
-        type.getAnnotations(RequiredConfiguration.class));
+  public static boolean shouldVeto(Class<?> type) {
+    return shouldVeto(type.getAnnotationsByType(RequiredClassPresent.class),
+        type.getAnnotationsByType(RequiredClassNotPresent.class),
+        type.getAnnotationsByType(RequiredConfiguration.class));
   }
 
-  public static boolean shouldVeto(Set<RequiredClassPresent> requiredClassNames,
-      Set<RequiredClassNotPresent> requiredNotClassNames,
-      Set<RequiredConfiguration> requireConfigs) {
+  public static boolean shouldVeto(RequiredClassPresent[] requiredClassNames,
+      RequiredClassNotPresent[] requiredNotClassNames, RequiredConfiguration[] requireConfigs) {
     boolean veto = false;
     if (isNotEmpty(requiredClassNames)) {
-      veto = requiredClassNames.stream().flatMap(r -> streamOf(r.value()))
+      veto = Arrays.stream(requiredClassNames).flatMap(r -> streamOf(r.value()))
           .anyMatch(r -> isNull(tryAsClass(r)));
     }
 
     if (!veto && isNotEmpty(requiredNotClassNames)) {
-      veto = requiredNotClassNames.stream().flatMap(r -> streamOf(r.value()))
+      veto = Arrays.stream(requiredNotClassNames).flatMap(r -> streamOf(r.value()))
           .anyMatch(r -> isNotNull(tryAsClass(r)));
     }
 
     if (!veto && isNotEmpty(requireConfigs)) {
-      veto = requireConfigs.stream().allMatch(c -> {
+      veto = Arrays.stream(requireConfigs).allMatch(c -> {
         String key = c.key();
         String value =
             RequiredConfiguration.DEFAULT_NULL_VALUE.equals(c.value()) ? null : c.value();
@@ -74,7 +71,7 @@ public class Required {
         Set<String> keys = new LinkedHashSet<>();
         if (key.indexOf('*') != -1 || key.indexOf('?') != -1) {
           WildcardMatcher matcher = WildcardMatcher.of(false, key);
-          for (String keyName : ConfigProvider.getConfig().getPropertyNames()) {
+          for (String keyName : Systems.getSystemPropertyNames()) {
             if (matcher.test(keyName)) {
               keys.add(keyName);
             }
@@ -88,9 +85,17 @@ public class Required {
     return veto;
   }
 
+  static Object convert(String value, Class<?> type) {
+    if (type.equals(String.class) || value == null) {
+      return value;
+    }
+    return StringObjectConverterFactory.forType(type).orElseThrow(CorantRuntimeException::new)
+        .apply(value, null);
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   static boolean shouldVeto(Set<String> keys, ValuePredicate requiredValuePredicate,
-      Class<?> requiredValueType, Object requiredValue) {
+      Class<?> requiredValueType, String requiredValue) {
     if (keys.size() == 0) {
       switch (requiredValuePredicate) {
         case BLANK:
@@ -106,10 +111,10 @@ public class Required {
               ? Boolean.FALSE
               : null;
       for (String k : keys) {
-        Object configValue = defaultObject(
-            ConfigProvider.getConfig().getOptionalValue(k, requiredValueType).orElse(null),
-            () -> defaultNullValue);
-        Object value = toObject(requiredValue, requiredValueType);
+        Object configValue =
+            defaultObject(defaultObject(Systems.getSystemProperty(k, requiredValueType),
+                () -> Systems.getSystemEnvValue(k, requiredValueType)), () -> defaultNullValue);
+        Object value = StringObjectConverterFactory.convert(requiredValue, requiredValueType);
         boolean match = false;
         switch (requiredValuePredicate) {
           case BLANK:

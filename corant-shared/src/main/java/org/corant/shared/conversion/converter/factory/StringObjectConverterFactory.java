@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Objects;
 
 /**
@@ -48,6 +49,35 @@ import org.corant.shared.util.Objects;
  *
  */
 public class StringObjectConverterFactory implements ConverterFactory<String, Object> {
+
+  @SuppressWarnings("unchecked")
+  public static <T> T convert(String source, Type generalType) {
+    if (source == null || String.class.equals(generalType)) {
+      return (T) source;
+    }
+    return (T) forType(generalType).orElseThrow(NotSupportedException::new).apply(source, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Optional<Converter<String, T>> forType(Type generalType) {
+    if (!(generalType instanceof Class)) {
+      return Optional.empty();
+    }
+    Class<T> type = (Class<T>) generalType;
+    //@formatter:off
+    return Stream.<Supplier<Converter<String, T>>>of(
+        () -> forMethod(type, "of", String.class),
+        () -> forMethod(type, "of", CharSequence.class),
+        () -> forMethod(type, "valueOf", String.class),
+        () -> forMethod(type, "valueOf", CharSequence.class),
+        () -> forMethod(type, "parse", String.class),
+        () -> forMethod(type, "parse", CharSequence.class),
+        () -> forConstructor(type, String.class),
+        () -> forConstructor(type, CharSequence.class)
+        ).map(Supplier::get)
+        .filter(Objects::isNotNull).findFirst();
+    //@formatter:on
+  }
 
   static <T> Converter<String, T> forConstructor(Class<?> targetClass, Class<?>... argumentTypes) {
     try {
@@ -91,27 +121,6 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     } catch (NoSuchMethodException | SecurityException e) {
       return null;
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  static <T> Optional<Converter<String, T>> forType(Type generalType) {
-    if (!(generalType instanceof Class)) {
-      return Optional.empty();
-    }
-    Class<T> type = (Class<T>) generalType;
-    //@formatter:off
-    return Stream.<Supplier<Converter<String, T>>>of(
-        () -> forMethod(type, "of", String.class),
-        () -> forMethod(type, "of", CharSequence.class),
-        () -> forMethod(type, "valueOf", String.class),
-        () -> forMethod(type, "valueOf", CharSequence.class),
-        () -> forMethod(type, "parse", String.class),
-        () -> forMethod(type, "parse", CharSequence.class),
-        () -> forConstructor(type, String.class),
-        () -> forConstructor(type, CharSequence.class)
-        ).map(Supplier::get)
-        .filter(Objects::isNotNull).findFirst();
-    //@formatter:on
   }
 
   @Override

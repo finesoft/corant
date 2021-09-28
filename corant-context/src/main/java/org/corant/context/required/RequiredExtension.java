@@ -23,6 +23,9 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.service.RequiredClassNotPresent;
+import org.corant.shared.service.RequiredClassPresent;
+import org.corant.shared.service.RequiredConfiguration;
 
 /**
  * corant-context

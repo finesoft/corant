@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -59,7 +58,6 @@ public class CorantConfigResolver {
   public static final String VAL_DELIMITER_ESCAPES = ESCAPE + VAL_DELIMITER;
   public static final Pattern VAL_SPLITTER = escapedPattern(ESCAPE, VAL_DELIMITER);
   public static final Pattern KEY_SPLITTER = escapedPattern(ESCAPE, KEY_DELIMITER);
-  public static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
 
   public static final String VAR_PREFIX = "${";
   public static final String EXP_PREFIX = "#{";
@@ -159,22 +157,6 @@ public class CorantConfigResolver {
       rs = defaultStrip(rs.substring(KEY_DELIMITER_LEN));
     }
     return rs;
-  }
-
-  public static String resolveSysEnvValue(Map<String, String> sysEnv, String propertyName) {
-    if (propertyName == null) {
-      return null;
-    }
-    String value = sysEnv.get(propertyName);
-    if (value != null) {
-      return value;
-    }
-    String sanitizedName = ENV_KEY_PATTERN.matcher(propertyName).replaceAll("_");
-    value = sysEnv.get(sanitizedName);
-    if (value != null) {
-      return value;
-    }
-    return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
   }
 
   /**

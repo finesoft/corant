@@ -13,7 +13,6 @@
  */
 package org.corant.config.source;
 
-import static org.corant.config.CorantConfigResolver.resolveSysEnvValue;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_PROFILE_ORDINAL;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -21,12 +20,9 @@ import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.SourceType;
@@ -60,9 +56,7 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   static String[] resolveProfiles() {
     String pfs = Systems.getSystemProperty(CFG_PROFILE_KEY);
     if (isBlank(pfs)) {
-      pfs = resolveSysEnvValue(
-          AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-          CFG_PROFILE_KEY);
+      pfs = Systems.getSystemEnvValue(CFG_PROFILE_KEY);
     }
     return split(pfs, ",");
   }

@@ -21,6 +21,7 @@ import javax.persistence.TupleElement;
 import org.corant.modules.json.Jsons;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
+import org.corant.shared.service.RequiredClassPresent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author bingo 上午12:06:55
  *
  */
+@RequiredClassPresent("javax.persistence.Tuple")
 public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 
   static final ObjectMapper mapper = Jsons.copyMapper();
@@ -58,5 +60,4 @@ public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<T
   public boolean isSupportTargetClass(Class<?> targetClass) {
     return true;
   }
-
 }

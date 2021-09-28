@@ -15,7 +15,6 @@ package org.corant.shared.conversion;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
@@ -29,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,6 +38,7 @@ import org.corant.shared.resource.ClassResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Services;
 import org.corant.shared.util.Types;
 
 /**
@@ -233,10 +232,10 @@ public class ConverterRegistry {
 
   static synchronized void load() {
     ObjectPrimitiveArrayConverterFactories.FACTORIES.forEach(ConverterRegistry::register);
-    streamOf(ServiceLoader.load(Converter.class, defaultClassLoader()))
-        .sorted(Sortable::reverseCompare).forEach(ConverterRegistry::register);
-    streamOf(ServiceLoader.load(ConverterFactory.class, defaultClassLoader()))
-        .sorted(Sortable::reverseCompare).forEach(ConverterRegistry::register);
+    Services.select(Converter.class).sorted(Sortable::reverseCompare)
+        .forEach(ConverterRegistry::register);
+    Services.select(ConverterFactory.class).sorted(Sortable::reverseCompare)
+        .forEach(ConverterRegistry::register);
   }
 
   static synchronized <S, T> void register(Class<S> sourceClass, Class<T> targetClass,

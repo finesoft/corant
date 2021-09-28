@@ -13,7 +13,6 @@
  */
 package org.corant.config.source;
 
-import static org.corant.config.CorantConfigResolver.resolveSysEnvValue;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
@@ -21,12 +20,9 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.config.CorantConfig;
@@ -58,9 +54,7 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
   static String getLocation() {
     String location = Systems.getSystemProperty(CFG_LOCATION_KEY);
     if (isBlank(location)) {
-      location = resolveSysEnvValue(
-          AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-          CFG_LOCATION_KEY);
+      location = Systems.getSystemEnvValue(CFG_LOCATION_KEY);
     }
     return location;
   }

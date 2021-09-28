@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Function;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
@@ -102,10 +102,10 @@ public class ConverterHints {
 
   static void resolveSysProHints(Map<String, Object> map, String key,
       Function<String, Object> func) {
-    Properties p = System.getProperties();
     String useKey = Names.CORANT_PREFIX.concat(key);
-    if (p.get(useKey) != null) {
-      map.put(key, func.apply(p.get(useKey).toString()));
+    String value = Systems.getSystemProperty(useKey);
+    if (value != null) {
+      map.put(key, func.apply(value));
     }
   }
 }

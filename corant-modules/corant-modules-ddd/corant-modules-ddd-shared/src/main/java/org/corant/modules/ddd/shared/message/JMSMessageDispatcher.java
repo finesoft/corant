@@ -34,8 +34,6 @@ import javax.inject.Inject;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.transaction.Transactional;
-import org.corant.context.required.RequiredConfiguration;
-import org.corant.context.required.RequiredConfiguration.ValuePredicate;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.Message.BinaryMessage;
 import org.corant.modules.ddd.MessageDispatcher;
@@ -45,6 +43,8 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.modules.jms.metadata.MessageDestinationMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

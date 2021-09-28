@@ -15,8 +15,6 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Conversions.toLong;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.split;
 import static org.corant.shared.util.Validates.isValidMacAddress;
@@ -28,11 +26,18 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import org.corant.shared.conversion.converter.factory.StringObjectConverterFactory;
 import com.sun.management.HotSpotDiagnosticMXBean;
 
 /**
@@ -42,6 +47,8 @@ import com.sun.management.HotSpotDiagnosticMXBean;
  *
  */
 public class Systems {
+
+  public static final Pattern ENV_KEY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
 
   private Systems() {}
 
@@ -204,7 +211,7 @@ public class Systems {
       Object attribute = ManagementFactory.getPlatformMBeanServer().getAttribute(
           new ObjectName("java.lang", "type", "OperatingSystem"), "TotalPhysicalMemorySize");
       if (attribute != null) {
-        return Optional.of(toLong(attribute.toString()));
+        return Optional.of(Long.valueOf(attribute.toString()));
       }
     } catch (Exception e) {
     }
@@ -236,12 +243,37 @@ public class Systems {
     return split(getSystemProperty("java.class.path"), File.pathSeparator);
   }
 
+  public static Map<String, String> getSystemEnv() {
+    return AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv);
+  }
+
+  public static String getSystemEnvValue(String propertyName) {
+    Map<String, String> sysEnv = getSystemEnv();
+    if (propertyName == null) {
+      return null;
+    }
+    String value = sysEnv.get(propertyName);
+    if (value != null) {
+      return value;
+    }
+    String sanitizedName = ENV_KEY_PATTERN.matcher(propertyName).replaceAll("_");
+    value = sysEnv.get(sanitizedName);
+    if (value != null) {
+      return value;
+    }
+    return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
+  }
+
+  public static <T> T getSystemEnvValue(String propertyName, Class<T> type) {
+    return StringObjectConverterFactory.convert(getSystemEnvValue(propertyName), type);
+  }
+
   public static String getSystemProperty(final String name) {
     return getSystemProperty(name, (String) null);
   }
 
   public static <T> T getSystemProperty(final String name, Class<T> type) {
-    return toObject(getSystemProperty(name), type);
+    return StringObjectConverterFactory.convert(getSystemProperty(name), type);
   }
 
   public static <T> T getSystemProperty(final String name, Class<T> type, T defaultValue) {
@@ -260,6 +292,20 @@ public class Systems {
     } catch (final Exception ignore) {
     }
     return defaultValue;
+  }
+
+  public static Set<String> getSystemPropertyNames() {
+    try {
+      if (System.getSecurityManager() == null) {
+        return System.getProperties().keySet().stream().map(Objects::asString)
+            .collect(Collectors.toSet());
+      } else {
+        return AccessController.doPrivileged((PrivilegedAction<Set<String>>) () -> System
+            .getProperties().keySet().stream().map(Objects::asString).collect(Collectors.toSet()));
+      }
+    } catch (final Exception ignore) {
+    }
+    return Collections.emptySet();
   }
 
   public static String getTempDir() {

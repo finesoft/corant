@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context.required;
+package org.corant.shared.service;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -29,6 +29,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
-public @interface RequiredClassPresent {
+public @interface RequiredClassNotPresent {
   String[] value();
 }

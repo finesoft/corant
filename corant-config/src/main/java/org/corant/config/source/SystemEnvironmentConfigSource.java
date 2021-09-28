@@ -13,14 +13,12 @@
  */
 package org.corant.config.source;
 
-import static org.corant.config.CorantConfigResolver.resolveSysEnvValue;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -53,8 +51,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
   @Override
   public Map<String, String> getProperties() {
-    return Collections.unmodifiableMap(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv));
+    return Collections.unmodifiableMap(Systems.getSystemEnv());
   }
 
   @Override
@@ -64,9 +61,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
   @Override
   public String getValue(String propertyName) {
-    return resolveSysEnvValue(
-        AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv),
-        propertyName);
+    return Systems.getSystemEnvValue(propertyName);
   }
 
 }

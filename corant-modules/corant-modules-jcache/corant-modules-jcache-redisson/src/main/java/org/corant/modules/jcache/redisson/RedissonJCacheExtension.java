@@ -31,13 +31,13 @@ public class RedissonJCacheExtension implements Extension {
   public static final String CACHE_PROVIDER_NAME = RedissonJCachingProvider.class.getName();
 
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
-    if (isEmpty(Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
-      Systems.setSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
-    } else if (!Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+    if (isEmpty(Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      Systems.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
         .equals(CACHE_PROVIDER_NAME)) {
       throw new CorantRuntimeException(
           "Found another caching provider %s, the caching provider in current implementation is exclusive!",
-          Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
+          Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
   }
 }

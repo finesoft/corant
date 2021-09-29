@@ -39,11 +39,11 @@ public class Log4jProvider implements CorantBootHandler {
 
   @Override
   public void handleBeforeStart(ClassLoader classLoader, String... args) {
-    if (!JUL_LOGMANAGER.equals(Systems.getSystemProperty(LOGMANAER_KEY))) {
-      Systems.setSystemProperty(LOGMANAER_KEY, JUL_LOGMANAGER);
+    if (!JUL_LOGMANAGER.equals(Systems.getProperty(LOGMANAER_KEY))) {
+      Systems.setProperty(LOGMANAER_KEY, JUL_LOGMANAGER);
     }
-    if (!"log4j2".equals(Systems.getSystemProperty(JBOSS_LOGGER_KEY))) {
-      Systems.setSystemProperty(JBOSS_LOGGER_KEY, "log4j2"); // FIXME
+    if (!"log4j2".equals(Systems.getProperty(JBOSS_LOGGER_KEY))) {
+      Systems.setProperty(JBOSS_LOGGER_KEY, "log4j2"); // FIXME
     }
   }
 

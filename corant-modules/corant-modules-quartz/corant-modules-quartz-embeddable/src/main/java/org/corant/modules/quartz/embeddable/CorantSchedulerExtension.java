@@ -11,7 +11,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.proxy.ContextualMethodHandler;
-import org.corant.context.required.Required;
+import org.corant.context.required.RequiredExt;
 import org.corant.shared.normal.Priorities;
 
 /**
@@ -36,7 +36,7 @@ public class CorantSchedulerExtension implements Extension {
 
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({CorantTrigger.class}) ProcessAnnotatedType<?> pat) {
-    if (Required.shouldVeto(pat.getAnnotatedType())) {
+    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
       return;
     }
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();

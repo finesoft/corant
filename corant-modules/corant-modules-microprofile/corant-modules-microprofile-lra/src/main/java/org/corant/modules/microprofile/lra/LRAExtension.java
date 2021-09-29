@@ -38,8 +38,8 @@ public class LRAExtension implements Extension {
 
     config = defaultObject(ConfigInstances.resolveSingle(LRAConfig.class), LRAConfig.EMPTY);
 
-    Systems.setSystemProperty(LRA_COORDINATOR_PORT_KEY, String.valueOf(config.getPort()));
-    Systems.setSystemProperty(LRA_COORDINATOR_HOST_KEY, config.getHost());
+    Systems.setProperty(LRA_COORDINATOR_PORT_KEY, String.valueOf(config.getPort()));
+    Systems.setProperty(LRA_COORDINATOR_HOST_KEY, config.getHost());
 
     event.addAnnotatedType(beanManager.createAnnotatedType(ServerLRAFilter.class),
         ServerLRAFilter.class.getSimpleName());

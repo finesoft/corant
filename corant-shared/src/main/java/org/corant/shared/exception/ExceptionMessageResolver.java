@@ -109,7 +109,7 @@ public interface ExceptionMessageResolver extends Sortable {
     static Map<Locale, Map<String, MessageFormat>> collect() {
       Map<Locale, Map<String, MessageFormat>> source = new HashMap<>();
       Set<String> paths = setOf(split(
-          Systems.getSystemProperty(SPEC_SOURCE_PATH_KEY, String.class, DEFAULT_SOURCE_PATH), ","));
+          Systems.getProperty(SPEC_SOURCE_PATH_KEY, String.class, DEFAULT_SOURCE_PATH), ","));
       paths.stream().filter(Strings::isNotBlank).forEach(path -> {
         try {
           Resources.from(path).forEach(rs -> {

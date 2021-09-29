@@ -89,7 +89,7 @@ public interface MetaDataPropertyResolver extends Sortable {
       if (varName.isEmpty()) {
         break;
       }
-      String varVal = Systems.getSystemProperty(varName);
+      String varVal = Systems.getProperty(varName);
       if (varVal != null) {
         resolvedValue =
             resolveVariable(resolvedValue.replace(VAR_PREFIX + varName + VAR_SUFFIX, varVal));

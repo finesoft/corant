@@ -48,9 +48,9 @@ import org.corant.shared.util.Systems;
 public class ClassPathResourceLoader implements ResourceLoader {
 
   public static final String SYS_PATH_SEPARATOR = Pattern.quote(Systems.getPathSeparator());
-  public static final String SYS_CLASS_PATH = Systems.getSystemProperty("java.class.path");
-  public static final String SYS_BOOT_CLASS_PATH = Systems.getSystemProperty("sun.boot.class.path");
-  public static final String SYS_EXT_DIRS = Systems.getSystemProperty("java.ext.dirs");
+  public static final String SYS_CLASS_PATH = Systems.getProperty("java.class.path");
+  public static final String SYS_BOOT_CLASS_PATH = Systems.getProperty("sun.boot.class.path");
+  public static final String SYS_EXT_DIRS = Systems.getProperty("java.ext.dirs");
   public static final Set<String> SYS_LIBS =
       immutableSetOf("java", "javax", "javafx", "jdk", "sun", "oracle", "netscape", "org/ietf",
           "org/jcp", "org/omg", "org/w3c", "org/xml", "com/sun", "com/oracle");

@@ -26,7 +26,7 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.context.required.Required;
+import org.corant.context.required.RequiredExt;
 import org.corant.modules.query.shared.declarative.DeclarativeQueryService;
 import org.corant.modules.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
 import org.corant.shared.normal.Priorities;
@@ -52,7 +52,7 @@ public class QueryExtension implements Extension {
 
   void findDeclarativeQueryServices(
       @Observes @WithAnnotations(DeclarativeQueryService.class) ProcessAnnotatedType<?> pat) {
-    if (Required.shouldVeto(pat.getAnnotatedType())) {
+    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
       return;
     }
     Class<?> klass = pat.getAnnotatedType().getJavaClass();

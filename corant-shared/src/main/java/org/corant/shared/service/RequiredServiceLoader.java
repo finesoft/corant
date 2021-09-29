@@ -44,7 +44,7 @@ public class RequiredServiceLoader {
       Iterator<S> it = loader.iterator();
       while (it.hasNext()) {
         S service = it.next();
-        if (!Required.shouldVeto(service.getClass())) {
+        if (!Required.INSTANCE.shouldVeto(service.getClass())) {
           list.add(service);
         }
       }

@@ -35,10 +35,10 @@ public class Desensitizer {
       "publickey", "privatekey", "keyid");
 
   static final boolean enable =
-      Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES_ENABLE, Boolean.class, true);
+      Systems.getProperty(ConfigNames.CFG_SENSITIVES_ENABLE, Boolean.class, true);
 
   static {
-    streamOf(split(Systems.getSystemProperty(ConfigNames.CFG_SENSITIVES), ","))
+    streamOf(split(Systems.getProperty(ConfigNames.CFG_SENSITIVES), ","))
         .forEach(sensitives::add);
   }
 

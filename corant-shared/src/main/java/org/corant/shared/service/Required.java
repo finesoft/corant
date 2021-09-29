@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.corant.shared.conversion.converter.factory.StringObjectConverterFactory;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.util.Strings.WildcardMatcher;
 import org.corant.shared.util.Systems;
@@ -41,13 +40,17 @@ import org.corant.shared.util.Systems;
  */
 public class Required {
 
-  public static boolean shouldVeto(Class<?> type) {
+  public static final Required INSTANCE = new Required();
+
+  protected Required() {}
+
+  public boolean shouldVeto(Class<?> type) {
     return shouldVeto(type.getAnnotationsByType(RequiredClassPresent.class),
         type.getAnnotationsByType(RequiredClassNotPresent.class),
         type.getAnnotationsByType(RequiredConfiguration.class));
   }
 
-  public static boolean shouldVeto(RequiredClassPresent[] requiredClassNames,
+  public boolean shouldVeto(RequiredClassPresent[] requiredClassNames,
       RequiredClassNotPresent[] requiredNotClassNames, RequiredConfiguration[] requireConfigs) {
     boolean veto = false;
     if (isNotEmpty(requiredClassNames)) {
@@ -71,7 +74,7 @@ public class Required {
         Set<String> keys = new LinkedHashSet<>();
         if (key.indexOf('*') != -1 || key.indexOf('?') != -1) {
           WildcardMatcher matcher = WildcardMatcher.of(false, key);
-          for (String keyName : Systems.getSystemPropertyNames()) {
+          for (String keyName : Systems.getPropertyNames()) {
             if (matcher.test(keyName)) {
               keys.add(keyName);
             }
@@ -85,16 +88,18 @@ public class Required {
     return veto;
   }
 
-  static Object convert(String value, Class<?> type) {
-    if (type.equals(String.class) || value == null) {
-      return value;
-    }
-    return StringObjectConverterFactory.forType(type).orElseThrow(CorantRuntimeException::new)
-        .apply(value, null);
+  protected Object getConfigValue(String key, Class<?> valueType, Object dfltNullValue) {
+    return defaultObject(getConvertValue(
+        defaultObject(Systems.getProperty(key), () -> Systems.getEnvironmentVariable(key)),
+        valueType), dfltNullValue);
+  }
+
+  protected Object getConvertValue(String value, Class<?> valueType) {
+    return StringObjectConverterFactory.convert(value, valueType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  static boolean shouldVeto(Set<String> keys, ValuePredicate requiredValuePredicate,
+  protected boolean shouldVeto(Set<String> keys, ValuePredicate requiredValuePredicate,
       Class<?> requiredValueType, String requiredValue) {
     if (keys.size() == 0) {
       switch (requiredValuePredicate) {
@@ -111,10 +116,8 @@ public class Required {
               ? Boolean.FALSE
               : null;
       for (String k : keys) {
-        Object configValue =
-            defaultObject(defaultObject(Systems.getSystemProperty(k, requiredValueType),
-                () -> Systems.getSystemEnvValue(k, requiredValueType)), () -> defaultNullValue);
-        Object value = StringObjectConverterFactory.convert(requiredValue, requiredValueType);
+        Object configValue = getConfigValue(k, requiredValueType, defaultNullValue);
+        Object value = getConvertValue(requiredValue, requiredValueType);
         boolean match = false;
         switch (requiredValuePredicate) {
           case BLANK:

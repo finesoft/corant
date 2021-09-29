@@ -68,7 +68,7 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
 
   @Override
   public String getValue(String s) {
-    return Systems.getSystemProperty(s);
+    return Systems.getProperty(s);
   }
 
 }

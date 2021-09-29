@@ -174,7 +174,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     });
     sortMap.clear();
     if (thrown != null
-        && !Systems.getSystemProperty(Names.CORANT_PREFIX + "config.builder.supress-exception",
+        && !Systems.getProperty(Names.CORANT_PREFIX + "config.builder.supress-exception",
             Boolean.class, false)) {
       // logger.log(Level.SEVERE, thrown, () -> "Process configurations occurred error");
       if (thrown instanceof RuntimeException) {

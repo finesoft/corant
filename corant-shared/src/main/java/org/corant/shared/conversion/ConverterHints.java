@@ -103,7 +103,7 @@ public class ConverterHints {
   static void resolveSysProHints(Map<String, Object> map, String key,
       Function<String, Object> func) {
     String useKey = Names.CORANT_PREFIX.concat(key);
-    String value = Systems.getSystemProperty(useKey);
+    String value = Systems.getProperty(useKey);
     if (value != null) {
       map.put(key, func.apply(value));
     }

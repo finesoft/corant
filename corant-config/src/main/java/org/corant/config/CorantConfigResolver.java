@@ -79,7 +79,7 @@ public class CorantConfigResolver {
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
-    map.forEach((k, v) -> Systems.setSystemProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
+    map.forEach((k, v) -> Systems.setProperty(CFG_ADJUST_PREFIX + defaultString(k), v));
   }
 
   public static String concatKey(String... keys) {

@@ -44,7 +44,7 @@ public interface Names {
   String CORANT_CFG_PREFIX = CORANT_PREFIX + "config";
 
   static String applicationName() {
-    return Systems.getSystemProperty(CORANT_APP_NAME_KEY, CORANT);
+    return Systems.getProperty(CORANT_APP_NAME_KEY, CORANT);
   }
 
   interface ConfigNames {

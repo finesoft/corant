@@ -54,9 +54,9 @@ public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSou
   }
 
   static String[] resolveProfiles() {
-    String pfs = Systems.getSystemProperty(CFG_PROFILE_KEY);
+    String pfs = Systems.getProperty(CFG_PROFILE_KEY);
     if (isBlank(pfs)) {
-      pfs = Systems.getSystemEnvValue(CFG_PROFILE_KEY);
+      pfs = Systems.getEnvironmentVariable(CFG_PROFILE_KEY);
     }
     return split(pfs, ",");
   }

@@ -65,7 +65,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 public class ElasticExtension implements Extension, Function<String, TransportClient> {
 
   static {
-    Systems.setSystemProperty("es.set.netty.runtime.available.processors", "false");
+    Systems.setProperty("es.set.netty.runtime.available.processors", "false");
   }
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());

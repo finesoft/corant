@@ -47,7 +47,7 @@ public class RequiredExtension implements Extension {
       RequiredClassNotPresent.class, RequiredClassPresent.class,
       RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
-    if (Required.shouldVeto(type)) {
+    if (RequiredExt.INSTANCE.shouldVeto(type)) {
       vetoes.add(event.getAnnotatedType().getJavaClass());
       event.veto();
       logger.info(() -> String.format("The bean type %s was ignored!",

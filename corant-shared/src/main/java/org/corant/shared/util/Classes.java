@@ -52,7 +52,7 @@ public class Classes {
   public static final String INNER_CLASS_SEPARATOR = String.valueOf(INNER_CLASS_SEPARATOR_CHAR);
   public static final String CLASS_FILE_NAME_EXTENSION = ".class";
   public static final float CLASS_VERSION =
-      Float.parseFloat(Systems.getSystemProperty("java.class.version"));
+      Float.parseFloat(Systems.getProperty("java.class.version"));
 
   private Classes() {}
 

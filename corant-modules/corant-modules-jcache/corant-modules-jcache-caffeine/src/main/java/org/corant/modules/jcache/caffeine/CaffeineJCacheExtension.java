@@ -66,23 +66,23 @@ public class CaffeineJCacheExtension implements Extension {
    * @param e onBeforeBeanDiscovery
    */
   public void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery e) {
-    if (isEmpty(Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
-      Systems.setSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
-    } else if (!Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
+    if (isEmpty(Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER))) {
+      Systems.setProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER, CACHE_PROVIDER_NAME);
+    } else if (!Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER)
         .equals(CACHE_PROVIDER_NAME)) {
       throw new CorantRuntimeException(
           "Found another caching provider %s, the caching provider in current implementation is exclusive!",
-          Systems.getSystemProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
+          Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
     String configSource;
     if (isNotBlank(configSource = Configs.getValue(CACHE_CONFIG_RESOURCE_KEY, String.class))) {
-      Systems.setSystemProperty("config.resource", configSource);
+      Systems.setProperty("config.resource", configSource);
     } else {
       for (String name : ConfigProvider.getConfig().getPropertyNames()) {
         if (name.startsWith(CACHE_CONFIG_KEY_PREFIX)) {
-          Systems.setSystemProperty(name, Configs.getValue(name, String.class));
+          Systems.setProperty(name, Configs.getValue(name, String.class));
         } else if (name.startsWith(CORANT_CAFFE_PREFIX)) {
-          Systems.setSystemProperty(
+          Systems.setProperty(
               CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
               Configs.getValue(name, String.class));
         }

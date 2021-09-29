@@ -35,6 +35,7 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.context.required.RequiredExt;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
@@ -76,7 +77,7 @@ public class CommandExtension implements Extension {
         if (cmdCls == null) {
           logger.warning(() -> String
               .format("Can not find any command type parameter for handler [%s]", handlerCls));
-        } else {
+        } else if (!RequiredExt.INSTANCE.shouldVeto(handlerCls)) {
           if (!cmdCls.isInterface() && !Modifier.isAbstract(cmdCls.getModifiers())) {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
                 .add((Class<? extends CommandHandler<?>>) handlerCls);

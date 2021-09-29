@@ -34,7 +34,7 @@ import org.corant.shared.util.Systems;
 public class KotlinScriptEngines {
 
   static {
-    Systems.setSystemProperty("idea.use.native.fs.for.win", "false");
+    Systems.setProperty("idea.use.native.fs.for.win", "false");
   }
 
   public static final ScriptEngineManager ENGINE_MANAGER =

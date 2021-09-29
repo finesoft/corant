@@ -51,7 +51,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
   @Override
   public Map<String, String> getProperties() {
-    return Collections.unmodifiableMap(Systems.getSystemEnv());
+    return Collections.unmodifiableMap(Systems.getEnvironmentVariables());
   }
 
   @Override
@@ -61,7 +61,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
   @Override
   public String getValue(String propertyName) {
-    return Systems.getSystemEnvValue(propertyName);
+    return Systems.getEnvironmentVariable(propertyName);
   }
 
 }

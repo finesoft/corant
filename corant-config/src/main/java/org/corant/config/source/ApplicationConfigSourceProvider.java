@@ -52,15 +52,15 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
       Arrays.stream(appExtName).map(e -> metaInf + appBaseName + e).toArray(String[]::new);
 
   static String getLocation() {
-    String location = Systems.getSystemProperty(CFG_LOCATION_KEY);
+    String location = Systems.getProperty(CFG_LOCATION_KEY);
     if (isBlank(location)) {
-      location = Systems.getSystemEnvValue(CFG_LOCATION_KEY);
+      location = Systems.getEnvironmentVariable(CFG_LOCATION_KEY);
     }
     return location;
   }
 
   static Predicate<URL> resolveExPattern() {
-    String cfgUrlExPattern = Systems.getSystemProperty(CFG_LOCATION_EXCLUDE_PATTERN);
+    String cfgUrlExPattern = Systems.getProperty(CFG_LOCATION_EXCLUDE_PATTERN);
     return u -> isBlank(cfgUrlExPattern)
         || !PathMatcher.matchClassPath(u.toExternalForm(), cfgUrlExPattern);
   }

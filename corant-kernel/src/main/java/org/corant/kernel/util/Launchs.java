@@ -64,7 +64,7 @@ public class Launchs {
   }
 
   public static List<String> getClassPaths() {
-    return Arrays.stream(Systems.getSystemClasspath()).filter(Strings::isNotBlank)
+    return Arrays.stream(Systems.getClasspath()).filter(Strings::isNotBlank)
         .collect(Collectors.toList());
   }
 
@@ -89,7 +89,7 @@ public class Launchs {
   }
 
   public static List<String> getMainCommands() {
-    return Arrays.stream(split(Systems.getSystemProperty("sun.java.command"), SPACE))
+    return Arrays.stream(split(Systems.getProperty("sun.java.command"), SPACE))
         .filter(Strings::isNotBlank).collect(Collectors.toList());
   }
 

@@ -13,10 +13,10 @@
  */
 package org.corant.config.spi;
 
-import static org.corant.shared.util.Lists.listOf;
 import java.util.List;
 import java.util.Objects;
-import java.util.ServiceLoader;
+import java.util.stream.Collectors;
+import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
@@ -32,7 +32,7 @@ public interface ConfigAdjuster extends Sortable {
   static ConfigAdjuster resolve(ClassLoader classLoader) {
     ConfigAdjuster adjuster = a -> a;
     List<ConfigAdjuster> discoveredAdjusters =
-        listOf(ServiceLoader.load(ConfigAdjuster.class, classLoader));
+        RequiredServiceLoader.load(ConfigAdjuster.class, classLoader).collect(Collectors.toList());
     discoveredAdjusters.sort(Sortable::reverseCompare);
     for (ConfigAdjuster discoveredAdjuster : discoveredAdjusters) {
       adjuster = adjuster.compose(discoveredAdjuster);

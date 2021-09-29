@@ -15,7 +15,6 @@ package org.corant.modules.datasource.dbcp;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -23,7 +22,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.logging.Level;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -37,6 +35,7 @@ import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.arjPropertyManager;
@@ -157,7 +156,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
     ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
 
-    streamOf(ServiceLoader.load(DBCPDataSourceConfigurator.class, defaultClassLoader()))
+    RequiredServiceLoader.load(DBCPDataSourceConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, ds));
     return ds;
   }

@@ -13,10 +13,12 @@
  */
 package org.corant.shared.service;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
+import java.util.stream.Stream;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-shared
@@ -26,29 +28,64 @@ import java.util.ServiceLoader;
  */
 public class RequiredServiceLoader {
 
-  public static <S> List<S> load(Class<S> service) {
-    return load(ServiceLoader.load(service));
+  public static <S> Optional<S> find(Class<S> service) {
+    return find(ServiceLoader.load(service), service);
   }
 
-  public static <S> List<S> load(Class<S> service, ClassLoader loader) {
-    return load(ServiceLoader.load(service, loader));
+  public static <S> Optional<S> find(Class<S> service, ClassLoader loader) {
+    return find(ServiceLoader.load(service, loader), service);
   }
 
-  public static <S> List<S> load(ModuleLayer layer, Class<S> service) {
-    return load(ServiceLoader.load(layer, service));
+  public static <S> Optional<S> find(ModuleLayer layer, Class<S> service) {
+    return find(ServiceLoader.load(layer, service), service);
   }
 
-  static <S> List<S> load(ServiceLoader<S> loader) {
-    List<S> list = new ArrayList<>();
-    if (loader != null) {
-      Iterator<S> it = loader.iterator();
-      while (it.hasNext()) {
-        S service = it.next();
-        if (!Required.INSTANCE.shouldVeto(service.getClass())) {
-          list.add(service);
+  public static <S> Stream<S> load(Class<S> service) {
+    return load(ServiceLoader.load(service), service);
+  }
+
+  public static <S> Stream<S> load(Class<S> service, ClassLoader loader) {
+    return load(ServiceLoader.load(service, loader), service);
+  }
+
+  public static <S> Stream<S> load(ModuleLayer layer, Class<S> service) {
+    return load(ServiceLoader.load(layer, service), service);
+  }
+
+  @SuppressWarnings("unchecked")
+  static <S> Optional<S> find(ServiceLoader<S> loader, Class<S> service) {
+    if (Sortable.class.isAssignableFrom(service)) {
+      return (Optional<S>) loader.stream().filter(RequiredServiceLoader::required)
+          .map(Provider::get).map(p -> (Sortable) p).min(Sortable::compare);
+    } else if (Comparable.class.isAssignableFrom(service)) {
+      return (Optional<S>) loader.stream().filter(RequiredServiceLoader::required)
+          .map(Provider::get).map(p -> (Comparable<?>) p).sorted().findFirst();
+    } else {
+      Iterator<Provider<S>> it = loader.stream().filter(RequiredServiceLoader::required).iterator();
+      if (it.hasNext()) {
+        Provider<S> p = it.next();
+        if (!it.hasNext()) {
+          return Optional.ofNullable(p.get());
         }
       }
+      return Optional.empty();
     }
-    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  static <S> Stream<S> load(ServiceLoader<S> loader, Class<S> service) {
+    if (Sortable.class.isAssignableFrom(service)) {
+      return (Stream<S>) loader.stream().filter(RequiredServiceLoader::required).map(Provider::get)
+          .map(p -> (Sortable) p).sorted(Sortable::compare);
+    } else if (Comparable.class.isAssignableFrom(service)) {
+      return (Stream<S>) loader.stream().filter(RequiredServiceLoader::required).map(Provider::get)
+          .map(p -> (Comparable<?>) p).sorted();
+    } else {
+      return loader.stream().filter(RequiredServiceLoader::required).map(Provider::get);
+    }
+  }
+
+  static <S> boolean required(Provider<S> p) {
+    return !Required.INSTANCE.shouldVeto(p.type());
   }
 }

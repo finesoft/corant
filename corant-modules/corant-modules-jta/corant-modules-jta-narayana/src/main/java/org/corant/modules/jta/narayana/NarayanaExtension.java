@@ -19,11 +19,9 @@ import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MBeans.registerToMBean;
-import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
@@ -48,6 +46,7 @@ import org.corant.modules.jta.shared.TransactionExtension;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;
+import org.corant.shared.util.Services;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
@@ -138,7 +137,7 @@ public class NarayanaExtension implements TransactionExtension {
     final JTAEnvironmentBean jtaBean = BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
     final RecoveryEnvironmentBean recoveryBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
-    streamOf(ServiceLoader.load(NarayanaConfigurator.class, defaultClassLoader()))
+    Services.select(NarayanaConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(cfgr -> {
           logger.fine(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));

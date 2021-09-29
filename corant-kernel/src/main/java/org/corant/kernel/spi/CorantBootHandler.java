@@ -13,14 +13,14 @@
  */
 package org.corant.kernel.spi;
 
-import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
-import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import org.corant.Corant;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 
 /**
  * corant-kernel
@@ -37,22 +37,21 @@ import org.corant.shared.ubiquity.Sortable;
 public interface CorantBootHandler extends Sortable, AutoCloseable {
 
   /**
-   * Return the sorted CorantBootHandler instance stream, using {@link java.util.ServiceLoader}
-   * mechanism to load.
+   * Return the sorted CorantBootHandler instance stream, using {@link java.util.ServiceLoader} and
+   * {@link RequiredServiceLoader} mechanism to load.
    *
    * @param classLoader the class loader use for load the CorantBootHandler
    * @param excludeClassNames the excluded handler class names
    *
    * @see Sortable#compare(Sortable, Sortable)
+   * @see Services#select(Class, ClassLoader)
    */
   static Stream<CorantBootHandler> load(ClassLoader classLoader, String... excludeClassNames) {
     if (excludeClassNames.length == 0) {
-      return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-          .sorted(Sortable::compare);
+      return Services.select(CorantBootHandler.class, classLoader);
     } else {
-      return streamOf(ServiceLoader.load(CorantBootHandler.class, classLoader))
-          .filter(h -> Arrays.binarySearch(excludeClassNames, h.getClass().getName()) == -1)
-          .sorted(Sortable::compare);
+      return Services.select(CorantBootHandler.class, classLoader)
+          .filter(h -> Arrays.binarySearch(excludeClassNames, h.getClass().getName()) == -1);
     }
   }
 

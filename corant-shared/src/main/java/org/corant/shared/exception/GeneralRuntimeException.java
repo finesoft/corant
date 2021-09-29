@@ -16,7 +16,6 @@ package org.corant.shared.exception;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.defaultString;
@@ -26,11 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
 import org.corant.shared.exception.ExceptionMessageResolver.SimpleExceptionMessageResolver;
-import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Services;
 
 /**
  * corant-shared
@@ -54,8 +52,8 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   protected static final String UN_KNOW_EXMSG = "An unknown exception has occurred!";
 
   protected static final ExceptionMessageResolver messageResolver =
-      streamOf(ServiceLoader.load(ExceptionMessageResolver.class, defaultClassLoader()))
-          .min(Sortable::compare).orElseGet(SimpleExceptionMessageResolver::new);
+      Services.find(ExceptionMessageResolver.class, defaultClassLoader())
+          .orElseGet(SimpleExceptionMessageResolver::new);
 
   private static final long serialVersionUID = -3720369148530068164L;
 

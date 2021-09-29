@@ -30,8 +30,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -42,11 +40,11 @@ import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
-import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
+import org.corant.shared.util.Services;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -74,12 +72,10 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
 
   static final HibernateSnowflakeIdTimeService specTimeGenerator =
-      ServiceLoader.load(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).stream()
-          .map(Provider::get).sorted(Sortable::compare).findFirst()
+      Services.select(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).findFirst()
           .orElse((u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
-  static final List<HibernateSessionTimeService> sessionTimeServices =
-      ServiceLoader.load(HibernateSessionTimeService.class, defaultClassLoader()).stream()
-          .map(Provider::get).sorted(Sortable::compare).collect(Collectors.toList());
+  static final List<HibernateSessionTimeService> sessionTimeServices = Services
+      .select(HibernateSessionTimeService.class, defaultClassLoader()).collect(Collectors.toList());
 
   static Map<String, Generator> generators = new ConcurrentHashMap<>();
 

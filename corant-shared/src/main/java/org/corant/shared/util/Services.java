@@ -14,9 +14,6 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Objects.forceCast;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -47,7 +44,7 @@ public class Services {
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> find(Class<T> serviceClass) {
-    return findFirst(serviceClass, RequiredServiceLoader.load(serviceClass, defaultClassLoader()));
+    return RequiredServiceLoader.find(serviceClass);
   }
 
   /**
@@ -67,7 +64,7 @@ public class Services {
    *        class loader) is to be used
    */
   public static <T> Optional<T> find(Class<T> serviceClass, ClassLoader classLoader) {
-    return findFirst(serviceClass, RequiredServiceLoader.load(serviceClass, classLoader));
+    return RequiredServiceLoader.find(serviceClass, classLoader);
   }
 
   /**
@@ -85,7 +82,7 @@ public class Services {
    * @param layer the module layer
    */
   public static <T> Optional<T> find(ModuleLayer layer, Class<T> serviceClass) {
-    return findFirst(serviceClass, RequiredServiceLoader.load(layer, serviceClass));
+    return RequiredServiceLoader.find(layer, serviceClass);
   }
 
   /**
@@ -153,20 +150,7 @@ public class Services {
    *        class loader) is to be used
    */
   public static <T> Stream<T> select(Class<T> serviceClass, ClassLoader classLoader) {
-    return RequiredServiceLoader.load(serviceClass, classLoader).stream();
+    return RequiredServiceLoader.load(serviceClass, classLoader);
   }
 
-  static <T> Optional<T> findFirst(Class<T> serviceClass, List<T> services) {
-    if (isNotEmpty(services)) {
-      if (services.size() == 1) {
-        return Optional.of(services.get(0));
-      } else if (Sortable.class.isAssignableFrom(serviceClass)) {
-        return Optional.ofNullable(forceCast(
-            services.stream().map(t -> (Sortable) t).min(Sortable::compare).orElse(null)));
-      } else if (Comparable.class.isAssignableFrom(serviceClass)) {
-        return Optional.ofNullable(forceCast(services.stream().sorted().findFirst().orElse(null)));
-      }
-    }
-    return Optional.empty();
-  }
 }

@@ -14,9 +14,7 @@
 package org.corant.modules.jta.narayana;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Streams.streamOf;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -27,6 +25,7 @@ import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jta.shared.TransactionIntegration;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Services;
 import com.arjuna.ats.arjuna.recovery.RecoveryManager;
 import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
 import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
@@ -75,9 +74,8 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
           }
           create();
           helpers.clear();
-          streamOf(
-              ServiceLoader.load(TransactionIntegration.class, Corant.current().getClassLoader()))
-                  .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
+          Services.select(TransactionIntegration.class, Corant.current().getClassLoader())
+              .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
           XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
           if (xaRecoveryModule != null && isNotEmpty(helpers)) {
             helpers.forEach(xaRecoveryModule::addXAResourceRecoveryHelper);

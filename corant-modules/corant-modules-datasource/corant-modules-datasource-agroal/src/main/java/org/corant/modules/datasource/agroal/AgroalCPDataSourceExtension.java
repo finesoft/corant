@@ -16,17 +16,13 @@ package org.corant.modules.datasource.agroal;
 import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.MBeans.registerToMBean;
-import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
@@ -44,6 +40,7 @@ import org.corant.modules.datasource.agroal.patch.MyNarayanaTransactionIntegrati
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;
 import io.agroal.api.AgroalDataSource;
@@ -165,16 +162,16 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.connectionPoolConfiguration().maxLifetime(cfg.getMaxLifetime());
 
     if (!cfg.getValidationTimeout().equals(Duration.ZERO)) {
-      List<ConnectionValidator> validators =
-          listOf(ServiceLoader.load(ConnectionValidator.class, defaultClassLoader()));
-      if (isEmpty(validators)) {
+      Optional<ConnectionValidator> validators =
+          RequiredServiceLoader.find(ConnectionValidator.class, defaultClassLoader());
+      if (validators.isEmpty()) {
         cfgs.connectionPoolConfiguration().connectionValidator(
             AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
       } else {
-        cfgs.connectionPoolConfiguration().connectionValidator(validators.get(0));
+        cfgs.connectionPoolConfiguration().connectionValidator(validators.get());
       }
     }
-    streamOf(ServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader()))
+    RequiredServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, cfgs));
     AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
     if (cfg.isEnableMetrics()) {

@@ -66,7 +66,7 @@ public @interface ConfigKeyRoot {
 
   boolean ignoreNoAnnotatedItem() default true;
 
-  int keyIndex() default 1;
+  int keyIndex() default -1;
 
   String value();
 }

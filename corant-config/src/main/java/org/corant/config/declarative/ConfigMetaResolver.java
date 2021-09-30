@@ -15,6 +15,7 @@ package org.corant.config.declarative;
 
 import static org.corant.config.CorantConfigResolver.concatKey;
 import static org.corant.config.CorantConfigResolver.dashify;
+import static org.corant.config.CorantConfigResolver.splitKey;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Fields.traverseFields;
@@ -52,41 +53,41 @@ public class ConfigMetaResolver {
     }
     String keyRoot = configKeyRoot.value();
     int keyIndex = configKeyRoot.keyIndex();
+    keyIndex = keyIndex > -1 ? keyIndex : splitKey(keyRoot).length;
     boolean ignoreNoAnnotatedItem = configKeyRoot.ignoreNoAnnotatedItem();
     final ConfigMetaClass configClass =
         new ConfigMetaClass(keyRoot, keyIndex, clazz, ignoreNoAnnotatedItem);
     traverseFields(clazz, field -> {
-      if (!Modifier.isFinal(field.getModifiers())) {
-        if (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null) {
-          Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-            field.setAccessible(true);
-            return field;
-          });
-          ConfigKeyItem configKeyItem =
-              defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
-          String keyItem =
-              isBlank(configKeyItem.name()) ? dashify(field.getName()) : configKeyItem.name();
-          DeclarativePattern pattern =
-              defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
-          String defaultValue = configKeyItem.defaultValue();
-          String defaultKey = concatKey(keyRoot, keyItem);
-          String defaultNull = ConfigKeyItem.NO_DFLT_VALUE;
-          if (pattern == DeclarativePattern.PREFIX) {
-            Type fieldType = field.getGenericType();
-            if (fieldType instanceof ParameterizedType) {
-              Type rawType = ((ParameterizedType) fieldType).getRawType();
-              shouldBeTrue(rawType.equals(Map.class),
-                  "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
-                  field.getName());
-            } else {
-              shouldBeTrue(fieldType.equals(Map.class),
-                  "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
-                  field.getName());
-            }
+      if (!Modifier.isFinal(field.getModifiers())
+          && (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null)) {
+        Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
+          field.setAccessible(true);
+          return field;
+        });
+        ConfigKeyItem configKeyItem =
+            defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
+        String keyItem =
+            isBlank(configKeyItem.name()) ? dashify(field.getName()) : configKeyItem.name();
+        DeclarativePattern pattern =
+            defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
+        String defaultValue = configKeyItem.defaultValue();
+        String defaultKey = concatKey(keyRoot, keyItem);
+        String defaultNull = ConfigKeyItem.NO_DFLT_VALUE;
+        if (pattern == DeclarativePattern.PREFIX) {
+          Type fieldType = field.getGenericType();
+          if (fieldType instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) fieldType).getRawType();
+            shouldBeTrue(rawType.equals(Map.class),
+                "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
+                field.getName());
+          } else {
+            shouldBeTrue(fieldType.equals(Map.class),
+                "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
+                field.getName());
           }
-          configClass.addField(new ConfigMetaField(configClass, theField, keyItem, pattern,
-              defaultValue, defaultKey, defaultNull));
         }
+        configClass.addField(new ConfigMetaField(configClass, theField, keyItem, pattern,
+            defaultValue, defaultKey, defaultNull));
       }
     });
     return configClass;
@@ -118,4 +119,5 @@ public class ConfigMetaResolver {
     });
     return configClass;
   }
+
 }

@@ -115,9 +115,16 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
     });
   }
 
+  static <X extends Aggregate, I extends Serializable> I shouldExists(Class<X> cls, I id) {
+    if (!exists(cls, id)) {
+      throw new GeneralRuntimeException(ERR_OBJ_NON_FUD, id);
+    }
+    return id;
+  }
+
   @Override
   default T retrieve() {
-    return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
+    return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD));
   }
 
   @Override

@@ -17,12 +17,15 @@ import static org.corant.modules.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
 import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_AGG_RESOLVE_MULTI;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.persistence.metamodel.EntityType;
 import org.corant.context.Beans;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.shared.repository.JPARepository;
@@ -40,7 +43,28 @@ import org.corant.shared.exception.GeneralRuntimeException;
  */
 public class Aggregates {
 
+  static final Map<Class<?>, String> AGG_ID_EXISTS_QLS = new ConcurrentHashMap<>();
+
   private Aggregates() {}
+
+  public static void clearAggIdExistsSqlCache() {
+    AGG_ID_EXISTS_QLS.clear();
+  }
+
+  public static <X extends Aggregate> boolean exists(Class<X> cls, Serializable id) {
+    if (id != null && cls != null) {
+      final String existQl = AGG_ID_EXISTS_QLS.computeIfAbsent(cls, c -> {
+        EntityType<X> et = resolveRepository(cls).getEntityManager().getMetamodel().entity(cls);
+        String idAttrName = et.getId(et.getIdType().getJavaType()).getName();
+        String entityName = getUserClass(cls).getCanonicalName();
+        return new StringBuilder(36 + idAttrName.length() + entityName.length()).append("SELECT A.")
+            .append(idAttrName).append(" FROM ").append(entityName).append(" A WHERE A.")
+            .append(idAttrName).append(" =:id").toString();
+      });
+      return resolveRepository(cls).query(existQl).parameters(Map.of("id", id)).get() != null;
+    }
+    throw new GeneralRuntimeException(ERR_PARAM);
+  }
 
   public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
     if (id != null && cls != null) {

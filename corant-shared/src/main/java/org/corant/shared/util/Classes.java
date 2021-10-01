@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -420,11 +421,15 @@ public class Classes {
   }
 
   public static Class<?> tryAsClass(String className) {
+    return tryAsClass(className, null);
+  }
+
+  public static Class<?> tryAsClass(String className, ClassLoader classLoader) {
     if (isBlank(className)) {
       return null;
     }
     try {
-      return asClass(defaultClassLoader(), className, true);
+      return asClass(defaultObject(classLoader, Classes::defaultClassLoader), className, true);
     } catch (ClassNotFoundException e) {
       return null;
     }

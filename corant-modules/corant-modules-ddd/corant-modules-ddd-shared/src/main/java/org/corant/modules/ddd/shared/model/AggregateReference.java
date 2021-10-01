@@ -42,6 +42,10 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
   Map<Pair<Class<?>, Class<?>>, Constructor<?>> constructors = new ConcurrentHashMap<>();
   Map<Class<?>, Class<?>> classes = new ConcurrentHashMap<>();
 
+  static <X extends Aggregate> boolean exists(Class<X> cls, Serializable id) {
+    return Aggregates.exists(cls, id);
+  }
+
   static <X> X invokeExactConstructor(Class<X> cls, Class<?> paramClasses, Object paramValue)
       throws InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException {

@@ -44,6 +44,7 @@ import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;
 import io.agroal.api.AgroalDataSource;
+import io.agroal.api.configuration.AgroalConnectionFactoryConfiguration.TransactionIsolation;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration.ConnectionValidator;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
@@ -126,6 +127,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         .connectionProviderClass(cfg.getDriver());
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .autoCommit(cfg.isAutoCommit());
+    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+        .jdbcTransactionIsolation(TransactionIsolation.fromLevel(cfg.getIsolationLevel()));
 
     // auth
     if (cfg.getUsername() != null) {

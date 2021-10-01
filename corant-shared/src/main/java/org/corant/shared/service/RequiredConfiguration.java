@@ -24,6 +24,10 @@ import java.lang.annotation.Target;
 /**
  * corant-context
  *
+ * <p>
+ * Annotation that may be placed upon a SPI implementation class, use to conditionally veto it if a
+ * system property or system environment variable not meet the condition.
+ *
  * @author bingo 下午3:08:47
  *
  */
@@ -33,12 +37,33 @@ public @interface RequiredConfiguration {
 
   String DEFAULT_NULL_VALUE = "$default_null$";
 
+  /**
+   * The name of system property or system environment variable which value will be use to
+   * predication.
+   *
+   * @return key
+   */
   String key();
 
+  /**
+   * The predication
+   *
+   * @return predicate
+   */
   ValuePredicate predicate() default ValuePredicate.NO_NULL;
 
+  /**
+   * The type of the value corresponding to the key
+   *
+   * @return type
+   */
   Class<?> type() default String.class;
 
+  /**
+   * The reference value used for predication
+   *
+   * @return value
+   */
   String value() default DEFAULT_NULL_VALUE;
 
   enum ValuePredicate {

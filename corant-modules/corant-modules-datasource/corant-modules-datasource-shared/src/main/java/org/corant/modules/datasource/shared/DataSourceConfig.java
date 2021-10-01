@@ -75,6 +75,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "64")
   protected int maxSize = 64;
 
+  @ConfigKeyItem(defaultValue = "-1")
+  protected int isolationLevel = -1;
+
   @ConfigKeyItem(defaultValue = "PT0S")
   protected Duration leakTimeout = Duration.ofSeconds(0);
 
@@ -159,6 +162,25 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public String getInitialSql() {
     return initialSql;
+  }
+
+  /**
+   * Isolation level for connections. The Isolation level must be one of the following:
+   * <p>
+   * <ul>
+   * <li>Connection.TRANSACTION_NONE,
+   * <li>Connection.TRANSACTION_READ_ UNCOMMITTED,
+   * <li>Connection.TRANSACTION_READ_COMMITTED,
+   * <li>Connection.TRANSACTION_REPEATABLE_READ,
+   * <li>Connection.TRANSACTION_SERIALIZABLE
+   * </ul>
+   * <p>
+   * Default -1 is vendor-specific.
+   *
+   * @since 1.1
+   */
+  public int getIsolationLevel() {
+    return isolationLevel;
   }
 
   /**

@@ -33,14 +33,10 @@ public class Services {
    * {@link Classes#defaultClassLoader()} from {@link RequiredServiceLoader} or return an empty
    * {@link Optional} if not found.
    *
-   * Note: If there are multiple service instances found by the {@link RequiredServiceLoader} and
-   * given service class is {@link Sortable} or {@link Comparable} then return the highest priority
-   * service instance, for some services that are implemented {@link Sortable} and
-   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
-   *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    *
+   * @see RequiredServiceLoader#find(Class)
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> find(Class<T> serviceClass) {
@@ -52,16 +48,14 @@ public class Services {
    * class loader from {@link RequiredServiceLoader} or return an empty {@link Optional} if not
    * found.
    *
-   * Note: If there are multiple service instances found by the {@link RequiredServiceLoader} and
-   * the given service class is {@link Sortable} or {@link Comparable} then return the highest
-   * priority service instance, for some services that are implemented {@link Sortable} and
-   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
-   *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    * @param classLoader The class loader to be used to load provider-configuration files and
    *        provider classes, or null if the system class loader (or, failing that, the bootstrap
    *        class loader) is to be used
+   *
+   * @see RequiredServiceLoader#find(Class, ClassLoader)
+   * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> find(Class<T> serviceClass, ClassLoader classLoader) {
     return RequiredServiceLoader.find(serviceClass, classLoader);
@@ -72,14 +66,12 @@ public class Services {
    * module layer and its ancestors from the {@link RequiredServiceLoader} or return an empty
    * {@link Optional} if not found.
    *
-   * Note: If there are multiple service instances found by ServiceLoader and the given service
-   * class is {@link Sortable} or {@link Comparable} then return the highest priority service
-   * instance, for some services that are implemented {@link Sortable} and {@link Comparable}, the
-   * {@link Sortable} will be used for sorting preferred.
-   *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    * @param layer the module layer
+   *
+   * @see RequiredServiceLoader#find(ModuleLayer, Class)
+   * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> find(ModuleLayer layer, Class<T> serviceClass) {
     return RequiredServiceLoader.find(layer, serviceClass);
@@ -90,14 +82,10 @@ public class Services {
    * {@link Classes#defaultClassLoader()} from {@link RequiredServiceLoader} or throws exception if
    * the service not found.
    *
-   * Note: If there are multiple service instances found by {@link RequiredServiceLoader} and given
-   * service class is {@link Sortable} or {@link Comparable} then return the highest priority
-   * service instance, for some services that are implemented {@link Sortable} and
-   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
-   *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    *
+   * @see RequiredServiceLoader#find(Class)
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> T resolve(Class<T> serviceClass) {
@@ -111,21 +99,35 @@ public class Services {
    * {@link Classes#defaultClassLoader()} from {@link RequiredServiceLoader} or throws exception if
    * the service not found.
    *
-   * Note: If there are multiple service instances found by {@link RequiredServiceLoader} and the
-   * given service class is {@link Sortable} or {@link Comparable} then return the highest priority
-   * service instance, for some services that are implemented {@link Sortable} and
-   * {@link Comparable}, the {@link Sortable} will be used for sorting preferred.
-   *
    * @param <T> the service type to be resolved
    * @param serviceClass the service instance class to be resolved
    * @param classLoader The class loader to be used to load provider-configuration files and
    *        provider classes, or null if the system class loader (or, failing that, the bootstrap
    *        class loader) is to be used
+   *
+   * @see RequiredServiceLoader#find(Class, ClassLoader)
+   * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> T resolve(Class<T> serviceClass, ClassLoader classLoader) {
     return find(serviceClass, classLoader).orElseThrow(() -> new CorantRuntimeException(
         "Unable to resolve the service %s through the class loader %s.", serviceClass,
         classLoader));
+  }
+
+  /**
+   * Returns a service instance that matches the given service class and the given module layer from
+   * {@link RequiredServiceLoader} or throws exception if the service not found.
+   *
+   * @param <T> the service type to be resolved
+   * @param layer the module layer
+   * @param serviceClass the service instance class to be resolved
+   *
+   * @see RequiredServiceLoader#find(ModuleLayer, Class)
+   * @see Sortable#compare(Sortable, Sortable)
+   */
+  public static <T> T resolve(ModuleLayer layer, Class<T> serviceClass) {
+    return find(layer, serviceClass).orElseThrow(() -> new CorantRuntimeException(
+        "Unable to resolve the service %s through the module layer %s.", serviceClass, layer));
   }
 
   /**

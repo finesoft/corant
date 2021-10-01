@@ -45,22 +45,22 @@ public class Required {
   protected Required() {}
 
   public boolean shouldVeto(Class<?> type) {
-    return shouldVeto(type.getAnnotationsByType(RequiredClassPresent.class),
+    return shouldVeto(type.getClassLoader(), type.getAnnotationsByType(RequiredClassPresent.class),
         type.getAnnotationsByType(RequiredClassNotPresent.class),
         type.getAnnotationsByType(RequiredConfiguration.class));
   }
 
-  public boolean shouldVeto(RequiredClassPresent[] requiredClassNames,
+  public boolean shouldVeto(ClassLoader classLoader, RequiredClassPresent[] requiredClassNames,
       RequiredClassNotPresent[] requiredNotClassNames, RequiredConfiguration[] requireConfigs) {
     boolean veto = false;
     if (isNotEmpty(requiredClassNames)) {
       veto = Arrays.stream(requiredClassNames).flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNull(tryAsClass(r)));
+          .anyMatch(r -> isNull(tryAsClass(r, classLoader)));
     }
 
     if (!veto && isNotEmpty(requiredNotClassNames)) {
       veto = Arrays.stream(requiredNotClassNames).flatMap(r -> streamOf(r.value()))
-          .anyMatch(r -> isNotNull(tryAsClass(r)));
+          .anyMatch(r -> isNotNull(tryAsClass(r, classLoader)));
     }
 
     if (!veto && isNotEmpty(requireConfigs)) {
@@ -118,7 +118,7 @@ public class Required {
       for (String k : keys) {
         Object configValue = getConfigValue(k, requiredValueType, defaultNullValue);
         Object value = getConvertValue(requiredValue, requiredValueType);
-        boolean match = false;
+        boolean match;
         switch (requiredValuePredicate) {
           case BLANK:
             match = isNotBlank((String) configValue);

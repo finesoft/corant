@@ -24,11 +24,21 @@ import java.lang.annotation.Target;
 /**
  * corant-context
  *
+ * <p>
+ * Annotation which may be placed upon a SPI implementation class, use to conditionally veto it if a
+ * class is not present. Multiple condition annotations will be applied with implicit <b>AND</b>
+ * semantics.
+ *
  * @author bingo 下午3:08:47
  *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})
 public @interface RequiredClassPresent {
+  /**
+   * Returns the class names, all classes will be applied with implicit <b>AND</b> semantics.
+   *
+   * @return value
+   */
   String[] value();
 }

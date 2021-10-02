@@ -21,7 +21,7 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import com.aliyun.oss.OSSClientBuilder;
 
 /**
@@ -49,6 +49,6 @@ public class OSSClientExtension implements Extension {
   }
 
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    config = ConfigInstances.resolveSingle(OSSClientConfiguration.class);
+    config = Configs.resolveSingle(OSSClientConfiguration.class);
   }
 }

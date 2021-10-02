@@ -27,7 +27,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
@@ -60,7 +60,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
         .map(ConfigProperties.class::cast).map(ConfigProperties::prefix)
         .filter(prefix -> !prefix.equals(ConfigProperties.UNCONFIGURED_PREFIX)).findFirst()
         .orElse(prefix);
-    return ConfigInstances.resolveMicroprofile(clazz, thePrefix);
+    return Configs.resolveMicroprofile(clazz, thePrefix);
   }
 
   @Override

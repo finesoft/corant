@@ -16,22 +16,15 @@ package org.corant.config.declarative;
 import static org.corant.config.CorantConfigResolver.KEY_DELIMITER;
 import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.config.CorantConfigResolver.regulateKeyPrefix;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-config
@@ -44,63 +37,13 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class ConfigInstances {
 
-  public static <T> T resolveMicroprofile(Class<T> cls, String prefix) {
-    Map<String, T> map = new HashMap<>(1);
-    ConfigMetaClass configClass = ConfigMetaResolver.microprofile(cls, prefix);
-    if (configClass != null) {
-      Config config = ConfigProvider.getConfig();
-      try {
-        map = resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME EMPTY?
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-    return isEmpty(map) ? null : map.values().iterator().next();
-  }
-
-  public static <T> Map<String, T> resolveMulti(Class<T> cls) {
-    Map<String, T> configMaps = null;
-    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
-    if (configClass != null) {
-      Config config = ConfigProvider.getConfig();
-      Set<String> keys = resolveKeys(configClass, config);
-      try {
-        configMaps = resolveConfigInstances(config, keys, configClass);
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-    return defaultObject(configMaps, HashMap::new);
-  }
-
-  public static <T> T resolveSingle(Class<T> cls) {
-    Map<String, T> map = new HashMap<>(1);
-    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
-    if (configClass != null) {
-      Config config = ConfigProvider.getConfig();
-      try {
-        map = resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME EMPTY?
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-    return isEmpty(map) ? null : map.values().iterator().next();
-  }
-
-  static Class<?> getFieldActualTypeArguments(Field field, int index) {
-    return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[index];
-  }
-
-  static <T extends DeclarativeConfig> T resolveConfigInstance(Config config, String infix,
-      T configObject, ConfigMetaClass configClass) throws Exception {
-    for (ConfigMetaField cf : configClass.getFields()) {
-      cf.getInjector().inject(config, infix, configObject, cf);
-    }
-    return configObject;
+  public static <T> Map<String, T> resolveConfigInstances(Config config,
+      ConfigMetaClass configClass) throws Exception {
+    return resolveConfigInstances(config, resolveKeys(configClass, config), configClass);
   }
 
   @SuppressWarnings("unchecked")
-  static <T> Map<String, T> resolveConfigInstances(Config config, Set<String> keys,
+  public static <T> Map<String, T> resolveConfigInstances(Config config, Set<String> keys,
       ConfigMetaClass configClass) throws Exception {
     if (isNotEmpty(keys)) {
       Map<String, T> configMaps = new HashMap<>(keys.size());

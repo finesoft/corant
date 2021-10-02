@@ -25,8 +25,8 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import org.corant.config.Configs;
 import org.corant.config.CorantConfig;
-import org.corant.config.declarative.ConfigInstances;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.config.declarative.DeclarativeConfigKey;
 import org.eclipse.microprofile.config.Config;
@@ -49,8 +49,7 @@ public class ConfigProducer implements Serializable {
   public static <T extends DeclarativeConfig> T declarative(InjectionPoint injectionPoint) {
     DeclarativeConfigKey key =
         shouldNotNull(injectionPoint.getAnnotated().getAnnotation(DeclarativeConfigKey.class));
-    return forceCast(
-        ConfigInstances.resolveMulti((Class<?>) injectionPoint.getType()).get(key.value()));
+    return forceCast(Configs.resolveMulti((Class<?>) injectionPoint.getType()).get(key.value()));
   }
 
   @ConfigProperty

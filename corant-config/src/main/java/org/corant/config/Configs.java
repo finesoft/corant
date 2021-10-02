@@ -13,13 +13,25 @@
  */
 package org.corant.config;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.declarative.ConfigMetaClass;
+import org.corant.config.declarative.ConfigMetaResolver;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 /**
  * corant-config
@@ -100,6 +112,76 @@ public class Configs {
     return op.orElse(nvl);
   }
 
+  /**
+   * Returns the microprofile configuration properties instance by given class and prefix.
+   *
+   * @param <T> the configuration properties instance type
+   * @param cls the configuration properties instance class
+   * @param prefix the prefix of the configuration properties.
+   *
+   * @see ConfigProperties
+   */
+  public static <T> T resolveMicroprofile(Class<T> cls, String prefix) {
+    Map<String, T> map = new HashMap<>(1);
+    ConfigMetaClass configClass = ConfigMetaResolver.microprofile(cls, prefix);
+    if (configClass != null) {
+      Config config = ConfigProvider.getConfig();
+      try {
+        // FIXME EMPTY?
+        map = ConfigInstances.resolveConfigInstances(config, setOf(EMPTY), configClass);
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return isEmpty(map) ? null : map.values().iterator().next();
+  }
+
+  /**
+   * Returns the declarative configuration instances map by given configuration instance class. The
+   * key of returns map is the configuration instance qualifier, and the value of returns map is the
+   * configuration instance.
+   *
+   * @param <T> the configuration instance type
+   * @param cls the configuration instance class
+   */
+  public static <T> Map<String, T> resolveMulti(Class<T> cls) {
+    Map<String, T> configMaps = null;
+    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
+    if (configClass != null) {
+      Config config = ConfigProvider.getConfig();
+      try {
+        configMaps = ConfigInstances.resolveConfigInstances(config, configClass);
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return defaultObject(configMaps, HashMap::new);
+  }
+
+  /**
+   * Returns a declarative configuration instance by given configuration instance class.
+   * <p>
+   * Note: If there are multiple instances then return one.
+   *
+   * @param <T> the configuration instance type
+   * @param cls the configuration instance class
+   * @return resolveSingle
+   */
+  public static <T> T resolveSingle(Class<T> cls) {
+    Map<String, T> map = new HashMap<>(1);
+    ConfigMetaClass configClass = ConfigMetaResolver.declarative(cls);
+    if (configClass != null) {
+      Config config = ConfigProvider.getConfig();
+      try {
+        map = ConfigInstances.resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME
+                                                                                         // EMPTY?
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+    return isEmpty(map) ? null : map.values().iterator().next();
+  }
+
   public static String resolveVariable(String propertyName) {
     int startVar = 0;
     String resolvedValue = propertyName;
@@ -120,4 +202,5 @@ public class Configs {
     }
     return resolvedValue;
   }
+
 }

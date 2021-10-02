@@ -38,7 +38,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
@@ -80,7 +80,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
   protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
 
   protected final Map<String, MessageReceivingExecutorConfig> executorConfigs =
-      ConfigInstances.resolveMulti(MessageReceivingExecutorConfig.class);
+      Configs.resolveMulti(MessageReceivingExecutorConfig.class);
 
   @Override
   public void start() {

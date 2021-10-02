@@ -34,7 +34,7 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Singleton;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
@@ -107,7 +107,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
   }
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    Map<String, ElasticConfig> configs = ConfigInstances.resolveMulti(ElasticConfig.class);
+    Map<String, ElasticConfig> configs = Configs.resolveMulti(ElasticConfig.class);
     configManager = new DefaultNamedQualifierObjectManager<>(configs.values());
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");

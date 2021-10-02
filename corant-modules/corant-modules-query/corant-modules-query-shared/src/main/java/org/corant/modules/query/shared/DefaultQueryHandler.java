@@ -33,7 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import org.corant.context.service.ConversionService;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryObjectMapper;
@@ -189,7 +189,7 @@ public class DefaultQueryHandler implements QueryHandler {
 
   @PostConstruct
   protected void onPostConstruct() {
-    querierConfig = ConfigInstances.resolveSingle(DefaultQuerierConfig.class);
+    querierConfig = Configs.resolveSingle(DefaultQuerierConfig.class);
   }
 
   @PreDestroy

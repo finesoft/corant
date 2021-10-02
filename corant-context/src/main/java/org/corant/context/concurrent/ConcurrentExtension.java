@@ -33,7 +33,6 @@ import javax.enterprise.inject.spi.Extension;
 import javax.naming.NamingException;
 import javax.transaction.TransactionManager;
 import org.corant.config.Configs;
-import org.corant.config.declarative.ConfigInstances;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
 import org.corant.context.concurrent.executor.DefaultContextService;
 import org.corant.context.concurrent.executor.DefaultManagedExecutorService;
@@ -136,7 +135,7 @@ public class ConcurrentExtension implements Extension {
 
   protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     Collection<ManagedExecutorConfig> mecs =
-        newArrayList(ConfigInstances.resolveMulti(ManagedExecutorConfig.class).values());
+        newArrayList(Configs.resolveMulti(ManagedExecutorConfig.class).values());
     if (mecs.isEmpty() && ENABLE_DFLT_MES) {
       logger.info(() -> String.format("Use default managed executor configuration %s",
           ManagedExecutorConfig.DFLT_INST));
@@ -144,7 +143,7 @@ public class ConcurrentExtension implements Extension {
     }
 
     Collection<ManagedScheduledExecutorConfig> msecs =
-        newArrayList(ConfigInstances.resolveMulti(ManagedScheduledExecutorConfig.class).values());
+        newArrayList(Configs.resolveMulti(ManagedScheduledExecutorConfig.class).values());
     if (msecs.isEmpty() && ENABLE_DFLT_MSES) {
       logger.info(() -> String.format("Use default managed scheduled executor configuration %s",
           ManagedScheduledExecutorConfig.DFLT_INST));
@@ -152,7 +151,7 @@ public class ConcurrentExtension implements Extension {
     }
 
     Collection<ContextServiceConfig> cscs =
-        newArrayList(ConfigInstances.resolveMulti(ContextServiceConfig.class).values());
+        newArrayList(Configs.resolveMulti(ContextServiceConfig.class).values());
     if (cscs.isEmpty() && ENABLE_DFLT_CS) {
       logger.info(() -> String.format("Use default context service configuration %s",
           ContextServiceConfig.DFLT_INST));

@@ -18,7 +18,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.corant.config.declarative.ConfigInstances;
+import org.corant.config.Configs;
 import org.corant.shared.resource.Resource;
 
 /**
@@ -96,7 +96,7 @@ public class DefaultMailSender implements MailSender {
   }
 
   protected MailConfig getConfig() {
-    return ConfigInstances.resolveSingle(MailConfig.class);
+    return Configs.resolveSingle(MailConfig.class);
   }
 
   protected Session getSession() {

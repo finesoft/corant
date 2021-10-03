@@ -16,7 +16,7 @@ package org.corant.context.service;
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Collection;
 import java.util.function.IntFunction;
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterRegistry;
@@ -49,7 +49,7 @@ public interface ConversionService {
    * @author bingo 下午6:47:49
    *
    */
-  @ApplicationScoped
+  @Singleton
   class DefaultConversionService implements ConversionService {
 
     @Override

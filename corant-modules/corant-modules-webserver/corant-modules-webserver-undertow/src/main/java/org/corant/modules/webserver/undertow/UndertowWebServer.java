@@ -70,6 +70,7 @@ import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.SecurityInfo.EmptyRoleSemantic;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.api.ServletSecurityInfo;
+import io.undertow.servlet.api.SessionManagerFactory;
 import io.undertow.servlet.api.SessionPersistenceManager;
 import io.undertow.servlet.api.TransportGuaranteeType;
 import io.undertow.servlet.handlers.DefaultServlet;
@@ -99,6 +100,10 @@ public class UndertowWebServer extends AbstractWebServer {
   @Inject
   @Any
   protected Instance<SessionPersistenceManager> sessionPersistenceManager;
+
+  @Inject
+  @Any
+  protected Instance<SessionManagerFactory> sessionManagerFactory;
 
   protected Undertow server;
 
@@ -252,6 +257,9 @@ public class UndertowWebServer extends AbstractWebServer {
     di.setEscapeErrorMessage(specConfig.isEscapeErrorMessage());// careful
     if (specConfig.isPersistenceSession() && sessionPersistenceManager.isResolvable()) {
       di.setSessionPersistenceManager(sessionPersistenceManager.get());
+    }
+    if (sessionManagerFactory.isResolvable()) {
+      di.setSessionManagerFactory(sessionManagerFactory.get());
     }
     specConfig.getDefaultSessionTimeout().ifPresent(di::setDefaultSessionTimeout);
     config.getLocaleCharsetMap().forEach(di::addLocaleCharsetMapping);

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Classes.getUserClass;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.jms.BytesMessage;
@@ -107,6 +108,11 @@ public class KryoMessageMarshaller implements MessageMarshaller {
     try (Input in = new Input(bytes)) {
       return kryo.readObject(in, clazz);
     }
+  }
+
+  @PreDestroy
+  protected void onPreDestroy() {
+    customSerializers.clear();
   }
 
   protected byte[] toBytes(Object object) {

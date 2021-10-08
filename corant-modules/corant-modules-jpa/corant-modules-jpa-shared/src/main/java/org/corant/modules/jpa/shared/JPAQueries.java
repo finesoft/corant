@@ -25,16 +25,23 @@ import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.SPACE;
+import java.net.URI;
+import java.net.URL;
+import java.sql.Timestamp;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -415,9 +422,12 @@ public class JPAQueries {
 
   private static boolean simpleClass(Class<?> type) {
     return isPrimitiveOrWrapper(type) || String.class.equals(type)
-        || Number.class.isAssignableFrom(type) || Boolean.class.isAssignableFrom(type)
-        || Temporal.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type)
-        || Enum.class.isAssignableFrom(type);
+        || Number.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type)
+        || Enum.class.isAssignableFrom(type) || Timestamp.class.isAssignableFrom(type)
+        || Temporal.class.isAssignableFrom(type) || URL.class.isAssignableFrom(type)
+        || URI.class.isAssignableFrom(type) || TemporalAmount.class.isAssignableFrom(type)
+        || Currency.class.isAssignableFrom(type) || Locale.class.isAssignableFrom(type)
+        || TimeZone.class.isAssignableFrom(type);
   }
 
   /**

@@ -129,7 +129,10 @@ public abstract class TransactionalAction<T> {
           // FIXME Is this the right place?
           tx.registerSynchronization(SynchronizationAdapter.beforeCompletion(() -> {
             try {
-              tx.setRollbackOnly();
+              Transaction curTx = TransactionService.currentTransaction();
+              if (curTx != null) {
+                curTx.setRollbackOnly();
+              }
             } catch (IllegalStateException | SystemException e) {
               throw new CorantRuntimeException(e);
             }

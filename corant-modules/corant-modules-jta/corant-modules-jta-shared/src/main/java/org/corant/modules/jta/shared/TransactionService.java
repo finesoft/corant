@@ -57,10 +57,9 @@ public interface TransactionService {
    *     });
    * </pre>
    *
-   * @param <T>
    */
-  static <T> TransactionalActuator<T> actuator() {
-    return new TransactionalActuator<>();
+  static TransactionalActuator actuator() {
+    return new TransactionalActuator();
   }
 
   /**

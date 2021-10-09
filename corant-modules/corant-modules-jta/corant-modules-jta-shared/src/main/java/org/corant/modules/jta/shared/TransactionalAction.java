@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.transaction.InvalidTransactionException;
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
@@ -46,11 +47,11 @@ import org.corant.shared.util.Classes;
  * @author bingo 上午9:45:50
  *
  */
-public abstract class TransactionalAction<T> {
+public abstract class TransactionalAction {
 
   static final Logger logger = Logger.getLogger(TransactionalAction.class.getName());
 
-  final Supplier<T> supplier;
+  final Supplier<?> supplier;
   final Class<?>[] rollbackOn;
   final Class<?>[] dontRollbackOn;
   final TxType type;
@@ -73,7 +74,7 @@ public abstract class TransactionalAction<T> {
    * @param rollbackOnly Modify the transaction associated with the target object such that the only
    *        possible outcome of the transaction is to roll back the transaction.
    */
-  protected TransactionalAction(TxType type, Supplier<T> supplier, Synchronization synchronization,
+  protected TransactionalAction(TxType type, Supplier<?> supplier, Synchronization synchronization,
       Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
     this.type = type;
     this.supplier = shouldNotNull(supplier, "The supplier can't null");
@@ -84,7 +85,7 @@ public abstract class TransactionalAction<T> {
     this.rollbackOnly = rollbackOnly;
   }
 
-  public T execute() throws Exception {
+  public Object execute() throws Exception {
     final TransactionManager tm = TransactionService.transactionManager();
     if (timeout != null && timeout > 0) {
       tm.setTransactionTimeout(timeout);
@@ -105,59 +106,37 @@ public abstract class TransactionalAction<T> {
     }
   }
 
-  protected abstract T doExecute(TransactionManager tm, Transaction tx) throws Exception;
+  protected abstract Object doExecute(TransactionManager tm, Transaction tx) throws Exception;
 
   protected void endTransaction(TransactionManager tm, Transaction tx) throws Exception {
     if (tx != tm.getTransaction()) {
       throw new CorantRuntimeException("Wrong transaction on thread");
     }
-
-    if (tx.getStatus() == Status.STATUS_MARKED_ROLLBACK || rollbackOnly) {
+    if (tx.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
       tm.rollback();
     } else {
       tm.commit();
     }
   }
 
-  protected T executeInCallerTx(Transaction tx) throws Exception {
+  protected Object executeInCallerTx(Transaction tx) throws Exception {
     try {
-      if (tx != null) {
-        if (synchronization != null) {
-          tx.registerSynchronization(synchronization);
-        }
-        if (rollbackOnly) {
-          // FIXME Is this the right place?
-          tx.registerSynchronization(SynchronizationAdapter.beforeCompletion(() -> {
-            try {
-              Transaction curTx = TransactionService.currentTransaction();
-              if (curTx != null) {
-                curTx.setRollbackOnly();
-              }
-            } catch (IllegalStateException | SystemException e) {
-              throw new CorantRuntimeException(e);
-            }
-          }));
-        }
-      }
-      return supplier.get();
+      return supply(tx);
     } catch (Exception e) {
       handleException(e, tx);
     }
     throw new CorantRuntimeException("UNREACHABLE");
   }
 
-  protected T executeInNoTx() throws Exception {
+  protected Object executeInNoTx() throws Exception {
     return supplier.get();
   }
 
-  protected T executeInOurTx(TransactionManager tm) throws Exception {
+  protected Object executeInOurTx(TransactionManager tm) throws Exception {
     tm.begin();
     Transaction tx = tm.getTransaction();
     try {
-      if (synchronization != null) {
-        tx.registerSynchronization(synchronization);
-      }
-      return supplier.get();
+      return supply(tx);
     } catch (Exception e) {
       handleException(e, tx);
     } finally {
@@ -188,22 +167,34 @@ public abstract class TransactionalAction<T> {
     throw e;
   }
 
+  protected Object supply(Transaction tx)
+      throws IllegalStateException, SystemException, RollbackException {
+    if (tx != null && synchronization != null) {
+      tx.registerSynchronization(synchronization);
+    }
+    Object result = supplier.get();
+    if (tx != null && rollbackOnly) {
+      tx.setRollbackOnly();
+    }
+    return result;
+  }
+
   /**
    * corant-modules-jta-shared
    *
    * @author bingo 上午10:45:40
    *
    */
-  public static class MandatoryTransactionalAction<T> extends TransactionalAction<T> {
+  public static class MandatoryTransactionalAction extends TransactionalAction {
 
-    protected MandatoryTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected MandatoryTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.MANDATORY, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx == null) {
         throw new TransactionalException("Transaction is required for execution",
             new TransactionRequiredException());
@@ -218,16 +209,16 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:46:08
    *
    */
-  public static class NeverTransactionalAction<T> extends TransactionalAction<T> {
+  public static class NeverTransactionalAction extends TransactionalAction {
 
-    protected NeverTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected NeverTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.NEVER, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx != null) {
         throw new TransactionalException("Don't be called inside a transaction context.",
             new InvalidTransactionException());
@@ -242,16 +233,16 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:45:44
    *
    */
-  public static class NotSupportedTransactionalAction<T> extends TransactionalAction<T> {
+  public static class NotSupportedTransactionalAction extends TransactionalAction {
 
-    protected NotSupportedTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected NotSupportedTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.NOT_SUPPORTED, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx != null) {
         tm.suspend();
         try {
@@ -271,16 +262,16 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:45:49
    *
    */
-  public static class RequiredTransactionalAction<T> extends TransactionalAction<T> {
+  public static class RequiredTransactionalAction extends TransactionalAction {
 
-    protected RequiredTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected RequiredTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.REQUIRED, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx == null) {
         return executeInOurTx(tm);
       } else {
@@ -295,16 +286,16 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:45:52
    *
    */
-  public static class RequiresNewTransactionalAction<T> extends TransactionalAction<T> {
+  public static class RequiresNewTransactionalAction extends TransactionalAction {
 
-    protected RequiresNewTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected RequiresNewTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.REQUIRES_NEW, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx != null) {
         tm.suspend();
         try {
@@ -324,16 +315,16 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:46:01
    *
    */
-  public static class SupportsTransactionalAction<T> extends TransactionalAction<T> {
+  public static class SupportsTransactionalAction extends TransactionalAction {
 
-    protected SupportsTransactionalAction(Supplier<T> supplier, Synchronization synchronization,
+    protected SupportsTransactionalAction(Supplier<?> supplier, Synchronization synchronization,
         Class<?>[] rollbackOn, Class<?>[] dontRollbackOn, Integer timeout, boolean rollbackOnly) {
       super(TxType.SUPPORTS, supplier, synchronization, rollbackOn, dontRollbackOn, timeout,
           rollbackOnly);
     }
 
     @Override
-    protected T doExecute(TransactionManager tm, Transaction tx) throws Exception {
+    protected Object doExecute(TransactionManager tm, Transaction tx) throws Exception {
       if (tx == null) {
         return executeInNoTx();
       } else {
@@ -352,7 +343,7 @@ public abstract class TransactionalAction<T> {
    * @author bingo 上午10:45:58
    *
    */
-  public static class TransactionalActuator<T> {
+  public static class TransactionalActuator {
 
     Class<?>[] rollbackOn = Classes.EMPTY_ARRAY;
     Class<?>[] dontRollbackOn = Classes.EMPTY_ARRAY;
@@ -361,7 +352,13 @@ public abstract class TransactionalAction<T> {
     Integer timeout;
     boolean rollbackOnly = false;
 
-    public TransactionalActuator<T> dontRollbackOn(final Class<?>... dontRollbackOn) {
+    /**
+     * Set the classes of exceptions that must not cause the transaction manager to mark the
+     * transaction for roll-back.
+     *
+     * @param dontRollbackOn the exception classes
+     */
+    public TransactionalActuator dontRollbackOn(final Class<?>... dontRollbackOn) {
       this.dontRollbackOn = dontRollbackOn;
       return this;
     }
@@ -371,9 +368,10 @@ public abstract class TransactionalAction<T> {
      *
      * @param supplier the execution
      */
-    public T get(final Supplier<T> supplier) {
+    @SuppressWarnings("unchecked")
+    public <T> T get(final Supplier<T> supplier) {
       try {
-        return plan(shouldNotNull(supplier)).execute();
+        return (T) plan(shouldNotNull(supplier)).execute();
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -385,7 +383,7 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#MANDATORY
      */
-    public TransactionalActuator<T> mandatory() {
+    public TransactionalActuator mandatory() {
       return txType(TxType.MANDATORY);
     }
 
@@ -395,7 +393,7 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#NEVER
      */
-    public TransactionalActuator<T> never() {
+    public TransactionalActuator never() {
       return txType(TxType.NEVER);
     }
 
@@ -405,7 +403,7 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#NOT_SUPPORTED
      */
-    public TransactionalActuator<T> notSupported() {
+    public TransactionalActuator notSupported() {
       return txType(TxType.NOT_SUPPORTED);
     }
 
@@ -415,7 +413,7 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#REQUIRED
      */
-    public TransactionalActuator<T> required() {
+    public TransactionalActuator required() {
       return txType(TxType.REQUIRED);
     }
 
@@ -425,17 +423,31 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#REQUIRES_NEW
      */
-    public TransactionalActuator<T> requiresNew() {
+    public TransactionalActuator requiresNew() {
       return txType(TxType.REQUIRES_NEW);
     }
 
-    public TransactionalActuator<T> rollbackOn(final Class<?>... rollbackOn) {
+    /**
+     * Set the classes of exceptions that must cause the transaction manager to mark the transaction
+     * for roll-back.
+     *
+     * @param rollbackOn the exception classes
+     */
+    public TransactionalActuator rollbackOn(final Class<?>... rollbackOn) {
       this.rollbackOn = rollbackOn;
       return this;
     }
 
-    public TransactionalActuator<T> rollbackOnly(boolean rollbackOnly) {
-      this.rollbackOnly = rollbackOnly;
+    /**
+     * Modify the transaction associated with the target object such that the only possible outcome
+     * of the transaction is to roll back the transaction, default is not roll-back.
+     * <p>
+     * Note: The roll-back will happen after transaction action executed.
+     *
+     * @see Transaction#setRollbackOnly()
+     */
+    public TransactionalActuator rollbackOnly() {
+      rollbackOnly = true;
       return this;
     }
 
@@ -462,11 +474,19 @@ public abstract class TransactionalAction<T> {
      *
      * @see TxType#SUPPORTS
      */
-    public TransactionalActuator<T> supports() {
+    public TransactionalActuator supports() {
       return txType(TxType.SUPPORTS);
     }
 
-    public TransactionalActuator<T> synchronization(final Synchronization synchronization) {
+    /**
+     * Register a synchronization object for the transaction associated with the target object.
+     *
+     * @param synchronization The Synchronization object for the transaction associated with the
+     *        target object
+     *
+     * @see Transaction#registerSynchronization(Synchronization)
+     */
+    public TransactionalActuator synchronization(final Synchronization synchronization) {
       if ((txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED) && synchronization != null) {
         throw new NotSupportedException(
             "The synchronization contained in the current actuator may not execute correctly!");
@@ -483,7 +503,7 @@ public abstract class TransactionalAction<T> {
      *        service restores the default value. If the value is negative a SystemException is
      *        thrown.
      */
-    public TransactionalActuator<T> timeout(final int timeout) {
+    public TransactionalActuator timeout(final int timeout) {
       this.timeout = timeout;
       return this;
     }
@@ -494,7 +514,7 @@ public abstract class TransactionalAction<T> {
      *
      * @param txType the value of TxType
      */
-    public TransactionalActuator<T> txType(final TxType txType) {
+    public TransactionalActuator txType(final TxType txType) {
       if (synchronization != null && (txType == TxType.NEVER || txType == TxType.NOT_SUPPORTED)) {
         throw new NotSupportedException(
             "The synchronization contained in the current actuator may not execute correctly!");
@@ -503,25 +523,25 @@ public abstract class TransactionalAction<T> {
       return this;
     }
 
-    protected TransactionalAction<T> plan(final Supplier<T> supplier) {
+    protected <T> TransactionalAction plan(final Supplier<T> supplier) {
       switch (txType) {
         case MANDATORY:
-          return new MandatoryTransactionalAction<>(supplier, synchronization, rollbackOn,
+          return new MandatoryTransactionalAction(supplier, synchronization, rollbackOn,
               dontRollbackOn, timeout, rollbackOnly);
         case REQUIRES_NEW:
-          return new RequiresNewTransactionalAction<>(supplier, synchronization, rollbackOn,
+          return new RequiresNewTransactionalAction(supplier, synchronization, rollbackOn,
               dontRollbackOn, timeout, rollbackOnly);
         case NEVER:
-          return new NeverTransactionalAction<>(supplier, synchronization, rollbackOn,
-              dontRollbackOn, timeout, rollbackOnly);
+          return new NeverTransactionalAction(supplier, synchronization, rollbackOn, dontRollbackOn,
+              timeout, rollbackOnly);
         case NOT_SUPPORTED:
-          return new NotSupportedTransactionalAction<>(supplier, synchronization, rollbackOn,
+          return new NotSupportedTransactionalAction(supplier, synchronization, rollbackOn,
               dontRollbackOn, timeout, rollbackOnly);
         case SUPPORTS:
-          return new SupportsTransactionalAction<>(supplier, synchronization, rollbackOn,
+          return new SupportsTransactionalAction(supplier, synchronization, rollbackOn,
               dontRollbackOn, timeout, rollbackOnly);
         default:
-          return new RequiredTransactionalAction<>(supplier, synchronization, rollbackOn,
+          return new RequiredTransactionalAction(supplier, synchronization, rollbackOn,
               dontRollbackOn, timeout, rollbackOnly);
       }
     }

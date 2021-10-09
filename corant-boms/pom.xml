@@ -123,6 +123,7 @@
     <version.microprofile-rest-client-api>2.0</version.microprofile-rest-client-api>
     <version.microprofile-lra-api>1.0</version.microprofile-lra-api>
     <version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
+    <version.minio>8.3.0</version.minio>
     <version.mongodb>3.9.1</version.mongodb>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
@@ -817,7 +818,11 @@
         <artifactId>smallrye-fault-tolerance</artifactId>
         <version>${version.smallrye-fault-tolerance}</version>
       </dependency>
-
+      <dependency>
+        <groupId>io.minio</groupId>
+        <artifactId>minio</artifactId>
+        <version>${version.minio}</version>
+      </dependency>
       <!-- TCP/IP -->
       <dependency>
         <groupId>org.jboss.xnio</groupId>

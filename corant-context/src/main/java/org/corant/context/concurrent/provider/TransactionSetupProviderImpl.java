@@ -18,6 +18,7 @@ import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.concurrent.ManagedTask;
+import javax.enterprise.inject.Instance;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -36,6 +37,13 @@ public class TransactionSetupProviderImpl implements TransactionSetupProvider {
   static final Logger logger = Logger.getLogger(TransactionSetupProviderImpl.class.getName());
   private static final long serialVersionUID = -4745961016107658962L;
   private transient TransactionManager transactionManager;
+
+  /**
+   * @param transactionManager
+   */
+  public TransactionSetupProviderImpl(Instance<Object> instance) {
+    transactionManager = instance.select(TransactionManager.class).get();
+  }
 
   /**
    * @param transactionManager

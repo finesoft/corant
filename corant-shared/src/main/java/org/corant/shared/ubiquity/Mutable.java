@@ -43,6 +43,10 @@ public interface Mutable<T> extends Supplier<T> {
     return this;
   }
 
+  default boolean isEmpty() {
+    return get() == null;
+  }
+
   default T orElse(T alt) {
     return defaultObject(get(), alt);
   }

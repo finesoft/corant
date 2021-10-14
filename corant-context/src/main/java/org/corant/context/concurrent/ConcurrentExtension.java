@@ -13,8 +13,10 @@
  */
 package org.corant.context.concurrent;
 
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Lists.newArrayList;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,8 +32,8 @@ import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.transaction.TransactionManager;
 import org.corant.config.Configs;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
 import org.corant.context.concurrent.executor.DefaultContextService;
@@ -42,6 +44,7 @@ import org.corant.context.concurrent.executor.ExecutorServiceManager;
 import org.corant.context.concurrent.provider.BlockingQueueProvider;
 import org.corant.context.concurrent.provider.ContextSetupProviderImpl;
 import org.corant.context.concurrent.provider.TransactionSetupProviderImpl;
+import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -75,6 +78,7 @@ public class ConcurrentExtension implements Extension {
       NamedQualifierObjectManager.empty();
   protected volatile NamedQualifierObjectManager<ContextServiceConfig> contextServiceConfigs =
       NamedQualifierObjectManager.empty();
+  protected volatile InitialContext jndi;
 
   public NamedQualifierObjectManager<ManagedExecutorConfig> getExecutorConfigs() {
     return executorConfigs;
@@ -100,6 +104,9 @@ public class ConcurrentExtension implements Extension {
               }
             });
         logger.info(() -> String.format("Resolved managed executor %s %s", cfg.getName(), cfg));
+        if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+          registerJndi(cfg.getName(), ManagedExecutorService.class, esn);
+        }
       });
 
       contextServiceConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
@@ -113,6 +120,9 @@ public class ConcurrentExtension implements Extension {
               }
             });
         logger.info(() -> String.format("Resolved context service %s %s", cfg.getName(), cfg));
+        if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+          registerJndi(cfg.getName(), ContextService.class, esn);
+        }
       });
 
       // TODO FIXME, since the ManagedScheduledExecutorService extends ManagedExecutorService
@@ -129,6 +139,9 @@ public class ConcurrentExtension implements Extension {
             });
         logger.info(
             () -> String.format("Resolved managed scheduled executor %s %s", cfg.getName(), cfg));
+        if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+          registerJndi(cfg.getName(), ManagedScheduledExecutorService.class, esn);
+        }
       });
     }
   }
@@ -165,23 +178,16 @@ public class ConcurrentExtension implements Extension {
 
   protected DefaultContextService produce(Instance<Object> instance, ContextServiceConfig cfg)
       throws NamingException {
-    TransactionManager tm = resolveTransactionManager(instance);
     logger.fine(() -> String.format("Create context service %s with %s.", cfg.getName(), cfg));
-    DefaultContextService service = new DefaultContextService(cfg.getName(),
-        new ContextSetupProviderImpl(cfg.getContextInfos().toArray(ContextInfo[]::new)),
-        new TransactionSetupProviderImpl(tm));
-    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
-      // TODO register to JNDI
-    }
-    return service;
+    return createContextService(cfg.getName(), instance,
+        cfg.getContextInfos().toArray(ContextInfo[]::new));
   }
 
   protected DefaultManagedExecutorService produce(Instance<Object> instance,
       ManagedExecutorConfig cfg) throws NamingException {
     DefaultManagedThreadFactory mtf = new DefaultManagedThreadFactory(cfg.getThreadName());
-    TransactionManager tm = resolveTransactionManager(instance);
-    DefaultContextService contextService = new DefaultContextService(cfg.getName(),
-        new ContextSetupProviderImpl(cfg.getContextInfos()), new TransactionSetupProviderImpl(tm));
+    DefaultContextService contextService =
+        createContextService(cfg.getName(), instance, cfg.getContextInfos());
     Instance<BlockingQueueProvider> ques =
         instance.select(BlockingQueueProvider.class, NamedLiteral.of(cfg.getName()));
     if (ques.isResolvable()) {
@@ -206,9 +212,8 @@ public class ConcurrentExtension implements Extension {
 
   protected DefaultManagedScheduledExecutorService produce(Instance<Object> instance,
       ManagedScheduledExecutorConfig cfg) throws NamingException {
-    DefaultContextService contextService = new DefaultContextService(cfg.getName(),
-        new ContextSetupProviderImpl(cfg.getContextInfos()),
-        new TransactionSetupProviderImpl(instance.select(TransactionManager.class).get()));
+    DefaultContextService contextService =
+        createContextService(cfg.getName(), instance, cfg.getContextInfos());
     logger.fine(() -> String.format("Create managed scheduled executor service %s with %s.",
         cfg.getName(), cfg));
     return new DefaultManagedScheduledExecutorService(cfg.getName(),
@@ -221,27 +226,38 @@ public class ConcurrentExtension implements Extension {
   protected ManagedExecutorServiceAdapter register(Instance<Object> instance,
       DefaultManagedExecutorService service, ManagedExecutorConfig cfg) {
     instance.select(ExecutorServiceManager.class).get().register(service);
-    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
-      // TODO register to JNDI
-    }
     return service.getAdapter();
   }
 
   protected ManagedScheduledExecutorServiceAdapter register(Instance<Object> instance,
       DefaultManagedScheduledExecutorService service, ManagedScheduledExecutorConfig cfg) {
     instance.select(ExecutorServiceManager.class).get().register(service);
-    if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
-      // TODO register to JNDI
-    }
     return service.getAdapter();
   }
 
-  protected TransactionManager resolveTransactionManager(Instance<Object> instance) {
-    Instance<TransactionManager> it;
-    if ((it = instance.select(TransactionManager.class)).isResolvable()) {
-      return it.get();
+  DefaultContextService createContextService(String name, Instance<Object> instance,
+      ContextInfo... infos) {
+    Class<?> tmCls = tryAsClass("javax.transaction.TransactionManager");
+    if (tmCls != null) {
+      return new DefaultContextService(name, new ContextSetupProviderImpl(infos),
+          new TransactionSetupProviderImpl(instance));
     }
-    return null;
+    return new DefaultContextService(name, new ContextSetupProviderImpl(infos));
   }
 
+  synchronized void registerJndi(String name, Class<?> clazz, Annotation... qualifiers) {
+    if (isNotBlank(name)) {
+      try {
+        if (jndi == null) {
+          jndi = new InitialContext();
+          jndi.createSubcontext(JNDI_SUBCTX_NAME);
+        }
+        String jndiName = JNDI_SUBCTX_NAME + "/" + name;
+        jndi.bind(jndiName, new NamingReference(clazz, qualifiers));
+        logger.fine(() -> String.format("Bind %s %s to jndi.", clazz.getName(), jndiName));
+      } catch (NamingException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
 }

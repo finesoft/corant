@@ -28,6 +28,10 @@ public class DefaultContextService extends ContextServiceImpl {
 
   private static final long serialVersionUID = -2380561596716132958L;
 
+  public DefaultContextService(String name, ContextSetupProvider contextSetupProvider) {
+    super(name, contextSetupProvider);
+  }
+
   /**
    * @param name
    * @param contextSetupProvider

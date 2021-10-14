@@ -16,6 +16,7 @@ package org.corant.modules.jta.shared;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Optional;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.transaction.InvalidTransactionException;
@@ -351,6 +352,33 @@ public abstract class TransactionalAction {
     Synchronization synchronization;
     Integer timeout;
     boolean rollbackOnly = false;
+
+    /**
+     * Register a consumer object for the transaction currently associated with the target object.
+     * After the transaction is completed, the transaction manager invokes the accept method of the
+     * consumer and pass the status of the transaction completion to it.
+     *
+     * @param consumer the given consumer
+     * @see Transaction#registerSynchronization(Synchronization)
+     * @see Synchronization#afterCompletion(int)
+     */
+    public TransactionalActuator afterCompletion(IntConsumer consumer) {
+      return synchronization(SynchronizationAdapter.afterCompletion(consumer));
+    }
+
+    /**
+     * Register a runnable object for the transaction currently associated with the target object.
+     * The transaction manager invokes the run method of the runnable prior to starting the
+     * two-phase transaction commit process.
+     *
+     * @param runnable the given runnable
+     *
+     * @see Transaction#registerSynchronization(Synchronization)
+     * @see Synchronization#beforeCompletion()
+     */
+    public TransactionalActuator beforeCompletion(Runnable runnable) {
+      return synchronization(SynchronizationAdapter.beforeCompletion(runnable));
+    }
 
     /**
      * Set the classes of exceptions that must not cause the transaction manager to mark the

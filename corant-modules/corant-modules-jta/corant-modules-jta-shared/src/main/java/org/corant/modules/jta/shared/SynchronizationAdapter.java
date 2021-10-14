@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jta.shared;
 
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import javax.transaction.Synchronization;
 
 /**
@@ -24,7 +24,7 @@ import javax.transaction.Synchronization;
  */
 public class SynchronizationAdapter implements Synchronization {
 
-  public static Synchronization afterCompletion(Consumer<Integer> consumer) {
+  public static Synchronization afterCompletion(IntConsumer consumer) {
     return new SynchronizationAdapter() {
       @Override
       public void afterCompletion(int status) {

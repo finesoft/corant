@@ -237,8 +237,7 @@ public class ConcurrentExtension implements Extension {
 
   DefaultContextService createContextService(String name, Instance<Object> instance,
       ContextInfo... infos) {
-    Class<?> tmCls = tryAsClass("javax.transaction.TransactionManager");
-    if (tmCls != null) {
+    if (tryAsClass("javax.transaction.TransactionManager") != null) {
       return new DefaultContextService(name, new ContextSetupProviderImpl(infos),
           new TransactionSetupProviderImpl(instance));
     }

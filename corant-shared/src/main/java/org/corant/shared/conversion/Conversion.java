@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -417,6 +418,19 @@ public class Conversion {
       Map<String, ?> hints) {
     if (value == null) {
       return null;
+    } else if (value instanceof Map) {
+      Map valueMap = (Map) value;
+      Map<K, V> map;
+      if (value instanceof LinkedHashMap) {
+        map = new LinkedHashMap<>(valueMap.size());
+      } else if (value instanceof TreeMap) {
+        map = new TreeMap<>();
+      } else {
+        map = new HashMap<>(valueMap.size());
+      }
+      valueMap
+          .forEach((k, v) -> map.put(convert(k, keyClass, hints), convert(v, valueClass, hints)));
+      return map;
     } else if (value instanceof Iterable) {
       Map<K, V> map = value instanceof List ? new LinkedHashMap<>() : new HashMap<>();
       Iterator<?> it = ((Iterable<?>) value).iterator();

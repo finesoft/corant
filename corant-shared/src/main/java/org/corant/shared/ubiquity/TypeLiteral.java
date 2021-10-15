@@ -16,6 +16,7 @@ package org.corant.shared.ubiquity;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -76,7 +77,7 @@ public abstract class TypeLiteral<T> {
     } else if (type instanceof GenericArrayType) {
       return (Class<T>) Object[].class;
     } else {
-      throw new RuntimeException("Illegal type");
+      throw new CorantRuntimeException("Illegal type");
     }
   }
 
@@ -87,11 +88,11 @@ public abstract class TypeLiteral<T> {
     if (actualType == null) {
       Class<?> typeLiteralSubclass = getTypeLiteralSubclass(this.getClass());
       if (typeLiteralSubclass == null) {
-        throw new RuntimeException(getClass() + " is not a subclass of TypeLiteral");
+        throw new CorantRuntimeException(getClass() + " is not a subclass of TypeLiteral");
       }
       actualType = getTypeParameter(typeLiteralSubclass);
       if (actualType == null) {
-        throw new RuntimeException(
+        throw new CorantRuntimeException(
             getClass() + " does not specify the type parameter T of TypeLiteral<T>");
       }
     }

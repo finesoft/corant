@@ -27,7 +27,9 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Conversions.toShort;
 import static org.corant.shared.util.Conversions.toTimeZone;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.linkedHashMapOf;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Sets.setOf;
 import static org.junit.Assert.assertArrayEquals;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
@@ -59,6 +62,7 @@ import org.corant.shared.resource.SourceType;
 import org.corant.shared.resource.TemporaryResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.junit.Test;
 import junit.framework.TestCase;
@@ -368,6 +372,17 @@ public class ConversionsTest extends TestCase {
     assertTrue(toShort(int_1).compareTo((short) 12) == 0);
     assertTrue(toShort(int_2).compareTo((short) 12) == 0);
     assertTrue(toShort(int_3).compareTo((short) -12) == 0);
+  }
+
+  @SuppressWarnings("rawtypes")
+  @Test
+  public void testTypeLiteral() {
+    Set<String> array = setOf("a", "1", "b", "2", "c");
+    Map<String, Integer> map = linkedHashMapOf("a", 1, "b", 2, "c");
+    assertEquals(toObject(array, new TypeLiteral<Map<String, Integer>>() {}), map);
+    array = setOf("java.lang.Integer", "java.lang.Double");
+    assertEquals(toObject(array, new TypeLiteral<Set<Class>>() {}),
+        setOf(Integer.class, Double.class));
   }
 
   public static class TTT extends TemporaryResource {

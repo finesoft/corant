@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.ConfigValue;
@@ -106,6 +107,12 @@ public class CorantConfig implements Config, Serializable {
         configConversion.convert(configSources.get().getValue(propertyName), propertyType)));
   }
 
+  public <T> Optional<T> getOptionalValue(String propertyName, TypeLiteral<T> propertyType) {
+    T value = forceCast(configConversion.convert(configSources.get().getValue(propertyName),
+        propertyType.getType()));
+    return Optional.ofNullable(value);
+  }
+
   @Override
   public <T> Optional<List<T>> getOptionalValues(String propertyName, Class<T> propertyType) {
     // TODO MP 2.0
@@ -125,6 +132,17 @@ public class CorantConfig implements Config, Serializable {
         propertyType.getName()));
     T value = forceCast(
         configConversion.convert(configSources.get().getValue(propertyName), propertyType));
+    if (value == null) {
+      throw new NoSuchElementException(
+          String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
+              propertyType, String.join(NEWLINE, getPropertyNames())));
+    }
+    return value;
+  }
+
+  public <T> T getValue(String propertyName, TypeLiteral<T> propertyType) {
+    T value = forceCast(configConversion.convert(configSources.get().getValue(propertyName),
+        propertyType.getType()));
     if (value == null) {
       throw new NoSuchElementException(
           String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,

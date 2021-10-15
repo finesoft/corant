@@ -16,17 +16,31 @@ package org.corant.shared.conversion;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.tryCast;
 import static org.corant.shared.util.Primitives.wrap;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.TypeLiteral;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
 
 /**
@@ -270,6 +284,35 @@ public class Conversion {
   }
 
   /**
+   * Convert the given object to the target type object, use the given type literal.
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map, etc. are supported,
+   * and the type parameter must be a concrete type.
+   *
+   * @param <T> the target type, including all actual type parameters
+   * @param value the source object
+   * @param typeLiteral the type literal
+   */
+  public static <T> T convert(Object value, TypeLiteral<T> typeLiteral) {
+    return forceCast(convertType(value, typeLiteral.getType(), null));
+  }
+
+  /**
+   * Convert the given object to the target type object, use the given type literal and hints. *
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map, etc. are supported,
+   * and the type parameter must be a concrete type.
+   *
+   * @param <T> the target type, including all actual type parameters
+   * @param value the source object
+   * @param typeLiteral the type literal
+   * @param hints the conversion hints
+   */
+  public static <T> T convert(Object value, TypeLiteral<T> typeLiteral, Map<String, ?> hints) {
+    return forceCast(convertType(value, typeLiteral.getType(), hints));
+  }
+
+  /**
    * Convert an array value to target array
    *
    * @param <T> the target class of element of the array
@@ -319,6 +362,161 @@ public class Conversion {
   }
 
   /**
+   * Convert an object to target class object array with hints
+   *
+   * @param <S> the source value object class
+   * @param <T> the target class
+   * @param value the value to convert
+   * @param targetClass the target class that convert to
+   * @param hints the converter hints use for intervening converters
+   * @return the converted object
+   */
+  public static <T> T[] convertArray(Object obj, Class<T> elementClazz, Map<String, ?> hints) {
+    if (obj == null) {
+      return (T[]) Array.newInstance(elementClazz, 0);
+    } else if (obj instanceof Object[]) {
+      Object[] arrayObj = (Object[]) obj;
+      int length = arrayObj.length;
+      Object array = Array.newInstance(elementClazz, length);
+      for (int i = 0; i < length; i++) {
+        Array.set(array, i, convert(arrayObj[i], elementClazz, hints));
+      }
+      return forceCast(array);
+    } else if (obj.getClass().isArray()) {
+      int length = Array.getLength(obj);
+      Object array = Array.newInstance(elementClazz, length);
+      for (int i = 0; i < length; i++) {
+        Array.set(array, i, convert(Array.get(obj, i), elementClazz, hints));
+      }
+      return forceCast(array);
+    } else if (obj instanceof Collection) {
+      Collection<?> collObj = (Collection<?>) obj;
+      int length = collObj.size();
+      Object array = Array.newInstance(elementClazz, length);
+      int i = 0;
+      for (Object e : collObj) {
+        Array.set(array, i, convert(e, elementClazz, hints));
+        i++;
+      }
+      return forceCast(array);
+    }
+    throw new NotSupportedException("Only support Collection and Array as source");
+  }
+
+  /**
+   * Convert an object to {@link Map}
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param value the source object
+   * @param keyClass the key class
+   * @param valueClass the value class
+   * @param hints the conversion hints
+   */
+  public static <K, V> Map<K, V> convertMap(Object value, Class<K> keyClass, Class<V> valueClass,
+      Map<String, ?> hints) {
+    if (value == null) {
+      return null;
+    } else if (value instanceof Iterable) {
+      Map<K, V> map = value instanceof List ? new LinkedHashMap<>() : new HashMap<>();
+      Iterator<?> it = ((Iterable<?>) value).iterator();
+      while (it.hasNext()) {
+        K key = convert(it.next(), keyClass, hints);
+        V val = null;
+        if (it.hasNext()) {
+          val = convert(it.next(), valueClass, hints);
+        }
+        map.put(key, val);
+      }
+      return map;
+    } else if (value.getClass().isArray()) {
+      int oLen = Array.getLength(value);
+      int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
+      int size = (rLen >> 1) + 1;
+      Map<K, V> map = new LinkedHashMap<>(size);
+      for (int i = 0; i < rLen; i += 2) {
+        map.put(convert(Array.get(value, i), keyClass, hints),
+            convert(Array.get(value, i + 1), valueClass, hints));
+      }
+      if (rLen < oLen) {
+        map.put(convert(Array.get(value, rLen), keyClass, hints), null);
+      }
+      return map;
+    }
+    throw new IllegalArgumentException("Cannot type for Map<" + keyClass + "," + valueClass + ">");
+  }
+
+  /**
+   * Convert the given object to the given target type. Note: If the target type is generic, only
+   * List/Set/Supplier/Optional/Map, etc. are supported, and the type parameter must be a concrete
+   * type.
+   *
+   * @param value the source object
+   * @param targetType the target type
+   * @param hints the conversion hints
+   */
+  static Object convertType(Object value, Type targetType, Map<String, ?> hints) {
+    Object result = null;
+    if (value != null) {
+      final Class<?> typeClass;
+      final Class[] argClasses;
+      if (targetType instanceof Class) {
+        typeClass = forceCast(targetType);
+        argClasses = Classes.EMPTY_ARRAY;
+      } else if (targetType instanceof ParameterizedType) {
+        typeClass = forceCast(((ParameterizedType) targetType).getRawType());
+        Type[] argTypes = ((ParameterizedType) targetType).getActualTypeArguments();
+        argClasses = new Class[argTypes.length];
+        for (int i = 0; i < argTypes.length; i++) {
+          if (!(argTypes[i] instanceof Class)) {
+            throw new IllegalArgumentException("Cannot convert for type" + targetType
+                + ", the parameterized type must be a concrete type");
+          }
+          argClasses[i] = (Class<?>) argTypes[i];
+        }
+      } else {
+        throw new IllegalArgumentException("Cannot convert for type" + targetType);
+      }
+
+      try {
+        if (typeClass.isArray()) {
+          if (argClasses.length == 0) {
+            result = convertArray(value, typeClass.getComponentType(), hints);
+          } else {
+            throw new IllegalArgumentException(
+                "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + "[]>");
+          }
+        } else {
+          if (List.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+            result = convert(value, argClasses[0], ArrayList::new, hints);
+          } else if (Set.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+            result = convert(value, argClasses[0], HashSet::new, hints);
+          } else if (Optional.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+            result = Optional.ofNullable(convert(value, argClasses[0]));
+          } else if (Supplier.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+            result = (Supplier<?>) () -> convert(value, argClasses[0]);
+          } else if (Map.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
+            result = convertMap(value, argClasses[0], argClasses[1], hints);
+          } else {
+            if (argClasses.length == 0) {
+              result = convert(value, typeClass, hints);
+            } else {
+              throw new IllegalArgumentException(
+                  "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + ">");
+            }
+          }
+        }
+      } catch (IllegalArgumentException e) {
+        throw e;
+      } catch (RuntimeException e) {
+        throw new IllegalArgumentException(
+            String.format("Cannot convert value %s with type %s.", value, targetType), e);
+      }
+    }
+    return result;
+  }
+
+  /**
    * Use source class and target class to find out the right converter
    *
    * @param sourceClass the source object class
@@ -327,5 +525,4 @@ public class Conversion {
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass) {
     return Converters.lookup(wrap(sourceClass), wrap(targetClass)).orElse(null);
   }
-
 }

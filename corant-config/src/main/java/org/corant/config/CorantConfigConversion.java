@@ -33,6 +33,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,6 +73,7 @@ public class CorantConfigConversion implements Serializable {
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
   private static final long serialVersionUID = -2708805756022227289L;
+  private static Type[] objectClasses = new Type[] {Object.class};
   static {
     // FIXME 6.1. Built-in Converters
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
@@ -140,16 +142,16 @@ public class CorantConfigConversion implements Serializable {
     Object result = null;
     if (isNotEmpty(rawValue)) {
       final Class<?> typeClass;
-      final Type argType;
+      final Type[] argTypes;
       final boolean parameterized;
       if (type instanceof Class) {
         parameterized = false;
         typeClass = forceCast(type);
-        argType = Object.class;
+        argTypes = objectClasses;
       } else if (type instanceof ParameterizedType) {
         parameterized = true;
         typeClass = forceCast(((ParameterizedType) type).getRawType());
-        argType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        argTypes = ((ParameterizedType) type).getActualTypeArguments();
       } else {
         throw new IllegalArgumentException("Cannot support config property for " + type);
       }
@@ -159,31 +161,31 @@ public class CorantConfigConversion implements Serializable {
           if (!parameterized) {
             result = convertArray(rawValue, typeClass.getComponentType());
           } else {
-            throw new IllegalArgumentException(
-                "Cannot convert config property for type " + typeClass + "<" + argType + "[]>");
+            throw new IllegalArgumentException("Cannot convert config property for type "
+                + typeClass + "<" + Arrays.toString(argTypes) + ">");
           }
         } else {
           if (Class.class.isAssignableFrom(typeClass)) {
             result = convertSingle(rawValue, Class.class);
-          } else if (List.class.isAssignableFrom(typeClass)) {
-            result = convertCollection(rawValue, argType, ArrayList::new);
-          } else if (Set.class.isAssignableFrom(typeClass)) {
-            result = convertCollection(rawValue, argType, HashSet::new);
-          } else if (Optional.class.isAssignableFrom(typeClass)) {
-            result = Optional.ofNullable(convert(rawValue, argType));
-          } else if (Supplier.class.isAssignableFrom(typeClass)) {
-            result = (Supplier<?>) () -> convert(rawValue, argType);
-          } else if (Provider.class.isAssignableFrom(typeClass)) {
-            result = (Provider<?>) () -> convert(rawValue, argType);
+          } else if (List.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+            result = convertCollection(rawValue, argTypes[0], ArrayList::new);
+          } else if (Set.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+            result = convertCollection(rawValue, argTypes[0], HashSet::new);
+          } else if (Optional.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+            result = Optional.ofNullable(convert(rawValue, argTypes[0]));
+          } else if (Supplier.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+            result = (Supplier<?>) () -> convert(rawValue, argTypes[0]);
+          } else if (Provider.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+            result = (Provider<?>) () -> convert(rawValue, argTypes[0]);
           } else if (Map.class.isAssignableFrom(typeClass)) {
             result = parameterized ? convertMap(rawValue, (ParameterizedType) type)
-                : convertMap(rawValue, (Class<?>) argType, (Class<?>) argType);
+                : convertMap(rawValue, (Class<?>) argTypes[0], (Class<?>) argTypes[1]);
           } else {
             if (!parameterized) {
               result = convertSingle(rawValue, typeClass);
             } else {
               throw new IllegalArgumentException(
-                  "Cannot convert config property for type " + typeClass + "<" + argType + ">");
+                  "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
             }
           }
         }

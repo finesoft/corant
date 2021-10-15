@@ -31,6 +31,7 @@ import org.corant.config.declarative.ConfigMetaClass;
 import org.corant.config.declarative.ConfigMetaResolver;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
@@ -123,6 +124,36 @@ public class Configs {
   public static <T> T getValue(String propertyName, Class<T> propertyType, T nvl) {
     Optional<T> op = ConfigProvider.getConfig().getOptionalValue(propertyName, propertyType);
     return op.orElse(nvl);
+  }
+
+  /**
+   * Get the configuration property from the {@link ConfigProvider} of Microprofile-config, if the
+   * property doesn't exist return null.
+   *
+   * @param <T> the property type
+   * @param propertyName the property name
+   * @param propertyTypeLiteral the property type literal
+   * @see ConfigProvider
+   * @see CorantConfig
+   */
+  public static <T> T getValue(String propertyName, TypeLiteral<T> propertyTypeLiteral) {
+    return getValue(propertyName, propertyTypeLiteral, null);
+  }
+
+  /**
+   * Get the configuration property from the {@link ConfigProvider} of Microprofile-config, if the
+   * property doesn't exist return the given alternative {@code nvl} property value.
+   *
+   * @param <T> the property type
+   * @param propertyName the property name
+   * @param propertyTypeLiteral the property type literal
+   * @param nvl the given alternative property value, if expected property doesn't exist
+   * @see ConfigProvider
+   * @see CorantConfig
+   */
+  public static <T> T getValue(String propertyName, TypeLiteral<T> propertyTypeLiteral, T nvl) {
+    return ((CorantConfig) ConfigProvider.getConfig())
+        .getOptionalValue(propertyName, propertyTypeLiteral).orElse(nvl);
   }
 
   /**

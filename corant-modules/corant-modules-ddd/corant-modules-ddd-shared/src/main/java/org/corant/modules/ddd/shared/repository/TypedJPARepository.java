@@ -13,7 +13,6 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
-import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -28,7 +27,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import org.corant.context.qualifier.AutoCreated;
@@ -294,85 +292,11 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    *
    */
   public static class TypedJPARepositoryTemplate<T extends Entity>
-      implements TypedJPARepository<T> {
+      extends AbstractTypedJPARepository<T> {
 
-    private final Class<T> entityClass;
-    private final PersistenceContext context;
-
-    protected TypedJPARepositoryTemplate(Class<T> entityClass) {
-      this.entityClass = entityClass;
-      this.context = resolve(EntityManagers.class).getPersistenceContext(entityClass);
+    public TypedJPARepositoryTemplate(Class<T> entityClass) {
+      super(entityClass);
     }
 
-    @Override
-    public void evictCache() {
-      Cache cache = getEntityManager().getEntityManagerFactory().getCache();
-      if (cache != null) {
-        cache.evict(entityClass);
-      }
-    }
-
-    @Override
-    public void evictCache(Serializable id) {
-      Cache cache = getEntityManager().getEntityManagerFactory().getCache();
-      if (cache != null) {
-        cache.evict(entityClass, id);
-      }
-    }
-
-    @Override
-    public T get(Serializable id) {
-      return id != null ? getEntityManager().find(entityClass, id) : null;
-    }
-
-    @Override
-    public T get(Serializable id, LockModeType lockMode) {
-      return id != null ? getEntityManager().find(entityClass, id, lockMode) : null;
-    }
-
-    @Override
-    public T get(Serializable id, LockModeType lockMode, Map<String, Object> properties) {
-      return id != null ? getEntityManager().find(entityClass, id, lockMode, properties) : null;
-    }
-
-    @Override
-    public T get(Serializable id, Map<String, Object> properties) {
-      return id != null ? getEntityManager().find(entityClass, id, properties) : null;
-    }
-
-    @Override
-    public EntityManager getEntityManager() {
-      return resolve(EntityManagers.class).getEntityManager(context);
-    }
-
-    @Override
-    public TypedJPAQuery<T> namedQuery(String name) {
-      return JPAQueries.namedQuery(name, entityClass).entityManager(this::getEntityManager);
-    }
-
-    @Override
-    public <X> TypedJPAQuery<X> namedQuery(String name, Class<X> type) {
-      return JPAQueries.namedQuery(name, type).entityManager(this::getEntityManager);
-    }
-
-    @Override
-    public TypedJPAQuery<T> nativeQuery(String sqlString) {
-      return JPAQueries.nativeQuery(sqlString, entityClass).entityManager(this::getEntityManager);
-    }
-
-    @Override
-    public <X> TypedJPAQuery<X> nativeQuery(String sqlString, Class<X> type) {
-      return JPAQueries.nativeQuery(sqlString, type).entityManager(this::getEntityManager);
-    }
-
-    @Override
-    public TypedJPAQuery<T> query(String qlString) {
-      return JPAQueries.query(qlString, entityClass).entityManager(this::getEntityManager);
-    }
-
-    @Override
-    public <X> TypedJPAQuery<X> query(String qlString, Class<X> type) {
-      return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
-    }
   }
 }

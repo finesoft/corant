@@ -25,6 +25,7 @@ public interface GlobalMessageCodes {
   String ERR_OP_NON_SUP = "global.operation_not_support_error";
   String ERR_OBJ_SEL = "global.object.serialize_error";
   String ERR_OBJ_NON_FUD = "global.object_not_found_error";
+  String ERR_OBJ_CONSTRUCT = "global.object_construct_error";
   String ERR_CTX = "global.context_error";
 
   String INF_OP_SUS = "global.operation_success";

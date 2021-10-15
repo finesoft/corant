@@ -18,7 +18,6 @@ import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -50,6 +49,7 @@ import org.corant.shared.conversion.converter.NumberBigIntegerConverter;
 import org.corant.shared.conversion.converter.StringBigDecimalConverter;
 import org.corant.shared.conversion.converter.StringBigIntegerConverter;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-shared
@@ -82,28 +82,7 @@ public class Conversions {
    * @param hints the convert hints
    */
   public static <T> T[] toArray(Object obj, Class<T> elementClazz, Map<String, ?> hints) {
-    if (obj == null) {
-      return null;
-    } else if (obj instanceof Object[]) {
-      Object[] arrayObj = (Object[]) obj;
-      int length = arrayObj.length;
-      Object array = Array.newInstance(elementClazz, length);
-      for (int i = 0; i < length; i++) {
-        Array.set(array, i, forceCast(toObject(arrayObj[i], elementClazz, hints)));
-      }
-      return forceCast(array);
-    } else if (obj instanceof Collection) {
-      Collection<?> collObj = (Collection<?>) obj;
-      int length = collObj.size();
-      Object array = Array.newInstance(elementClazz, length);
-      int i = 0;
-      for (Object e : collObj) {
-        Array.set(array, i, forceCast(toObject(e, elementClazz, hints)));
-        i++;
-      }
-      return forceCast(array);
-    }
-    throw new NotSupportedException("Only support Collection and Array as source");
+    return Conversion.convertArray(obj, elementClazz, hints);
   }
 
   /**
@@ -561,6 +540,22 @@ public class Conversions {
 
   public static Object toObject(Object obj, String className) {
     return toObject(obj, asClass(className));
+  }
+
+  public static <T> T toObject(Object obj, TypeLiteral<T> typeLiteral) {
+    return Conversion.convert(obj, typeLiteral);
+  }
+
+  /**
+   * Convert the given object to the target type object, use the given type literal and hints.
+   *
+   * @param <T> the target type, including all actual type parameters
+   * @param value the source object
+   * @param typeLiteral the type literal
+   * @param hints the conversion hints
+   */
+  public static <T> T toObject(Object obj, TypeLiteral<T> typeLiteral, Map<String, ?> hints) {
+    return Conversion.convert(obj, typeLiteral, hints);
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz) {

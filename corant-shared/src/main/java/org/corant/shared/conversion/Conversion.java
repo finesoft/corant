@@ -419,17 +419,16 @@ public class Conversion {
     if (value == null) {
       return null;
     } else if (value instanceof Map) {
-      Map valueMap = (Map) value;
+      Map vm = (Map) value;
       Map<K, V> map;
       if (value instanceof LinkedHashMap) {
-        map = new LinkedHashMap<>(valueMap.size());
+        map = new LinkedHashMap<>(vm.size());
       } else if (value instanceof TreeMap) {
         map = new TreeMap<>();
       } else {
-        map = new HashMap<>(valueMap.size());
+        map = new HashMap<>(vm.size());
       }
-      valueMap
-          .forEach((k, v) -> map.put(convert(k, keyClass, hints), convert(v, valueClass, hints)));
+      vm.forEach((k, v) -> map.put(convert(k, keyClass, hints), convert(v, valueClass, hints)));
       return map;
     } else if (value instanceof Iterable) {
       Map<K, V> map = value instanceof List ? new LinkedHashMap<>() : new HashMap<>();

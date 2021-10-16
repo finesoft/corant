@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -73,9 +72,8 @@ public class Conversion {
       return null;
     }
     C collection = collectionFactory.apply(value.size());
-    Iterator<T> it = convert(value, targetItemClass, hints).iterator();
-    while (it.hasNext()) {
-      collection.add(it.next());
+    for (T t : convert(value, targetItemClass, hints)) {
+      collection.add(t);
     }
     return collection;
   }
@@ -328,9 +326,8 @@ public class Conversion {
     }
     T[] array = arrayFactory.apply(value.length);
     int i = 0;
-    Iterator<T> it = convert(iterableOf(value), targetItemClass, hints).iterator();
-    while (it.hasNext()) {
-      array[i] = it.next();
+    for (T t : convert(iterableOf(value), targetItemClass, hints)) {
+      array[i] = t;
       i++;
     }
     return array;
@@ -353,9 +350,8 @@ public class Conversion {
       return null;
     }
     C collection = collectionFactory.apply(value.length);
-    Iterator<T> it = convert(iterableOf(value), targetItemClass, hints).iterator();
-    while (it.hasNext()) {
-      collection.add(it.next());
+    for (T t : convert(iterableOf(value), targetItemClass, hints)) {
+      collection.add(t);
     }
     return collection;
   }
@@ -363,31 +359,30 @@ public class Conversion {
   /**
    * Convert an object to target class object array with hints
    *
-   * @param <S> the source value object class
    * @param <T> the target class
    * @param value the value to convert
    * @param targetClass the target class that convert to
    * @param hints the converter hints use for intervening converters
    * @return the converted object
    */
-  public static <T> T[] convertArray(Object value, Class<T> elementClazz, Map<String, ?> hints) {
+  public static <T> T[] convertArray(Object value, Class<T> targetClass, Map<String, ?> hints) {
     if (value == null) {
-      return (T[]) Array.newInstance(elementClazz, 0);
+      return (T[]) Array.newInstance(targetClass, 0);
     } else if (value.getClass().isArray()) {
       Object[] array = wrapArray(value);
       int length = array.length;
-      T[] result = (T[]) Array.newInstance(elementClazz, length);
+      T[] result = (T[]) Array.newInstance(targetClass, length);
       for (int i = 0; i < length; i++) {
-        result[i] = convert(array[i], elementClazz, hints);
+        result[i] = convert(array[i], targetClass, hints);
       }
       return forceCast(result);
     } else if (value instanceof Collection) {
       Collection<?> collection = (Collection<?>) value;
       int length = collection.size();
-      T[] result = (T[]) Array.newInstance(elementClazz, length);
+      T[] result = (T[]) Array.newInstance(targetClass, length);
       int i = 0;
       for (Object e : collection) {
-        result[i] = convert(e, elementClazz, hints);
+        result[i] = convert(e, targetClass, hints);
         i++;
       }
       return forceCast(result);
@@ -414,8 +409,6 @@ public class Conversion {
       Map<K, V> map;
       if (value instanceof LinkedHashMap) {
         map = new LinkedHashMap<>(vm.size());
-      } else if (value instanceof TreeMap) {
-        map = new TreeMap<>();
       } else {
         map = new HashMap<>(vm.size());
       }

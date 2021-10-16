@@ -20,6 +20,7 @@ import static org.corant.shared.util.Conversions.toSet;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Strings.split;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -297,8 +298,8 @@ public class Maps {
     Object obj = map == null ? null : map.get(key);
     if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
-    } else if (obj instanceof Object[]) {
-      return Conversion.convert((Object[]) obj, collectionFactory, elementClazz, hints);
+    } else if (obj != null && obj.getClass().isArray()) {
+      return Conversion.convert(wrapArray(obj), collectionFactory, elementClazz, hints);
     } else if (obj != null) {
       return Conversion.convert(obj, elementClazz, collectionFactory, hints);
     } else {
@@ -1056,9 +1057,9 @@ public class Maps {
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
-    } else if (val instanceof Object[]) {
+    } else if (val != null && val.getClass().isArray()) {
       int idx = 0;
-      Object[] vals = (Object[]) val;
+      Object[] vals = wrapArray(val);
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
@@ -1089,8 +1090,8 @@ public class Maps {
               throw new NotSupportedException("We only support implants for a map object!");
             }
           }
-        } else if (next instanceof Object[]) {
-          for (Object item : (Object[]) next) {
+        } else if (next != null && next.getClass().isArray()) {
+          for (Object item : wrapArray(next)) {
             if (item instanceof Map) {
               implantMapValue((Map) item, paths, nextDeep, value);
             } else if (item != null) {
@@ -1131,8 +1132,8 @@ public class Maps {
          * = it.next(); if (next != null) { iterateMapValue(next, keyPath, deep, flat, remove,
          * holder); } if (removed && isEmptyOrNull(next)) { it.remove(); } }
          */
-      } else if (value instanceof Object[]) {
-        for (Object next : (Object[]) value) {
+      } else if (value.getClass().isArray()) {
+        for (Object next : wrapArray(value)) {
           if (next != null) {
             iterateMapValue(next, keyPath, deep, flat, remove, holder);
           }

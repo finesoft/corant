@@ -173,7 +173,7 @@ public class JsonWebTokens {
             c.setJwtId(shouldNotNull(v).toString());
           } else if (v instanceof Collection) {
             c.setStringListClaim(k, toList(v, String.class));
-          } else if (v instanceof Object[]) {
+          } else if (v != null && v.getClass().isArray()) {
             c.setStringListClaim(k, toArray(v, String.class));
           } else if (v instanceof String) {
             c.setStringClaim(k, (String) v);

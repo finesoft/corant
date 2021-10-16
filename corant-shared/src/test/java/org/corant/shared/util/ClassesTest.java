@@ -13,11 +13,13 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Set;
+import org.corant.shared.conversion.Conversion;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -28,6 +30,33 @@ import junit.framework.TestCase;
  *
  */
 public class ClassesTest extends TestCase {
+
+  public static void main(String... args) {
+    int[] ee = null;
+    int[] inta = new int[] {1, 2, 3, 4};
+    Object x = inta;
+    final String[] arr = new String[0];
+    Object[] objsss = new Object[] {"123"};
+    Object objsss1 = new Object[] {"123"};
+    System.out.println(inta.getClass().isArray());
+    System.out.println(arr.getClass().isArray());
+    System.out.println(x.getClass().isArray());
+    System.out.println(objsss.getClass().isArray());
+    System.out.println(objsss1.getClass().isArray());
+    System.out.println("===============================");
+    System.out.println(x instanceof Object[]);
+    System.out.println("===============================");
+    Object[] intaw = wrapArray(inta);
+    for (Object obj : intaw) {
+      System.out.print(obj + ",");
+    }
+    System.out.println(ee);
+    System.out.println("===============================");
+    String[] ints = Conversion.convertArray(intaw, String.class, null);
+    for (String obj : ints) {
+      System.out.print(obj + ",");
+    }
+  }
 
   @Test
   public void testGetAllSuperClasses() {

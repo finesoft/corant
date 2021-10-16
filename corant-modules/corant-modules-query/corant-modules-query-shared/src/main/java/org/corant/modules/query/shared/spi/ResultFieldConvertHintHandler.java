@@ -17,6 +17,7 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNoneBlank;
@@ -142,11 +143,6 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
   }
 
-  @Override
-  public boolean supports(Class<?> resultClass, QueryHint hint) {
-    return conversionService != null && hint != null && areEqual(hint.getKey(), HINT_NAME);
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
@@ -180,6 +176,11 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
   }
 
+  @Override
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
+    return conversionService != null && hint != null && areEqual(hint.getKey(), HINT_NAME);
+  }
+
   protected void handle(Map<Object, Object> map, String[] keyPath, Class<?> targetClass,
       Object[] convertHits) {
     convertMapValue(map, keyPath, orginalVal -> {
@@ -190,8 +191,9 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
           } else if (orginalVal instanceof Set) {
             return conversionService.convert(orginalVal, targetClass, LinkedHashSet::new,
                 convertHits);
-          } else if (orginalVal instanceof Object[]) {
-            return conversionService.convert(orginalVal, targetClass, ArrayList::new, convertHits);
+          } else if (orginalVal.getClass().isArray()) {
+            return conversionService.convert(wrapArray(orginalVal), targetClass, ArrayList::new,
+                convertHits);
           } else {
             return conversionService.convert(orginalVal, targetClass, convertHits);
           }

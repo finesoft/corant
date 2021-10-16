@@ -15,10 +15,10 @@ package org.corant.modules.query.sql;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.substring;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -145,14 +145,9 @@ public class SqlStatements {
         for (Object obj : (Collection<?>) parameter) {
           params.add(obj);
         }
-      } else if (parameter instanceof Object[]) {
-        for (Object obj : (Object[]) parameter) {
-          params.add(obj);
-        }
       } else if (parameter != null && parameter.getClass().isArray()) {
-        int length = Array.getLength(parameter);
-        for (int i = 0; i < length; i++) {
-          params.add(Array.get(parameter, i));
+        for (Object obj : wrapArray(parameter)) {
+          params.add(obj);
         }
       } else {
         params.add(parameter);

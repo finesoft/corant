@@ -15,7 +15,7 @@ package org.corant.shared.conversion.converter.factory;
 
 import static org.corant.shared.util.Lists.immutableListOf;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Primitives.unboxing;
+import static org.corant.shared.util.Primitives.unwrap;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
@@ -37,7 +37,7 @@ import org.corant.shared.conversion.ConverterFactory;
  */
 public class ObjectPrimitiveArrayConverterFactories {
 
-  public static List<ObjectPrimitiveArrayConverterFactory<Object, ?>> FACTORIES =
+  public static final List<ObjectPrimitiveArrayConverterFactory<Object, ?>> FACTORIES =
   //@formatter:off
       immutableListOf(
         new ObjectBooleanArrayConverterFactory(),
@@ -94,7 +94,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, boolean[]> create(Class<boolean[]> targetClass, boolean[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Boolean.class, h));
+      return (s, h) -> unwrap(convert(s, Boolean.class, h));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, byte[]> create(Class<byte[]> targetClass, byte[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Byte.class, h));
+      return (s, h) -> unwrap(convert(s, Byte.class, h));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, double[]> create(Class<double[]> targetClass, double[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Double.class, h));
+      return (s, h) -> unwrap(convert(s, Double.class, h));
     }
 
     @Override
@@ -142,7 +142,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, float[]> create(Class<float[]> targetClass, float[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Float.class, h));
+      return (s, h) -> unwrap(convert(s, Float.class, h));
     }
 
     @Override
@@ -158,7 +158,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, int[]> create(Class<int[]> targetClass, int[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Integer.class, h));
+      return (s, h) -> unwrap(convert(s, Integer.class, h));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, long[]> create(Class<long[]> targetClass, long[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Long.class, h));
+      return (s, h) -> unwrap(convert(s, Long.class, h));
     }
 
     @Override
@@ -198,7 +198,7 @@ public class ObjectPrimitiveArrayConverterFactories {
     @Override
     public Converter<Object, short[]> create(Class<short[]> targetClass, short[] defaultValue,
         boolean throwException) {
-      return (s, h) -> unboxing(convert(s, Short.class, h));
+      return (s, h) -> unwrap(convert(s, Short.class, h));
     }
 
     @Override

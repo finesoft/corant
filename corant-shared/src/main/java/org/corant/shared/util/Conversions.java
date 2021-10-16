@@ -17,6 +17,7 @@ import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Streams.streamOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -385,8 +386,8 @@ public class Conversions {
       return null;
     } else if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
-    } else if (obj instanceof Object[]) {
-      return Conversion.convert((Object[]) obj, ArrayList::new, clazz, hints);
+    } else if (obj.getClass().isArray()) {
+      return Conversion.convert(wrapArray(obj), ArrayList::new, clazz, hints);
     }
     return Conversion.convert(obj, clazz, ArrayList::new, hints);// FIXME weird
   }
@@ -396,8 +397,8 @@ public class Conversions {
       return null;
     } else if (obj instanceof Iterable<?>) {
       return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toList());
-    } else if (obj instanceof Object[]) {
-      return streamOf((Object[]) obj).map(convert).collect(Collectors.toList());
+    } else if (obj.getClass().isArray()) {
+      return streamOf(wrapArray(obj)).map(convert).collect(Collectors.toList());
     }
     throw new NotSupportedException("Only support Iterable or Array");
   }
@@ -567,8 +568,8 @@ public class Conversions {
       return null;
     } else if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, HashSet::new, clazz, hints);
-    } else if (obj instanceof Object[]) {
-      return Conversion.convert((Object[]) obj, HashSet::new, clazz, hints);
+    } else if (obj.getClass().isArray()) {
+      return Conversion.convert(wrapArray(obj), HashSet::new, clazz, hints);
     }
     return Conversion.convert(obj, clazz, HashSet::new, hints);// FIXME weird
   }
@@ -578,8 +579,8 @@ public class Conversions {
       return null;
     } else if (obj instanceof Iterable<?>) {
       return streamOf((Iterable<?>) obj).map(convert).collect(Collectors.toSet());
-    } else if (obj instanceof Object[]) {
-      return streamOf((Object[]) obj).map(convert).collect(Collectors.toSet());
+    } else if (obj.getClass().isArray()) {
+      return streamOf(wrapArray(obj)).map(convert).collect(Collectors.toSet());
     }
     throw new NotSupportedException("Only support Iterable and Array");
   }

@@ -19,8 +19,8 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Strings.NULL;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -219,8 +219,9 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       }
     } else if (obj != null && obj.getClass().isArray()) {
       simple = 2;
-      if (Array.getLength(obj) > 0) {
-        for (Object o : (Object[]) obj) {
+      Object[] arrayObj = wrapArray(obj);
+      if (arrayObj.length > 0) {
+        for (Object o : arrayObj) {
           if (o != null && !isSimpleType(o.getClass())) {
             simple = -1;
           }

@@ -19,6 +19,7 @@ import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.tryCast;
 import static org.corant.shared.util.Primitives.wrap;
+import static org.corant.shared.util.Primitives.wrapArray;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -231,12 +232,9 @@ public class Conversion {
       it = convert(iterableOf((Enumeration) value), targetItemClass, hints);
     } else if (value != null) {
       if (value.getClass().isArray()) {
-        size = Array.getLength(value);
-        Object[] array = new Object[size];
-        for (int i = 0; i < size; i++) {
-          array[i] = Array.get(value, i);
-        }
-        it = convert(iterableOf(array), targetItemClass, hints);
+        Object[] array = wrapArray(value);
+        size = array.length;
+        it = convert(iterableOf(wrapArray(array)), targetItemClass, hints);
       } else {
         it = convert(iterableOf(value), targetItemClass, hints);
       }
@@ -372,34 +370,27 @@ public class Conversion {
    * @param hints the converter hints use for intervening converters
    * @return the converted object
    */
-  public static <T> T[] convertArray(Object obj, Class<T> elementClazz, Map<String, ?> hints) {
-    if (obj == null) {
+  public static <T> T[] convertArray(Object value, Class<T> elementClazz, Map<String, ?> hints) {
+    if (value == null) {
       return (T[]) Array.newInstance(elementClazz, 0);
-    } else if (obj instanceof Object[]) {
-      Object[] arrayObj = (Object[]) obj;
-      int length = arrayObj.length;
-      Object array = Array.newInstance(elementClazz, length);
+    } else if (value.getClass().isArray()) {
+      Object[] array = wrapArray(value);
+      int length = array.length;
+      T[] result = (T[]) Array.newInstance(elementClazz, length);
       for (int i = 0; i < length; i++) {
-        Array.set(array, i, convert(arrayObj[i], elementClazz, hints));
+        result[i] = convert(array[i], elementClazz, hints);
       }
-      return forceCast(array);
-    } else if (obj.getClass().isArray()) {
-      int length = Array.getLength(obj);
-      Object array = Array.newInstance(elementClazz, length);
-      for (int i = 0; i < length; i++) {
-        Array.set(array, i, convert(Array.get(obj, i), elementClazz, hints));
-      }
-      return forceCast(array);
-    } else if (obj instanceof Collection) {
-      Collection<?> collObj = (Collection<?>) obj;
-      int length = collObj.size();
-      Object array = Array.newInstance(elementClazz, length);
+      return forceCast(result);
+    } else if (value instanceof Collection) {
+      Collection<?> collection = (Collection<?>) value;
+      int length = collection.size();
+      T[] result = (T[]) Array.newInstance(elementClazz, length);
       int i = 0;
-      for (Object e : collObj) {
-        Array.set(array, i, convert(e, elementClazz, hints));
+      for (Object e : collection) {
+        result[i] = convert(e, elementClazz, hints);
         i++;
       }
-      return forceCast(array);
+      return forceCast(result);
     }
     throw new NotSupportedException("Only support Collection and Array as source");
   }
@@ -443,16 +434,16 @@ public class Conversion {
       }
       return map;
     } else if (value.getClass().isArray()) {
-      int oLen = Array.getLength(value);
+      Object[] array = wrapArray(value);
+      int oLen = array.length;
       int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
       int size = (rLen >> 1) + 1;
       Map<K, V> map = new LinkedHashMap<>(size);
       for (int i = 0; i < rLen; i += 2) {
-        map.put(convert(Array.get(value, i), keyClass, hints),
-            convert(Array.get(value, i + 1), valueClass, hints));
+        map.put(convert(array[i], keyClass, hints), convert(array[i + 1], valueClass, hints));
       }
       if (rLen < oLen) {
-        map.put(convert(Array.get(value, rLen), keyClass, hints), null);
+        map.put(convert(array[rLen], keyClass, hints), null);
       }
       return map;
     }
@@ -505,9 +496,9 @@ public class Conversion {
           } else if (Set.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
             result = convert(value, argClasses[0], HashSet::new, hints);
           } else if (Optional.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = Optional.ofNullable(convert(value, argClasses[0]));
+            result = Optional.ofNullable(convert(value, argClasses[0], hints));
           } else if (Supplier.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = (Supplier<?>) () -> convert(value, argClasses[0]);
+            result = (Supplier<?>) () -> convert(value, argClasses[0], hints);
           } else if (Map.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
             result = convertMap(value, argClasses[0], argClasses[1], hints);
           } else {

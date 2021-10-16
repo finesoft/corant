@@ -16,6 +16,7 @@ package org.corant.modules.query.shared.dynamic;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
@@ -125,8 +126,8 @@ public class SqlHelper {
    * @param parameters the parameters
    */
   public static Pair<String, Object[]> getPrepared(String sql, Object... parameters) {
-    if (isEmpty(parameters) || isBlank(sql)
-        || streamOf(parameters).noneMatch(p -> p instanceof Collection || p.getClass().isArray())) {
+    if (isEmpty(parameters) || isBlank(sql) || streamOf(parameters)
+        .noneMatch(p -> p instanceof Collection || p != null && p.getClass().isArray())) {
       return Pair.of(sql, parameters);
     }
     LinkedList<Object> orginalParams = linkedListOf(parameters);
@@ -150,7 +151,7 @@ public class SqlHelper {
             fixedSql.deleteCharAt(fixedSql.length() - 1);
           }
         } else if (param != null && param.getClass().isArray()) {
-          Object[] arrayParam = (Object[]) param;
+          Object[] arrayParam = wrapArray(param);
           if (isNotEmpty(arrayParam)) {
             for (Object p : arrayParam) {
               fixedParams.add(p);

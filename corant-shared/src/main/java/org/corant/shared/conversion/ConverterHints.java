@@ -41,9 +41,9 @@ public class ConverterHints {
 
   public static final String CVT_NUMBER_UNSIGNED_KEY = "converter.number.unsigned";
 
-  public static final String CVT_TEMPORAL_FMT_PTN_KEY = "converter.temporal.formater.pattern";
+  public static final String CVT_TEMPORAL_FMT_PTN_KEY = "converter.temporal.formatter.pattern";
 
-  public static final String CVT_TEMPORAL_FMT_KEY = "converter.temporal.formater";
+  public static final String CVT_TEMPORAL_FMT_KEY = "converter.temporal.formatter";
 
   public static final String CVT_TEMPORAL_EPOCH_KEY = "converter.temporal.of-epoch";
 
@@ -61,6 +61,8 @@ public class ConverterHints {
   public static final String CVT_CLS_LOADER_KEY = "converter.class-loader";
 
   public static final String CVT_FREE_AFTER_CONVERTED = "converter.free-after-converted";
+
+  public static final String CVT_CASE_SENSITIVE = "converter.case-sensitive";
 
   private static final Map<String, ?> sys_hints = Collections.unmodifiableMap(resolveSysProHints());// static?
 

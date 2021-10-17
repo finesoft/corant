@@ -126,7 +126,7 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
   @Override
   public Converter<String, Object> create(Class<Object> targetClass, Object defaultValue,
       boolean throwException) {
-    return forType(targetClass).get();
+    return forType(targetClass).orElseThrow(NotSupportedException::new);
   }
 
   @Override

@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
  * corant-context
  *
  * <p>
- * Annotation which may be placed upon a SPI implementation class, use to conditionally veto it if a
- * class is present.
+ * Annotation which may be placed upon an SPI implementation class, use to conditionally veto it if
+ * a class is present.
  *
  * @author bingo 下午3:08:47
  *

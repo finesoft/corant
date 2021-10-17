@@ -79,7 +79,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   /**
    * Constructs a general runtime exception with the given code and message parameters
    *
-   * @param code the the exception code use for message resolving or checking
+   * @param code the exception code use for message resolving or checking
    * @param variants the message parameters
    */
   public GeneralRuntimeException(Object code, Object... variants) {
@@ -90,8 +90,8 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    * Constructs a general runtime exception with the given codes and message parameters and
    * additional attributes.
    *
-   * @param code the the exception code use for message resolving or checking
-   * @param subCode the the exception sub-code use for message resolving or checking
+   * @param code the exception code use for message resolving or checking
+   * @param subCode the exception sub-code use for message resolving or checking
    * @param attributes the additional business-significant attributes for the catcher to do more
    *        action
    * @param parameters the message parameters
@@ -126,7 +126,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    *
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
-   * @param code the the exception code use for message resolving or checking
+   * @param code the exception code use for message resolving or checking
    */
   public GeneralRuntimeException(Throwable cause, Object code) {
     super(cause);
@@ -138,7 +138,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    *
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
-   * @param code the the exception code use for message resolving or checking
+   * @param code the exception code use for message resolving or checking
    * @param parameters the message parameters
    */
   public GeneralRuntimeException(Throwable cause, Object code, Object... parameters) {

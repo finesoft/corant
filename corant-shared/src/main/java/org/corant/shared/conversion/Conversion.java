@@ -79,12 +79,12 @@ public class Conversion {
   }
 
   /**
-   * Convert iterable values with knowed source class and target class
+   * Convert iterable values with known source class and target class
    *
    * @param <T> the target class of item
    * @param value the value to convert
-   * @param sourceClass the knowed item source class
-   * @param targetClass the item target class that will be convertted
+   * @param sourceClass the known item source class
+   * @param targetClass the item target class that will be converted
    * @param hints the converter hints use for intervening converters
    * @return An iterable of items converted according to the target type
    */
@@ -197,7 +197,7 @@ public class Conversion {
   }
 
   /**
-   * Convert an value object to a collection objects, use for converting the
+   * Convert a value object to a collection objects, use for converting the
    * iterable/array/iterator/enumeration objects to collection objects.
    *
    * if the value object not belong to above then regard the value object as the first item of

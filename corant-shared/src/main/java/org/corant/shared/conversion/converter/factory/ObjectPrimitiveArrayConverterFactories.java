@@ -51,7 +51,7 @@ public class ObjectPrimitiveArrayConverterFactories {
   //@formatter:on
 
   static <T> T[] convert(Object s, Class<T> targetClass, Map<String, ?> hints) {
-    T[] result = null;
+    T[] result;
     final Class<?> sourceClass = s.getClass();
     if (sourceClass.isArray()) {
       int length = Array.getLength(s);

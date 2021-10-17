@@ -38,7 +38,7 @@ public class Bytes {
   /**
    * Create BitArray from bytes array.
    *
-   * @param bytes the bytes array that use to create BitArray
+   * @param bytes the bytes array that used to create BitArray
    * @return A bit array constructed from the given bytes array
    */
   public static BitArray asBitArray(byte[] bytes) {
@@ -67,10 +67,10 @@ public class Bytes {
   }
 
   /**
-   * Returns a big-endian representation of {@code value} in a 8-element byte array.
+   * Returns a big-endian representation of {@code value} in an 8-element byte array.
    *
    * @param value the double value
-   * @return a big-endian representation of the given double value in a 8-element byte array.
+   * @return a big-endian representation of the given double value in an 8-element byte array.
    */
   public static byte[] toBytes(double value) {
     long data = Double.doubleToRawLongBits(value);
@@ -103,10 +103,10 @@ public class Bytes {
   }
 
   /**
-   * Returns a big-endian representation of {@code value} in a 8-element byte array.
+   * Returns a big-endian representation of {@code value} in an 8-element byte array.
    *
    * @param value the long integer value
-   * @return a big-endian representation of the given long integer in a 8-element byte array.
+   * @return a big-endian representation of the given long integer in an 8-element byte array.
    */
   public static byte[] toBytes(long value) {
     byte[] result = new byte[8];
@@ -131,7 +131,7 @@ public class Bytes {
    * Returns the char value whose big-endian representation is stored in the first 2 bytes of byte
    * array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up Character
    * @return toChar
    */
   public static Character toChar(byte[] bytes) {
@@ -141,7 +141,8 @@ public class Bytes {
   /**
    * Returns the char value whose big-endian representation is stored in 2 bytes of byte array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up Character
+   * @param strict whether to strictly follow the char bytes length constraint
    * @return toChar
    */
   public static Character toChar(byte[] bytes, boolean strict) {
@@ -159,8 +160,8 @@ public class Bytes {
    * Returns the double value whose big-endian representation is stored in the first 8 bytes of byte
    * array.
    *
-   * @param bytes
-   * @return toLong
+   * @param bytes the given bytes that make up double
+   * @return toDouble
    */
   public static double toDouble(byte[] bytes) {
     return toDouble(bytes, false);
@@ -169,8 +170,9 @@ public class Bytes {
   /**
    * Returns the double value whose big-endian representation is stored in 8 bytes of byte array.
    *
-   * @param bytes
-   * @return toLong
+   * @param bytes the given bytes that make up double
+   * @param strict whether to strictly follow the double bytes length constraint
+   * @return toDouble
    */
   public static double toDouble(byte[] bytes, boolean strict) {
     if (strict) {
@@ -187,8 +189,8 @@ public class Bytes {
    * Returns the float value whose big-endian representation is stored in the first 4 bytes of byte
    * array.
    *
-   * @param bytes
-   * @return toLong
+   * @param bytes the given bytes that make up float
+   * @return toFloat
    */
   public static float toFloat(byte[] bytes) {
     return toFloat(bytes, false);
@@ -197,8 +199,9 @@ public class Bytes {
   /**
    * Returns the float value whose big-endian representation is stored in 4 bytes of byte array.
    *
-   * @param bytes
-   * @return toLong
+   * @param bytes the given bytes that make up float
+   * @param strict whether to strictly follow the float bytes length constraint
+   * @return toFloat
    */
   public static float toFloat(byte[] bytes, boolean strict) {
     if (strict) {
@@ -216,7 +219,7 @@ public class Bytes {
    * Returns the int value whose big-endian representation is stored in the first 4 bytes of byte
    * array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up int
    * @return toInt
    */
   public static int toInt(byte[] bytes) {
@@ -226,7 +229,8 @@ public class Bytes {
   /**
    * Returns the int value whose big-endian representation is stored in 4 bytes of byte array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up int
+   * @param strict whether to strictly follow the int bytes length constraint
    * @return toInt
    */
   public static int toInt(byte[] bytes, boolean strict) {
@@ -244,7 +248,7 @@ public class Bytes {
    * Returns the long value whose big-endian representation is stored in the first 8 bytes of byte
    * array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up long
    * @return toLong
    */
   public static long toLong(byte[] bytes) {
@@ -254,7 +258,8 @@ public class Bytes {
   /**
    * Returns the long value whose big-endian representation is stored in 8 bytes of byte array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up long
+   * @param strict whether to strictly follow the long bytes length constraint
    * @return toLong
    */
   public static long toLong(byte[] bytes, boolean strict) {
@@ -274,7 +279,7 @@ public class Bytes {
    * Returns the short value whose big-endian representation is stored in the first 2 bytes of byte
    * array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up short
    * @return toShort
    */
   public static short toShort(byte[] bytes) {
@@ -284,7 +289,8 @@ public class Bytes {
   /**
    * Returns the short value whose big-endian representation is stored in 2 bytes of byte array.
    *
-   * @param bytes
+   * @param bytes the given bytes that make up short
+   * @param strict whether to strictly follow the short bytes length constraint
    * @return toShort
    */
   public static short toShort(byte[] bytes, boolean strict) {
@@ -326,7 +332,7 @@ public class Bytes {
     /**
      * Obtain bit value
      *
-     * @param pos
+     * @param pos the position
      * @return getBit
      */
     public boolean getBit(int pos) {
@@ -344,8 +350,8 @@ public class Bytes {
     /**
      * Set bit value into array
      *
-     * @param pos
-     * @param b setBit
+     * @param pos the position
+     * @param b setBit the bit to set
      */
     public void setBit(int pos, boolean b) {
       byte b8 = array[pos >> 3];

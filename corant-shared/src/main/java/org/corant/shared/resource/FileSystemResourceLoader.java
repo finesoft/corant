@@ -90,8 +90,8 @@ public class FileSystemResourceLoader implements ResourceLoader {
   /**
    * Select file by file path and filter.
    *
-   * @param path
-   * @param filter
+   * @param path the file path to be scanned, the scanning can scan all files under this path.
+   * @param filter the file filter
    * @return selectFiles
    */
   protected List<File> selectFiles(String path, Predicate<File> filter) {

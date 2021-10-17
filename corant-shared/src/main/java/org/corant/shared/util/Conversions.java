@@ -56,7 +56,6 @@ import org.corant.shared.ubiquity.TypeLiteral;
  * corant-shared
  *
  * @author bingo 上午10:05:26
- *
  */
 public class Conversions {
 
@@ -90,9 +89,8 @@ public class Conversions {
    * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal.
    * Support converting String or Numeric type to BigDecimal type.
    *
-   * @param obj
+   * @param obj the given object to be converted
    * @return the converted object
-   *
    * @see StringBigDecimalConverter
    * @see NumberBigDecimalConverter
    */
@@ -108,7 +106,6 @@ public class Conversions {
    * @param obj the object that to be converted
    * @param altVal the alternative object if converted object is null
    * @return the converted object
-   *
    * @see StringBigDecimalConverter
    * @see NumberBigDecimalConverter
    */
@@ -126,7 +123,6 @@ public class Conversions {
    * @param scale the scale of the value to be returned.
    * @param roundingMode the rounding mode to apply.
    * @return the converted object
-   *
    * @see StringBigDecimalConverter
    * @see NumberBigDecimalConverter
    */
@@ -151,14 +147,13 @@ public class Conversions {
 
   /**
    * Convert an object to BigDecimal list.
-   *
+   * <p>
    * Supports String[], Number[], Iterable&lt;String&gt;, Iterable&lt;? extends Number&gt;,
    * Iterator&lt;String&gt;, Iterator&lt;? extends Number&gt;, Enumeration&lt;String&gt;,
    * Enumeration&lt;? extends Number&gt;
    *
    * @param obj the object that to be converted
    * @return the converted object list
-   *
    * @see Conversion#convert(Collection, IntFunction, Class, Map)
    */
   public static List<BigDecimal> toBigDecimalList(Object obj) {
@@ -171,7 +166,6 @@ public class Conversions {
    *
    * @param obj the object that to be converted
    * @return the converted object
-   *
    * @see StringBigIntegerConverter
    * @see NumberBigIntegerConverter
    */
@@ -254,7 +248,7 @@ public class Conversions {
   /**
    * Convert an object to Class, support class name string.
    *
-   * @param obj
+   * @param obj the given object to be converted
    * @return toClass
    */
   public static Class<?> toClass(Object obj) {
@@ -271,7 +265,6 @@ public class Conversions {
    * @param itemClass the converted collection item class
    * @param collectionFactory the collection factory use to create Collection
    * @return toCollection
-   *
    * @see Conversion#convert(Collection, IntFunction, Class, Map)
    */
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
@@ -342,11 +335,11 @@ public class Conversions {
   }
 
   public static Instant toInstant(Object obj) {
-    return toInstant(obj, (Map<String, ?>) null, null);
+    return toInstant(obj, null, null);
   }
 
   public static Instant toInstant(Object obj, Instant altVal) {
-    return toInstant(obj, (Map<String, ?>) null, altVal);
+    return toInstant(obj, null, altVal);
   }
 
   public static Instant toInstant(Object obj, Map<String, ?> hints) {
@@ -526,7 +519,6 @@ public class Conversions {
    * @param clazz the target class
    * @param hints the conversion hints use to intervene in the conversion process
    * @return the converted target object
-   *
    * @see Conversion#convert(Object, Class, Map)
    * @see Converter
    * @see ConverterFactory
@@ -551,7 +543,7 @@ public class Conversions {
    * Convert the given object to the target type object, use the given type literal and hints.
    *
    * @param <T> the target type, including all actual type parameters
-   * @param value the source object
+   * @param obj the given object to be converted
    * @param typeLiteral the type literal
    * @param hints the conversion hints
    */

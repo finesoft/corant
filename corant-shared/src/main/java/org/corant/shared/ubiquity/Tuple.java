@@ -47,7 +47,7 @@ public interface Tuple {
   boolean isEmpty();
 
   /**
-   * Returns an array containing all of the elements in this tuple in proper sequence (from left to
+   * Returns an array containing all the elements in this tuple in proper sequence (from left to
    * right element or from min to max).
    *
    * @return toArray

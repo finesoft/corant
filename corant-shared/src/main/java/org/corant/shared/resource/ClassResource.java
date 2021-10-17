@@ -31,12 +31,12 @@ public class ClassResource extends ClassPathResource {
   public ClassResource(String classPath, ClassLoader classLoader, URL url) {
     super(classPath, classLoader, url);
     String useClassPath = classPath;
-    if (useClassPath.indexOf(ClassPathResourceScanner.JAR_URL_SEPARATOR) != -1) {
+    if (useClassPath.contains(ClassPathResourceScanner.JAR_URL_SEPARATOR)) {
       useClassPath =
           useClassPath.substring(classPath.indexOf(ClassPathResourceScanner.JAR_URL_SEPARATOR)
               + ClassPathResourceScanner.JAR_URL_SEPARATOR.length());
     }
-    if (useClassPath.indexOf(ClassPathResourceScanner.CLASSES_FOLDER) != -1) {
+    if (useClassPath.contains(ClassPathResourceScanner.CLASSES_FOLDER)) {
       useClassPath =
           useClassPath.substring(useClassPath.indexOf(ClassPathResourceScanner.CLASSES_FOLDER)
               + ClassPathResourceScanner.CLASSES_FOLDER.length());

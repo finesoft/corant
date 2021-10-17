@@ -44,7 +44,7 @@ public class Atomics {
    * or synchronized keywords for one-off singleton object construction.
    *
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
-   * called, otherwise an exception will be thrown, the {@code supplier} may be called more then
+   * called, otherwise an exception will be thrown, the {@code supplier} may be called more than
    * once.
    *
    * Partial code block come from org.apache.commons.

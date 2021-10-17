@@ -24,7 +24,7 @@ import org.corant.shared.ubiquity.Sortable;
  * by the converter factory may be cached or combined into a combined converter.
  *
  * <p>
- * the generic parameter S is the source type that converter accept and the generic parameter T is
+ * the generic parameter S is the source type that converter accepts and the generic parameter T is
  * the target type that converter will convert source to.
  *
  * <p>
@@ -63,7 +63,7 @@ public interface ConverterFactory<S, T> extends Sortable {
    * target class
    *
    * @param sourceClass the source object class that will be converted
-   * @param targetClass the target class that will be convert to
+   * @param targetClass the target class that will be converted to
    */
   default boolean isSupports(Class<?> sourceClass, Class<?> targetClass) {
     return isSupportSourceClass(sourceClass) && isSupportTargetClass(targetClass);
@@ -81,7 +81,7 @@ public interface ConverterFactory<S, T> extends Sortable {
   /**
    * Returns whether the converter factory supports the conversion of the given target class
    *
-   * @param targetClass the target class that will be convert to
+   * @param targetClass the target class that will be converted to
    */
   boolean isSupportTargetClass(Class<?> targetClass);
 }

@@ -13,7 +13,7 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORGINAL;
+import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORDINAL;
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -50,7 +50,7 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
 
       }
     }
-    return SYSTEM_PROPERTIES_ORGINAL;
+    return SYSTEM_PROPERTIES_ORDINAL;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})

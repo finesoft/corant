@@ -34,7 +34,7 @@ import org.corant.shared.util.Systems;
 /**
  * corant-shared
  * <p>
- * Note: Some code come from gixon.com
+ * Note: Some codes come from GIXON.COM
  *
  * @author bingo 下午5:27:33
  *
@@ -42,7 +42,7 @@ import org.corant.shared.util.Systems;
 public class TemporaryResource implements WritableResource {
 
   protected static final String systemTempDir = Systems.getTempDir();
-  protected static final String unknowFileName = Names.CORANT.concat("_temp");
+  protected static final String unknownFileName = Names.CORANT.concat("_temp");
 
   protected String filename;
   protected int memoryThreshold;
@@ -64,7 +64,7 @@ public class TemporaryResource implements WritableResource {
 
   public TemporaryResource(String filename, int memoryThreshold, String tempDir,
       Object... properties) {
-    this.filename = defaultString(filename, unknowFileName);
+    this.filename = defaultString(filename, unknownFileName);
     this.memoryThreshold = max(memoryThreshold, 0);
     this.tempDir = defaultString(tempDir, systemTempDir);
     metaData = Maps.immutableMapOf(properties);
@@ -126,7 +126,7 @@ public class TemporaryResource implements WritableResource {
     String tempFileName = filename.concat("_").concat(UUID.randomUUID().toString());
     File tempFile = new File(tempDir, tempFileName);
     Cleaner.create().register(this, () -> {
-      if (tempFile != null && tempFile.exists()) {
+      if (tempFile.exists()) {
         tempFile.delete();
       }
     });

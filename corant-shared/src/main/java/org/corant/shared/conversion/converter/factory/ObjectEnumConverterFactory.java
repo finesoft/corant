@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-shared
@@ -62,9 +63,16 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
         }
       }
       if (name != null) {
+        boolean cs = ConverterHints.getHint(hints, ConverterHints.CVT_CASE_SENSITIVE, false);
         for (T t : targetClass.getEnumConstants()) {
-          if (t.name().equalsIgnoreCase(name)) {
-            return t;
+          if (cs) {
+            if (t.name().equals(name)) {
+              return t;
+            }
+          } else {
+            if (t.name().equalsIgnoreCase(name)) {
+              return t;
+            }
           }
         }
       }

@@ -30,7 +30,7 @@ import org.corant.shared.util.Threads;
 public class FileWatcher extends AbstractWatcher {
 
   protected final File file;
-  protected final AtomicLong modifiedTimeStemp;
+  protected final AtomicLong modifiedTimeStamp;
   protected final long pollingIntervalMs;
 
   public FileWatcher(File file, long pollingIntervalMs, FileChangeListener... listeners) {
@@ -38,7 +38,7 @@ public class FileWatcher extends AbstractWatcher {
     this.pollingIntervalMs = pollingIntervalMs < 0 ? 64 : pollingIntervalMs;
     Collections.addAll(this.listeners, listeners);
     this.file = file;
-    modifiedTimeStemp = new AtomicLong(file.lastModified());
+    modifiedTimeStamp = new AtomicLong(file.lastModified());
   }
 
   @Override
@@ -49,7 +49,7 @@ public class FileWatcher extends AbstractWatcher {
         break;
       } else {
         final long lastModified = file.lastModified();
-        if (lastModified > modifiedTimeStemp.getAndSet(lastModified)) {
+        if (lastModified > modifiedTimeStamp.getAndSet(lastModified)) {
           fire(ENTRY_MODIFY, file, null);
         }
       }

@@ -49,7 +49,7 @@ import org.corant.shared.util.Systems;
 /**
  * corant-shared
  * <p>
- * The interface use to resolve the message of exception. This interface inherits the
+ * The interface used to resolve the message of exception. This interface inherits the
  * {@link Sortable} interface, and the implementer can easily specify the priority to replace the
  * default implementation.
  *
@@ -108,8 +108,8 @@ public interface ExceptionMessageResolver extends Sortable {
 
     static Map<Locale, Map<String, MessageFormat>> collect() {
       Map<Locale, Map<String, MessageFormat>> source = new HashMap<>();
-      Set<String> paths = setOf(split(
-          Systems.getProperty(SPEC_SOURCE_PATH_KEY, String.class, DEFAULT_SOURCE_PATH), ","));
+      Set<String> paths = setOf(
+          split(Systems.getProperty(SPEC_SOURCE_PATH_KEY, String.class, DEFAULT_SOURCE_PATH), ","));
       paths.stream().filter(Strings::isNotBlank).forEach(path -> {
         try {
           Resources.from(path).forEach(rs -> {

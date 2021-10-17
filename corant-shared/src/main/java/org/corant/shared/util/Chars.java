@@ -76,11 +76,11 @@ public class Chars {
    * NOTE: code base come from Apache Lucene. if there is infringement, please inform
    * me(finesoft@gmail.com)
    *
-   * @param input
-   * @param inputPos
-   * @param output
-   * @param outputPos
-   * @param length
+   * @param input the input chars array to be folded
+   * @param inputPos the beginning position
+   * @param output the output folded chars array
+   * @param outputPos the output beginning position
+   * @param length the chars length
    * @return foldToAscii
    */
   public static int foldToAscii(char[] input, int inputPos, char[] output, int outputPos,
@@ -2013,7 +2013,7 @@ public class Chars {
 
   /**
    * @see #foldToAscii(char[], int, char[], int, int)
-   * @param chars
+   * @param chars the chars to be folded
    * @return foldToASCII
    */
   public static String foldToAscii(String chars) {
@@ -2034,7 +2034,7 @@ public class Chars {
   /**
    * 'a'~'Z'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiAlpha
    */
   public static boolean isAsciiAlpha(final char c) {
@@ -2044,7 +2044,7 @@ public class Chars {
   /**
    * 'a'~'Z'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiAlpha
    */
   public static boolean isAsciiAlpha(final int c) {
@@ -2054,7 +2054,7 @@ public class Chars {
   /**
    * 'a'~'Z' '0'~'9'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiAlphaOrNumeric
    */
   public static boolean isAsciiAlphaOrNumeric(final char c) {
@@ -2064,7 +2064,7 @@ public class Chars {
   /**
    * 'a'~'Z' '0'~'9'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiAlphaOrNumeric
    */
   public static boolean isAsciiAlphaOrNumeric(final int c) {
@@ -2074,7 +2074,7 @@ public class Chars {
   /**
    * '0'~'9'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiNumeric
    */
   public static boolean isAsciiNumeric(final char c) {
@@ -2084,7 +2084,7 @@ public class Chars {
   /**
    * '0'~'9'
    *
-   * @param c
+   * @param c the char to check
    * @return isAsciiNumeric
    */
   public static boolean isAsciiNumeric(final int c) {
@@ -2101,7 +2101,7 @@ public class Chars {
   /**
    * {@link #isFullWidthChar(char)}
    *
-   * @param c
+   * @param c the char to check
    * @return isFullWidthChar
    */
   public static boolean isFullWidthChar(final int c) {
@@ -2118,7 +2118,7 @@ public class Chars {
   /**
    * 'a'~'z'
    *
-   * @param c
+   * @param c the char to check
    * @return isLowerAsciiAlpha
    */
   public static boolean isLowerAsciiAlpha(final char c) {
@@ -2128,7 +2128,7 @@ public class Chars {
   /**
    * 'a'~'z'
    *
-   * @param c
+   * @param c the char to check
    * @return isLowerAsciiAlpha
    */
   public static boolean isLowerAsciiAlpha(final int c) {
@@ -2138,7 +2138,7 @@ public class Chars {
   /**
    * 'A'~'Z'
    *
-   * @param c
+   * @param c the char to check
    * @return isUpperAsciiAlpha
    */
   public static boolean isUpperAsciiAlpha(final char c) {
@@ -2148,7 +2148,7 @@ public class Chars {
   /**
    * 'A'~'Z'
    *
-   * @param c
+   * @param c the char to check
    * @return isUpperAsciiAlpha
    */
   public static boolean isUpperAsciiAlpha(final int c) {
@@ -2158,7 +2158,7 @@ public class Chars {
   /**
    * Return character is Chinese character
    *
-   * @param c
+   * @param c the char to check
    * @return isZhChar
    */
   public static boolean isZhChar(char c) {
@@ -2175,7 +2175,7 @@ public class Chars {
   /**
    * Return character is Chinese character
    *
-   * @param c
+   * @param c the char to check
    * @return isZhChar
    */
   public static boolean isZhChar(int c) {
@@ -2186,7 +2186,7 @@ public class Chars {
    * Return character is Chinese numeric character, contains simplified and traditional characters.
    *
    * @see <a href="https://baike.baidu.com/item/%E5%A4%A7%E5%86%99%E6%95%B0%E5%AD%97"> 大写数字 </a>
-   * @param c
+   * @param c the char to check
    * @return isZhNumeric
    */
   public static boolean isZhNumeric(final char c) {
@@ -2199,7 +2199,7 @@ public class Chars {
   /**
    * Return character is Chinese numeric character
    *
-   * @param c
+   * @param c the char to check
    * @return isZhNumeric
    */
   public static boolean isZhNumeric(final int c) {
@@ -2210,7 +2210,7 @@ public class Chars {
    * Returns if the parameter character is full-width, it will be converted to half-width and
    * returned, otherwise it will be returned directly
    *
-   * @param c
+   * @param c the char to check
    * @return toHalfWidthCharacter
    */
   public static char toHalfWidthCharacter(char c) {
@@ -2226,7 +2226,7 @@ public class Chars {
   /**
    * {@link #toHalfWidthCharacter(char)}
    *
-   * @param c
+   * @param c the char to check
    * @return toHalfWidthCharacter
    */
   public static char toHalfWidthCharacter(int c) {
@@ -2236,7 +2236,7 @@ public class Chars {
   /**
    * Convert ASCII alpha char to lower case
    *
-   * @param c
+   * @param c the char to check
    * @return toLowerAsciiAlpha
    */
   public static char toLowerAsciiAlpha(char c) {
@@ -2249,7 +2249,7 @@ public class Chars {
   /**
    * Convert ASCII alpha char to upper case
    *
-   * @param c
+   * @param c the char to check
    * @return toUpperAsciiAlpha
    */
   public static char toUpperAsciiAlpha(char c) {

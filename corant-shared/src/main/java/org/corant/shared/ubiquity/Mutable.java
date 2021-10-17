@@ -65,7 +65,7 @@ public interface Mutable<T> extends Supplier<T> {
    */
   class MutableBoolean extends MutableObject<Boolean> implements Comparable<MutableBoolean> {
 
-    protected MutableBoolean(final boolean value) {
+    public MutableBoolean(final boolean value) {
       super(value);
     }
 
@@ -132,7 +132,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Byte addAndGet(Number operand) {
       final Byte current = value;
-      value = (byte) (current.byteValue() + shouldNotNull(operand).byteValue());
+      value = (byte) (current + shouldNotNull(operand).byteValue());
       return value;
     }
 
@@ -163,7 +163,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Byte subtractAndGet(final Number operand) {
       final Byte current = value;
-      value = (byte) (current.byteValue() - shouldNotNull(operand).byteValue());
+      value = (byte) (current - shouldNotNull(operand).byteValue());
       return value;
     }
   }
@@ -211,7 +211,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Double addAndGet(Number operand) {
       final Double current = value;
-      value = current.doubleValue() + shouldNotNull(operand).doubleValue();
+      value = current + shouldNotNull(operand).doubleValue();
       return value;
     }
 
@@ -242,7 +242,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Double subtractAndGet(Number operand) {
       final Double current = value;
-      value = current.doubleValue() - shouldNotNull(operand).doubleValue();
+      value = current - shouldNotNull(operand).doubleValue();
       return value;
     }
   }
@@ -290,7 +290,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Float addAndGet(Number operand) {
       final Float current = value;
-      value = current.floatValue() + shouldNotNull(operand).floatValue();
+      value = current + shouldNotNull(operand).floatValue();
       return value;
     }
 
@@ -321,7 +321,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Float subtractAndGet(Number operand) {
       final Float current = value;
-      value = current.floatValue() - shouldNotNull(operand).floatValue();
+      value = current - shouldNotNull(operand).floatValue();
       return value;
     }
   }
@@ -369,7 +369,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Integer addAndGet(Number operand) {
       final Integer current = value;
-      value = current.intValue() + shouldNotNull(operand).intValue();
+      value = current + shouldNotNull(operand).intValue();
       return value;
     }
 
@@ -400,7 +400,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Integer subtractAndGet(Number operand) {
       final Integer current = value;
-      value = current.intValue() - shouldNotNull(operand).intValue();
+      value = current - shouldNotNull(operand).intValue();
       return value;
     }
   }
@@ -448,7 +448,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Long addAndGet(Number operand) {
       final Long current = value;
-      value = current.longValue() + shouldNotNull(operand).longValue();
+      value = current + shouldNotNull(operand).longValue();
       return value;
     }
 
@@ -479,7 +479,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Long subtractAndGet(Number operand) {
       final Long current = value;
-      value = current.longValue() - shouldNotNull(operand).longValue();
+      value = current - shouldNotNull(operand).longValue();
       return value;
     }
   }
@@ -519,17 +519,17 @@ public interface Mutable<T> extends Supplier<T> {
     protected static Number doAdd(Number current, Number operand) {
       shouldNotNull(operand);
       if (current instanceof Long) {
-        return Long.valueOf(current.longValue() + operand.longValue());
+        return current.longValue() + operand.longValue();
       } else if (current instanceof Integer) {
-        return Integer.valueOf(current.intValue() + operand.intValue());
+        return current.intValue() + operand.intValue();
       } else if (current instanceof Short) {
-        return Short.valueOf((short) (current.shortValue() + operand.shortValue()));
+        return (short) (current.shortValue() + operand.shortValue());
       } else if (current instanceof Byte) {
-        return Byte.valueOf((byte) (current.byteValue() + operand.byteValue()));
+        return (byte) (current.byteValue() + operand.byteValue());
       } else if (current instanceof Double) {
-        return Double.valueOf(current.doubleValue() + operand.doubleValue());
+        return current.doubleValue() + operand.doubleValue();
       } else if (current instanceof Float) {
-        return Float.valueOf(current.floatValue() + operand.floatValue());
+        return current.floatValue() + operand.floatValue();
       } else if (current instanceof BigInteger) {
         return ((BigInteger) current).add(BigInteger.valueOf(operand.longValue()));
       } else if (current instanceof BigDecimal) {
@@ -542,17 +542,17 @@ public interface Mutable<T> extends Supplier<T> {
     protected static Number doSubtract(Number current, Number operand) {
       shouldNotNull(operand);
       if (current instanceof Long) {
-        return Long.valueOf(current.longValue() - operand.longValue());
+        return current.longValue() - operand.longValue();
       } else if (current instanceof Integer) {
-        return Integer.valueOf(current.intValue() - operand.intValue());
+        return current.intValue() - operand.intValue();
       } else if (current instanceof Short) {
-        return Short.valueOf((short) (current.shortValue() - operand.shortValue()));
+        return (short) (current.shortValue() - operand.shortValue());
       } else if (current instanceof Byte) {
-        return Byte.valueOf((byte) (current.byteValue() - operand.byteValue()));
+        return (byte) (current.byteValue() - operand.byteValue());
       } else if (current instanceof Double) {
-        return Double.valueOf(current.doubleValue() - operand.doubleValue());
+        return current.doubleValue() - operand.doubleValue();
       } else if (current instanceof Float) {
-        return Float.valueOf(current.floatValue() - operand.floatValue());
+        return current.floatValue() - operand.floatValue();
       } else if (current instanceof BigInteger) {
         return ((BigInteger) current).subtract(BigInteger.valueOf(operand.longValue()));
       } else if (current instanceof BigDecimal) {
@@ -803,7 +803,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Short addAndGet(Number operand) {
       final Short current = value;
-      value = (short) (current.shortValue() + shouldNotNull(operand).shortValue());
+      value = (short) (current + shouldNotNull(operand).shortValue());
       return value;
     }
 
@@ -834,7 +834,7 @@ public interface Mutable<T> extends Supplier<T> {
     @Override
     public Short subtractAndGet(Number operand) {
       final Short current = value;
-      value = (short) (current.shortValue() - shouldNotNull(operand).shortValue());
+      value = (short) (current - shouldNotNull(operand).shortValue());
       return value;
     }
   }
@@ -847,11 +847,11 @@ public interface Mutable<T> extends Supplier<T> {
    */
   class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
-    protected MutableString() {}
-
-    protected MutableString(final String value) {
+    public MutableString(final String value) {
       super(value);
     }
+
+    protected MutableString() {}
 
     public static MutableString of(final String value) {
       return new MutableString(value);

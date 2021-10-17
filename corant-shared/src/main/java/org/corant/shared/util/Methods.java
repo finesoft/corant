@@ -25,6 +25,7 @@ import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -46,11 +47,8 @@ public class Methods {
 
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
       final Class<?>... parameterTypes) {
-    shouldNotNull(cls, "Null class not allowed.");
     shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
-    List<Method> methods = listOf(cls.getDeclaredMethods());
-    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods).map(Lists::listOf)
-        .forEach(methods::addAll);
+    List<Method> methods = getAllMethods(shouldNotNull(cls, "Null class not allowed."));
     Method inexactMatch = null;
     for (final Method method : methods) {
       if (methodName.equals(method.getName())
@@ -146,6 +144,20 @@ public class Methods {
       }
     }
     return answer;
+  }
+
+  static List<Method> getAllMethods(Class<?> cls) {
+    List<Method> methods = listOf(cls.getDeclaredMethods());
+    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
+        .forEach(ms -> Collections.addAll(methods, ms));
+    Classes.getAllInterfaces(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
+        .forEach(im -> {
+          if (im.isDefault() && methods.stream().noneMatch(m -> m.getName().equals(im.getName())
+              && Objects.deepEquals(m.getParameterTypes(), im.getParameterTypes()))) {
+            methods.add(im);
+          }
+        });
+    return methods;
   }
 
   /**

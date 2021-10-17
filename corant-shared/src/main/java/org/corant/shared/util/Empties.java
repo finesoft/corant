@@ -14,6 +14,9 @@
 package org.corant.shared.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -31,9 +34,7 @@ import org.corant.shared.ubiquity.Tuple.Triple;
  */
 public class Empties {
 
-  private Empties() {
-    super();
-  }
+  private Empties() {}
 
   /**
    * <pre>
@@ -51,7 +52,7 @@ public class Empties {
   /**
    * Return true if object is null or object.size() == 0
    *
-   * @param object
+   * @param object the collection object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Collection<?> object) {
@@ -61,7 +62,7 @@ public class Empties {
   /**
    * Return true if object is null or object.hasMoreElements() == false
    *
-   * @param object
+   * @param object the enumeration object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Enumeration<?> object) {
@@ -71,7 +72,7 @@ public class Empties {
   /**
    * Return true if object is null or object.iterator().hasNext() == false
    *
-   * @param object
+   * @param object the iterable object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Iterable<?> object) {
@@ -81,7 +82,7 @@ public class Empties {
   /**
    * Return true if object is null and object.hasNext() == false
    *
-   * @param object
+   * @param object the iterator object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Iterator<?> object) {
@@ -91,7 +92,7 @@ public class Empties {
   /**
    * Return true if object is null and object.isEmpty() == true
    *
-   * @param object
+   * @param object the map object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Map<?, ?> object) {
@@ -124,19 +125,29 @@ public class Empties {
     } else if (object instanceof Optional<?>) {
       return isEmpty((Optional<?>) object);
     } else {
-      try {
+      if (object.getClass().isArray()) {
         return Array.getLength(object) == 0;
-      } catch (final IllegalArgumentException ex) {
-        throw new IllegalArgumentException(
-            "Unsupported object type: " + object.getClass().getName());
+      } else {
+        Method m = Methods.getMatchingMethod(object.getClass(), "isEmpty");
+        if (m != null && Modifier.isPublic(m.getModifiers())
+            && (m.getReturnType().equals(Boolean.TYPE)
+                || m.getReturnType().equals(Boolean.class))) {
+          try {
+            return (boolean) m.invoke(object);
+          } catch (IllegalAccessException | IllegalArgumentException
+              | InvocationTargetException e) {
+            throw new IllegalArgumentException(e);
+          }
+        }
       }
+      throw new IllegalArgumentException("Unsupported object type: " + object.getClass().getName());
     }
   }
 
   /**
    * Return true if object is null and object.length == 0
    *
-   * @param object
+   * @param object the object array to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Object[] object) {
@@ -146,17 +157,17 @@ public class Empties {
   /**
    * Return true if object is null or object.iterator().hasNext() == false
    *
-   * @param object
+   * @param object the optional object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Optional<?> object) {
-    return object == null || !object.isPresent();
+    return object == null || object.isEmpty();
   }
 
   /**
    * Return true if object is null and object.isEmpty() == true
    *
-   * @param object
+   * @param object the tuple pair object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Pair<?, ?> object) {
@@ -166,7 +177,7 @@ public class Empties {
   /**
    * Return true if object is null and object.isEmpty() == true
    *
-   * @param object
+   * @param object the tuple range object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Range<? extends Comparable<?>> object) {
@@ -176,7 +187,7 @@ public class Empties {
   /**
    * Return true if object is null and object.isEmpty() == true
    *
-   * @param object
+   * @param object the tuple triple object to check
    * @return isEmpty
    */
   public static boolean isEmpty(final Triple<?, ?, ?> object) {
@@ -192,7 +203,7 @@ public class Empties {
    * Empties.isNotEmpty("  abc  ") = true
    * </pre>
    *
-   * @param object
+   * @param object the char sequence (string) object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final CharSequence object) {
@@ -200,9 +211,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.isEmpty() == false
+   * Return true if and only if object is not null and object.isEmpty() == false
    *
-   * @param object
+   * @param object the collection object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Collection<?> object) {
@@ -210,9 +221,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.hasMoreElements() == true
+   * Return true if and only if object is not null and object.hasMoreElements() == true
    *
-   * @param object
+   * @param object the enumeration object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Enumeration<?> object) {
@@ -220,9 +231,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.iterator().hasNext() == true
+   * Return true if and only if object is not null and object.iterator().hasNext() == true
    *
-   * @param object
+   * @param object the iterable object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Iterable<?> object) {
@@ -230,9 +241,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.hasNext() == true
+   * Return true if and only if object is not null and object.hasNext() == true
    *
-   * @param object
+   * @param object the iterator object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Iterator<?> object) {
@@ -240,9 +251,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.isEmpty() == false
+   * Return true if and only if object is not null and object.isEmpty() == false
    *
-   * @param object
+   * @param object the map object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Map<?, ?> object) {
@@ -254,9 +265,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.length > 0
+   * Return true if and only if object is not null and object.length > 0
    *
-   * @param object
+   * @param object the object array to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Object[] object) {
@@ -268,9 +279,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.isEmpty() == false
+   * Return true if and only if object is not null and object.isEmpty() == false
    *
-   * @param object
+   * @param object the tuple pair object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Pair<?, ?> object) {
@@ -278,9 +289,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.isEmpty() == false
+   * Return true if and only if object is not null and object.isEmpty() == false
    *
-   * @param object
+   * @param object the tuple range object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Range<? extends Comparable<?>> object) {
@@ -288,9 +299,9 @@ public class Empties {
   }
 
   /**
-   * Return true if only if object is not null and object.isEmpty() == false
+   * Return true if and only if object is not null and object.isEmpty() == false
    *
-   * @param object
+   * @param object the tuple triple object to check
    * @return isNotEmpty
    */
   public static boolean isNotEmpty(final Triple<?, ?, ?> object) {
@@ -300,7 +311,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive boolean array to check
    * @return sizeOf
    */
   public static int sizeOf(final boolean[] object) {
@@ -310,7 +321,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive byte array to check
    * @return sizeOf
    */
   public static int sizeOf(final byte[] object) {
@@ -320,7 +331,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive char array to check
    * @return sizeOf
    */
   public static int sizeOf(final char[] object) {
@@ -330,7 +341,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length();
    *
-   * @param object
+   * @param object the char sequence (string) object
    * @return sizeOf
    */
   public static int sizeOf(final CharSequence object) {
@@ -340,7 +351,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.size();
    *
-   * @param object
+   * @param object the collection object
    * @return sizeOf
    */
   public static int sizeOf(final Collection<?> object) {
@@ -350,7 +361,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive double array
    * @return sizeOf
    */
   public static int sizeOf(final double[] object) {
@@ -360,7 +371,7 @@ public class Empties {
   /**
    * Returns the number of enumeration elements passed in
    *
-   * @param enums
+   * @param enums the enumeration object
    * @return sizeOf
    */
   public static int sizeOf(final Enumeration<?> enums) {
@@ -375,7 +386,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive float array
    * @return sizeOf
    */
   public static int sizeOf(final float[] object) {
@@ -385,7 +396,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive int array
    * @return sizeOf
    */
   public static int sizeOf(final int[] object) {
@@ -395,7 +406,7 @@ public class Empties {
   /**
    * Returns the number of times the passed in iterable can iterate
    *
-   * @param iterable
+   * @param iterable the iterable object
    * @return sizeOf
    */
   public static int sizeOf(final Iterable<?> iterable) {
@@ -413,6 +424,7 @@ public class Empties {
    * @param iterator
    * @return sizeOf
    */
+  @Deprecated
   public static int sizeOf(final Iterator<?> iterator) {
     int size = 0;
     if (iterator != null) {
@@ -427,7 +439,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive long array
    * @return sizeOf
    */
   public static int sizeOf(final long[] object) {
@@ -437,7 +449,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.size();
    *
-   * @param object
+   * @param object the map object
    * @return sizeOf
    */
   public static int sizeOf(final Map<?, ?> object) {
@@ -447,7 +459,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the object array
    * @return sizeOf
    */
   public static int sizeOf(final Object[] object) {
@@ -457,7 +469,7 @@ public class Empties {
   /**
    * If object is null return 0 else return object.length;
    *
-   * @param object
+   * @param object the primitive short array
    * @return sizeOf
    */
   public static int sizeOf(final short[] object) {

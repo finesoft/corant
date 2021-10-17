@@ -34,8 +34,7 @@ public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Numb
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public NumberZonedDateTimeConverter() {
-  }
+  public NumberZonedDateTimeConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)
@@ -66,7 +65,7 @@ public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Numb
   @Override
   protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
-    if (!ozoneId.isPresent()) {
+    if (ozoneId.isEmpty()) {
       if (!isStrict(hints)) {
         warn(LocalDateTime.class, value);
         if (ChronoUnit.SECONDS

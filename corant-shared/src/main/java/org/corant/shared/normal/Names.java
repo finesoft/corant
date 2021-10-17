@@ -27,7 +27,7 @@ public interface Names {
 
   char NAME_SPACE_SEPARATOR = '.';
 
-  char DOMMAIN_SPACE_SEPARATOR = ':';
+  char DOMAIN_SPACE_SEPARATOR = ':';
 
   String NAME_SPACE_SEPARATORS = ".";
 

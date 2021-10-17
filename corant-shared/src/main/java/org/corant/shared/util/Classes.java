@@ -60,9 +60,9 @@ public class Classes {
   /**
    * Convert the class name string to Class using {@code classLoader}
    *
-   * @param classLoader
-   * @param className
-   * @return
+   * @param classLoader the class loader used to load the class with the given name
+   * @param className the class name
+   * @return the class
    * @throws ClassNotFoundException asClass
    */
   public static Class<?> asClass(final ClassLoader classLoader, final String className)
@@ -73,10 +73,10 @@ public class Classes {
   /**
    * Convert the class name string to Class using {@code classLoader}
    *
-   * @param classLoader
-   * @param className
+   * @param classLoader the class loader used to load the class with the given name
+   * @param className the class name
    * @param initialize whether the class must be initialized
-   * @return
+   * @return the class
    * @throws ClassNotFoundException asClass
    */
   public static Class<?> asClass(final ClassLoader classLoader, final String className,
@@ -86,10 +86,10 @@ public class Classes {
   }
 
   /**
-   * Return Class from string class name.
+   * Return Class from string class name, use default class loader.
    *
-   * @param className
-   * @return
+   * @param className the class name
+   * @return the class
    * @see #defaultClassLoader()
    */
   public static Class<?> asClass(String className) {
@@ -155,7 +155,7 @@ public class Classes {
   /**
    * Return all the interfaces implemented by this {@code clazz}
    *
-   * @param clazz
+   * @param clazz the given class
    * @return getAllInterfaces
    */
   public static Set<Class<?>> getAllInterfaces(final Class<?> clazz) {
@@ -179,7 +179,7 @@ public class Classes {
   /**
    * Return all the interfaces represented by this {@code object}
    *
-   * @param object
+   * @param object the given object
    * @return getAllInterfaces
    */
   public static Set<Class<?>> getAllInterfaces(final Object object) {
@@ -190,7 +190,7 @@ public class Classes {
   /**
    * Return all the super classes extended by this {@code clazz}
    *
-   * @param clazz
+   * @param clazz the given class
    * @return getAllSuperClasses
    */
   public static Set<Class<?>> getAllSuperClasses(final Class<?> clazz) {
@@ -210,7 +210,7 @@ public class Classes {
   /**
    * Return all the super classes represented by this {@code object}
    *
-   * @param object
+   * @param object the given object
    * @return getAllSuperClasses
    */
   public static Set<Class<?>> getAllSuperClasses(final Object object) {
@@ -250,7 +250,7 @@ public class Classes {
    * Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if not
    * resolved
    *
-   * @param object
+   * @param object the given object
    * @return getComponentClass
    */
   public static Class<?> getComponentClass(Object object) {

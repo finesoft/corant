@@ -42,8 +42,8 @@ public class Annotations {
    * is base method. NOTE: Starting with Java8, we recommend using
    * {@link AnnotatedElement#getDeclaredAnnotation(Class)}
    *
-   * @param element
-   * @param annotationType
+   * @param element the AnnotatedElement object corresponding to the annotation type
+   * @param annotationType the type of the annotation to query
    * @return the first matching annotation, or null if not found.
    */
   public static <A extends Annotation> A findAnnotation(AnnotatedElement element,
@@ -79,8 +79,8 @@ public class Annotations {
    * Find the annotation object from given class with given annotation type class or optionally find
    * from the super classes (don't include interfaces) of the given class.
    *
-   * @param clazz the class with annotated to be find
-   * @param annotationType the annotation class which to be find
+   * @param clazz the class with annotated to be found
+   * @param annotationType the annotation class which to be found
    * @param searchSupers If true, all super classes are looked up.
    * @return the first matching annotation, or null if not found.
    */
@@ -101,8 +101,8 @@ public class Annotations {
    * or optionally on any equivalent method in super classes and interfaces. Returns null if the
    * annotation type was not present.
    *
-   * @param method the class with annotated to be find
-   * @param annotationType the annotation class which to be find
+   * @param method the class with annotated to be found
+   * @param annotationType the annotation class which to be found
    * @param searchSupers If true, all super classes or interfaces are looked up.
    * @param ignoreAccess determines if underlying method has to be accessible
    * @return the annotation if not found will return null.

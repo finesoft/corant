@@ -45,7 +45,7 @@ public class URLResourceLoader implements ResourceLoader {
   @Override
   public Collection<? extends Resource> load(Object location) throws IOException {
     shouldNotNull(location);
-    URL url = null;
+    URL url;
     if (location instanceof URL) {
       url = (URL) location;
     } else if (location instanceof URI) {

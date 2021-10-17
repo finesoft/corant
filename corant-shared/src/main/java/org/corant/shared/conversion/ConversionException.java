@@ -25,34 +25,25 @@ public class ConversionException extends CorantRuntimeException {
 
   private static final long serialVersionUID = -1317399303124421364L;
 
-  /**
-   *
-   */
-  public ConversionException() {
-    super();
-  }
+  public ConversionException() {}
 
   /**
-   * @param msgOrFormat
-   * @param args
+   * @see CorantRuntimeException#CorantRuntimeException(String, Object...)
    */
   public ConversionException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);
   }
 
   /**
-   * @param cause
+   * @see CorantRuntimeException#CorantRuntimeException(Throwable)
    */
   public ConversionException(Throwable cause) {
     super(cause);
   }
 
   /**
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   * @param msgOrFormat
-   * @param args
+   * @see CorantRuntimeException#CorantRuntimeException(Throwable, boolean, boolean, String,
+   *      Object...)
    */
   public ConversionException(Throwable cause, boolean enableSuppression, boolean writableStackTrace,
       String msgOrFormat, Object... args) {
@@ -60,9 +51,7 @@ public class ConversionException extends CorantRuntimeException {
   }
 
   /**
-   * @param cause
-   * @param msgOrFormat
-   * @param args
+   * @see CorantRuntimeException#CorantRuntimeException(Throwable, String, Object...)
    */
   public ConversionException(Throwable cause, String msgOrFormat, Object... args) {
     super(cause, msgOrFormat, args);

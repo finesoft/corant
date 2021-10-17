@@ -13,7 +13,7 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORGINAL;
+import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_ENVIRONMENT_ORDINAL;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class SystemEnvironmentConfigSource implements ConfigSource, Serializable
 
       }
     }
-    return SYSTEM_ENVIRONMENT_ORGINAL;
+    return SYSTEM_ENVIRONMENT_ORDINAL;
   }
 
   @Override

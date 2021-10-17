@@ -28,8 +28,8 @@ import org.corant.shared.util.Streams;
  * corant-shared
  *
  * <p>
- * Object that representation of a resource that can be loaded from URL, class, file system or
- * inputstream.
+ * Object that representation of a resource that can be loaded from URL, class, file system or input
+ * stream.
  * </p>
  *
  * @author bingo 下午3:19:30

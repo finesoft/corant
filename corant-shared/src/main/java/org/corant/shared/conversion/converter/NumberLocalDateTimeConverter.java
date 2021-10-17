@@ -64,7 +64,7 @@ public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Numb
   @Override
   protected LocalDateTime convert(Number value, Map<String, ?> hints) throws Exception {
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
-    if (!ozoneId.isPresent()) {
+    if (ozoneId.isEmpty()) {
       if (!isStrict(hints)) {
         warn(LocalDateTime.class, value);
         if (ChronoUnit.SECONDS

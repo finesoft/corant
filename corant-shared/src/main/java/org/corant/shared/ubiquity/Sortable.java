@@ -63,8 +63,8 @@ public interface Sortable {
    * -1 * compare(s1, s2)
    * </pre>
    *
-   * @param s1
-   * @param s2
+   * @param s1 the first {@code Sortable} to compare
+   * @param s2 the second {@code Sortable} to compare
    * @see #compare(Sortable, Sortable)
    */
   static int reverseCompare(Sortable s1, Sortable s2) {

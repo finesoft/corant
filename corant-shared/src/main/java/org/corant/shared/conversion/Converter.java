@@ -23,7 +23,7 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-shared
  *
  * Object converter, used for conversion between objects, the generic parameter S is the source type
- * that converter accept and the generic parameter T is the target type that converter will convert
+ * that converter accepts and the generic parameter T is the target type that converter will convert
  * source to.
  *
  * <p>

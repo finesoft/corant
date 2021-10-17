@@ -74,9 +74,9 @@ public class ConverterRegistry {
    * the conversion pipeline, the conversion pipeline will also be removed, but the converter
    * pipeline may be reorganized when necessary.
    *
-   * @param <S>
-   * @param <T>
-   * @param converter deregister
+   * @param <S> the source type
+   * @param <T> the target type
+   * @param converter the converter to be deregistered
    */
   public static synchronized <S, T> void deregister(Converter<S, T> converter) {
     Class[] type = resolveTypes(converter);
@@ -90,9 +90,9 @@ public class ConverterRegistry {
    * conversion pipeline will also be removed, but the converter pipeline may be reorganized when
    * necessary.
    *
-   * @param <S>
-   * @param <T>
-   * @param converterFactory deregister
+   * @param <S> the source type
+   * @param <T> the target type
+   * @param converterFactory the converter factory to be deregistered
    */
   public static synchronized <S, T> void deregister(ConverterFactory<S, T> converterFactory) {
     CONVERTER_FACTORIES.remove(converterFactory);
@@ -127,9 +127,9 @@ public class ConverterRegistry {
   /**
    * Register a converter
    *
-   * @param <S>
-   * @param <T>
-   * @param converter register
+   * @param <S> the source type
+   * @param <T> the target type
+   * @param converter the converter to be register
    */
   public static synchronized <S, T> void register(Converter<S, T> converter) {
     Class[] types = resolveTypes(converter);
@@ -139,9 +139,9 @@ public class ConverterRegistry {
   /**
    * Register a converter factory
    *
-   * @param <S>
-   * @param <T>
-   * @param converterFactory register
+   * @param <S> the source type
+   * @param <T> the target type
+   * @param converterFactory the converter factory to be registered
    */
   public static synchronized <S, T> void register(ConverterFactory<S, T> converterFactory) {
     if (converterFactory != null && !CONVERTER_FACTORIES.contains(converterFactory)) {
@@ -151,10 +151,10 @@ public class ConverterRegistry {
   }
 
   /**
-   * Register not support type conversion
+   * Register not support type conversion for fast interrupt lookup.
    *
-   * @param sourceClass
-   * @param targetClass registerNotSupportType
+   * @param sourceClass the source class
+   * @param targetClass the target class
    */
   public static synchronized void registerNotSupportType(Class<?> sourceClass,
       Class<?> targetClass) {
@@ -162,9 +162,9 @@ public class ConverterRegistry {
   }
 
   /**
-   * Register not support type conversion
+   * Register not support type conversion for fast interrupt lookup.
    *
-   * @param converterType registerNotSupportType
+   * @param converterType the converter that we don't support
    */
   public static synchronized void registerNotSupportType(ConverterType converterType) {
     if (!NOT_SUPPORT_TYPES.contains(converterType) && NOT_SUPPORT_TYPES.add(converterType)
@@ -265,7 +265,7 @@ public class ConverterRegistry {
   static Class[] resolveTypes(Converter<?, ?> converter) {
     Class[] classes = resolveClasses(
         Types.getParameterizedTypes(getUserClass(shouldNotNull(converter)), Converter.class));
-    shouldBeTrue(classes.length == 2, "The converter %s parametered type must be actual type!",
+    shouldBeTrue(classes.length == 2, "The converter %s parameterized type must be actual type!",
         converter.toString());
     return classes;
   }
@@ -274,7 +274,7 @@ public class ConverterRegistry {
     Type[] types = Types.getParameterizedTypes(getUserClass(shouldNotNull(converterFactory)),
         ConverterFactory.class);
     shouldBeTrue(types.length == 2 && types[0] instanceof Class,
-        "The converter %s parametered type must be actual type!", converterFactory.toString());
+        "The converter %s parameterized type must be actual type!", converterFactory.toString());
     return types;
   }
 

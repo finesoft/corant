@@ -75,7 +75,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
   /**
    * Returns the radix contained in hints, or 10 if it does not exist.
    *
-   * @param hints the hints may contains radix
+   * @param hints the hints may contain radix
    */
   protected static Integer getHintsRadix(Map<String, ?> hints) {
     return ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_RADIX_KEY, 10);
@@ -84,7 +84,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
   /**
    * Returns whether the hint contains unsigned
    *
-   * @param hints the hints may contains unsigned
+   * @param hints the hints may contain unsigned
    */
   protected static boolean isHintsUnsigned(Map<String, ?> hints) {
     return ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_UNSIGNED_KEY, false);

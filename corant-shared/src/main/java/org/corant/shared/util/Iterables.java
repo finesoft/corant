@@ -63,7 +63,7 @@ public class Iterables {
    * @param <C> the collection type
    * @param supplier the collection instance builder
    * @param objects the array
-   * @return an collection that combined by the passed in array
+   * @return a collection that combined by the passed in array
    */
   @SafeVarargs
   public static <E, C extends Collection<E>> C collectionOf(final IntFunction<C> supplier,
@@ -86,7 +86,7 @@ public class Iterables {
    * @param <C> the collection type
    * @param supplier the collection instance builder
    * @param it the iterator
-   * @return an collection that combined by the passed in iterator
+   * @return a collection that combined by the passed in iterator
    */
   public static <E, C extends Collection<E>> C collectionOf(final Supplier<C> supplier,
       final Iterator<? extends E> it) {
@@ -288,9 +288,10 @@ public class Iterables {
    * element.
    *
    * @param <E> the element type
-   * @param iterator the iterator that use to retrieve the index-th value
+   * @param iterator the iterator that used to retrieve the index-th value
    * @param index the index
    */
+  @Deprecated
   public static <E> E get(final Iterator<? extends E> iterator, final int index) {
     int i = index;
     if (i < 0) {
@@ -307,7 +308,7 @@ public class Iterables {
   }
 
   /**
-   * Converts an array to an non-null iterable
+   * Converts an array to a non-null iterable
    *
    * @param <E> the element type
    * @param objects the elements array
@@ -341,7 +342,7 @@ public class Iterables {
   }
 
   /**
-   * Converts an enumeration to an non-null iterable
+   * Converts an enumeration to a non-null iterable
    *
    * @param <E> the element type
    * @param enums the enumeration that contain the index-th value

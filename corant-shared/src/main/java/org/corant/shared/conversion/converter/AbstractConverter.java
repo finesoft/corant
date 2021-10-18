@@ -118,7 +118,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    * @param value the object to be converted, do not need to check for null.
    * @param hints the conversion hints use to intervene in the conversion process
    * @return the converted value
-   * @throws Exception exception occurred during the conversion process
+   * @throws Exception occurred during the conversion process
    */
   protected abstract T convert(S value, Map<String, ?> hints) throws Exception;
 

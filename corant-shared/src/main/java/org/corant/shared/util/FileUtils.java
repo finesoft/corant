@@ -207,7 +207,7 @@ public class FileUtils {
   /**
    * Returns the file content type corresponding to the path.
    *
-   * @param filePath
+   * @param filePath the file path
    * @return getContentType
    */
   public static String getContentType(String filePath) {
@@ -222,7 +222,7 @@ public class FileUtils {
   /**
    * Returns the file base name from file, base name is the file name without extension.
    *
-   * @param file
+   * @param file the file
    * @return getFileBaseName
    */
   public static String getFileBaseName(File file) {
@@ -232,7 +232,7 @@ public class FileUtils {
   /**
    * Returns the file base name from path, base name is the file name without extension.
    *
-   * @param path
+   * @param path the path
    * @return getFileBaseName
    */
   public static String getFileBaseName(String path) {
@@ -251,7 +251,7 @@ public class FileUtils {
   /**
    * Returns the file name from path
    *
-   * @param path
+   * @param path the file path
    * @return getFileName
    */
   public static String getFileName(String path) {
@@ -267,7 +267,7 @@ public class FileUtils {
   /**
    * Returns the file extension from path
    *
-   * @param path
+   * @param path the file path
    * @return getFileNameExtension
    */
   public static String getFileNameExtension(String path) {
@@ -288,8 +288,8 @@ public class FileUtils {
    * Compare whether two files are the same by byte, if the file is a directory or the file is not
    * readable, it returns False.
    *
-   * @param file1
-   * @param file2
+   * @param file1 the file to be compared
+   * @param file2 the file to be compared
    * @return
    * @throws IOException isSameContent
    */

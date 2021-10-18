@@ -127,13 +127,25 @@ public class Methods {
     }
   }
 
+  /**
+   * Code base from from apache.org
+   * <p>
+   * Returns the aggregate number of inheritance hops between assignable argument class types.
+   * Returns -1 if the arguments aren't assignable. Fills a specific purpose for getMatchingMethod
+   * and is not generalized.
+   * </p>
+   *
+   * @param classArray
+   * @param toClassArray
+   * @return the aggregate number of inheritance hops between assignable argument class types.
+   *
+   */
   static int distance(final Class<?>[] classArray, final Class<?>[] toClassArray) {
     int answer = 0;
     if (!isParameterTypesMatching(classArray, toClassArray, true)) {
       return -1;
     }
     for (int offset = 0; offset < classArray.length; offset++) {
-      // Note InheritanceUtils.distance() uses different scoring system.
       if (classArray[offset].equals(toClassArray[offset])) {
         continue;
       } else if (Classes.isAssignable(classArray[offset], toClassArray[offset], true)
@@ -153,7 +165,7 @@ public class Methods {
     Classes.getAllInterfaces(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
         .forEach(im -> {
           if (im.isDefault() && methods.stream().noneMatch(m -> m.getName().equals(im.getName())
-              && Objects.deepEquals(m.getParameterTypes(), im.getParameterTypes()))) {
+              && isParameterTypesMatching(m.getParameterTypes(), im.getParameterTypes(), true))) {
             methods.add(im);
           }
         });

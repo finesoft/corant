@@ -131,10 +131,10 @@ public class ClassPathResourceScanner {
   }
 
   /**
-   * Build an war class loader, Careful use may result in leakage. We only extract WEB-INF folder to
+   * Build a war class loader, Careful use may result in leakage. We only extract WEB-INF folder to
    * default temporary-file directory.
    *
-   * @param path the temporary-file path that use to place the war resources.
+   * @param path the temporary-file path that used to place the war resources.
    * @param parentClassLoader the parent class loader
    * @see Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute...)
    * @return The war class loader
@@ -367,7 +367,7 @@ public class ClassPathResourceScanner {
   }
 
   protected void scanWar(File file, ClassLoader parent) throws IOException {
-    // We need to build an temporary war class loader;
+    // We need to build a temporary war class loader;
     ClassPathResourceScanner warScanner = new ClassPathResourceScanner(root, filter);
     final URLClassLoader warClassLoader = buildWarClassLoader(file.toPath(), parent);
     for (URL url : warClassLoader.getURLs()) {
@@ -393,7 +393,7 @@ public class ClassPathResourceScanner {
       }
     } catch (URISyntaxException ignore) {
       logger.log(Level.WARNING, ignore,
-          () -> String.format("Can not extract file uri from %s.", jarUri.toString()));
+          () -> String.format("Can not extract file uri from %s.", jarUri));
     }
     return null;
   }

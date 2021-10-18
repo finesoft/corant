@@ -196,7 +196,7 @@ public class Strings {
    * </pre>
    *
    * @param str the string
-   * @param supplier the supplier use to provide the default value
+   * @param supplier the supplier used to provide the default value
    */
   public static <T extends CharSequence> T defaultBlank(final T str, final Supplier<T> supplier) {
     return isBlank(str) ? supplier == null ? null : supplier.get() : str;
@@ -1023,8 +1023,8 @@ public class Strings {
    *
    *
    * Returns a string that is a substring of this string. The substring begins at the specified
-   * beginIndex and extends to the character at index endIndex - 1. Thus the length of the substring
-   * is endIndex-beginIndex.
+   * beginIndex and extends to the character at index endIndex - 1. Thus, the length of the
+   * substring is endIndex-beginIndex.
    *
    * <p>
    * Note: If the given index < 0 it represents the reverse order index position of the given

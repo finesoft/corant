@@ -136,7 +136,7 @@ public class Texts {
    * @param is the CSV format input stream
    * @param charset
    * @param offset the offset start from 0
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
    */
   public static Stream<List<String>> asCSVLines(final InputStream is, final Charset charset,
       final int offset, final BiPredicate<Integer, String> terminator) {
@@ -218,7 +218,7 @@ public class Texts {
    * @param is the input stream
    * @param charset
    * @param offset the offset start from 0, use for skip lines
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
    * @param delimiter the field delimiter
    */
   public static Stream<List<String>> asXSVLines(final InputStream is, final Charset charset,
@@ -359,7 +359,7 @@ public class Texts {
    *
    *
    * @param file the file to read
-   * @param offset use to skip lines, the offset start from 0
+   * @param offset used to skip lines, the offset start from 0
    * @param limit the number of lines returned
    */
   public static Stream<String> lines(final File file, int offset, int limit) {
@@ -396,8 +396,8 @@ public class Texts {
    *
    * @param is the text input stream
    * @param charset the charset
-   * @param offset use to skip lines, the offset start from 0
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   * @param offset used to skip lines, the offset start from 0
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
    */
   public static Stream<String> lines(final InputStream is, final Charset charset, final int offset,
       final BiPredicate<Integer, String> terminator) {
@@ -410,8 +410,8 @@ public class Texts {
    * Note: The caller must maintain resource release by himself
    *
    * @param is the text input stream
-   * @param offset use to skip lines, the offset start from 0
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   * @param offset used to skip lines, the offset start from 0
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
    */
   public static Stream<String> lines(final InputStream is, final int offset,
       final BiPredicate<Integer, String> terminator) {
@@ -439,7 +439,7 @@ public class Texts {
    *
    * @param isr the text input stream reader
    * @param offset the offset start from 0
-   * @param terminator use to brake out the stream, terminator return true means need to brake out
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
    */
   public static Stream<String> lines(final InputStreamReader isr, final int offset,
       final BiPredicate<Integer, String> terminator) {
@@ -458,9 +458,9 @@ public class Texts {
   }
 
   /**
-   * Parse CSV line to fields list
+   * Parse CSV line to field list
    *
-   * NOTE: Some code come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform
+   * NOTE: Some codes come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform
    * me(finesoft@gmail.com).
    *
    * @param line the CSV format line

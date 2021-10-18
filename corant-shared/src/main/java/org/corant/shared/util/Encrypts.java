@@ -34,6 +34,7 @@ import org.corant.shared.util.Bytes.BitArray;
  *
  * @author bingo 上午12:29:41
  */
+@Deprecated
 public class Encrypts {
 
   public static final String DFLT_CHARSET_NAME = "utf-8";

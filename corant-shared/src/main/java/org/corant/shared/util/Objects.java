@@ -204,7 +204,7 @@ public class Objects {
 
   /**
    * Return the max one, if the two parameters are the same, then return the first. If any of the
-   * comparables are null, return the greater of the non-null objects.
+   * comparable are null, return the greatest of the non-null objects.
    *
    * @param <T> the comparable type
    * @param comparables the given comparable object to find out the max one
@@ -234,7 +234,7 @@ public class Objects {
 
   /**
    * Return the min one, if the two parameters are the same, then return the first. If any of the
-   * comparables are null, return the lesser of the non-null objects.
+   * comparables are null, return the least of the non-null objects.
    *
    * @param <T> the comparable type
    * @param comparables the given comparable object to find out the min one

@@ -73,7 +73,7 @@ public class Identifiers {
   }
 
   /**
-   * The general snow flake UUID generator, Use time increment as a prefix, use numerical increment
+   * The general snowflake UUID generator, Use time increment as a prefix, use numerical increment
    * as a suffix, support multi-segment infix, return 64-bit unsigned long UUID.
    *
    *
@@ -120,7 +120,7 @@ public class Identifiers {
      * Construct a generator
      *
      * @param unit The prefix time unit, current we only support MILLIS and SECOND
-     * @param delayedTimingMs less then 1 means no delay. no delay means that the time will be
+     * @param delayedTimingMs less than 1 means no delay. no delay means that the time will be
      *        retrieved each time the ID is generated; delay means that the time will be compared
      *        each time the ID is generated, and the time will be retrieved when the serial number
      *        overflows or the time exceeds the delay; using delay will reduce the pressure of time
@@ -542,7 +542,7 @@ public class Identifiers {
   }
 
   /**
-   * The simple snow flake buffered UUID generator.
+   * The simple snowflake buffered UUID generator.
    *
    * <pre>
    * Supports 10-bit work processes, 12-bit serial numbers, 42-bit time stamps,

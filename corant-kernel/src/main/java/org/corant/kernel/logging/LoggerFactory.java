@@ -83,6 +83,11 @@ public class LoggerFactory {
   @Produces
   @Dependent
   protected Logger createLogger(InjectionPoint injectionPoint) {
-    return Logger.getLogger(getUserClass(injectionPoint.getMember().getDeclaringClass()).getName());
+    if (injectionPoint.getMember() != null) {
+      return Logger
+          .getLogger(getUserClass(injectionPoint.getMember().getDeclaringClass()).getName());
+    } else {
+      return Logger.getGlobal();
+    }
   }
 }

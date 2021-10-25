@@ -30,6 +30,10 @@ public class Log4jLoggerFactory {
   @Produces
   @Dependent
   Logger createLogger(InjectionPoint injectionPoint) {
-    return LogManager.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+    if (injectionPoint.getMember() != null) {
+      return LogManager.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+    } else {
+      return LogManager.getRootLogger();
+    }
   }
 }

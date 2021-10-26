@@ -364,8 +364,8 @@ public class JPAQueries {
     };
   }
 
-  public static JPAQuery storedProcedureQuery(final String procedureName) {
-    return new JPAQuery() {
+  public static AbstractJPAQuery storedProcedureQuery(final String procedureName) {
+    return new AbstractJPAQuery() {
       @Override
       public String toString() {
         return "Stored proceduce query: " + procedureName + getParameterDescription();
@@ -378,8 +378,9 @@ public class JPAQueries {
     };
   }
 
-  public static JPAQuery storedProcedureQuery(final String procedureName, final Class<?>... type) {
-    return new JPAQuery() {
+  public static AbstractJPAQuery storedProcedureQuery(final String procedureName,
+      final Class<?>... type) {
+    return new AbstractJPAQuery() {
       @Override
       public String toString() {
         return "Stored proceduce query: " + procedureName + getParameterDescription();
@@ -392,9 +393,9 @@ public class JPAQueries {
     };
   }
 
-  public static JPAQuery storedProcedureQuery(final String procedureName,
+  public static AbstractJPAQuery storedProcedureQuery(final String procedureName,
       final String... resultSetMappings) {
-    return new JPAQuery() {
+    return new AbstractJPAQuery() {
       @Override
       public String toString() {
         return "Stored proceduce query: " + procedureName + getParameterDescription();
@@ -429,6 +430,149 @@ public class JPAQueries {
         || URI.class.isAssignableFrom(type) || TemporalAmount.class.isAssignableFrom(type)
         || Currency.class.isAssignableFrom(type) || Locale.class.isAssignableFrom(type)
         || TimeZone.class.isAssignableFrom(type);
+  }
+
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午6:05:43
+   *
+   */
+  public static abstract class AbstractJPAQuery extends AbstractQuery {
+
+    public AbstractJPAQuery entityManager(final EntityManager entityManager) {
+      setEntityManagerSupplier(
+          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
+      return this;
+    }
+
+    public AbstractJPAQuery entityManager(final Supplier<EntityManager> entityManagerSupplier) {
+      setEntityManagerSupplier(entityManagerSupplier);
+      return this;
+    }
+
+    /**
+     * {@link Query#setFirstResult(int)}
+     */
+    public AbstractJPAQuery firstResult(int firstResult) {
+      setFirstResult(firstResult);
+      return this;
+    }
+
+    /**
+     * {@link Query#setFlushMode(FlushModeType)}
+     */
+    public AbstractJPAQuery flushMode(FlushModeType flushMode) {
+      setFlushMode(flushMode);
+      return this;
+    }
+
+    /**
+     * Execute a SELECT query that returns a single result.
+     *
+     * @param <T> the single result type
+     * @return get
+     */
+    public <T> T get() {
+      setMaxResults(2);
+      List<T> result = this.select();
+      int size = sizeOf(result);
+      if (size == 1) {
+        return result.get(0);
+      } else if (size > 1) {
+        throw new NonUniqueResultException("The query return multiple results");
+      }
+      return null;
+    }
+
+    /**
+     * Set the query hint pairs.
+     *
+     * {@link Query#setHint(String, Object)}
+     */
+    public AbstractJPAQuery hints(Object... hints) {
+      setHints(hints);
+      return this;
+    }
+
+    /**
+     * {@link Query#setLockMode(LockModeType)}
+     */
+    public AbstractJPAQuery lockMode(LockModeType lockMode) {
+      setLockMode(lockMode);
+      return this;
+    }
+
+    /**
+     * {@link Query#setMaxResults(int)}
+     */
+    public AbstractJPAQuery maxResults(int maxResults) {
+      setMaxResults(maxResults);
+      return this;
+    }
+
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
+    public AbstractJPAQuery parameters(List<?> parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    /**
+     * Bind named query parameters, the query parameter name same as the key of the given
+     * parameters.
+     *
+     * @param parameters named parameters
+     * @return parameters
+     * @see Query#setParameter(String, Object)
+     */
+    public AbstractJPAQuery parameters(final Map<?, ?> parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    /**
+     * Bind positional query parameters, the query parameter position same as the given parameters
+     * array index.
+     *
+     * @param parameters positional parameters
+     * @see Query#setParameter(int, Object)
+     */
+    public AbstractJPAQuery parameters(final Object... parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    /**
+     * Execute a SELECT query and return the query results as List.
+     *
+     * @param <T> the result record type
+     * @return select
+     */
+    @SuppressWarnings("unchecked")
+    public <T> List<T> select() {
+      return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
+    }
+
+    /**
+     * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
+     * default this method delegates to getResultList().stream(),however persistence provider may
+     * choose to override this method to provide additional capabilities.
+     *
+     * @param <T> the type of the resulting instance(s)
+     * @return a stream of the results
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Stream<T> stream() {
+      return populateQuery(createQuery()).getResultStream();
+    }
+
+    protected abstract Query createQuery();
   }
 
   /**
@@ -560,74 +704,61 @@ public class JPAQueries {
    * @author bingo 下午6:05:43
    *
    */
-  public static abstract class JPAQuery extends AbstractQuery {
+  public static abstract class JPAQuery extends AbstractJPAQuery {
 
+    @Override
     public JPAQuery entityManager(final EntityManager entityManager) {
       setEntityManagerSupplier(
           () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
       return this;
     }
 
+    @Override
     public JPAQuery entityManager(final Supplier<EntityManager> entityManagerSupplier) {
       setEntityManagerSupplier(entityManagerSupplier);
       return this;
     }
 
     /**
-     * {@link Query#setFirstResult(int)}
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery firstResult(int firstResult) {
       setFirstResult(firstResult);
       return this;
     }
 
     /**
-     * {@link Query#setFlushMode(FlushModeType)}
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery flushMode(FlushModeType flushMode) {
       setFlushMode(flushMode);
       return this;
     }
 
     /**
-     * Execute a SELECT query that returns a single result.
-     *
-     * @param <T> the single result type
-     * @return get
+     * {@inheritDoc}
      */
-    public <T> T get() {
-      setMaxResults(2);
-      List<T> result = this.select();
-      int size = sizeOf(result);
-      if (size == 1) {
-        return result.get(0);
-      } else if (size > 1) {
-        throw new NonUniqueResultException("The query return multiple results");
-      }
-      return null;
-    }
-
-    /**
-     * Set the query hint pairs.
-     *
-     * {@link Query#setHint(String, Object)}
-     */
+    @Override
     public JPAQuery hints(Object... hints) {
       setHints(hints);
       return this;
     }
 
     /**
-     * {@link Query#setLockMode(LockModeType)}
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery lockMode(LockModeType lockMode) {
       setLockMode(lockMode);
       return this;
     }
 
     /**
-     * {@link Query#setMaxResults(int)}
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery maxResults(int maxResults) {
       setMaxResults(maxResults);
       return this;
@@ -665,67 +796,32 @@ public class JPAQueries {
     }
 
     /**
-     * Bind positional query parameters, the query parameter position same as the given parameters
-     * index.
-     *
-     * @param parameters positional parameters
-     * @see Query#setParameter(int, Object)
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
     }
 
     /**
-     * Bind named query parameters, the query parameter name same as the key of the given
-     * parameters.
-     *
-     * @param parameters named parameters
-     * @return parameters
-     * @see Query#setParameter(String, Object)
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery parameters(final Map<?, ?> parameters) {
       setParameters(parameters);
       return this;
     }
 
     /**
-     * Bind positional query parameters, the query parameter position same as the given parameters
-     * array index.
-     *
-     * @param parameters positional parameters
-     * @see Query#setParameter(int, Object)
+     * {@inheritDoc}
      */
+    @Override
     public JPAQuery parameters(final Object... parameters) {
       setParameters(parameters);
       return this;
     }
 
-    /**
-     * Execute a SELECT query and return the query results as List.
-     *
-     * @param <T> the result record type
-     * @return select
-     */
-    @SuppressWarnings("unchecked")
-    public <T> List<T> select() {
-      return defaultObject(populateQuery(createQuery()).getResultList(), ArrayList::new);
-    }
-
-    /**
-     * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
-     * default this method delegates to getResultList().stream(),however persistence provider may
-     * choose to override this method to provide additional capabilities.
-     *
-     * @param <T> the type of the resulting instance(s)
-     * @return a stream of the results
-     */
-    @SuppressWarnings("unchecked")
-    public <T> Stream<T> stream() {
-      return populateQuery(createQuery()).getResultStream();
-    }
-
-    protected abstract Query createQuery();
   }
 
   /**

@@ -35,6 +35,7 @@ import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.Repository;
 import org.corant.modules.jpa.shared.JPAQueries;
+import org.corant.modules.jpa.shared.JPAQueries.AbstractJPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.JPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 import org.corant.shared.util.Objects;
@@ -361,16 +362,17 @@ public interface JPARepository extends Repository<Query> {
     return defaultObject(query.getResultList(), ArrayList::new);
   }
 
-  default JPAQuery storedProcedureQuery(final String procedureName) {
+  default AbstractJPAQuery storedProcedureQuery(final String procedureName) {
     return JPAQueries.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
   }
 
-  default JPAQuery storedProcedureQuery(final String procedureName, final Class<?>... type) {
+  default AbstractJPAQuery storedProcedureQuery(final String procedureName,
+      final Class<?>... type) {
     return JPAQueries.storedProcedureQuery(procedureName, type)
         .entityManager(this::getEntityManager);
   }
 
-  default JPAQuery storedProcedureQuery(final String procedureName,
+  default AbstractJPAQuery storedProcedureQuery(final String procedureName,
       final String... resultSetMappings) {
     return JPAQueries.storedProcedureQuery(procedureName, resultSetMappings)
         .entityManager(this::getEntityManager);

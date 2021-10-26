@@ -15,6 +15,7 @@ package org.corant.devops.test.unit.web;
 
 import static org.corant.shared.util.Maps.mapOf;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -57,16 +58,33 @@ public class RestAssuredInitializer {
   @Any
   private Instance<AuthenticationScheme> authSchema;
 
-  public static void initializeMultipartFormParam(RequestSpecification rs,
-      Map<String, Object> params) {
-    params.forEach((k, v) -> rs.multiPart(new IdiotMultiPartSpecification(k, v)));
-  }
-
   public static RequestSpecification multipartOf(Map<String, Object> params) {
     RequestSpecification rs = RestAssured.given()
         .contentType("multipart/form-data; charset=" + Defaults.DFLT_CHARSET_STR);
     params.putIfAbsent("_charset_", Defaults.DFLT_CHARSET_STR);
-    initializeMultipartFormParam(rs, params);
+    return withMultipartFormData(rs, params);
+  }
+
+  public static RequestSpecification withMultipartFormData(RequestSpecification rs,
+      Map<String, Object> params) {
+    params.forEach((k, vs) -> {
+      if (vs instanceof Iterable) {
+        for (Object v : (Iterable<?>) vs) {
+          rs.multiPart(new IdiotMultiPartSpecification(k, v));
+        }
+      } else if (vs instanceof Object[]) {
+        for (Object v : (Object[]) vs) {
+          rs.multiPart(new IdiotMultiPartSpecification(k, v));
+        }
+      } else if (vs.getClass().isArray()) {
+        int len = Array.getLength(vs);
+        for (int i = 0; i < len; i++) {
+          rs.multiPart(new IdiotMultiPartSpecification(k, Array.get(vs, i)));
+        }
+      } else {
+        rs.multiPart(new IdiotMultiPartSpecification(k, vs));
+      }
+    });
     return rs;
   }
 

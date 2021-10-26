@@ -81,6 +81,14 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
     }
   }
 
+  /**
+   * {@inheritDoc}}
+   * <p>
+   * Note: In some implementations that require a separate total record query, if the offset exceeds
+   * the total number of results in the query result set, the total number of returned paging result
+   * set results is 0.
+   * </p>
+   */
   @Override
   public <T> Paging<T> page(String q, Object p) {
     try {
@@ -130,6 +138,67 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
   protected abstract <T> Paging<T> doPage(String q, Object p) throws Exception;
 
   protected abstract <T> List<T> doSelect(String q, Object p) throws Exception;
+
+  /**
+   * Actual execution method for {@link #stream(String, Object)}
+   *
+   * @param <T> the result record type
+   * @param queryName the query name
+   * @param param the query parameter
+   * @return stream the query result stream
+   */
+  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter param) {
+    return streamOf(new Iterator<T>() {
+      Forwarding<T> buffer = null;
+      int counter = 0;
+      T next = null;
+
+      @Override
+      public boolean hasNext() {
+        initialize();
+        if (!param.terminateIf(counter, next)) {
+          if (!buffer.hasResults()) {
+            if (buffer.hasNext()) {
+              buffer.with(doForward(queryName, param.forward(next)));
+              return buffer.hasResults();
+            }
+          } else {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      @Override
+      public T next() {
+        initialize();
+        if (!buffer.hasResults()) {
+          throw new NoSuchElementException();
+        }
+        counter++;
+        next = buffer.getResults().remove(0);
+        return next;
+      }
+
+      private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
+        if (parameter.needRetry()) {
+          return Retry.retryer().times(parameter.getRetryTimes())
+              .interval(parameter.getRetryInterval())
+              .breaker(() -> Corant.current() != null && Corant.current().isRunning())
+              .execute(() -> forward(queryName, parameter));
+        } else {
+          return forward(queryName, parameter);
+        }
+      }
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = defaultObject(doForward(queryName, param), Forwarding::inst);
+          counter = buffer.hasResults() ? 1 : 0;
+        }
+      }
+    });
+  }
 
   protected <T> void fetch(List<T> results, Querier parentQuerier) {
     List<FetchQuery> fetchQueries;
@@ -294,67 +363,6 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         postFetch(fr, parentQuerier, result);
       }
     }
-  }
-
-  /**
-   * Actual execution method for {@link #stream(String, Object)}
-   *
-   * @param <T> the result record type
-   * @param queryName the query name
-   * @param param the query parameter
-   * @return stream the query result stream
-   */
-  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter param) {
-    return streamOf(new Iterator<T>() {
-      Forwarding<T> buffer = null;
-      int counter = 0;
-      T next = null;
-
-      @Override
-      public boolean hasNext() {
-        initialize();
-        if (!param.terminateIf(counter, next)) {
-          if (!buffer.hasResults()) {
-            if (buffer.hasNext()) {
-              buffer.with(doForward(queryName, param.forward(next)));
-              return buffer.hasResults();
-            }
-          } else {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      @Override
-      public T next() {
-        initialize();
-        if (!buffer.hasResults()) {
-          throw new NoSuchElementException();
-        }
-        counter++;
-        next = buffer.getResults().remove(0);
-        return next;
-      }
-
-      private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
-        if (parameter.needRetry()) {
-          return Retry.retryer().times(parameter.getRetryTimes())
-              .interval(parameter.getRetryInterval())
-              .breaker(() -> Corant.current() != null && Corant.current().isRunning())
-              .execute(() -> forward(queryName, parameter));
-        } else {
-          return forward(queryName, parameter);
-        }
-      }
-
-      private void initialize() {
-        if (buffer == null) {
-          buffer = defaultObject(doForward(queryName, param), Forwarding::inst);
-          counter = buffer.hasResults() ? 1 : 0;
-        }
-      }
-    });
   }
 
   @PreDestroy

@@ -254,11 +254,15 @@ public class DistPackager implements Packager {
     } else {
       log.debug(String.format("(corant) create temp entry file for entry %s.", entryName));
       file = Files.createTempFile("corant-mojo-pack", entry.getName()).toFile();
-      IOUtils.copy(entry.getInputStream(), new FileOutputStream(file));
+      try (OutputStream os = new FileOutputStream(file)) {
+        IOUtils.copy(entry.getInputStream(), os);
+      }
       file.deleteOnExit();
     }
     aos.putArchiveEntry(aos.createArchiveEntry(file, entryName));
-    IOUtils.copy(new FileInputStream(file), aos);
+    try (InputStream fis = new FileInputStream(file)) {
+      IOUtils.copy(fis, aos);
+    }
     aos.closeArchiveEntry();
     log.debug(String.format("(corant) packaged entry %s.", entryName));
   }

@@ -14,6 +14,7 @@
 package org.corant.modules.jpa.shared;
 
 import static org.corant.context.Beans.select;
+import static org.corant.modules.jpa.shared.JPQLHelper.getTotalQuery;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -633,6 +634,37 @@ public class JPAQueries {
     }
 
     /**
+     * Execute SELECT query and return the paging result set, the paging result set contains paging
+     * results and the total number of results in the query result.
+     *
+     * Note: If the offset exceeds the total number of results in the query result, the total number
+     * of returned paging result set results is 0.
+     *
+     * @param <T> the result object type
+     * @param offset the position of the first result to retrieve.
+     * @param limit the maximum number of results to retrieve.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> PagingResultSet<T> page(int offset, int limit) {
+      PagingResultSet<T> rs = new PagingResultSet<>();
+      rs.offset = max(offset, 0);
+      rs.limit = max(limit, 1);
+      Query query = populateQuery(createQuery());
+      query.setFirstResult(rs.offset).setMaxResults(rs.limit);
+      rs.results = defaultObject(query.getResultList(), ArrayList::new);
+      int size = rs.results.size();
+      if (size > 0) {
+        if (size < limit) {
+          rs.total = rs.offset + size;
+        } else {
+          rs.total = ((Number) populateQuery(getTotalQuery(query, entityManagerSupplier.get()))
+              .setMaxResults(1).getSingleResult()).intValue();
+        }
+      }
+      return rs;
+    }
+
+    /**
      * Bind positional query parameters, the query parameter position same as the given parameters
      * index.
      *
@@ -694,6 +726,36 @@ public class JPAQueries {
     }
 
     protected abstract Query createQuery();
+  }
+
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午3:13:23
+   *
+   */
+  public static class PagingResultSet<T> {
+    protected int total;
+    protected int offset;
+    protected int limit;
+    protected List<T> results = new ArrayList<>();
+
+    public int getLimit() {
+      return limit;
+    }
+
+    public int getOffset() {
+      return offset;
+    }
+
+    public List<T> getResults() {
+      return results;
+    }
+
+    public int getTotal() {
+      return total;
+    }
+
   }
 
   /**
@@ -785,6 +847,40 @@ public class JPAQueries {
     public TypedJPAQuery<T> maxResults(int maxResults) {
       setMaxResults(maxResults);
       return this;
+    }
+
+    /**
+     * Execute SELECT query and return the paging result set, the paging result set contains paging
+     * results and the total number of results in the query result.
+     *
+     * Note: If the offset exceeds the total number of results in the query result, the total number
+     * of returned paging result set results is 0.
+     *
+     * @param offset the position of the first result to retrieve.
+     * @param limit the maximum number of results to retrieve.
+     */
+    @SuppressWarnings("unchecked")
+    public PagingResultSet<T> page(int offset, int limit) {
+      PagingResultSet<T> rs = new PagingResultSet<>();
+      rs.offset = max(offset, 0);
+      rs.limit = max(limit, 1);
+      Query query = populateQuery(createQuery());
+      query.setFirstResult(rs.offset).setMaxResults(rs.limit);
+      if (resultType == null || converter == null) {
+        rs.results = defaultObject(query.getResultList(), ArrayList::new);
+      } else {
+        rs.results = convertTuples(converter, query.getResultList(), resultType);
+      }
+      int size = rs.results.size();
+      if (size > 0) {
+        if (size < limit) {
+          rs.total = rs.offset + size;
+        } else {
+          rs.total = ((Number) populateQuery(getTotalQuery(query, entityManagerSupplier.get()))
+              .setMaxResults(1).getSingleResult()).intValue();
+        }
+      }
+      return rs;
     }
 
     /**

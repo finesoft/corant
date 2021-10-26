@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.jpql;
 
-import static org.corant.modules.query.jpql.JpqlHelper.getCountJpql;
+import static org.corant.modules.jpa.shared.JPQLHelper.getTotalQL;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapEnum;
@@ -190,7 +190,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
         if (size < limit) {
           result.withTotal(offset + size);
         } else {
-          String totalSql = getCountJpql(ql);
+          String totalSql = getTotalQL(ql);
           log("total-> " + queryName, scriptParameter, totalSql);
           result.withTotal(
               ((Number) createQuery(em, totalSql, properties, resultClass, timeout, scriptParameter)

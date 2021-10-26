@@ -11,25 +11,32 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.jpql;
+package org.corant.modules.jpa.shared;
 
+import static org.corant.context.Beans.resolve;
 import java.util.Locale;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 /**
- * corant-modules-query-jpql
+ * corant-modules-jpa-shared
  *
  * @author bingo 下午3:01:05
  *
  */
-public class JpqlHelper {
+public class JPQLHelper {
 
-  public static String getCountJpql(String ql) {
+  public static String getTotalQL(String ql) {
     String queryString = ql;
     queryString =
         "select count(*) as n " + queryString.substring(shallowIndexOfWord(queryString, "from", 0));
     queryString = queryString.replaceAll("(?i)\\sorder(\\s)+by.+", " "); // 若存在order by则去除
     queryString = queryString.replaceAll("(?i)\\sjoin(\\s)+fetch\\s", " join "); // 若存在fetch则去除
     return queryString;
+  }
+
+  public static Query getTotalQuery(Query noTotalQuery, EntityManager em) {
+    return resolve(JPQLResolver.class).resolveTotalQuery(noTotalQuery, em);
   }
 
   /**
@@ -81,5 +88,10 @@ public class JpqlHelper {
     return index != -1 ? index + 1 : -1; // In case of match adding one
     // because of space placed in
     // front of search term.
+  }
+
+  @FunctionalInterface
+  public interface JPQLResolver {
+    Query resolveTotalQuery(Query noTotalQuery, EntityManager em);
   }
 }

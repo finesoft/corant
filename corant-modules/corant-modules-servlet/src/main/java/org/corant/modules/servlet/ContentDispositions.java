@@ -56,7 +56,7 @@ public class ContentDispositions {
       if (isRFC5987AttrChar(b)) {
         bos.write((char) b);
         index++;
-      } else if (b == '%') {
+      } else if (b == '%' && index + 3 < value.length) {
         char[] array = {(char) value[index + 1], (char) value[index + 2]};
         bos.write(Integer.parseInt(String.valueOf(array), 16));
         index += 3;
@@ -209,14 +209,14 @@ public class ContentDispositions {
     private final ZonedDateTime readDate;
 
     /**
-     * @param type
-     * @param name
-     * @param filename
-     * @param charset
-     * @param size
-     * @param creationDate
-     * @param modificationDate
-     * @param readDate
+     * @param type the disposition type.
+     * @param name the value of the name parameter.
+     * @param filename the value of the filename parameter.
+     * @param charset the charset defined in filename* parameter.
+     * @param size the value of the size parameter.
+     * @param creationDate the value of the creation-date parameter.
+     * @param modificationDate the value of the modification-date parameter.
+     * @param readDate the value of the read-date parameter.
      */
     public ContentDisposition(String type, String name, String filename, Charset charset, Long size,
         ZonedDateTime creationDate, ZonedDateTime modificationDate, ZonedDateTime readDate) {

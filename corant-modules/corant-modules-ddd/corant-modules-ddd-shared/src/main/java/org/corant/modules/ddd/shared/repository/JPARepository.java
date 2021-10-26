@@ -258,7 +258,7 @@ public interface JPARepository extends Repository<Query> {
    *
    * @param name name assigned to the stored procedure query in metadata
    */
-  default JPAQuery namedStoredProcedureQuery(final String name) {
+  default AbstractJPAQuery namedStoredProcedureQuery(final String name) {
     return JPAQueries.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
   }
 

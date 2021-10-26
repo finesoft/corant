@@ -185,8 +185,8 @@ public class JPAQueries {
    * @return JPAQuery
    * @see EntityManager#createNamedStoredProcedureQuery(String)
    */
-  public static JPAQuery namedStoredProcedureQuery(final String name) {
-    return new JPAQuery() {
+  public static AbstractJPAQuery namedStoredProcedureQuery(final String name) {
+    return new AbstractJPAQuery() {
       @Override
       public String toString() {
         return "Named stroed procedure query: " + name + getParameterDescription();

@@ -35,8 +35,8 @@ import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.Repository;
 import org.corant.modules.jpa.shared.JPAQueries;
-import org.corant.modules.jpa.shared.JPAQueries.AbstractJPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.JPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries.AdvancedJPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 import org.corant.shared.util.Objects;
 
@@ -238,7 +238,7 @@ public interface JPARepository extends Repository<Query> {
    * @param name the named query name
    * @return a JPAQuery
    */
-  default JPAQuery namedQuery(final String name) {
+  default AdvancedJPAQuery namedQuery(final String name) {
     return JPAQueries.namedQuery(name).entityManager(this::getEntityManager);
   }
 
@@ -258,7 +258,7 @@ public interface JPARepository extends Repository<Query> {
    *
    * @param name name assigned to the stored procedure query in metadata
    */
-  default AbstractJPAQuery namedStoredProcedureQuery(final String name) {
+  default JPAQuery namedStoredProcedureQuery(final String name) {
     return JPAQueries.namedStoredProcedureQuery(name).entityManager(this::getEntityManager);
   }
 
@@ -267,7 +267,7 @@ public interface JPARepository extends Repository<Query> {
    *
    * @param sqlString a native SQL query string
    */
-  default JPAQuery nativeQuery(final String sqlString) {
+  default AdvancedJPAQuery nativeQuery(final String sqlString) {
     return JPAQueries.nativeQuery(sqlString).entityManager(this::getEntityManager);
   }
 
@@ -288,7 +288,7 @@ public interface JPARepository extends Repository<Query> {
    * @param sqlString a native SQL query string
    * @param resultSetMapping the name of the result set mapping
    */
-  default JPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
+  default AdvancedJPAQuery nativeQuery(final String sqlString, final String resultSetMapping) {
     return JPAQueries.nativeQuery(sqlString, resultSetMapping)
         .entityManager(this::getEntityManager);
   }
@@ -314,7 +314,7 @@ public interface JPARepository extends Repository<Query> {
    *
    * @param qlString a Jakarta Persistence query string
    */
-  default JPAQuery query(final String qlString) {
+  default AdvancedJPAQuery query(final String qlString) {
     return JPAQueries.query(qlString).entityManager(this::getEntityManager);
   }
 
@@ -362,17 +362,17 @@ public interface JPARepository extends Repository<Query> {
     return defaultObject(query.getResultList(), ArrayList::new);
   }
 
-  default AbstractJPAQuery storedProcedureQuery(final String procedureName) {
+  default JPAQuery storedProcedureQuery(final String procedureName) {
     return JPAQueries.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
   }
 
-  default AbstractJPAQuery storedProcedureQuery(final String procedureName,
+  default JPAQuery storedProcedureQuery(final String procedureName,
       final Class<?>... type) {
     return JPAQueries.storedProcedureQuery(procedureName, type)
         .entityManager(this::getEntityManager);
   }
 
-  default AbstractJPAQuery storedProcedureQuery(final String procedureName,
+  default JPAQuery storedProcedureQuery(final String procedureName,
       final String... resultSetMappings) {
     return JPAQueries.storedProcedureQuery(procedureName, resultSetMappings)
         .entityManager(this::getEntityManager);

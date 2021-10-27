@@ -19,7 +19,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.eclipse.microprofile.config.ConfigProvider.getConfig;
+import static org.corant.shared.util.Strings.parseDollarTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -277,24 +277,7 @@ public class Configs {
    *
    */
   public static String resolveVariable(String propertyName) {
-    int startVar = 0;
-    String resolvedValue = propertyName;
-    while ((startVar = resolvedValue.indexOf("${", startVar)) >= 0) {
-      int endVar = resolvedValue.indexOf('}', startVar);
-      if (endVar <= 0) {
-        break;
-      }
-      String varName = resolvedValue.substring(startVar + 2, endVar);
-      if (varName.isEmpty()) {
-        break;
-      }
-      Optional<String> varVal = getConfig().getOptionalValue(varName, String.class);
-      if (varVal.isPresent()) {
-        resolvedValue = resolveVariable(resolvedValue.replace("${" + varName + "}", varVal.get()));
-      }
-      startVar++;
-    }
-    return resolvedValue;
+    return parseDollarTemplate(propertyName, k -> getValue(k, String.class));
   }
 
 }

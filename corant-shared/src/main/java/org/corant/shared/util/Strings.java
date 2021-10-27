@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import org.corant.shared.ubiquity.StringTemplate;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.PathMatcher.GlobPatterns;
 
@@ -626,6 +627,37 @@ public class Strings {
       return str.substring(pos);
     }
     return str.substring(pos, pos + len);
+  }
+
+  /**
+   * Parses string template and replaces macros with resolved values. if the given template does not
+   * contain the macro element of the string template, it will return directly. Supports default
+   * value and escape and nested.
+   * <p>
+   *
+   * <pre>
+   * The string macro templates: ${...}
+   * Example:
+   *   <b>1. Normal</b>: ${firstName} ${lastName}, the firstName and the lastName will be resolved
+   *   from the given provider, if not found throw NoSuchElementException.
+   *
+   *   <b>2. With default value</b>: ${firstName} ${lastName:unknown}, if the lastName can't be
+   *   resolved from the given provider, then use 'unknown' as the retrieve result.
+   *
+   *   <b>3. With escape</b>: ${firstName} ${lastName} \\${escape}, the \\${escape} will be restore
+   *   to ${escape}.
+   *
+   *   <b>4. Nested</b>: ${first${key}}, If the provider provides the value of the variable named 'key' as
+   *   Name and at the same time provides the value of the variable named 'firstName', the value
+   *   corresponding to firstName will be returned.
+   * </pre>
+   *
+   * @param template the given template that may contain the macro element of the template.
+   * @param provider the template named variable value provider
+   *
+   */
+  public static String parseDollarTemplate(String template, Function<String, Object> provider) {
+    return StringTemplate.DEFAULT.parse(template, provider);
   }
 
   /**

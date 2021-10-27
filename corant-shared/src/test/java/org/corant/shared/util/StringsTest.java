@@ -13,8 +13,11 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.escapedSplit;
+import static org.corant.shared.util.Strings.parseDollarTemplate;
 import static org.junit.Assert.assertArrayEquals;
+import java.util.Map;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -53,5 +56,22 @@ public class StringsTest extends TestCase {
     assertArrayEquals(escapedSplit(str, "\\", "|"), new String[] {"a1", "b|2", "c3"});
     str = "a1hhhhb\\hhhh2hhhhc3";
     assertArrayEquals(escapedSplit(str, "\\", "hhhh"), new String[] {"a1", "bhhhh2", "c3"});
+  }
+
+  @Test
+  public void testParseDollarTemplate() {
+    Map<String, String> full = mapOf("firstName", "Bingo", "lastName", "Chen");
+    String tpl = "My name is ${firstName} ${lastName:Chen}";
+    assertEquals(parseDollarTemplate(tpl, full::get), "My name is Bingo Chen");
+    Map<String, String> absent = mapOf("firstName", "Bingo");
+    assertEquals(parseDollarTemplate(tpl, absent::get), "My name is Bingo Chen");
+    Map<String, String> nested = mapOf("firstName", "Bingo", "nested", "Name");
+    tpl = "My name is ${first${nested}}";
+    assertEquals(parseDollarTemplate(tpl, nested::get), "My name is Bingo");
+    tpl = "My name is ${firstName} ${lastName:Chen}, do not escaped \\${reserve}";
+    Map<String, String> escaped = mapOf("firstName", "Bingo");
+    assertEquals(parseDollarTemplate(tpl, escaped::get),
+        "My name is Bingo Chen, do not escaped ${reserve}");
+
   }
 }

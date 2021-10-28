@@ -69,6 +69,10 @@ public class StreamOutputBuilder {
   }
 
   public Response build() {
+    return build(false);
+  }
+
+  public Response build(boolean loose) {
     if (isBlank(contentType)) {
       if (isNotBlank(fileName)) {
         contentType = FileUtils.getContentType(fileName);
@@ -91,7 +95,7 @@ public class StreamOutputBuilder {
     if (size != null) {
       rb.header(HttpHeaders.CONTENT_LENGTH, size);
     }
-    rb.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition());
+    rb.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition(loose));
     rb.header(HttpHeaders.LAST_MODIFIED, modificationDate);
     additionalHeaders.forEach(rb::header);
     return rb.build();
@@ -117,22 +121,14 @@ public class StreamOutputBuilder {
     return this;
   }
 
-  public String getContentDisposition() {
-    StringBuilder sb = new StringBuilder();
-    if (inline) {
-      sb.append("inline");
+  public String getContentDisposition(boolean loose) {
+    if (loose) {
+      return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size)
+          .toString();
     } else {
-      sb.append("attachment");
+      return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size,
+          creationDate, modificationDate, readDate).toString();
     }
-    String content = new ContentDisposition(null, name, fileName, charset, size, creationDate,
-        modificationDate, readDate).toString();
-    if (isNotBlank(content)) {
-      if (!content.startsWith(";")) {
-        sb.append("; ");
-      }
-      sb.append(content);
-    }
-    return sb.toString();
   }
 
   public StreamOutputBuilder inline(boolean inline) {

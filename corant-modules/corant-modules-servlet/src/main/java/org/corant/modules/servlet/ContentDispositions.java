@@ -208,8 +208,24 @@ public class ContentDispositions {
 
     private final ZonedDateTime readDate;
 
+    private final boolean loose;
+
     /**
-     * @param type the disposition type.
+     * @param type the disposition type, the disposition type, like for example {@literal inline},
+     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
+     * @param name the value of the name parameter.
+     * @param filename the value of the filename parameter.
+     * @param charset the charset defined in filename* parameter.
+     * @param size the value of the size parameter.
+     */
+    public ContentDisposition(String type, String name, String filename, Charset charset,
+        Long size) {
+      this(type, name, filename, charset, size, null, null, null, true);
+    }
+
+    /**
+     * @param type the disposition type, the disposition type, like for example {@literal inline},
+     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
      * @param name the value of the name parameter.
      * @param filename the value of the filename parameter.
      * @param charset the charset defined in filename* parameter.
@@ -220,6 +236,24 @@ public class ContentDispositions {
      */
     public ContentDisposition(String type, String name, String filename, Charset charset, Long size,
         ZonedDateTime creationDate, ZonedDateTime modificationDate, ZonedDateTime readDate) {
+      this(type, name, filename, charset, size, creationDate, modificationDate, readDate, false);
+    }
+
+    /**
+     * @param type the disposition type, the disposition type, like for example {@literal inline},
+     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
+     * @param name the value of the name parameter.
+     * @param filename the value of the filename parameter.
+     * @param charset the charset defined in filename* parameter.
+     * @param size the value of the size parameter.
+     * @param creationDate the value of the creation-date parameter.
+     * @param modificationDate the value of the modification-date parameter.
+     * @param readDate the value of the read-date parameter.
+     * @param loose if true, the name and filename no quotes.
+     */
+    public ContentDisposition(String type, String name, String filename, Charset charset, Long size,
+        ZonedDateTime creationDate, ZonedDateTime modificationDate, ZonedDateTime readDate,
+        boolean loose) {
       this.type = type;
       this.name = name;
       this.filename = filename;
@@ -228,6 +262,7 @@ public class ContentDispositions {
       this.creationDate = creationDate;
       this.modificationDate = modificationDate;
       this.readDate = readDate;
+      this.loose = loose;
     }
 
     public Charset getCharset() {
@@ -262,6 +297,10 @@ public class ContentDispositions {
       return type;
     }
 
+    public boolean isLoose() {
+      return loose;
+    }
+
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
@@ -269,16 +308,24 @@ public class ContentDispositions {
         sb.append(type);
       }
       if (name != null) {
-        sb.append("; name=\"");
-        sb.append(name).append('\"');
+        if (loose) {
+          sb.append("; name=").append(name);
+        } else {
+          sb.append("; name=\"");
+          sb.append(name).append('\"');
+        }
       }
       if (filename != null) {
-        if (charset == null || US_ASCII.equals(charset)) {
-          sb.append("; filename=\"");
-          sb.append(filename).append('\"');
+        if (loose) {
+          sb.append("; filename=").append(filename);
         } else {
-          sb.append("; filename*=");
-          sb.append(encodeHeaderFieldParam(filename, charset));
+          if (charset == null || US_ASCII.equals(charset)) {
+            sb.append("; filename=\"");
+            sb.append(filename).append('\"');
+          } else {
+            sb.append("; filename*=");
+            sb.append(encodeHeaderFieldParam(filename, charset));
+          }
         }
       }
       if (size != null) {

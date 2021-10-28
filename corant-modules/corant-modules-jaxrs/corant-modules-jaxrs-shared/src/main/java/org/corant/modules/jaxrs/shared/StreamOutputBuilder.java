@@ -123,8 +123,8 @@ public class StreamOutputBuilder {
 
   public String getContentDisposition(boolean loose) {
     if (loose) {
-      return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size)
-          .toString();
+      return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size,
+          true).toString();
     } else {
       return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size,
           creationDate, modificationDate, readDate).toString();

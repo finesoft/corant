@@ -217,10 +217,11 @@ public class ContentDispositions {
      * @param filename the value of the filename parameter.
      * @param charset the charset defined in filename* parameter.
      * @param size the value of the size parameter.
+     * @param loose if true, the name and filename no quotes.
      */
-    public ContentDisposition(String type, String name, String filename, Charset charset,
-        Long size) {
-      this(type, name, filename, charset, size, null, null, null, true);
+    public ContentDisposition(String type, String name, String filename, Charset charset, Long size,
+        boolean loose) {
+      this(type, name, filename, charset, size, null, null, null, loose);
     }
 
     /**

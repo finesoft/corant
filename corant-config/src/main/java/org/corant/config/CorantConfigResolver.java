@@ -22,21 +22,13 @@ import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.escapedPattern;
 import static org.corant.shared.util.Strings.isNotBlank;
-import static org.corant.shared.util.Strings.left;
 import static org.corant.shared.util.Strings.replace;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.logging.Logger;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.corant.shared.ubiquity.Mutable.MutableInteger;
+import org.corant.config.CorantConfigExpander.CorantConfigRawValueProvider;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.Config;
@@ -58,24 +50,6 @@ public class CorantConfigResolver {
   public static final String VAL_DELIMITER_ESCAPES = ESCAPE + VAL_DELIMITER;
   public static final Pattern VAL_SPLITTER = escapedPattern(ESCAPE, VAL_DELIMITER);
   public static final Pattern KEY_SPLITTER = escapedPattern(ESCAPE, KEY_DELIMITER);
-
-  public static final String VAR_PREFIX = "${";
-  public static final String EXP_PREFIX = "#{";
-  public static final String VNE_SUFFIX = "}";
-  public static final String VAR_DEFAULT = ":";
-  public static final int VE_SUFFIX_LEN = 1;
-  public static final int VE_PREFIX_LEN = 2;
-  public static final int EXPANDED_LIMITED = 16;
-
-  public static final String VAR_REP = ESCAPE + VAR_PREFIX;
-  public static final String EXP_REP = ESCAPE + EXP_PREFIX;
-
-  public static final Pattern VAR_SPTN = escapedPattern(ESCAPE, VAR_PREFIX);
-  public static final Pattern EXP_SPTN = escapedPattern(ESCAPE, EXP_PREFIX);
-  public static final Pattern VNE_EPTN = escapedPattern(ESCAPE, VNE_SUFFIX);
-  public static final Pattern VAR_DPTN = escapedPattern(ESCAPE, VAR_DEFAULT);
-
-  private static final Logger logger = Logger.getLogger(CorantConfigResolver.class.getName());
 
   public static void adjust(Object... props) {
     Map<String, String> map = mapOf(props);
@@ -169,24 +143,7 @@ public class CorantConfigResolver {
    * @return the expanded value or the original given value if it can't expand
    */
   public static String resolveValue(String configValue, CorantConfigRawValueProvider provider) {
-    String value = configValue;
-    if (isNotBlank(value) && provider != null) {
-      boolean exps = value.contains(EXP_PREFIX);
-      boolean vars = value.contains(VAR_PREFIX);
-      if (exps || vars) {
-        List<String> stacks = new ArrayList<>(EXPANDED_LIMITED);
-        if (exps) {
-          value = expandValue(true, value, provider, stacks);
-          value = replace(value, EXP_REP, EXP_PREFIX);
-        }
-        if (vars) {
-          value = expandValue(false, value, provider, stacks);
-          value = replace(value, VAR_REP, VAR_PREFIX);
-        }
-        stacks.clear();
-      }
-    }
-    return value;
+    return CorantConfigExpander.expand(configValue, provider);
   }
 
   public static String[] splitKey(String text) {
@@ -195,74 +152,6 @@ public class CorantConfigResolver {
 
   public static String[] splitValue(String text) {
     return split(text, VAL_SPLITTER, false);
-  }
-
-  // TODO Use AST?
-  static String expandValue(boolean eval, String value, CorantConfigRawValueProvider provider,
-      Collection<String> stacks) {
-    Pattern pattern = eval ? EXP_SPTN : VAR_SPTN;
-    Matcher matcher = pattern.matcher(value);
-    if (matcher.find()) {
-      MutableInteger start = new MutableInteger(matcher.start());
-      matcher.results().map(MatchResult::start).forEach(start::set);
-      String content = value.substring(start.intValue() + VE_PREFIX_LEN);
-      Optional<MatchResult> contents = VNE_EPTN.matcher(content).results().findFirst();
-      if (contents.isPresent()) {
-        // TODO replace \\} to }
-        int end = contents.get().start();
-        String extracted = content.substring(0, end);
-        final String logExtracted = extracted;
-        logger.finer(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
-            stacks.size(), logExtracted));
-        if (isNotBlank(extracted)) {
-          if (!eval && extracted.contains(VAR_DEFAULT)) {
-            Optional<MatchResult> defaults = VAR_DPTN.matcher(extracted).results().findFirst();
-            if (defaults.isPresent()) {
-              // TODO replace \\: to :
-              String defaultValue = extracted.substring(defaults.get().start() + VE_SUFFIX_LEN);
-              extracted = extracted.substring(0, defaults.get().start());
-              extracted =
-                  defaultString(resolveValue(eval, extracted, provider, stacks), defaultValue);
-            } else if (extracted.endsWith(VAR_DEFAULT) && extracted.length() > 1) {
-              // default value not exist return Strings.EMPTY
-              extracted =
-                  defaultString(resolveValue(eval, extracted, provider, stacks), Strings.EMPTY);
-            }
-          } else {
-            extracted = resolveValue(eval, extracted, provider, stacks);
-          }
-        }
-        if (extracted != null) {
-          return expandValue(eval, left(value, start.intValue()).concat(extracted)
-              .concat(content.substring(end + VE_SUFFIX_LEN)), provider, stacks);
-        } else {
-          throw new NoSuchElementException(String.format(
-              "Can not expanded the config value, the extracted not found, the expanded path [%s].",
-              String.join(" -> ", stacks)));
-        }
-      }
-    }
-    return value;
-  }
-
-  static String resolveValue(boolean eval, String key, CorantConfigRawValueProvider provider,
-      Collection<String> stacks) {
-    if (stacks.size() > EXPANDED_LIMITED) {
-      throw new IllegalArgumentException(String.format(
-          "Can not expanded the config value, lookups exceeds limit(max: %d), the expanded path [%s].",
-          EXPANDED_LIMITED, String.join(" -> ", stacks)));
-    }
-    stacks.add(key);
-    String result = provider.get(eval, key);
-    if (result != null) {
-      if (result.contains(EXP_PREFIX)) {
-        return expandValue(true, result, provider, stacks);
-      }
-      if (result.contains(VAR_PREFIX)) {
-        return expandValue(false, result, provider, stacks);
-      }
-    }
-    return result;
   }
 
   static String[] split(String text, Pattern pattern, boolean key) {
@@ -287,9 +176,4 @@ public class CorantConfigResolver {
     return Arrays.copyOf(result, resultLength);
   }
 
-  @FunctionalInterface
-  public interface CorantConfigRawValueProvider {
-
-    String get(boolean eval, String key);
-  }
 }

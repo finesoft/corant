@@ -2,7 +2,7 @@ package org.corant.modules.quartz.embeddable;
 
 import static org.corant.shared.util.Strings.isNotBlank;
 import org.corant.config.Configs;
-import org.corant.config.CorantConfigResolver;
+import org.corant.config.CorantConfigExpander;
 import org.corant.context.proxy.ContextualMethodHandler;
 
 /**
@@ -24,7 +24,7 @@ public class CorantDeclarativeJobMetaData {
   public CorantDeclarativeJobMetaData(ContextualMethodHandler method) {
     this.method = method;
     final CorantTrigger ann = method.getMethod().getAnnotation(CorantTrigger.class);
-    if (isNotBlank(ann.cron()) && ann.cron().startsWith(CorantConfigResolver.VAR_PREFIX)) {
+    if (isNotBlank(ann.cron()) && ann.cron().startsWith(CorantConfigExpander.MACRO_VAR_PREFIX)) {
       cron = Configs.assemblyStringConfigProperty(ann.cron());
     } else {
       cron = ann.cron();

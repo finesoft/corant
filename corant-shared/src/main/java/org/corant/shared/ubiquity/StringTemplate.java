@@ -20,8 +20,8 @@ import static org.corant.shared.util.Strings.escapedPattern;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.left;
 import static org.corant.shared.util.Strings.replace;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.corant.shared.ubiquity.Mutable.MutableInteger;
 import org.corant.shared.util.Strings;
 
 /**
@@ -53,6 +52,8 @@ public class StringTemplate {
   final String macroSuffix;
   final String macroDefault;
   final String escapedMacroPrefix;
+  final String escapedMacroSuffix;
+  final String escapedMacroDefault;
   final int macroPrefixLength;
   final int macroSuffixLength;
   final Pattern macroPrefixPattern;
@@ -65,13 +66,21 @@ public class StringTemplate {
     this.escape = defaultBlank(escape, Strings.BACK_SLASH);
     this.macroPrefix = shouldNotBlank(macroPrefix);
     this.macroSuffix = shouldNotBlank(macroSuffix);
-    this.macroDefault = defaultBlank(macroDefault, Strings.COLON);
+    this.macroDefault = macroDefault;
     escapedMacroPrefix = escape + macroPrefix;
+    escapedMacroSuffix = escape + macroSuffix;
+    if (macroDefault != null) {
+      escapedMacroDefault = escape + macroDefault;
+      macroDefaultPattern = escapedPattern(escape, macroDefault);
+    } else {
+      escapedMacroDefault = null;
+      macroDefaultPattern = null;
+    }
     macroPrefixLength = macroPrefix.length();
     macroSuffixLength = macroSuffix.length();
     macroPrefixPattern = escapedPattern(escape, macroPrefix);
     macroSuffixPattern = escapedPattern(escape, macroSuffix);
-    macroDefaultPattern = escapedPattern(escape, macroDefault);
+
     this.expandedLimit = expandedLimit;
   }
 
@@ -120,69 +129,82 @@ public class StringTemplate {
 
   public String parse(String template, Function<String, Object> provider) {
     String value = template;
-    if (isNotBlank(value) && provider != null) {
-      boolean vars = value.contains(macroPrefix);
-      if (vars) {
-        List<String> stacks = new ArrayList<>(expandedLimit);
-        value = expandValue(value, provider, stacks);
-        value = replace(value, escapedMacroPrefix, macroPrefix);
-        stacks.clear();
-      }
+    if (isNotBlank(value) && provider != null && value.contains(macroPrefix)) {
+      List<String> stacks = new LinkedList<>();
+      value = resolveEscape(resolve(value, provider, stacks));
+      stacks.clear();
     }
     return value;
   }
 
   // TODO Use AST?
-  String expandValue(String value, Function<String, Object> provider, Collection<String> stacks) {
-    Matcher matcher = macroPrefixPattern.matcher(value);
-    if (matcher.find()) {
-      MutableInteger start = new MutableInteger(matcher.start());
-      matcher.results().map(MatchResult::start).forEach(start::set);
-      String content = value.substring(start.intValue() + macroPrefixLength);
-      Optional<MatchResult> contents = macroSuffixPattern.matcher(content).results().findFirst();
-      if (contents.isPresent()) {
-        int end = contents.get().start();
-        String extracted = content.substring(0, end);
-        if (isNotBlank(extracted)) {
-          if (extracted.contains(macroDefault)) {
-            Optional<MatchResult> defaults =
-                macroDefaultPattern.matcher(extracted).results().findFirst();
-            if (defaults.isPresent()) {
-              String defaultValue = extracted.substring(defaults.get().start() + macroSuffixLength);
-              extracted = extracted.substring(0, defaults.get().start());
-              extracted = defaultString(resolveValue(extracted, provider, stacks), defaultValue);
-            } else if (extracted.endsWith(macroDefault) && extracted.length() > 1) {
-              // default value not exist return Strings.EMPTY
-              extracted = defaultString(resolveValue(extracted, provider, stacks), Strings.EMPTY);
-            }
-          } else {
-            extracted = resolveValue(extracted, provider, stacks);
-          }
-        }
-        if (extracted != null) {
-          return expandValue(left(value, start.intValue()).concat(extracted)
-              .concat(content.substring(end + macroSuffixLength)), provider, stacks);
+  protected String resolve(String template, Function<String, Object> provider,
+      Collection<String> stacks) {
+    int[] position = resolvePosition(template);
+    if (position[0] >= 0) {
+      String extracted = template.substring(position[0] + macroPrefixLength, position[1]);
+      if (isNotBlank(extracted)) {
+        Optional<MatchResult> dflt = Optional.empty();
+        if (macroDefaultPattern != null
+            && (dflt = macroDefaultPattern.matcher(extracted).results().findFirst()).isPresent()) {
+          String defaultValue = extracted.substring(dflt.get().start() + macroSuffixLength);
+          extracted = extracted.substring(0, dflt.get().start());
+          extracted = defaultString(resolveValue(extracted, provider, stacks), defaultValue);
+        } else if (macroDefault != null && extracted.endsWith(macroDefault)
+            && extracted.length() > 1) {
+          extracted = defaultString(resolveValue(extracted, provider, stacks), Strings.EMPTY);
         } else {
-          throw new NoSuchElementException(String.format(
-              "Can not expanded the variable value, the extracted not found, the expanded path [%s].",
-              String.join(" -> ", stacks)));
+          extracted = resolveValue(extracted, provider, stacks);
         }
       }
+      if (extracted != null) {
+        return resolve(left(template, position[0]).concat(extracted)
+            .concat(template.substring(position[1] + 1)), provider, stacks);
+      } else {
+        throw new NoSuchElementException(String.format(
+            "Can not expanded the variable value, the extracted not found, the expanded path [%s].",
+            String.join(" -> ", stacks)));
+      }
     }
-    return value;
+    return template;
   }
 
-  String resolveValue(String key, Function<String, Object> provider, Collection<String> stacks) {
+  protected String resolveEscape(String value) {
+    String resolved = replace(value, escapedMacroPrefix, macroPrefix);
+    resolved = replace(resolved, escapedMacroSuffix, macroSuffix);
+    resolved = replace(resolved, escapedMacroDefault, macroDefault);
+    return resolved;
+  }
+
+  protected int[] resolvePosition(String value) {
+    Matcher matcher = macroPrefixPattern.matcher(value);
+    if (matcher.find()) {
+      int start = matcher.start();
+      start = matcher.results().map(MatchResult::start).max(Integer::compareTo).orElse(start);
+      String content = value.substring(start + macroPrefixLength);
+      Optional<MatchResult> result = macroSuffixPattern.matcher(content).results().findFirst();
+      if (result.isPresent()) {
+        return new int[] {start, start + macroPrefixLength + result.get().start()};
+      } else {
+        return resolvePosition(value.substring(0, start));
+      }
+    }
+    return new int[] {-1, -1};
+  }
+
+  protected String resolveValue(String key, Function<String, Object> provider,
+      Collection<String> stacks) {
     if (stacks.size() > expandedLimit) {
       throw new IllegalArgumentException(String.format(
           "Can not expanded the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           expandedLimit, String.join(" -> ", stacks)));
     }
-    stacks.add(key);
-    Object value = provider.apply(key);
+    String acutalKey = macroDefault == null ? key : replace(key, escapedMacroDefault, macroDefault);
+    stacks.add(acutalKey);
+    Object value = provider.apply(acutalKey);
     String result = value == null ? null : value.toString();
     if (result != null && result.contains(macroPrefix)) {
-      return expandValue(result, provider, stacks);
+      return resolve(result, provider, stacks);
     }
     return result;
   }

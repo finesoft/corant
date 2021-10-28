@@ -211,8 +211,8 @@ public class ContentDispositions {
     private final boolean loose;
 
     /**
-     * @param type the disposition type, the disposition type, like for example {@literal inline},
-     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
+     * @param type the disposition type, like for example {@literal inline}, {@literal attachment},
+     *        {@literal form-data}, or {@code null} if not defined.
      * @param name the value of the name parameter.
      * @param filename the value of the filename parameter.
      * @param charset the charset defined in filename* parameter.
@@ -225,8 +225,8 @@ public class ContentDispositions {
     }
 
     /**
-     * @param type the disposition type, the disposition type, like for example {@literal inline},
-     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
+     * @param type the disposition type, like for example {@literal inline}, {@literal attachment},
+     *        {@literal form-data}, or {@code null} if not defined.
      * @param name the value of the name parameter.
      * @param filename the value of the filename parameter.
      * @param charset the charset defined in filename* parameter.
@@ -241,8 +241,8 @@ public class ContentDispositions {
     }
 
     /**
-     * @param type the disposition type, the disposition type, like for example {@literal inline},
-     *        {@literal attachment}, {@literal form-data}, or {@code null} if not defined.
+     * @param type the disposition type, like for example {@literal inline}, {@literal attachment},
+     *        {@literal form-data}, or {@code null} if not defined.
      * @param name the value of the name parameter.
      * @param filename the value of the filename parameter.
      * @param charset the charset defined in filename* parameter.

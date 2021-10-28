@@ -173,7 +173,7 @@ public class JPAQueries {
    * @see EntityManager#createNamedQuery(String,Class)
    */
   public static <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
-    Converter<Tuple, T> converter = null;
+    Converter<Tuple, T> converter;
     if (isPersistenceClass(type)
         || (converter = Converters.lookup(Tuple.class, type).orElse(null)) == null) {
       return new TypedJPAQuery<>() {
@@ -278,7 +278,7 @@ public class JPAQueries {
    * @see EntityManager#createNativeQuery(String, Class)
    */
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
-    Converter<Tuple, T> converter = null;
+    Converter<Tuple, T> converter;
     if (isPersistenceClass(type)
         || (converter = Converters.lookup(Tuple.class, type).orElse(null)) == null) {
       return new TypedJPAQuery<>() {

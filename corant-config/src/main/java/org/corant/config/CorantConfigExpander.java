@@ -49,7 +49,7 @@ public class CorantConfigExpander {
   public static final int MACRO_PREFIX_LENGTH = 2;
   public static final int MACRO_SUFFIX_LENGTH = 1;
   // "(?<!" + Pattern.quote(ESCAPE) + ")" + "[\\$,\\#]" + Pattern.quote("{");
-  public static final String MACRO_PREFIX_REGEX = "(?<!\\Q\\\\E)[\\$,\\#]\\Q{\\E";
+  public static final String MACRO_PREFIX_REGEX = "(?<!\\Q\\\\E)[$,#]\\Q{\\E";
   public static final Pattern MACRO_PREFIX_PATTERN = Pattern.compile(MACRO_PREFIX_REGEX);
   public static final Pattern MACRO_SUFFIX_PATTERN = escapedPattern(ESCAPE, MACRO_SUFFIX);
   public static final Pattern MACRO_DEFAULT_PATTERN = escapedPattern(ESCAPE, MACRO_DEFAULT);
@@ -68,10 +68,6 @@ public class CorantConfigExpander {
     return value;
   }
 
-  public static void main(String... a) {
-    System.out.print(MACRO_PREFIX_REGEX);
-  }
-
   static boolean hasMacro(String value) {
     return isNotBlank(value)
         && (value.contains(MACRO_EXP_PREFIX) || value.contains(MACRO_VAR_PREFIX));
@@ -88,14 +84,13 @@ public class CorantConfigExpander {
       logger.finer(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
           stacks.size(), logExtracted));
       if (isNotBlank(extracted)) {
-        Optional<MatchResult> dflt = Optional.empty();
-        if (!eval && (dflt = MACRO_DEFAULT_PATTERN.matcher(extracted).results().findFirst())
+        Optional<MatchResult> defaults;
+        if (!eval && (defaults = MACRO_DEFAULT_PATTERN.matcher(extracted).results().findFirst())
             .isPresent()) {
-          String defaultValue = extracted.substring(dflt.get().start() + MACRO_SUFFIX_LENGTH);
-          extracted = extracted.substring(0, dflt.get().start());
+          String defaultValue = extracted.substring(defaults.get().start() + MACRO_SUFFIX_LENGTH);
+          extracted = extracted.substring(0, defaults.get().start());
           extracted = defaultString(resolveValue(eval, extracted, provider, stacks), defaultValue);
-        } else if (MACRO_DEFAULT != null && extracted.endsWith(MACRO_DEFAULT)
-            && extracted.length() > 1) {
+        } else if (extracted.endsWith(MACRO_DEFAULT) && extracted.length() > 1) {
           extracted = defaultString(resolveValue(eval, extracted, provider, stacks), Strings.EMPTY);
         } else {
           extracted = resolveValue(eval, extracted, provider, stacks);
@@ -115,7 +110,7 @@ public class CorantConfigExpander {
 
   static String resolveEscape(String value) {
     String resolved = replace(value, ESCAPED_MACRO_EXP_PREFIX, MACRO_EXP_PREFIX);
-    resolved = replace(value, ESCAPED_MACRO_VAR_PREFIX, MACRO_VAR_PREFIX);
+    resolved = replace(resolved, ESCAPED_MACRO_VAR_PREFIX, MACRO_VAR_PREFIX);
     resolved = replace(resolved, ESCAPED_MACRO_SUFFIX, MACRO_SUFFIX);
     resolved = replace(resolved, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
     return resolved;
@@ -145,9 +140,9 @@ public class CorantConfigExpander {
           "Can not expanded the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           EXPANDED_LIMITED, String.join(" -> ", stacks)));
     }
-    String acutalKey = eval ? key : replace(key, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
-    stacks.add(acutalKey);
-    String result = provider.get(eval, acutalKey);
+    String actualKey = eval ? key : replace(key, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
+    stacks.add(actualKey);
+    String result = provider.get(eval, actualKey);
     if (hasMacro(result)) {
       return resolve(result, provider, stacks);
     }

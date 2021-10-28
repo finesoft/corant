@@ -144,11 +144,12 @@ public class StringTemplate {
     if (position[0] >= 0) {
       String extracted = template.substring(position[0] + macroPrefixLength, position[1]);
       if (isNotBlank(extracted)) {
-        Optional<MatchResult> dflt = Optional.empty();
+        Optional<MatchResult> defaults;
         if (macroDefaultPattern != null
-            && (dflt = macroDefaultPattern.matcher(extracted).results().findFirst()).isPresent()) {
-          String defaultValue = extracted.substring(dflt.get().start() + macroSuffixLength);
-          extracted = extracted.substring(0, dflt.get().start());
+            && (defaults = macroDefaultPattern.matcher(extracted).results().findFirst())
+                .isPresent()) {
+          String defaultValue = extracted.substring(defaults.get().start() + macroSuffixLength);
+          extracted = extracted.substring(0, defaults.get().start());
           extracted = defaultString(resolveValue(extracted, provider, stacks), defaultValue);
         } else if (macroDefault != null && extracted.endsWith(macroDefault)
             && extracted.length() > 1) {
@@ -199,9 +200,9 @@ public class StringTemplate {
           "Can not expanded the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           expandedLimit, String.join(" -> ", stacks)));
     }
-    String acutalKey = macroDefault == null ? key : replace(key, escapedMacroDefault, macroDefault);
-    stacks.add(acutalKey);
-    Object value = provider.apply(acutalKey);
+    String actualKey = macroDefault == null ? key : replace(key, escapedMacroDefault, macroDefault);
+    stacks.add(actualKey);
+    Object value = provider.apply(actualKey);
     String result = value == null ? null : value.toString();
     if (result != null && result.contains(macroPrefix)) {
       return resolve(result, provider, stacks);

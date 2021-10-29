@@ -39,6 +39,8 @@ import java.util.zip.CRC32;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
@@ -106,6 +108,12 @@ public class Compressors {
     }
   }
 
+  public static void gzip(InputStream is, OutputStream os) throws IOException {
+    try (GZIPOutputStream gos = new GZIPOutputStream(os);) {
+      copy(is, gos);
+    }
+  }
+
   public static byte[] tryCompress(byte[] bytes) {
     try {
       return compress(bytes);
@@ -135,6 +143,12 @@ public class Compressors {
       decompress(is, os);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void ungzip(InputStream is, OutputStream os) throws IOException {
+    try (GZIPInputStream gis = new GZIPInputStream(is)) {
+      copy(gis, os);
     }
   }
 
@@ -182,6 +196,19 @@ public class Compressors {
     if (isNotEmpty(files)) {
       try (FileOutputStream os = new FileOutputStream(zipFile);
           CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
+          ZipOutputStream zos = new ZipOutputStream(cos)) {
+        for (File file : files) {
+          if (file.exists()) {
+            zip(file, EMPTY, zos);
+          }
+        }
+      }
+    }
+  }
+
+  public static void zip(OutputStream os, File... files) throws IOException {
+    if (isNotEmpty(files)) {
+      try (CheckedOutputStream cos = new CheckedOutputStream(os, new CRC32());
           ZipOutputStream zos = new ZipOutputStream(cos)) {
         for (File file : files) {
           if (file.exists()) {

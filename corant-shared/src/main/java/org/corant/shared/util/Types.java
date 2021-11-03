@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-shared
@@ -197,7 +198,7 @@ public class Types {
     if (supTyp instanceof ParameterizedType) {
       return ((ParameterizedType) supTyp).getActualTypeArguments();
     }
-    return new Type[0];
+    return TypeLiteral.EMPTY_ARRAY;
   }
 
   public static Class<?> getRawType(Type type) {

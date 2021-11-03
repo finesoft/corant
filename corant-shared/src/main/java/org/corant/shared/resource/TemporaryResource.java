@@ -44,10 +44,10 @@ public class TemporaryResource implements WritableResource {
   protected static final String systemTempDir = Systems.getTempDir();
   protected static final String unknownFileName = Names.CORANT.concat("_temp");
 
-  protected String filename;
-  protected int memoryThreshold;
-  protected String tempDir;
-  protected Map<String, Object> metaData;
+  protected final String filename;
+  protected final int memoryThreshold;
+  protected final String tempDir;
+  protected final Map<String, Object> metaData;
   protected SimpleDeferredFileOutputStream dfos;
 
   public TemporaryResource() {

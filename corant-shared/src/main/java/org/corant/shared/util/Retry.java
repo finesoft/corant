@@ -220,8 +220,10 @@ public class Retry {
         case EXPO:
           return computeExpoBackoff(backoffFactor, maxInterval.toMillis(), base, attempts);
         case EXPO_DECORR:
-          return base =
-              computeExpoBackoffDecorr(maxInterval.toMillis(), interval.toMillis(), attempts, base);
+          synchronized (this) {
+            return base = computeExpoBackoffDecorr(maxInterval.toMillis(), interval.toMillis(),
+                attempts, base);
+          }
         case EXPO_EQUAL_JITTER:
           return computeExpoBackoffEqualJitter(backoffFactor, maxInterval.toMillis(), base,
               attempts);

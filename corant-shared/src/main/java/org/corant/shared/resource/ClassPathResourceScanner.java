@@ -377,7 +377,7 @@ public class ClassPathResourceScanner {
         throw new CorantRuntimeException(e);
       }
     }
-    warScanner.resources.forEach(resources::add);
+    resources.addAll(warScanner.resources);
   }
 
   protected URI tryExtractFileUri(URI jarUri) {
@@ -402,7 +402,7 @@ public class ClassPathResourceScanner {
     if (path == null) {
       return null;
     } else {
-      return !path.endsWith(PATH_SEPARATOR_STRING) ? path + PATH_SEPARATOR_STRING : path;
+      return path.endsWith(PATH_SEPARATOR_STRING) ? path : path + PATH_SEPARATOR_STRING;
     }
   }
 

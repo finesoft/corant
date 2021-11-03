@@ -33,10 +33,10 @@ import java.util.Map;
 public class InputStreamResource implements Resource {
 
   protected final SourceType sourceType = SourceType.UNKNOWN;
-  protected String name;
-  protected String location;
-  protected InputStream inputStream;
-  protected Map<String, Object> metadata;
+  protected final String name;
+  protected final String location;
+  protected final InputStream inputStream;
+  protected final Map<String, Object> metadata;
 
   public InputStreamResource(InputStream inputStream, String name) {
     this.name = name;
@@ -77,7 +77,7 @@ public class InputStreamResource implements Resource {
         "query", url.getQuery(), "ref", url.getRef(), "userInfo", url.getUserInfo());
   }
 
-  static Map<String, Object> resolveMetadata(String location, String name,
+  protected static Map<String, Object> resolveMetadata(String location, String name,
       Map<String, Object> metadata) {
     Map<String, Object> temp =
         mapOf("location", location, "sourceType", SourceType.UNKNOWN.name(), "name", name);
@@ -94,7 +94,7 @@ public class InputStreamResource implements Resource {
 
   @Override
   public Map<String, Object> getMetadata() {
-    return Collections.unmodifiableMap(metadata);
+    return metadata;
   }
 
   @Override

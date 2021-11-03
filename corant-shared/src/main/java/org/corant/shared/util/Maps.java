@@ -999,7 +999,7 @@ public class Maps {
 
   public static Properties propertiesOf(String... strings) {
     Properties result = new Properties();
-    mapOf((Object[]) strings).forEach(result::put);
+    result.putAll(mapOf((Object[]) strings));
     return result;
   }
 

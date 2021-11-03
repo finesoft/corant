@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATOR;
 import static org.corant.shared.normal.Names.NAME_SPACE_SEPARATORS;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_ADJUST_PREFIX;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -42,7 +43,7 @@ import org.eclipse.microprofile.config.Config;
 public class CorantConfigResolver {
 
   public static final String ESCAPE = "\\";
-
+  public static final char KEY_DELIMITER_CHAR = NAME_SPACE_SEPARATOR;
   public static final String KEY_DELIMITER = NAME_SPACE_SEPARATORS;
   public static final int KEY_DELIMITER_LEN = KEY_DELIMITER.length();
   public static final String VAL_DELIMITER = ",";
@@ -121,7 +122,7 @@ public class CorantConfigResolver {
 
   public static String removeSplitor(final String str) {
     String rs = defaultStrip(str);
-    if (rs.length() == 0) {
+    if (rs.length() == 0 || rs.indexOf(KEY_DELIMITER_CHAR) == -1) {
       return rs;
     }
     while (rs.endsWith(KEY_DELIMITER) && !rs.endsWith(KEY_DELIMITER_ESCAPES)) {

@@ -28,17 +28,16 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class ByteArrayResource implements Resource {
 
-  protected byte[] byteArray;
+  protected final byte[] byteArray;
 
-  protected String location;
+  protected final String location;
 
   public ByteArrayResource(byte[] byteArray) {
-    this.byteArray = byteArray;
-    location = null;
+    this(byteArray, null);
   }
 
   public ByteArrayResource(byte[] byteArray, String location) {
-    this.byteArray = byteArray;
+    this.byteArray = byteArray; // non copy or clone
     this.location = location;
   }
 
@@ -77,6 +76,10 @@ public class ByteArrayResource implements Resource {
   @Override
   public InputStream openInputStream() throws IOException {
     return new ByteArrayInputStream(byteArray);
+  }
+
+  public ByteArrayResource withLocation(String location) {
+    return new ByteArrayResource(byteArray, location);
   }
 
 }

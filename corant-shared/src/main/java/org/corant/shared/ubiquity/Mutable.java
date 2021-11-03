@@ -18,7 +18,6 @@ import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.NULL;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.temporal.Temporal;
@@ -75,7 +74,7 @@ public interface Mutable<T> extends Supplier<T> {
 
     @Override
     public int compareTo(final MutableBoolean o) {
-      return areEqual(value, o.value) ? 0 : !value ? -1 : 1;
+      return areEqual(value, o.value) ? 0 : value ? 1 : -1;
     }
 
     public Boolean getAndSet(boolean other) {
@@ -492,7 +491,7 @@ public interface Mutable<T> extends Supplier<T> {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   class MutableNumber<T extends Number> extends Number
-      implements Mutable<T>, Comparable<MutableNumber<T>>, Serializable {
+      implements Mutable<T>, Comparable<MutableNumber<T>> {
 
     private static final long serialVersionUID = -6244772495084570391L;
 

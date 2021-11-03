@@ -76,7 +76,7 @@ public class Bytes {
     long data = Double.doubleToRawLongBits(value);
     return new byte[] {(byte) (data >> 56 & 0xFF), (byte) (data >> 48 & 0xFF),
         (byte) (data >> 40 & 0xFF), (byte) (data >> 32 & 0xFF), (byte) (data >> 24 & 0xFF),
-        (byte) (data >> 16 & 0xFF), (byte) (data >> 8 & 0xFF), (byte) (data >> 0 & 0xFF)};
+        (byte) (data >> 16 & 0xFF), (byte) (data >> 8 & 0xFF), (byte) (data & 0xFF)};
   }
 
   /**
@@ -88,7 +88,7 @@ public class Bytes {
   public static byte[] toBytes(float value) {
     int data = Float.floatToIntBits(value);
     return new byte[] {(byte) (data >> 24 & 0xFF), (byte) (data >> 16 & 0xFF),
-        (byte) (data >> 8 & 0xFF), (byte) (data >> 0 & 0xFF)};
+        (byte) (data >> 8 & 0xFF), (byte) (data & 0xFF)};
   }
 
   /**

@@ -59,7 +59,6 @@ import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
 import org.corant.shared.resource.SourceType;
-import org.corant.shared.resource.TemporaryResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.TypeLiteral;
@@ -385,10 +384,4 @@ public class ConversionsTest extends TestCase {
         setOf(Integer.class, Double.class));
   }
 
-  public static class TTT extends TemporaryResource {
-
-    public TTT() {
-
-    }
-  }
 }

@@ -66,6 +66,18 @@ public class Methods {
     return inexactMatch;
   }
 
+  public static InvokerBuilder invokerBuilder(Class<?> clazz) {
+    return new InvokerBuilder(clazz);
+  }
+
+  public static InvokerBuilder invokerBuilder(Object object) {
+    return new InvokerBuilder(object);
+  }
+
+  public static InvokerBuilder invokerBuilder(String className) {
+    return new InvokerBuilder(tryAsClass(className));
+  }
+
   public static boolean isGetter(Method method) {
     if (Modifier.isPublic(method.getModifiers()) && method.getParameterTypes().length == 0) {
       if (GETTER_PTN.matcher(method.getName()).matches()
@@ -179,31 +191,19 @@ public class Methods {
    *
    */
   public static class InvokerBuilder {
-    Class<?> clazz;
-    String methodName;
-    Class<?>[] parameterTypes;
-    Object object;
-    boolean forceAccess;
+    protected Class<?> clazz;
+    protected String methodName;
+    protected Class<?>[] parameterTypes;
+    protected Object object;
+    protected boolean forceAccess;
 
-    private InvokerBuilder(Class<?> clazz) {
+    protected InvokerBuilder(Class<?> clazz) {
       this.clazz = clazz;
     }
 
-    private InvokerBuilder(Object object) {
+    protected InvokerBuilder(Object object) {
       clazz = shouldNotNull(object).getClass();
       this.object = object;
-    }
-
-    public static InvokerBuilder from(Object object) {
-      return new InvokerBuilder(object);
-    }
-
-    public static InvokerBuilder of(Class<?> clazz) {
-      return new InvokerBuilder(clazz);
-    }
-
-    public static InvokerBuilder of(String className) {
-      return of(tryAsClass(className));
     }
 
     public InvokerBuilder forceAccess(boolean forceAccess) {
@@ -211,7 +211,8 @@ public class Methods {
       return this;
     }
 
-    public Object invoke(Object... parameters)
+    @SuppressWarnings("unchecked")
+    public <T> T invoke(Object... parameters)
         throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
       Method method = getMatchingMethod(clazz, methodName, parameterTypes);
       if (forceAccess) {
@@ -220,7 +221,7 @@ public class Methods {
           return null;
         });
       }
-      return method.invoke(object, parameters);
+      return (T) method.invoke(object, parameters);
     }
 
     public InvokerBuilder methodName(String methodName) {
@@ -238,7 +239,7 @@ public class Methods {
       return this;
     }
 
-    public Object tryInvoke(Object... parameters) {
+    public <T> T tryInvoke(Object... parameters) {
       try {
         return invoke(parameters);
       } catch (Exception e) {
@@ -251,9 +252,9 @@ public class Methods {
 
     private static final long serialVersionUID = 2424253135982857193L;
 
-    private final String methodName;
+    protected final String methodName;
 
-    private final String[] parameterTypes;
+    protected final String[] parameterTypes;
 
     public MethodSignature(Method method) {
       methodName = method.getName();
@@ -266,7 +267,7 @@ public class Methods {
 
     public MethodSignature(String methodName, String... parameterTypes) {
       this.methodName = methodName;
-      this.parameterTypes = parameterTypes;
+      this.parameterTypes = parameterTypes.clone();
     }
 
     public static MethodSignature of(Method method) {
@@ -334,8 +335,8 @@ public class Methods {
 
     @Override
     public String toString() {
-      return new StringBuilder().append("method ").append(getMethodName())
-          .append(Arrays.toString(parameterTypes).replace('[', '(').replace(']', ')')).toString();
+      return "method " + methodName
+          + Arrays.toString(parameterTypes).replace('[', '(').replace(']', ')');
     }
 
   }

@@ -38,8 +38,8 @@ import org.corant.shared.util.FileUtils;
  *
  */
 public class URLResource implements WrappedResource {
-  protected SourceType sourceType;
-  protected URL url;
+  protected final SourceType sourceType;
+  protected final URL url;
 
   public URLResource(String url) throws MalformedURLException {
     this(new URL(url), SourceType.URL);

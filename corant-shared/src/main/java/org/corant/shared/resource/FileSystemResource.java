@@ -41,7 +41,7 @@ import org.corant.shared.util.FileUtils;
  */
 public class FileSystemResource extends URLResource implements WritableResource {
 
-  protected File file;
+  protected final File file;
 
   public FileSystemResource(File file) {
     super(getFileUrl(file), SourceType.FILE_SYSTEM);

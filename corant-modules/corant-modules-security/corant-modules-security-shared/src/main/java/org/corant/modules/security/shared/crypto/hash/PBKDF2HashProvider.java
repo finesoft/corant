@@ -73,7 +73,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     this.iterations = max(DEFAULT_ITERATIONS, iterations);
     this.saltSize = max(DEFAULT_SALT_SIZE, saltSize);
     this.derivedKeySize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeySize);
-    shouldBeTrue(derivedKeySize % 8 == 0 && saltSize % 8 == 0,
+    shouldBeTrue(this.derivedKeySize % 8 == 0 && this.saltSize % 8 == 0,
         "The derived key or salt bits size error must be divisible by 8.");
     shouldNotNull(getSecretKeyFactory(algorithm));// for checking
   }

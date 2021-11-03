@@ -463,8 +463,9 @@ public class Conversion {
       } else if (targetType instanceof ParameterizedType) {
         typeClass = forceCast(((ParameterizedType) targetType).getRawType());
         Type[] argTypes = ((ParameterizedType) targetType).getActualTypeArguments();
-        argClasses = new Class[argTypes.length];
-        for (int i = 0; i < argTypes.length; i++) {
+        int argTypesLen = argTypes.length;
+        argClasses = new Class[argTypesLen];
+        for (int i = 0; i < argTypesLen; i++) {
           if (!(argTypes[i] instanceof Class)) {
             throw new IllegalArgumentException("Cannot convert for type" + targetType
                 + ", the parameterized type must be a concrete type");

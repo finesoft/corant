@@ -16,16 +16,7 @@ package org.corant.shared.util;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Locale;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Bytes.BitArray;
 
@@ -34,11 +25,7 @@ import org.corant.shared.util.Bytes.BitArray;
  *
  * @author bingo 上午12:29:41
  */
-@Deprecated
 public class Encrypts {
-
-  public static final String DFLT_CHARSET_NAME = "utf-8";
-  public static final Charset DFLT_CHARSET = Charset.forName(DFLT_CHARSET_NAME);
 
   private static final char[] R62_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a',
       'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
@@ -86,289 +73,6 @@ public class Encrypts {
       ba.setBit(i, s.charAt(i) == '1');
     }
     return ba.getBytes();
-  }
-
-  /**
-   * AES解密，使用默认字符集对key进行字节获取，返回默认字符集的原文字符串
-   *
-   * @param aesB64Str b64密文字符串
-   * @param key 密钥字符串
-   * @return 默认字符集的原文字符串
-   * @throws GeneralSecurityException
-   */
-  public static String decodeAesB64StringToString(String aesB64Str, String key)
-      throws GeneralSecurityException {
-    return decodeAesBytesToString(decodeB64StringToBytes(aesB64Str), key.getBytes(DFLT_CHARSET),
-        DFLT_CHARSET);
-  }
-
-  /**
-   * AES解密，使用指定字符集对key进行字节获取，返回指定字符集的原文字符串
-   *
-   * @param aesB64Str b64密文字符串
-   * @param key 密钥字符串
-   * @param charset 指定字符集
-   * @return 指定字符集的原文字符串
-   * @throws GeneralSecurityException
-   */
-  public static String decodeAesB64StringToString(String aesB64Str, String key, Charset charset)
-      throws GeneralSecurityException {
-    return decodeAesBytesToString(decodeB64StringToBytes(aesB64Str), key.getBytes(charset),
-        charset);
-  }
-
-  /**
-   * AES解密
-   *
-   * @param aesBytes 密文字节数组
-   * @param key 密钥字节数组
-   * @return 原文字节数组
-   * @throws GeneralSecurityException
-   */
-  public static byte[] decodeAesBytesToBytes(byte[] aesBytes, byte[] key)
-      throws GeneralSecurityException {
-    KeyGenerator kgen = KeyGenerator.getInstance("AES");
-    kgen.init(128, new SecureRandom(key));
-    Cipher cipher = Cipher.getInstance("AES");
-    cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(kgen.generateKey().getEncoded(), "AES"));
-    return cipher.doFinal(aesBytes);
-  }
-
-  /**
-   * AES解密字符串，使用指定的字符串返回原文字符串
-   *
-   * @param aesBytes 密文字节数组
-   * @param key 密钥字节数组
-   * @param charset 字符集
-   * @return 指定字符集的原文字符串
-   * @throws GeneralSecurityException
-   */
-  public static String decodeAesBytesToString(byte[] aesBytes, byte[] key, Charset charset)
-      throws GeneralSecurityException {
-    return new String(decodeAesBytesToBytes(aesBytes, key), charset);
-  }
-
-  /**
-   * AES解密，使用默认字符集对key进行字节获取，返回默认字符集的原文字符串
-   *
-   * @param aesHexStr 16进制字符串密文
-   * @param key 密钥字符串
-   * @return 默认字符集的原文字符串
-   * @throws NumberFormatException
-   * @throws GeneralSecurityException
-   */
-  public static String decodeAesHexStringToString(String aesHexStr, String key)
-      throws GeneralSecurityException {
-    return decodeAesBytesToString(hexStringToBytes(aesHexStr), key.getBytes(DFLT_CHARSET),
-        DFLT_CHARSET);
-  }
-
-  /**
-   * AES解密，使用指定字符集对key进行字节获取，返回指定字符集的原文字符串
-   *
-   * @param aesHexStr 16进制字符串密文
-   * @param key 密钥字符串
-   * @param charset 指定字符集
-   * @return 指定字符集的原文字符串
-   * @throws NumberFormatException
-   * @throws GeneralSecurityException
-   */
-  public static String decodeAesHexStringToString(String aesHexStr, String key, Charset charset)
-      throws GeneralSecurityException {
-    return decodeAesBytesToString(hexStringToBytes(aesHexStr), key.getBytes(charset), charset);
-  }
-
-  /**
-   * 对base64字节数组进行解码
-   *
-   * @param bytes
-   * @return
-   */
-  public static byte[] decodeB64BytesToBytes(byte[] bytes) {
-    return Base64.getDecoder().decode(bytes);
-  }
-
-  /**
-   * 从b64字节解码为字符串
-   *
-   * @param bytes
-   * @return
-   */
-  public static String decodeB64BytesToString(byte[] bytes) {
-    return decodeB64BytesToString(bytes, DFLT_CHARSET);
-  }
-
-  /**
-   * 从B64字节解码为指定charset的字符串
-   *
-   * @param bytes
-   * @param toCharset
-   * @return
-   */
-  public static String decodeB64BytesToString(byte[] bytes, Charset toCharset) {
-    return new String(decodeB64BytesToBytes(bytes), toCharset);
-  }
-
-  /**
-   * 从B64字符串解码为字节数组
-   *
-   * @param b64Str
-   * @return
-   */
-  public static byte[] decodeB64StringToBytes(String b64Str) {
-    return decodeB64BytesToBytes(b64Str.getBytes(StandardCharsets.ISO_8859_1));
-  }
-
-  /**
-   * 从B64字符串解码为指定字符集的字符串
-   *
-   * @param b64Str
-   * @param toCharset
-   * @return
-   */
-  public static String decodeB64StringToString(String b64Str, Charset toCharset) {
-    return new String(decodeB64StringToBytes(b64Str), toCharset);
-  }
-
-  /**
-   * AES加密
-   *
-   * @param content 待加密的内容字节数组
-   * @param key 密钥字节数组
-   * @return 加密过的字节数组
-   * @throws GeneralSecurityException
-   */
-  public static byte[] encodeBytesToAesBytes(byte[] content, byte[] key)
-      throws GeneralSecurityException {
-    KeyGenerator kgen = KeyGenerator.getInstance("AES");
-    kgen.init(128, new SecureRandom(key));
-    Cipher cipher = Cipher.getInstance("AES");
-    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(kgen.generateKey().getEncoded(), "AES"));
-    return cipher.doFinal(content);
-  }
-
-  /**
-   * 二进制数据编码为BASE64字节
-   *
-   * @param bytes
-   * @return
-   * @throws Exception
-   */
-  public static byte[] encodeBytesToB64Bytes(byte[] bytes) {
-    return Base64.getEncoder().encode(bytes);
-  }
-
-  /**
-   * 字节编码成B64编码字符串
-   *
-   * @param bytes
-   * @return
-   */
-  public static String encodeBytesToB64String(byte[] bytes) {
-    return Base64.getEncoder().encodeToString(bytes);
-  }
-
-  /**
-   * AES加密，使用默认的字符集对待加密内容和密钥获取字节数组，加密后返回密文为b64格式
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @return b64格式的密文
-   * @throws GeneralSecurityException
-   */
-  public static String encodeStringToAesB64String(String content, String key)
-      throws GeneralSecurityException {
-    return encodeBytesToB64String(encodeStringToAesBytes(content, key));
-  }
-
-  /**
-   * AES加密 使用指定的字符集对待加密内容和密钥获取字节数组
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @param charset 字符集
-   * @return b64格式的密文
-   * @throws GeneralSecurityException
-   */
-  public static String encodeStringToAesB64String(String content, String key, Charset charset)
-      throws GeneralSecurityException {
-    return encodeBytesToB64String(encodeStringToAesBytes(content, key, charset));
-  }
-
-  /**
-   * AES加密，使用默认的字符集对待加密内容和密钥获取字节数组
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @return 加密过的字节数组
-   * @throws GeneralSecurityException
-   */
-  public static byte[] encodeStringToAesBytes(String content, String key)
-      throws GeneralSecurityException {
-    return encodeStringToAesBytes(content, key, DFLT_CHARSET);
-  }
-
-  /**
-   * AES加密，使用指定字符集对待加密内容和密钥获取字节数组
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @param charset 指定字符集
-   * @return 密文字节数组
-   * @throws GeneralSecurityException
-   */
-  public static byte[] encodeStringToAesBytes(String content, String key, Charset charset)
-      throws GeneralSecurityException {
-    return encodeBytesToAesBytes(content.getBytes(charset), key.getBytes(charset));
-  }
-
-  /**
-   * AES加密 ，使用默认字符集对待加密内容和密钥获取字节数组，加密后返回密文为b64格式
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @return hex格式密文
-   * @throws GeneralSecurityException
-   */
-  public static String encodeStringToAesHexString(String content, String key)
-      throws GeneralSecurityException {
-    return toHexString(encodeStringToAesBytes(content, key));
-  }
-
-  /**
-   * AES加密，使用指定的字符集对待加密内容和密钥获取字节数组，加密后返回密文为b64格式
-   *
-   * @param content 待加密的字符串
-   * @param key 密钥字符串
-   * @param charset 指定字符集
-   * @return hex格式密文
-   * @throws GeneralSecurityException
-   */
-  public static String encodeStringToAesHexString(String content, String key, Charset charset)
-      throws GeneralSecurityException {
-    return toHexString(encodeStringToAesBytes(content, key, charset));
-  }
-
-  /**
-   * 把字符串编码成B64字符串，字符集为UTF-8
-   *
-   * @param str
-   * @return
-   */
-  public static String encodeStringToB64String(String str) {
-    return encodeStringToB64String(str, DFLT_CHARSET);
-  }
-
-  /**
-   * 把字符串根据指定的字符集编码成B64码字符串
-   *
-   * @param str
-   * @param fromCharset
-   * @return
-   */
-  public static String encodeStringToB64String(String str, Charset fromCharset) {
-    return new String(Base64.getEncoder().encode(str.getBytes(fromCharset)),
-        StandardCharsets.ISO_8859_1);
   }
 
   /**
@@ -453,12 +157,6 @@ public class Encrypts {
     return new BigInteger(s, radix).longValue();
   }
 
-  public static String repeat(char character, int times) {
-    char[] buffer = new char[times];
-    Arrays.fill(buffer, character);
-    return new String(buffer);
-  }
-
   /**
    * 把字节转为字节字符串例如 00101010
    *
@@ -470,7 +168,7 @@ public class Encrypts {
     if (formatted.length() > 8) {
       formatted = formatted.substring(formatted.length() - 8);
     }
-    StringBuilder buf = new StringBuilder(repeat('0', 8));
+    StringBuilder buf = new StringBuilder("0".repeat(8));
     buf.replace(8 - formatted.length(), 8, formatted);
     return buf.toString();
   }
@@ -499,7 +197,7 @@ public class Encrypts {
    */
   public static String toBinaryString(int i) {
     String formatted = Integer.toBinaryString(i);
-    StringBuilder buf = new StringBuilder(repeat('0', 32));
+    StringBuilder buf = new StringBuilder("0".repeat(32));
     buf.replace(32 - formatted.length(), 32, formatted);
     return buf.toString();
   }
@@ -512,7 +210,7 @@ public class Encrypts {
    */
   public static String toBinaryString(long l) {
     String formatted = Long.toBinaryString(l);
-    StringBuilder buf = new StringBuilder(repeat('0', 64));
+    StringBuilder buf = new StringBuilder("0".repeat(64));
     buf.replace(64 - formatted.length(), 64, formatted);
     return buf.toString();
   }
@@ -557,87 +255,8 @@ public class Encrypts {
     if (s == null) {
       return null;
     }
-    return charset == null ? toHexString(s.getBytes(DFLT_CHARSET))
+    return charset == null ? toHexString(s.getBytes(StandardCharsets.UTF_8))
         : toHexString(s.getBytes(charset));
-  }
-
-  /**
-   * 获取MD5加密字串
-   *
-   * @param b 待转换的字节数组
-   * @return
-   * @throws NoSuchAlgorithmException
-   */
-  public static byte[] toMD5Bytes(byte[] b) throws NoSuchAlgorithmException {
-    if (b == null) {
-      return Bytes.EMPTY_ARRAY;
-    }
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    md.update(b);
-    return md.digest();
-  }
-
-  /**
-   * 获取MD5加密字串，16进制字符串
-   *
-   * @param s 待加密字符串
-   * @return 加密后的16进制字符串
-   * @throws NoSuchAlgorithmException
-   */
-  public static String toMD5HexString(String s) throws NoSuchAlgorithmException {
-    if (s == null) {
-      return null;
-    }
-    return toHexString(toMD5Bytes(s.getBytes(DFLT_CHARSET)));
-  }
-
-  /**
-   * 获取MD5加密字串
-   *
-   * @param s 待加密字符串
-   * @param cs 获取字符串字节时指定的字符集
-   * @return 加密后的16进制字符串
-   * @throws NoSuchAlgorithmException
-   */
-  public static String toMD5HexString(String s, Charset cs) throws NoSuchAlgorithmException {
-    if (s == null) {
-      return null;
-    }
-    return toHexString(toMD5Bytes(s.getBytes(cs == null ? DFLT_CHARSET : cs)));
-  }
-
-  /**
-   * 把原始字符串和混淆字符串通过md5进行加密混淆
-   *
-   * @param s 待加密字符串
-   * @param salt 盐
-   * @return 加密后的16进制字符串
-   * @throws NoSuchAlgorithmException
-   */
-  public static String toMD5HexStringWithSalt(String s, String salt)
-      throws NoSuchAlgorithmException {
-    return toMD5HexStringWithSalt(s, salt, DFLT_CHARSET);
-  }
-
-  /**
-   * 把原始字符串和混淆字符串通过md5进行加密混淆
-   *
-   * @param s 待加密字符串
-   * @param salt 盐
-   * @param charset 指定字符集
-   * @return
-   * @throws NoSuchAlgorithmException
-   */
-  public static String toMD5HexStringWithSalt(String s, String salt, Charset charset)
-      throws NoSuchAlgorithmException {
-    if (s == null) {
-      return null;
-    }
-    if (salt == null) {
-      return toHexString(toMD5Bytes(s.getBytes(charset)));
-    }
-    String firstHash = toHexString(toMD5Bytes(s.getBytes(charset)));
-    return toHexString(toMD5Bytes((firstHash + salt).getBytes(charset)));
   }
 
   /**

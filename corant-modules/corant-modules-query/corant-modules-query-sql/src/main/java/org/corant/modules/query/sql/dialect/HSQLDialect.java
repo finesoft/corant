@@ -39,7 +39,7 @@ public class HSQLDialect implements Dialect {
    */
   public String getLimitString(String sql, int offset, int limit, Map<String, ?> hints) {
     boolean hasOffset = offset > 0;
-    return new StringBuffer(sql.length() + 10).append(sql)
+    return new StringBuilder(sql.length() + 10).append(sql)
         .insert(SqlHelper.shallowIndexOfPattern(sql, SqlHelper.SELECT_PATTERN, 0) + 7,
             hasOffset ? " LIMIT " + offset + " " + limit : " TOP " + limit)
         .toString();

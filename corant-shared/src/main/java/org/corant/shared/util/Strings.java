@@ -370,8 +370,8 @@ public class Strings {
     if (cs == null || (len = cs.length()) == 0) {
       return true;
     }
-    for (int i = 0; i < len; i++) {
-      if (!Character.isWhitespace(cs.charAt(i))) {
+    for (int i = 0, j = len - 1; i <= j; i++, j--) {
+      if (!Character.isWhitespace(cs.charAt(i)) || !Character.isWhitespace(cs.charAt(j))) {
         return false;
       }
     }
@@ -493,6 +493,19 @@ public class Strings {
    */
   public static boolean isNotBlank(final CharSequence cs) {
     return !isBlank(cs);
+  }
+
+  /**
+   * <pre>
+   * Strings.isNotBlank(null)      = false
+   * Strings.isNotBlank("")        = false
+   * Strings.isNotBlank(" ")       = false
+   * Strings.isNotBlank("abc")     = true
+   * Strings.isNotBlank("  abc  ") = true
+   * </pre>
+   */
+  public static boolean isNotBlank(final String cs) {
+    return cs != null && !cs.isBlank();
   }
 
   /**

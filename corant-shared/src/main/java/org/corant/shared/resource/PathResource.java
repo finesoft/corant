@@ -14,6 +14,7 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 /**
  * corant-shared
@@ -35,23 +37,23 @@ import java.nio.file.StandardOpenOption;
  */
 public class PathResource implements WritableResource {
 
-  protected OpenOption[] openOptions;
+  public static final OpenOption[] EMPTY_ARRAY = new OpenOption[0];
 
-  protected Path path;
+  protected final OpenOption[] openOptions;
 
-  public PathResource(Path path, OpenOption... openOptions) {
+  protected final Path path;
+
+  public PathResource(Path path, OpenOption... ops) {
     this.path = shouldNotNull(path).normalize();
-    this.openOptions = openOptions;
+    openOptions = isEmpty(ops) ? EMPTY_ARRAY : Arrays.copyOf(ops, ops.length);
   }
 
-  public PathResource(String path, OpenOption... openOptions) {
-    this.path = Paths.get(shouldNotNull(path)).normalize();
-    this.openOptions = openOptions;
+  public PathResource(String path, OpenOption... ops) {
+    this(Paths.get(path).normalize(), ops);
   }
 
-  public PathResource(URI path, OpenOption... openOptions) {
-    this.path = Paths.get(shouldNotNull(path)).normalize();
-    this.openOptions = openOptions;
+  public PathResource(URI path, OpenOption... ops) {
+    this(Paths.get(path).normalize(), ops);
   }
 
   @Override
@@ -80,16 +82,19 @@ public class PathResource implements WritableResource {
 
   @Override
   public InputStream openInputStream() throws IOException {
-    return Files.newInputStream(getPath(), openOptions);
+    if (!Files.exists(path) || Files.isDirectory(path)) {
+      throw new IOException(path + " doesn't exist or is a directory.");
+    }
+    return Files.newInputStream(path, openOptions);
   }
 
   @Override
   public OutputStream openOutputStream() throws IOException {
     if (Files.isDirectory(path)) {
-      throw new IOException(getPath() + " (is a directory)");
+      throw new IOException(path + " is a directory.");
     }
     if (isReadOnly()) {
-      throw new IOException(getPath() + " (is read only)");
+      throw new IOException(path + " is read only.");
     }
     return Files.newOutputStream(path);
   }
@@ -102,7 +107,7 @@ public class PathResource implements WritableResource {
   @Override
   public WritableByteChannel openWritableChannel() throws IOException {
     if (isReadOnly()) {
-      throw new IOException(getPath() + " (is read only)");
+      throw new IOException(path + " is read only.");
     }
     return Files.newByteChannel(path, StandardOpenOption.WRITE);
   }

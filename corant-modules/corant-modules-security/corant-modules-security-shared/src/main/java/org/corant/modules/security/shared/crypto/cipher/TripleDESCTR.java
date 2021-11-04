@@ -28,7 +28,7 @@ public class TripleDESCTR extends JCACipherProvider {
   public static final String ALGORITHM = "DESede";
   public static final String TRANSFORMATION = ALGORITHM + "/CTR/NoPadding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
-  public static final int IV_BIT_SIZE = 0;// not support
+  public static final int IV_BIT_SIZE = 64;
 
   public TripleDESCTR() {
     this(112);
@@ -41,6 +41,11 @@ public class TripleDESCTR extends JCACipherProvider {
   @Override
   protected void checkSize(int keyBitSize, int ivBitSize) {
     shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
+  }
+
+  @Override
+  protected String getTransformation() {
+    return TRANSFORMATION;
   }
 
 }

@@ -26,7 +26,7 @@ import java.util.Set;
 public class TripleDESECB extends JCACipherProvider {
 
   public static final String ALGORITHM = "DESede";
-  public static final String TRANSFORMATION = ALGORITHM + "/ECB/NoPadding";
+  public static final String TRANSFORMATION = ALGORITHM + "/ECB/PKCS5Padding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
   public static final int IV_BIT_SIZE = 0;// not support
 
@@ -41,6 +41,11 @@ public class TripleDESECB extends JCACipherProvider {
   @Override
   protected void checkSize(int keyBitSize, int ivBitSize) {
     shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
+  }
+
+  @Override
+  protected String getTransformation() {
+    return TRANSFORMATION;
   }
 
 }

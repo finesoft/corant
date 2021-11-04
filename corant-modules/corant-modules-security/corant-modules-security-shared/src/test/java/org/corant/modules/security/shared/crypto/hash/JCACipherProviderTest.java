@@ -102,6 +102,12 @@ public class JCACipherProviderTest extends TestCase {
     tesJCA("", provider);
     tesJCA(content, provider);
     tesJCA(content.repeat(1000), provider);
+    for (Integer i : TripleDESCTR.ALLOW_KEY_BIT_SIZES) {
+      provider = new TripleDESCTR(i);
+      tesJCA("", provider);
+      tesJCA(content, provider);
+      tesJCA(content.repeat(1000), provider);
+    }
   }
 
   @Test
@@ -111,6 +117,12 @@ public class JCACipherProviderTest extends TestCase {
     tesJCA("", provider);
     tesJCA(content, provider);
     tesJCA(content.repeat(1000), provider);
+    for (Integer i : TripleDESECB.ALLOW_KEY_BIT_SIZES) {
+      provider = new TripleDESECB(i);
+      tesJCA("", provider);
+      tesJCA(content, provider);
+      tesJCA(content.repeat(1000), provider);
+    }
   }
 
   void tesJCA(String content, JCACipherProvider provider) {

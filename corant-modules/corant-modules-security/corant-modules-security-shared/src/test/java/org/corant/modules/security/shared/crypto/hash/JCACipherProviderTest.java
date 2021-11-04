@@ -45,7 +45,7 @@ public class JCACipherProviderTest extends TestCase {
     tesJCA("", provider);
     tesJCA(content, provider);
     tesJCA(content.repeat(1000), provider);
-    for (Integer i : AESCBCCipherProvider.ALLOW_KEY_SIZES) {
+    for (Integer i : AESCBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
       provider = new AESCBCCipherProvider(i);
       tesJCA("", provider);
       tesJCA(content, provider);
@@ -60,7 +60,7 @@ public class JCACipherProviderTest extends TestCase {
     tesJCA("", provider);
     tesJCA(content, provider);
     tesJCA(content.repeat(1000), provider);
-    for (Integer i : AESCTRCipherProvider.ALLOW_KEY_SIZES) {
+    for (Integer i : AESCTRCipherProvider.ALLOW_KEY_BIT_SIZES) {
       provider = new AESCTRCipherProvider(i);
       tesJCA("", provider);
       tesJCA(content, provider);

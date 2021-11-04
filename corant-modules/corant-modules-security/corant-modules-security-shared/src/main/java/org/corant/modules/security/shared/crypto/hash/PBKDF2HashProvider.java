@@ -45,8 +45,8 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   protected static final SecureRandom secureRandom = new SecureRandom();
   protected final String algorithm;
   protected final int iterations;
-  protected final int derivedKeySize;
-  protected final int saltSize;
+  protected final int derivedKeyBitSize;
+  protected final int saltBitSize;
 
   /**
    * Specify the secret-key algorithm name and the number of hash iterations times to create an
@@ -65,15 +65,16 @@ public abstract class PBKDF2HashProvider implements HashProvider {
    *
    * @param algorithm the standard secret-key PBKDF2 algorithm name, can't not empty
    * @param iterations the iterations times, the minimum value is 1024
-   * @param saltSize the salt bits size, the minimum value is 128
-   * @param derivedKeySize the derived key bits size, the minimum value is 512
+   * @param saltBitSize the salt bits size, the minimum value is 128
+   * @param derivedKeyBitSize the derived key bits size, the minimum value is 512
    */
-  protected PBKDF2HashProvider(String algorithm, int iterations, int saltSize, int derivedKeySize) {
+  protected PBKDF2HashProvider(String algorithm, int iterations, int saltBitSize,
+      int derivedKeyBitSize) {
     this.algorithm = shouldNotBlank(algorithm);
     this.iterations = max(DEFAULT_ITERATIONS, iterations);
-    this.saltSize = max(DEFAULT_SALT_SIZE, saltSize);
-    this.derivedKeySize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeySize);
-    shouldBeTrue(this.derivedKeySize % 8 == 0 && this.saltSize % 8 == 0,
+    this.saltBitSize = max(DEFAULT_SALT_SIZE, saltBitSize);
+    this.derivedKeyBitSize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeyBitSize);
+    shouldBeTrue(this.derivedKeyBitSize % Byte.SIZE == 0 && this.saltBitSize % Byte.SIZE == 0,
         "The derived key or salt bits size error must be divisible by 8.");
     shouldNotNull(getSecretKeyFactory(algorithm));// for checking
   }
@@ -85,12 +86,12 @@ public abstract class PBKDF2HashProvider implements HashProvider {
    * @param algorithm the standard secret-key algorithm name, can't not empty
    * @param iterations the iterations times
    * @param salt the salt bytes
-   * @param derivedKeySize the derived key bits size
+   * @param derivedKeyBitSize the derived key bits size
    * @return encode
    */
   protected static byte[] encode(String input, String algorithm, int iterations, byte[] salt,
-      int derivedKeySize) {
-    KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeySize);
+      int derivedKeyBitSize) {
+    KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeyBitSize);
     try {
       return getSecretKeyFactory(algorithm).generateSecret(spec).getEncoded();
     } catch (InvalidKeySpecException e) {
@@ -175,8 +176,20 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   @Override
   public Object encode(Object data) {
     byte[] salt = getSalt();
-    byte[] digested = encode(data.toString(), algorithm, iterations, salt, derivedKeySize);
+    byte[] digested = encode(data.toString(), algorithm, iterations, salt, derivedKeyBitSize);
     return toMergedB64(algorithm, iterations, salt, digested);
+  }
+
+  public String getAlgorithm() {
+    return algorithm;
+  }
+
+  public int getDerivedKeyBitSize() {
+    return derivedKeyBitSize;
+  }
+
+  public int getIterations() {
+    return iterations;
   }
 
   @Override
@@ -184,15 +197,19 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     return algorithm;
   }
 
+  public int getSaltBitSize() {
+    return saltBitSize;
+  }
+
   @Override
   public boolean validate(Object input, Object criterion) {
     shouldNoneNull(input, criterion);
     HashInfo criterionHash = fromMergedB64(criterion.toString());
     if (algorithm.equalsIgnoreCase(criterionHash.algorithm)
-        && criterionHash.derivedKeySize == derivedKeySize && criterionHash.iterations == iterations
-        && criterionHash.saltSize == saltSize) {
+        && criterionHash.derivedKeySize == derivedKeyBitSize
+        && criterionHash.iterations == iterations && criterionHash.saltSize == saltBitSize) {
       return compare(
-          encode(input.toString(), algorithm, iterations, criterionHash.salt, derivedKeySize),
+          encode(input.toString(), algorithm, iterations, criterionHash.salt, derivedKeyBitSize),
           criterionHash.digested);
     }
     return false;
@@ -214,7 +231,7 @@ public abstract class PBKDF2HashProvider implements HashProvider {
   }
 
   protected byte[] getSalt() {
-    byte[] buffer = new byte[saltSize >>> 3];
+    byte[] buffer = new byte[saltBitSize >>> 3];
     secureRandom.nextBytes(buffer);
     return buffer;
   }

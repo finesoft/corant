@@ -26,20 +26,20 @@ import java.util.Set;
 public class AESCTRCipherProvider extends JCACipherProvider {
   public static final String ALGORITHM = "AES";
   public static final String TRANSFORMATION = ALGORITHM + "/CTR/NoPadding";
-  public static final Set<Integer> ALLOW_KEY_SIZES = immutableSetOf(128, 192, 256);
-  public static final int IV_SIZE = 128;// always 128
+  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128, 192, 256);
+  public static final int IV_BIT_SIZE = 128;// always 128
 
   public AESCTRCipherProvider() {
     this(128);
   }
 
-  public AESCTRCipherProvider(int keySize) {
-    super(ALGORITHM, keySize, IV_SIZE);
+  public AESCTRCipherProvider(int keyBitSize) {
+    super(ALGORITHM, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override
-  protected void checkSize(int keySize, int ivSize) {
-    shouldBeTrue(ivSize == IV_SIZE && ALLOW_KEY_SIZES.contains(keySize));
+  protected void checkSize(int keyBitSize, int ivBitSize) {
+    shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
   }
 
   @Override

@@ -44,42 +44,51 @@ import org.corant.shared.util.Bytes;
  */
 public abstract class JCACipherProvider implements CipherProvider {
 
-  static final int DEFAULT_KEY_SIZE = 128;
+  static final int DEFAULT_KEY_BIT_SIZE = 128;
   static final String RANDOM_NUM_GENERATOR_ALGORITHM_NAME = "SHA1PRNG";
 
-  protected String algorithm;
-  protected int keySize = DEFAULT_KEY_SIZE;
-  protected int ivSize = 0;
-  protected int streamingBufferSize = DEFAULT_STREAMING_BUFFER_SIZE;
+  protected final String algorithm;
+  protected final int keyBitSize;
+  protected final int ivBitSize;
+  protected int streamingBufferSize;
   protected SecureRandom secureRandom;
   protected SecureRandom ivSecureRandom;
 
   protected JCACipherProvider(String algorithm) {
-    this(algorithm, DEFAULT_KEY_SIZE, DEFAULT_KEY_SIZE, null, null);
+    this(algorithm, DEFAULT_KEY_BIT_SIZE, DEFAULT_KEY_BIT_SIZE, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected JCACipherProvider(String algorithm, int keySize, int ivSize) {
-    this(algorithm, keySize, ivSize, null, null);
+  protected JCACipherProvider(String algorithm, int keyBitSize, int ivBitSize) {
+    this(algorithm, keyBitSize, ivBitSize, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected JCACipherProvider(String algorithm, int keySize, int ivSize, SecureRandom secureRandom,
-      SecureRandom ivSecureRandom) {
+  protected JCACipherProvider(String algorithm, int keyBitSize, int ivBitSize,
+      int streamingBufferSize) {
+    this(algorithm, keyBitSize, ivBitSize, streamingBufferSize, null, null);
+  }
+
+  protected JCACipherProvider(String algorithm, int keyBitSize, int ivBitSize,
+      int streamingBufferSize, SecureRandom secureRandom, SecureRandom ivSecureRandom) {
     this.algorithm = shouldNotBlank(algorithm, "algorithm can't be null or empty");
-    this.keySize = keySize <= 0 ? DEFAULT_KEY_SIZE : keySize;
-    if (ivSize > 0) {
-      shouldBeTrue(ivSize % Byte.SIZE == 0);
+    this.keyBitSize = keyBitSize <= 0 ? DEFAULT_KEY_BIT_SIZE : keyBitSize;
+    this.streamingBufferSize =
+        streamingBufferSize <= 0 ? DEFAULT_STREAMING_BUFFER_SIZE : streamingBufferSize;
+    if (ivBitSize > 0) {
+      shouldBeTrue(ivBitSize % Byte.SIZE == 0);
       this.ivSecureRandom =
           defaultObject(ivSecureRandom, JCACipherProvider::getDefaultSecureRandom);
-      this.ivSize = ivSize;
+      this.ivBitSize = ivBitSize;
+    } else {
+      this.ivBitSize = 0;
     }
-    checkSize(this.keySize, this.ivSize);
+    checkSize(this.keyBitSize, this.ivBitSize);
     this.secureRandom = secureRandom;
   }
 
   public static Key generateKey(JCACipherProvider provider) {
     try {
       KeyGenerator generator = KeyGenerator.getInstance(provider.getAlgorithm());
-      generator.init(provider.keySize);
+      generator.init(provider.keyBitSize);
       return generator.generateKey();
     } catch (NoSuchAlgorithmException e) {
       throw new CorantRuntimeException(e);
@@ -88,16 +97,16 @@ public abstract class JCACipherProvider implements CipherProvider {
 
   protected static SecureRandom getDefaultSecureRandom() {
     try {
-      return java.security.SecureRandom.getInstance(RANDOM_NUM_GENERATOR_ALGORITHM_NAME);
-    } catch (java.security.NoSuchAlgorithmException e) {
-      return new java.security.SecureRandom();
+      return SecureRandom.getInstance(RANDOM_NUM_GENERATOR_ALGORITHM_NAME);
+    } catch (NoSuchAlgorithmException e) {
+      return new SecureRandom();
     }
   }
 
   @Override
   public byte[] decrypt(byte[] encrypted, byte[] decryptionKey) {
     try {
-      return doDecrypt(encrypted, decryptionKey, false);
+      return decryptBytes(encrypted, decryptionKey);
     } catch (IllegalBlockSizeException | BadPaddingException e) {
       throw new CorantRuntimeException(e);
     }
@@ -106,7 +115,7 @@ public abstract class JCACipherProvider implements CipherProvider {
   @Override
   public void decrypt(InputStream is, OutputStream os, byte[] decryptionKey) {
     try {
-      doDecrypt(is, os, decryptionKey);
+      decryptStream(is, os, decryptionKey);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
@@ -115,7 +124,7 @@ public abstract class JCACipherProvider implements CipherProvider {
   @Override
   public byte[] encrypt(byte[] unencrypted, byte[] encryptionKey) {
     try {
-      return doEncrypt(unencrypted, encryptionKey, false);
+      return encryptBytes(unencrypted, encryptionKey);
     } catch (IllegalBlockSizeException | BadPaddingException e) {
       throw new CorantRuntimeException(e);
     }
@@ -124,7 +133,7 @@ public abstract class JCACipherProvider implements CipherProvider {
   @Override
   public void encrypt(InputStream is, OutputStream os, byte[] encryptionKey) {
     try {
-      doEncrypt(is, os, encryptionKey);
+      encryptStream(is, os, encryptionKey);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
@@ -134,19 +143,29 @@ public abstract class JCACipherProvider implements CipherProvider {
     return algorithm;
   }
 
-  public int getKeySize() {
-    return keySize;
+  public int getIvBitSize() {
+    return ivBitSize;
   }
 
-  protected void checkSize(int keySize, int ivSize) {
-
+  public int getKeyBitSize() {
+    return keyBitSize;
   }
+
+  public SecureRandom getSecureRandom() {
+    return secureRandom;
+  }
+
+  public int getStreamingBufferSize() {
+    return streamingBufferSize;
+  }
+
+  protected void checkSize(int keySize, int ivSize) {}
 
   protected Cipher createCipher(int mode, byte[] key, byte[] iv, boolean streaming) {
     try {
       final Cipher cipher = Cipher.getInstance(getTransformation());
-      Key secretKeySpec = new SecretKeySpec(key, getAlgorithm());
-      AlgorithmParameterSpec algoParamSpec = createParameterSpec(iv, streaming);
+      final Key secretKeySpec = new SecretKeySpec(key, getAlgorithm());
+      final AlgorithmParameterSpec algoParamSpec = createParameterSpec(iv, streaming);
       if (secureRandom != null) {
         if (algoParamSpec != null) {
           cipher.init(mode, secretKeySpec, algoParamSpec, secureRandom);
@@ -174,7 +193,7 @@ public abstract class JCACipherProvider implements CipherProvider {
     return null;
   }
 
-  protected byte[] doDecrypt(byte[] encrypted, byte[] key, boolean streaming)
+  protected byte[] decryptBytes(byte[] encrypted, byte[] key)
       throws IllegalBlockSizeException, BadPaddingException {
     byte[] iv = resolveIv(encrypted);
     if (iv.length > 0) {
@@ -182,16 +201,16 @@ public abstract class JCACipherProvider implements CipherProvider {
       int encryptedSize = encrypted.length - ivByteSize;
       byte[] encryptedWithoutIv = new byte[encryptedSize];
       System.arraycopy(encrypted, ivByteSize, encryptedWithoutIv, 0, encryptedSize);
-      return createCipher(Cipher.DECRYPT_MODE, key, iv, streaming).doFinal(encryptedWithoutIv);
+      return createCipher(Cipher.DECRYPT_MODE, key, iv, false).doFinal(encryptedWithoutIv);
     } else {
-      return createCipher(Cipher.DECRYPT_MODE, key, iv, streaming).doFinal(encrypted);
+      return createCipher(Cipher.DECRYPT_MODE, key, iv, false).doFinal(encrypted);
     }
   }
 
-  protected void doDecrypt(InputStream is, OutputStream os, byte[] key) throws IOException {
+  protected void decryptStream(InputStream is, OutputStream os, byte[] key) throws IOException {
     byte[] iv = Bytes.EMPTY_ARRAY;
-    if (ivSize > 0) {
-      int ivByteSize = ivSize / 8;
+    if (ivBitSize > 0) {
+      int ivByteSize = ivBitSize >>> 3;
       iv = new byte[ivByteSize];
       if (is.read(iv) != ivByteSize) {
         throw new CorantRuntimeException();
@@ -207,23 +226,23 @@ public abstract class JCACipherProvider implements CipherProvider {
     }
   }
 
-  protected byte[] doEncrypt(byte[] unencrypted, byte[] key, boolean streaming)
+  protected byte[] encryptBytes(byte[] unencrypted, byte[] key)
       throws IllegalBlockSizeException, BadPaddingException {
     byte[] output;
     byte[] iv = resolveIv(Bytes.EMPTY_ARRAY);
     if (iv.length > 0) {
-      byte[] encrypted = createCipher(Cipher.ENCRYPT_MODE, key, iv, streaming).doFinal(unencrypted);
+      byte[] encrypted = createCipher(Cipher.ENCRYPT_MODE, key, iv, false).doFinal(unencrypted);
       output = new byte[iv.length + encrypted.length];
       System.arraycopy(iv, 0, output, 0, iv.length);
       System.arraycopy(encrypted, 0, output, iv.length, encrypted.length);
     } else {
       output =
-          createCipher(Cipher.ENCRYPT_MODE, key, Bytes.EMPTY_ARRAY, streaming).doFinal(unencrypted);
+          createCipher(Cipher.ENCRYPT_MODE, key, Bytes.EMPTY_ARRAY, false).doFinal(unencrypted);
     }
     return output;
   }
 
-  protected void doEncrypt(InputStream is, OutputStream os, byte[] key) throws IOException {
+  protected void encryptStream(InputStream is, OutputStream os, byte[] key) throws IOException {
     byte[] iv = resolveIv(Bytes.EMPTY_ARRAY);
     try (CipherInputStream cis =
         new CipherInputStream(is, createCipher(Cipher.ENCRYPT_MODE, key, iv, true))) {
@@ -245,14 +264,14 @@ public abstract class JCACipherProvider implements CipherProvider {
   protected byte[] resolveIv(byte[] encrypted) {
     byte[] iv = Bytes.EMPTY_ARRAY;
     if (encrypted.length > 0) {
-      if (ivSize > 0) {
-        int ivByteSize = ivSize / 8;
+      if (ivBitSize > 0) {
+        int ivByteSize = ivBitSize >>> 3;
         iv = new byte[ivByteSize];
         System.arraycopy(encrypted, 0, iv, 0, ivByteSize);
       }
     } else {
-      if (ivSize > 0) {
-        iv = new byte[ivSize / 8];
+      if (ivBitSize > 0) {
+        iv = new byte[ivBitSize >>> 3];
         ivSecureRandom.nextBytes(iv);
       }
     }

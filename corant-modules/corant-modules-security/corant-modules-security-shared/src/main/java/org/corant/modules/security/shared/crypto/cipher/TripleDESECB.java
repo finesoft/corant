@@ -27,20 +27,20 @@ public class TripleDESECB extends JCACipherProvider {
 
   public static final String ALGORITHM = "DESede";
   public static final String TRANSFORMATION = ALGORITHM + "/ECB/NoPadding";
-  public static final Set<Integer> ALLOW_KEY_SIZES = immutableSetOf(112, 168);
-  public static final int IV_SIZE = 0;// not support
+  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
+  public static final int IV_BIT_SIZE = 0;// not support
 
   public TripleDESECB() {
     this(112);
   }
 
-  public TripleDESECB(int keySize) {
-    super(ALGORITHM, keySize, IV_SIZE);
+  public TripleDESECB(int keyBitSize) {
+    super(ALGORITHM, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override
-  protected void checkSize(int keySize, int ivSize) {
-    shouldBeTrue(ivSize == IV_SIZE && ALLOW_KEY_SIZES.contains(keySize));
+  protected void checkSize(int keyBitSize, int ivBitSize) {
+    shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
   }
 
 }

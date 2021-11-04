@@ -25,17 +25,17 @@ import javax.crypto.spec.GCMParameterSpec;
 public class AESGCMCipherProvider extends JCACipherProvider {
   public static final String ALGORITHM = "AES";
   public static final String TRANSFORMATION = ALGORITHM + "/GCM/NoPadding";
-  public static final int KEY_SIZE = 128;// always 128
-  public static final int IV_SIZE = 128;// always 128
+  public static final int KEY_BIT_SIZE = 128;// always 128
+  public static final int IV_BIT_SIZE = 128;// always 128
 
   public AESGCMCipherProvider() {
-    super(ALGORITHM, KEY_SIZE, IV_SIZE);
+    super(ALGORITHM, KEY_BIT_SIZE, IV_BIT_SIZE);
   }
 
   @Override
   protected AlgorithmParameterSpec createParameterSpec(byte[] iv, boolean streaming) {
     if (iv.length > 0) {
-      return new GCMParameterSpec(keySize, iv);
+      return new GCMParameterSpec(keyBitSize, iv);
     }
     return super.createParameterSpec(iv, streaming);
   }

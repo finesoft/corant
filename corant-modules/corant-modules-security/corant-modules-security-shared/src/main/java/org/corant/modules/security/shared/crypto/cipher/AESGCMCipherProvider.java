@@ -19,6 +19,9 @@ import javax.crypto.spec.GCMParameterSpec;
 /**
  * corant-modules-security-shared
  *
+ * <p>
+ * Note: This class may not be suitable for streaming encryption and decryption.
+ *
  * @author bingo 下午3:50:26
  *
  */

@@ -28,6 +28,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
@@ -216,12 +217,12 @@ public abstract class JCACipherProvider implements CipherProvider {
         throw new CorantRuntimeException();
       }
     }
-    try (CipherInputStream cis =
-        new CipherInputStream(is, createCipher(Cipher.DECRYPT_MODE, key, iv, true))) {
+    try (CipherOutputStream cos =
+        new CipherOutputStream(os, createCipher(Cipher.DECRYPT_MODE, key, iv, true))) {
       byte[] buffer = new byte[streamingBufferSize];
       int bytesRead;
-      while ((bytesRead = cis.read(buffer)) != -1) {
-        os.write(buffer, 0, bytesRead);
+      while ((bytesRead = is.read(buffer)) != -1) {
+        cos.write(buffer, 0, bytesRead);
       }
     }
   }

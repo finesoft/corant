@@ -50,9 +50,10 @@ import org.corant.shared.util.Systems;
  */
 public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 
-  static final int priority = Systems.getProperty(
-      "corant.jpa.tuple-object-converter.priority", Integer.class, Priorities.FRAMEWORK_LOWER + 1);
-  static final int maxSize = 1024;
+  static final int priority = Systems.getProperty("corant.jpa.tuple-object-converter.priority",
+      Integer.class, Priorities.FRAMEWORK_LOWER + 1);
+  static final int maxSize =
+      Systems.getProperty("corant.jpa.tuple-object-converter.cache-type-size", Integer.class, 1024);
   static final ConcurrentHashMap<Class<?>, Injector> map = new ConcurrentHashMap<>(512, 0.8f, 4);
 
   @Override

@@ -17,6 +17,9 @@ import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.propertiesOf;
 import static org.corant.shared.util.Strings.replace;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
@@ -185,8 +188,9 @@ public class HibernateOrmDeveloperKits {
     if (!end) {
       System.out.println("\n/**-->>>>>>>> Schema output start**/");
     } else {
-      System.out.println("\n/**--Version: V1_0_" + System.currentTimeMillis()
-          + "\n\n--<<<<<<<< Schema output end. **/\n");
+      String version = "V"+DateTimeFormatter.ofPattern("yyMMddHHmmss").format(LocalDateTime.now());
+      System.out.println("\n/**--Version: " + version + "__todo.sql");
+      System.out.println("\n--<<<<<<<< Schema output end. **/\n");
     }
   }
 
@@ -200,5 +204,4 @@ public class HibernateOrmDeveloperKits {
             new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,
                 "org.corant.modules.logging.Log4jProvider").toString()});
   }
-
 }

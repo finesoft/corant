@@ -25,6 +25,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
@@ -37,7 +38,10 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.URLResource;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Resources;
@@ -147,6 +151,16 @@ public class Keys {
         KeyPairGenerator.getInstance(defaultString(algo, "RSA"), "BC");
     keyPairGenerator.initialize(keySize);
     return keyPairGenerator.genKeyPair();
+  }
+
+  public static SecretKey generateSecretKey(String agorithm, int keyBitSize) {
+    try {
+      KeyGenerator generator = KeyGenerator.getInstance(agorithm);
+      generator.init(keyBitSize);
+      return generator.generateKey();
+    } catch (NoSuchAlgorithmException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public static KeyPair loadKeyPairFromKeystore(String path, String storePassword,

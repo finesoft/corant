@@ -23,18 +23,18 @@ import java.util.Set;
  * @author bingo 下午3:50:26
  *
  */
-public class AESCBCCipherProvider extends JCACipherProvider {
+public class AESCBCCipherProvider extends SymmetricCipherProvider {
   public static final String ALGORITHM = "AES";
   public static final String TRANSFORMATION = ALGORITHM + "/CBC/PKCS5Padding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128, 192, 256);
   public static final int IV_BIT_SIZE = 128;// always 128
 
-  public AESCBCCipherProvider() {
-    this(128);
+  public AESCBCCipherProvider(byte[] key, int keyBitSize) {
+    this(null, key, keyBitSize);
   }
 
-  public AESCBCCipherProvider(int keyBitSize) {
-    super(ALGORITHM, keyBitSize, IV_BIT_SIZE);
+  public AESCBCCipherProvider(String provider, byte[] key, int keyBitSize) {
+    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override

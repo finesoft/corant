@@ -27,20 +27,20 @@ public interface CipherProvider {
 
   int DEFAULT_STREAMING_BUFFER_SIZE = 512;
 
-  byte[] decrypt(byte[] encrypted, byte[] decryptionKey);
+  byte[] decrypt(byte[] encrypted);
 
-  void decrypt(InputStream is, OutputStream os, byte[] decryptionKey);
+  void decrypt(InputStream is, OutputStream os);
 
-  default byte[] decryptB64(String base64Encrypted, byte[] decryptionKey) {
-    return decrypt(Base64.getDecoder().decode(base64Encrypted), decryptionKey);
+  default byte[] decryptB64(String base64Encrypted) {
+    return decrypt(Base64.getDecoder().decode(base64Encrypted));
   }
 
-  byte[] encrypt(byte[] unencrypted, byte[] encryptionKey);
+  byte[] encrypt(byte[] unencrypted);
 
-  void encrypt(InputStream is, OutputStream os, byte[] encryptionKey);
+  void encrypt(InputStream is, OutputStream os);
 
-  default String encryptB64(byte[] unencrypted, byte[] encryptionKey) {
-    return Base64.getEncoder().encodeToString(encrypt(unencrypted, encryptionKey));
+  default String encryptB64(byte[] unencrypted) {
+    return Base64.getEncoder().encodeToString(encrypt(unencrypted));
   }
 
 }

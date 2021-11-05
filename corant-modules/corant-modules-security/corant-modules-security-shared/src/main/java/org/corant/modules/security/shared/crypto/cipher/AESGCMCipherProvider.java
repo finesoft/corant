@@ -13,7 +13,9 @@
  */
 package org.corant.modules.security.shared.crypto.cipher;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Set;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
@@ -25,20 +27,24 @@ import javax.crypto.spec.GCMParameterSpec;
  * @author bingo 下午3:50:26
  *
  */
-public class AESGCMCipherProvider extends JCACipherProvider {
+public class AESGCMCipherProvider extends SymmetricCipherProvider {
   public static final String ALGORITHM = "AES";
   public static final String TRANSFORMATION = ALGORITHM + "/GCM/NoPadding";
-  public static final int KEY_BIT_SIZE = 128;// always 128
+  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
   public static final int IV_BIT_SIZE = 128;// always 128
 
-  public AESGCMCipherProvider() {
-    super(ALGORITHM, KEY_BIT_SIZE, IV_BIT_SIZE);
+  public AESGCMCipherProvider(byte[] key, int keyBitSize) {
+    this(null, key, keyBitSize);
+  }
+
+  public AESGCMCipherProvider(String provider, byte[] key, int keyBitSize) {
+    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override
   protected AlgorithmParameterSpec createParameterSpec(byte[] iv, boolean streaming) {
     if (iv.length > 0) {
-      return new GCMParameterSpec(keyBitSize, iv);
+      return new GCMParameterSpec(getKeyBitSize(), iv);
     }
     return super.createParameterSpec(iv, streaming);
   }

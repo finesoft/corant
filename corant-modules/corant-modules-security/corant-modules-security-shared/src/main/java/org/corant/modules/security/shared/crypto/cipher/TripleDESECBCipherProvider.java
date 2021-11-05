@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared.crypto.cipher;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import java.util.Set;
 
@@ -23,24 +22,19 @@ import java.util.Set;
  * @author bingo 下午11:35:46
  *
  */
-public class TripleDESCTR extends JCACipherProvider {
+public class TripleDESECBCipherProvider extends SymmetricCipherProvider {
 
   public static final String ALGORITHM = "DESede";
-  public static final String TRANSFORMATION = ALGORITHM + "/CTR/NoPadding";
+  public static final String TRANSFORMATION = ALGORITHM + "/ECB/PKCS5Padding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
-  public static final int IV_BIT_SIZE = 64;
+  public static final int IV_BIT_SIZE = 0;// not support
 
-  public TripleDESCTR() {
-    this(112);
+  public TripleDESECBCipherProvider(byte[] key, int keyBitSize) {
+    this(null, key, keyBitSize);
   }
 
-  public TripleDESCTR(int keyBitSize) {
-    super(ALGORITHM, keyBitSize, IV_BIT_SIZE);
-  }
-
-  @Override
-  protected void checkSize(int keyBitSize, int ivBitSize) {
-    shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
+  public TripleDESECBCipherProvider(String provider, byte[] key, int keyBitSize) {
+    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override

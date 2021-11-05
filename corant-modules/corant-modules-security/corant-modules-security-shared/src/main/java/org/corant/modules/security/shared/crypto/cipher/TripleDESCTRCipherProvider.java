@@ -23,19 +23,19 @@ import java.util.Set;
  * @author bingo 下午11:35:46
  *
  */
-public class TripleDESECB extends JCACipherProvider {
+public class TripleDESCTRCipherProvider extends SymmetricCipherProvider {
 
   public static final String ALGORITHM = "DESede";
-  public static final String TRANSFORMATION = ALGORITHM + "/ECB/PKCS5Padding";
+  public static final String TRANSFORMATION = ALGORITHM + "/CTR/NoPadding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
-  public static final int IV_BIT_SIZE = 0;// not support
+  public static final int IV_BIT_SIZE = 64;
 
-  public TripleDESECB() {
-    this(112);
+  public TripleDESCTRCipherProvider(byte[] key, int keyBitSize) {
+    this(null, key, keyBitSize);
   }
 
-  public TripleDESECB(int keyBitSize) {
-    super(ALGORITHM, keyBitSize, IV_BIT_SIZE);
+  public TripleDESCTRCipherProvider(String provider, byte[] key, int keyBitSize) {
+    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
   }
 
   @Override

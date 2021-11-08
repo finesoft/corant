@@ -109,6 +109,82 @@ public class Assertions {
   }
 
   /**
+   * Throw CorantRuntimeException if the given object is less than or equal to the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldBeGreater(T obj, T comparison) {
+    return shouldBeGreater(obj, comparison,
+        "Object should not null and must be greater than the comparison");
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is less than or equal to the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldBeGreater(T obj, T comparison,
+      String messageOrFormat, Object... args) {
+    if (obj != null && comparison != null && obj.compareTo(comparison) > 0) {
+      return obj;
+    }
+    throw new CorantRuntimeException(messageOrFormat, args);
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is greater than or equal to the given
+   * comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldBeLess(T obj, T comparison) {
+    return shouldBeLess(obj, comparison,
+        "Object should not null and must be less than the comparison");
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is greater than or equal to the given
+   * comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldBeLess(T obj, T comparison,
+      String messageOrFormat, Object... args) {
+    if (obj != null && comparison != null && obj.compareTo(comparison) < 0) {
+      return obj;
+    }
+    throw new CorantRuntimeException(messageOrFormat, args);
+  }
+
+  /**
    * Throw CorantRuntimeException if argument is not null
    *
    * @param obj an object that should be null
@@ -215,6 +291,80 @@ public class Assertions {
     for (Object obj : args) {
       shouldNotNull(obj);
     }
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is greater than the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldNotBeGreater(T obj, T comparison) {
+    return shouldNotBeGreater(obj, comparison,
+        "Object should not null and must not greater than the comparad object");
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is greater than the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldNotBeGreater(T obj, T comparison,
+      String messageOrFormat, Object... args) {
+    if (obj != null && comparison != null && obj.compareTo(comparison) <= 0) {
+      return obj;
+    }
+    throw new CorantRuntimeException(messageOrFormat, args);
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is less than the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldNotBeLess(T obj, T comparison) {
+    return shouldNotBeLess(obj, comparison,
+        "Object should not null and must not less than the comparad object");
+  }
+
+  /**
+   * Throw CorantRuntimeException if the given object is less than the given comparison.
+   *
+   * <p>
+   * Note: If any of the given objects is null then throw the exceptions.
+   *
+   * @param <T> the object type
+   * @param obj the object to check
+   * @param comparison the object of comparison
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message parameters
+   * @return the given object
+   */
+  public static <T extends Comparable<T>> T shouldNotBeLess(T obj, T comparison,
+      String messageOrFormat, Object... args) {
+    if (obj != null && comparison != null && obj.compareTo(comparison) >= 0) {
+      return obj;
+    }
+    throw new CorantRuntimeException(messageOrFormat, args);
   }
 
   /**

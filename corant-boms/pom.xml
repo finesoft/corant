@@ -145,6 +145,7 @@
     <version.resteasy>4.7.3.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
+    <version.slf4j>1.7.32</version.slf4j>
     <version.smallrye-config>2.6.0</version.smallrye-config>
     <version.smallrye-fault-tolerance>5.2.1</version.smallrye-fault-tolerance>
     <version.smallrye-open-api>2.1.15</version.smallrye-open-api>
@@ -1484,6 +1485,12 @@
         <groupId>io.prometheus.jmx</groupId>
         <artifactId>jmx_prometheus_javaagent</artifactId>
         <version>${version.prometheus}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${version.slf4j}</version>
       </dependency>
 
       <!-- Reports -->

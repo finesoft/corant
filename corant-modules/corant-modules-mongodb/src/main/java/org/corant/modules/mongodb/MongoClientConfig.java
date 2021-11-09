@@ -285,10 +285,10 @@ public class MongoClientConfig implements NamedObject {
   }
 
   public Builder produceBuiler() {
-    Map<String, Method> settingsMap = MongoClientConfigurator.createSettingsMap();
+    Map<String, Pair<Method, Class<?>[]>> settingsMap = MongoClientConfigurator.createSettingsMap();
     MongoClientOptions.Builder optionsBuilder = MongoClientOptions.builder();
-    for (Map.Entry<String, Method> entry : settingsMap.entrySet()) {
-      Class<?> type = entry.getValue().getParameterTypes()[0];
+    for (Map.Entry<String, Pair<Method, Class<?>[]>> entry : settingsMap.entrySet()) {
+      Class<?> type = entry.getValue().right()[0];
       if (int.class.equals(type)) {
         type = Integer.class;
       }
@@ -303,7 +303,7 @@ public class MongoClientConfig implements NamedObject {
         continue;
       }
       try {
-        entry.getValue().invoke(optionsBuilder, value);
+        entry.getValue().left().invoke(optionsBuilder, value);
       } catch (InvocationTargetException | IllegalAccessException e) {
         throw new CorantRuntimeException(e, "Unable to build mongo client options [%s]",
             entry.getKey());

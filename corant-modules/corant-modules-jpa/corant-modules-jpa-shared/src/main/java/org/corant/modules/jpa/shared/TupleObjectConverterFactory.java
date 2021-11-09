@@ -165,11 +165,11 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
           setAccessible(method, true);
           String name = method.getName();
           Class<?>[] parameterTypes = method.getParameterTypes();
-          if (method.getParameterCount() == 1) {
+          if (parameterTypes.length == 1) {
             if (Methods.isSetter(method)) { // for common setter
               String useName = name.substring(3);
               useName = useName.substring(0, 1).toLowerCase(Locale.ROOT) + useName.substring(1);
-              propertySetters.put(useName, Pair.of(method, method.getParameterTypes()));
+              propertySetters.put(useName, Pair.of(method, parameterTypes));
             } else { // for fluent setter
               for (Field field : fields) {
                 if (field.getGenericType() instanceof Class && field.getName().equals(name)
@@ -179,9 +179,9 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
                 }
               }
             }
-          } else if (method.getParameterCount() == 2 && "setProperty".equals(name)
+          } else if (parameterTypes.length == 2 && "setProperty".equals(name)
               && parameterTypes[0].equals(String.class) && isSimpleType(parameterTypes[1])) {
-            propertySetters.put("Property", Pair.of(method, method.getParameterTypes()));
+            propertySetters.put("Property", Pair.of(method, parameterTypes));
           }
         }
       }

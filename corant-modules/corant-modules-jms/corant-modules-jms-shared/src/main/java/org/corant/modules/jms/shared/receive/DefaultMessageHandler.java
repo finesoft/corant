@@ -45,7 +45,7 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
   protected DefaultMessageHandler(MessageReceivingMetaData meta,
       MessageReceivingMediator mediator) {
     method = meta.getMethod();
-    messageClass = method.getMethod().getParameters()[0].getType();
+    messageClass = method.getMethod().getParameterTypes()[0];
     this.mediator = mediator;
   }
 

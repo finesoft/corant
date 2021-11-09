@@ -13,6 +13,7 @@
  */
 package org.corant.modules.cloud.alibaba.oss;
 
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -32,10 +33,12 @@ import com.aliyun.oss.OSSClientBuilder;
  */
 public class OSSClientExtension implements Extension {
 
+  protected static final Logger logger = Logger.getLogger(OSSClientExtension.class.getName());
+
   protected OSSClientConfiguration config;
 
   void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
-    if (config.isEnable()) {
+    if (config != null && config.isEnable()) {
       for (String bucket : config.getBuckets()) {
         event.addBean()
             .addQualifiers(Default.Literal.INSTANCE, Any.Literal.INSTANCE, NamedLiteral.of(bucket))
@@ -45,6 +48,9 @@ public class OSSClientExtension implements Extension {
                 .build(config.getEndpoint(), config.getAccessKeyId(), config.getSecretAccessKey())))
             .destroyWith((b, ctx) -> b.destroy());
       }
+    } else {
+      logger.warning(
+          "Unable to find the available Alibaba Cloud OSS client configuration information");
     }
   }
 

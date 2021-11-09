@@ -79,7 +79,7 @@ public class Methods {
   }
 
   public static boolean isGetter(Method method) {
-    if (Modifier.isPublic(method.getModifiers()) && method.getParameterTypes().length == 0) {
+    if (Modifier.isPublic(method.getModifiers()) && method.getParameterCount() == 0) {
       if (GETTER_PTN.matcher(method.getName()).matches()
           && !method.getReturnType().equals(void.class)) {
         return true;
@@ -107,7 +107,7 @@ public class Methods {
 
   public static boolean isSetter(Method method) {
     return Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(void.class)
-        && method.getParameterTypes().length == 1 && SETTER_PTN.matcher(method.getName()).matches();
+        && method.getParameterCount() == 1 && SETTER_PTN.matcher(method.getName()).matches();
   }
 
   public static MethodSignature signature(Method method) {
@@ -191,14 +191,16 @@ public class Methods {
    *
    */
   public static class InvokerBuilder {
-    protected Class<?> clazz;
+    protected final Class<?> clazz;
+    protected final Object object;
     protected String methodName;
     protected Class<?>[] parameterTypes;
-    protected Object object;
     protected boolean forceAccess;
+    protected volatile Method method;
 
     protected InvokerBuilder(Class<?> clazz) {
       this.clazz = clazz;
+      object = null;
     }
 
     protected InvokerBuilder(Object object) {
@@ -211,17 +213,22 @@ public class Methods {
       return this;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T invoke(Object... parameters)
         throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-      Method method = getMatchingMethod(clazz, methodName, parameterTypes);
+      return invoke(shouldNotNull(object), parameters);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T invoke(Object instance, Object[] parameters)
+        throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+      resolveMethod();
       if (forceAccess) {
         AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
           method.setAccessible(true);
           return null;
         });
       }
-      return (T) method.invoke(object, parameters);
+      return (T) method.invoke(instance, parameters);
     }
 
     public InvokerBuilder methodName(String methodName) {
@@ -229,13 +236,12 @@ public class Methods {
       return this;
     }
 
-    public InvokerBuilder on(Object object) {
-      this.object = object;
-      return this;
-    }
-
     public InvokerBuilder parameterTypes(Class<?>... parameterTypes) {
-      this.parameterTypes = parameterTypes;
+      if (parameterTypes.length == 0) {
+        this.parameterTypes = Classes.EMPTY_ARRAY;
+      } else {
+        this.parameterTypes = parameterTypes.clone();
+      }
       return this;
     }
 
@@ -246,8 +252,33 @@ public class Methods {
         return null;
       }
     }
+
+    public <T> T tryInvoke(Object instance, Object... parameters) {
+      try {
+        return invoke(instance, parameters);
+      } catch (Exception e) {
+        return null;
+      }
+    }
+
+    protected void resolveMethod() {
+      if (method == null) {
+        synchronized (this) {
+          if (method == null) {
+            method = shouldNotNull(getMatchingMethod(clazz, methodName, parameterTypes),
+                "Can't find the method!");
+          }
+        }
+      }
+    }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午5:20:37
+   *
+   */
   public static class MethodSignature implements Serializable {
 
     private static final long serialVersionUID = 2424253135982857193L;
@@ -340,4 +371,5 @@ public class Methods {
     }
 
   }
+
 }

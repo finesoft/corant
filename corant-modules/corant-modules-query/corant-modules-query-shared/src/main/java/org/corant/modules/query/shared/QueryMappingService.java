@@ -120,10 +120,11 @@ public class QueryMappingService {
       }
       m.getQueries().forEach(q -> {
         // q.setParamMappings(m.getParaMapping());// copy
-        if (queries.containsKey(q.getVersionedName())) {
+        Query repeat = queries.get(q.getVersionedName());
+        if (repeat != null) {
           throw new QueryRuntimeException(
-              "The 'name' [%s] of query element in query file [%s] can not repeat!",
-              q.getVersionedName(), m.getUrl());
+              "The 'name' [%s] of query element in query file [%s] can not repeat, the previous query file [%s].",
+              q.getVersionedName(), m.getUrl(), repeat.getMappingFilePath());
         } else {
           queries.put(q.getVersionedName(), q);
         }

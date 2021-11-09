@@ -52,7 +52,7 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
     return forceCast(constructors.computeIfAbsent(Pair.of(cls, paramClasses), cp -> {
       Constructor<?> candidate = null;
       for (Constructor<?> ct : cp.getKey().getDeclaredConstructors()) {
-        if (ct.getParameterCount() == 1 && ct.getParameterTypes().length == 1
+        if (ct.getParameterCount() == 1
             && ct.getParameterTypes()[0].isAssignableFrom(paramClasses)) {
           candidate = ct;
           break;

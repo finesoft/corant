@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Iterables.collectionOf;
 import static org.corant.shared.util.Objects.areEqual;
@@ -199,6 +200,21 @@ public class Lists {
    */
   public static <E> E get(List<? extends E> list, int index) {
     return index < 0 ? list.get(sizeOf(list) + index) : list.get(index);
+  }
+
+  /**
+   * Convert and returns the element at the specified position in the list. If the passing index is
+   * negative means that search element from last to first position.
+   *
+   * @param <E> the element type
+   * @param list the list to get a value from
+   * @param index the index to get
+   * @param clazz the return class
+   *
+   * @see #get(List, int)
+   */
+  public static <T> T get(List<?> list, int index, Class<T> clazz) {
+    return toObject(get(list, index), clazz);
   }
 
   /**

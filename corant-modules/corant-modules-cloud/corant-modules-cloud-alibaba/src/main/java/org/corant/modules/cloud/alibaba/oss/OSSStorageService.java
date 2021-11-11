@@ -97,7 +97,7 @@ public class OSSStorageService {
     ObjectMetadata ossMeta = new ObjectMetadata();
     ossMeta.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard.toString());
     ossMeta.setContentType(contentType.toString());
-    ossMeta.setContentDisposition(new ContentDisposition(contentType.toString(), null,
+    ossMeta.setContentDisposition(new ContentDisposition(null, resource.getName(),
         resource.getName(), StandardCharsets.UTF_8, getMapLong(meta, Resource.META_CONTENT_LENGTH),
         null, getMapZonedDateTime(meta, Resource.META_LAST_MODIFIED), null).toString());
     Map<String, String> userMetadataMap = mapOf((Object[]) userMetadata);

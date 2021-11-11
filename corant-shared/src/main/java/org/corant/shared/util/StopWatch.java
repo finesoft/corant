@@ -86,15 +86,15 @@ public class StopWatch {
   }
 
   public void destroy(Logger logger) {
-    destroy(sw -> logger.info(() -> String.format("Task %s take %s.",
+    destroy(sw -> logger.info(() -> String.format("Task %s take %s ms.",
         String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
-        sw.getTotalDuration())));
+        sw.getTotalTimeMillis())));
   }
 
   public void destroy(PrintStream ps) {
-    destroy(sw -> ps.printf("Task %s take %s.%n",
+    destroy(sw -> ps.printf("Task %s take %s ms.%n",
         String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
-        sw.getTotalDuration()));
+        sw.getTotalTimeMillis()));
   }
 
   public String getCurrentTaskName() {
@@ -154,6 +154,7 @@ public class StopWatch {
     long lastTime = System.currentTimeMillis() - startTimeMillis;
     totalTimeMillis += lastTime;
     lastTaskInfo = new TaskInfo(currentTaskName, lastTime);
+    taskInfos.add(lastTaskInfo);
     if (consumer != null) {
       consumer.accept(lastTaskInfo, this);
     }
@@ -169,6 +170,7 @@ public class StopWatch {
     long lastTime = System.currentTimeMillis() - startTimeMillis;
     totalTimeMillis += lastTime;
     lastTaskInfo = new TaskInfo(currentTaskName, lastTime);
+    taskInfos.add(lastTaskInfo);
     if (consumer != null) {
       consumer.accept(lastTaskInfo);
     }

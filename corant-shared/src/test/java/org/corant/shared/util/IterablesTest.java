@@ -26,6 +26,7 @@ import junit.framework.TestCase;
  */
 public class IterablesTest extends TestCase {
 
+  @SuppressWarnings("deprecation")
   @Test
   public void test() {
     Iterable<String> it1 = listOf("1", "2");

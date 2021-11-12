@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Iterables.collectionOf;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
  * corant-shared
@@ -139,7 +141,7 @@ public class Lists {
    */
   public static <E> E[] copyOfRange(E[] original, int from, int to) {
     if (original == null) {
-      return original;
+      return null;
     }
     int length = original.length;
     int beginIndex = from < 0 ? length + from : from;
@@ -149,8 +151,8 @@ public class Lists {
 
   /**
    * Remove duplicate elements of the array and return a new array of unique elements sorted in the
-   * original order. Return null if the given {@code src} array is null, return a empty new array if
-   * the given {@code src} array is empty.
+   * original order. Return null if the given {@code src} array is null, return an empty new array
+   * if the given {@code src} array is empty.
    *
    * @param <E> the element type
    * @param src the original array
@@ -206,7 +208,7 @@ public class Lists {
    * Convert and returns the element at the specified position in the list. If the passing index is
    * negative means that search element from last to first position.
    *
-   * @param <E> the element type
+   * @param <T> the element type
    * @param list the list to get a value from
    * @param index the index to get
    * @param clazz the return class
@@ -389,20 +391,34 @@ public class Lists {
   }
 
   /**
+   * Split a collection into sub-lists with size.
+   *
+   * @param <E> the element type
+   * @param size the sub-list size
+   * @param collection the collection to split
+   */
+  public static <E> List<List<E>> split(int size, Collection<E> collection) {
+    shouldBeTrue(size > 0 && collection != null);
+    final MutableInteger counter = new MutableInteger(0);
+    return new ArrayList<>(collection.stream()
+        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size)).values());
+  }
+
+  /**
    * Expand the {@link List#subList(int, int)}, add convenient reverse index support. When the given
    * index>=0, the processing process is the same as {@link List#subList(int, int)}, when the
    * index<0, the reverse index is used.
    *
    * @param <E> the element type
    * @param list the list to gain the sub list
-   * @param fromIndex low end point (inclusive) of the subList
-   * @param toIndex high end point (exclusive) of the subList
+   * @param fromIndex low-end point (inclusive) of the subList
+   * @param toIndex high-end point (exclusive) of the subList
    *
    * @see List#subList(int, int)
    */
   public static <E> List<E> subList(List<E> list, int fromIndex, int toIndex) {
     if (list == null) {
-      return list;
+      return null;
     }
     int size = list.size();
     int beginIndex = fromIndex < 0 ? size + fromIndex : fromIndex;

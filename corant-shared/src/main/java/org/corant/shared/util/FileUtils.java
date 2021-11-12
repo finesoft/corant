@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.normal.Defaults.FOUR_KB;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -82,6 +83,12 @@ public class FileUtils {
 
   public static void copyFile(final File srcFile, final File destFile,
       final boolean preserveFileDate) throws IOException {
+    copyFile(srcFile, destFile, FILE_COPY_BUFFER_SIZE, preserveFileDate);
+
+  }
+
+  public static void copyFile(final File srcFile, final File destFile, final long bufferSize,
+      final boolean preserveFileDate) throws IOException {
     if (destFile.exists() && destFile.isDirectory()) {
       throw new IOException("Destination '" + destFile + "' exists but is a directory");
     }
@@ -92,9 +99,9 @@ public class FileUtils {
       final long size = input.size();
       long pos = 0;
       long count = 0;
-      while (pos < size) {
+      while (pos < size && !Thread.currentThread().isInterrupted()) {
         final long remain = size - pos;
-        count = remain > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : remain;
+        count = remain > bufferSize ? bufferSize : remain;
         final long bytesCopied = output.transferFrom(input, pos, count);
         if (bytesCopied == 0) {
           break;
@@ -116,8 +123,13 @@ public class FileUtils {
 
   public static void copyToFile(final InputStream source, final File destination)
       throws IOException {
+    copyToFile(source, destination, FOUR_KB);
+  }
+
+  public static void copyToFile(final InputStream source, final File destination, int bufferSize)
+      throws IOException {
     try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
-      Streams.copy(in, out);
+      Streams.copy(in, out, bufferSize);
     }
   }
 
@@ -290,7 +302,6 @@ public class FileUtils {
    *
    * @param file1 the file to be compared
    * @param file2 the file to be compared
-   * @return
    * @throws IOException isSameContent
    */
   public static boolean isSameContent(final File file1, final File file2) throws IOException {

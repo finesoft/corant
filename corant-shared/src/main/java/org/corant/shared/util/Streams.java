@@ -13,10 +13,12 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.normal.Defaults.FOUR_KB;
 import static org.corant.shared.normal.Defaults.MAX_BUFFERED_BYTES;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.emptyConsumer;
+import static org.corant.shared.util.Objects.max;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,11 +36,11 @@ import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.Spliterators.AbstractSpliterator;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
  * corant-shared
@@ -61,7 +63,7 @@ public class Streams {
    */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
     final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
-    final AtomicInteger counter = new AtomicInteger();
+    final MutableInteger counter = new MutableInteger(0);
     return shouldNotNull(source)
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
         .stream();
@@ -70,12 +72,15 @@ public class Streams {
   /**
    * Receive iterable object converts it to a list stream, use for batch processing.
    *
-   * NOTE : parallel not support
+   * <p>
+   * Note: Parallel not support, and if the current thread is in an interrupted state, the stream
+   * will be broken and finally exit.
    *
    * @param <T> the element type
    * @param batchSize the batch size
    * @param source the source
    * @return the list stream
+   * @see #batchStream(int, Iterator)
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Iterable<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
@@ -84,7 +89,9 @@ public class Streams {
   /**
    * Receive iterator object converts it to a list stream, use for batch processing.
    *
-   * NOTE : parallel not support
+   * <p>
+   * Note: Parallel not support, and if the current thread is in an interrupted state, the stream
+   * will be broken and finally exit.
    *
    * @param <T> the element type
    * @param batchSize the batch size
@@ -93,7 +100,7 @@ public class Streams {
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Iterator<? extends T> it) {
 
-    return streamOf(new Iterator<List<T>>() {
+    return streamOf(new Iterator<>() {
 
       final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
       final Iterator<? extends T> useIt = shouldNotNull(it);
@@ -102,7 +109,7 @@ public class Streams {
 
       @Override
       public boolean hasNext() {
-        if (end) {
+        if (end || Thread.currentThread().isInterrupted()) {
           return false;
         }
         if (isNotEmpty(buffer)) {
@@ -135,30 +142,55 @@ public class Streams {
   /**
    * Receive stream object converts it to a list stream, use for batch processing.
    *
-   * NOTE : parallel not support
+   * <p>
+   * Note: Parallel not support, and if the current thread is in an interrupted state, the stream
+   * will be broken and finally exit.
    *
    * @param <T> the element type
    * @param batchSize the batch size
    * @param source the source
    * @return the list stream
+   * @see #batchStream(int, Iterator)
    */
   public static <T> Stream<List<T>> batchStream(int batchSize, Stream<? extends T> source) {
     return batchStream(batchSize, shouldNotNull(source).iterator());
   }
 
   /**
-   * Copy the given input stream to the given output stream without closing the streams.
+   * Copy the given input stream to the given output stream without closing the streams, the buffer
+   * size is 4kbs.
    *
    * @param input the input stream
    * @param output the output stream
    * @return the bytes length
    * @throws IOException If I/O errors occur
+   *
+   * @see #copy(InputStream, OutputStream, int)
    */
   public static long copy(InputStream input, OutputStream output) throws IOException {
-    byte[] buffer = new byte[4096];
+    return copy(input, output, FOUR_KB);
+  }
+
+  /**
+   * Copy the given input stream to the given output stream without closing the streams.
+   *
+   * <p>
+   * Note: If the current thread is in an interrupted state, the copy will be stopped and finally
+   * exit.
+   *
+   * @param input the input stream
+   * @param output the output stream
+   * @param bufferSize the buffer size
+   * @return the bytes length
+   * @throws IOException If I/O errors occur
+   */
+  public static long copy(InputStream input, OutputStream output, int bufferSize)
+      throws IOException {
+    byte[] buffer = new byte[max(1, bufferSize)];
     long count;
     int n;
-    for (count = 0L; -1 != (n = input.read(buffer)); count += n) {
+    for (count = 0L; -1 != (n = input.read(buffer))
+        && !Thread.currentThread().isInterrupted(); count += n) {
       output.write(buffer, 0, n);
     }
     return count;
@@ -171,12 +203,31 @@ public class Streams {
    * @param writer the character streams writer
    * @return the char length
    * @throws IOException If I/O errors occur
+   *
+   * @see #copy(Reader, Writer, int)
    */
   public static long copy(Reader reader, Writer writer) throws IOException {
-    char[] buffer = new char[2048];
+    return copy(reader, writer, 2048);
+  }
+
+  /**
+   * Copy character streams from the given reader to the given writer without closing them.
+   *
+   * <p>
+   * Note: If the current thread is in an interrupted state, the copy will be stopped and finally
+   * exit.
+   *
+   * @param reader the character streams reader
+   * @param writer the character streams writer
+   * @param bufferSize the buffer size
+   * @return the char length
+   * @throws IOException If I/O errors occur
+   */
+  public static long copy(Reader reader, Writer writer, int bufferSize) throws IOException {
+    char[] buffer = new char[max(1, bufferSize)];
     long count = 0;
     int n;
-    while ((n = reader.read(buffer)) != -1) {
+    while ((n = reader.read(buffer)) != -1 && !Thread.currentThread().isInterrupted()) {
       writer.write(buffer, 0, n);
       count += n;
     }
@@ -206,19 +257,32 @@ public class Streams {
   }
 
   /**
-   * Read the input stream to byte array without closing the input stream.
+   * Read the input stream to byte array without closing the input stream, the buffer size is 4kbs.
    *
    * @param is the input stream for reading
    * @return the bytes
    * @throws IOException If I/O errors occur
    */
   public static byte[] readAllBytes(InputStream is) throws IOException {
-    byte[] buf = new byte[4096];
+    return readAllBytes(is, FOUR_KB);
+  }
+
+  /**
+   * Read the input stream to byte array without closing the input stream.
+   *
+   * @param is the input stream for reading
+   * @param bufferSize the read buffer size
+   * @return the bytes
+   * @throws IOException If I/O errors occur
+   */
+  public static byte[] readAllBytes(InputStream is, int bufferSize) throws IOException {
+    byte[] buf = new byte[max(1, bufferSize)];
     int capacity = buf.length;
     int nread = 0;
     int n;
     for (;;) {
-      while ((n = is.read(buf, nread, capacity - nread)) > 0) {
+      while ((n = is.read(buf, nread, capacity - nread)) > 0
+          && !Thread.currentThread().isInterrupted()) {
         nread += n;
       }
       // returned -1, done
@@ -247,7 +311,7 @@ public class Streams {
    */
   public static <T> Stream<T> streamOf(final Enumeration<? extends T> enumeration) {
     if (enumeration != null) {
-      return streamOf(new Iterator<T>() {
+      return streamOf(new Iterator<>() {
         @Override
         public boolean hasNext() {
           return enumeration.hasMoreElements();
@@ -327,6 +391,10 @@ public class Streams {
   /**
    * corant-shared
    *
+   * <p>
+   * Note: If the current thread is in an interrupted state, the stream will be broken and finally
+   * exit.
+   *
    * @author bingo 上午10:39:59
    *
    */
@@ -350,7 +418,7 @@ public class Streams {
           this.handler.accept(j);
         }
         j++;
-      } while (tryAdvance(action));
+      } while (tryAdvance(action) && !Thread.currentThread().isInterrupted());
       this.handler.accept(j);
     }
 

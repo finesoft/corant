@@ -95,7 +95,7 @@ public interface CorantJunit4Runner {
     }
     if (!isEmbedded() && (rc = testClass.getAnnotation(RunConfig.class)) != null) {
       // BEAN_CLASSES.set(rc.beanClasses());
-      if (rc.configClass() != null) {
+      if (rc.configClass() != null && !rc.configClass().equals(Object.class)) {
         classes.add(rc.configClass());
       }
       for (Class<?> cls : rc.beanClasses()) {

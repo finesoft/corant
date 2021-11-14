@@ -66,7 +66,7 @@ public @interface RunConfig {
    *
    * @return configClass
    */
-  Class<?> configClass();
+  Class<?> configClass() default Object.class;
 
   /**
    * Which config path to exclude, use glob pattern.

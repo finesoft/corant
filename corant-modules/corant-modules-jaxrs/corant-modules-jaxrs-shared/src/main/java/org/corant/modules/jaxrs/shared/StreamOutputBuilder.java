@@ -15,6 +15,8 @@ package org.corant.modules.jaxrs.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Maps.getMapLong;
+import static org.corant.shared.util.Maps.getMapString;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,8 +56,10 @@ public class StreamOutputBuilder extends AbstractStreamOutputHandler<StreamOutpu
     return of(new InputStreamResource(is, null, null));
   }
 
-  public static StreamOutputBuilder of(Resource resources) {
-    return new StreamOutputBuilder(resources).fileName(resources.getName());
+  public static StreamOutputBuilder of(Resource resource) {
+    return new StreamOutputBuilder(resource).fileName(resource.getName()).name(resource.getName())
+        .size(getMapLong(resource.getMetadata(), Resource.META_CONTENT_LENGTH))
+        .contentType(getMapString(resource.getMetadata(), Resource.META_CONTENT_TYPE));
   }
 
   public static StreamOutputBuilder zipFiles(File... files) {

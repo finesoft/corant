@@ -11,10 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.security.shared.crypto.jose;
+
+import java.util.Map;
+
 /**
  * corant-modules-security-shared
- * 
- * @author bingo 下午4:48:43
+ *
+ * @author bingo 上午10:38:16
  *
  */
-package org.corant.modules.security.shared.crypto.hash;
+public interface JWTSignatureProvider {
+
+  Map<String, Object> parse(String signed, boolean verify);
+
+  String sign(String claimsJson);
+
+}

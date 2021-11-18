@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared.crypto.cipher;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import java.util.Set;
 
@@ -30,17 +29,12 @@ public class TripleDESCTRCipherProvider extends SymmetricCipherProvider {
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
   public static final int IV_BIT_SIZE = 64;
 
-  public TripleDESCTRCipherProvider(byte[] key, int keyBitSize) {
-    this(null, key, keyBitSize);
+  public TripleDESCTRCipherProvider(byte[] key) {
+    this(null, key);
   }
 
-  public TripleDESCTRCipherProvider(String provider, byte[] key, int keyBitSize) {
-    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
-  }
-
-  @Override
-  protected void checkSize(int keyBitSize, int ivBitSize) {
-    shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
+  public TripleDESCTRCipherProvider(String provider, byte[] key) {
+    super(ALGORITHM, provider, key, IV_BIT_SIZE);
   }
 
   @Override

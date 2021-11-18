@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared.crypto.cipher;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import java.util.Set;
 
@@ -29,17 +28,12 @@ public class AESCBCCipherProvider extends SymmetricCipherProvider {
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128, 192, 256);
   public static final int IV_BIT_SIZE = 128;// always 128
 
-  public AESCBCCipherProvider(byte[] key, int keyBitSize) {
-    this(null, key, keyBitSize);
+  public AESCBCCipherProvider(byte[] key) {
+    this(null, key);
   }
 
-  public AESCBCCipherProvider(String provider, byte[] key, int keyBitSize) {
-    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
-  }
-
-  @Override
-  protected void checkSize(int keyBitSize, int ivBitSize) {
-    shouldBeTrue(ivBitSize == IV_BIT_SIZE && ALLOW_KEY_BIT_SIZES.contains(keyBitSize));
+  public AESCBCCipherProvider(String provider, byte[] key) {
+    super(ALGORITHM, provider, key, IV_BIT_SIZE);
   }
 
   @Override

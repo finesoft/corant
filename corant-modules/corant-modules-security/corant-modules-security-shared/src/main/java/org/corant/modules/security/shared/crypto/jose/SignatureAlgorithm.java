@@ -15,10 +15,28 @@ package org.corant.modules.security.shared.crypto.jose;
 
 /**
  * corant-modules-security-shared
- * 
- * @author bingo 上午10:38:16
+ *
+ * @author bingo 下午3:09:01
  *
  */
-public interface JWTSigningProvider {
+public enum SignatureAlgorithm {
 
+  //@formatter:off
+  RS256,
+  RS384,
+  RS512,
+  ES256,
+  ES384,
+  ES512,
+  HS256,
+  HS384,
+  HS512,
+  PS256,
+  PS384,
+  PS512;
+  //@formatter:on
+
+  public String getAlgorithmName() {
+    return name();
+  }
 }

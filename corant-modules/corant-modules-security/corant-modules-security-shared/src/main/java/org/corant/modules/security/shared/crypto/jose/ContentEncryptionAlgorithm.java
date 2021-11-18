@@ -11,21 +11,33 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.hash;
+package org.corant.modules.security.shared.crypto.jose;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午8:31:04
+ * @author bingo 下午3:12:13
  *
  */
-public interface HashProvider {
+public enum ContentEncryptionAlgorithm {
 
-  default Object encode(Object data) {
-    return data;
+  //@formatter:off
+  A128GCM("A128GCM"),
+  A192GCM("A192GCM"),
+  A256GCM("A256GCM"),
+  A128CBC_HS256("A128CBC-HS256"),
+  A192CBC_HS384("A192CBC-HS384"),
+  A256CBC_HS512("A256CBC-HS512");
+  //@formatter:on
+
+  final String algorithmName;
+
+  ContentEncryptionAlgorithm(String algorithmName) {
+    this.algorithmName = algorithmName;
   }
 
-  String getName();
+  public String getAlgorithmName() {
+    return algorithmName;
+  }
 
-  boolean validate(Object input, Object criterion);
 }

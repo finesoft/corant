@@ -29,12 +29,12 @@ public class TripleDESECBCipherProvider extends SymmetricCipherProvider {
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
   public static final int IV_BIT_SIZE = 0;// not support
 
-  public TripleDESECBCipherProvider(byte[] key, int keyBitSize) {
-    this(null, key, keyBitSize);
+  public TripleDESECBCipherProvider(byte[] key) {
+    this(null, key);
   }
 
-  public TripleDESECBCipherProvider(String provider, byte[] key, int keyBitSize) {
-    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
+  public TripleDESECBCipherProvider(String provider, byte[] key) {
+    super(ALGORITHM, provider, key, IV_BIT_SIZE);
   }
 
   @Override

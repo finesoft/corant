@@ -103,13 +103,12 @@ public class Identifiers {
     protected final AtomicLong sequence = new AtomicLong(0L);
 
     /**
-     * Construct a generator with no delay
+     * Construct a generator without delay
      *
-     * @param unit The prefix time unit, current we only support MILLIS and SECOND
+     * @param unit The prefix segment epoch time unit, current we only support MILLIS and SECOND
      * @param workers The infix segments, use an ordered pairs, every pair contains two values, one
      *        is the worker bits the other is the worker id
-     * @param sequenceBits The last suffix bits
-     * @see
+     * @param sequenceBits The last suffix segment bits
      */
     public GeneralSnowflakeUUIDGenerator(ChronoUnit unit, List<Pair<Long, Long>> workers,
         long sequenceBits) {
@@ -119,10 +118,10 @@ public class Identifiers {
     /**
      * Construct a generator
      *
-     * @param unit The prefix time unit, current we only support MILLIS and SECOND
-     * @param delayedTimingMs less than 1 means no delay. no delay means that the time will be
-     *        retrieved each time the ID is generated; delay means that the time will be compared
-     *        each time the ID is generated, and the time will be retrieved when the serial number
+     * @param unit The prefix segment epoch time unit, current we only support MILLIS and SECOND
+     * @param delayedTimingMs less than 1 means no delay. No delay means that the time will be
+     *        retrieved in each the ID is generated; delay means that the time will be compared in
+     *        each the ID is generated, and the time will be re-retrieved when the serial number
      *        overflows or the time exceeds the delay; using delay will reduce the pressure of time
      *        service, but the time of the generated id will be a bit delayed.
      * @param workers The infix segments, use an ordered pairs, every pair contains two values, one
@@ -134,7 +133,7 @@ public class Identifiers {
       if (isEmpty(workers) || workers.stream().anyMatch(w -> w.getLeft() < 0 || w.getRight() < 0)
           || sequenceBits < 0) {
         throw new IllegalArgumentException(
-            "The workers id bits or sequence bits error, Both parameters must be greater than zero");
+            "The workers id bits or sequence bits error, both parameters must be greater than zero");
       }
       workersBits = workers.stream().map(Pair::getLeft).reduce(Long::sum).get();
       this.sequenceBits = sequenceBits;

@@ -30,21 +30,23 @@ import javax.crypto.spec.GCMParameterSpec;
 public class AESGCMCipherProvider extends SymmetricCipherProvider {
   public static final String ALGORITHM = "AES";
   public static final String TRANSFORMATION = ALGORITHM + "/GCM/NoPadding";
-  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
+  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128, 192, 256);
   public static final int IV_BIT_SIZE = 128;// always 128
+  protected int keyBitSize;
 
-  public AESGCMCipherProvider(byte[] key, int keyBitSize) {
-    this(null, key, keyBitSize);
+  public AESGCMCipherProvider(byte[] key) {
+    this(null, key);
   }
 
-  public AESGCMCipherProvider(String provider, byte[] key, int keyBitSize) {
-    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
+  public AESGCMCipherProvider(String provider, byte[] key) {
+    super(ALGORITHM, provider, key, key.length << 3);
+    keyBitSize = key.length << 3;
   }
 
   @Override
   protected AlgorithmParameterSpec createParameterSpec(byte[] iv, boolean streaming) {
     if (iv.length > 0) {
-      return new GCMParameterSpec(getKeyBitSize(), iv);
+      return new GCMParameterSpec(IV_BIT_SIZE, iv);
     }
     return super.createParameterSpec(iv, streaming);
   }

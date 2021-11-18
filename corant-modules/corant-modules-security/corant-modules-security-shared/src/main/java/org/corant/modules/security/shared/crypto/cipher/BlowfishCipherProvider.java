@@ -28,12 +28,12 @@ public class BlowfishCipherProvider extends SymmetricCipherProvider {
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
   public static final int IV_BIT_SIZE = 0;
 
-  public BlowfishCipherProvider(byte[] key, int keyBitSize) {
-    this(null, key, keyBitSize);
+  public BlowfishCipherProvider(byte[] key) {
+    this(null, key);
   }
 
-  public BlowfishCipherProvider(String provider, byte[] key, int keyBitSize) {
-    super(ALGORITHM, provider, key, keyBitSize, IV_BIT_SIZE);
+  public BlowfishCipherProvider(String provider, byte[] key) {
+    super(ALGORITHM, provider, key, IV_BIT_SIZE);
   }
 
   @Override

@@ -41,29 +41,25 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
 
   protected final SecretKeySpec key;
   protected final int ivByteSize;
-  protected final int keyBitSize;
   protected SecureRandom ivSecureRandom;
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int keyBitSize) {
-    this(algorithm, provider, key, keyBitSize, DEFAULT_KEY_BIT_SIZE);
+  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key) {
+    this(algorithm, provider, key, DEFAULT_KEY_BIT_SIZE);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int keyBitSize,
-      int ivBitSize) {
-    this(algorithm, provider, key, keyBitSize, ivBitSize, DEFAULT_STREAMING_BUFFER_SIZE);
+  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize) {
+    this(algorithm, provider, key, ivBitSize, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int keyBitSize,
-      int ivBitSize, int streamingBufferSize) {
-    this(algorithm, provider, key, keyBitSize, ivBitSize, streamingBufferSize, null, null);
+  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize,
+      int streamingBufferSize) {
+    this(algorithm, provider, key, ivBitSize, streamingBufferSize, null, null);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int keyBitSize,
-      int ivBitSize, int streamingBufferSize, SecureRandom secureRandom,
-      SecureRandom ivSecureRandom) {
+  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize,
+      int streamingBufferSize, SecureRandom secureRandom, SecureRandom ivSecureRandom) {
     super(algorithm, provider, streamingBufferSize, secureRandom);
     this.key = new SecretKeySpec(key, algorithm);
-    this.keyBitSize = keyBitSize;
     if (ivBitSize > 0) {
       shouldBeTrue(ivBitSize % Byte.SIZE == 0);
       this.ivSecureRandom =
@@ -72,7 +68,6 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
     } else {
       ivByteSize = 0;
     }
-    checkSize(this.keyBitSize, ivBitSize);
   }
 
   @Override
@@ -114,12 +109,6 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
   public int getIvByteSize() {
     return ivByteSize;
   }
-
-  public int getKeyBitSize() {
-    return keyBitSize;
-  }
-
-  protected void checkSize(int keyBitSize, int ivBitSize) {}
 
   protected Cipher createCipher(int mode, Key key, byte[] iv, boolean streaming) {
     return createCipher(mode, key, createParameterSpec(iv, streaming), secureRandom);

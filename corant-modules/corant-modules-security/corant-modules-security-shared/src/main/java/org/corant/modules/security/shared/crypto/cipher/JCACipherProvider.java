@@ -58,23 +58,11 @@ public abstract class JCACipherProvider implements CipherProvider {
     this.secureRandom = secureRandom;
   }
 
-  protected static SecureRandom getDefaultSecureRandom() {
+  public static Cipher createCipher(String provider, String transformation, int mode, Key key,
+      AlgorithmParameterSpec algoParamSpec, SecureRandom secureRandom) {
     try {
-      return SecureRandom.getInstance(RANDOM_NUM_GENERATOR_ALGORITHM_NAME);
-    } catch (NoSuchAlgorithmException e) {
-      return new SecureRandom();
-    }
-  }
-
-  public Cipher createCipher(int mode, Key key) {
-    return createCipher(mode, key, null, null);
-  }
-
-  public Cipher createCipher(int mode, Key key, AlgorithmParameterSpec algoParamSpec,
-      SecureRandom secureRandom) {
-    try {
-      final Cipher cipher = provider == null ? Cipher.getInstance(getTransformation())
-          : Cipher.getInstance(getTransformation(), provider);
+      final Cipher cipher = provider == null ? Cipher.getInstance(transformation)
+          : Cipher.getInstance(transformation, provider);
       if (secureRandom != null) {
         if (algoParamSpec != null) {
           cipher.init(mode, key, algoParamSpec, secureRandom);
@@ -93,6 +81,23 @@ public abstract class JCACipherProvider implements CipherProvider {
         | InvalidAlgorithmParameterException | NoSuchProviderException e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  protected static SecureRandom getDefaultSecureRandom() {
+    try {
+      return SecureRandom.getInstance(RANDOM_NUM_GENERATOR_ALGORITHM_NAME);
+    } catch (NoSuchAlgorithmException e) {
+      return new SecureRandom();
+    }
+  }
+
+  public Cipher createCipher(int mode, Key key) {
+    return createCipher(mode, key, null, null);
+  }
+
+  public Cipher createCipher(int mode, Key key, AlgorithmParameterSpec algoParamSpec,
+      SecureRandom secureRandom) {
+    return createCipher(provider, getTransformation(), mode, key, algoParamSpec, secureRandom);
   }
 
   public String getAlgorithm() {

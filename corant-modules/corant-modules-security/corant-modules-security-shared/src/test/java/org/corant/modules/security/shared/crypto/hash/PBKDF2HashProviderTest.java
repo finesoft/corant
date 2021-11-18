@@ -19,6 +19,11 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import org.corant.modules.security.shared.crypto.digest.HashProvider;
+import org.corant.modules.security.shared.crypto.digest.PBKDF2HashProvider;
+import org.corant.modules.security.shared.crypto.digest.PBKDF2WithHmacSHA1HashProvider;
+import org.corant.modules.security.shared.crypto.digest.PBKDF2WithHmacSHA256HashProvider;
+import org.corant.modules.security.shared.crypto.digest.PBKDF2WithHmacSHA512HashProvider;
 import org.junit.Test;
 import junit.framework.TestCase;
 

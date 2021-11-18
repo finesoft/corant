@@ -45,7 +45,7 @@ public class JCACipherProviderTest extends TestCase {
     SymmetricCipherProvider provider;
     for (Integer i : AESCBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(AESCBCCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESCBCCipherProvider(keyBytes, i);
+      provider = new AESCBCCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -58,7 +58,7 @@ public class JCACipherProviderTest extends TestCase {
     SymmetricCipherProvider provider;
     for (Integer i : AESCTRCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(AESCTRCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESCTRCipherProvider(keyBytes, i);
+      provider = new AESCTRCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -71,7 +71,7 @@ public class JCACipherProviderTest extends TestCase {
     SymmetricCipherProvider provider;
     for (Integer i : AESGCMCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(AESGCMCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESGCMCipherProvider(keyBytes, i);
+      provider = new AESGCMCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -84,7 +84,7 @@ public class JCACipherProviderTest extends TestCase {
     SymmetricCipherProvider provider;
     for (Integer i : BlowfishCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(BlowfishCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new BlowfishCipherProvider(keyBytes, i);
+      provider = new BlowfishCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -97,7 +97,7 @@ public class JCACipherProviderTest extends TestCase {
     SymmetricCipherProvider provider;
     for (Integer i : BlowfishCBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(BlowfishCBCCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new BlowfishCBCCipherProvider(keyBytes, i);
+      provider = new BlowfishCBCCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -111,7 +111,7 @@ public class JCACipherProviderTest extends TestCase {
     for (Integer i : TripleDESCTRCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes =
           Keys.generateSecretKey(TripleDESCTRCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new TripleDESCTRCipherProvider(keyBytes, i);
+      provider = new TripleDESCTRCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -125,7 +125,7 @@ public class JCACipherProviderTest extends TestCase {
     for (Integer i : TripleDESECBCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes =
           Keys.generateSecretKey(TripleDESECBCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new TripleDESECBCipherProvider(keyBytes, i);
+      provider = new TripleDESECBCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;

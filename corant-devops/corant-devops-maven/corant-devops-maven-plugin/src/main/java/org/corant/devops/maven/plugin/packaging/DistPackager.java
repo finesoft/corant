@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -160,14 +159,13 @@ public class DistPackager implements Packager {
   List<Entry> resolveConfigFiles() {
     List<Entry> entries = new ArrayList<>();
     String regex = getMojo().getDistConfigPaths();
-    List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
-        .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
+    List<Pattern> patterns = GlobPatterns.buildAll(regex, false, true);
     final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
     final DirectoryScanner scanner = new DirectoryScanner();
     scanner.setBasedir(artDir);
     scanner.scan();
     for (final String file : scanner.getIncludedFiles()) {
-      if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+      if (GlobPatterns.matchPath(file, patterns)) {
         log.debug(String.format("(corant) resolve configuration file %s.", file));
         entries.add(FileEntry.of(new File(artDir, file)));
       }
@@ -200,14 +198,13 @@ public class DistPackager implements Packager {
   List<Entry> resolveRootResources() throws IOException {
     List<Entry> entries = new ArrayList<>();
     String regex = getMojo().getDistResourcePaths();
-    List<Pattern> patterns = Arrays.stream(regex.split(",")).filter(Objects::nonNull)
-        .map(p -> GlobPatterns.build(p, false, true)).collect(Collectors.toList());
+    List<Pattern> patterns = GlobPatterns.buildAll(regex, false, true);
     final File artDir = new File(getMojo().getProject().getBuild().getOutputDirectory());
     final DirectoryScanner scanner = new DirectoryScanner();
     scanner.setBasedir(artDir);
     scanner.scan();
     for (final String file : scanner.getIncludedFiles()) {
-      if (patterns.stream().anyMatch(p -> p.matcher(file.replaceAll("\\\\", "/")).matches())) {
+      if (GlobPatterns.matchPath(file, patterns)) {
         log.debug(String.format("(corant) resolve resource file %s.", file));
         entries.add(FileEntry.of(new File(artDir, file)));
       }
@@ -252,7 +249,7 @@ public class DistPackager implements Packager {
     if (entry instanceof FileEntry) {
       file = ((FileEntry) entry).getFile();
     } else {
-      log.debug(String.format("(corant) create temp entry file for entry %s.", entryName));
+      log.debug(String.format("(corant) create temp file for archive file entry %s.", entryName));
       file = Files.createTempFile("corant-mojo-pack", entry.getName()).toFile();
       try (OutputStream os = new FileOutputStream(file)) {
         IOUtils.copy(entry.getInputStream(), os);
@@ -264,18 +261,18 @@ public class DistPackager implements Packager {
       IOUtils.copy(fis, aos);
     }
     aos.closeArchiveEntry();
-    log.debug(String.format("(corant) packaged entry %s.", entryName));
+    log.debug(String.format("(corant) entry %s was packaged.", entryName));
   }
 
   private ArchiveOutputStream packArchiveOutput(OutputStream os) throws ArchiveException {
     return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(), os);
   }
 
-  private String resolveRunshVar(String var) {
-    if (!var.isEmpty()) {
-      return "\"".concat(var).concat("\"");
+  private String resolveRunshVar(String variable) {
+    if (!variable.isEmpty()) {
+      return "\"".concat(variable).concat("\"");
     }
-    return var;
+    return variable;
   }
 
   /**

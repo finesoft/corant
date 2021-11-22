@@ -35,9 +35,11 @@ public class DefaultArchive implements Archive {
   private final Path path;
 
   DefaultArchive(String name, Archive parent) {
-    path = Paths.get(name);
     if (parent != null) {
+      path = parent.getPath().resolve(name);
       parent.getChildren().add(this);
+    } else {
+      path = Paths.get(name);
     }
   }
 

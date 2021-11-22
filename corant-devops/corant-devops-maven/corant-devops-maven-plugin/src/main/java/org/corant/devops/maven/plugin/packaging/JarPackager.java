@@ -89,7 +89,7 @@ public class JarPackager implements Packager {
           jos.putArchiveEntry(jarFileEntry);
           IOUtils.copy(entry.getInputStream(), jos);
           jos.closeArchiveEntry();
-          log.debug(String.format("(corant) packaged entry %s.", jarFileEntry.getName()));
+          log.debug(String.format("(corant) entry %s was packaged.", jarFileEntry.getName()));
         }
       }
       // handle child archives
@@ -103,7 +103,8 @@ public class JarPackager implements Packager {
             jos.putArchiveEntry(childJarFileEntry);
             IOUtils.copy(childEntry.getInputStream(), jos);
             jos.closeArchiveEntry();
-            log.debug(String.format("(corant) packaged entry %s.", childJarFileEntry.getName()));
+            log.debug(
+                String.format("(corant) entry %s was packaged.", childJarFileEntry.getName()));
           }
         }
         childrenArchives.addAll(childArchive.getChildren());

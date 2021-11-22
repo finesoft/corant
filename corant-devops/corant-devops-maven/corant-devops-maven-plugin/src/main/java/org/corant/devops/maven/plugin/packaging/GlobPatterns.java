@@ -13,8 +13,13 @@
  */
 package org.corant.devops.maven.plugin.packaging;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 /**
  * corant-devops-maven-plugin
@@ -28,6 +33,9 @@ public class GlobPatterns {
   private static final char EOL = 0;
 
   public static Pattern build(String globExpress, boolean isDos, boolean ignoreCase) {
+    if (globExpress == null || globExpress.isBlank()) {
+      return null;
+    }
     if (isDos) {
       if (ignoreCase) {
         return Pattern.compile(toWindowsRegexPattern(globExpress), Pattern.UNICODE_CASE);
@@ -45,6 +53,14 @@ public class GlobPatterns {
     }
   }
 
+  public static List<Pattern> buildAll(String globExpresses, boolean isDos, boolean ignoreCase) {
+    if (globExpresses == null || globExpresses.isBlank()) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(globExpresses.split(",")).map(p -> GlobPatterns.build(p, false, true))
+        .filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
   public static boolean isGlobChar(char c) {
     return GLO_CHARS.indexOf(c) != -1;
   }
@@ -59,6 +75,14 @@ public class GlobPatterns {
 
   public static boolean isRegexChar(int c) {
     return REG_CHARS.indexOf(c) != -1;
+  }
+
+  public static boolean matchPath(String path, List<Pattern> patterns) {
+    if (patterns == null || patterns.isEmpty()) {
+      return false;
+    }
+    String usePath = path.replaceAll("\\\\", "/");
+    return patterns.stream().anyMatch(p -> p.matcher(usePath).matches());
   }
 
   public static String toUnixRegexPattern(String globExpress) {

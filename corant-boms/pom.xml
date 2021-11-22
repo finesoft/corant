@@ -160,7 +160,7 @@
     <version.snakeyaml>1.27</version.snakeyaml>
     <version.swagger>2.0.8</version.swagger>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.12.Final</version.undertow>
+    <version.undertow>2.2.13.Final</version.undertow>
     <version.vertx>4.1.4</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>

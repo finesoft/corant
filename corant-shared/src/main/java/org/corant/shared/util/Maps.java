@@ -48,6 +48,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.converter.NumberLocalDateConverter;
 import org.corant.shared.conversion.converter.SqlDateLocalDateConverter;
@@ -1006,6 +1008,17 @@ public class Maps {
   @SuppressWarnings("rawtypes")
   public static void putMapKeyPathValue(Map target, Object[] paths, Object value) {
     implantMapValue(target, paths, 0, value);
+  }
+
+  public static <K, V> Map<K, V> removeIfKey(Predicate<K> predicate, Map<K, V> map) {
+    Map<K, V> removed = new HashMap<>();
+    if (predicate != null && map != null) {
+      Set<K> removeKeys = map.keySet().stream().filter(predicate).collect(Collectors.toSet());
+      for (K key : removeKeys) {
+        removed.put(key, map.remove(key));
+      }
+    }
+    return removed;
   }
 
   public static Map<String, String> toMap(final Properties properties) {

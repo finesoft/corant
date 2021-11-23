@@ -13,18 +13,31 @@
  */
 package org.corant.modules.security.shared.crypto.jose;
 
+import java.security.Key;
 import java.util.Map;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 上午10:38:16
+ * @author bingo 上午10:38:38
  *
  */
-public interface JWTSignatureProvider {
+public interface JoseEncryptionProvider {
 
-  Map<String, Object> parse(String signed, boolean verify);
+  default Map<String, Object> decrypt(String data, Pair<Key, String> signatures, boolean verify) {
+    throw new NotSupportedException();
+  }
 
-  String sign(String claimsJson);
+  String encrypt(String claimsJson, boolean innerSigned);
+
+  String getContentEncryptionAlgorithmName();
+
+  Key getDecriptionKey();
+
+  Key getEncriptionKey();
+
+  String getKeyManagementAlgorithmName();
 
 }

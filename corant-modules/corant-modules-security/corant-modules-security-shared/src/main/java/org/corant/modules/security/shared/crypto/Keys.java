@@ -13,41 +13,42 @@
  */
 package org.corant.modules.security.shared.crypto;
 
-import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.Strings.defaultString;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.MessageDigest;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.logging.Logger;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.resource.URLResource;
-import org.corant.shared.ubiquity.Tuple.Triple;
-import org.corant.shared.util.Resources;
+import org.corant.shared.resource.Resource;
+import org.corant.shared.util.Texts;
 
 /**
  * corant-modules-security-shared
+ *
+ * <p>
+ * The format of all public key certificates adopts the X.509 standard, and the storing syntax of
+ * all private key information adopts PKCS8.
  *
  * @author bingo 19:23:17
  *
@@ -60,145 +61,209 @@ public class Keys {
     }
   }
 
-  static final Logger LOGGER = Logger.getLogger(Keys.class.getName());
-
-  public static String createKeyId(Key key, String algo) throws GeneralSecurityException {
-    return Base64.getEncoder().encodeToString(
-        MessageDigest.getInstance(defaultString(algo, "SHA-256")).digest(key.getEncoded()));
+  public static byte[] decodeBase64(String data) {
+    return Base64.getDecoder().decode(data);
   }
 
-  public static Triple<String, String, String> createKeySet(AlgorithmParameterSpec spec,
-      String algo) throws GeneralSecurityException {
-    KeyPair keyPair = generateKeyPair(spec, algo);
-    String pubKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-    String priKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
-    String keyId = createKeyId(keyPair.getPrivate(), "SHA-256");
-    return Triple.of(pubKey, priKey, keyId);
-  }
-
-  public static Triple<String, String, String> createKeySet(int bits, String algo)
-      throws GeneralSecurityException {
-    KeyPair keyPair = generateKeyPair(bits, algo);
-    String pubKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-    String priKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
-    String keyId = createKeyId(keyPair.getPrivate(), "SHA-256");
-    return Triple.of(pubKey, priKey, keyId);
-  }
-
-  public static PrivateKey decodePrivateKey(byte[] der, String algo)
-      throws GeneralSecurityException {
-    PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(der);
-    KeyFactory kf = KeyFactory.getInstance(defaultString(algo, "RSA"), "BC");
-    return kf.generatePrivate(spec);
-  }
-
-  public static PrivateKey decodePrivateKey(InputStream is, String algo) throws Exception {
-    DataInputStream dis = new DataInputStream(is);
-    byte[] keyBytes = new byte[dis.available()];
-    dis.readFully(keyBytes);
-    return decodePrivateKey(keyBytes, algo);
-  }
-
-  public static PrivateKey decodePrivateKey(String pem, String algo)
-      throws GeneralSecurityException {
-    return pem == null ? null : decodePrivateKey(pemToDer(pem), algo);
-  }
-
-  public static PublicKey decodePublicKey(byte[] der, String algo) throws GeneralSecurityException {
-    X509EncodedKeySpec spec = new X509EncodedKeySpec(der);
-    KeyFactory kf = KeyFactory.getInstance(defaultString(algo, "RSA"), "BC");
-    return kf.generatePublic(spec);
-  }
-
-  public static PublicKey decodePublicKey(InputStream is, String algo) throws Exception {
-    DataInputStream dis = new DataInputStream(is);
-    byte[] keyBytes = new byte[dis.available()];
-    dis.readFully(keyBytes);
-    return decodePublicKey(keyBytes, algo);
-  }
-
-  public static PublicKey decodePublicKey(String pem, String algo) throws GeneralSecurityException {
-    return pem == null ? null : decodePublicKey(pemToDer(pem), algo);
-  }
-
-  public static X509Certificate decodex509Certificate(String cert) throws GeneralSecurityException {
-    if (cert == null) {
-      return null;
-    }
-    try (ByteArrayInputStream bis = new ByteArrayInputStream(pemToDer(cert))) {
-      return decodeX509Certificate(bis);
-    } catch (Exception e) {
-      throw new GeneralSecurityException(e);
-    }
-  }
-
-  public static X509Certificate decodeX509Certificate(InputStream is)
-      throws GeneralSecurityException {
-    CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
-    return (X509Certificate) cf.generateCertificate(is);
-  }
-
-  public static KeyPair generateKeyPair(AlgorithmParameterSpec spec, String algo)
-      throws GeneralSecurityException {
-    KeyPairGenerator keyPairGenerator =
-        KeyPairGenerator.getInstance(defaultString(algo, "RSA"), "BC");
-    keyPairGenerator.initialize(spec);
-    return keyPairGenerator.genKeyPair();
-  }
-
-  public static KeyPair generateKeyPair(int keySize, String algo) throws GeneralSecurityException {
-    KeyPairGenerator keyPairGenerator =
-        KeyPairGenerator.getInstance(defaultString(algo, "RSA"), "BC");
-    keyPairGenerator.initialize(keySize);
-    return keyPairGenerator.genKeyPair();
-  }
-
-  public static SecretKey generateSecretKey(String agorithm, int keyBitSize) {
+  public static PrivateKey decodePrivateKey(String pemEncoded, String algo) {
     try {
-      KeyGenerator generator = KeyGenerator.getInstance(agorithm);
-      generator.init(keyBitSize);
-      return generator.generateKey();
-    } catch (NoSuchAlgorithmException e) {
+      String encode = removePemKeyBeginEnd(pemEncoded);
+      byte[] pkcs8EncodedBytes = decodeBase64(encode);
+      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
+      KeyFactory kf = KeyFactory.getInstance(algo);
+      return kf.generatePrivate(keySpec);
+    } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }
   }
 
-  public static KeyPair loadKeyPairFromKeystore(String path, String storePassword,
-      String keyPassword, String keyAlias, String algo) throws GeneralSecurityException {
-    Optional<URLResource> resource = Resources.tryFrom(shouldNotBlank(path)).findAny();
-    if (resource.isPresent()) {
-      try (InputStream is = resource.get().openInputStream()) {
-        KeyStore keyStore = KeyStore.getInstance(defaultString(algo, "PKCS12"), "BC");
-        keyStore.load(is, storePassword.toCharArray());
-        PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyPassword.toCharArray());
-        if (privateKey == null) {
-          throw new GeneralSecurityException(
-              "Couldn't load key with alias '" + keyAlias + "' from keystore");
+  public static PublicKey decodePublicKey(String pemEncoded, String algo) {
+    try {
+      String encode = removePemKeyBeginEnd(pemEncoded);
+      byte[] encodedBytes = decodeBase64(encode);
+      X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedBytes);
+      KeyFactory kf = KeyFactory.getInstance(algo);
+      return kf.generatePublic(spec);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static SecretKeySpec decodeSecretKeySpec(String pemEncoded, String algo) {
+    String encode = removePemKeyBeginEnd(pemEncoded);
+    return new SecretKeySpec(decodeBase64(encode), algo);
+  }
+
+  public static String encodeBase64(byte[] data) {
+    return Base64.getEncoder().encodeToString(data);
+  }
+
+  public static KeyPair generateKeyPair(String algo) {
+    return generateKeyPair(null, algo, (Integer) null, null);
+  }
+
+  public static KeyPair generateKeyPair(String algo, AlgorithmParameterSpec spec) {
+    return generateKeyPair(null, algo, spec, null);
+  }
+
+  public static KeyPair generateKeyPair(String algo, AlgorithmParameterSpec spec,
+      SecureRandom secureRandom) {
+    return generateKeyPair(null, algo, spec, secureRandom);
+  }
+
+  public static KeyPair generateKeyPair(String algo, Integer keySize) {
+    return generateKeyPair(null, algo, keySize, null);
+  }
+
+  public static KeyPair generateKeyPair(String algo, Integer keySize, SecureRandom secureRandom) {
+    return generateKeyPair(null, algo, keySize, secureRandom);
+  }
+
+  public static KeyPair generateKeyPair(String provider, String algo, AlgorithmParameterSpec spec,
+      SecureRandom secureRandom) {
+    try {
+      KeyPairGenerator keyPairGenerator =
+          provider != null ? KeyPairGenerator.getInstance(algo, provider)
+              : KeyPairGenerator.getInstance(algo);
+      if (spec != null) {
+        if (secureRandom != null) {
+          keyPairGenerator.initialize(spec, secureRandom);
+        } else {
+          keyPairGenerator.initialize(spec);
         }
-        PublicKey publicKey = keyStore.getCertificate(keyAlias).getPublicKey();
-        return new KeyPair(publicKey, privateKey);
-      } catch (Exception e) {
-        throw new GeneralSecurityException(e);
       }
+      return keyPairGenerator.genKeyPair();
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
     }
-    return null;
   }
 
-  public static KeyStore loadKeyStore(String path, String password) throws Exception {
-    Optional<URLResource> resource = Resources.tryFrom(shouldNotBlank(path)).findAny();
-    if (resource.isPresent()) {
+  public static KeyPair generateKeyPair(String provider, String algo, Integer keySize,
+      SecureRandom secureRandom) {
+    try {
+      KeyPairGenerator keyPairGenerator =
+          provider != null ? KeyPairGenerator.getInstance(algo, provider)
+              : KeyPairGenerator.getInstance(algo);
+      if (keySize != null) {
+        if (secureRandom != null) {
+          keyPairGenerator.initialize(keySize, secureRandom);
+        } else {
+          keyPairGenerator.initialize(keySize);
+        }
+      }
+      return keyPairGenerator.genKeyPair();
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static SecretKey generateSecretKey(String algo, AlgorithmParameterSpec spec) {
+    return generateSecretKey(null, algo, spec, null);
+  }
+
+  public static SecretKey generateSecretKey(String algo, Integer keyBitSize) {
+    return generateSecretKey(null, algo, keyBitSize, null);
+  }
+
+  public static SecretKey generateSecretKey(String provider, String algo,
+      AlgorithmParameterSpec spec, SecureRandom secureRandom) {
+    try {
+      KeyGenerator generator = provider != null ? KeyGenerator.getInstance(algo, provider)
+          : KeyGenerator.getInstance(algo);
+      if (secureRandom != null) {
+        generator.init(spec, secureRandom);
+      } else {
+        generator.init(spec);
+      }
+      return generator.generateKey();
+    } catch (NoSuchAlgorithmException | NoSuchProviderException
+        | InvalidAlgorithmParameterException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static SecretKey generateSecretKey(String provider, String algo, Integer keyBitSize,
+      SecureRandom secureRandom) {
+    try {
+      KeyGenerator generator = provider != null ? KeyGenerator.getInstance(algo, provider)
+          : KeyGenerator.getInstance(algo);
+      if (secureRandom != null) {
+        generator.init(keyBitSize, secureRandom);
+      } else {
+        generator.init(keyBitSize);
+      }
+      return generator.generateKey();
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static SecretKey generateSecretKeySpec(String algo, int keyBitSize) {
+    shouldBeTrue(keyBitSize % 8 == 0);
+    byte[] secretBytes = new byte[keyBitSize / 8];
+    SecureRandom secureRandom = new SecureRandom();
+    secureRandom.nextBytes(secretBytes);
+    return new SecretKeySpec(secretBytes, algo);
+  }
+
+  public static KeyPair readKeyPairFromKeystore(Resource resource, String provider, String algo,
+      String storePassword, String keyPassword, String keyAlias) {
+    try (InputStream is = resource.openInputStream()) {
+      KeyStore keyStore =
+          provider != null ? KeyStore.getInstance(algo, provider) : KeyStore.getInstance(algo);
+      keyStore.load(is, storePassword.toCharArray());
+      PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyPassword.toCharArray());
+      if (privateKey == null) {
+        throw new CorantRuntimeException("Couldn't load key with alias '%s' from keystore",
+            keyAlias);
+      }
+      PublicKey publicKey = keyStore.getCertificate(keyAlias).getPublicKey();
+      return new KeyPair(publicKey, privateKey);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static KeyStore readKeyStore(Resource resource, String password) {
+    try (InputStream is = resource.openInputStream()) {
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      try (InputStream is = resource.get().openInputStream()) {
-        trustStore.load(is, password.toCharArray());
-      }
+      trustStore.load(is, password.toCharArray());
       return trustStore;
+    } catch (NoSuchAlgorithmException | IOException | KeyStoreException | CertificateException e) {
+      throw new CorantRuntimeException(e);
     }
-    return null;
   }
 
-  public static byte[] pemToDer(String pem) {
-    String usePem = removeBeginEnd(pem);
-    return Base64.getDecoder().decode(usePem);
+  public static PrivateKey readPrivateKey(Resource resource, String algo) {
+    try (InputStream is = resource.openInputStream()) {
+      return decodePrivateKey(Texts.fromInputStream(is), algo);
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static PublicKey readPublicKey(Resource resource, String algo) {
+    try (InputStream is = resource.openInputStream()) {
+      return decodePublicKey(Texts.fromInputStream(is), algo);
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static SecretKeySpec readSecretKeySpec(Resource resource, String algo) {
+    try (InputStream is = resource.openInputStream()) {
+      return decodeSecretKeySpec(Texts.fromInputStream(is), algo);
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static String removePemKeyBeginEnd(String pem) {
+    String rpem = pem.replaceAll("-----BEGIN (.*)-----", "");
+    rpem = rpem.replaceAll("-----END (.*)----", "");
+    rpem = rpem.replaceAll("\r\n", "");
+    rpem = rpem.replaceAll("\n", "");
+    return rpem.trim();
   }
 
   public static String toPem(Key key) {
@@ -208,17 +273,8 @@ public class Keys {
     }
     StringBuilder sb = new StringBuilder();
     sb.append("-----BEGIN ").append(name).append("-----\n");
-    sb.append(Base64.getEncoder().encodeToString(key.getEncoded())).append("\n");
+    sb.append(encodeBase64(key.getEncoded())).append("\n");
     sb.append("-----END ").append(name).append("-----\n");
     return sb.toString();
   }
-
-  static String removeBeginEnd(String pem) {
-    String rpem = pem.replaceAll("-----BEGIN (.*)-----", "");
-    rpem = rpem.replaceAll("-----END (.*)----", "");
-    rpem = rpem.replaceAll("\r\n", "");
-    rpem = rpem.replaceAll("\n", "");
-    return rpem.trim();
-  }
-
 }

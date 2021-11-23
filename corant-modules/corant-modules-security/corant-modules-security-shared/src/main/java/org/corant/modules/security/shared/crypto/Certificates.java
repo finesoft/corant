@@ -13,12 +13,18 @@
  */
 package org.corant.modules.security.shared.crypto;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -45,6 +51,8 @@ import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.jose4j.base64url.Base64Url;
+import org.jose4j.lang.HashUtil;
 
 /**
  * corant-modules-security-shared
@@ -76,6 +84,24 @@ public class Certificates {
     } catch (Exception e) {
       throw new CorantRuntimeException(e, "Could not create content signer.");
     }
+  }
+
+  public static X509Certificate decodex509Certificate(String cert) throws GeneralSecurityException {
+    if (cert == null) {
+      return null;
+    }
+    try (ByteArrayInputStream bis =
+        new ByteArrayInputStream(Base64.getDecoder().decode(removeCertBeginEnd(cert)))) {
+      return decodeX509Certificate(bis);
+    } catch (Exception e) {
+      throw new GeneralSecurityException(e);
+    }
+  }
+
+  public static X509Certificate decodeX509Certificate(InputStream is)
+      throws GeneralSecurityException {
+    CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+    return (X509Certificate) cf.generateCertificate(is);
   }
 
   /**
@@ -183,5 +209,29 @@ public class Certificates {
     } catch (Exception e) {
       throw new GeneralSecurityException("Error creating X509v3Certificate.", e);
     }
+  }
+
+  public static String x5t(X509Certificate certificate) throws CertificateEncodingException {
+    return base64urlThumbprint(certificate, "SHA-1");
+  }
+
+  public static String x5tS256(X509Certificate certificate) throws CertificateEncodingException {
+    return base64urlThumbprint(certificate, "SHA-256");
+  }
+
+  static String base64urlThumbprint(X509Certificate certificate, String hashAlg)
+      throws CertificateEncodingException {
+    MessageDigest msgDigest = HashUtil.getMessageDigest(hashAlg);
+    byte[] digest = msgDigest.digest(certificate.getEncoded());
+    return Base64Url.encode(digest);
+  }
+
+  static String removeCertBeginEnd(String pem) {
+    pem = pem.replaceAll("-----BEGIN(.*?)CERTIFICATE-----", "");
+    pem = pem.replaceAll("-----END(.*?)CERTIFICATE-----", "");
+    pem = pem.replaceAll("\r\n", "");
+    pem = pem.replaceAll("\n", "");
+    pem = pem.replaceAll("\\\\n", "");
+    return pem.trim();
   }
 }

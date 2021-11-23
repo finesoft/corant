@@ -13,10 +13,15 @@
  */
 package org.corant.modules.security.shared.crypto.jose;
 
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.security.Key;
+import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.SecretKey;
+import org.corant.modules.security.shared.crypto.jose.algorithm.SignatureAlgorithm;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
@@ -27,19 +32,55 @@ import org.jose4j.jwt.JwtClaims;
  * @author bingo 下午2:47:00
  *
  */
-public class DefaultJWTSignatureProvider implements JWTSignatureProvider {
+public class DefaultJoseSignatureProvider implements JoseSignatureProvider {
 
-  protected Key key;
+  protected SecretKey secretKey;
+
+  protected KeyPair keyPair;
 
   protected Map<String, Object> headers = new HashMap<>();
 
   protected SignatureAlgorithm algorithm;
 
+  protected boolean symmetric = false;
+
+  public DefaultJoseSignatureProvider(KeyPair keyPair, SignatureAlgorithm algorithm) {
+    shouldBeTrue(algorithm.isAsymmetric());
+    this.keyPair = keyPair;
+    this.algorithm = algorithm;
+    symmetric = !algorithm.isAsymmetric();
+  }
+
+  public DefaultJoseSignatureProvider(SecretKey key, SignatureAlgorithm algorithm) {
+    shouldBeFalse(algorithm.isAsymmetric());
+    secretKey = key;
+    this.algorithm = algorithm;
+    symmetric = !algorithm.isAsymmetric();
+  }
+
+  @Override
+  public String getAlgorithmName() {
+    return algorithm.getAlgorithmName();
+  }
+
+  @Override
+  public Key getVerificationKey() {
+    if (symmetric) {
+      return secretKey;
+    } else {
+      return keyPair.getPublic();
+    }
+  }
+
   @Override
   public Map<String, Object> parse(String signed, boolean verify) {
     try {
       JsonWebSignature jws = new JsonWebSignature();
-      jws.setKey(key);
+      if (symmetric) {
+        jws.setKey(secretKey);
+      } else {
+        jws.setKey(keyPair.getPublic());
+      }
       jws.setCompactSerialization(signed);
       if (verify) {
         jws.verifySignature();
@@ -59,7 +100,11 @@ public class DefaultJWTSignatureProvider implements JWTSignatureProvider {
     }
     jws.setAlgorithmHeaderValue(algorithm.getAlgorithmName());
     jws.setPayload(shouldNotBlank(claimsJson));
-    jws.setKey(key);
+    if (symmetric) {
+      jws.setKey(secretKey);
+    } else {
+      jws.setKey(keyPair.getPrivate());
+    }
     try {
       return jws.getCompactSerialization();
     } catch (Exception ex) {

@@ -13,12 +13,22 @@
  */
 package org.corant.modules.security.shared.crypto.jose;
 
+import java.security.Key;
+import java.util.Map;
+
 /**
  * corant-modules-security-shared
- * 
- * @author bingo 上午10:38:38
+ *
+ * @author bingo 上午10:38:16
  *
  */
-public interface JWTEncryptionProvider {
+public interface JoseSignatureProvider {
 
+  String getAlgorithmName();
+
+  Key getVerificationKey();
+
+  Map<String, Object> parse(String signed, boolean verify);
+
+  String sign(String claimsJson);
 }

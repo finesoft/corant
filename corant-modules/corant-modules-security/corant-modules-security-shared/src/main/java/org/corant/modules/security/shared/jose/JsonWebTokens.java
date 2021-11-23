@@ -28,7 +28,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.corant.modules.security.shared.crypto.Keys;
+import org.corant.modules.security.shared.crypto.KeyUtils;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -60,9 +60,9 @@ public class JsonWebTokens {
   public static RsaJsonWebKey createRSASHA256JsonWebKey(String rsaPublicKeyPem,
       String rsaPrivateKeyPem, String sha256keyId) throws GeneralSecurityException {
     RsaJsonWebKey rsaJsonWebKey =
-        new RsaJsonWebKey((RSAPublicKey) Keys.decodePublicKey(rsaPublicKeyPem, "RSA"));
+        new RsaJsonWebKey((RSAPublicKey) KeyUtils.decodePublicKey(rsaPublicKeyPem, "RSA"));
     rsaJsonWebKey.setKeyId(sha256keyId);
-    rsaJsonWebKey.setPrivateKey(Keys.decodePrivateKey(rsaPrivateKeyPem, "RSA"));
+    rsaJsonWebKey.setPrivateKey(KeyUtils.decodePrivateKey(rsaPrivateKeyPem, "RSA"));
     return rsaJsonWebKey;
   }
 

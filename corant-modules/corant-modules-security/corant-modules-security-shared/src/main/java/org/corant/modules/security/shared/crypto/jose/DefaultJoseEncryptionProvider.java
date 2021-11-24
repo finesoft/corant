@@ -86,8 +86,8 @@ public class DefaultJoseEncryptionProvider implements JoseEncryptionProvider {
     if (contentEncryptionAlgorithm != null) {
       headers.put("enc", contentEncryptionAlgorithm.getAlgorithmName());
     }
-    if (keyId != null) {
-      headers.put("kid", keyId);
+    if (this.keyId != null) {
+      headers.put("kid", this.keyId);
     }
   }
 
@@ -192,7 +192,7 @@ public class DefaultJoseEncryptionProvider implements JoseEncryptionProvider {
         throw new CorantRuntimeException();// Ill header
       }
       return jwe.getPlaintextString();
-    } catch (Exception e) {
+    } catch (JoseException e) {
       throw new CorantRuntimeException(e);
     }
   }

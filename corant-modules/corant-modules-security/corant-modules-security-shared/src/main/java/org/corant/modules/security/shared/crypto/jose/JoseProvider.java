@@ -56,35 +56,35 @@ public interface JoseProvider {
         algo.getKeyFactoryDefaultKeyBitSize());
   }
 
-  static PrivateKey readDecryptionPrivateKey(Resource resource) {
-    return readDecryptionPrivateKey(resource, KeyManagementAlgorithm.RSA_OAEP);
+  static PrivateKey readKeyManagementPrivateKey(Resource resource) {
+    return readKeyManagementPrivateKey(resource, KeyManagementAlgorithm.RSA_OAEP);
   }
 
-  static PrivateKey readDecryptionPrivateKey(Resource resource, KeyManagementAlgorithm algo) {
+  static PrivateKey readKeyManagementPrivateKey(Resource resource, KeyManagementAlgorithm algo) {
     return Keys.readPrivateKey(resource, algo.getKeyFactoryAlgorithm());
   }
 
-  static PrivateKey readDecryptionPrivateKey(String pemEncoded) {
-    return readDecryptionPrivateKey(pemEncoded, KeyManagementAlgorithm.RSA_OAEP);
+  static PrivateKey readKeyManagementPrivateKey(String pemEncoded) {
+    return readKeyManagementPrivateKey(pemEncoded, KeyManagementAlgorithm.RSA_OAEP);
   }
 
-  static PrivateKey readDecryptionPrivateKey(String pemEncoded, KeyManagementAlgorithm algo) {
+  static PrivateKey readKeyManagementPrivateKey(String pemEncoded, KeyManagementAlgorithm algo) {
     return Keys.decodePrivateKey(pemEncoded, algo.getKeyFactoryAlgorithm());
   }
 
-  static PublicKey readEncryptionPublicKey(Resource resource) {
-    return readEncryptionPublicKey(resource, KeyManagementAlgorithm.RSA_OAEP);
+  static PublicKey readKeyManagementPublicKey(Resource resource) {
+    return readKeyManagementPublicKey(resource, KeyManagementAlgorithm.RSA_OAEP);
   }
 
-  static PublicKey readEncryptionPublicKey(Resource resource, KeyManagementAlgorithm algo) {
+  static PublicKey readKeyManagementPublicKey(Resource resource, KeyManagementAlgorithm algo) {
     return Keys.readPublicKey(resource, algo.getKeyFactoryAlgorithm());
   }
 
-  static PublicKey readEncryptionPublicKey(String pemEncoded) {
-    return readEncryptionPublicKey(pemEncoded, KeyManagementAlgorithm.RSA_OAEP);
+  static PublicKey readKeyManagementPublicKey(String pemEncoded) {
+    return readKeyManagementPublicKey(pemEncoded, KeyManagementAlgorithm.RSA_OAEP);
   }
 
-  static PublicKey readEncryptionPublicKey(String pemEncoded, KeyManagementAlgorithm algo) {
+  static PublicKey readKeyManagementPublicKey(String pemEncoded, KeyManagementAlgorithm algo) {
     return Keys.decodePublicKey(pemEncoded, algo.getKeyFactoryAlgorithm());
   }
 

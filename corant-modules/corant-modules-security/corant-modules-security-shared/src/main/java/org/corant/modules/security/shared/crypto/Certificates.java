@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared.crypto;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -22,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -37,6 +39,7 @@ import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509ExtensionUtils;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
@@ -47,6 +50,7 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -81,20 +85,20 @@ public class Certificates {
 
       return new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
           .build(PrivateKeyFactory.createKey(privateKey.getEncoded()));
-    } catch (Exception e) {
+    } catch (IOException | OperatorCreationException e) {
       throw new CorantRuntimeException(e, "Could not create content signer.");
     }
   }
 
-  public static X509Certificate decodex509Certificate(String cert) throws GeneralSecurityException {
+  public static X509Certificate decodex509Certificate(String cert) {
     if (cert == null) {
       return null;
     }
     try (ByteArrayInputStream bis =
         new ByteArrayInputStream(Base64.getDecoder().decode(removeCertBeginEnd(cert)))) {
       return decodeX509Certificate(bis);
-    } catch (Exception e) {
-      throw new GeneralSecurityException(e);
+    } catch (IOException | GeneralSecurityException e) {
+      throw new CorantRuntimeException(e);
     }
   }
 
@@ -206,7 +210,7 @@ public class Certificates {
       // Certificate
       return new JcaX509CertificateConverter().setProvider("BC")
           .getCertificate(certGen.build(sigGen));
-    } catch (Exception e) {
+    } catch (CertificateException | OperatorCreationException | CertIOException e) {
       throw new GeneralSecurityException("Error creating X509v3Certificate.", e);
     }
   }
@@ -227,11 +231,11 @@ public class Certificates {
   }
 
   static String removeCertBeginEnd(String pem) {
-    pem = pem.replaceAll("-----BEGIN(.*?)CERTIFICATE-----", "");
-    pem = pem.replaceAll("-----END(.*?)CERTIFICATE-----", "");
-    pem = pem.replaceAll("\r\n", "");
-    pem = pem.replaceAll("\n", "");
-    pem = pem.replaceAll("\\\\n", "");
-    return pem.trim();
+    String rpem = pem.replaceAll("-----BEGIN(.*?)CERTIFICATE-----", "");
+    rpem = rpem.replaceAll("-----END(.*?)CERTIFICATE-----", "");
+    rpem = rpem.replaceAll("\r\n", "");
+    rpem = rpem.replaceAll("\n", "");
+    rpem = rpem.replaceAll("\\\\n", "");
+    return rpem.trim();
   }
 }

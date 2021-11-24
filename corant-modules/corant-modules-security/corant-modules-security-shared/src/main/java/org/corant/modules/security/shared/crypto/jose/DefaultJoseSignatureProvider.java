@@ -23,8 +23,11 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import org.corant.modules.security.shared.crypto.jose.algorithm.SignatureAlgorithm;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Objects;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.lang.JoseException;
 
 /**
  * corant-modules-security-shared
@@ -86,7 +89,7 @@ public class DefaultJoseSignatureProvider implements JoseSignatureProvider {
         jws.verifySignature();
       }
       return JwtClaims.parse(jws.getPayload()).getClaimsMap();
-    } catch (Exception e) {
+    } catch (JoseException | InvalidJwtException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -94,7 +97,7 @@ public class DefaultJoseSignatureProvider implements JoseSignatureProvider {
   @Override
   public String sign(String claimsJson) {
     JsonWebSignature jws = new JsonWebSignature();
-    headers.forEach((k, v) -> jws.setHeader(k.toString(), v));
+    headers.forEach((k, v) -> jws.setHeader(Objects.asString(k), v));
     if (!headers.containsKey("typ")) {
       jws.setHeader("typ", "JWT");
     }

@@ -55,7 +55,7 @@ public class JoseProviderTest extends TestCase {
                 a.getKeyFactoryDefaultKeyBitSize());
             jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
           }
-          test(new DefaultJoseProvider(ProtectionLevel.ENCRYPT, null, jep));
+          testProvider(new DefaultJoseProvider(ProtectionLevel.ENCRYPT, null, jep));
         }
       }
     }
@@ -72,7 +72,7 @@ public class JoseProviderTest extends TestCase {
         SecretKey key = JoseProvider.generateSignSecretKey(sa);
         sp = new DefaultJoseSignatureProvider(key, sa);
       }
-      test(new DefaultJoseProvider(ProtectionLevel.SIGN, sp, null));
+      testProvider(new DefaultJoseProvider(ProtectionLevel.SIGN, sp, null));
     }
   }
 
@@ -99,14 +99,14 @@ public class JoseProviderTest extends TestCase {
               SecretKey key = JoseProvider.generateSignSecretKey(sa);
               sp = new DefaultJoseSignatureProvider(key, sa);
             }
-            test(new DefaultJoseProvider(ProtectionLevel.SIGN_ENCRYPT, sp, jep));
+            testProvider(new DefaultJoseProvider(ProtectionLevel.SIGN_ENCRYPT, sp, jep));
           }
         }
       }
     }
   }
 
-  void test(JoseProvider provider) {
+  void testProvider(JoseProvider provider) {
     String sub = "bin.chen";
     String iss = "corant.org";
     JwtClaims claims = new JwtClaims();

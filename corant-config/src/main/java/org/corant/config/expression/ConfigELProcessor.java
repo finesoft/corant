@@ -14,23 +14,32 @@
 package org.corant.config.expression;
 
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Strings.isNotBlank;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import javax.el.ELManager;
 import javax.el.ExpressionFactory;
 import javax.el.StandardELContext;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.ConfigNames;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Randoms;
+import org.corant.shared.util.Resources;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
+import org.corant.shared.util.Texts;
 
 /**
  * corant-config
@@ -42,9 +51,11 @@ public class ConfigELProcessor {
 
   static final ThreadLocal<ELManager> elManagers = new ThreadLocal<>();
   final ConfigSourceBean sourceBean;
+  final ResourceBean resourceBean;
 
   public ConfigELProcessor(Function<String, String> provider) {
     sourceBean = new ConfigSourceBean(provider);
+    resourceBean = new ResourceBean();
   }
 
   public String evalValue(final String value) {
@@ -78,6 +89,8 @@ public class ConfigELProcessor {
       elm.importClass(Systems.class.getName());
       elm.setVariable("source", ELManager.getExpressionFactory().createValueExpression(sourceBean,
           ConfigSourceBean.class));
+      elm.setVariable("resource",
+          ELManager.getExpressionFactory().createValueExpression(resourceBean, ResourceBean.class));
       elManagers.set(elm);
     }
     return elManagers.get();
@@ -93,15 +106,39 @@ public class ConfigELProcessor {
 
     final Function<String, String> provider;
 
-    /**
-     * @param provider
-     */
     ConfigSourceBean(Function<String, String> provider) {
       this.provider = provider;
     }
 
     public String get(String propertyName) {
       return provider.apply(propertyName);
+    }
+  }
+
+  /**
+   * corant-config
+   * <p>
+   * A resource resolver use to get text/plain content
+   *
+   * @author bingo 上午11:21:08
+   *
+   */
+  public static class ResourceBean {
+
+    public String get(String propertyName) {
+      if (isNotBlank(propertyName)) {
+        try (Stream<URLResource> res = Resources.from(propertyName.strip())) {
+          Optional<URLResource> re = res.findFirst();
+          if (re.isPresent()) {
+            try (InputStream is = re.get().openInputStream()) {
+              return Texts.fromInputStream(is);
+            }
+          }
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+      }
+      return null;
     }
   }
 }

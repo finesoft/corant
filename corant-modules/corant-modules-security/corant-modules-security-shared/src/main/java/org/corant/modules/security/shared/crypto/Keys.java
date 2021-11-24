@@ -29,8 +29,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -55,6 +57,8 @@ import org.corant.shared.util.Texts;
  */
 public class Keys {
 
+  static SecureRandom secureRandom = new SecureRandom();
+
   static {
     if (Security.getProvider("BC") == null) {
       Security.addProvider(new BouncyCastleProvider());
@@ -72,7 +76,7 @@ public class Keys {
       PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
       KeyFactory kf = KeyFactory.getInstance(algo);
       return kf.generatePrivate(keySpec);
-    } catch (Exception e) {
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -84,7 +88,7 @@ public class Keys {
       X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedBytes);
       KeyFactory kf = KeyFactory.getInstance(algo);
       return kf.generatePublic(spec);
-    } catch (Exception e) {
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -133,7 +137,8 @@ public class Keys {
         }
       }
       return keyPairGenerator.genKeyPair();
-    } catch (Exception e) {
+    } catch (NoSuchProviderException | NoSuchAlgorithmException
+        | InvalidAlgorithmParameterException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -152,7 +157,7 @@ public class Keys {
         }
       }
       return keyPairGenerator.genKeyPair();
-    } catch (Exception e) {
+    } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -201,7 +206,6 @@ public class Keys {
   public static SecretKey generateSecretKeySpec(String algo, int keyBitSize) {
     shouldBeTrue(keyBitSize % 8 == 0);
     byte[] secretBytes = new byte[keyBitSize / 8];
-    SecureRandom secureRandom = new SecureRandom();
     secureRandom.nextBytes(secretBytes);
     return new SecretKeySpec(secretBytes, algo);
   }
@@ -219,7 +223,8 @@ public class Keys {
       }
       PublicKey publicKey = keyStore.getCertificate(keyAlias).getPublicKey();
       return new KeyPair(publicKey, privateKey);
-    } catch (Exception e) {
+    } catch (NoSuchProviderException | IOException | KeyStoreException | NoSuchAlgorithmException
+        | CertificateException | UnrecoverableKeyException e) {
       throw new CorantRuntimeException(e);
     }
   }

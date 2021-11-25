@@ -125,6 +125,7 @@
     <version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
     <version.minio>8.3.0</version.minio>
     <version.mongodb>3.9.1</version.mongodb>
+    <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
@@ -1819,6 +1820,12 @@
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-generator-annprocess</artifactId>
         <version>${version.org.openjdk.jmh}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${version.mokito}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

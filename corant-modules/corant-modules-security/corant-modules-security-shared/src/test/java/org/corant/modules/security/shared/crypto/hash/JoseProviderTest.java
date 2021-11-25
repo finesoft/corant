@@ -44,19 +44,17 @@ public class JoseProviderTest extends TestCase {
   @Test
   public void testEncryptAndDecrypt() {
     for (KeyManagementAlgorithm a : KeyManagementAlgorithm.values()) {
-      if (!a.getAlgorithmName().startsWith("PBE")) {
-        JoseEncryptionProvider jep = null;
-        for (ContentEncryptionAlgorithm ca : ContentEncryptionAlgorithm.values()) {
-          if (a.isAsymmetric()) {
-            KeyPair kp = JoseProvider.generateKeyManagementKeyPair(a);
-            jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
-          } else {
-            SecretKey kp = Keys.generateSecretKeySpec(a.getKeyFactoryAlgorithm(),
-                a.getKeyFactoryDefaultKeyBitSize());
-            jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
-          }
-          testProvider(new DefaultJoseProvider(ProtectionLevel.ENCRYPT, null, jep));
+      JoseEncryptionProvider jep = null;
+      for (ContentEncryptionAlgorithm ca : ContentEncryptionAlgorithm.values()) {
+        if (a.isAsymmetric()) {
+          KeyPair kp = JoseProvider.generateKeyManagementKeyPair(a);
+          jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
+        } else {
+          SecretKey kp = Keys.generateSecretKeySpec(a.getKeyFactoryAlgorithm(),
+              a.getKeyFactoryDefaultKeyBitSize());
+          jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
         }
+        testProvider(new DefaultJoseProvider(ProtectionLevel.ENCRYPT, null, jep));
       }
     }
   }
@@ -79,28 +77,26 @@ public class JoseProviderTest extends TestCase {
   @Test
   public void testSignEncryptAndDecrypt() {
     for (KeyManagementAlgorithm a : KeyManagementAlgorithm.values()) {
-      if (!a.getAlgorithmName().startsWith("PBE")) {
-        JoseEncryptionProvider jep = null;
-        for (ContentEncryptionAlgorithm ca : ContentEncryptionAlgorithm.values()) {
-          if (a.isAsymmetric()) {
-            KeyPair kp = JoseProvider.generateKeyManagementKeyPair(a);
-            jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
+      JoseEncryptionProvider jep = null;
+      for (ContentEncryptionAlgorithm ca : ContentEncryptionAlgorithm.values()) {
+        if (a.isAsymmetric()) {
+          KeyPair kp = JoseProvider.generateKeyManagementKeyPair(a);
+          jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
+        } else {
+          SecretKey kp = Keys.generateSecretKeySpec(a.getKeyFactoryAlgorithm(),
+              a.getKeyFactoryDefaultKeyBitSize());
+          jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
+        }
+        for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
+          JoseSignatureProvider sp;
+          if (sa.isAsymmetric()) {
+            KeyPair keyPair = JoseProvider.generateSignKeyPair(sa);
+            sp = new DefaultJoseSignatureProvider(keyPair, sa);
           } else {
-            SecretKey kp = Keys.generateSecretKeySpec(a.getKeyFactoryAlgorithm(),
-                a.getKeyFactoryDefaultKeyBitSize());
-            jep = new DefaultJoseEncryptionProvider(a, kp, null, ca);
+            SecretKey key = JoseProvider.generateSignSecretKey(sa);
+            sp = new DefaultJoseSignatureProvider(key, sa);
           }
-          for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
-            JoseSignatureProvider sp;
-            if (sa.isAsymmetric()) {
-              KeyPair keyPair = JoseProvider.generateSignKeyPair(sa);
-              sp = new DefaultJoseSignatureProvider(keyPair, sa);
-            } else {
-              SecretKey key = JoseProvider.generateSignSecretKey(sa);
-              sp = new DefaultJoseSignatureProvider(key, sa);
-            }
-            testProvider(new DefaultJoseProvider(ProtectionLevel.SIGN_ENCRYPT, sp, jep));
-          }
+          testProvider(new DefaultJoseProvider(ProtectionLevel.SIGN_ENCRYPT, sp, jep));
         }
       }
     }
@@ -124,14 +120,14 @@ public class JoseProviderTest extends TestCase {
     long t2 = System.currentTimeMillis();
     float t = (t2 - t1) / (float) decodeTimes;
     if (provider.getProtectionLevel() == ProtectionLevel.SIGN) {
-      System.out.printf("TIME_USE: %-16f SA: %-32s%n", t,
+      System.out.printf("TIME_USE\t%-16f\tSA\t%-32s%n", t,
           provider.getSignatureProvider().getAlgorithmName());
     } else if (provider.getProtectionLevel() == ProtectionLevel.ENCRYPT) {
-      System.out.printf("TIME_USE: %-16f KA: %-32s CA:%-32s %n", t,
+      System.out.printf("TIME_USE\t%-16f\tKA\t%-32s\tCA\t%-32s %n", t,
           provider.getEncryptionProvider().getKeyManagementAlgorithmName(),
           provider.getEncryptionProvider().getContentEncryptionAlgorithmName());
     } else {
-      System.out.printf("TIME_USE: %-16f KA: %-32s CA: %-32s SA: %-32s%n", t,
+      System.out.printf("TIME_USE\t%-16f\tKA\t%-32s\tCA\t%-32s\tSA\t%-32s%n", t,
           provider.getEncryptionProvider().getKeyManagementAlgorithmName(),
           provider.getEncryptionProvider().getContentEncryptionAlgorithmName(),
           provider.getSignatureProvider().getAlgorithmName());

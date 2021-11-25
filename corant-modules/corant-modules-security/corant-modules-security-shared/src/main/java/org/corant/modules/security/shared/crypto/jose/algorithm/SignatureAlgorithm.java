@@ -16,6 +16,12 @@ package org.corant.modules.security.shared.crypto.jose.algorithm;
 /**
  * corant-modules-security-shared
  *
+ * <p>
+ * Symmetrically signed JWTs such as HMAC-SHA256 (hs256) are not recommended, deemed insecure for a
+ * distributed microservice architecture where JWTs are expected to be passed around freely. Use of
+ * symmetric signatures would require all microservices to share a secret, eliminating the ability
+ * to determine who created the JWT.
+ *
  * @author bingo 下午3:09:01
  *
  */

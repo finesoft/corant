@@ -24,6 +24,7 @@ public enum KeyManagementAlgorithm {
   //@formatter:off
 
   //asymmetric
+  RSA1_5(true, "RSA1_5", "RSA", 2048, "RSAES-PKCS1-v1_5"),
   RSA_OAEP(true, "RSA-OAEP", "RSA", 2048, "RSA_OAEP"),
   RSA_OAEP_256(true, "RSA-OAEP-256", "RSA", 2048, "RSA_OAEP_256"),
   ECDH_ES(true,"ECDH-ES", "EC", null, "ECDH_ES"),
@@ -37,10 +38,9 @@ public enum KeyManagementAlgorithm {
   A128GCMKW(false, "A128GCMKW", "AES",128, "A128GCMKW"),
   A192GCMKW(false, "A192GCMKW", "AES",192, "A192GCMKW"),
   A256GCMKW(false, "A256GCMKW", "AES",256, "A256GCMKW"),
-  //password base
-  PBES2_HS256_A128KW(false, "PBES2-HS256+A128KW", null, null, "PBES2_HS256_A128KW"),
-  PBES2_HS384_A192KW(false, "PBES2-HS384+A192KW", null, null, "PBES2_HS384_A192KW"),
-  PBES2_HS512_A256KW(false, "PBES2-HS512+A256KW", null, null, "PBES2_HS512_A256KW");
+  PBES2_HS256_A128KW(false, "PBES2-HS256+A128KW", "AES", 128, "PBES2_HS256_A128KW"),
+  PBES2_HS384_A192KW(false, "PBES2-HS384+A192KW", "AES", 192, "PBES2_HS384_A192KW"),
+  PBES2_HS512_A256KW(false, "PBES2-HS512+A256KW", "AES", 256, "PBES2_HS512_A256KW");
 
   //@formatter:on
 

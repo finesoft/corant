@@ -60,7 +60,7 @@ public class CorantConfigExpander {
 
   public static String expand(String configValue, CorantConfigRawValueProvider provider) {
     String value = configValue;
-    if (hasMacro(value) && provider != null) {
+    if (containsMacro(value) && provider != null) {
       List<String> stacks = new LinkedList<>();
       value = resolveEscape(resolve(value, provider, stacks));
       stacks.clear();
@@ -68,7 +68,7 @@ public class CorantConfigExpander {
     return value;
   }
 
-  static boolean hasMacro(String value) {
+  static boolean containsMacro(String value) {
     return isNotBlank(value)
         && (value.contains(MACRO_EXP_PREFIX) || value.contains(MACRO_VAR_PREFIX));
   }
@@ -143,7 +143,7 @@ public class CorantConfigExpander {
     String actualKey = eval ? key : replace(key, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
     stacks.add(actualKey);
     String result = provider.get(eval, actualKey);
-    if (hasMacro(result)) {
+    if (containsMacro(result)) {
       return resolve(result, provider, stacks);
     }
     return result;

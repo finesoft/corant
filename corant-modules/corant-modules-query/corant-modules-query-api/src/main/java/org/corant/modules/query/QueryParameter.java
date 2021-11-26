@@ -100,7 +100,7 @@ public interface QueryParameter extends Serializable {
     private static final long serialVersionUID = 6618232487063961660L;
 
     protected Object criteria;
-    protected Integer limit;
+    protected Integer limit = 1;
     protected Integer offset = 0;
     protected Map<String, Object> context = new HashMap<>();
 

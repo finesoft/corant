@@ -69,11 +69,9 @@ public class Keys {
     return Base64.getDecoder().decode(data);
   }
 
-  public static PrivateKey decodePrivateKey(String pemEncoded, String algo) {
+  public static PrivateKey decodePrivateKey(byte[] encodedBytes, String algo) {
     try {
-      String encode = removePemKeyBeginEnd(pemEncoded);
-      byte[] pkcs8EncodedBytes = decodeBase64(encode);
-      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
+      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encodedBytes);
       KeyFactory kf = KeyFactory.getInstance(algo);
       return kf.generatePrivate(keySpec);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -81,10 +79,12 @@ public class Keys {
     }
   }
 
-  public static PublicKey decodePublicKey(String pemEncoded, String algo) {
+  public static PrivateKey decodePrivateKey(String pemEncoded, String algo) {
+    return decodePrivateKey(decodeBase64(removePemKeyBeginEnd(pemEncoded)), algo);
+  }
+
+  public static PublicKey decodePublicKey(byte[] encodedBytes, String algo) {
     try {
-      String encode = removePemKeyBeginEnd(pemEncoded);
-      byte[] encodedBytes = decodeBase64(encode);
       X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedBytes);
       KeyFactory kf = KeyFactory.getInstance(algo);
       return kf.generatePublic(spec);
@@ -93,9 +93,16 @@ public class Keys {
     }
   }
 
+  public static PublicKey decodePublicKey(String pemEncoded, String algo) {
+    return decodePublicKey(decodeBase64(removePemKeyBeginEnd(pemEncoded)), algo);
+  }
+
+  public static SecretKeySpec decodeSecretKeySpec(byte[] bytes, String algo) {
+    return new SecretKeySpec(bytes, algo);
+  }
+
   public static SecretKeySpec decodeSecretKeySpec(String pemEncoded, String algo) {
-    String encode = removePemKeyBeginEnd(pemEncoded);
-    return new SecretKeySpec(decodeBase64(encode), algo);
+    return decodeSecretKeySpec(decodeBase64(removePemKeyBeginEnd(pemEncoded)), algo);
   }
 
   public static String encodeBase64(byte[] data) {

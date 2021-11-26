@@ -733,6 +733,20 @@ public class Strings {
   }
 
   /**
+   * Remove characters that contains in the given sample chars sequence.
+   *
+   * @param str
+   * @param sample
+   * @return removeCharIf
+   */
+  public static String removeCharIf(final String str, final String sample) {
+    if (str == null || sample == null) {
+      return str;
+    }
+    return removeCharIf(str, s -> sample.indexOf(s.charValue()) != -1);
+  }
+
+  /**
    * Replace string use for short string, not regex.
    *
    * @param source

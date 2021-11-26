@@ -64,7 +64,7 @@ public class WXPayReport {
           while (true) {
             // 先用 take 获取数据
             try {
-              StringBuffer sb = new StringBuffer();
+              StringBuilder sb = new StringBuilder();
               String firstMsg = reportMsgQueue.take();
               WXPayUtil.getLogger().info("get first report msg: {}", firstMsg);
               String msg = null;
@@ -226,7 +226,7 @@ public class WXPayReport {
       Object[] objects = new Object[] {version, sdk, uuid, timestamp, elapsedTimeMillis,
           firstDomain, primaryDomain, firstConnectTimeoutMillis, firstReadTimeoutMillis,
           firstHasDnsError, firstHasConnectTimeout, firstHasReadTimeout};
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for (Object obj : objects) {
         sb.append(obj).append(separator);
       }

@@ -84,7 +84,10 @@ public class CorantConfigBuilder implements ConfigBuilder {
   public Config build() {
     CorantConfigSources configSources = CorantConfigSources.of(sources, classLoader);
     CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), configSources);
-    validate(configSources, config);
+    if (!Systems.getProperty(Names.CORANT_PREFIX + "config.builder.ignore-validate", Boolean.class,
+        false)) {
+      validate(configSources, config);
+    }
     return config;
   }
 

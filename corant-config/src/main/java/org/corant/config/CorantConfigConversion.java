@@ -326,7 +326,8 @@ public class CorantConfigConversion implements Serializable {
   }
 
   public <T> T convertSingle(String value, Class<T> propertyType) {
-    if (propertyType == String.class || propertyType == Object.class) {
+    if (propertyType == String.class || propertyType == Object.class
+        || propertyType == CharSequence.class) {
       return forceCast(value);
     } else {
       final Converter<?> converter = converters.get().get(wrap(propertyType));

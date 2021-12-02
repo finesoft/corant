@@ -45,6 +45,9 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
+ * <p>
+ * This class is used to organize and aggregate all configuration resources according to the
+ * microprofile specification and provide a unified interface to caller.
  *
  * @author bingo 下午6:04:42
  *
@@ -65,9 +68,11 @@ public class CorantConfigSources {
   protected final boolean expressionsEnabled;
 
   /**
-   * @param sources
-   * @param expressionsEnabled
-   * @param profiles
+   * Build an instance
+   *
+   * @param sources the processed configuration resources.
+   * @param expressionsEnabled whether to enabled the el expression.
+   * @param profiles the parsed profiles.
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
       String[] profiles) {
@@ -75,8 +80,8 @@ public class CorantConfigSources {
     this.profiles = defaultObject(profiles, Strings.EMPTY_ARRAY);
     this.expressionsEnabled = expressionsEnabled;
     if (isNotEmpty(profiles)) {
-      String[] cps = Arrays.copyOf(profiles, profiles.length);
-      Arrays.setAll(cps, i -> PROFILE_SPECIFIC_PREFIX + cps[i] + Names.NAME_SPACE_SEPARATOR);
+      String[] cps = new String[profiles.length];
+      Arrays.setAll(cps, i -> PROFILE_SPECIFIC_PREFIX + profiles[i] + Names.NAME_SPACE_SEPARATOR);
       profilePrefixs = cps;
     } else {
       profilePrefixs = Strings.EMPTY_ARRAY;
@@ -85,17 +90,19 @@ public class CorantConfigSources {
   }
 
   /**
+   * Build an instance
    *
-   * @param orginals
-   * @param classLoader
-   * @return of
+   * @param originalSources the original sources
+   * @param classLoader the used class loader
    */
-  public static CorantConfigSources of(List<ConfigSource> orginals, ClassLoader classLoader) {
-    shouldNotNull(orginals, "The config sources can not null!");
+  public static CorantConfigSources of(List<ConfigSource> originalSources,
+      ClassLoader classLoader) {
+    shouldNotNull(originalSources, "The config sources can not null!");
     MutableObject<String[]> profiles = new MutableObject<>(Strings.EMPTY_ARRAY);
     MutableBoolean enableExpressions = MutableBoolean.of(true);
-    List<Pair<String, ConfigSource>> profileSources = new ArrayList<>(orginals.size());
-    orginals.stream().sorted(CONFIG_SOURCE_COMPARATOR.reversed()).forEachOrdered(cs -> {
+    List<Pair<String, ConfigSource>> profileSources = new ArrayList<>(originalSources.size());
+    // collect the profile and source
+    originalSources.stream().sorted(CONFIG_SOURCE_COMPARATOR.reversed()).forEachOrdered(cs -> {
       String sourceProfile = resolveSourceProfile(cs.getName());
       if (sourceProfile == null) {
         String propertyProfile =
@@ -111,7 +118,7 @@ public class CorantConfigSources {
       }
     });
     final ConfigAdjuster configAdjuster = ConfigAdjuster.resolve(classLoader);
-    List<CorantConfigSource> sources = new ArrayList<>(orginals.size());
+    List<CorantConfigSource> sources = new ArrayList<>(originalSources.size());
     profileSources.forEach(ps -> {
       if (ps.getLeft() == null || Arrays.binarySearch(profiles.get(), ps.getLeft()) != -1) {
         ConfigSource adjustedSource = configAdjuster.apply(ps.getRight());
@@ -120,6 +127,8 @@ public class CorantConfigSources {
         }
       }
     });
+    // collect the profiled microprofile-config-* sources if necessary, may be we can use GLOB
+    // pattern to collect them in Config Builder
     if (isNotEmpty(profiles.get())) {
       for (String profile : profiles.get()) {
         for (ConfigSource mps : MicroprofileConfigSources.get(classLoader, profile)) {
@@ -132,6 +141,7 @@ public class CorantConfigSources {
         }
       }
     }
+    // sorting the collected sources
     sources.sort(CONFIG_SOURCE_COMPARATOR);
     return new CorantConfigSources(sources, enableExpressions.get(), profiles.get());
   }
@@ -203,9 +213,15 @@ public class CorantConfigSources {
   }
 
   /**
-   * Return the profiled value with source if necessary
+   * Find and return the property value in the processed configuration resources according to the
+   * given property name.
+   * <p>
+   * Note: The search order complies with the microprofile sorting rule. First search the highest
+   * priority config source system.profile etc., and then search the profiled sources according to
+   * the profile names order if not found, and then search the profiled source items with the
+   * profile prefix key if not found, finally search source items diectly.
    *
-   * @param propertyName
+   * @param propertyName the property name to find
    * @return config source and value
    */
   protected Pair<ConfigSource, String> getSourceAndValue(String propertyName) {

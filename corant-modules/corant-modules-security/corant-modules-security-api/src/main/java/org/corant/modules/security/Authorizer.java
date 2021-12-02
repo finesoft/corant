@@ -23,7 +23,11 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface Authorizer extends Sortable {
 
-  void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException;
+  default void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {
+    if (!testAccess(context, roleOrPermit)) {
+      throw new AuthenticationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+    }
+  }
 
   boolean testAccess(Object context, Object roleOrPermit);
 

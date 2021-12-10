@@ -29,7 +29,7 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -113,7 +113,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
         } else {
           return compare(left, right, Double.class);
         }
-      } else if (left instanceof Temporal && right instanceof Temporal) {
+      } else if (left instanceof TemporalAccessor && right instanceof TemporalAccessor) {
         if (left instanceof Date && right instanceof Date) {
           return ((Date) left).compareTo((Date) right);
         } else if (left instanceof Instant && right instanceof Instant) {
@@ -122,8 +122,6 @@ public interface ASTComparisonNode extends ASTPredicateNode {
           return ((ZonedDateTime) left).compareTo((ZonedDateTime) right);
         } else if (left instanceof LocalTime && right instanceof LocalTime) {
           return ((LocalTime) left).compareTo((LocalTime) right);
-        } else if (left instanceof Duration && right instanceof Duration) {
-          return ((Duration) left).compareTo((Duration) right);
         } else if (left instanceof LocalDate && right instanceof LocalDate) {
           return ((LocalDate) left).compareTo((LocalDate) right);
         } else if (left instanceof LocalDateTime && right instanceof LocalDateTime) {
@@ -145,6 +143,8 @@ public interface ASTComparisonNode extends ASTPredicateNode {
         return left.toString().compareTo(right.toString());
       } else if (areEqual(left.getClass(), right.getClass())) {
         return ((Comparable) left).compareTo(right);
+      } else if (left instanceof Duration && right instanceof Duration) {
+        return ((Duration) left).compareTo((Duration) right);
       }
       throw new NotSupportedException();
     }
@@ -216,7 +216,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (right == null || !(right instanceof Collection)) {
+      if (!(right instanceof Collection)) {
         return false;
       }
       return ((Collection) right).contains(left);
@@ -276,7 +276,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (right == null || !(right instanceof Collection)) {
+      if (!(right instanceof Collection)) {
         return true;
       }
       return !((Collection) right).contains(left);

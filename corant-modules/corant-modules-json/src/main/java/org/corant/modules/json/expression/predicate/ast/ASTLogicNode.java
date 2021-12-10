@@ -68,7 +68,7 @@ public interface ASTLogicNode extends ASTPredicateNode {
 
     @Override
     public Boolean getValue(EvaluationContext ctx) {
-      return children.stream().map(n -> n.getValue(ctx)).allMatch(Boolean::booleanValue);
+      return children.stream().allMatch(n -> n.getValue(ctx));
     }
   }
 
@@ -111,7 +111,7 @@ public interface ASTLogicNode extends ASTPredicateNode {
 
     @Override
     public Boolean getValue(EvaluationContext ctx) {
-      return children.stream().map(n -> n.getValue(ctx)).anyMatch(Boolean::booleanValue);
+      return children.stream().anyMatch(n -> n.getValue(ctx));
     }
   }
 

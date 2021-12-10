@@ -184,7 +184,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
   class ASTGreaterEqualThanNode extends AbstractASTComparisonNode {
 
     public ASTGreaterEqualThanNode() {
-      super(ASTNodeType.CP_GT);
+      super(ASTNodeType.CP_GTE);
     }
 
     @Override

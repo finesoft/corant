@@ -48,6 +48,8 @@ import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResult;
+import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResultPair;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
@@ -74,8 +76,9 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
-    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchPredicates(fetchQuery);
-    return fun == null || toBoolean(fun.apply(new Object[] {queryParameter, result}));
+    Function<ParameterAndResult, Object> fun =
+        QueryScriptEngines.resolveFetchPredicates(fetchQuery);
+    return fun == null || toBoolean(fun.apply(new ParameterAndResult(queryParameter, result)));
   }
 
   @Override
@@ -84,13 +87,15 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   }
 
   @Override
-  public void handleFetchedResult(Object result, List<?> fetchedResults, FetchQuery fetchQuery) {
+  public void handleFetchedResult(QueryParameter parameter, Object result, List<?> fetchedResults,
+      FetchQuery fetchQuery) {
     if (result == null) {
       return;
     }
-    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    Function<ParameterAndResultPair, Object> fun =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
-      fun.apply(new Object[] {new Object[] {result}, fetchedResults});
+      fun.apply(new ParameterAndResultPair(parameter, listOf(result), fetchedResults));
     } else {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
@@ -106,13 +111,16 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   }
 
   @Override
-  public void handleFetchedResults(List<?> results, List<?> fetchedResults, FetchQuery fetchQuery) {
+  public void handleFetchedResults(QueryParameter parameter, List<?> results,
+      List<?> fetchedResults, FetchQuery fetchQuery) {
     if (isEmpty(results)) {
       return;
     }
-    Function<Object[], Object> fun = QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    Function<ParameterAndResultPair, Object> fun =
+        QueryScriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
-      fun.apply(new Object[] {results, defaultObject(fetchedResults, ArrayList::new)});
+      fun.apply(new ParameterAndResultPair(parameter, results,
+          defaultObject(fetchedResults, ArrayList::new)));
     } else {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
@@ -134,9 +142,9 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
       QueryParameter parentQueryparameter) {
-    MutableObject<QueryParameter> resolved = new MutableObject<>(
-        new DefaultQueryParameter().context(parentQueryparameter.getContext()).criteria(
-            resolveFetchQueryCriteria(result, query, extractCriterias(parentQueryparameter))));
+    MutableObject<QueryParameter> resolved =
+        new MutableObject<>(new DefaultQueryParameter().context(parentQueryparameter.getContext())
+            .criteria(resolveFetchQueryCriteria(result, query, parentQueryparameter)));
     select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
         .sorted(Sortable::compare).forEach(resolved::apply);
     return resolved.get();
@@ -184,7 +192,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   }
 
   protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
-      Map<String, Object> criteria) {
+      QueryParameter parentQueryParameter) {
+    Map<String, Object> criteria = extractCriterias(parentQueryParameter);
     Map<String, Object> fetchCriteria = new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       final Class<?> type = parameter.getType();
@@ -199,9 +208,10 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
         fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
       } else if (source == FetchQueryParameterSource.S) {
         // the parameter script handling
-        Function<Object[], Object> fun = QueryScriptEngines.resolveFetchParameter(parameter);
+        Function<ParameterAndResult, Object> fun =
+            QueryScriptEngines.resolveFetchParameter(parameter);
         List<Object> parentReuslt = result instanceof List ? (List) result : listOf(result);
-        Object resultValue = fun.apply(new Object[] {criteria, parentReuslt});
+        Object resultValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentReuslt));
         resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
         fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
       } else if (result != null) {

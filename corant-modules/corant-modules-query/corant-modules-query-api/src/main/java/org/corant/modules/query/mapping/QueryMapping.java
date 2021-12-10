@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.modules.query.mapping.Script.ScriptType;
 
 /**
  * corant-modules-query-api
@@ -108,6 +109,11 @@ public class QueryMapping {
             "The 'script' element in 'query' element [%s] in query file [%s] can not null!",
             q.getName(), getUrl()));
       }
+      if (q.getScript().getType() == ScriptType.JPE) {
+        brokens.add(String.format(
+            "The type [%s] of the 'script' element of the 'query' element [%s] in the query file [%s] not support!",
+            q.getScript().getType().toString(), q.getName(), getUrl()));
+      }
       if (queryNames.contains(q.getVersionedName())) {
         brokens.add(String.format(
             "The 'name' attribute of 'query' element [%s] in query file [%s] can not repeat!",
@@ -132,6 +138,12 @@ public class QueryMapping {
           brokens.add(String.format(
               "The 'fetch-query' [%s] with 'inject-property-name' [%s] in query element [%s] in query file [%s] can not repeat!",
               fq.getReferenceQuery(), fq.getInjectPropertyName(), q.getName(), getUrl()));
+        } else if (fq.getInjectionScript().isValid()
+            && fq.getInjectionScript().getType() == ScriptType.FM) {
+          brokens.add(String.format(
+              "The script type [%s] can't be 'FM' which in 'fetch-query' [%s] 'injection-script' element in query element [%s] in query file [%s].",
+              fq.getInjectionScript().getType().name(), fq.getReferenceQuery(), q.getName(),
+              getUrl()));
         }
 
         // if (isBlank(fq.getInjectPropertyName())) {

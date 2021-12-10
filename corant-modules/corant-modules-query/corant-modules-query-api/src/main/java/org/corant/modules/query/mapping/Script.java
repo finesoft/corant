@@ -14,6 +14,7 @@
 package org.corant.modules.query.mapping;
 
 import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.strip;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -78,7 +79,7 @@ public class Script implements Serializable {
    * @param code the code to set
    */
   protected void setCode(String code) {
-    this.code = code;
+    this.code = strip(code);
   }
 
   /**
@@ -98,6 +99,8 @@ public class Script implements Serializable {
   }
 
   public enum ScriptType {
-    JS, FM, KT
+
+    JS, FM, KT, CDI, JPE;
+
   }
 }

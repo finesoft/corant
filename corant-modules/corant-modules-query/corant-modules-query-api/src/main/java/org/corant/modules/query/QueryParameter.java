@@ -100,7 +100,7 @@ public interface QueryParameter extends Serializable {
     private static final long serialVersionUID = 6618232487063961660L;
 
     protected Object criteria;
-    protected Integer limit = 1;
+    protected Integer limit;
     protected Integer offset = 0;
     protected Map<String, Object> context = new HashMap<>();
 
@@ -301,13 +301,18 @@ public interface QueryParameter extends Serializable {
       if (enhancer != null) {
         enhancer.accept(current, this);
       } else {
-        offset(offset + super.getLimit());
+        offset(offset + getLimit());
       }
       return this;
     }
 
     public BiConsumer<Object, StreamQueryParameter> getEnhancer() {
       return enhancer;
+    }
+
+    @Override
+    public Integer getLimit() {
+      return defaultObject(super.getLimit(), 1);
     }
 
     /**
@@ -415,6 +420,7 @@ public interface QueryParameter extends Serializable {
       this.terminater = terminater;
       return this;
     }
+
   }
 
 }

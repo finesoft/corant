@@ -21,6 +21,7 @@ import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Objects.min;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.ref.Cleaner;
@@ -37,8 +38,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.modules.query.Querier;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryParameter.StreamQueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -146,6 +147,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
       FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
+      if (!querier.getQuery().getProperties().containsKey(PRO_KEY_BATCH_SIZE)) {
+        fi.batchSize(min(maxSize, 64));
+      }
       List<Map<String, Object>> fetchedList = null;
       try (MongoCursor<Document> cursor = fi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
@@ -176,9 +180,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
+    int fetchLimit = limit + 1;
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
-    FindIterable<Document> fi = query(querier).skip(offset).limit(limit + 1);
+    FindIterable<Document> fi = query(querier).batchSize(fetchLimit).skip(offset).limit(fetchLimit);
     List<Document> docList = collect(fi);
     List<Map<String, Object>> list = new ArrayList<>();
     if (docList != null) {
@@ -220,7 +225,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int limit = querier.resolveLimit();
     Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).skip(offset).limit(limit);
+    FindIterable<Document> fi = query(querier).batchSize(limit).skip(offset).limit(limit);
     List<Document> docList = collect(fi);
     List<Map<String, Object>> list = new ArrayList<>();
     if (docList != null) {
@@ -256,6 +261,85 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
     }
     return querier.handleResults(list);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>
+   * Note: Be careful about {@link FindIterable#noCursorTimeout(boolean)}
+   *
+   * @see #query(MgNamedQuerier)
+   * @see #PRO_KEY_NO_CURSOR_TIMEOUT
+   */
+  @Override
+  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter parameter) {
+    if (parameter.getEnhancer() != null) {
+      return super.doStream(queryName, parameter);
+    }
+    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
+    final Iterator<T> iterator = new Iterator<>() {
+      int counter = 0;
+      Forwarding<T> buffer = null;
+      T next = null;
+
+      @Override
+      public boolean hasNext() {
+        initialize();
+        boolean more = false;
+        if (!parameter.terminateIf(counter, next)) {
+          if (!buffer.hasResults()) {
+            if (buffer.hasNext()) {
+              buffer.with(doForward(cursor));
+              more = buffer.hasResults();
+            }
+          } else {
+            more = true;
+          }
+        }
+        if (!more && cursor != null) {
+          cursor.close();
+        }
+        return more;
+      }
+
+      @Override
+      public T next() {
+        initialize();
+        if (!buffer.hasResults()) {
+          throw new NoSuchElementException();
+        }
+        counter++;
+        next = buffer.getResults().remove(0);
+        return next;
+      }
+
+      private Forwarding<T> doForward(MongoCursor<Document> it) {
+        int size = parameter.getLimit();
+        List<Object> list = new ArrayList<>(size);
+        while (it.hasNext() && --size >= 0) {
+          list.add(it.next());
+        }
+        fetch(list, querier);
+        return Forwarding.of(querier.handleResults(list), it.hasNext());
+      }
+
+      private void initialize() {
+        if (buffer == null) {
+          buffer = defaultObject(doForward(cursor), Forwarding::inst);
+          counter = buffer.hasResults() ? 1 : 0;
+        }
+      }
+    };
+    Stream<T> stream = streamOf(iterator).onClose(cursor::close);
+    Cleaner.create().register(iterator, () -> {
+      if (cursor != null) {
+        cursor.close();
+      }
+    });// JDK9+
+    return stream;
   }
 
   protected abstract MongoDatabase getDataBase();
@@ -387,84 +471,5 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
 
     return Optional.empty();
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * <p>
-   * Note: Be careful about {@link FindIterable#noCursorTimeout(boolean)}
-   *
-   * @see #query(MgNamedQuerier)
-   * @see #PRO_KEY_NO_CURSOR_TIMEOUT
-   */
-  @Override
-  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter parameter) {
-    if (parameter.getEnhancer() != null) {
-      return super.doStream(queryName, parameter);
-    }
-    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
-    final Iterator<T> iterator = new Iterator<>() {
-      int counter = 0;
-      Forwarding<T> buffer = null;
-      T next = null;
-
-      @Override
-      public boolean hasNext() {
-        initialize();
-        boolean more = false;
-        if (!parameter.terminateIf(counter, next)) {
-          if (!buffer.hasResults()) {
-            if (buffer.hasNext()) {
-              buffer.with(doForward(cursor));
-              more = buffer.hasResults();
-            }
-          } else {
-            more = true;
-          }
-        }
-        if (!more && cursor != null) {
-          cursor.close();
-        }
-        return more;
-      }
-
-      @Override
-      public T next() {
-        initialize();
-        if (!buffer.hasResults()) {
-          throw new NoSuchElementException();
-        }
-        counter++;
-        next = buffer.getResults().remove(0);
-        return next;
-      }
-
-      private Forwarding<T> doForward(MongoCursor<Document> it) {
-        int size = parameter.getLimit();
-        List<Object> list = new ArrayList<>(size);
-        while (it.hasNext() && --size >= 0) {
-          list.add(it.next());
-        }
-        fetch(list, querier);
-        return Forwarding.of(querier.handleResults(list), it.hasNext());
-      }
-
-      private void initialize() {
-        if (buffer == null) {
-          buffer = defaultObject(doForward(cursor), Forwarding::inst);
-          counter = buffer.hasResults() ? 1 : 0;
-        }
-      }
-    };
-    Stream<T> stream = streamOf(iterator).onClose(cursor::close);
-    Cleaner.create().register(iterator, () -> {
-      if (cursor != null) {
-        cursor.close();
-      }
-    });// JDK9+
-    return stream;
   }
 }

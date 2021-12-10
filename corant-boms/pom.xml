@@ -29,7 +29,7 @@
     <version.atomikos>5.0.8</version.atomikos>
     <version.bouncycastle>1.68</version.bouncycastle>
     <version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
-    <version.caffeine>3.0.3</version.caffeine>
+    <version.caffeine>3.0.5</version.caffeine>
     <version.calcite>1.27.0</version.calcite>
     <version.commons-beanutils>1.9.4</version.commons-beanutils>
     <version.commons-cli>1.4</version.commons-cli>
@@ -143,7 +143,7 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.13.4</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.7.3.Final</version.resteasy>
+    <version.resteasy>4.7.4.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.slf4j>1.7.32</version.slf4j>
@@ -161,7 +161,7 @@
     <version.snakeyaml>1.27</version.snakeyaml>
     <version.swagger>2.0.8</version.swagger>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.13.Final</version.undertow>
+    <version.undertow>2.2.14.Final</version.undertow>
     <version.vertx>4.1.4</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>

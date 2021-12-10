@@ -92,7 +92,7 @@
                 <xsd:annotation>
                     <xsd:documentation>
                     	<![CDATA[
-                    		The query script, default script is freemarker.
+                    		The query script, default script type is FM(freemarker).
                     	]]>
                     </xsd:documentation>
                 </xsd:annotation>
@@ -453,6 +453,16 @@
                     <xsd:documentation><![CDATA[Specify that the script language is Kotlin.]]></xsd:documentation>
                 </xsd:annotation>
             </xsd:enumeration>
+            <xsd:enumeration value="CDI">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[Specify that the script is java CDI named qualifier]]></xsd:documentation>
+                </xsd:annotation>                
+            </xsd:enumeration>      
+            <xsd:enumeration value="JPE">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[Specify that the script is json predicate expression]]></xsd:documentation>
+                </xsd:annotation>                
+            </xsd:enumeration>                     
         </xsd:restriction>
     </xsd:simpleType>    
         

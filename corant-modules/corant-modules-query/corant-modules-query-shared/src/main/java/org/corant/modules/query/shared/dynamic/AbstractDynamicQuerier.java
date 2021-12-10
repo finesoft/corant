@@ -85,12 +85,12 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   @Override
   public void handleFetchedResult(Object result, List<?> fetchResult, FetchQuery fetchQuery) {
-    fetchQueryHandler.handleFetchedResult(result, fetchResult, fetchQuery);
+    fetchQueryHandler.handleFetchedResult(queryParameter, result, fetchResult, fetchQuery);
   }
 
   @Override
   public void handleFetchedResults(List<?> results, List<?> fetchResult, FetchQuery fetchQuery) {
-    fetchQueryHandler.handleFetchedResults(results, fetchResult, fetchQuery);
+    fetchQueryHandler.handleFetchedResults(queryParameter, results, fetchResult, fetchQuery);
   }
 
   @Override

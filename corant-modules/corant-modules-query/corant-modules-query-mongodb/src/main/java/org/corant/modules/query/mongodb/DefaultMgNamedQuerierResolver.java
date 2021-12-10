@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-query-mongodb
@@ -53,7 +54,16 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
-    return new FreemarkerMgQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+    switch (query.getScript().getType()) {
+      case CDI:
+      case JPE:
+      case JS:
+      case KT:
+        throw new NotSupportedException("The query script type %s not support!",
+            query.getScript().getType());
+      default:
+        return new FreemarkerMgQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+    }
   }
 
   @PreDestroy

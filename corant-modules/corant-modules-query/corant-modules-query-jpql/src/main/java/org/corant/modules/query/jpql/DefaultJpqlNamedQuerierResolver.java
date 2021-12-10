@@ -23,7 +23,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.shared.exception.NotSupportedException;
@@ -64,10 +63,16 @@ public class DefaultJpqlNamedQuerierResolver
       throw new NotSupportedException();
     }
     // FIXME decide script engine
-    if (query.getScript().getType() == ScriptType.JS) {
-      return createJsProcessor(query);
-    } else {
-      return createFmProcessor(query);
+    switch (query.getScript().getType()) {
+      case JS:
+        return createJsProcessor(query);
+      case CDI:
+      case JPE:
+      case KT:
+        throw new NotSupportedException("The query script type %s not support!",
+            query.getScript().getType());
+      default:
+        return createFmProcessor(query);
     }
   }
 

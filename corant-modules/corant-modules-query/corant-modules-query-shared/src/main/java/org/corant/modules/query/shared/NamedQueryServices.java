@@ -17,6 +17,7 @@ import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,7 @@ public class NamedQueryServices {
   }
 
   public <T> Stream<List<T>> batch() {
-    return Streams.batchStream(parameter.getLimit(), stream());
+    return Streams.batchStream(defaultObject(parameter.getLimit(), 16), stream());
   }
 
   public NamedQueryServices context(Map<String, Object> context) {

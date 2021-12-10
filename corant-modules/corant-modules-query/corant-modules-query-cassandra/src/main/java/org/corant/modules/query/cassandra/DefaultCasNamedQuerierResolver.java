@@ -28,6 +28,7 @@ import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.modules.query.shared.dynamic.freemarker.DynamicTemplateMethodModelEx;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQuerierBuilder;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -66,8 +67,16 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
-    // FIXME decide script engine
-    return createFmBuilder(query);
+    switch (query.getScript().getType()) {
+      case CDI:
+      case JPE:
+      case JS:
+      case KT:
+        throw new NotSupportedException("The query script type %s not support!",
+            query.getScript().getType());
+      default:
+        return createFmBuilder(query);
+    }
   }
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {

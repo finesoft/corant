@@ -20,16 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.shared.QueryScriptEngines;
+import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResult;
 import org.corant.modules.query.spi.ResultHintHandler;
 
 /**
@@ -88,21 +90,15 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @Inject
   protected Logger logger;
 
-  @Override
-  public boolean supports(Class<?> resultClass, QueryHint hint) {
-    return hint != null && areEqual(hint.getKey(), HINT_NAME)
-        && isNotBlank(hint.getScript().getCode());
-  }
-
   @SuppressWarnings("rawtypes")
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
-    Consumer<Object[]> func;
+    Function<ParameterAndResult, Object> func;
     if (brokens.contains(qh.getId()) || (func = resolve(qh)) == null) {
       return;
     }
     if (result instanceof Map) {
-      func.accept(new Object[] {parameter, (Map) result});
+      func.apply(new ParameterAndResult((QueryParameter) parameter, result));
     } else {
       List<?> list = null;
       if (result instanceof Forwarding) {
@@ -115,11 +111,17 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
       if (!isEmpty(list)) {
         for (Object item : list) {
           if (item instanceof Map) {
-            func.accept(new Object[] {parameter, (Map) item});
+            func.apply(new ParameterAndResult((QueryParameter) parameter, item));
           }
         }
       }
     }
+  }
+
+  @Override
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
+    return hint != null && areEqual(hint.getKey(), HINT_NAME)
+        && isNotBlank(hint.getScript().getCode());
   }
 
   @PreDestroy
@@ -128,8 +130,9 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
     logger.fine(() -> "Clear result script mapper hint handler caches.");
   }
 
-  protected Consumer<Object[]> resolve(QueryHint qh) {
-    Consumer<Object[]> func = QueryScriptEngines.resolveQueryHintResultScriptMappers(qh);
+  protected Function<ParameterAndResult, Object> resolve(QueryHint qh) {
+    Function<ParameterAndResult, Object> func =
+        QueryScriptEngines.resolveQueryHintResultScriptMappers(qh);
     if (func == null) {
       brokens.add(qh.getId());
     }

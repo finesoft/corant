@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
@@ -37,9 +38,18 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryParser;
+import org.corant.modules.query.mapping.Script.ScriptType;
+import org.corant.modules.query.spi.FetchQueryParameterResolver;
+import org.corant.modules.query.spi.FetchQueryPredicate;
+import org.corant.modules.query.spi.FetchQueryResultInjector;
 import org.corant.modules.query.spi.QueryProvider;
+import org.corant.modules.query.spi.QueryScriptResolver;
+import org.corant.modules.query.spi.ResultHintResolver;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -127,6 +137,57 @@ public class QueryMappingService {
               q.getVersionedName(), m.getUrl(), repeat.getMappingFilePath());
         } else {
           queries.put(q.getVersionedName(), q);
+        }
+        // check script CDI
+        if (q.getScript().getType() == ScriptType.CDI
+            && findNamed(QueryScriptResolver.class, q.getScript().getCode()).isEmpty()) {
+          throw new QueryRuntimeException(
+              "The script of query [%s] element in query file [%s] can't find the script resolver.",
+              q.getVersionedName(), m.getUrl());
+        }
+        if (q.getHints() != null) {
+          for (QueryHint qh : q.getHints()) {
+            if (qh.getScript() != null && qh.getScript().isValid()
+                && qh.getScript().getType() == ScriptType.CDI
+                && findNamed(ResultHintResolver.class, qh.getScript().getCode()).isEmpty()) {
+              throw new QueryRuntimeException(
+                  "The script of query hint [%s] in query [%s] file [%s] can't find the script resolver.",
+                  qh.getKey(), q.getVersionedName(), m.getUrl());
+            }
+          }
+        }
+        if (q.getFetchQueries() != null) {
+          for (FetchQuery fq : q.getFetchQueries()) {
+            if (fq.getPredicateScript() != null && fq.getPredicateScript().isValid()
+                && fq.getPredicateScript().getType() == ScriptType.CDI
+                && findNamed(FetchQueryPredicate.class, fq.getPredicateScript().getCode())
+                    .isEmpty()) {
+              throw new QueryRuntimeException(
+                  "The script of fetch query predicate [%s] in query [%s] file [%s] can't find the script resolver.",
+                  fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
+            } else if (fq.getInjectionScript() != null && fq.getInjectionScript().isValid()
+                && fq.getInjectionScript().getType() == ScriptType.CDI
+                && findNamed(FetchQueryResultInjector.class, fq.getInjectionScript().getCode())
+                    .isEmpty()) {
+              throw new QueryRuntimeException(
+                  "The script of fetch query injection [%s] in query [%s] file [%s] can't find the script resolver.",
+                  fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
+            } else {
+              if (fq.getParameters() != null) {
+                for (FetchQueryParameter fp : fq.getParameters()) {
+                  if (fp.getScript() != null && fp.getScript().isValid()
+                      && fp.getScript().getType() == ScriptType.CDI
+                      && findNamed(FetchQueryParameterResolver.class, fp.getScript().getCode())
+                          .isEmpty()) {
+                    throw new QueryRuntimeException(
+                        "The script of fetch query parameter [%s] in query [%s] file [%s] can't find the script resolver.",
+                        fq.getReferenceQuery().getVersionedName(), q.getVersionedName(),
+                        m.getUrl());
+                  }
+                }
+              }
+            }
+          }
         }
       });
     });

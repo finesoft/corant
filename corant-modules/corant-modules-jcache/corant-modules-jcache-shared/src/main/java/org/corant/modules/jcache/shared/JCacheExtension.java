@@ -9,6 +9,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jsr107.ri.annotations.DefaultGeneratedCacheKey;
 import org.jsr107.ri.annotations.cdi.CachePutInterceptor;
 import org.jsr107.ri.annotations.cdi.CacheRemoveAllInterceptor;
 import org.jsr107.ri.annotations.cdi.CacheRemoveEntryInterceptor;
@@ -27,6 +28,10 @@ public class JCacheExtension implements Extension {
       .orElse(Boolean.FALSE);
 
   protected CachingProvider cachingProvider;
+
+  public static DefaultGeneratedCacheKey resolveDefaultCacheKey(Object... parameters) {
+    return new DefaultGeneratedCacheKey(parameters);
+  }
 
   public void observeAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, final BeanManager bm) {
     cachingProvider = Caching.getCachingProvider();

@@ -23,9 +23,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
+import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -64,15 +64,26 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
       throw new QueryRuntimeException("Can not find name query for name [%s]", key);
     }
     // FIXME decide script engine
-    if (query.getScript().getType() == ScriptType.JS) {
-      return createJsBuilder(query);
-    } else {
-      return createFmBuilder(query);
+    switch (query.getScript().getType()) {
+      case JS:
+        return createJsBuilder(query);
+      case CDI:
+        return createJbBuilder(query);
+      case JPE:
+      case KT:
+        throw new NotSupportedException("The query script type %s not support!",
+            query.getScript().getType());
+      default:
+        return createFmBuilder(query);
     }
   }
 
   protected DynamicQuerierBuilder createFmBuilder(Query query) {
     return new FreemarkerSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+  }
+
+  protected DynamicQuerierBuilder createJbBuilder(Query query) {
+    return new JavabeanSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {

@@ -20,12 +20,9 @@ import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Maps.getMapKeyPathValues;
-import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.asDefaultString;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +35,6 @@ import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.apache.commons.beanutils.BeanUtils;
 import org.corant.context.service.ConversionService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryObjectMapper;
@@ -48,10 +44,9 @@ import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
-import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResult;
-import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResultPair;
+import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResult;
+import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
 import org.corant.modules.query.spi.QueryParameterReviser;
-import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -72,12 +67,14 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   protected QueryObjectMapper objectMapper;
 
   @Inject
+  protected QueryScriptEngines scriptEngines;
+
+  @Inject
   protected Logger logger;
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
-    Function<ParameterAndResult, Object> fun =
-        QueryScriptEngines.resolveFetchPredicates(fetchQuery);
+    Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchPredicates(fetchQuery);
     return fun == null || toBoolean(fun.apply(new ParameterAndResult(queryParameter, result)));
   }
 
@@ -92,19 +89,18 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     if (result == null) {
       return;
     }
-    Function<ParameterAndResultPair, Object> fun =
-        QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    Function<ParameterAndResultPair, Object> fun = scriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
       fun.apply(new ParameterAndResultPair(parameter, listOf(result), fetchedResults));
     } else {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
-        injectFetchedResult(result, null, injectProNamePath);
+        objectMapper.putMappedValue(result, injectProNamePath, null);
       } else {
         if (fetchQuery.isMultiRecords()) {
-          injectFetchedResult(result, fetchedResults, injectProNamePath);
+          objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
         } else {
-          injectFetchedResult(result, fetchedResults.iterator().next(), injectProNamePath);
+          objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.iterator().next());
         }
       }
     }
@@ -116,8 +112,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     if (isEmpty(results)) {
       return;
     }
-    Function<ParameterAndResultPair, Object> fun =
-        QueryScriptEngines.resolveFetchInjections(fetchQuery);
+    Function<ParameterAndResultPair, Object> fun = scriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
       fun.apply(new ParameterAndResultPair(parameter, results,
           defaultObject(fetchedResults, ArrayList::new)));
@@ -125,14 +120,14 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
         for (Object result : results) {
-          injectFetchedResult(result, null, injectProNamePath);
+          objectMapper.putMappedValue(result, injectProNamePath, null);
         }
       } else {
         for (Object result : results) {
           if (fetchQuery.isMultiRecords()) {
-            injectFetchedResult(result, fetchedResults, injectProNamePath);
+            objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
           } else {
-            injectFetchedResult(result, fetchedResults.get(0), injectProNamePath);
+            objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.get(0));
           }
         }
       }
@@ -171,21 +166,6 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     return map;
   }
 
-  protected void injectFetchedResult(Object result, Object fetchedResult,
-      String[] injectProNamePath) {
-    if (result instanceof Map) {
-      putMapKeyPathValue((Map) result, injectProNamePath, fetchedResult);
-    } else if (result != null) {
-      try {
-        BeanUtils.setProperty(result, String.join(Names.NAME_SPACE_SEPARATORS, injectProNamePath),
-            fetchedResult);
-      } catch (IllegalAccessException | InvocationTargetException e) {
-        throw new QueryRuntimeException(e, "Inject fetched result occurred error %s.",
-            e.getMessage());
-      }
-    }
-  }
-
   @PreDestroy
   protected synchronized void onPreDestroy() {
     logger.fine(() -> "Clear default fetch query handler caches.");
@@ -208,8 +188,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
         fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
       } else if (source == FetchQueryParameterSource.S) {
         // the parameter script handling
-        Function<ParameterAndResult, Object> fun =
-            QueryScriptEngines.resolveFetchParameter(parameter);
+        Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchParameter(parameter);
         List<Object> parentReuslt = result instanceof List ? (List) result : listOf(result);
         Object resultValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentReuslt));
         resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
@@ -221,7 +200,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
             // handle multi results
             Collection<Object> values = distinct ? new LinkedHashSet<>() : new ArrayList<>();
             for (Object resultItem : (List<?>) result) {
-              Object resultItemValue = resolveFetchQueryCriteriaValue(resultItem, namePath);
+              Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
               if (resultItemValue instanceof Collection) {
                 values.addAll((Collection) convertCriteriaValue(resultItemValue, type));
               } else if (resultItemValue != null) {
@@ -231,11 +210,11 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
             fetchCriteria.put(name, values);
           } else {
             // handle single results
-            Object resultValue = resolveFetchQueryCriteriaValue(result, namePath);
+            Object resultValue = objectMapper.getMappedValue(result, namePath);
             resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
             fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
           }
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (Exception e) {
           throw new QueryRuntimeException(e,
               "Can not extract value from query result for resolve fetch query [%s] parameter!",
               fetchQuery.getReferenceQuery());
@@ -243,20 +222,6 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       }
     }
     return fetchCriteria;
-  }
-
-  protected Object resolveFetchQueryCriteriaValue(Object result, String[] sourceNamePath)
-      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-    if (result instanceof Map) {
-      if (sourceNamePath.length > 1) {
-        List<Object> values = getMapKeyPathValues(result, sourceNamePath);
-        return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
-      } else {
-        return ((Map) result).get(sourceNamePath[0]);
-      }
-    } else {
-      return BeanUtils.getProperty(result, String.join(".", sourceNamePath));
-    }
   }
 
   protected Object resolveFetchQueryCriteriaValueResult(Object resultValue, boolean distinct,

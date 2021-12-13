@@ -23,6 +23,7 @@ import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLes
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessThanNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoInNode;
+import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTRegexNode;
 import org.corant.modules.json.expression.predicate.ast.ASTFunctionNode.ASTDefaultFunctionNode;
 import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicAndNode;
 import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicNorNode;
@@ -96,7 +97,7 @@ public enum ASTNodeType {
   /**
    * The inequality comparator operator.
    */
-  CP_NE("$neq", false) {
+  CP_NE("$ne", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTNoEqualNode();
@@ -179,7 +180,7 @@ public enum ASTNodeType {
   CP_REGEX("$regex", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
-      return new ASTGreaterEqualThanNode();
+      return new ASTRegexNode();
     }
   },
 
@@ -218,34 +219,36 @@ public enum ASTNodeType {
     this.leaf = leaf;
   }
 
-  public static ASTNode<?> decideNode(Object object) {
-    if (object instanceof String) {
+  public static ASTNodeType decideType(Object token) {
+    if (token instanceof String) {
       String useToken;
-      if (!isBlank(useToken = strip((String) object))) {
-        if (useToken.startsWith("#") && useToken.length() > 1) {
-          return VAR.buildNode(useToken);
-        } else if (useToken.startsWith(FUN.token) && useToken.length() > 4) {
-          return FUN.buildNode(useToken);
+      if (!isBlank(useToken = strip((String) token))) {
+        if (useToken.startsWith(ASTNodeType.VAR.token)
+            && useToken.length() > ASTNodeType.VAR.token.length()) {
+          return ASTNodeType.VAR;
+        } else if (useToken.startsWith(ASTNodeType.FUN.token)
+            && useToken.length() > ASTNodeType.FUN.token.length()) {
+          return ASTNodeType.FUN;
         } else {
           for (ASTNodeType t : ASTNodeType.values()) {
-            if (t.getToken().equalsIgnoreCase(useToken)) {
-              return t.buildNode(useToken);
+            if (t.token().equalsIgnoreCase(useToken)) {
+              return t;
             }
           }
         }
       }
     }
-    return ASTNodeType.VAL.buildNode(object);
+    return ASTNodeType.VAL;
   }
 
   public abstract ASTNode<?> buildNode(Object object);
 
-  public String getToken() {
-    return token;
-  }
-
   public boolean isLeaf() {
     return leaf;
+  }
+
+  public String token() {
+    return token;
   }
 
 }

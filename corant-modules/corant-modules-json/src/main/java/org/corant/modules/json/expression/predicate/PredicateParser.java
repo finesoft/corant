@@ -18,26 +18,19 @@ import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
-import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
-import java.net.URI;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.util.Collection;
-import java.util.Currency;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TimeZone;
+import java.util.stream.Stream;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.predicate.ast.ASTNode;
+import org.corant.modules.json.expression.predicate.ast.ASTNodeBuilder;
 import org.corant.modules.json.expression.predicate.ast.ASTNodeType;
+import org.corant.modules.json.expression.predicate.ast.ASTNodeVisitor;
 import org.corant.modules.json.expression.predicate.ast.ASTPredicateNode;
-import org.corant.modules.json.expression.predicate.ast.ASTVisitor;
-import org.corant.modules.json.expression.predicate.ast.ASTVisitor.ASTDefaultVisitor;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-json
@@ -47,41 +40,77 @@ import org.corant.shared.exception.NotSupportedException;
  */
 public class PredicateParser {
 
+  public static void main(String... args) {
+
+  }
+
   public static Node<Boolean> parse(String json) {
-    Map<String, Object> map = Jsons.fromString(json);
+    return parse(json, resolveBuilder(), resolveVisitor());
+  }
+
+  public static Node<Boolean> parse(String json, ASTNodeBuilder builder) {
+    return parse(json, builder, resolveVisitor());
+  }
+
+  public static Node<Boolean> parse(String json, ASTNodeBuilder builder, ASTNodeVisitor visitor) {
+    final Map<String, Object> map = Jsons.fromString(json);
     shouldBeTrue(isNotEmpty(map) && sizeOf(map) == 1,
         () -> new ParseException("The syntax error!"));
-    Entry<String, Object> entry = map.entrySet().iterator().next();
-    String key = entry.getKey();
-    Object val = entry.getValue();
-    ASTPredicateNode root =
-        shouldInstanceOf(shouldNotNull(ASTNodeType.decideNode(key)), ASTPredicateNode.class);
-    parse(new ASTDefaultVisitor(), root, val);
+    final Entry<String, Object> entry = map.entrySet().iterator().next();
+    final String key = entry.getKey();
+    final Object val = entry.getValue();
+    final ASTPredicateNode root =
+        shouldInstanceOf(shouldNotNull(builder.build(key)), ASTPredicateNode.class);
+    if (visitor.supports(root.getType())) {
+      visitor.prepare(root);
+    }
+    parse(builder, visitor, root, val);
+    if (visitor.supports(root.getType())) {
+      visitor.visit(root);
+    }
     return root;
   }
 
+  public static ASTNodeBuilder resolveBuilder() {
+    return Services.find(ASTNodeBuilder.class).orElse(ASTNodeBuilder.DFLT);
+  }
+
+  public static Stream<FunctionResolver> resolveFunction() {
+    return Services.select(FunctionResolver.class);
+  }
+
+  public static ASTNodeVisitor resolveVisitor() {
+    return Services.find(ASTNodeVisitor.class).orElse(ASTNodeVisitor.DFLT);
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
-  static void parse(ASTVisitor visitor, Node<?> parent, Object val) {
+  static void parse(ASTNodeBuilder builder, ASTNodeVisitor visitor, Node<?> parent, Object val) {
     if (val == null || isSimpleClass(val.getClass())) {
-      parseSingle(visitor, parent, val);
+      parseSingle(builder, visitor, parent, val);
     } else if (val instanceof Collection) {
       for (Object ele : (Collection<?>) val) {
-        parse(visitor, parent, ele);
+        parse(builder, visitor, parent, ele);
       }
     } else if (val instanceof Object[]) {
       for (Object ele : (Object[]) val) {
-        parse(visitor, parent, ele);
+        parse(builder, visitor, parent, ele);
       }
     } else if (val instanceof Map) {
       ((Map) val).forEach((k, v) -> {
         if (isSimpleClass(shouldNotNull(k).getClass())) {
-          ASTNode<?> keyNode = ASTNodeType.decideNode(k);
-          if (keyNode.getType().isLeaf()) {
-            parseSingle(visitor, parent, k);
-            parse(visitor, parent, v);
+          if (ASTNodeType.decideType(k).isLeaf()) {
+            parseSingle(builder, visitor, parent, k);
+            parse(builder, visitor, parent, v);
           } else {
-            parent.addChild(keyNode);
-            parse(visitor, keyNode, v);
+            ASTNode<?> subNode = builder.build(k);
+            if (visitor.supports(subNode.getType())) {
+              visitor.prepare(subNode);
+            }
+            parent.addChild(subNode);
+            parse(builder, visitor, subNode, v);
+            if (visitor.supports(subNode.getType())) {
+              visitor.visit(subNode);
+            }
           }
         } else {
           throw new NotSupportedException();
@@ -92,24 +121,16 @@ public class PredicateParser {
     }
   }
 
-  static void parseSingle(ASTVisitor visitor, Node<?> parent, Object object) {
-    ASTNode<?> vn = ASTNodeType.decideNode(object);
-    if (visitor.supports(vn.getType())) {
-      visitor.prepare(vn);
-      parent.addChild(vn);
-      visitor.visit(vn);
+  static void parseSingle(ASTNodeBuilder builder, ASTNodeVisitor visitor, Node<?> parent,
+      Object token) {
+    ASTNode<?> node = builder.build(token);
+    if (visitor.supports(node.getType())) {
+      visitor.prepare(node);
+      parent.addChild(node);
+      visitor.visit(node);
     } else {
-      parent.addChild(vn);
+      parent.addChild(node);
     }
   }
 
-  private static boolean isSimpleClass(Class<?> type) {
-    return isPrimitiveOrWrapper(type) || String.class.equals(type)
-        || Number.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type)
-        || Enum.class.isAssignableFrom(type) || Timestamp.class.isAssignableFrom(type)
-        || Temporal.class.isAssignableFrom(type) || URL.class.isAssignableFrom(type)
-        || URI.class.isAssignableFrom(type) || TemporalAmount.class.isAssignableFrom(type)
-        || Currency.class.isAssignableFrom(type) || Locale.class.isAssignableFrom(type)
-        || TimeZone.class.isAssignableFrom(type);
-  }
 }

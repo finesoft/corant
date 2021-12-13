@@ -31,7 +31,7 @@ import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.shared.QueryScriptEngines;
-import org.corant.modules.query.shared.QueryScriptEngines.ParameterAndResult;
+import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResult;
 import org.corant.modules.query.spi.ResultHintHandler;
 
 /**
@@ -90,6 +90,9 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
   @Inject
   protected Logger logger;
 
+  @Inject
+  protected QueryScriptEngines scriptEngines;
+
   @SuppressWarnings("rawtypes")
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
@@ -132,7 +135,7 @@ public class ResultScriptMapperHintHandler implements ResultHintHandler {
 
   protected Function<ParameterAndResult, Object> resolve(QueryHint qh) {
     Function<ParameterAndResult, Object> func =
-        QueryScriptEngines.resolveQueryHintResultScriptMappers(qh);
+        scriptEngines.resolveQueryHintResultScriptMappers(qh);
     if (func == null) {
       brokens.add(qh.getId());
     }

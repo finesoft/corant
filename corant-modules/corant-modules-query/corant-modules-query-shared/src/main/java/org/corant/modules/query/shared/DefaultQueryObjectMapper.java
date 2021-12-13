@@ -13,14 +13,19 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Maps.getMapKeyPathValues;
+import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.forceCast;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import org.apache.commons.beanutils.BeanUtils;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.shared.normal.Names;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.JavaType;
@@ -55,6 +60,26 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
+  public Object getMappedValue(Object object, Object key) {
+    String[] keyPath = (String[]) key;
+    if (object instanceof Map) {
+      if (keyPath.length > 1) {
+        List<Object> values = getMapKeyPathValues(object, keyPath);
+        return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
+      } else {
+        return ((Map) object).get(keyPath[0]);
+      }
+    } else {
+      try {
+        return BeanUtils.getProperty(object, String.join(".", keyPath));
+      } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        throw new QueryRuntimeException(e);
+      }
+    }
+  }
+
+  @Override
   public Map<String, Object> mapOf(Object object, boolean convert) {
     if (object == null) {
       return null;
@@ -67,6 +92,22 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
       }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
+  public void putMappedValue(Object object, Object key, Object value) {
+    String[] keyPath = (String[]) key;
+    if (object instanceof Map) {
+      putMapKeyPathValue((Map) object, keyPath, value);
+    } else if (object != null) {
+      try {
+        BeanUtils.setProperty(object, String.join(Names.NAME_SPACE_SEPARATORS, keyPath), value);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new QueryRuntimeException(e, "Inject fetched result occurred error %s.",
+            e.getMessage());
+      }
     }
   }
 

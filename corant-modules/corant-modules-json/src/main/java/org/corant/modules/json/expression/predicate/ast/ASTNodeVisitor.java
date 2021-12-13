@@ -14,6 +14,8 @@
 package org.corant.modules.json.expression.predicate.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTRegexNode;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-json
@@ -21,7 +23,36 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
  * @author bingo 下午5:01:15
  *
  */
-public interface ASTVisitor {
+public interface ASTNodeVisitor extends Sortable {
+
+  ASTNodeVisitor DFLT = node -> {
+    switch (node.getType()) {
+      case CP_EM:
+      case CP_EQ:
+      case CP_GT:
+      case CP_GTE:
+      case CP_LT:
+      case CP_LTE:
+      case CP_NE:
+      case LG_NOR:
+        shouldBeTrue(node.getChildren().size() == 2);
+        break;
+      case CP_REGEX:
+        shouldBeTrue(node.getChildren().size() == 2
+            && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VAL);
+        ((ASTRegexNode) node).initialize();
+        break;
+      case CP_IN:
+      case CP_NIN:
+      case LG_AND:
+      case LG_NOT:
+      case LG_OR:
+        shouldBeTrue(node.getChildren().size() > 0);
+        break;
+      default:
+        break;
+    }
+  };
 
   default void prepare(ASTNode<?> node) {}
 
@@ -30,35 +61,5 @@ public interface ASTVisitor {
   }
 
   void visit(ASTNode<?> node);
-
-  class ASTDefaultVisitor implements ASTVisitor {
-
-    @Override
-    public void visit(ASTNode<?> node) {
-      switch (node.getType()) {
-        case CP_EM:
-        case CP_EQ:
-        case CP_GT:
-        case CP_GTE:
-        case CP_LT:
-        case CP_LTE:
-        case CP_NE:
-        case LG_NOR:
-        case CP_REGEX:
-          shouldBeTrue(node.getChildren().size() == 2);
-          break;
-        case CP_IN:
-        case CP_NIN:
-        case LG_AND:
-        case LG_NOT:
-        case LG_OR:
-          shouldBeTrue(node.getChildren().size() > 0);
-          break;
-        default:
-          break;
-      }
-    }
-
-  }
 
 }

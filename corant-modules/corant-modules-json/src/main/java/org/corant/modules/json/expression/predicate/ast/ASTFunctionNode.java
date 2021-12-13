@@ -62,7 +62,7 @@ public interface ASTFunctionNode extends ASTNode<Object> {
 
     @Override
     public Object getValue(EvaluationContext ctx) {
-      return ctx.resolveFunction(name).apply(children.stream().map(c -> c.getValue(ctx)).toArray());
+      return ctx.resolveFunction(this).apply(children.stream().map(c -> c.getValue(ctx)).toArray());
     }
 
   }

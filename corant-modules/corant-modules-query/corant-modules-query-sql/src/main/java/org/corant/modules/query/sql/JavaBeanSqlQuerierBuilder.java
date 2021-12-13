@@ -13,13 +13,16 @@
  */
 package org.corant.modules.query.sql;
 
-import java.util.ArrayList;
+import static org.corant.shared.util.Objects.defaultObject;
+import java.util.Collections;
 import java.util.List;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.dynamic.javascript.JavascriptDynamicQuerierBuilder;
+import org.corant.modules.query.shared.dynamic.javabean.JavaBeanDynamicQuerierBuilder;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-sql
@@ -27,15 +30,15 @@ import org.corant.modules.query.shared.dynamic.javascript.JavascriptDynamicQueri
  * @author bingo 下午7:46:22
  *
  */
-public class JavascriptSqlQuerierBuilder
-    extends JavascriptDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
+public class JavaBeanSqlQuerierBuilder
+    extends JavaBeanDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
    * @param query
    * @param queryResolver
    * @param fetchQueryResolver
    */
-  public JavascriptSqlQuerierBuilder(Query query, QueryHandler queryResolver,
+  public JavaBeanSqlQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
     super(query, queryResolver, fetchQueryResolver);
   }
@@ -43,13 +46,18 @@ public class JavascriptSqlQuerierBuilder
   /**
    * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public DefaultSqlNamedQuerier build(Object param) {
     QueryParameter queryParameter = resolveParameter(param);// convert parameter
-    List<Object> useParam = new ArrayList<>();
-    Object script = execution.apply(new Object[] {queryParameter, useParam});
-    return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryHandler(),
-        getFetchQueryHandler(), useParam.toArray(new Object[useParam.size()]), script.toString());
+    Object resolved = scriptResolver.resolve(queryParameter);
+    if (resolved instanceof Pair<?, ?>) {
+      Pair<String, List<Object>> re = (Pair<String, List<Object>>) resolved;
+      List<Object> useParam = defaultObject(re.right(), Collections.emptyList());
+      return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryHandler(),
+          getFetchQueryHandler(), useParam.toArray(new Object[useParam.size()]), re.left());
+    }
+    throw new QueryRuntimeException("Can't build querier, the script resolver occurred error!");
   }
 
 }

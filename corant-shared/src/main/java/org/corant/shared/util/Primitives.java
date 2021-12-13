@@ -16,9 +16,18 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Maps.immutableMapOf;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.Collections;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -76,6 +85,16 @@ public class Primitives {
 
   public static boolean isPrimitiveWrapperArray(final Class<?> clazz) {
     return clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType());
+  }
+
+  public static boolean isSimpleClass(Class<?> type) {
+    return isPrimitiveOrWrapper(type) || String.class.equals(type)
+        || Number.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type)
+        || Enum.class.isAssignableFrom(type) || Timestamp.class.isAssignableFrom(type)
+        || TemporalAccessor.class.isAssignableFrom(type) || URL.class.isAssignableFrom(type)
+        || URI.class.isAssignableFrom(type) || TemporalAmount.class.isAssignableFrom(type)
+        || Currency.class.isAssignableFrom(type) || Locale.class.isAssignableFrom(type)
+        || TimeZone.class.isAssignableFrom(type);
   }
 
   public static boolean[] unwrap(final Boolean[] array) {

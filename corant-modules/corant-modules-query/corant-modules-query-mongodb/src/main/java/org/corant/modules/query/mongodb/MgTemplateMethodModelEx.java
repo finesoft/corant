@@ -20,6 +20,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Primitives.wrap;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -175,9 +176,8 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
     return Collections.emptyMap();// mongodb query we use inline
   }
 
-  @Override
   public boolean isSimpleType(Class<?> cls) {
-    return super.isSimpleType(cls) || BsonMinKey.class.equals(cls)
+    return isSimpleClass(cls) || BsonMinKey.class.equals(cls)
         || BsonMaxKey.class.isAssignableFrom(cls) || BsonObjectId.class.isAssignableFrom(cls)
         || Decimal128.class.isAssignableFrom(cls)
         || BsonRegularExpression.class.isAssignableFrom(cls)

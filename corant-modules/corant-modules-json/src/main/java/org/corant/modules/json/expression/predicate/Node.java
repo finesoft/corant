@@ -28,5 +28,4 @@ public interface Node<T> {
   List<? extends Node<?>> getChildren();
 
   T getValue(EvaluationContext ctx);
-
 }

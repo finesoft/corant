@@ -13,7 +13,9 @@
  */
 package org.corant.modules.json.expression.predicate.ast;
 
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.areEqual;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.corant.modules.json.expression.predicate.EvaluationContext;
 import org.corant.modules.json.expression.predicate.Node;
 import org.corant.shared.exception.NotSupportedException;
@@ -141,10 +144,10 @@ public interface ASTComparisonNode extends ASTPredicateNode {
         }
       } else if (left instanceof String && right instanceof String) {
         return left.toString().compareTo(right.toString());
-      } else if (areEqual(left.getClass(), right.getClass())) {
-        return ((Comparable) left).compareTo(right);
       } else if (left instanceof Duration && right instanceof Duration) {
         return ((Duration) left).compareTo((Duration) right);
+      } else if (areEqual(left.getClass(), right.getClass())) {
+        return ((Comparable) left).compareTo(right);
       }
       throw new NotSupportedException();
     }
@@ -169,13 +172,12 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       super(ASTNodeType.CP_EQ);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (left instanceof Comparable && right instanceof Comparable) {
-        return ((Comparable) left).compareTo(right) == 0;
+      if (left instanceof Number && right instanceof Number) {
+        return compare(left, right) == 0;
       }
       return areEqual(left, right);
     }
@@ -253,13 +255,12 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       super(ASTNodeType.CP_NE);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (left instanceof Comparable && right instanceof Comparable) {
-        return ((Comparable) left).compareTo(right) != 0;
+      if (left instanceof Number && right instanceof Number) {
+        return compare(left, right) == 0;
       }
       return !areEqual(left, right);
     }
@@ -282,4 +283,30 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       return !((Collection) right).contains(left);
     }
   }
+
+  class ASTRegexNode extends AbstractASTComparisonNode {
+
+    protected Pattern pattern;
+
+    public ASTRegexNode() {
+      super(ASTNodeType.CP_REGEX);
+    }
+
+    @Override
+    public Boolean getValue(EvaluationContext ctx) {
+      Object left = getLeftValue(ctx);
+      if (left == null) {
+        return false;
+      } else {
+        return pattern.matcher(left.toString()).matches();
+      }
+    }
+
+    public void initialize() {
+      shouldBeTrue(sizeOf(getChildren()) == 2
+          && ((ASTNode<?>) getChildren().get(1)).getType() == ASTNodeType.VAL);
+      pattern = Pattern.compile(((ASTValueNode) getChildren().get(1)).getValue(null).toString());
+    }
+  }
+
 }

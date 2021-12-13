@@ -18,23 +18,14 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Strings.NULL;
-import java.net.URI;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
-import java.util.Currency;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.TimeZone;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
@@ -188,13 +179,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    * @return isSimpleType
    */
   protected boolean isSimpleType(Class<?> cls) {
-    return isPrimitiveOrWrapper(cls) || String.class.equals(cls)
-        || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls)
-        || Enum.class.isAssignableFrom(cls) || Timestamp.class.isAssignableFrom(cls)
-        || Temporal.class.isAssignableFrom(cls) || URL.class.isAssignableFrom(cls)
-        || URI.class.isAssignableFrom(cls) || TemporalAmount.class.isAssignableFrom(cls)
-        || Currency.class.isAssignableFrom(cls) || Locale.class.isAssignableFrom(cls)
-        || TimeZone.class.isAssignableFrom(cls);
+    return isSimpleClass(cls);
   }
 
   /**

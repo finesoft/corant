@@ -83,11 +83,11 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   protected DynamicQuerierBuilder createJbBuilder(Query query) {
-    return new JavabeanSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+    return new JavaBeanSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   protected DynamicQuerierBuilder createJsBuilder(Query query) {
-    return new JavascriptSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+    return new JavaScriptSqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

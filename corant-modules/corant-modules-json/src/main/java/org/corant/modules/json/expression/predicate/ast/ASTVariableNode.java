@@ -47,7 +47,7 @@ public interface ASTVariableNode extends ASTNode<Object> {
 
     @Override
     public Object getValue(EvaluationContext ctx) {
-      return ctx.resolveVariableValue(name);
+      return ctx.resolveVariableValue(this);
     }
 
   }

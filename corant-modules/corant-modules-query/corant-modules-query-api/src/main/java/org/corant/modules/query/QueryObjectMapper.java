@@ -41,6 +41,14 @@ public interface QueryObjectMapper {
   <T> T fromJsonString(String jsonString, Class<T> type);
 
   /**
+   * From the object of the given map struct, get the corresponding value through the given key.
+   *
+   * @param object the map struct object
+   * @param key the key
+   */
+  Object getMappedValue(Object object, Object key);
+
+  /**
    * Since the query processing process requires free extraction and conversion, a large number of
    * Map structure objects are used in the query process. This method is used to read JSON strings
    * and convert them to Map or convert ordinary POJO objects to Map.
@@ -51,6 +59,15 @@ public interface QueryObjectMapper {
    * @return a Map structure object
    */
   Map<String, Object> mapOf(Object object, boolean convert);
+
+  /**
+   * Inject the given object into the given map struct object through the given key
+   *
+   * @param object the map struct object which to inject
+   * @param key the key
+   * @param value the value to be injected
+   */
+  void putMappedValue(Object object, Object key, Object value);
 
   /**
    * Serialize given object to JSON strings.

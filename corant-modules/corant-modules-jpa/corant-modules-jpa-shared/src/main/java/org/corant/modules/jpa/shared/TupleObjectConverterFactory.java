@@ -16,14 +16,11 @@ package org.corant.modules.jpa.shared;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.setAccessible;
-import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -180,7 +177,7 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
               }
             }
           } else if (parameterTypes.length == 2 && "setProperty".equals(name)
-              && parameterTypes[0].equals(String.class) && isSimpleType(parameterTypes[1])) {
+              && parameterTypes[0].equals(String.class) && isSimpleClass(parameterTypes[1])) {
             propertySetters.put("Property", Pair.of(method, parameterTypes));
           }
         }
@@ -216,13 +213,6 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
     @Override
     public boolean isUsable() {
       return !propertySetters.isEmpty();
-    }
-
-    boolean isSimpleType(Class<?> cls) {
-      return isPrimitiveOrWrapper(cls) || String.class.equals(cls)
-          || Number.class.isAssignableFrom(cls) || TemporalAmount.class.isAssignableFrom(cls)
-          || Temporal.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls)
-          || Enum.class.isAssignableFrom(cls);
     }
 
     Constructor<?> lookupConstructor(Class<?> pojoClass) {

@@ -13,32 +13,18 @@
  */
 package org.corant.modules.json.expression.predicate.ast;
 
-import java.util.List;
-import org.corant.modules.json.expression.predicate.Node;
-import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午5:04:44
+ * @author bingo 上午10:13:20
  *
  */
-public interface ASTNode<T> extends Node<T> {
+public interface ASTNodeBuilder extends Sortable {
 
-  default void accept(ASTNodeVisitor visitor) {
-    visitor.visit(this);
-  }
+  ASTNodeBuilder DFLT = token -> ASTNodeType.decideType(token).buildNode(token);
 
-  @Override
-  default boolean addChild(Node<?> child) {
-    throw new NotSupportedException();
-  }
-
-  @Override
-  default List<? extends Node<?>> getChildren() {
-    throw new NotSupportedException();
-  }
-
-  ASTNodeType getType();
+  ASTNode<?> build(Object token);
 
 }

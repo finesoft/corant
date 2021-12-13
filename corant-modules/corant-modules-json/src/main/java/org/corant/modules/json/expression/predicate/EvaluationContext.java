@@ -14,6 +14,7 @@
 package org.corant.modules.json.expression.predicate;
 
 import java.util.function.Function;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-json
@@ -21,10 +22,10 @@ import java.util.function.Function;
  * @author bingo 下午2:23:09
  *
  */
-public interface EvaluationContext {
+public interface EvaluationContext extends Sortable {
 
-  Function<Object[], Object> resolveFunction(String name);
+  Function<Object[], Object> resolveFunction(Node<?> node);
 
-  Object resolveVariableValue(String name);
+  Object resolveVariableValue(Node<?> node);
 
 }

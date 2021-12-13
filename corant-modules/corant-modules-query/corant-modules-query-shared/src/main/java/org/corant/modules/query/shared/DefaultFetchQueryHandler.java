@@ -136,10 +136,10 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @Override
   public QueryParameter resolveFetchQueryParameter(Object result, FetchQuery query,
-      QueryParameter parentQueryparameter) {
+      QueryParameter parentQueryParameter) {
     MutableObject<QueryParameter> resolved =
-        new MutableObject<>(new DefaultQueryParameter().context(parentQueryparameter.getContext())
-            .criteria(resolveFetchQueryCriteria(result, query, parentQueryparameter)));
+        new MutableObject<>(new DefaultQueryParameter().context(parentQueryParameter.getContext())
+            .criteria(resolveFetchQueryCriteria(result, query, parentQueryParameter)));
     select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
         .sorted(Sortable::compare).forEach(resolved::apply);
     return resolved.get();
@@ -153,7 +153,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     }
   }
 
-  protected Map<String, Object> extractCriterias(QueryParameter parameter) {
+  protected Map<String, Object> extractCriteria(QueryParameter parameter) {
     Map<String, Object> map = new HashMap<>();
     if (parameter != null) {
       Object criteria = parameter.getCriteria();
@@ -173,7 +173,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
       QueryParameter parentQueryParameter) {
-    Map<String, Object> criteria = extractCriterias(parentQueryParameter);
+    Map<String, Object> criteria = extractCriteria(parentQueryParameter);
     Map<String, Object> fetchCriteria = new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       final Class<?> type = parameter.getType();
@@ -189,8 +189,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       } else if (source == FetchQueryParameterSource.S) {
         // the parameter script handling
         Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchParameter(parameter);
-        List<Object> parentReuslt = result instanceof List ? (List) result : listOf(result);
-        Object resultValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentReuslt));
+        List<Object> parentResults = result instanceof List ? (List) result : listOf(result);
+        Object resultValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
         resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
         fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
       } else if (result != null) {

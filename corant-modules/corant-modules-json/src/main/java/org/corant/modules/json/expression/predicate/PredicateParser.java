@@ -40,10 +40,6 @@ import org.corant.shared.util.Services;
  */
 public class PredicateParser {
 
-  public static void main(String... args) {
-
-  }
-
   public static Node<Boolean> parse(String json) {
     return parse(json, resolveBuilder(), resolveVisitor());
   }

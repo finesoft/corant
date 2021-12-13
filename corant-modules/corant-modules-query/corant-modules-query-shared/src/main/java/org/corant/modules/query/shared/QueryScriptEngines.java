@@ -43,54 +43,48 @@ public class QueryScriptEngines {
   /**
    * NOTE: Don't share the complied function in multi threads.
    *
-   * @param fetchQuery
-   * @return resolveFetchInjections
+   * @see ScriptProcessor#resolveFetchInjections(FetchQuery)
    */
   public Function<ParameterAndResultPair, Object> resolveFetchInjections(FetchQuery fetchQuery) {
     final Script script = fetchQuery.getInjectionScript();
-    final ScriptProcessor processor = processors.stream().filter(p -> p.supports(script))
-        .sorted(Sortable::compare).findFirst().orElse(null);
+    final ScriptProcessor processor =
+        processors.stream().filter(p -> p.supports(script)).min(Sortable::compare).orElse(null);
     return processor != null ? processor.resolveFetchInjections(fetchQuery) : null;
   }
 
   /**
    * NOTE: Don't share the complied function in multi threads.
    *
-   * @param fetchQuery
-   * @return resolveFetchInjections
+   * @see ScriptProcessor#resolveFetchParameter(FetchQueryParameter)
    */
   public Function<ParameterAndResult, Object> resolveFetchParameter(FetchQueryParameter parameter) {
-    final ScriptProcessor processor =
-        processors.stream().filter(p -> p.supports(parameter.getScript())).sorted(Sortable::compare)
-            .findFirst().orElse(null);
+    final ScriptProcessor processor = processors.stream()
+        .filter(p -> p.supports(parameter.getScript())).min(Sortable::compare).orElse(null);
     return processor != null ? processor.resolveFetchParameter(parameter) : null;
   }
 
   /**
    * NOTE: Don't share the complied function in multi threads.
    *
-   * @param fetchQuery
-   * @return resolveFetchPredicates
+   * @see ScriptProcessor#resolveFetchPredicates(FetchQuery)
    */
   public Function<ParameterAndResult, Object> resolveFetchPredicates(FetchQuery fetchQuery) {
     final ScriptProcessor processor =
         processors.stream().filter(p -> p.supports(fetchQuery.getPredicateScript()))
-            .sorted(Sortable::compare).findFirst().orElse(null);
+            .min(Sortable::compare).orElse(null);
     return processor != null ? processor.resolveFetchPredicates(fetchQuery) : null;
   }
 
   /**
    * NOTE: Don't share the complied function in multi threads.
    *
-   * @param queryHint
-   * @return resolveQueryHintResultScriptMappers
+   * @see ScriptProcessor#resolveQueryHintResultScriptMappers(QueryHint)
    */
   public Function<ParameterAndResult, Object> resolveQueryHintResultScriptMappers(
       QueryHint queryHint) {
     if (queryHint != null && queryHint.getScript().isValid()) {
-      final ScriptProcessor processor =
-          processors.stream().filter(p -> p.supports(queryHint.getScript()))
-              .sorted(Sortable::compare).findFirst().orElse(null);
+      final ScriptProcessor processor = processors.stream()
+          .filter(p -> p.supports(queryHint.getScript())).min(Sortable::compare).orElse(null);
       return processor != null ? processor.resolveQueryHintResultScriptMappers(queryHint) : null;
     } else {
       return null;

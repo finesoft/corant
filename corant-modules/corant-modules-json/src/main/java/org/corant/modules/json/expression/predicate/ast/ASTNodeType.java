@@ -16,10 +16,10 @@ package org.corant.modules.json.expression.predicate.ast;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.strip;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTEqualNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterEqualThanNode;
+import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTInNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessEqualThanNode;
+import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessThanEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessThanNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoInNode;
@@ -105,7 +105,8 @@ public enum ASTNodeType {
   },
 
   /**
-   * The in comparison operator. Use only one data type in the specified values.
+   * The IN comparison operator. Use only one data type in the specified values, Use for element and
+   * collection comparison.
    */
   CP_IN("$in", false) {
     @Override
@@ -115,7 +116,7 @@ public enum ASTNodeType {
   },
 
   /**
-   * The not in comparison operator.
+   * The NOT-IN comparison operator, Use for element and collection comparison.
    */
   CP_NIN("$nin", false) {
     @Override
@@ -125,7 +126,7 @@ public enum ASTNodeType {
   },
 
   /**
-   * The not in comparison operator.
+   * The less than comparison operator.
    */
   CP_LT("$lt", false) {
     @Override
@@ -140,7 +141,7 @@ public enum ASTNodeType {
   CP_LTE("$lte", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
-      return new ASTLessEqualThanNode();
+      return new ASTLessThanEqualNode();
     }
   },
 
@@ -160,7 +161,7 @@ public enum ASTNodeType {
   CP_GTE("$gte", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
-      return new ASTGreaterEqualThanNode();
+      return new ASTGreaterThanEqualNode();
     }
   },
 

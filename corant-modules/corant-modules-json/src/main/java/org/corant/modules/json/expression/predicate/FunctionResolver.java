@@ -26,5 +26,5 @@ public interface FunctionResolver extends Sortable {
 
   Function<Object[], Object> resolve(String name);
 
-  boolean support(String name);
+  boolean supports(String name);
 }

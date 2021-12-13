@@ -38,6 +38,7 @@ import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.ScriptProcessor;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -49,16 +50,19 @@ import org.corant.shared.ubiquity.Sortable;
 @Singleton
 public class JsonPredicateScriptProcessor implements ScriptProcessor {
 
-  public static final String PARENT_RESULT_VAR_PREFIX = RESULT_FUNC_PARAMETER_NAME + ".";
+  public static final String PARENT_RESULT_VAR_PREFIX =
+      RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int PARENT_RESULT_VAR_PREFIX_LEN = PARENT_RESULT_VAR_PREFIX.length();
-  public static final String FETCH_RESULT_VAR_PREFIX = FETCHED_RESULT_FUNC_PARAMETER_NAME + ".";
+  public static final String FETCH_RESULT_VAR_PREFIX =
+      FETCHED_RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int FETCH_RESULT_VAR_PREFIX_LEN = FETCH_RESULT_VAR_PREFIX.length();
-  public static final String PARAMETER_VAR_PREFIX = PARAMETER_FUNC_PARAMETER_NAME + ".";
+  public static final String PARAMETER_VAR_PREFIX =
+      PARAMETER_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int PARAMETER_VAR_PREFIX_LEN = PARAMETER_VAR_PREFIX.length();
 
-  static final Map<String, Function<ParameterAndResultPair, Object>> inFuns =
+  static final Map<String, Function<ParameterAndResultPair, Object>> injFuns =
       new ConcurrentHashMap<>();
-  static final Map<String, Function<ParameterAndResult, Object>> peFuns = new ConcurrentHashMap<>();
+  static final Map<String, Function<ParameterAndResult, Object>> pedFuns = new ConcurrentHashMap<>();
   static final List<FunctionResolver> functionResolvers =
       PredicateParser.resolveFunction().collect(Collectors.toList());
 
@@ -70,7 +74,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     final Script script = fetchQuery.getInjectionScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return inFuns.computeIfAbsent(script.getId(), k -> createInjectFuns(fetchQuery, script));
+      return injFuns.computeIfAbsent(script.getId(), k -> createInjectFuns(fetchQuery, script));
     }
     return null;
   }
@@ -80,7 +84,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     final Script script = fetchQuery.getPredicateScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return peFuns.computeIfAbsent(script.getId(), k -> createPreFetchFuns(fetchQuery, script));
+      return pedFuns.computeIfAbsent(script.getId(), k -> createPreFetchFuns(fetchQuery, script));
     }
     return null;
   }
@@ -98,8 +102,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     return p -> {
       List<Map<Object, Object>> parentResults = (List<Map<Object, Object>>) p.parentResult;
       List<Map<Object, Object>> fetchResults = (List<Map<Object, Object>>) p.fetchedResult;
-      MyEvaluationContext evalCtx =
-          new MyEvaluationContext(mapper, p.parameter.getCriteria(), functionResolvers);
+      MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       for (Map<Object, Object> r : parentResults) {
         List<Map<Object, Object>> injectResults = new ArrayList<>();
         for (Map<Object, Object> fr : fetchResults) {
@@ -120,8 +123,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     final Node<Boolean> ast = PredicateParser.parse(code, MyASTNodeBuilder.INST);
     return p -> {
       Map<Object, Object> r = (Map<Object, Object>) p.result;
-      MyEvaluationContext evalCtx =
-          new MyEvaluationContext(mapper, p.parameter.getCriteria(), functionResolvers);
+      MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       return ast.getValue(evalCtx.reset(r, null));
     };
   }
@@ -160,11 +162,11 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     public MyASTVariableNode(String name) {
       super(name);
       if (name.startsWith(PARENT_RESULT_VAR_PREFIX)) {
-        namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), ".");
+        namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
       } else if (name.startsWith(FETCH_RESULT_VAR_PREFIX)) {
-        namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), ".");
+        namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
       } else {
-        namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), ".");
+        namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
       }
     }
 
@@ -184,14 +186,14 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
 
     Map<Object, Object> parentResult;
     Map<Object, Object> fetchResult;
-    Object queryCriteria;
+    Object queryParameter;
     final QueryObjectMapper objectMapper;
     final List<FunctionResolver> functionResolvers;
 
-    public MyEvaluationContext(QueryObjectMapper objectMapper, Object queryCriteria,
+    public MyEvaluationContext(QueryObjectMapper objectMapper, Object queryParameter,
         List<FunctionResolver> functionResolvers) {
       this.objectMapper = objectMapper;
-      this.queryCriteria = queryCriteria;
+      this.queryParameter = queryParameter;
       this.functionResolvers = functionResolvers;
     }
 
@@ -205,9 +207,8 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
     @Override
     public Function<Object[], Object> resolveFunction(Node<?> node) {
       ASTFunctionNode myNode = (ASTFunctionNode) node;
-      return functionResolvers.stream().filter(fr -> fr.support(myNode.getName()))
-          .sorted(Sortable::compare).findFirst().orElseThrow(NotSupportedException::new)
-          .resolve(myNode.getName());
+      return functionResolvers.stream().filter(fr -> fr.supports(myNode.getName()))
+          .min(Sortable::compare).orElseThrow(NotSupportedException::new).resolve(myNode.getName());
     }
 
     @Override
@@ -218,7 +219,8 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
       } else if (myNode.getName().startsWith(FETCH_RESULT_VAR_PREFIX)) {
         return objectMapper.getMappedValue(fetchResult, myNode.getNamePath());
       } else {
-        return objectMapper.getMappedValue(queryCriteria, myNode.getNamePath());
+        return objectMapper.getMappedValue(objectMapper.toObject(queryParameter, Map.class),
+            myNode.getNamePath());
       }
     }
 

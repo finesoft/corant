@@ -183,9 +183,9 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     }
   }
 
-  class ASTGreaterEqualThanNode extends AbstractASTComparisonNode {
+  class ASTGreaterThanEqualNode extends AbstractASTComparisonNode {
 
-    public ASTGreaterEqualThanNode() {
+    public ASTGreaterThanEqualNode() {
       super(ASTNodeType.CP_GTE);
     }
 
@@ -225,9 +225,9 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     }
   }
 
-  class ASTLessEqualThanNode extends AbstractASTComparisonNode {
+  class ASTLessThanEqualNode extends AbstractASTComparisonNode {
 
-    public ASTLessEqualThanNode() {
+    public ASTLessThanEqualNode() {
       super(ASTNodeType.CP_LTE);
     }
 

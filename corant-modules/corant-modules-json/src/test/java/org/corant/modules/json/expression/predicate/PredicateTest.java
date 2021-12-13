@@ -41,7 +41,7 @@ public class PredicateTest extends TestCase {
       public Function<Object[], Object> resolveFunction(Node<?> node) {
         ASTFunctionNode fn = (ASTFunctionNode) node;
         Optional<FunctionResolver> fr =
-            PredicateParser.resolveFunction().filter(p -> p.support(fn.getName())).findFirst();
+            PredicateParser.resolveFunction().filter(p -> p.supports(fn.getName())).findFirst();
         if (fr.isPresent()) {
           return fr.get().resolve(fn.getName());
         } else {

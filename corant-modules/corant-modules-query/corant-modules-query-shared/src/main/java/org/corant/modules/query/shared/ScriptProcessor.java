@@ -73,7 +73,7 @@ public interface ScriptProcessor extends Sortable {
   }
 
   /**
-   * Return an predicate function converted from the predicate script in fetch query. This function
+   * Return a predicate function converted from the predicate script in fetch query. This function
    * can be used by the {@link FetchQueryHandler} to pre-process the fetch query.
    *
    * @param fetchQuery the fetch query that contains predicate script
@@ -96,8 +96,7 @@ public interface ScriptProcessor extends Sortable {
   /**
    * Returns whether the processor can support the given script.
    *
-   * @param script
-   * @return supports
+   * @param script the script used to test whether this processor can process
    */
   boolean supports(Script script);
 
@@ -123,7 +122,7 @@ public interface ScriptProcessor extends Sortable {
       final Script script = fetchQuery.getInjectionScript();
       if (script.isValid()) {
         shouldBeTrue(supports(script));
-        return complieFunction(script, null, RESULTS_FUNC_PARAMETER_NAME,
+        return compileFunction(script, null, RESULTS_FUNC_PARAMETER_NAME,
             FETCHED_RESULTS_FUNC_PARAMETER_NAME);
       }
       return null;
@@ -135,7 +134,7 @@ public interface ScriptProcessor extends Sortable {
       final Script script = parameter.getScript();
       if (script.isValid()) {
         shouldBeTrue(supports(script));
-        return complieFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULTS_FUNC_PARAMETER_NAME);
+        return compileFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULTS_FUNC_PARAMETER_NAME);
       }
       return null;
     }
@@ -145,7 +144,7 @@ public interface ScriptProcessor extends Sortable {
       final Script script = fetchQuery.getPredicateScript();
       if (script.isValid()) {
         shouldBeTrue(supports(script));
-        return complieFunction(fetchQuery.getPredicateScript(), PARAMETER_FUNC_PARAMETER_NAME,
+        return compileFunction(fetchQuery.getPredicateScript(), PARAMETER_FUNC_PARAMETER_NAME,
             RESULT_FUNC_PARAMETER_NAME);
       }
       return null;
@@ -157,12 +156,12 @@ public interface ScriptProcessor extends Sortable {
       final Script script = queryHint.getScript();
       if (script.isValid()) {
         shouldBeTrue(supports(script));
-        return complieFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
+        return compileFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
       }
       return null;
     }
 
-    protected Function<ParameterAndResult, Object> complieFunction(Script script,
+    protected Function<ParameterAndResult, Object> compileFunction(Script script,
         String parameterPName, String resultPName) {
       return PARAM_RESULT_FUNCTIONS.get().computeIfAbsent(script.getId(), k -> {
         try {
@@ -189,7 +188,7 @@ public interface ScriptProcessor extends Sortable {
       });
     }
 
-    protected Function<ParameterAndResultPair, Object> complieFunction(Script script,
+    protected Function<ParameterAndResultPair, Object> compileFunction(Script script,
         String parameterPName, String parentResultPName, String fetchResultPName) {
       return PARAM_RESULT_PAIR_FUNCTIONS.get().computeIfAbsent(script.getId(), k -> {
         try {

@@ -42,6 +42,9 @@ public interface ASTNodeVisitor extends Sortable {
             && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VAL);
         ((ASTRegexNode) node).initialize();
         break;
+      case CP_BTW:
+        shouldBeTrue(node.getChildren().size() == 3);
+        break;
       case CP_IN:
       case CP_NIN:
       case LG_AND:

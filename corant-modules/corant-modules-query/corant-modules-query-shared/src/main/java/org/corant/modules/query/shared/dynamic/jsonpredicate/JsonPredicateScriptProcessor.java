@@ -62,7 +62,8 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
 
   static final Map<String, Function<ParameterAndResultPair, Object>> injFuns =
       new ConcurrentHashMap<>();
-  static final Map<String, Function<ParameterAndResult, Object>> pedFuns = new ConcurrentHashMap<>();
+  static final Map<String, Function<ParameterAndResult, Object>> pedFuns =
+      new ConcurrentHashMap<>();
   static final List<FunctionResolver> functionResolvers =
       PredicateParser.resolveFunction().collect(Collectors.toList());
 
@@ -186,7 +187,9 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
 
     Map<Object, Object> parentResult;
     Map<Object, Object> fetchResult;
-    Object queryParameter;
+    Map<Object, Object> queryParameterMap;
+    boolean queryParamMapResolved;
+    final Object queryParameter;
     final QueryObjectMapper objectMapper;
     final List<FunctionResolver> functionResolvers;
 
@@ -211,6 +214,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
           .min(Sortable::compare).orElseThrow(NotSupportedException::new).resolve(myNode.getName());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object resolveVariableValue(Node<?> node) {
       MyASTVariableNode myNode = (MyASTVariableNode) node;
@@ -219,8 +223,10 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
       } else if (myNode.getName().startsWith(FETCH_RESULT_VAR_PREFIX)) {
         return objectMapper.getMappedValue(fetchResult, myNode.getNamePath());
       } else {
-        return objectMapper.getMappedValue(objectMapper.toObject(queryParameter, Map.class),
-            myNode.getNamePath());
+        if (!queryParamMapResolved) {
+          queryParameterMap = objectMapper.toObject(queryParameter, Map.class);
+        }
+        return objectMapper.getMappedValue(queryParameterMap, myNode.getNamePath());
       }
     }
 

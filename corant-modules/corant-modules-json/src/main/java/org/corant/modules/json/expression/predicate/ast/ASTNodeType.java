@@ -15,6 +15,7 @@ package org.corant.modules.json.expression.predicate.ast;
 
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.strip;
+import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTBetweenNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanEqualNode;
 import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanNode;
@@ -172,6 +173,16 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       throw new NotSupportedException();
+    }
+  },
+
+  /**
+   * The BETWEEN match operator.
+   */
+  CP_BTW("$btw", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTBetweenNode();
     }
   },
 

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -135,22 +136,27 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked"})
   @Override
-  public <T> T toObject(Object from, Class<T> type) {
+  public <T> T toObject(Object from, Type type) {
     if (from == null) {
       return null;
     } else {
-      if (type.isInstance(from)) {
-        return (T) from;
+      if (type instanceof Class) {
+        Class<?> clazz = (Class<?>) type;
+        if (clazz.isInstance(from)) {
+          return (T) from;
+        } else {
+          return (T) objectMapper.convertValue(from, clazz);
+        }
       } else {
-        return objectMapper.convertValue(from, type);
+        return (T) objectMapper.convertValue(from, objectMapper.constructType(type));
       }
     }
   }
 
   @Override
-  public <T> List<T> toObjects(List<Object> from, Class<T> type) {
+  public <T> List<T> toObjects(List<Object> from, Type type) {
     if (from == null) {
       return new ArrayList<>();
     }

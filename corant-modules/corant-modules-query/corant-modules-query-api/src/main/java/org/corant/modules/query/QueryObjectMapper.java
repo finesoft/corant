@@ -14,6 +14,7 @@
 package org.corant.modules.query;
 
 import static org.corant.shared.util.Objects.forceCast;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,22 +83,22 @@ public interface QueryObjectMapper {
   /**
    * Convert the given object to expected typed object.
    *
-   * @param <T> the expected type
+   * @param <T> the expected type class
    * @param from the object to be converted
-   * @param type the expected class
+   * @param type the expected type
    * @return the converted object
    */
-  <T> T toObject(Object from, Class<T> type);
+  <T> T toObject(Object from, Type type);
 
   /**
    * Convert the given objects list to expected typed objects list.
    *
-   * @param <T> the expected type
+   * @param <T> the expected type class
    * @param from the objects list to be converted
-   * @param type the expected class
+   * @param type the expected type
    * @return the converted objects list
    */
-  default <T> List<T> toObjects(List<Object> from, Class<T> type) {
+  default <T> List<T> toObjects(List<Object> from, Type type) {
     if (from == null) {
       return new ArrayList<>();
     }

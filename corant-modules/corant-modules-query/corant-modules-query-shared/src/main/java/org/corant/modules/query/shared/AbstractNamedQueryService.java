@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared;
 
 import static java.util.stream.Collectors.toList;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -38,6 +39,7 @@ import org.corant.Corant;
 import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.Querier;
+import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryParameter.StreamQueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
@@ -79,6 +81,11 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s]!",
           q);
     }
+  }
+
+  @Override
+  public QueryObjectMapper getObjectMapper() {
+    return resolve(QueryObjectMapper.class);
   }
 
   /**

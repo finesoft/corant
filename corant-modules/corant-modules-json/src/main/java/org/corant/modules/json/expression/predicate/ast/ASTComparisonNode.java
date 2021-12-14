@@ -88,8 +88,8 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     }
 
     protected int compare(EvaluationContext ctx) {
-      Object left = getLeftValue(ctx);
-      Object right = getRightValue(ctx);
+      Object left = getLeftValue(ctx);// FIXME wrap?
+      Object right = getRightValue(ctx);// FIXME wrap?
       if (left instanceof Comparable && right instanceof Comparable) {
         return compare(left, right);
       }
@@ -100,19 +100,19 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     protected int compare(Object left, Object right) {
       if (left instanceof Number && right instanceof Number) {
         if (left instanceof Integer || right instanceof Integer) {
-          return compare(left, right, Integer.class);
+          return ((Integer) left).compareTo((Integer) right);
         } else if (left instanceof Long || right instanceof Long) {
-          return compare(left, right, Long.class);
+          return ((Long) left).compareTo((Long) right);
         } else if (left instanceof BigDecimal || right instanceof BigDecimal) {
-          return compare(left, right, BigDecimal.class);
+          return ((BigDecimal) left).compareTo((BigDecimal) right);
         } else if (left instanceof Float || right instanceof Float) {
-          return compare(left, right, Float.class);
+          return ((Float) left).compareTo((Float) right);
         } else if (left instanceof BigInteger || right instanceof BigInteger) {
-          return compare(left, right, BigInteger.class);
+          return ((BigInteger) left).compareTo((BigInteger) right);
         } else if (left instanceof Short || right instanceof Short) {
-          return compare(left, right, Short.class);
+          return ((Short) left).compareTo((Short) right);
         } else if (left instanceof Byte || right instanceof Byte) {
-          return compare(left, right, Byte.class);
+          return ((Byte) left).compareTo((Byte) right);
         } else {
           return compare(left, right, Double.class);
         }
@@ -164,6 +164,22 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     protected Object getRightValue(EvaluationContext ctx) {
       return getRight().getValue(ctx);
     }
+  }
+
+  class ASTBetweenNode extends AbstractASTComparisonNode {
+
+    public ASTBetweenNode() {
+      super(ASTNodeType.CP_BTW);
+    }
+
+    @Override
+    public Boolean getValue(EvaluationContext ctx) {
+      Object min = getChildren().get(1).getValue(ctx);
+      Object mid = getChildren().get(0).getValue(ctx);
+      Object max = getChildren().get(2).getValue(ctx);
+      return compare(min, mid) <= 0 && compare(mid, max) <= 0;
+    }
+
   }
 
   class ASTEqualNode extends AbstractASTComparisonNode {

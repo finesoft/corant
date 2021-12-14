@@ -17,9 +17,11 @@ import static org.corant.context.Beans.select;
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.modules.query.QueryParameter.OFFSET_PARAM_NME;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Conversions;
 
 /**
  * corant-modules-query-shared
@@ -168,7 +171,19 @@ public class DefaultQueryHandler implements QueryHandler {
    * @param expectedClass the excepted class
    */
   protected <T> T convertRecord(Object result, Class<T> expectedClass) {
-    return objectMapper.toObject(result, expectedClass);
+    final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
+    if (needConvert) {
+      if (isSimpleClass(expectedClass)) {
+        Map<?, ?> em = (Map<?, ?>) result;
+        shouldBeTrue(em.size() == 1, "Can't support result type from %s to %s conversion.",
+            result.getClass(), expectedClass);
+        return Conversions.toObject(em.entrySet().iterator().next().getValue(), expectedClass);
+      } else {
+        return objectMapper.toObject(result, expectedClass);
+      }
+    } else {
+      return forceCast(result);
+    }
   }
 
   /**
@@ -181,7 +196,17 @@ public class DefaultQueryHandler implements QueryHandler {
   protected <T> List<T> convertRecords(List<Object> records, Class<T> expectedClass) {
     final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
     if (needConvert) {
-      return objectMapper.toObjects(records, expectedClass);
+      if (isSimpleClass(expectedClass)) {
+        records.replaceAll(e -> {
+          Map<?, ?> em = (Map<?, ?>) e;
+          shouldBeTrue(em.size() == 1, "Can't support result type from %s to %s conversion.",
+              e.getClass(), expectedClass);
+          return Conversions.toObject(em.entrySet().iterator().next().getValue(), expectedClass);
+        });
+        return forceCast(records);
+      } else {
+        return objectMapper.toObjects(records, expectedClass);
+      }
     } else {
       return forceCast(records);
     }

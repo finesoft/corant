@@ -16,6 +16,7 @@ package org.corant.modules.query.shared;
 import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import org.corant.modules.json.Jsons;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Conversions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.JavaType;
@@ -146,6 +148,8 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
         Class<?> clazz = (Class<?>) type;
         if (clazz.isInstance(from)) {
           return (T) from;
+        } else if (isSimpleClass(clazz)) {
+          return (T) Conversions.toObject(from, clazz);
         } else {
           return (T) objectMapper.convertValue(from, clazz);
         }
@@ -160,8 +164,16 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     if (from == null) {
       return new ArrayList<>();
     }
-    final JavaType targetType = objectMapper.constructType(type);
-    from.replaceAll(e -> objectMapper.convertValue(e, targetType));
+    if (type instanceof Class) {
+      if (isSimpleClass((Class<?>) type)) {
+        from.replaceAll(e -> Conversions.toObject(e, (Class<?>) type));
+      } else {
+        from.replaceAll(e -> objectMapper.convertValue(e, (Class<?>) type));
+      }
+    } else {
+      final JavaType targetType = objectMapper.constructType(type);
+      from.replaceAll(e -> objectMapper.convertValue(e, targetType));
+    }
     return forceCast(from);
   }
 }

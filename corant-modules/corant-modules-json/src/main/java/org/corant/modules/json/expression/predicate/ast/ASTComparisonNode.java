@@ -99,20 +99,24 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected int compare(Object left, Object right) {
       if (left instanceof Number && right instanceof Number) {
-        if (left instanceof Integer || right instanceof Integer) {
-          return ((Integer) left).compareTo((Integer) right);
-        } else if (left instanceof Long || right instanceof Long) {
-          return ((Long) left).compareTo((Long) right);
-        } else if (left instanceof BigDecimal || right instanceof BigDecimal) {
-          return ((BigDecimal) left).compareTo((BigDecimal) right);
-        } else if (left instanceof Float || right instanceof Float) {
-          return ((Float) left).compareTo((Float) right);
-        } else if (left instanceof BigInteger || right instanceof BigInteger) {
-          return ((BigInteger) left).compareTo((BigInteger) right);
-        } else if (left instanceof Short || right instanceof Short) {
-          return ((Short) left).compareTo((Short) right);
-        } else if (left instanceof Byte || right instanceof Byte) {
-          return ((Byte) left).compareTo((Byte) right);
+        Number numberLeft = (Number) left;
+        Number numberRight = (Number) right;
+        if (numberLeft instanceof BigDecimal || numberRight instanceof BigDecimal) {
+          return compare(numberLeft, numberRight, BigDecimal.class);
+        } else if (numberLeft instanceof Double || numberRight instanceof Double) {
+          return Double.compare(numberLeft.doubleValue(), numberRight.doubleValue());
+        } else if (numberLeft instanceof Float || numberRight instanceof Float) {
+          return Float.compare(numberLeft.floatValue(), numberRight.floatValue());
+        } else if (numberLeft instanceof BigInteger || numberRight instanceof BigInteger) {
+          return compare(numberLeft, numberRight, BigInteger.class);
+        } else if (numberLeft instanceof Long || numberRight instanceof Long) {
+          return Long.compare(numberLeft.longValue(), numberRight.longValue());
+        } else if (numberLeft instanceof Integer || numberRight instanceof Integer) {
+          return Integer.compare(numberLeft.intValue(), numberRight.intValue());
+        } else if (numberLeft instanceof Short || numberRight instanceof Short) {
+          return Short.compare(numberLeft.shortValue(), numberRight.shortValue());
+        } else if (numberLeft instanceof Byte || numberRight instanceof Byte) {
+          return Byte.compare(numberLeft.byteValue(), numberRight.byteValue());
         } else {
           return compare(left, right, Double.class);
         }

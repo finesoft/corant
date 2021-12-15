@@ -40,7 +40,6 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-      int maxSize = fetchQuery.getMaxSize();
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
       CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       String cql = querier.getScript();
@@ -48,12 +47,8 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       String ks = resolveKeyspace(querier);
       Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, cql);
-      List<Map<String, Object>> fetchedList;
-      if (maxSize > 0) {
-        fetchedList = getExecutor().paging(ks, cql, 0, maxSize, timeout, scriptParameter);
-      } else {
-        fetchedList = getExecutor().select(ks, cql, timeout, scriptParameter);
-      }
+      List<Map<String, Object>> fetchedList =
+          getExecutor().select(ks, cql, timeout, scriptParameter);
       return new FetchResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,

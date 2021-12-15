@@ -142,13 +142,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-      int maxSize = fetchQuery.getMaxSize();
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
       MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-      FindIterable<Document> fi = maxSize > 0 ? query(querier).limit(maxSize) : query(querier);
+      FindIterable<Document> fi = query(querier);
       if (!querier.getQuery().getProperties().containsKey(PRO_KEY_BATCH_SIZE)) {
-        fi.batchSize(min(maxSize, 64));
+        fi.batchSize(min(fetchQuery.getMaxSize(), 128));
       }
       List<Map<String, Object>> fetchedList = null;
       try (MongoCursor<Document> cursor = fi.iterator()) {

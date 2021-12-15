@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared.dynamic.jsonpredicate;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,9 +110,17 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
         for (Map<Object, Object> fr : fetchResults) {
           if (ast.getValue(evalCtx.reset(r, fr))) {
             injectResults.add(fr);
+            if (!fetchQuery.isMultiRecords()) {
+              break;
+            }
           }
         }
-        mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
+        if (fetchQuery.isMultiRecords()) {
+          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
+        } else {
+          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(),
+              isNotEmpty(injectResults) ? injectResults.get(0) : null);
+        }
       }
       return null;
     };

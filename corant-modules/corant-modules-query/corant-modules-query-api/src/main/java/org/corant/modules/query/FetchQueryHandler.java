@@ -49,6 +49,10 @@ public interface FetchQueryHandler {
    * Inject fetch query result into single parent query result, the parameter 'fetchResult' may be
    * modified.
    *
+   * <p>
+   * Note: In the default implementation, all injections may be only reference injections, and no
+   * deep clone, which means that must be careful when modifying the result set.
+   *
    * @param queryParameter the query parameter
    * @param result the parent query result
    * @param fetchResults the fetched results
@@ -60,6 +64,10 @@ public interface FetchQueryHandler {
   /**
    * Inject fetch query result into parent query result list, the parameter 'fetchResult' may be
    * modified.
+   *
+   * <p>
+   * Note: In the default implementation, all injections may be only reference injections, and no
+   * deep clone, which means that must be careful when modifying the result set.
    *
    * @param queryParameter the query parameter
    * @param results the parent query result list

@@ -15,6 +15,8 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Lists.listOf;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -30,6 +32,39 @@ import junit.framework.TestCase;
  *
  */
 public class TextsTest extends TestCase {
+
+  public static void main(String... args) throws FileNotFoundException, IOException {
+    String text = Texts.fromInputStream(new FileInputStream("d:\\corant-1.9.w.txt"));
+    List<String> lines = Texts.lines("d:\\corant-1.9.w.txt").collect(Collectors.toList());
+    int t = lines.size();
+    int x = t - 1;
+    for (int i = 0; i < t; i++) {
+      StringBuilder line = new StringBuilder(lines.get(i));
+      if (i + 1 < x) {
+        line.append(lines.get(i + 1) + "\n");
+      }
+      if (i + 2 < x) {
+        line.append(lines.get(i + 2) + "\n");
+      }
+      if (i + 3 < x) {
+        line.append(lines.get(i + 3) + "\n");
+      }
+      String b = line.toString();
+      for (int j = 0; j < b.length(); j++) {
+        char c = b.charAt(j);
+        if (c == '{') {
+          int z = b.indexOf("}", j);
+          if (z != -1) {
+            String cc = b.substring(j + 1, z);
+            if (cc.isBlank()) {
+              System.out.println(b);
+              System.out.println("=======================================================");
+            }
+          }
+        }
+      }
+    }
+  }
 
   @Test
   public void testAsCSVLines() {

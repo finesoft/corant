@@ -129,7 +129,7 @@ public class FetchQuery implements Serializable {
    * @return the maxSize
    */
   public int getMaxSize() {
-    return isMultiRecords() ? maxSize : 1;
+    return maxSize;
   }
 
   /**

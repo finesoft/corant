@@ -96,8 +96,7 @@ public class SimpleFloatRange {
     final int prime = 31;
     int result = 1;
     result = prime * result + (getGte() == null ? 0 : getGte().hashCode());
-    result = prime * result + (getLte() == null ? 0 : getLte().hashCode());
-    return result;
+    return prime * result + (getLte() == null ? 0 : getLte().hashCode());
   }
 
   public String toKeyedString() {

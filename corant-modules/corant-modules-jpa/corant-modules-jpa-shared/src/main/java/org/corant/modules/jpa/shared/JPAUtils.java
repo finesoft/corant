@@ -51,8 +51,7 @@ public class JPAUtils {
 
   public static String getMixedPuName(PersistenceUnit pu) {
     String usePuName = defaultString(pu.unitName(), PersistenceNames.PU_DFLT_NME);
-    usePuName = isEmpty(pu.name()) ? usePuName : usePuName + "." + pu.name();
-    return usePuName;
+    return isEmpty(pu.name()) ? usePuName : usePuName + "." + pu.name();
   }
 
   public static Set<Class<?>> getPersistenceClasses(String packages) {
@@ -71,7 +70,7 @@ public class JPAUtils {
     Set<String> paths = new LinkedHashSet<>();
     try {
       for (String pathExpression : pathExpressions) {
-        Resources.fromClassPath(pathExpression).filter(r -> !ClassResource.class.isInstance(r))
+        Resources.fromClassPath(pathExpression).filter(r -> !(r instanceof ClassResource))
             .map(ClassPathResource::getClassPath).forEach(paths::add);
       }
     } catch (IOException e) {
@@ -102,7 +101,7 @@ public class JPAUtils {
   }
 
   public static void stdoutPersistClasses(String pkg, PrintStream ps) throws IOException {
-    String path = shouldNotNull(pkg).replaceAll("\\.", "/");
+    String path = shouldNotNull(pkg).replace('.', '/');
     Resources.fromClassPath(path).filter(c -> c instanceof ClassResource)
         .map(c -> (ClassResource) c).map(ClassResource::load).filter(JPAUtils::isPersistenceClass)
         .map(Class::getName).sorted(String::compareTo)
@@ -118,7 +117,7 @@ public class JPAUtils {
   }
 
   public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
-    String path = shouldNotNull(pkg).replaceAll("\\.", "/");
+    String path = shouldNotNull(pkg).replace('.', '/');
     Resources.fromClassPath(path).filter(r -> r.getClassPath().endsWith("JpaOrm.xml"))
         .map(ClassPathResource::getClassPath).map(s -> new StringBuilder().append("<mapping-file>")
             .append(s.substring(s.indexOf(path))).append("</mapping-file>"))

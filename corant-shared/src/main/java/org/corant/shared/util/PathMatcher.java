@@ -266,8 +266,7 @@ public interface PathMatcher extends Predicate<String> {
       int result = 1;
       result = prime * result + (globExpress == null ? 0 : globExpress.hashCode());
       result = prime * result + (ignoreCase ? 1231 : 1237);
-      result = prime * result + (isDos ? 1231 : 1237);
-      return result;
+      return prime * result + (isDos ? 1231 : 1237);
     }
 
     public boolean isDos() {
@@ -413,13 +412,11 @@ public interface PathMatcher extends Predicate<String> {
         } else {
           return Pattern.compile(toWindowsRegexPattern(globExpress), Pattern.UNICODE_CASE);
         }
+      } else if (ignoreCase) {
+        return Pattern.compile(toUnixRegexPattern(globExpress),
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
       } else {
-        if (ignoreCase) {
-          return Pattern.compile(toUnixRegexPattern(globExpress),
-              Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        } else {
-          return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
-        }
+        return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
       }
     }
 
@@ -575,13 +572,11 @@ public interface PathMatcher extends Predicate<String> {
               // crosses directory boundaries
               regex.append(".*");
               i++;
+            } else // within directory boundary
+            if (isDos) {
+              regex.append("[^\\\\]*");
             } else {
-              // within directory boundary
-              if (isDos) {
-                regex.append("[^\\\\]*");
-              } else {
-                regex.append("[^/]*");
-              }
+              regex.append("[^/]*");
             }
             break;
           case '?':

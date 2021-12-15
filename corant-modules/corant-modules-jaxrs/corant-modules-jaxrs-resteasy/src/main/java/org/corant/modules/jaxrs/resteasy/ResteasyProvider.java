@@ -182,8 +182,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (contextPath == null ? 0 : contextPath.hashCode());
-      return result;
+      return prime * result + (contextPath == null ? 0 : contextPath.hashCode());
     }
 
     public ResteasyDeployment toResteasyDeployment(Consumer<ResteasyDeployment> handler) {
@@ -202,8 +201,9 @@ public class ResteasyProvider implements WebMetaDataProvider {
           contextPath.endsWith("/") ? contextPath.concat("*") : contextPath.concat("/*");
       String diapatchName = dispatcherClass.getSimpleName();
       String appName = getUserClass(applicationClass.getClass()).getSimpleName();
-      WebInitParamMetaData[] ipmds = new WebInitParamMetaData[] {new WebInitParamMetaData(
-          ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX, contextPath, null)};
+      WebInitParamMetaData[] ipmds =
+          {new WebInitParamMetaData(ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX,
+              contextPath, null)};
       return new WebServletMetaData(diapatchName, new String[] {pattern}, new String[] {pattern},
           loadOnStartup, ipmds, true, null, null, null, diapatchName.concat("-").concat(appName),
           dispatcherClass, null, null);

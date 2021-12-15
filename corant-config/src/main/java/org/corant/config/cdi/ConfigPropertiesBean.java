@@ -58,7 +58,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
         (InjectionPoint) beanManager.getInjectableReference(new CurrentInjectionPoint(), context);
     String thePrefix = ip.getQualifiers().stream().filter(ConfigProperties.class::isInstance)
         .map(ConfigProperties.class::cast).map(ConfigProperties::prefix)
-        .filter(prefix -> !prefix.equals(ConfigProperties.UNCONFIGURED_PREFIX)).findFirst()
+        .filter(prefix -> !ConfigProperties.UNCONFIGURED_PREFIX.equals(prefix)).findFirst()
         .orElse(prefix);
     return Configs.resolveMicroprofile(clazz, thePrefix);
   }
@@ -123,7 +123,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
       Class<?> cls = (Class<?>) annotated.getBaseType();
       ConfigProperties cp = cls.getAnnotation(ConfigProperties.class);
       if (cp != null) {
-        return cp.prefix().equals(ConfigProperties.UNCONFIGURED_PREFIX) ? null : cp.prefix();
+        return ConfigProperties.UNCONFIGURED_PREFIX.equals(cp.prefix()) ? null : cp.prefix();
       }
     }
     return null;

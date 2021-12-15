@@ -65,7 +65,6 @@ public class NamingReference extends Reference {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + Arrays.hashCode(qualifiers);
-    return result;
+    return prime * result + Arrays.hashCode(qualifiers);
   }
 }

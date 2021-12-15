@@ -33,8 +33,7 @@ public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegu
   /**
    *
    */
-  public StringBsonRegexConverter() {
-  }
+  public StringBsonRegexConverter() {}
 
   /**
    * @param throwException

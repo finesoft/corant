@@ -64,12 +64,6 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   protected Logger logger;
 
   @Override
-  public boolean supports(Class<?> resultClass, QueryHint hint) {
-    return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
-        && areEqual(hint.getKey(), HINT_NAME);
-  }
-
-  @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
     Consumer<Map> handler;
     if (brokens.contains(qh.getId()) || (handler = resolveHint(qh)) == null) {
@@ -92,6 +86,12 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
         }
       }
     }
+  }
+
+  @Override
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
+    return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
+        && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @PreDestroy

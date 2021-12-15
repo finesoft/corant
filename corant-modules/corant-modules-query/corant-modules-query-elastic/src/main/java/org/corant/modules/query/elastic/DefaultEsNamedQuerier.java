@@ -52,7 +52,7 @@ public class DefaultEsNamedQuerier extends
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver,
       Map<Object, Object> scriptMap) {
     super(query, queryParameter, queryResolver, fetchQueryResolver);
-    String[] useHintKeys = new String[] {EsQueryExecutor.HIT_RS_KEY};
+    String[] useHintKeys = {EsQueryExecutor.HIT_RS_KEY};
     if (isNotEmpty(scriptMap)) {
       Entry<?, ?> entry = scriptMap.entrySet().iterator().next();
       indexName = asDefaultString(entry.getKey());

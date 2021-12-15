@@ -69,12 +69,10 @@ public abstract class JCACipherProvider implements CipherProvider {
         } else {
           cipher.init(mode, key, secureRandom);
         }
+      } else if (algoParamSpec != null) {
+        cipher.init(mode, key, algoParamSpec);
       } else {
-        if (algoParamSpec != null) {
-          cipher.init(mode, key, algoParamSpec);
-        } else {
-          cipher.init(mode, key);
-        }
+        cipher.init(mode, key);
       }
       return cipher;
     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException

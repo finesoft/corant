@@ -13,7 +13,7 @@
  */
 /**
  * corant-shared
- * 
+ *
  * @author bingo 下午8:35:58
  *
  */

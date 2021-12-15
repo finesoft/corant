@@ -154,13 +154,11 @@ public class NamingContext implements Context {
         } else {
           throw new NamingException("Name is not bound to a Context");
         }
+      } else if (entry.type == NamingContextEntry.CONTEXT) {
+        ((Context) entry.value).close();
+        bindings.remove(useName.get(0));
       } else {
-        if (entry.type == NamingContextEntry.CONTEXT) {
-          ((Context) entry.value).close();
-          bindings.remove(useName.get(0));
-        } else {
-          throw new NotContextException("Name is not bound to a Context");
-        }
+        throw new NotContextException("Name is not bound to a Context");
       }
     } finally {
       lock.unlock();
@@ -422,26 +420,24 @@ public class NamingContext implements Context {
         } else {
           ((Context) entry.value).bind(useName.getSuffix(1), obj);
         }
+      } else if (!rebind && entry != null) {
+        throw new NameAlreadyBoundException(
+            String.format("Name [%s] is already bound in this Context", useName.get(0)));
       } else {
-        if (!rebind && entry != null) {
-          throw new NameAlreadyBoundException(
-              String.format("Name [%s] is already bound in this Context", useName.get(0)));
+        Object toBind = NamingManager.getStateToBind(obj, useName, this, getEnvironment());
+        if (toBind instanceof Context) {
+          entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.CONTEXT);
+        } else if (toBind instanceof LinkRef) {
+          entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.LINK_REF);
+        } else if (toBind instanceof Reference) {
+          entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.REFERENCE);
+        } else if (toBind instanceof Referenceable) {
+          toBind = ((Referenceable) toBind).getReference();
+          entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.REFERENCE);
         } else {
-          Object toBind = NamingManager.getStateToBind(obj, useName, this, getEnvironment());
-          if (toBind instanceof Context) {
-            entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.CONTEXT);
-          } else if (toBind instanceof LinkRef) {
-            entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.LINK_REF);
-          } else if (toBind instanceof Reference) {
-            entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.REFERENCE);
-          } else if (toBind instanceof Referenceable) {
-            toBind = ((Referenceable) toBind).getReference();
-            entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.REFERENCE);
-          } else {
-            entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.ENTRY);
-          }
-          bindings.put(useName.get(0), entry);
+          entry = new NamingContextEntry(useName.get(0), toBind, NamingContextEntry.ENTRY);
         }
+        bindings.put(useName.get(0), entry);
       }
     } finally {
       lock.unlock();
@@ -481,27 +477,25 @@ public class NamingContext implements Context {
           throw new NamingException("Name must be bound to a Context, since it has children.");
         }
         return ((Context) entry.value).lookup(useName.getSuffix(1));
-      } else {
-        if (resolveLinks && entry.type == NamingContextEntry.LINK_REF) {
-          String link = ((LinkRef) entry.value).getLinkName();
-          if (!link.isEmpty() && link.charAt(0) == '.') {
-            return lookup(link.substring(1));// Link relative to this context
-          } else {
-            return new InitialContext(getEnvironment()).lookup(link);
-          }
-        } else if (entry.type == NamingContextEntry.REFERENCE) {
-          try {
-            return NamingManager.getObjectInstance(entry.value, useName, this, getEnvironment());
-          } catch (NamingException e) {
-            throw e;
-          } catch (Exception e) {
-            NamingException ne = new NamingException("Unexpected exception resolving reference");
-            ne.initCause(e);
-            throw ne;
-          }
+      } else if (resolveLinks && entry.type == NamingContextEntry.LINK_REF) {
+        String link = ((LinkRef) entry.value).getLinkName();
+        if (!link.isEmpty() && link.charAt(0) == '.') {
+          return lookup(link.substring(1));// Link relative to this context
         } else {
-          return entry.value;
+          return new InitialContext(getEnvironment()).lookup(link);
         }
+      } else if (entry.type == NamingContextEntry.REFERENCE) {
+        try {
+          return NamingManager.getObjectInstance(entry.value, useName, this, getEnvironment());
+        } catch (NamingException e) {
+          throw e;
+        } catch (Exception e) {
+          NamingException ne = new NamingException("Unexpected exception resolving reference");
+          ne.initCause(e);
+          throw ne;
+        }
+      } else {
+        return entry.value;
       }
     } finally {
       lock.unlock();

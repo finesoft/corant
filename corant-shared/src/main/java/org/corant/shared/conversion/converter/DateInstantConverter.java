@@ -28,8 +28,7 @@ public class DateInstantConverter extends AbstractConverter<Date, Instant> {
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public DateInstantConverter() {
-  }
+  public DateInstantConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

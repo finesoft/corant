@@ -171,11 +171,9 @@ public class DirectoryWatcher extends AbstractWatcher {
       Path prev = keys.get(key);
       if (prev == null) {
         logger.fine(() -> String.format("register %s to watch service.", dir));
-      } else {
-        if (!dir.equals(prev)) {
-          logger.fine(() -> String.format("update %s -> %s", prev, dir));
-          fire(null, dir.toFile(), prev.toFile());
-        }
+      } else if (!dir.equals(prev)) {
+        logger.fine(() -> String.format("update %s -> %s", prev, dir));
+        fire(null, dir.toFile(), prev.toFile());
       }
     }
     keys.put(key, dir);

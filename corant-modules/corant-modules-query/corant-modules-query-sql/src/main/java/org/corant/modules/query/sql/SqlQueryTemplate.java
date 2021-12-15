@@ -649,11 +649,9 @@ public class SqlQueryTemplate {
           tpl.offset = config.namedParameterReviser.apply(next, tpl.namedParameters);
           revise = true;
         }
-      } else {
-        if (config.ordinaryParameterReviser != null) {
-          tpl.offset = config.ordinaryParameterReviser.apply(next, tpl.ordinaryParameters);
-          revise = true;
-        }
+      } else if (config.ordinaryParameterReviser != null) {
+        tpl.offset = config.ordinaryParameterReviser.apply(next, tpl.ordinaryParameters);
+        revise = true;
       }
       if (!revise) {
         tpl.offset += tpl.limit;

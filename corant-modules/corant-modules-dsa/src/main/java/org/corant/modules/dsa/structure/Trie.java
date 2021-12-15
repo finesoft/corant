@@ -87,23 +87,21 @@ public class Trie<T> implements Comparable<Trie<T>>, Serializable {
           node.setValue(child.getValue());
       }
       return node;
-    } else {
-      if (childNodes != null && childNodes.length >= MAX_SIZE * rate) {
-        Trie<T>[] tempChildNodes = new Trie[MAX_SIZE];
-        for (Trie<T> node : childNodes) {
-          tempChildNodes[node.getIndex()] = node;
-        }
-        tempChildNodes[child.getIndex()] = child;
-        childNodes = null;
-        childNodes = tempChildNodes;
-      } else {
-        Trie<T>[] newChildNodes = new Trie[childNodes.length + 1];
-        int insert = -(idx + 1);
-        System.arraycopy(this.childNodes, 0, newChildNodes, 0, insert);
-        System.arraycopy(childNodes, insert, newChildNodes, insert + 1, childNodes.length - insert);
-        newChildNodes[insert] = child;
-        this.childNodes = newChildNodes;
+    } else if (childNodes != null && childNodes.length >= MAX_SIZE * rate) {
+      Trie<T>[] tempChildNodes = new Trie[MAX_SIZE];
+      for (Trie<T> node : childNodes) {
+        tempChildNodes[node.getIndex()] = node;
       }
+      tempChildNodes[child.getIndex()] = child;
+      childNodes = null;
+      childNodes = tempChildNodes;
+    } else {
+      Trie<T>[] newChildNodes = new Trie[childNodes.length + 1];
+      int insert = -(idx + 1);
+      System.arraycopy(this.childNodes, 0, newChildNodes, 0, insert);
+      System.arraycopy(childNodes, insert, newChildNodes, insert + 1, childNodes.length - insert);
+      newChildNodes[insert] = child;
+      this.childNodes = newChildNodes;
     }
     return child;
   }
@@ -169,8 +167,7 @@ public class Trie<T> implements Comparable<Trie<T>>, Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + index;
-    return result;
+    return prime * result + index;
   }
 
   public void put(String key, T value) {

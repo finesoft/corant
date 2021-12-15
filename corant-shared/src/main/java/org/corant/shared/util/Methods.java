@@ -344,8 +344,7 @@ public class Methods {
       final int prime = 31;
       int result = 1;
       result = prime * result + methodName.hashCode();
-      result = prime * result + Arrays.hashCode(parameterTypes);
-      return result;
+      return prime * result + Arrays.hashCode(parameterTypes);
     }
 
     public boolean matches(Method method) {

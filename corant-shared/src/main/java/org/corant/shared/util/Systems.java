@@ -64,12 +64,41 @@ public class Systems {
         + Runtime.getRuntime().freeMemory();
   }
 
+  public static String[] getClasspath() {
+    return split(getProperty("java.class.path"), File.pathSeparator);
+  }
+
   public static int getCPUs() {
     return Runtime.getRuntime().availableProcessors();
   }
 
   public static long getCurrentPID() {
     return Long.parseLong(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
+  }
+
+  public static String getEnvironmentVariable(String varName) {
+    if (varName == null) {
+      return null;
+    }
+    Map<String, String> sysEnv = getEnvironmentVariables();
+    String value = sysEnv.get(varName);
+    if (value != null) {
+      return value;
+    }
+    String sanitizedName = ENV_KEY_PATTERN.matcher(varName).replaceAll("_");
+    value = sysEnv.get(sanitizedName);
+    if (value != null) {
+      return value;
+    }
+    return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
+  }
+
+  public static <T> T getEnvironmentVariable(String varName, Class<T> type) {
+    return StringObjectConverterFactory.convert(getEnvironmentVariable(varName), type);
+  }
+
+  public static Map<String, String> getEnvironmentVariables() {
+    return AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv);
   }
 
   public static String getFileEncoding() {
@@ -218,56 +247,6 @@ public class Systems {
     return Optional.empty();
   }
 
-  public static byte[] getSecureMungedAddress(Random rd) {
-    byte[] address = null;
-    try {
-      address = getMacAddress();
-    } catch (SocketException e) {
-      // address will be set below
-    }
-
-    if (!isValidMacAddress(address)) {
-      address = constructDummyMulticastAddress(rd);
-    }
-
-    byte[] mungedBytes = new byte[6];
-    rd.nextBytes(mungedBytes);
-    for (int i = 0; i < 6; ++i) {
-      mungedBytes[i] ^= address[i];
-    }
-
-    return mungedBytes;
-  }
-
-  public static String[] getClasspath() {
-    return split(getProperty("java.class.path"), File.pathSeparator);
-  }
-
-  public static Map<String, String> getEnvironmentVariables() {
-    return AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv);
-  }
-
-  public static String getEnvironmentVariable(String varName) {
-    if (varName == null) {
-      return null;
-    }
-    Map<String, String> sysEnv = getEnvironmentVariables();
-    String value = sysEnv.get(varName);
-    if (value != null) {
-      return value;
-    }
-    String sanitizedName = ENV_KEY_PATTERN.matcher(varName).replaceAll("_");
-    value = sysEnv.get(sanitizedName);
-    if (value != null) {
-      return value;
-    }
-    return sysEnv.get(sanitizedName.toUpperCase(Locale.ROOT));
-  }
-
-  public static <T> T getEnvironmentVariable(String varName, Class<T> type) {
-    return StringObjectConverterFactory.convert(getEnvironmentVariable(varName), type);
-  }
-
   public static String getProperty(final String name) {
     return getProperty(name, (String) null);
   }
@@ -308,6 +287,27 @@ public class Systems {
     return Collections.emptySet();
   }
 
+  public static byte[] getSecureMungedAddress(Random rd) {
+    byte[] address = null;
+    try {
+      address = getMacAddress();
+    } catch (SocketException e) {
+      // address will be set below
+    }
+
+    if (!isValidMacAddress(address)) {
+      address = constructDummyMulticastAddress(rd);
+    }
+
+    byte[] mungedBytes = new byte[6];
+    rd.nextBytes(mungedBytes);
+    for (int i = 0; i < 6; ++i) {
+      mungedBytes[i] ^= address[i];
+    }
+
+    return mungedBytes;
+  }
+
   public static String getTempDir() {
     return getProperty("java.io.tmpdir");
   }
@@ -321,8 +321,7 @@ public class Systems {
   }
 
   public static String getUserCountry() {
-    return defaultObject(getProperty("user.country"),
-        () -> getProperty("user.country"));
+    return defaultObject(getProperty("user.country"), () -> getProperty("user.country"));
   }
 
   public static String getUserHome() {

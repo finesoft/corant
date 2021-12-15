@@ -191,11 +191,11 @@ public class ClassPathResourceScanner {
   }
 
   public ClassPathResourceScanner scan(URI uri, ClassLoader classloader) throws IOException {
-    if (uri.getScheme().equals(FILE_SCHEMA)) {
+    if (FILE_SCHEMA.equals(uri.getScheme())) {
       if (scannedUris.add(uri)) {
         scanFromFile(new File(uri), classloader);
       }
-    } else if (uri.getScheme().equals(JAR_SCHEMA)) {
+    } else if (JAR_SCHEMA.equals(uri.getScheme())) {
       if (scannedUris.add(uri)) {
         scanFromJar(uri, classloader);
       }
@@ -269,7 +269,7 @@ public class ClassPathResourceScanner {
         scanDirectory(file, classloader, pathPrefix + name + PATH_SEPARATOR, ancestors);
       } else {
         String resourceName = pathPrefix + name;
-        if (!resourceName.equals(JarFile.MANIFEST_NAME) && filter.test(resourceName)) {
+        if (!JarFile.MANIFEST_NAME.equals(resourceName) && filter.test(resourceName)) {
           resources.add(ClassPathResource.of(resourceName, classloader, file.toURI().toURL()));
         }
       }
@@ -334,7 +334,7 @@ public class ClassPathResourceScanner {
       while (entries.hasMoreElements()) {
         JarEntry entry = entries.nextElement();
         String resourceName = entry.getName();
-        if (entry.isDirectory() || resourceName.equals(JarFile.MANIFEST_NAME)
+        if (entry.isDirectory() || JarFile.MANIFEST_NAME.equals(resourceName)
             || isNotBlank(root) && !resourceName.startsWith(root) || !filter.test(resourceName)) {
           continue;
         }
@@ -355,7 +355,7 @@ public class ClassPathResourceScanner {
     String filePath = replace(file.getCanonicalPath(), File.separator, PATH_SEPARATOR_STRING);
     if (filePath.endsWith(JAR_EXT)) {
       scanJar(file.toURI(), file, classloader);
-    } else if (!filePath.equals(JarFile.MANIFEST_NAME)) {
+    } else if (!JarFile.MANIFEST_NAME.equals(filePath)) {
       int classesIdx;
       if ((classesIdx = filePath.indexOf(CLASSES_FOLDER)) != -1) {
         filePath = filePath.substring(classesIdx + CLASSES_FOLDER.length());

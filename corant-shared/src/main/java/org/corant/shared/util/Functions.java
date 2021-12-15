@@ -106,6 +106,16 @@ public class Functions {
     };
   }
 
+  public static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T, Exception> consumer) {
+    return i -> {
+      try {
+        consumer.accept(i);
+      } catch (Exception ex) {
+        throw new CorantRuntimeException(ex);
+      }
+    };
+  }
+
   public static <T, R, E extends Throwable> Function<T, R> uncheckedFunction(
       ThrowingFunction<T, R, E> computer) {
     return t -> {
@@ -113,16 +123,6 @@ public class Functions {
         return shouldNotNull(computer).apply(t);
       } catch (Throwable e) {
         throw new CorantRuntimeException(e);
-      }
-    };
-  }
-
-  public static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T, Exception> consumer) {
-    return i -> {
-      try {
-        consumer.accept(i);
-      } catch (Exception ex) {
-        throw new CorantRuntimeException(ex);
       }
     };
   }

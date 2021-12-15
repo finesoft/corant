@@ -21,6 +21,7 @@ import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.substring;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.QueryRuntimeException;
@@ -142,13 +143,9 @@ public class SqlStatements {
     protected List<Object> resolveParameter(Object parameter) {
       List<Object> params = new ArrayList<>();
       if (parameter instanceof Collection) {
-        for (Object obj : (Collection<?>) parameter) {
-          params.add(obj);
-        }
+        params.addAll((Collection<?>) parameter);
       } else if (parameter != null && parameter.getClass().isArray()) {
-        for (Object obj : wrapArray(parameter)) {
-          params.add(obj);
-        }
+        Collections.addAll(params, wrapArray(parameter));
       } else {
         params.add(parameter);
       }

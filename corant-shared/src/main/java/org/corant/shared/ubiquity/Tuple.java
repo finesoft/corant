@@ -146,8 +146,7 @@ public interface Tuple {
       final int prime = 31;
       int result = 1;
       result = prime * result + (left == null ? 0 : left.hashCode());
-      result = prime * result + (right == null ? 0 : right.hashCode());
-      return result;
+      return prime * result + (right == null ? 0 : right.hashCode());
     }
 
     @Override
@@ -303,8 +302,7 @@ public interface Tuple {
       final int prime = 31;
       int result = 1;
       result = prime * result + (max == null ? 0 : max.hashCode());
-      result = prime * result + (min == null ? 0 : min.hashCode());
-      return result;
+      return prime * result + (min == null ? 0 : min.hashCode());
     }
 
     public boolean intersect(Range<T> other) {
@@ -438,8 +436,7 @@ public interface Tuple {
       int result = 1;
       result = prime * result + (left == null ? 0 : left.hashCode());
       result = prime * result + (middle == null ? 0 : middle.hashCode());
-      result = prime * result + (right == null ? 0 : right.hashCode());
-      return result;
+      return prime * result + (right == null ? 0 : right.hashCode());
     }
 
     @Override

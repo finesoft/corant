@@ -34,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Objects {
 
-  public static final Object[] EMPTY_ARRAY = new Object[0];
+  public static final Object[] EMPTY_ARRAY = {};
 
   protected Objects() {}
 

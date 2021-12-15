@@ -53,7 +53,7 @@ import org.corant.shared.normal.Defaults;
  */
 public class FileUtils {
 
-  public static final File[] EMPTY_ARRAY = new File[0];
+  public static final File[] EMPTY_ARRAY = {};
   public static final char EXTENSION_SEPARATOR = '.';
   public static final String EXTENSION_SEPARATOR_STR = Character.toString(EXTENSION_SEPARATOR);
   public static final char UNIX_SEPARATOR = '/';
@@ -63,7 +63,7 @@ public class FileUtils {
   public static final String JAR_URL_SEPARATOR = "!/";
   public static final String FILE_URL_PREFIX = "file:";
   protected static final Logger logger = Logger.getLogger(FileUtils.class.getName());
-  static final String[] JARS = new String[] {"jar", "war, ", "zip", "vfszip", "wsjar"};
+  static final String[] JARS = {"jar", "war, ", "zip", "vfszip", "wsjar"};
 
   private FileUtils() {}
 
@@ -206,13 +206,11 @@ public class FileUtils {
             + "not a directory. Unable to create directory.";
         throw new IOException(message);
       }
-    } else {
-      // Double-check that some other thread or process hasn't made
-      // the directory in the background
-      if (!directory.mkdirs() && !directory.isDirectory()) {
-        final String message = "Unable to create directory " + directory;
-        throw new IOException(message);
-      }
+    } else // Double-check that some other thread or process hasn't made
+    // the directory in the background
+    if (!directory.mkdirs() && !directory.isDirectory()) {
+      final String message = "Unable to create directory " + directory;
+      throw new IOException(message);
     }
   }
 

@@ -119,8 +119,7 @@ public class MessageDestinationMetaData {
     int result = 1;
     result = prime * result + (connectionFactoryId == null ? 0 : connectionFactoryId.hashCode());
     result = prime * result + (multicast ? 1231 : 1237);
-    result = prime * result + (name == null ? 0 : name.hashCode());
-    return result;
+    return prime * result + (name == null ? 0 : name.hashCode());
   }
 
   public boolean isMulticast() {

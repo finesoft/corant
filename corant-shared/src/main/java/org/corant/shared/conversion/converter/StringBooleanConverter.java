@@ -30,7 +30,6 @@ public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
   // private String[] falses = {"false", "no", "n", "off", "0", "否"};
 
   public StringBooleanConverter() {
-    super();
   }
 
   public StringBooleanConverter(Boolean defaultValue, String[] trues/* , String[] falses */) {

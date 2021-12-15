@@ -47,7 +47,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class JDBCTransactionIntegration implements TransactionIntegration {
 
-  public static final XAResource[] EMPTY_XA_RESOURCES = new XAResource[0];
+  public static final XAResource[] EMPTY_XA_RESOURCES = {};
   static Map<DataSourceConfig, JDBCRecoveryXAResource> recoveryXAResources =
       new ConcurrentHashMap<>();// static
 
@@ -265,7 +265,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public Xid[] recover(int flag) throws XAException {
-      Xid[] xids = new Xid[0];
+      Xid[] xids = {};
       try {
         if (isConnected()) {
           xids = xaresource.get().recover(flag);

@@ -44,7 +44,7 @@ public interface EsQueryExecutor {
 
   String HIT_HL_KEY = "hits.hits.highlight";
   String HIT_RS_KEY = "hits.hits._source";
-  String[] HIT_KEYS = new String[] {"hits", "hits"};
+  String[] HIT_KEYS = {"hits", "hits"};
   String AGG_RS_ETR_PATH = "aggregations";
   String SUG_RS_ERT_PATH = "suggest";
 

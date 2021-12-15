@@ -214,7 +214,6 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
           .min(Sortable::compare).orElseThrow(NotSupportedException::new).resolve(myNode.getName());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object resolveVariableValue(Node<?> node) {
       MyASTVariableNode myNode = (MyASTVariableNode) node;

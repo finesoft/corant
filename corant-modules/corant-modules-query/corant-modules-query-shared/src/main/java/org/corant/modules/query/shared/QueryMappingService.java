@@ -21,6 +21,7 @@ import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -172,18 +173,15 @@ public class QueryMappingService {
               throw new QueryRuntimeException(
                   "The script of fetch query injection [%s] in query [%s] file [%s] can't find the script resolver.",
                   fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
-            } else {
-              if (fq.getParameters() != null) {
-                for (FetchQueryParameter fp : fq.getParameters()) {
-                  if (fp.getScript() != null && fp.getScript().isValid()
-                      && fp.getScript().getType() == ScriptType.CDI
-                      && findNamed(FetchQueryParameterResolver.class, fp.getScript().getCode())
-                          .isEmpty()) {
-                    throw new QueryRuntimeException(
-                        "The script of fetch query parameter [%s] in query [%s] file [%s] can't find the script resolver.",
-                        fq.getReferenceQuery().getVersionedName(), q.getVersionedName(),
-                        m.getUrl());
-                  }
+            } else if (fq.getParameters() != null) {
+              for (FetchQueryParameter fp : fq.getParameters()) {
+                if (fp.getScript() != null && fp.getScript().isValid()
+                    && fp.getScript().getType() == ScriptType.CDI
+                    && findNamed(FetchQueryParameterResolver.class, fp.getScript().getCode())
+                        .isEmpty()) {
+                  throw new QueryRuntimeException(
+                      "The script of fetch query parameter [%s] in query [%s] file [%s] can't find the script resolver.",
+                      fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
                 }
               }
             }
@@ -270,9 +268,7 @@ public class QueryMappingService {
       });
     } // FIXME still has not figured out
     if (isEmpty(paths)) {
-      for (String p : resolvePaths(mappingFilePaths)) {
-        paths.add(p);
-      }
+      paths.addAll(resolvePaths(mappingFilePaths));
     }
     return paths.toArray(new String[paths.size()]);
   }
@@ -280,9 +276,7 @@ public class QueryMappingService {
   protected Set<String> resolvePaths(String... paths) {
     Set<String> resolved = new LinkedHashSet<>();
     for (String path : paths) {
-      for (String r : split(path, ",", true, true)) {
-        resolved.add(r);
-      }
+      Collections.addAll(resolved, split(path, ",", true, true));
     }
     return resolved;
   }

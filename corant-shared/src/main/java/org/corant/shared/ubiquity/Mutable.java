@@ -660,8 +660,7 @@ public interface Mutable<T> extends Supplier<T> {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (value == null ? 0 : value.hashCode());
-      return result;
+      return prime * result + (value == null ? 0 : value.hashCode());
     }
 
     public MutableNumber<T> increment() {

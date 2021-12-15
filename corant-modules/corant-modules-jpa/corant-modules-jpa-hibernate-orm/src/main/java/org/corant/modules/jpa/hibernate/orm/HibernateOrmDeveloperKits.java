@@ -17,7 +17,6 @@ import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.propertiesOf;
 import static org.corant.shared.util.Strings.replace;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -188,7 +187,8 @@ public class HibernateOrmDeveloperKits {
     if (!end) {
       System.out.println("\n/**-->>>>>>>> Schema output start**/");
     } else {
-      String version = "V"+DateTimeFormatter.ofPattern("yyMMddHHmmss").format(LocalDateTime.now());
+      String version =
+          "V" + DateTimeFormatter.ofPattern("yyMMddHHmmss").format(LocalDateTime.now());
       System.out.println("\n/**--Version: " + version + "__todo.sql");
       System.out.println("\n--<<<<<<<< Schema output end. **/\n");
     }

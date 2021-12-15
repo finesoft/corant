@@ -25,7 +25,7 @@ public class InstantGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new InstantBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
+    return new InstantBasicGridBinder<>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override

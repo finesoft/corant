@@ -36,7 +36,7 @@ public class WebServletMetaData {
   private String[] value = Strings.EMPTY_ARRAY;
   private String[] urlPatterns = Strings.EMPTY_ARRAY;
   private int loadOnStartup = -1;
-  private WebInitParamMetaData[] initParams = new WebInitParamMetaData[0];
+  private WebInitParamMetaData[] initParams = {};
   private boolean asyncSupported;
   private String smallIcon;
   private String largeIcon;

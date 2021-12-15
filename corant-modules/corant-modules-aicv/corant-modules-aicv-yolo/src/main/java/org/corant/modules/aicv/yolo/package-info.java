@@ -13,7 +13,7 @@
  */
 /**
  * corant-modules-aicv-yolo
- * 
+ *
  * @author bingo 上午11:25:08
  *
  */

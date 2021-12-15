@@ -46,7 +46,7 @@ public class DefaultConvertFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return name != null && name.equalsIgnoreCase("convert");
+    return name != null && "convert".equalsIgnoreCase(name);
   }
 
 }

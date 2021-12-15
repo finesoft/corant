@@ -57,9 +57,7 @@ public class JNDIBean<T> implements Bean<T>, PassivationCapable {
     this.qualifiers = new HashSet<>();
     this.qualifiers.add(Any.Literal.INSTANCE);
     this.qualifiers.add(Default.Literal.INSTANCE);
-    for (Annotation q : qualifiers) {
-      this.qualifiers.add(q);
-    }
+    Collections.addAll(this.qualifiers, qualifiers);
   }
 
   @Override

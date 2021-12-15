@@ -32,8 +32,7 @@ public abstract class AbstractDefaultAggregate extends AbstractAggregate {
 
   protected transient volatile AggregateAssistant assistant;
 
-  protected AbstractDefaultAggregate() {
-  }
+  protected AbstractDefaultAggregate() {}
 
   @Override
   protected synchronized AggregateAssistant callAssistant() {

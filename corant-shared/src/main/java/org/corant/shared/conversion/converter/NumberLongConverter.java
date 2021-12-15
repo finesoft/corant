@@ -26,8 +26,7 @@ public class NumberLongConverter extends AbstractConverter<Number, Long> {
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public NumberLongConverter() {
-  }
+  public NumberLongConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

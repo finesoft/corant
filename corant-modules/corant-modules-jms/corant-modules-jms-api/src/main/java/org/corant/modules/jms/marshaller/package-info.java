@@ -13,7 +13,7 @@
  */
 /**
  * corant-modules-jms-api
- * 
+ *
  * @author bingo 上午11:40:53
  *
  */

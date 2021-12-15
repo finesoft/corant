@@ -25,8 +25,8 @@ import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.AuthorizationException;
-import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.SecurityManager;
+import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
@@ -83,11 +83,9 @@ public class SecuredInterceptor extends AbstractInterceptor {
           sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-    } else {
-      if (!securityManagers.stream().allMatch(
-          sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
-        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-      }
+    } else if (!securityManagers.stream().allMatch(
+        sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
+      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
     }
   }
 
@@ -99,11 +97,9 @@ public class SecuredInterceptor extends AbstractInterceptor {
           .noneMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-    } else {
-      if (!securityManagers.stream()
-          .allMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
-        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-      }
+    } else if (!securityManagers.stream()
+        .allMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
+      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
     }
   }
 

@@ -101,8 +101,7 @@ public class MixedDateRange {
     final int prime = 31;
     int result = 1;
     result = prime * result + (getEndValue() == null ? 0 : getEndValue().hashCode());
-    result = prime * result + (getStartValue() == null ? 0 : getStartValue().hashCode());
-    return result;
+    return prime * result + (getStartValue() == null ? 0 : getStartValue().hashCode());
   }
 
   public LocalDate obtainCmprEndValue() {

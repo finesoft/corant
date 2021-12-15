@@ -17,6 +17,7 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -98,9 +99,7 @@ public interface CorantJunit4Runner {
       if (rc.configClass() != null && !rc.configClass().equals(Object.class)) {
         classes.add(rc.configClass());
       }
-      for (Class<?> cls : rc.beanClasses()) {
-        classes.add(cls);
-      }
+      Collections.addAll(classes, rc.beanClasses());
       ENA_RDM_WEB_PORTS.set(rc.randomWebPort());
       if (isNotBlank(rc.profile())) {
         PROFILES.set(rc.profile());

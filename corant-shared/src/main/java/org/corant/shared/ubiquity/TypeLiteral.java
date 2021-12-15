@@ -29,7 +29,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public abstract class TypeLiteral<T> {
 
-  public static final Type[] EMPTY_ARRAY = new Type[0];
+  public static final Type[] EMPTY_ARRAY = {};
 
   private transient Type actualType;
 

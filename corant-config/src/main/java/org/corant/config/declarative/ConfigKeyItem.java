@@ -38,9 +38,9 @@ public @interface ConfigKeyItem {
 
   String defaultValue() default NO_DFLT_VALUE;
 
-  DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
-
   String name() default Strings.EMPTY;
+
+  DeclarativePattern pattern() default DeclarativePattern.SUFFIX;
 
   class ConfigKeyItemLiteral extends AnnotationLiteral<ConfigKeyItem> implements ConfigKeyItem {
 
@@ -52,13 +52,13 @@ public @interface ConfigKeyItem {
     }
 
     @Override
-    public DeclarativePattern pattern() {
-      return DeclarativePattern.SUFFIX;
+    public String name() {
+      return Strings.EMPTY;
     }
 
     @Override
-    public String name() {
-      return Strings.EMPTY;
+    public DeclarativePattern pattern() {
+      return DeclarativePattern.SUFFIX;
     }
 
   }

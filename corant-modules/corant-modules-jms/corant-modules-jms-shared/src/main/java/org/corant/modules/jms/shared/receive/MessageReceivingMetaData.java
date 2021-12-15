@@ -118,12 +118,10 @@ public class MessageReceivingMetaData {
       shouldBeFalse(method.getMethod().getReturnType().equals(Void.TYPE),
           "The message receiving method %s requires a return type because the method is configured with a reply.",
           method.getMethod());
-    } else {
-      if (!method.getMethod().getReturnType().equals(Void.TYPE)) {
-        logger.warning(() -> String.format(
-            "The message receiving method %s has a return type, but the method is configured without a reply.",
-            method.getMethod()));
-      }
+    } else if (!method.getMethod().getReturnType().equals(Void.TYPE)) {
+      logger.warning(() -> String.format(
+          "The message receiving method %s has a return type, but the method is configured without a reply.",
+          method.getMethod()));
     }
   }
 
@@ -263,8 +261,7 @@ public class MessageReceivingMetaData {
     result = prime * result + (connectionFactoryId == null ? 0 : connectionFactoryId.hashCode());
     result = prime * result + (destination == null ? 0 : destination.hashCode());
     result = prime * result + (multicast ? 1231 : 1237);
-    result = prime * result + (selector == null ? 0 : selector.hashCode());
-    return result;
+    return prime * result + (selector == null ? 0 : selector.hashCode());
   }
 
   public boolean isMulticast() {

@@ -115,7 +115,7 @@ public class ConfigExtensionx implements Extension {
       BeanAttributes<?> attributes = null;
       AnnotatedMethod<? super ConfigProducer> method = null;
       for (AnnotatedMethod<?> annMethod : beanType.getMethods()) {
-        if (annMethod.getJavaMember().getName().equals("getConfigProperty")) {
+        if ("getConfigProperty".equals(annMethod.getJavaMember().getName())) {
           attributes = beanManager.createBeanAttributes(annMethod);
           method = forceCast(annMethod);
           break;
@@ -233,8 +233,7 @@ public class ConfigExtensionx implements Extension {
       final int prime = 31;
       int result = 1;
       result = prime * result + (qualifiers == null ? 0 : qualifiers.hashCode());
-      result = prime * result + (types == null ? 0 : types.hashCode());
-      return result;
+      return prime * result + (types == null ? 0 : types.hashCode());
     }
 
   }

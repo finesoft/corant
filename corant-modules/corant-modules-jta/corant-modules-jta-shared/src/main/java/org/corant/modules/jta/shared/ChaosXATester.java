@@ -108,9 +108,9 @@ public class ChaosXATester {
       commitRequests += 1;
 
       if (fault != null) {
-        if (fault.equals(faultType.EX)) {
+        if (faultType.EX.equals(fault)) {
           throw new XAException(XAException.XA_RBTRANSIENT);
-        } else if (fault.equals(faultType.HALT)) {
+        } else if (faultType.HALT.equals(fault)) {
           recoveryXids = new Xid[1];
           recoveryXids[0] = xid;
           Runtime.getRuntime().halt(1);

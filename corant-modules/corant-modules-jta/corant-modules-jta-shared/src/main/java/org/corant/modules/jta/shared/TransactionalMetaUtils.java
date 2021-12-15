@@ -37,9 +37,7 @@ public class TransactionalMetaUtils {
     if (transactionalMethod != null) {
       return transactionalMethod;
     }
-    Transactional transactionalExtension =
-        getTransactionalAnnotationRecursive(currentAnnotatedType.getAnnotations());
-    return transactionalExtension;
+    return getTransactionalAnnotationRecursive(currentAnnotatedType.getAnnotations());
   }
 
   public static Transactional getTransactionalAnnotationRecursive(

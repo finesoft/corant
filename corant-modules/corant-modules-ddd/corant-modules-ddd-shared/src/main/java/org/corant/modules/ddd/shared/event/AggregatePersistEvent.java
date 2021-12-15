@@ -19,9 +19,9 @@ import javax.transaction.Synchronization;
 import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.ddd.AbstractEvent;
 import org.corant.modules.ddd.Aggregate;
-import org.corant.modules.ddd.DefaultAggregateIdentifier;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
+import org.corant.modules.ddd.DefaultAggregateIdentifier;
 import org.corant.modules.ddd.annotation.Events;
 
 /**

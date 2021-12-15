@@ -107,7 +107,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return name != null && (name.equalsIgnoreCase("add") || name.equalsIgnoreCase("sub")
-        || name.equalsIgnoreCase("mul") || name.equalsIgnoreCase("div"));
+    return name != null && ("add".equalsIgnoreCase(name) || "sub".equalsIgnoreCase(name)
+        || "mul".equalsIgnoreCase(name) || "div".equalsIgnoreCase(name));
   }
 }

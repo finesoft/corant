@@ -69,10 +69,8 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
             if (t.name().equals(name)) {
               return t;
             }
-          } else {
-            if (t.name().equalsIgnoreCase(name)) {
-              return t;
-            }
+          } else if (t.name().equalsIgnoreCase(name)) {
+            return t;
           }
         }
       }

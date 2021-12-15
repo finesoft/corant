@@ -38,7 +38,6 @@ public class CorantConfigValue implements ConfigValue {
    */
   public CorantConfigValue(String name, String rawValue, String value, String sourceName,
       int sourceOrdinal) {
-    super();
     this.name = name;
     this.rawValue = rawValue;
     this.value = value;

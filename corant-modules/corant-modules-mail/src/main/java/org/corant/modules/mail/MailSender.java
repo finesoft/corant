@@ -29,8 +29,8 @@ public interface MailSender {
 
   void send(Function<Session, MimeMessage> messageProvider) throws MessagingException;
 
-  void send(String subject, String message, List<String> toAddressList,
-      Resource... resources) throws MessagingException;
+  void send(String subject, String message, List<String> toAddressList, Resource... resources)
+      throws MessagingException;
 
   void send(String subject, String htmlMessage, String toAddress, String ccAddress)
       throws MessagingException;

@@ -28,8 +28,7 @@ public class TimestampLocalDateTimeConverter extends AbstractConverter<Timestamp
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public TimestampLocalDateTimeConverter() {
-  }
+  public TimestampLocalDateTimeConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

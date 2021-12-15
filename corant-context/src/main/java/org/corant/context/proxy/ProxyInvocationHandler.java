@@ -75,8 +75,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (clazz == null ? 0 : clazz.hashCode());
-    return result;
+    return prime * result + (clazz == null ? 0 : clazz.hashCode());
   }
 
   @Override
@@ -86,7 +85,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
       // The default method and java.lang.Object methods use for hq in Collection
       if (method.isDefault()) {
         return ProxyUtils.invokeDefaultMethod(o, method, args);
-      } else if (method.getName().equals("equals") && method.getParameterTypes()[0] == Object.class
+      } else if ("equals".equals(method.getName()) && method.getParameterTypes()[0] == Object.class
           && args != null && args.length == 1) {
         if (args[0] == null) {
           return false;
@@ -96,9 +95,9 @@ public class ProxyInvocationHandler implements InvocationHandler {
         }
         return ProxyUtils.isProxyOfSameInterfaces(args[0], clazz)
             && equals(Proxy.getInvocationHandler(args[0]));
-      } else if (method.getName().equals("hashCode") && (args == null || args.length == 0)) {
+      } else if ("hashCode".equals(method.getName()) && (args == null || args.length == 0)) {
         return hashCode();
-      } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
+      } else if ("toString".equals(method.getName()) && (args == null || args.length == 0)) {
         return toString();
       } else {
         throw new CorantRuntimeException("Can not find method %s.", method);

@@ -106,8 +106,7 @@ public class URLResource implements WrappedResource {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + getURI().hashCode(); // FIXME URI hq
-    return result;
+    return prime * result + getURI().hashCode();
   }
 
   @Override

@@ -176,6 +176,7 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
     return Collections.emptyMap();// mongodb query we use inline
   }
 
+  @Override
   public boolean isSimpleType(Class<?> cls) {
     return isSimpleClass(cls) || BsonMinKey.class.equals(cls)
         || BsonMaxKey.class.isAssignableFrom(cls) || BsonObjectId.class.isAssignableFrom(cls)

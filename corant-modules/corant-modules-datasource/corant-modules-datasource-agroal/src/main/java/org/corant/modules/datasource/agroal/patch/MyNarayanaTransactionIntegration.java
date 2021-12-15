@@ -177,7 +177,7 @@ public class MyNarayanaTransactionIntegration implements TransactionIntegration 
   // connection.
   private static class AgroalXAResourceRecovery implements XAResourceRecovery {
 
-    private static final XAResource[] EMPTY_RESOURCES = new XAResource[0];
+    private static final XAResource[] EMPTY_RESOURCES = {};
 
     private final ResourceRecoveryFactory connectionFactory;
     private final String name;

@@ -72,7 +72,7 @@ public class JPAExtension implements Extension {
   volatile boolean finishedMetadatas = false;
 
   public PersistenceUnitInfoMetaData getPersistenceUnitInfoMetaData(PersistenceUnit pu) {
-    if (Qualifiers.resolveName(pu.unitName()).equals(Qualifiers.EMPTY_NAME)
+    if (Qualifiers.EMPTY_NAME.equals(Qualifiers.resolveName(pu.unitName()))
         && persistenceUnitInfoMetaDatas.size() == 1) {
       return persistenceUnitInfoMetaDatas.values().iterator().next();// FIXME
     }

@@ -25,7 +25,7 @@ public class BigDecimalGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new BigDecimalBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
+    return new BigDecimalBasicGridBinder<>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override
@@ -37,7 +37,7 @@ public class BigDecimalGridTypeDescriptor implements GridTypeDescriptor {
       } else if (document instanceof Decimal128) {
         return javaTypeDescriptor.wrap(toBigDecimal(((Decimal128) document).bigDecimalValue()),
             null);
-      } else if (Double.class.isInstance(document) || BigDecimal.class.isInstance(document)) {
+      } else if ((document instanceof Double) || (document instanceof BigDecimal)) {
         return javaTypeDescriptor.wrap(toBigDecimal(document), null);
       } else {
         return javaTypeDescriptor.wrap(toBigDecimal(document.toString()), null);

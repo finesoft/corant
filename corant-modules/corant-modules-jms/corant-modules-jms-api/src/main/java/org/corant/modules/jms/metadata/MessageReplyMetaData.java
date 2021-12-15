@@ -110,8 +110,7 @@ public class MessageReplyMetaData {
     int result = 1;
     result = prime * result + deliveryMode;
     result = prime * result + (destination == null ? 0 : destination.hashCode());
-    result = prime * result + (multicast ? 1231 : 1237);
-    return result;
+    return prime * result + (multicast ? 1231 : 1237);
   }
 
   public boolean isMulticast() {

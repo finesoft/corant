@@ -81,8 +81,7 @@ public class ClassResource extends ClassPathResource {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + (className == null ? 0 : className.hashCode());
-    return result;
+    return prime * result + (className == null ? 0 : className.hashCode());
   }
 
   public Class<?> load() {

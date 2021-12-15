@@ -34,7 +34,7 @@ public class LocaleUtils {
   }
 
   public static Locale langToLocale(String lang, char separator) {
-    if (lang == null || lang.equals(EMPTY)) { // not specified => getDefault
+    if (lang == null || EMPTY.equals(lang)) { // not specified => getDefault
       return Locale.getDefault();
     }
     String language = EMPTY;

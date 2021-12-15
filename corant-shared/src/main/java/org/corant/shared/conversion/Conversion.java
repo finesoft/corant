@@ -484,24 +484,22 @@ public class Conversion {
             throw new IllegalArgumentException(
                 "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + "[]>");
           }
+        } else if (List.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+          result = convert(value, argClasses[0], ArrayList::new, hints);
+        } else if (Set.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+          result = convert(value, argClasses[0], HashSet::new, hints);
+        } else if (Optional.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+          result = Optional.ofNullable(convert(value, argClasses[0], hints));
+        } else if (Supplier.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
+          result = (Supplier<?>) () -> convert(value, argClasses[0], hints);
+        } else if (Map.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
+          result = convertMap(value, argClasses[0], argClasses[1], hints);
         } else {
-          if (List.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = convert(value, argClasses[0], ArrayList::new, hints);
-          } else if (Set.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = convert(value, argClasses[0], HashSet::new, hints);
-          } else if (Optional.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = Optional.ofNullable(convert(value, argClasses[0], hints));
-          } else if (Supplier.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-            result = (Supplier<?>) () -> convert(value, argClasses[0], hints);
-          } else if (Map.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
-            result = convertMap(value, argClasses[0], argClasses[1], hints);
+          if (argClasses.length == 0) {
+            result = convert(value, typeClass, hints);
           } else {
-            if (argClasses.length == 0) {
-              result = convert(value, typeClass, hints);
-            } else {
-              throw new IllegalArgumentException(
-                  "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + ">");
-            }
+            throw new IllegalArgumentException(
+                "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + ">");
           }
         }
       } catch (IllegalArgumentException e) {

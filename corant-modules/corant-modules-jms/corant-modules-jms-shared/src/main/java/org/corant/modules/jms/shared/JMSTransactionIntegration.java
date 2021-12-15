@@ -47,8 +47,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class JMSTransactionIntegration implements TransactionIntegration {
 
-  public static final XAResource[] EMPTY_XA_RESOURCES = new XAResource[0];
-  public static final Xid[] EMPTY_XIDS = new Xid[0];
+  public static final XAResource[] EMPTY_XA_RESOURCES = {};
+  public static final Xid[] EMPTY_XIDS = {};
   static Map<AbstractJMSConfig, JMSRecoveryXAResource> recoveryXAResources =
       new ConcurrentHashMap<>();// static?
 

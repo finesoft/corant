@@ -190,13 +190,11 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
 
   protected byte[] resolveIvBytes(byte[] encrypted) {
     byte[] iv = Bytes.EMPTY_ARRAY;
-    if (encrypted.length > 0) {
-      if (ivByteSize > 0) {
+    if (ivByteSize > 0) {
+      if (encrypted.length > 0) {
         iv = new byte[ivByteSize];
         System.arraycopy(encrypted, 0, iv, 0, ivByteSize);
-      }
-    } else {
-      if (ivByteSize > 0) {
+      } else {
         iv = new byte[ivByteSize];
         ivSecureRandom.nextBytes(iv);
       }

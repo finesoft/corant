@@ -79,25 +79,25 @@ public class PersistenceXmlParser {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         Element subEle = (Element) children.item(i);
         String tag = subEle.getTagName();
-        if (tag.equals(JPAConfig.JCX_NON_JTA_DS)) {
+        if (JPAConfig.JCX_NON_JTA_DS.equals(tag)) {
           puimd.setNonJtaDataSourceName(extractContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_JTA_DS)) {
+        } else if (JPAConfig.JCX_JTA_DS.equals(tag)) {
           puimd.setJtaDataSourceName(extractContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_PROVIDER)) {
+        } else if (JPAConfig.JCX_PROVIDER.equals(tag)) {
           puimd.setPersistenceProviderClassName(extractContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_CLS)) {
+        } else if (JPAConfig.JCX_CLS.equals(tag)) {
           puimd.addManagedClassName(extractContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_MAP_FILE)) {
+        } else if (JPAConfig.JCX_MAP_FILE.equals(tag)) {
           puimd.addMappingFileName(extractContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_JAR_FILE)) {
+        } else if (JPAConfig.JCX_JAR_FILE.equals(tag)) {
           puimd.getJarFileUrls().add(extractUrlContent(subEle));
-        } else if (tag.equals(JPAConfig.JCX_EX_UL_CLS)) {
+        } else if (JPAConfig.JCX_EX_UL_CLS.equals(tag)) {
           puimd.setExcludeUnlistedClasses(extractBooleanContent(subEle, true));
-        } else if (tag.equals(JPAConfig.JCX_VAL_MOD)) {
+        } else if (JPAConfig.JCX_VAL_MOD.equals(tag)) {
           puimd.setValidationMode(ValidationMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(JPAConfig.JCX_SHARE_CACHE_MOD)) {
+        } else if (JPAConfig.JCX_SHARE_CACHE_MOD.equals(tag)) {
           puimd.setSharedCacheMode(SharedCacheMode.valueOf(extractContent(subEle)));
-        } else if (tag.equals(JPAConfig.JCX_PROS)) {
+        } else if (JPAConfig.JCX_PROS.equals(tag)) {
           NodeList props = subEle.getChildNodes();
           for (int j = 0; j < props.getLength(); j++) {
             if (props.item(j).getNodeType() == Node.ELEMENT_NODE) {
@@ -110,7 +110,7 @@ public class PersistenceXmlParser {
               if (isEmpty(propValue)) {
                 propValue = extractContent(propElement, EMPTY);
               }
-              if (propName.equals(JPAConfig.BIND_JNDI)) {
+              if (JPAConfig.BIND_JNDI.equals(propName)) {
                 puimd.setBindToJndi(toBoolean(propValue));
               } else {
                 puimd.putPropertity(propName, propValue);
@@ -133,7 +133,7 @@ public class PersistenceXmlParser {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         final Element element = (Element) children.item(i);
         final String tag = element.getTagName();
-        if (tag.equals(JPAConfig.JCX_TAG)) {
+        if (JPAConfig.JCX_TAG.equals(tag)) {
           final String puName = element.getAttribute(JPAConfig.JCX_NME);
           shouldBeFalse(cfgs.stream().anyMatch(p -> p.getPersistenceUnitName().equals(puName)),
               "Persistence unit name %s dup!", tag);
@@ -159,7 +159,7 @@ public class PersistenceXmlParser {
   protected static boolean extractBooleanContent(Element element, boolean defaultBool) {
     String content = extractContent(element);
     if (content != null && content.length() > 0) {
-      return Boolean.valueOf(content);
+      return Boolean.parseBoolean(content);
     }
     return defaultBool;
   }
@@ -227,9 +227,9 @@ public class PersistenceXmlParser {
       try (InputStream inputStream = conn.getInputStream()) {
         final InputSource inputSource = new InputSource(inputStream);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = documentBuilder.parse(inputSource);
+
         // validate(document); FIXME
-        return document;
+        return documentBuilder.parse(inputSource);
       } catch (IOException | ParserConfigurationException | SAXException e) {
         throw new CorantRuntimeException(e);
       }
@@ -241,9 +241,9 @@ public class PersistenceXmlParser {
   protected static PersistenceUnitTransactionType parseTransactionType(String value) {
     if (isEmpty(value)) {
       return null;
-    } else if (value.equalsIgnoreCase("JTA")) {
+    } else if ("JTA".equalsIgnoreCase(value)) {
       return PersistenceUnitTransactionType.JTA;
-    } else if (value.equalsIgnoreCase("RESOURCE_LOCAL")) {
+    } else if ("RESOURCE_LOCAL".equalsIgnoreCase(value)) {
       return PersistenceUnitTransactionType.RESOURCE_LOCAL;
     } else {
       throw new CorantRuntimeException("Unknown persistence unit transaction type : %s.", value);

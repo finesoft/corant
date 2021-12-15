@@ -41,7 +41,7 @@ import org.corant.shared.util.PathMatcher.GlobPatterns;
 public class Strings {
 
   //@formatter:off
-  public static final String[] EMPTY_ARRAY    = new String[0];
+  public static final String[] EMPTY_ARRAY    = {};
   public static final String EMPTY            = "";
   public static final String AMPERSAND        = "&";
   public static final String AT               = "@";
@@ -1241,8 +1241,7 @@ public class Strings {
       final int prime = 31;
       int result = 1;
       result = prime * result + (ignoreCase ? 1231 : 1237);
-      result = prime * result + (wildcardExpress == null ? 0 : wildcardExpress.hashCode());
-      return result;
+      return prime * result + (wildcardExpress == null ? 0 : wildcardExpress.hashCode());
     }
 
     public boolean isIgnoreCase() {
@@ -1263,13 +1262,13 @@ public class Strings {
           anyChars = true;
         }
         while (tokenIdx < tokens.length) {
-          if (tokens[tokenIdx].equals("?")) {
+          if ("?".equals(tokens[tokenIdx])) {
             textIdx++;
             if (textIdx > text.length()) {
               break;
             }
             anyChars = false;
-          } else if (tokens[tokenIdx].equals("*")) {
+          } else if ("*".equals(tokens[tokenIdx])) {
             anyChars = true;
             if (tokenIdx == tokens.length - 1) {
               textIdx = text.length();
@@ -1284,10 +1283,8 @@ public class Strings {
               if (repeat >= 0) {
                 backtrack.push(new int[] {tokenIdx, repeat});
               }
-            } else {
-              if (!checkRegionMatches(text, textIdx, tokens[tokenIdx])) {
-                break;
-              }
+            } else if (!checkRegionMatches(text, textIdx, tokens[tokenIdx])) {
+              break;
             }
             textIdx += tokens[tokenIdx].length();
             anyChars = false;

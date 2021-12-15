@@ -62,7 +62,7 @@ public class MySQLDialect implements Dialect {
    *    [PROCEDURE procedure_name(argument_list)]
    *    [into_option]
    *    [FOR UPDATE | LOCK IN SHARE MODE]
-  
+
    * into_option: {
    *    INTO OUTFILE 'file_name'
    *    * [CHARACTER SET charset_name]

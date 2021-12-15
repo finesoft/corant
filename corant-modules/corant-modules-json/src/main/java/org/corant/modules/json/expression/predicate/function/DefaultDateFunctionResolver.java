@@ -48,7 +48,7 @@ public class DefaultDateFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return name != null && name.equalsIgnoreCase("datediff");
+    return name != null && "datediff".equalsIgnoreCase(name);
   }
 
 }

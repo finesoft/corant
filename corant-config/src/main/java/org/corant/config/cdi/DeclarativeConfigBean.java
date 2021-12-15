@@ -104,7 +104,7 @@ public class DeclarativeConfigBean<T> implements Bean<T> {
     if (annotated != null) {
       DeclarativeConfigKey cp = annotated.getAnnotation(DeclarativeConfigKey.class);
       if (cp != null) {
-        return cp.value().equals(DeclarativeConfigKey.UNCONFIGURED_KEY) ? null : cp.value();
+        return DeclarativeConfigKey.UNCONFIGURED_KEY.equals(cp.value()) ? null : cp.value();
       }
     }
     return null;

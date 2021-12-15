@@ -29,10 +29,6 @@ public interface ResultHintHandler extends AutoCloseable {
     return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
   }
 
-  default boolean supports(Class<?> resultClass, QueryHint qh) {
-    return false;
-  }
-
   @Override
   default void close() throws Exception {}
 
@@ -45,6 +41,10 @@ public interface ResultHintHandler extends AutoCloseable {
   }
 
   void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception;
+
+  default boolean supports(Class<?> resultClass, QueryHint qh) {
+    return false;
+  }
 
   default void validate(QueryHint qh) {}
 

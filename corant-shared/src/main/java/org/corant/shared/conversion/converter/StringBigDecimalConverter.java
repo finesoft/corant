@@ -28,8 +28,7 @@ public class StringBigDecimalConverter extends AbstractNumberConverter<String, B
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public StringBigDecimalConverter() {
-  }
+  public StringBigDecimalConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(Object)

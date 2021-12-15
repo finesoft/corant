@@ -112,8 +112,7 @@ public class CorantConfigExpander {
     String resolved = replace(value, ESCAPED_MACRO_EXP_PREFIX, MACRO_EXP_PREFIX);
     resolved = replace(resolved, ESCAPED_MACRO_VAR_PREFIX, MACRO_VAR_PREFIX);
     resolved = replace(resolved, ESCAPED_MACRO_SUFFIX, MACRO_SUFFIX);
-    resolved = replace(resolved, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
-    return resolved;
+    return replace(resolved, ESCAPED_MACRO_DEFAULT, MACRO_DEFAULT);
   }
 
   static int[] resolvePosition(String value) {

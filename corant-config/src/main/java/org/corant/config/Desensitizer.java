@@ -38,8 +38,7 @@ public class Desensitizer {
       Systems.getProperty(ConfigNames.CFG_SENSITIVES_ENABLE, Boolean.class, true);
 
   static {
-    streamOf(split(Systems.getProperty(ConfigNames.CFG_SENSITIVES), ","))
-        .forEach(sensitives::add);
+    streamOf(split(Systems.getProperty(ConfigNames.CFG_SENSITIVES), ",")).forEach(sensitives::add);
   }
 
   public static String desensitize(String propertyName, String propertyValue) {

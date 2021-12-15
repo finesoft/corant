@@ -281,7 +281,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
       final ParameterizedType parameterizedType = (ParameterizedType) type;
       final Type argType = parameterizedType.getActualTypeArguments()[0];
       final Class<T> entityClass = (Class<T>) argType;
-      return new TypedJPARepositoryTemplate<T>(entityClass);
+      return new TypedJPARepositoryTemplate<>(entityClass);
     }
   }
 

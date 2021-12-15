@@ -118,8 +118,7 @@ public class MixedFloatRange {
     final int prime = 31;
     int result = 1;
     result = prime * result + (maxValue == null ? 0 : maxValue.hashCode());
-    result = prime * result + (minValue == null ? 0 : minValue.hashCode());
-    return result;
+    return prime * result + (minValue == null ? 0 : minValue.hashCode());
   }
 
   public BigDecimal midValue() {

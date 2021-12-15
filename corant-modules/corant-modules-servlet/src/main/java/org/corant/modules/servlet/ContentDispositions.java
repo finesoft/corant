@@ -319,14 +319,12 @@ public class ContentDispositions {
       if (filename != null) {
         if (loose) {
           sb.append("; filename=").append(filename);
+        } else if (charset == null || US_ASCII.equals(charset)) {
+          sb.append("; filename=\"");
+          sb.append(filename).append('\"');
         } else {
-          if (charset == null || US_ASCII.equals(charset)) {
-            sb.append("; filename=\"");
-            sb.append(filename).append('\"');
-          } else {
-            sb.append("; filename*=");
-            sb.append(encodeHeaderFieldParam(filename, charset));
-          }
+          sb.append("; filename*=");
+          sb.append(encodeHeaderFieldParam(filename, charset));
         }
       }
       if (size != null) {

@@ -73,7 +73,7 @@ public class CorantConfigConversion implements Serializable {
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
   private static final long serialVersionUID = -2708805756022227289L;
-  private static Type[] objectClasses = new Type[] {Object.class};
+  private static Type[] objectClasses = {Object.class};
   static {
     // FIXME 6.1. Built-in Converters
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
@@ -164,29 +164,27 @@ public class CorantConfigConversion implements Serializable {
             throw new IllegalArgumentException("Cannot convert config property for type "
                 + typeClass + "<" + Arrays.toString(argTypes) + ">");
           }
+        } else if (Class.class.isAssignableFrom(typeClass)) {
+          result = convertSingle(rawValue, Class.class);
+        } else if (List.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+          result = convertCollection(rawValue, argTypes[0], ArrayList::new);
+        } else if (Set.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+          result = convertCollection(rawValue, argTypes[0], HashSet::new);
+        } else if (Optional.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+          result = Optional.ofNullable(convert(rawValue, argTypes[0]));
+        } else if (Supplier.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+          result = (Supplier<?>) () -> convert(rawValue, argTypes[0]);
+        } else if (Provider.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
+          result = (Provider<?>) () -> convert(rawValue, argTypes[0]);
+        } else if (Map.class.isAssignableFrom(typeClass)) {
+          result = parameterized ? convertMap(rawValue, (ParameterizedType) type)
+              : convertMap(rawValue, (Class<?>) argTypes[0], (Class<?>) argTypes[1]);
         } else {
-          if (Class.class.isAssignableFrom(typeClass)) {
-            result = convertSingle(rawValue, Class.class);
-          } else if (List.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
-            result = convertCollection(rawValue, argTypes[0], ArrayList::new);
-          } else if (Set.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
-            result = convertCollection(rawValue, argTypes[0], HashSet::new);
-          } else if (Optional.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
-            result = Optional.ofNullable(convert(rawValue, argTypes[0]));
-          } else if (Supplier.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
-            result = (Supplier<?>) () -> convert(rawValue, argTypes[0]);
-          } else if (Provider.class.isAssignableFrom(typeClass) && argTypes.length == 1) {
-            result = (Provider<?>) () -> convert(rawValue, argTypes[0]);
-          } else if (Map.class.isAssignableFrom(typeClass)) {
-            result = parameterized ? convertMap(rawValue, (ParameterizedType) type)
-                : convertMap(rawValue, (Class<?>) argTypes[0], (Class<?>) argTypes[1]);
+          if (!parameterized) {
+            result = convertSingle(rawValue, typeClass);
           } else {
-            if (!parameterized) {
-              result = convertSingle(rawValue, typeClass);
-            } else {
-              throw new IllegalArgumentException(
-                  "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
-            }
+            throw new IllegalArgumentException(
+                "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
           }
         }
       } catch (IllegalArgumentException e) {
@@ -213,7 +211,7 @@ public class CorantConfigConversion implements Serializable {
     int length = values.length;
     if (length == 0) {
       return null;
-    } else if (length == 1 && values[0].equals(EMPTY_ARRAY_VALUE)) {
+    } else if (length == 1 && EMPTY_ARRAY_VALUE.equals(values[0])) {
       length = 0; // MP 2.0 ??
     }
     Object array = Array.newInstance(propertyComponentType, length);

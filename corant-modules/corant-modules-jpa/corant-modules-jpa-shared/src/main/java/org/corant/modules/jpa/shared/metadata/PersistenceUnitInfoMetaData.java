@@ -131,9 +131,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   public PersistenceUnitInfoMetaData configTransformers(ClassTransformer... classTransformers) {
     transformers.clear();
-    for (ClassTransformer ctf : classTransformers) {
-      transformers.add(ctf);
-    }
+    Collections.addAll(transformers, classTransformers);
     return this;
   }
 
@@ -274,8 +272,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (persistenceUnitName == null ? 0 : persistenceUnitName.hashCode());
-    return result;
+    return prime * result + (persistenceUnitName == null ? 0 : persistenceUnitName.hashCode());
   }
 
   public boolean isBindToJndi() {

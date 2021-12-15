@@ -47,8 +47,7 @@ public class DefaultSecurityContext implements SecurityContext {
 
   @Override
   public <T> T getPrincipal(Class<T> cls) {
-    T t = principal == null ? null : principal.unwrap(cls);
-    return t;
+    return principal == null ? null : principal.unwrap(cls);
   }
 
   @Override

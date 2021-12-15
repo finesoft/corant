@@ -26,7 +26,6 @@ public final class IdentityConverter<T> extends AbstractConverter<T, T> {
   public static final IdentityConverter<?> INSTANCE = new IdentityConverter<>();
 
   private IdentityConverter() {
-    super();
   }
 
   @Override

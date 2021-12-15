@@ -24,7 +24,7 @@ public class LocalDateGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new LocalDateBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
+    return new LocalDateBasicGridBinder<>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override

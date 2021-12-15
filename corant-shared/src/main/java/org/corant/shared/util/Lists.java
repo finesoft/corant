@@ -245,9 +245,7 @@ public class Lists {
   public static <E> LinkedList<E> linkedListOf(final E... objects) {
     LinkedList<E> list = new LinkedList<>();
     if (objects != null) {
-      for (E object : objects) {
-        list.add(object);
-      }
+      Collections.addAll(list, objects);
     }
     return list;
   }

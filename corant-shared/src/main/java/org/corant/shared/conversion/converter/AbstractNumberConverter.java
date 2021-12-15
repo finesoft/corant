@@ -60,9 +60,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
    * @param value the string to check
    */
   public static boolean hasPrefix(String value) {
-    if (value == null) {
-      return false;
-    } else {
+    if (value != null) {
       for (String hp : NUMERIC_PREFIXES) {
         if (value.startsWith(hp)) {
           return true;

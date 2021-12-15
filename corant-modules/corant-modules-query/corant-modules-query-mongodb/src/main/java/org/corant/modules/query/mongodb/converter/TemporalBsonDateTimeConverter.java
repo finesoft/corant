@@ -33,8 +33,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  */
 public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, BsonDateTime> {
 
-  public TemporalBsonDateTimeConverter() {
-  }
+  public TemporalBsonDateTimeConverter() {}
 
   /**
    * @param throwException

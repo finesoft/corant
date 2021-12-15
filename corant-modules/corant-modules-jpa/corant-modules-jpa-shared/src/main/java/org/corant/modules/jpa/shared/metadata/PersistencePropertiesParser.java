@@ -146,7 +146,7 @@ public class PersistencePropertiesParser {
       for (String cfgNme : proCfgNmes) {
         config.getOptionalValue(cfgNme, String.class).ifPresent(s -> {
           String proName = cfgNme.substring(len);
-          if (proName.equals(JPAConfig.BIND_JNDI)) {
+          if (JPAConfig.BIND_JNDI.equals(proName)) {
             metaData.setBindToJndi(toBoolean(s));
           } else {
             metaData.putPropertity(proName, s);

@@ -82,8 +82,7 @@ public class CaffeineJCacheExtension implements Extension {
         if (name.startsWith(CACHE_CONFIG_KEY_PREFIX)) {
           Systems.setProperty(name, Configs.getValue(name, String.class));
         } else if (name.startsWith(CORANT_CAFFE_PREFIX)) {
-          Systems.setProperty(
-              CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
+          Systems.setProperty(CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
               Configs.getValue(name, String.class));
         }
       }

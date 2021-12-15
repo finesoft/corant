@@ -31,7 +31,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Bytes {
 
-  public static final byte[] EMPTY_ARRAY = new byte[0];
+  public static final byte[] EMPTY_ARRAY = {};
 
   private Bytes() {}
 

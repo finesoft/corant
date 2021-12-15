@@ -52,7 +52,7 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
       Map<String, Serializable> map = new HashMap<>();
       for (String cn : principal.getClaimNames()) {
         Object co = principal.getClaim(cn);
-        if (!cn.equals("raw_token")) {
+        if (!"raw_token".equals(cn)) {
           map.put(cn, convert(co));
         }
       }

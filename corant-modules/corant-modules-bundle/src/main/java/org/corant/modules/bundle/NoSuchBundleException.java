@@ -28,8 +28,7 @@ public class NoSuchBundleException extends CorantRuntimeException {
   /**
    *
    */
-  public NoSuchBundleException() {
-  }
+  public NoSuchBundleException() {}
 
   /**
    * @param msgOrFormat

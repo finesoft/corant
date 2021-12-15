@@ -29,7 +29,7 @@ import javax.enterprise.util.AnnotationLiteral;
 @Retention(RUNTIME)
 public @interface MessageProperty {
 
-  MessageProperty[] EMPTY_ARRAY = new MessageProperty[0];
+  MessageProperty[] EMPTY_ARRAY = {};
 
   /** The name of the property */
   String name();

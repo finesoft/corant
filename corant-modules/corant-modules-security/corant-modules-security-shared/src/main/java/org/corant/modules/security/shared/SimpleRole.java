@@ -76,8 +76,7 @@ public class SimpleRole implements Role {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (name == null ? 0 : name.hashCode());
-    return result;
+    return prime * result + (name == null ? 0 : name.hashCode());
   }
 
   @Override

@@ -25,7 +25,7 @@ public class ZonedDateTimeGridTypeDescriptor implements GridTypeDescriptor {
 
   @Override
   public <X> GridValueBinder<X> getBinder(JavaTypeDescriptor<X> javaTypeDescriptor) {
-    return new ZonedDateTimeBasicGridBinder<X>(javaTypeDescriptor, this, javaTypeDescriptor);
+    return new ZonedDateTimeBasicGridBinder<>(javaTypeDescriptor, this, javaTypeDescriptor);
   }
 
   @Override

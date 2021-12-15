@@ -147,8 +147,7 @@ public class ContextualMethodHandler implements Serializable {
     final int prime = 31;
     int result = 1;
     result = prime * result + (clazz == null ? 0 : clazz.hashCode());
-    result = prime * result + (method == null ? 0 : method.hashCode());
-    return result;
+    return prime * result + (method == null ? 0 : method.hashCode());
   }
 
   public Object invoke(Object... parameters)

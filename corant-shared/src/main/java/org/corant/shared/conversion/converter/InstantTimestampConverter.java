@@ -28,8 +28,7 @@ public class InstantTimestampConverter extends AbstractConverter<Instant, Timest
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public InstantTimestampConverter() {
-  }
+  public InstantTimestampConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

@@ -22,8 +22,8 @@ import org.elasticsearch.common.unit.TimeValue;
  * corant-modules-query-elastic
  *
  * <p>
- * Note: The query of Elastic Search is special, and there may be long-tail data, so when the
- * result set returned by select exceeds the limit, no throws exception.
+ * Note: The query of Elastic Search is special, and there may be long-tail data, so when the result
+ * set returned by select exceeds the limit, no throws exception.
  *
  * @author bingo 下午3:07:55
  *

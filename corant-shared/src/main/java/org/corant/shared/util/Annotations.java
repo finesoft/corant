@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class Annotations {
 
-  public static final Annotation[] EMPTY_ARRAY = new Annotation[0];
+  public static final Annotation[] EMPTY_ARRAY = {};
 
   /**
    * Find the annotation object from given annotated element with given annotation type class, this

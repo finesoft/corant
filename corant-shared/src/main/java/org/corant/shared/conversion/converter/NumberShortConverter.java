@@ -27,8 +27,7 @@ public class NumberShortConverter extends AbstractConverter<Number, Short> {
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public NumberShortConverter() {
-  }
+  public NumberShortConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

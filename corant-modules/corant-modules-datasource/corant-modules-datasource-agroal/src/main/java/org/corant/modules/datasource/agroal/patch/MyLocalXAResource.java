@@ -181,10 +181,8 @@ public class MyLocalXAResource implements XAResourceWrapper {
         throw xaException(XAER_RMERR, "Error trying to start local transaction: ", t);
       }
       currentXid = xid;
-    } else {
-      if (flags != TMJOIN && flags != TMRESUME) {
-        throw xaException(XAException.XAER_DUPID, "Invalid flag for join|resume");
-      }
+    } else if (flags != TMJOIN && flags != TMRESUME) {
+      throw xaException(XAException.XAER_DUPID, "Invalid flag for join|resume");
     }
   }
 }

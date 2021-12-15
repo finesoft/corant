@@ -32,14 +32,14 @@ import org.corant.shared.util.Strings;
 public class WebFilterMetaData {
 
   private String displayName;
-  private WebInitParamMetaData[] initParams = new WebInitParamMetaData[0];
+  private WebInitParamMetaData[] initParams = {};
   private String filterName;
   private String smallIcon;
   private String largeIcon;
   private String[] servletNames = Strings.EMPTY_ARRAY;
   private String[] value = Strings.EMPTY_ARRAY;
   private String[] urlPatterns = Strings.EMPTY_ARRAY;
-  private DispatcherType[] dispatcherTypes = new DispatcherType[] {DispatcherType.REQUEST};
+  private DispatcherType[] dispatcherTypes = {DispatcherType.REQUEST};
   private boolean asyncSupported;
   private String description;
   private Class<? extends Filter> clazz;

@@ -25,8 +25,7 @@ public class ParseException extends CorantRuntimeException {
 
   private static final long serialVersionUID = -3085053879489647592L;
 
-  public ParseException() {
-  }
+  public ParseException() {}
 
   public ParseException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);

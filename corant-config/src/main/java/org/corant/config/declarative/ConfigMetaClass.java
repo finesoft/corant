@@ -40,7 +40,6 @@ public class ConfigMetaClass {
    */
   protected ConfigMetaClass(String keyRoot, int keyIndex, Class<?> clazz,
       boolean ignoreNoAnnotatedItem) {
-    super();
     this.keyRoot = keyRoot;
     this.keyIndex = keyIndex;
     this.clazz = clazz;

@@ -272,8 +272,7 @@ public class Identifiers {
       result = prime * result + (unit == null ? 0 : unit.hashCode());
       result = prime * result + Arrays.hashCode(workerIds);
       result = prime * result + Arrays.hashCode(workerSegms);
-      result = prime * result + (int) (workersBits ^ workersBits >>> 32);
-      return result;
+      return prime * result + (int) (workersBits ^ workersBits >>> 32);
     }
 
     /**
@@ -457,8 +456,7 @@ public class Identifiers {
       final int prime = 31;
       int result = super.hashCode();
       result = prime * result + (int) (dataCenterId ^ dataCenterId >>> 32);
-      result = prime * result + (int) (workerId ^ workerId >>> 32);
-      return result;
+      return prime * result + (int) (workerId ^ workerId >>> 32);
     }
 
   }
@@ -534,8 +532,7 @@ public class Identifiers {
     public int hashCode() {
       final int prime = 31;
       int result = super.hashCode();
-      result = prime * result + (ip == null ? 0 : ip.hashCode());
-      return result;
+      return prime * result + (ip == null ? 0 : ip.hashCode());
     }
 
   }
@@ -594,8 +591,7 @@ public class Identifiers {
     public int hashCode() {
       final int prime = 31;
       int result = super.hashCode();
-      result = prime * result + (int) (workerId ^ workerId >>> 32);
-      return result;
+      return prime * result + (int) (workerId ^ workerId >>> 32);
     }
 
   }

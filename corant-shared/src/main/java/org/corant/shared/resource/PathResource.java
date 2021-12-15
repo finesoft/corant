@@ -37,7 +37,7 @@ import java.util.Arrays;
  */
 public class PathResource implements WritableResource {
 
-  public static final OpenOption[] EMPTY_ARRAY = new OpenOption[0];
+  public static final OpenOption[] EMPTY_ARRAY = {};
 
   protected final OpenOption[] openOptions;
 

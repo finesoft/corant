@@ -74,7 +74,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
     @Override
     public String getValue(String propertyName) {
-      if (propertyName.equals(WEB_SERVER_PORT_PN)) {
+      if (WEB_SERVER_PORT_PN.equals(propertyName)) {
         return properties.getOrDefault(WEB_SERVER_PORT_PN, "0");
       }
       return null;

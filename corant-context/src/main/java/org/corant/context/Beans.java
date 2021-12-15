@@ -363,7 +363,7 @@ public class Beans {
     }
     // supports the extended Named qualifier
     String useName = Qualifiers.resolveName(name);
-    if (useName.equals(Qualifiers.EMPTY_NAME) && inst.isResolvable()
+    if (Qualifiers.EMPTY_NAME.equals(useName) && inst.isResolvable()
         || (inst = inst.select(Unnamed.INST)).isResolvable()) {
       return Optional.of(inst.get());
     }

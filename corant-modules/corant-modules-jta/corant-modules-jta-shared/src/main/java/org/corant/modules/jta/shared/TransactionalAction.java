@@ -162,7 +162,6 @@ public abstract class TransactionalAction {
 
     if (e instanceof RuntimeException) {
       tx.setRollbackOnly();
-      throw e;
     }
 
     throw e;

@@ -173,8 +173,7 @@ public class StringTemplate {
   protected String resolveEscape(String value) {
     String resolved = replace(value, escapedMacroPrefix, macroPrefix);
     resolved = replace(resolved, escapedMacroSuffix, macroSuffix);
-    resolved = replace(resolved, escapedMacroDefault, macroDefault);
-    return resolved;
+    return replace(resolved, escapedMacroDefault, macroDefault);
   }
 
   protected int[] resolvePosition(String value) {

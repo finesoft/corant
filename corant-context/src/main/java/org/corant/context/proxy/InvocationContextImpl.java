@@ -143,22 +143,20 @@ public class InvocationContextImpl implements InvocationContext {
   protected Object interceptorChainCompleted() {
     if (methodInvoker != null) {
       return methodInvoker.invoke(target, args);
-    } else {
-      if (method.isDefault()) {
-        return ProxyUtils.invokeDefaultMethod(target, method, args);
-      } else if (method.getName().equals("equals") && method.getParameterTypes()[0] == Object.class
-          && args != null && args.length == 1) {
-        if (args[0] == null) {
-          return false;
-        }
-        return target == args[0];
-      } else if (method.getName().equals("hashCode") && (args == null || args.length == 0)) {
-        return hashCode();
-      } else if (method.getName().equals("toString") && (args == null || args.length == 0)) {
-        return "Corant proxy for ".concat(targetClass.getName());
-      } else {
-        throw new CorantRuntimeException("Can not find method %s.", method);
+    } else if (method.isDefault()) {
+      return ProxyUtils.invokeDefaultMethod(target, method, args);
+    } else if ("equals".equals(method.getName()) && method.getParameterTypes()[0] == Object.class
+        && args != null && args.length == 1) {
+      if (args[0] == null) {
+        return false;
       }
+      return target == args[0];
+    } else if ("hashCode".equals(method.getName()) && (args == null || args.length == 0)) {
+      return hashCode();
+    } else if ("toString".equals(method.getName()) && (args == null || args.length == 0)) {
+      return "Corant proxy for ".concat(targetClass.getName());
+    } else {
+      throw new CorantRuntimeException("Can not find method %s.", method);
     }
   }
 

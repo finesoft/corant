@@ -28,8 +28,7 @@ public class ParameterMapping implements Serializable {
   private String name;
   private Class<?> type;
 
-  public ParameterMapping() {
-  }
+  public ParameterMapping() {}
 
   /**
    * @param name

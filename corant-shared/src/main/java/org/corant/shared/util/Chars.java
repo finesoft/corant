@@ -28,7 +28,7 @@ public class Chars {
   static final Logger logger = Logger.getLogger(Chars.class.getName());
 
   //@formatter:off
-  public static final char[] EMPTY_ARRAY    = new char[0];
+  public static final char[] EMPTY_ARRAY    = {};
   public static final char AMPERSAND        = '&';
   public static final char AT               = '@';
   public static final char ASTERISK         = '*';

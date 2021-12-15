@@ -296,8 +296,7 @@ public class Retry {
       temp = Double.doubleToLongBits(backoffFactor);
       result = prime * result + (int) (temp ^ temp >>> 32);
       result = prime * result + (interval == null ? 0 : interval.hashCode());
-      result = prime * result + (maxInterval == null ? 0 : maxInterval.hashCode());
-      return result;
+      return prime * result + (maxInterval == null ? 0 : maxInterval.hashCode());
     }
 
     @Override

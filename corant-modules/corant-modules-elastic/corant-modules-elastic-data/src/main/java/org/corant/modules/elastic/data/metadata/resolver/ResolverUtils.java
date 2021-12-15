@@ -163,7 +163,7 @@ public class ResolverUtils {
     map.put("eager_global_ordinals", ann.eager_global_ordinals());
     map.put("ignore_above", ann.ignore_above());
     map.put("index_options", ann.index_options().getValue());
-    if (isNotBlank(ann.normalizer()) && !ann.normalizer().equalsIgnoreCase("$null$")) {
+    if (isNotBlank(ann.normalizer()) && !"$null$".equalsIgnoreCase(ann.normalizer())) {
       map.put("normalizer", ann.normalizer());
     }
     map.put("norms", ann.norms());

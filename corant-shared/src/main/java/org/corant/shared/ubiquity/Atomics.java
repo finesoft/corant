@@ -55,7 +55,7 @@ public class Atomics {
    */
   public static <T> Supplier<T> atomicInitializer(final Supplier<T> supplier) {
     shouldNotNull(supplier);
-    return new Supplier<T>() {
+    return new Supplier<>() {
       final AtomicReference<T> supplied = new AtomicReference<>();
 
       @Override
@@ -89,7 +89,7 @@ public class Atomics {
    */
   public static <T> Supplier<T> strictAtomicInitializer(final Supplier<T> supplier) {
     shouldNotNull(supplier);
-    return new Supplier<T>() {
+    return new Supplier<>() {
       final AtomicReference<Supplier<T>> factory = new AtomicReference<>();
       final AtomicReference<T> supplied = new AtomicReference<>();
 

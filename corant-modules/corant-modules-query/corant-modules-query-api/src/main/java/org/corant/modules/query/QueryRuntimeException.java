@@ -28,8 +28,7 @@ public class QueryRuntimeException extends CorantRuntimeException {
   /**
    *
    */
-  public QueryRuntimeException() {
-  }
+  public QueryRuntimeException() {}
 
   /**
    * @param msgOrFormat

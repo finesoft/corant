@@ -71,8 +71,7 @@ public interface Token extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (id == null ? 0 : id.hashCode());
-      return result;
+      return prime * result + (id == null ? 0 : id.hashCode());
     }
 
   }
@@ -119,8 +118,7 @@ public interface Token extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (data == null ? 0 : data.hashCode());
-      return result;
+      return prime * result + (data == null ? 0 : data.hashCode());
     }
 
   }
@@ -164,8 +162,7 @@ public interface Token extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = super.hashCode();
-      result = prime * result + Arrays.hashCode(password);
-      return result;
+      return prime * result + Arrays.hashCode(password);
     }
 
   }
@@ -212,8 +209,7 @@ public interface Token extends Serializable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (username == null ? 0 : username.hashCode());
-      return result;
+      return prime * result + (username == null ? 0 : username.hashCode());
     }
 
   }

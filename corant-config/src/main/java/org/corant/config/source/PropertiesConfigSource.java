@@ -53,7 +53,6 @@ public class PropertiesConfigSource extends AbstractCorantConfigSource {
    * @param properties
    */
   PropertiesConfigSource(String name, int ordinal, Map<String, String> properties) {
-    super();
     this.name = name;
     this.ordinal = ordinal;
     if (properties != null) {

@@ -34,8 +34,7 @@ public class TemporalLocalDateTimeConverter
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public TemporalLocalDateTimeConverter() {
-  }
+  public TemporalLocalDateTimeConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

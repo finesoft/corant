@@ -1,5 +1,9 @@
 package org.corant.modules.mail;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Maps.toProperties;
+import java.util.Date;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -10,11 +14,6 @@ import javax.mail.Transport;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.util.Date;
-import java.util.Map;
-
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Maps.toProperties;
 
 /**
  * corant-modules-mail
@@ -24,20 +23,15 @@ import static org.corant.shared.util.Maps.toProperties;
  */
 public class MailSenderTemplate {
 
-  @Inject private MailConfig config;
+  @Inject
+  private MailConfig config;
 
   private MailSenderTemplate(MailConfig config) {
     this.config = shouldNotNull(config);
   }
 
-  public static MailSenderTemplate config(
-      String protocol,
-      String host,
-      int port,
-      String username,
-      String password,
-      int connectionTimeout,
-      Map<String, String> properties) {
+  public static MailSenderTemplate config(String protocol, String host, int port, String username,
+      String password, int connectionTimeout, Map<String, String> properties) {
     MailConfig config =
         new MailConfig(protocol, host, port, username, password, connectionTimeout, properties);
     return new MailSenderTemplate(config);
@@ -61,15 +55,14 @@ public class MailSenderTemplate {
   }
 
   private Session getSession() {
-    return Session.getInstance(
-        toProperties(config.getProperties()),
+    return Session.getInstance(toProperties(config.getProperties()),
         new DefaultAuthenticator(config.getUsername(), config.getPassword()));
   }
 
   private void send(MimeMessage mimeMessage) throws MessagingException {
     try (Transport transport = getSession().getTransport(config.getProtocol())) {
-      transport.connect(
-          config.getHost(), config.getPort(), config.getUsername(), config.getPassword());
+      transport.connect(config.getHost(), config.getPort(), config.getUsername(),
+          config.getPassword());
       if (mimeMessage.getSentDate() == null) {
         mimeMessage.setSentDate(new Date());
       }

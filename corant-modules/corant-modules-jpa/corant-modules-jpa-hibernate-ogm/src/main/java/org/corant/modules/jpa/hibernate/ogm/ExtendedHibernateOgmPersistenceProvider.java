@@ -69,7 +69,7 @@ public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersist
         && pui.getPersistenceProviderClassName().equals(HibernateOgmPersistence.class.getName())) {
       Map<?, ?> integration =
           map == null ? Collections.emptyMap() : Collections.unmodifiableMap(map);
-      Map<Object, Object> protectiveCopy = new HashMap<Object, Object>(integration);
+      Map<Object, Object> protectiveCopy = new HashMap<>(integration);
       protectiveCopy.put(AvailableSettings.DATASOURCE, "---PlaceHolderDSForOGM---");
       protectiveCopy.put(OgmProperties.ENABLED, true);
       protectiveCopy.put(org.hibernate.cfg.AvailableSettings.JPA_PERSISTENCE_PROVIDER,

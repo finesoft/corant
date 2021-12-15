@@ -73,8 +73,7 @@ public class MessageContextMetaData {
     final int prime = 31;
     int result = 1;
     result = prime * result + (connectionFactoryId == null ? 0 : connectionFactoryId.hashCode());
-    result = prime * result + (dupsOkAck ? 1231 : 1237);
-    return result;
+    return prime * result + (dupsOkAck ? 1231 : 1237);
   }
 
   public boolean isDupsOkAck() {

@@ -143,8 +143,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (aggregate == null ? 0 : aggregate.hashCode());
-    return result;
+    return prime * result + (aggregate == null ? 0 : aggregate.hashCode());
   }
 
 }

@@ -35,8 +35,7 @@ public class TemporalZonedDateTimeConverter
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public TemporalZonedDateTimeConverter() {
-  }
+  public TemporalZonedDateTimeConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)

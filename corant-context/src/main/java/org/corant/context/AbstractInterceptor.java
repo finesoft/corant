@@ -108,23 +108,21 @@ public abstract class AbstractInterceptor {
             return interceptorAnnotation;
           }
         }
-      } else {
-        // for EE components
-        if (targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR)) {
-          if (ic.getMethod() != null && (interceptorAnnotation =
-              ic.getMethod().getAnnotation(interceptorAnnotationType)) != null) {
-            return interceptorAnnotation;
-          }
-          if (ic.getConstructor() != null && (interceptorAnnotation =
-              ic.getConstructor().getAnnotation(interceptorAnnotationType)) != null) {
-            return interceptorAnnotation;
-          }
-        } else if (targets.contains(ElementType.TYPE) && ic.getTarget() != null) {
-          Class<?> targetClass = getUserClass(ic.getTarget());
-          interceptorAnnotation = targetClass.getAnnotation(interceptorAnnotationType);
-          if (interceptorAnnotation != null) {
-            return interceptorAnnotation;
-          }
+      } else // for EE components
+      if (targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR)) {
+        if (ic.getMethod() != null && (interceptorAnnotation =
+            ic.getMethod().getAnnotation(interceptorAnnotationType)) != null) {
+          return interceptorAnnotation;
+        }
+        if (ic.getConstructor() != null && (interceptorAnnotation =
+            ic.getConstructor().getAnnotation(interceptorAnnotationType)) != null) {
+          return interceptorAnnotation;
+        }
+      } else if (targets.contains(ElementType.TYPE) && ic.getTarget() != null) {
+        Class<?> targetClass = getUserClass(ic.getTarget());
+        interceptorAnnotation = targetClass.getAnnotation(interceptorAnnotationType);
+        if (interceptorAnnotation != null) {
+          return interceptorAnnotation;
         }
       }
     }

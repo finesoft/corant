@@ -30,8 +30,7 @@ public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonO
   /**
    *
    */
-  public StringBsonObjectIdConverter() {
-  }
+  public StringBsonObjectIdConverter() {}
 
   /**
    * @param throwException

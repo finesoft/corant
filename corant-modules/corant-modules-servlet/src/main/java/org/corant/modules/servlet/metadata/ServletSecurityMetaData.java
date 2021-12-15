@@ -28,8 +28,7 @@ import javax.servlet.annotation.ServletSecurity;
 public class ServletSecurityMetaData {
 
   private HttpConstraintMetaData httpConstraint;
-  private HttpMethodConstraintMetaData[] httpMethodConstraints =
-      new HttpMethodConstraintMetaData[0];
+  private HttpMethodConstraintMetaData[] httpMethodConstraints = {};
   private Class<? extends Servlet> clazz;
 
   /**

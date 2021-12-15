@@ -32,7 +32,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 public class Serializations {
 
   private Serializations() {
-    super();
   }
 
   public static Object deserialize(byte[] bytes) {

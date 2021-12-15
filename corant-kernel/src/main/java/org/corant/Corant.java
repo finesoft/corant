@@ -712,13 +712,11 @@ public class Corant implements AutoCloseable {
     if (cmd == null) {
       CorantBootHandler.load(classLoader)
           .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
+    } else if (cmd.hasArguments()) {
+      CorantBootHandler.load(classLoader, cmd.getArguments())
+          .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      if (cmd.hasArguments()) {
-        CorantBootHandler.load(classLoader, cmd.getArguments())
-            .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
-      } else {
-        logInfo("The after start boot handlers are disabled!");
-      }
+      logInfo("The after start boot handlers are disabled!");
     }
   }
 
@@ -727,13 +725,11 @@ public class Corant implements AutoCloseable {
     if (cmd == null) {
       CorantBootHandler.load(classLoader).forEach(
           h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    } else if (cmd.hasArguments()) {
+      CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
+          h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      if (cmd.hasArguments()) {
-        CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
-            h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
-      } else {
-        logInfo("The after stopped handlers are disabled!");
-      }
+      logInfo("The after stopped handlers are disabled!");
     }
   }
 
@@ -742,13 +738,11 @@ public class Corant implements AutoCloseable {
     if (cmd == null) {
       CorantBootHandler.load(classLoader).forEach(
           h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
+    } else if (cmd.hasArguments()) {
+      CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
+          h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      if (cmd.hasArguments()) {
-        CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
-            h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
-      } else {
-        logInfo("The before start boot handlers are disabled!");
-      }
+      logInfo("The before start boot handlers are disabled!");
     }
   }
 

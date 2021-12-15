@@ -28,11 +28,11 @@ import org.corant.modules.query.mapping.Query;
 @Deprecated
 public interface ParameterReviser extends Supplier<Map<String, Object>> {
 
-  default boolean supports(Query query) {
-    return true;
-  }
-
   default int getPriority() {
     return 0;
+  }
+
+  default boolean supports(Query query) {
+    return true;
   }
 }

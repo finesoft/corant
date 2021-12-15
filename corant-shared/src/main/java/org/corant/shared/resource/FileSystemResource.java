@@ -118,8 +118,7 @@ public class FileSystemResource extends URLResource implements WritableResource 
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + (file == null ? 0 : file.hashCode());
-    return result;
+    return prime * result + (file == null ? 0 : file.hashCode());
   }
 
   @Override

@@ -475,7 +475,7 @@ public class QueryParseHandler extends DefaultHandler {
       }
       charStack.delete(0, charStack.length());
       obj.setCode(scriptCode);
-      if (qName.equalsIgnoreCase(SchemaNames.X_SCRIPT)) {
+      if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
         if (this.currentObject() instanceof Query) {
           Query q = this.currentObject();
           if (q == null || !obj.isValid()) {
@@ -501,7 +501,7 @@ public class QueryParseHandler extends DefaultHandler {
           }
           p.setScript(obj);
         }
-      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_PREDICATE_SCRIPT)) {
+      } else if (SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)) {
         if (this.currentObject() instanceof FetchQuery) {
           FetchQuery q = this.currentObject();
           if (q == null || !obj.isValid()) {
@@ -511,7 +511,7 @@ public class QueryParseHandler extends DefaultHandler {
           }
           q.setPredicateScript(obj);
         }
-      } else if (qName.equalsIgnoreCase(SchemaNames.FQE_ELE_INJECTION_SCRIPT)
+      } else if (SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)
           && this.currentObject() instanceof FetchQuery) {
         FetchQuery q = this.currentObject();
         if (q == null || !obj.isValid()) {

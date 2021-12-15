@@ -33,8 +33,8 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
-import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.annotation.Secured;
+import org.corant.modules.security.annotation.SecuredType;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
@@ -55,7 +55,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 
   @Override
   public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), ri -> new Consumer<FeatureContext>() {
+    handlers.computeIfAbsent(MpResourceInfo.of(resourceInfo), ri -> new Consumer<>() {
       private final Object registration = resolveRegistration(ri);
 
       @Override
@@ -91,10 +91,8 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       } else if (mpJwtAnnotation instanceof PermitAll) {
         registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       }
-    } else {
-      if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {
-        registration = denyAllFilter;
-      }
+    } else if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {
+      registration = denyAllFilter;
     }
     return registration;
   }
@@ -211,8 +209,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       final int prime = 31;
       int result = 1;
       result = prime * result + (clazz == null ? 0 : clazz.hashCode());
-      result = prime * result + (method == null ? 0 : method.hashCode());
-      return result;
+      return prime * result + (method == null ? 0 : method.hashCode());
     }
 
   }

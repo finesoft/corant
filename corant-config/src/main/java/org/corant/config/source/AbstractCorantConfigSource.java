@@ -32,7 +32,6 @@ public abstract class AbstractCorantConfigSource implements ConfigSource, Serial
   protected int ordinal;
 
   protected AbstractCorantConfigSource() {
-    super();
   }
 
   /**
@@ -40,7 +39,6 @@ public abstract class AbstractCorantConfigSource implements ConfigSource, Serial
    * @param ordinal
    */
   protected AbstractCorantConfigSource(String name, int ordinal) {
-    super();
     this.name = name;
     this.ordinal = ordinal;
   }

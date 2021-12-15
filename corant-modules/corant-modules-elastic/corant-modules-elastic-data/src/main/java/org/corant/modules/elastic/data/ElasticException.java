@@ -31,8 +31,7 @@ public class ElasticException extends CorantRuntimeException {
   /**
    *
    */
-  public ElasticException() {
-  }
+  public ElasticException() {}
 
   /**
    * @param msgOrFormat

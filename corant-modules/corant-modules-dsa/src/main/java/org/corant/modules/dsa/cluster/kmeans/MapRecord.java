@@ -85,8 +85,7 @@ public class MapRecord {
     final int prime = 31;
     int result = 1;
     result = prime * result + (id == null ? 0 : id.hashCode());
-    result = prime * result + (features == null ? 0 : features.hashCode());
-    return result;
+    return prime * result + (features == null ? 0 : features.hashCode());
   }
 
   @Override

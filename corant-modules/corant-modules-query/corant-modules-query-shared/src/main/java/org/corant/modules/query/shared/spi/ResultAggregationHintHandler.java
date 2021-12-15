@@ -108,12 +108,6 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   @Inject
   protected Logger logger;
 
-  @Override
-  public boolean supports(Class<?> resultClass, QueryHint hint) {
-    return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
-        && areEqual(hint.getKey(), HINT_NAME);
-  }
-
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
@@ -132,6 +126,12 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     if (!isEmpty(list)) {
       handler.accept(list);
     }
+  }
+
+  @Override
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
+    return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
+        && areEqual(hint.getKey(), HINT_NAME);
   }
 
   @PreDestroy
@@ -180,12 +180,10 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
                   } else {
                     key.put(e.getKey(), e.getValue());
                   }
+                } else if (!fieldNames.getValue().contains(e.getKey())) {
+                  val.put(e.getKey(), e.getValue());
                 } else {
-                  if (!fieldNames.getValue().contains(e.getKey())) {
-                    val.put(e.getKey(), e.getValue());
-                  } else {
-                    key.put(e.getKey(), e.getValue());
-                  }
+                  key.put(e.getKey(), e.getValue());
                 }
               }
               temp.computeIfAbsent(key, vk -> new ArrayList<>()).add(val);

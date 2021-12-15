@@ -19,6 +19,7 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -72,9 +73,7 @@ public class Iterables {
       return supplier.apply(0);
     } else {
       final C collection = supplier.apply(objects.length);
-      for (E object : objects) {
-        collection.add(object);
-      }
+      Collections.addAll(collection, objects);
       return collection;
     }
   }

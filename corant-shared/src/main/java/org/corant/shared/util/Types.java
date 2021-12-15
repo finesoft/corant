@@ -47,7 +47,7 @@ import org.corant.shared.ubiquity.TypeLiteral;
  */
 public class Types {
 
-  static final Type[] EMPTY_TYPE_ARRAY = new Type[] {};
+  static final Type[] EMPTY_TYPE_ARRAY = {};
 
   private Types() {
     throw new UnsupportedOperationException();

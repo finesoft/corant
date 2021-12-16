@@ -40,6 +40,11 @@ public interface QueryParameter extends Serializable {
   String LIMIT_PARAM_NME = "_limit";
   String CONTEXT_NME = "_context";
 
+  // Use to manual adjust the query execution, can be set in the context
+  String CTX_QHH_EXCLUDE_FETCH_QUERY = "__QHH_EXCLUDE_FETCH_QUERY";
+  String CTX_QHH_EXCLUDE_RESULTHINT = "__QHH_EXCLUDE_RESULT_HINT";
+  String CTX_QHH_DONT_CONVERT_RESULT = "__QHH_DONT_CONVERT_RESULT";
+
   /**
    * Return the query context that may be contain current user context or security context.
    *

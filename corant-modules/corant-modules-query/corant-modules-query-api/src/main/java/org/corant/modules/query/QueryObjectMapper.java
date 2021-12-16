@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-modules-query-api
@@ -30,6 +31,17 @@ import java.util.Map;
  *
  */
 public interface QueryObjectMapper {
+
+  /**
+   * Copy an object
+   *
+   * @param <T> the object type
+   * @param object the object to be copyed
+   * @param type the object type
+   */
+  default <T> T copy(T object, TypeLiteral<T> type) {
+    return object;
+  }
 
   /**
    * Deserialize JSON content from given JSON content String and expected type.

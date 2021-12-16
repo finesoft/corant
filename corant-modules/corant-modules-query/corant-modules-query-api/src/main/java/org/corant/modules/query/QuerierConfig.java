@@ -23,6 +23,7 @@ import java.time.Duration;
  */
 public interface QuerierConfig {
 
+  // Use to cover the global 'corant.query.querier' configuration, they may be assigned in query xml
   String CTX_KEY_PARALLEL_FETCH = ".parallel-fetch";
   int UN_LIMIT_SELECT_SIZE = Integer.MAX_VALUE - 16;
   String PRO_KEY_MAX_SELECT_SIZE = ".max-select-size";

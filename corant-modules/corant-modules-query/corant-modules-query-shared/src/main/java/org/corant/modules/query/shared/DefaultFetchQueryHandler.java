@@ -14,15 +14,21 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.context.Beans.select;
+import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_FETCH_QUERY;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.asDefaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.matchWildcard;
+import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,6 +55,7 @@ import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Strings.WildcardMatcher;
 
 /**
  * corant-modules-query-shared
@@ -74,6 +81,16 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @Override
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
+    String exs = getMapString(queryParameter.getContext(), CTX_QHH_EXCLUDE_FETCH_QUERY);
+    if (isNotBlank(exs)) {
+      final String fetchQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      for (String ex : split(exs, ",", true, true)) {
+        if (WildcardMatcher.hasWildcard(ex) && matchWildcard(fetchQueryName, false, ex)
+            || areEqual(fetchQueryName, ex)) {
+          return false;
+        }
+      }
+    }
     Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchPredicates(fetchQuery);
     return fun == null || toBoolean(fun.apply(new ParameterAndResult(queryParameter, result)));
   }
@@ -96,12 +113,10 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
         objectMapper.putMappedValue(result, injectProNamePath, null);
+      } else if (fetchQuery.isMultiRecords()) {
+        objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
       } else {
-        if (fetchQuery.isMultiRecords()) {
-          objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
-        } else {
-          objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.iterator().next());
-        }
+        objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.iterator().next());
       }
     }
   }

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
-import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-modules-query-api
@@ -50,25 +49,6 @@ public interface QueryService<Q, P> {
   <T> T get(Q q, P p);
 
   /**
-   * Like {@link #get(Object, Object)} but support an result type conversion.
-   *
-   * @param <T> The expected query result object type.
-   * @param q The query object reference, in named query this parameter may be the name of query.
-   * @param p The query parameter, include query criteria and context.
-   * @param resultType The expected result type literal;
-   * @return A single result
-   *
-   * @see QueryObjectMapper#toObject(Object, java.lang.reflect.Type)
-   */
-  default <T> T get(Q q, P p, TypeLiteral<T> resultType) {
-    Object result = get(q, p);
-    if (result != null) {
-      return getObjectMapper().toObject(result, resultType.getType());
-    }
-    return null;
-  }
-
-  /**
    * Returns a query object mapper to be used in result type conversion.
    *
    * @return getQueryObjectMapper
@@ -94,25 +74,6 @@ public interface QueryService<Q, P> {
    * @return A list of result sets
    */
   <T> List<T> select(Q q, P p);
-
-  /**
-   * Like {@link #select(Object, Object)} but support result type conversion.
-   *
-   * @param <T> The expected query result object type.
-   * @param q The query object reference, in named query this parameter may be the name of query.
-   * @param p The query parameter, include query criteria and context.
-   * @param resultType The expected result type literal
-   * @return A list of result sets of the specified type
-   *
-   * @see QueryObjectMapper#toObject(Object, java.lang.reflect.Type)
-   */
-  default <T> List<T> select(Q q, P p, TypeLiteral<T> resultType) {
-    List<Object> list = select(q, p);
-    if (isNotEmpty(list)) {
-      return getObjectMapper().toObjects(list, resultType.getType());
-    }
-    return new ArrayList<>();
-  }
 
   /**
    * Query stream results, use for mass data query.

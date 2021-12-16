@@ -15,17 +15,26 @@ package org.corant.modules.query.shared;
 
 import static org.corant.context.Beans.select;
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
+import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESULT;
+import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULTHINT;
 import static org.corant.modules.query.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.modules.query.QueryParameter.OFFSET_PARAM_NME;
 import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Maps.getMapBoolean;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.isSimpleClass;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.matchWildcard;
+import static org.corant.shared.util.Strings.split;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -42,12 +51,15 @@ import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Functions;
+import org.corant.shared.util.Strings.WildcardMatcher;
 
 /**
  * corant-modules-query-shared
@@ -87,8 +99,12 @@ public class DefaultQueryHandler implements QueryHandler {
   @Override
   public <T> T handleResult(Object result, Query query, QueryParameter parameter) {
     if (result != null) {
-      return forceCast(Map.class.isAssignableFrom(query.getResultClass()) ? result
-          : convertRecord(result, query.getResultClass()));
+      if (!getMapBoolean(parameter.getContext(), CTX_QHH_DONT_CONVERT_RESULT, false)) {
+        return forceCast(Map.class.isAssignableFrom(query.getResultClass()) ? result
+            : convertRecord(result, query.getResultClass()));
+      } else {
+        return forceCast(result);
+      }
     }
     return null;
   }
@@ -97,7 +113,22 @@ public class DefaultQueryHandler implements QueryHandler {
   public void handleResultHints(Object result, Class<?> originalResultClass, Query query,
       QueryParameter parameter) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      query.getHints().forEach(qh -> {
+      final String exs = getMapString(parameter.getContext(), CTX_QHH_EXCLUDE_RESULTHINT);
+      final Predicate<QueryHint> predicate;
+      if (isBlank(exs)) {
+        predicate = Functions.emptyPredicate(true);
+      } else {
+        predicate = h -> {
+          for (String ex : split(exs, ",", true, true)) {
+            if (WildcardMatcher.hasWildcard(ex) && matchWildcard(h.getKey(), false, ex)
+                || areEqual(h.getKey(), ex)) {
+              return false;
+            }
+          }
+          return true;
+        };
+      }
+      query.getHints().stream().filter(predicate::test).forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
         resultHintHandlers.stream().filter(h -> h.supports(originalResultClass, qh))
             .sorted(ResultHintHandler::compare).forEachOrdered(h -> {
@@ -116,7 +147,8 @@ public class DefaultQueryHandler implements QueryHandler {
 
   @Override
   public <T> List<T> handleResults(List<Object> results, Query query, QueryParameter parameter) {
-    if (!isEmpty(results)) {
+    if (!isEmpty(results)
+        && !getMapBoolean(parameter.getContext(), CTX_QHH_DONT_CONVERT_RESULT, false)) {
       return convertRecords(results, forceCast(query.getResultClass()));
     }
     return forceCast(results);

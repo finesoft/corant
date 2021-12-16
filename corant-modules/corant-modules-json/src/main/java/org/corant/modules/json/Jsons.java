@@ -28,6 +28,7 @@ import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Bytes;
 import org.corant.shared.util.Services;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -46,6 +47,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NullSerializer;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
@@ -86,6 +88,27 @@ public class Jsons {
   private Jsons() {}
 
   /**
+   * Convert an object to given target type literal object.
+   *
+   * <p>
+   * example:
+   *
+   * <pre>
+   * Map&lt;String, String&gt; map = convert(object, new TypeLiteral&lt;Map&lt;String, String&gt;&gt;() {});
+   * </pre>
+   *
+   * @param <T> the target type
+   * @param object the object to be convert
+   * @param typeLiteral the target type literal
+   * @return the converted object
+   *
+   * @see ObjectMapper#convertValue(Object, Class)
+   */
+  public static <T> T convert(Object object, TypeLiteral<T> typeLiteral) {
+    return objectMapper.convertValue(object, objectMapper.constructType(typeLiteral.getType()));
+  }
+
+  /**
    * Convert an object to given target type object.
    *
    * <p>
@@ -104,6 +127,93 @@ public class Jsons {
    */
   public static <T> T convert(Object object, TypeReference<T> targetTypeRef) {
     return objectMapper.convertValue(object, targetTypeRef);
+  }
+
+  /**
+   * Clone a pojo
+   *
+   * <p>
+   * NOTE: This method is experiential.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T copy(T pojo) {
+    if (pojo == null) {
+      return null;
+    } else {
+      try {
+        TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+        objectMapper.writeValue(tb, pojo);
+        return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Clone a pojo with given type literal
+   *
+   * <p>
+   * NOTE: This method is experiential.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T copy(T pojo, TypeLiteral<T> type) {
+    try {
+      TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+      objectMapper.writeValue(tb, pojo);
+      if (type == null) {
+        return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
+      } else {
+        return objectMapper.readValue(tb.asParser(), objectMapper.constructType(type.getType()));
+      }
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  /**
+   * Clone a pojo with given type reference
+   *
+   * <p>
+   * NOTE: This method is experiential.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T copy(T pojo, TypeReference<T> type) {
+    if (pojo == null) {
+      return null;
+    } else {
+      try {
+        TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+        objectMapper.writeValue(tb, pojo);
+        if (type == null) {
+          return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
+        } else {
+          return objectMapper.readValue(tb.asParser(), type);
+        }
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
   }
 
   /**
@@ -182,6 +292,24 @@ public class Jsons {
       }
     }
     return null;
+  }
+
+  /**
+   * Returns an typed object from given JSON string and type literal.
+   *
+   * @param jsonString the JSON string to be deserialize
+   * @param targetTypeLiteral the target type literal
+   */
+  public static <T> T fromString(String jsonString, TypeLiteral<T> targetTypeLiteral) {
+    if (!isNotBlank(jsonString)) {
+      return null;
+    }
+    try {
+      return objectMapper.readValue(jsonString,
+          objectMapper.constructType(targetTypeLiteral.getType()));
+    } catch (IOException e) {
+      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
+    }
   }
 
   /**

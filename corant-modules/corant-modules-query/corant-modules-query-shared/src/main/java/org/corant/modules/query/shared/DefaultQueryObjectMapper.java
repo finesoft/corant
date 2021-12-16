@@ -17,6 +17,7 @@ import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.isSimpleClass;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Conversions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -35,6 +38,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 
 /**
  * corant-modules-query-shared
@@ -52,6 +56,22 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
       ppObjectWriter.with(JsonpCharacterEscapes.instance());
   protected JavaType mapType = objectMapper.constructType(Map.class);
   protected ObjectReader mapReader = objectMapper.readerFor(mapType);
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T copy(T object, TypeLiteral<T> type) {
+    try {
+      TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+      objectMapper.writeValue(tb, object);
+      if (type == null) {
+        return (T) objectMapper.readValue(tb.asParser(), object.getClass());
+      } else {
+        return objectMapper.readValue(tb.asParser(), objectMapper.constructType(type.getType()));
+      }
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
 
   @Override
   public <T> T fromJsonString(String jsonString, Class<T> type) {
@@ -126,12 +146,10 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
         } else {
           return ppObjectWriter.writeValueAsString(object);
         }
+      } else if (escape) {
+        return escapeObjectWriter.writeValueAsString(object);
       } else {
-        if (escape) {
-          return escapeObjectWriter.writeValueAsString(object);
-        } else {
-          return objectWriter.writeValueAsString(object);
-        }
+        return objectWriter.writeValueAsString(object);
       }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
@@ -143,19 +161,17 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   public <T> T toObject(Object from, Type type) {
     if (from == null) {
       return null;
-    } else {
-      if (type instanceof Class) {
-        Class<?> clazz = (Class<?>) type;
-        if (clazz.isInstance(from)) {
-          return (T) from;
-        } else if (isSimpleClass(clazz)) {
-          return (T) Conversions.toObject(from, clazz);
-        } else {
-          return (T) objectMapper.convertValue(from, clazz);
-        }
+    } else if (type instanceof Class) {
+      Class<?> clazz = (Class<?>) type;
+      if (clazz.isInstance(from)) {
+        return (T) from;
+      } else if (isSimpleClass(clazz)) {
+        return (T) Conversions.toObject(from, clazz);
       } else {
-        return (T) objectMapper.convertValue(from, objectMapper.constructType(type));
+        return (T) objectMapper.convertValue(from, clazz);
       }
+    } else {
+      return (T) objectMapper.convertValue(from, objectMapper.constructType(type));
     }
   }
 

@@ -36,7 +36,7 @@ public interface Authenticator extends Sortable {
 
   default void checkAuthenticated(Object object) throws AuthenticationException {
     if (!authenticated(object)) {
-      throw new AuthenticationException(SecurityMessageCodes.UNAUTHC_ACCESS);
+      throw new AuthenticationException((Object) SecurityMessageCodes.UNAUTHC_ACCESS);
     }
   }
 }

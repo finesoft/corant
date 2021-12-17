@@ -25,7 +25,7 @@ public interface Authorizer extends Sortable {
 
   default void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {
     if (!testAccess(context, roleOrPermit)) {
-      throw new AuthenticationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      throw new AuthorizationException((Object) SecurityMessageCodes.UNAUTHZ_ACCESS);
     }
   }
 

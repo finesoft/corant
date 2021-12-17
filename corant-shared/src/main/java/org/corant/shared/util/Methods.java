@@ -140,7 +140,7 @@ public class Methods {
   }
 
   /**
-   * Code base from from apache.org
+   * Code base from apache.org
    * <p>
    * Returns the aggregate number of inheritance hops between assignable argument class types.
    * Returns -1 if the arguments aren't assignable. Fills a specific purpose for getMatchingMethod

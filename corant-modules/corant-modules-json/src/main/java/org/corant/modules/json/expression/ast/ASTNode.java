@@ -11,21 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate;
+package org.corant.modules.json.expression.ast;
 
 import java.util.List;
+import org.corant.modules.json.expression.Node;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午2:23:27
+ * @author bingo 下午5:04:44
  *
  */
-public interface Node<T> {
+public interface ASTNode<T> extends Node<T> {
 
-  boolean addChild(Node<?> child);
+  default void accept(ASTNodeVisitor visitor) {
+    visitor.visit(this);
+  }
 
-  List<? extends Node<?>> getChildren();
+  @Override
+  default boolean addChild(Node<?> child) {
+    throw new NotSupportedException();
+  }
 
-  T getValue(EvaluationContext ctx);
+  @Override
+  default List<? extends Node<?>> getChildren() {
+    throw new NotSupportedException();
+  }
+
+  ASTNodeType getType();
+
 }

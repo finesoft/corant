@@ -11,26 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.strip;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTBetweenNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTEqualNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanEqualNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTGreaterThanNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTInNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessThanEqualNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTLessThanNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoEqualNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTNoInNode;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTRegexNode;
-import org.corant.modules.json.expression.predicate.ast.ASTFunctionNode.ASTDefaultFunctionNode;
-import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicAndNode;
-import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicNorNode;
-import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicNotNode;
-import org.corant.modules.json.expression.predicate.ast.ASTLogicNode.ASTLogicOrNode;
-import org.corant.modules.json.expression.predicate.ast.ASTVariableNode.ASTDefaultVariableNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTBetweenNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTEqualNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTGreaterThanEqualNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTGreaterThanNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTInNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTLessThanEqualNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTLessThanNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTNoEqualNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTNoInNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTRegexNode;
+import org.corant.modules.json.expression.ast.predicate.ASTFunctionNode.ASTDefaultFunctionNode;
+import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicAndNode;
+import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicNorNode;
+import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicNotNode;
+import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicOrNode;
+import org.corant.modules.json.expression.ast.predicate.ASTValueNode;
+import org.corant.modules.json.expression.ast.predicate.ASTVariableNode.ASTDefaultVariableNode;
 import org.corant.shared.exception.NotSupportedException;
 
 /**

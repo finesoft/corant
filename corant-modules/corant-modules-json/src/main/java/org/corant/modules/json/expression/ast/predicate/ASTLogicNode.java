@@ -11,14 +11,15 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression.ast.predicate;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import org.corant.modules.json.expression.predicate.EvaluationContext;
-import org.corant.modules.json.expression.predicate.Node;
+import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNodeType;
 
 /**
  * corant-modules-json

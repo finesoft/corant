@@ -11,11 +11,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression.ast.predicate;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.strip;
-import org.corant.modules.json.expression.predicate.EvaluationContext;
+import java.util.ArrayList;
+import java.util.List;
+import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode;
+import org.corant.modules.json.expression.ast.ASTNodeType;
 
 /**
  * corant-modules-json
@@ -23,16 +28,28 @@ import org.corant.modules.json.expression.predicate.EvaluationContext;
  * @author bingo 下午10:24:55
  *
  */
-public interface ASTVariableNode extends ASTNode<Object> {
+public interface ASTFunctionNode extends ASTNode<Object> {
 
   String getName();
 
-  class ASTDefaultVariableNode implements ASTVariableNode {
+  class ASTDefaultFunctionNode implements ASTFunctionNode {
 
     protected final String name;
 
-    public ASTDefaultVariableNode(String name) {
+    protected List<ASTNode<?>> children = new ArrayList<>();
+
+    public ASTDefaultFunctionNode(String name) {
       this.name = shouldNotBlank(strip(name));
+    }
+
+    @Override
+    public boolean addChild(Node<?> child) {
+      return children.add((ASTNode<?>) child);
+    }
+
+    @Override
+    public List<? extends Node<?>> getChildren() {
+      return children;
     }
 
     @Override
@@ -42,12 +59,12 @@ public interface ASTVariableNode extends ASTNode<Object> {
 
     @Override
     public ASTNodeType getType() {
-      return ASTNodeType.VAR;
+      return ASTNodeType.FUN;
     }
 
     @Override
     public Object getValue(EvaluationContext ctx) {
-      return ctx.resolveVariableValue(this);
+      return ctx.resolveFunction(this).apply(children.stream().map(c -> c.getValue(ctx)).toArray());
     }
 
   }

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate;
+package org.corant.modules.json.expression;
 
 import org.corant.shared.exception.CorantRuntimeException;
 

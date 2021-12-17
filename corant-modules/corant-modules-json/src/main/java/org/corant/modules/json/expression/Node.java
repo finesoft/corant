@@ -11,21 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate;
+package org.corant.modules.json.expression;
 
-import java.util.function.Function;
-import org.corant.shared.ubiquity.Sortable;
+import java.util.List;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午2:23:09
+ * @author bingo 下午2:23:27
  *
  */
-public interface EvaluationContext extends Sortable {
+public interface Node<T> {
 
-  Function<Object[], Object> resolveFunction(Node<?> node);
+  boolean addChild(Node<?> child);
 
-  Object resolveVariableValue(Node<?> node);
+  List<? extends Node<?>> getChildren();
 
+  T getValue(EvaluationContext ctx);
 }

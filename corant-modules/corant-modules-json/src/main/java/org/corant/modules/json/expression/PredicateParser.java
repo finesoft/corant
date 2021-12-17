@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate;
+package org.corant.modules.json.expression;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 import org.corant.modules.json.Jsons;
-import org.corant.modules.json.expression.predicate.ast.ASTNode;
-import org.corant.modules.json.expression.predicate.ast.ASTNodeBuilder;
-import org.corant.modules.json.expression.predicate.ast.ASTNodeType;
-import org.corant.modules.json.expression.predicate.ast.ASTNodeVisitor;
-import org.corant.modules.json.expression.predicate.ast.ASTPredicateNode;
+import org.corant.modules.json.expression.ast.ASTNode;
+import org.corant.modules.json.expression.ast.ASTNodeType;
+import org.corant.modules.json.expression.ast.ASTNodeVisitor;
+import org.corant.modules.json.expression.ast.predicate.ASTNodeBuilder;
+import org.corant.modules.json.expression.ast.predicate.ASTPredicateNode;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Services;
 

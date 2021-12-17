@@ -1,3 +1,0 @@
-org.corant.modules.json.expression.predicate.function.DefaultConvertFunctionResolver
-org.corant.modules.json.expression.predicate.function.DefaultDateFunctionResolver
-org.corant.modules.json.expression.predicate.function.DefaultMathFunctionResolver

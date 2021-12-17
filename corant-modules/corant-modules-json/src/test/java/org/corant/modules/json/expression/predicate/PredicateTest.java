@@ -17,8 +17,12 @@ import static org.corant.shared.util.Maps.mapOf;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import org.corant.modules.json.expression.predicate.ast.ASTFunctionNode;
-import org.corant.modules.json.expression.predicate.ast.ASTVariableNode;
+import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.FunctionResolver;
+import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.PredicateParser;
+import org.corant.modules.json.expression.ast.predicate.ASTFunctionNode;
+import org.corant.modules.json.expression.ast.predicate.ASTVariableNode;
 import org.junit.Test;
 import junit.framework.TestCase;
 

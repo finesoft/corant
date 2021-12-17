@@ -11,19 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression;
 
-import org.corant.modules.json.expression.predicate.EvaluationContext;
+import java.util.function.Function;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午9:25:56
+ * @author bingo 下午3:29:32
  *
  */
-public interface ASTPredicateNode extends ASTNode<Boolean> {
+public interface FunctionResolver extends Sortable {
 
-  @Override
-  Boolean getValue(EvaluationContext ctx);
+  Function<Object[], Object> resolve(String name);
 
+  boolean supports(String name);
 }

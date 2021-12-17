@@ -13,8 +13,8 @@
  */
 /**
  * corant-modules-json
- *
- * @author bingo 下午7:53:07
+ * 
+ * @author bingo 下午9:37:17
  *
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression.ast;

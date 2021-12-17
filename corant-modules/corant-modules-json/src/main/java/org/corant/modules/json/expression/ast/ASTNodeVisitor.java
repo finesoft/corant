@@ -11,10 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.ast;
+package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import org.corant.modules.json.expression.predicate.ast.ASTComparisonNode.ASTRegexNode;
+import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTRegexNode;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

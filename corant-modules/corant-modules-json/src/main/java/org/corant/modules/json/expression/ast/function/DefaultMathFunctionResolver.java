@@ -11,14 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.predicate.function;
+package org.corant.modules.json.expression.ast.function;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toDouble;
 import static org.corant.shared.util.Conversions.toLong;
 import java.util.Arrays;
 import java.util.function.Function;
-import org.corant.modules.json.expression.predicate.FunctionResolver;
+import org.corant.modules.json.expression.FunctionResolver;
 
 /**
  * corant-modules-json

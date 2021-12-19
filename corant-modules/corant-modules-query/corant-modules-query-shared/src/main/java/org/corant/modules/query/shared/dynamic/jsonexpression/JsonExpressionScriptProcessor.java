@@ -11,29 +11,38 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.shared.dynamic.jsonpredicate;
+package org.corant.modules.query.shared.dynamic.jsonexpression;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotEmpty;
+import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.modules.json.expression.Node;
-import org.corant.modules.json.expression.PredicateParser;
+import org.corant.modules.json.expression.SimpleParser;
+import org.corant.modules.json.expression.ast.ASTFunctionNode;
 import org.corant.modules.json.expression.ast.ASTNode;
-import org.corant.modules.json.expression.ast.predicate.ASTFunctionNode;
-import org.corant.modules.json.expression.ast.predicate.ASTNodeBuilder;
-import org.corant.modules.json.expression.ast.predicate.ASTVariableNode;
-import org.corant.modules.json.expression.ast.predicate.ASTVariableNode.ASTDefaultVariableNode;
+import org.corant.modules.json.expression.ast.ASTNodeBuilder;
+import org.corant.modules.json.expression.ast.ASTVariableNode;
+import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariableNode;
 import org.corant.modules.query.QueryObjectMapper;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -41,6 +50,7 @@ import org.corant.modules.query.shared.ScriptProcessor;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-shared
@@ -49,8 +59,10 @@ import org.corant.shared.ubiquity.Sortable;
  *
  */
 @Singleton
-public class JsonPredicateScriptProcessor implements ScriptProcessor {
+public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
+  public static final String FILTER_KEY = "filter";
+  public static final String PROJECTION_KEY = "projection";
   public static final String PARENT_RESULT_VAR_PREFIX =
       RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int PARENT_RESULT_VAR_PREFIX_LEN = PARENT_RESULT_VAR_PREFIX.length();
@@ -66,7 +78,7 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
   static final Map<String, Function<ParameterAndResult, Object>> pedFuns =
       new ConcurrentHashMap<>();
   static final List<FunctionResolver> functionResolvers =
-      PredicateParser.resolveFunction().collect(Collectors.toList());
+      SimpleParser.resolveFunction().collect(Collectors.toList());
 
   @Inject
   protected QueryObjectMapper mapper;
@@ -100,20 +112,36 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
   protected Function<ParameterAndResultPair, Object> createInjectFuns(FetchQuery fetchQuery,
       Script script) {
     final String code = script.getCode();
-    final Node<Boolean> ast = PredicateParser.parse(code, MyASTNodeBuilder.INST);
+    final Pair<Node<Boolean>, BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>>> eval =
+        resolveScript(code);
     return p -> {
       List<Map<Object, Object>> parentResults = (List<Map<Object, Object>>) p.parentResult;
       List<Map<Object, Object>> fetchResults = (List<Map<Object, Object>>) p.fetchedResult;
+
+      final Node<Boolean> filter = eval.left();
+      final BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>> projector =
+          eval.right();
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       for (Map<Object, Object> r : parentResults) {
         List<Map<Object, Object>> injectResults = new ArrayList<>();
-        for (Map<Object, Object> fr : fetchResults) {
-          if (ast.getValue(evalCtx.reset(r, fr))) {
-            injectResults.add(fr);
-            if (!fetchQuery.isMultiRecords()) {
-              break;
+        if (filter == null) {
+          if (!fetchQuery.isMultiRecords()) {
+            injectResults.add(fetchResults.get(0));
+          } else {
+            injectResults.addAll(fetchResults);
+          }
+        } else {
+          for (Map<Object, Object> fr : fetchResults) {
+            if (filter.getValue(evalCtx.reset(r, fr))) {
+              injectResults.add(fr);
+              if (!fetchQuery.isMultiRecords()) {
+                break;
+              }
             }
           }
+        }
+        if (projector != null) {
+          injectResults = projector.apply(injectResults, mapper);
         }
         if (fetchQuery.isMultiRecords()) {
           mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
@@ -130,12 +158,54 @@ public class JsonPredicateScriptProcessor implements ScriptProcessor {
   protected Function<ParameterAndResult, Object> createPreFetchFuns(FetchQuery fetchQuery,
       Script script) {
     final String code = script.getCode();
-    final Node<Boolean> ast = PredicateParser.parse(code, MyASTNodeBuilder.INST);
+    final Node<Boolean> ast = (Node<Boolean>) SimpleParser.parse(code, MyASTNodeBuilder.INST);
     return p -> {
       Map<Object, Object> r = (Map<Object, Object>) p.result;
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       return ast.getValue(evalCtx.reset(r, null));
     };
+  }
+
+  @SuppressWarnings("unchecked")
+  protected Pair<Node<Boolean>, BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>>> resolveScript(
+      String code) {
+    final Map<String, Object> root = Jsons.fromString(code);
+    Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
+    Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
+    Node<Boolean> filter = null;
+    BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>> projector =
+        null;
+    if (filterMap != null) {
+      filter = (Node<Boolean>) SimpleParser.parse(filterMap, MyASTNodeBuilder.INST);
+    }
+    if (projectionMap != null) {
+      Set<String[]> keys = new LinkedHashSet<>();
+      projectionMap.forEach((k, v) -> {
+        if (k != null && v != null && toBoolean(v)) {
+          String[] key = split(k.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
+          if (key.length > 0) {
+            keys.add(key);
+          }
+        }
+      });
+      shouldNotEmpty(keys,
+          () -> new QueryRuntimeException("The projection can't empty, script:\n %s", code));
+      projector = (frs, m) -> {
+        List<Map<Object, Object>> results = new ArrayList<>();
+        for (Map<Object, Object> fr : frs) {
+          Map<Object, Object> result = new LinkedHashMap<>();
+          for (String[] key : keys) {
+            m.putMappedValue(result, key, m.getMappedValue(fr, key));
+          }
+          results.add(result);
+        }
+        return results;
+      };
+    }
+    if (filter == null && projector == null) {
+      filter = (Node<Boolean>) SimpleParser.parse(root, MyASTNodeBuilder.INST);
+    }
+    return Pair.of(filter, projector);
   }
 
   /**

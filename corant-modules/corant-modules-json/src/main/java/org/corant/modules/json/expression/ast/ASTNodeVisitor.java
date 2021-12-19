@@ -14,7 +14,7 @@
 package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTRegexNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTRegexNode;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

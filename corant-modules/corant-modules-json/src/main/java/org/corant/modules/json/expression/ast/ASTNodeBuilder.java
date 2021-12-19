@@ -11,10 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.json.expression.ast;
+
+import org.corant.shared.ubiquity.Sortable;
+
 /**
- * corant-modules-query-shared
- * 
- * @author bingo 下午3:00:03
+ * corant-modules-json
+ *
+ * @author bingo 上午10:13:20
  *
  */
-package org.corant.modules.query.shared.dynamic.jsonpredicate;
+public interface ASTNodeBuilder extends Sortable {
+
+  ASTNodeBuilder DFLT = token -> ASTNodeType.decideType(token).buildNode(token);
+
+  ASTNode<?> build(Object token);
+
+}

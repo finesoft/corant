@@ -20,9 +20,9 @@ import java.util.function.Function;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.modules.json.expression.Node;
-import org.corant.modules.json.expression.PredicateParser;
-import org.corant.modules.json.expression.ast.predicate.ASTFunctionNode;
-import org.corant.modules.json.expression.ast.predicate.ASTVariableNode;
+import org.corant.modules.json.expression.SimpleParser;
+import org.corant.modules.json.expression.ast.ASTFunctionNode;
+import org.corant.modules.json.expression.ast.ASTVariableNode;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -38,14 +38,14 @@ public class PredicateTest extends TestCase {
   public void testMixed() {
     Map<String, Object> r = mapOf("r.id", 123, "r.name", "bingo.chen", "r.a", 100, "r.b", "10");
     String exp =
-        "{\"$and\":[{\"$eq\":[{\"$fn:add\":[\"#r.a\", {\"$fn:convert\":[\"#r.b\",\"java.lang.Integer\"]},13]},123]},{\"$eq\":{\"#r.name\":{\"$fn:xxx\":\"bingo\"}}}]}";
-    Node<Boolean> node = PredicateParser.parse(exp);
-    assertTrue(node.getValue(new EvaluationContext() {
+        "{\"$and\":[{\"$eq\":[{\"#add\":[\"@r.a\", {\"#convert\":[\"@r.b\",\"java.lang.Integer\"]},13]},123]},{\"$eq\":{\"@r.name\":{\"#xxx\":\"bingo\"}}}]}";
+    Node<?> node = SimpleParser.parse(exp);
+    assertTrue((Boolean) node.getValue(new EvaluationContext() {
       @Override
       public Function<Object[], Object> resolveFunction(Node<?> node) {
         ASTFunctionNode fn = (ASTFunctionNode) node;
         Optional<FunctionResolver> fr =
-            PredicateParser.resolveFunction().filter(p -> p.supports(fn.getName())).findFirst();
+            SimpleParser.resolveFunction().filter(p -> p.supports(fn.getName())).findFirst();
         if (fr.isPresent()) {
           return fr.get().resolve(fn.getName());
         } else {

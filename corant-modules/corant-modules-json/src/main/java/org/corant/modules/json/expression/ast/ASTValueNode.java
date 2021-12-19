@@ -11,10 +11,32 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.json.expression.ast;
+
+import org.corant.modules.json.expression.EvaluationContext;
+
 /**
  * corant-modules-json
- * 
- * @author bingo 下午9:37:48
+ *
+ * @author bingo 下午5:04:44
  *
  */
-package org.corant.modules.json.expression.ast.function;
+public class ASTValueNode implements ASTNode<Object> {
+
+  protected final Object value;
+
+  public ASTValueNode(Object value) {
+    this.value = value;
+  }
+
+  @Override
+  public ASTNodeType getType() {
+    return ASTNodeType.VAL;
+  }
+
+  @Override
+  public Object getValue(EvaluationContext ctx) {
+    return value;
+  }
+
+}

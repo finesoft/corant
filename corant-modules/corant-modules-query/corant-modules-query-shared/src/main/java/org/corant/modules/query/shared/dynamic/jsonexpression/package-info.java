@@ -11,34 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.predicate;
-
-import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.ast.ASTNode;
-import org.corant.modules.json.expression.ast.ASTNodeType;
-
 /**
- * corant-modules-json
+ * corant-modules-query-shared
  *
- * @author bingo 下午5:04:44
+ * @author bingo 下午1:18:52
  *
  */
-public class ASTValueNode implements ASTNode<Object> {
-
-  protected final Object value;
-
-  public ASTValueNode(Object value) {
-    this.value = value;
-  }
-
-  @Override
-  public ASTNodeType getType() {
-    return ASTNodeType.VAL;
-  }
-
-  @Override
-  public Object getValue(EvaluationContext ctx) {
-    return value;
-  }
-
-}
+package org.corant.modules.query.shared.dynamic.jsonexpression;

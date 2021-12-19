@@ -15,23 +15,22 @@ package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.strip;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTBetweenNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTEqualNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTGreaterThanEqualNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTGreaterThanNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTInNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTLessThanEqualNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTLessThanNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTNoEqualNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTNoInNode;
-import org.corant.modules.json.expression.ast.predicate.ASTComparisonNode.ASTRegexNode;
-import org.corant.modules.json.expression.ast.predicate.ASTFunctionNode.ASTDefaultFunctionNode;
-import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicAndNode;
-import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicNorNode;
-import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicNotNode;
-import org.corant.modules.json.expression.ast.predicate.ASTLogicNode.ASTLogicOrNode;
-import org.corant.modules.json.expression.ast.predicate.ASTValueNode;
-import org.corant.modules.json.expression.ast.predicate.ASTVariableNode.ASTDefaultVariableNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTBetweenNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTEqualNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTGreaterThanEqualNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTGreaterThanNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTInNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTLessThanEqualNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTLessThanNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTNoEqualNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTNoInNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTRegexNode;
+import org.corant.modules.json.expression.ast.ASTFunctionNode.ASTDefaultFunctionNode;
+import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicAndNode;
+import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNorNode;
+import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNotNode;
+import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicOrNode;
+import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariableNode;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -200,13 +199,16 @@ public enum ASTNodeType {
   /**
    * The variable node
    */
-  VAR("#", true) {
+  VAR("@", true) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTDefaultVariableNode(object.toString().substring(1));
     }
   },
 
+  /**
+   * The value node
+   */
   VAL("", true) {
     @Override
     public ASTNode<?> buildNode(Object object) {
@@ -217,10 +219,10 @@ public enum ASTNodeType {
   /**
    * The function node
    */
-  FUN("$fn:", false) {
+  FUN("#", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
-      return new ASTDefaultFunctionNode(object.toString().substring(4));
+      return new ASTDefaultFunctionNode(object.toString().substring(1));
     }
   };
 

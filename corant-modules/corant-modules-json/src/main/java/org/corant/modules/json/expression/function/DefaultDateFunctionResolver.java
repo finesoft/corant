@@ -11,42 +11,46 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.function;
+package org.corant.modules.json.expression.function;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Classes.asClass;
-import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Conversions.toInstant;
 import static org.corant.shared.util.Maps.mapOf;
-import java.util.Arrays;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.function.Function;
 import org.corant.modules.json.expression.FunctionResolver;
+import org.corant.shared.conversion.ConverterHints;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午3:29:41
+ * @author bingo 下午3:29:37
  *
  */
-public class DefaultConvertFunctionResolver implements FunctionResolver {
+public class DefaultDateFunctionResolver implements FunctionResolver {
+
+  public static final String SIGN = "datediff";
 
   @Override
   public Function<Object[], Object> resolve(String name) {
     return fs -> {
-      shouldBeTrue(fs.length > 1);
-      Object object = fs[0];
-      Class<?> targetClass = asClass(fs[1].toString());
-      Map<String, ?> hints = null;
-      if (fs.length > 2) {
-        hints = mapOf(Arrays.copyOfRange(fs, 2, fs.length));
-      }
-      return toObject(object, targetClass, hints);
+      // FIXME Unfinished yet~
+      shouldBeTrue(fs.length > 2);
+      ChronoUnit unit = ChronoUnit.valueOf(fs[0].toString());
+      ZoneId zoneId = fs.length > 3 ? ZoneId.of(fs[3].toString()) : ZoneId.systemDefault();
+      Map<String, Object> hint = mapOf(ConverterHints.CVT_ZONE_ID_KEY, zoneId);
+      Instant left = toInstant(fs[1], hint);
+      Instant right = toInstant(fs[2], hint);
+      return left.until(right, unit);
     };
   }
 
   @Override
   public boolean supports(String name) {
-    return name != null && "convert".equalsIgnoreCase(name);
+    return SIGN.equalsIgnoreCase(name);
   }
 
 }

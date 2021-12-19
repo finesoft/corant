@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.predicate;
+package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toObject;
@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
-import org.corant.modules.json.expression.ast.ASTNode;
-import org.corant.modules.json.expression.ast.ASTNodeType;
 import org.corant.shared.exception.NotSupportedException;
 
 /**

@@ -11,22 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.predicate;
+package org.corant.modules.json.expression.ast;
 
-import org.corant.modules.json.expression.ast.ASTNode;
-import org.corant.modules.json.expression.ast.ASTNodeType;
-import org.corant.shared.ubiquity.Sortable;
+import org.corant.modules.json.expression.EvaluationContext;
 
 /**
  * corant-modules-json
  *
- * @author bingo 上午10:13:20
+ * @author bingo 下午9:25:56
  *
  */
-public interface ASTNodeBuilder extends Sortable {
+public interface ASTPredicateNode extends ASTNode<Boolean> {
 
-  ASTNodeBuilder DFLT = token -> ASTNodeType.decideType(token).buildNode(token);
-
-  ASTNode<?> build(Object token);
+  @Override
+  Boolean getValue(EvaluationContext ctx);
 
 }

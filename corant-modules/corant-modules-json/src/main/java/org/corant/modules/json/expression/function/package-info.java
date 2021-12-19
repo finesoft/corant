@@ -11,20 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.predicate;
-
-import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.ast.ASTNode;
-
 /**
  * corant-modules-json
  *
- * @author bingo 下午9:25:56
+ * @author bingo 上午11:31:13
  *
  */
-public interface ASTPredicateNode extends ASTNode<Boolean> {
-
-  @Override
-  Boolean getValue(EvaluationContext ctx);
-
-}
+package org.corant.modules.json.expression.function;

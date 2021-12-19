@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.function;
+package org.corant.modules.json.expression.function;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toDouble;
@@ -27,6 +27,11 @@ import org.corant.modules.json.expression.FunctionResolver;
  *
  */
 public class DefaultMathFunctionResolver implements FunctionResolver {
+
+  public static final String SIGN_ADD = "add";
+  public static final String SIGN_SUB = "sub";
+  public static final String SIGN_MUL = "mul";
+  public static final String SIGN_DIV = "div";
 
   public double[] convertDouble(Object[] factors) {
     double[] doubleFactors = new double[factors.length];
@@ -53,17 +58,17 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
         double[] dfs = convertDouble(fs);
         double result = dfs[0];
         switch (operator) {
-          case "add":
+          case SIGN_ADD:
             for (int i = 1; i < dfs.length; i++) {
               result += dfs[i];
             }
             break;
-          case "sub":
+          case SIGN_SUB:
             for (int i = 1; i < dfs.length; i++) {
               result -= dfs[i];
             }
             break;
-          case "mul":
+          case SIGN_MUL:
             for (int i = 1; i < dfs.length; i++) {
               result *= dfs[i];
             }
@@ -79,17 +84,17 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
         long[] lfs = convertLong(fs);
         long result = lfs[0];
         switch (operator) {
-          case "add":
+          case SIGN_ADD:
             for (int i = 1; i < lfs.length; i++) {
               result += lfs[i];
             }
             break;
-          case "sub":
+          case SIGN_SUB:
             for (int i = 1; i < lfs.length; i++) {
               result -= lfs[i];
             }
             break;
-          case "mul":
+          case SIGN_MUL:
             for (int i = 1; i < lfs.length; i++) {
               result *= lfs[i];
             }
@@ -107,7 +112,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return name != null && ("add".equalsIgnoreCase(name) || "sub".equalsIgnoreCase(name)
-        || "mul".equalsIgnoreCase(name) || "div".equalsIgnoreCase(name));
+    return SIGN_ADD.equalsIgnoreCase(name) || SIGN_SUB.equalsIgnoreCase(name)
+        || SIGN_MUL.equalsIgnoreCase(name) || SIGN_DIV.equalsIgnoreCase(name);
   }
 }

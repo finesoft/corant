@@ -14,7 +14,6 @@
 package org.corant.modules.json.expression;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -25,10 +24,9 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.ast.ASTNode;
+import org.corant.modules.json.expression.ast.ASTNodeBuilder;
 import org.corant.modules.json.expression.ast.ASTNodeType;
 import org.corant.modules.json.expression.ast.ASTNodeVisitor;
-import org.corant.modules.json.expression.ast.predicate.ASTNodeBuilder;
-import org.corant.modules.json.expression.ast.predicate.ASTPredicateNode;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Services;
 
@@ -38,25 +36,20 @@ import org.corant.shared.util.Services;
  * @author bingo 下午2:44:37
  *
  */
-public class PredicateParser {
+public class SimpleParser {
 
-  public static Node<Boolean> parse(String json) {
-    return parse(json, resolveBuilder(), resolveVisitor());
+  public static Node<?> parse(Map<String, Object> map, ASTNodeBuilder builder) {
+    return parse(map, builder, resolveVisitor());
   }
 
-  public static Node<Boolean> parse(String json, ASTNodeBuilder builder) {
-    return parse(json, builder, resolveVisitor());
-  }
-
-  public static Node<Boolean> parse(String json, ASTNodeBuilder builder, ASTNodeVisitor visitor) {
-    final Map<String, Object> map = Jsons.fromString(json);
+  public static Node<?> parse(Map<String, Object> map, ASTNodeBuilder builder,
+      ASTNodeVisitor visitor) {
     shouldBeTrue(isNotEmpty(map) && sizeOf(map) == 1,
         () -> new ParseException("The syntax error!"));
     final Entry<String, Object> entry = map.entrySet().iterator().next();
     final String key = entry.getKey();
     final Object val = entry.getValue();
-    final ASTPredicateNode root =
-        shouldInstanceOf(shouldNotNull(builder.build(key)), ASTPredicateNode.class);
+    final ASTNode<?> root = shouldNotNull(builder.build(key));
     if (visitor.supports(root.getType())) {
       visitor.prepare(root);
     }
@@ -65,6 +58,18 @@ public class PredicateParser {
       visitor.visit(root);
     }
     return root;
+  }
+
+  public static Node<?> parse(String json) {
+    return parse(json, resolveBuilder(), resolveVisitor());
+  }
+
+  public static Node<?> parse(String json, ASTNodeBuilder builder) {
+    return parse(json, builder, resolveVisitor());
+  }
+
+  public static Node<?> parse(String json, ASTNodeBuilder builder, ASTNodeVisitor visitor) {
+    return parse(Jsons.fromString(json), builder, visitor);
   }
 
   public static ASTNodeBuilder resolveBuilder() {

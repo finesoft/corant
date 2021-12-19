@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.json.expression.ast.predicate;
+package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.strip;
@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
-import org.corant.modules.json.expression.ast.ASTNode;
-import org.corant.modules.json.expression.ast.ASTNodeType;
 
 /**
  * corant-modules-json

@@ -32,6 +32,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
   public static final String SIGN_SUB = "sub";
   public static final String SIGN_MUL = "mul";
   public static final String SIGN_DIV = "div";
+  public static final String SIGN_MOD = "mod";
 
   public double[] convertDouble(Object[] factors) {
     double[] doubleFactors = new double[factors.length];
@@ -73,6 +74,11 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
               result *= dfs[i];
             }
             break;
+          case SIGN_MOD:
+            for (int i = 1; i < dfs.length; i++) {
+              result %= dfs[i];
+            }
+            break;
           default:
             for (int i = 1; i < dfs.length; i++) {
               result /= dfs[i];
@@ -99,6 +105,11 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
               result *= lfs[i];
             }
             break;
+          case SIGN_MOD:
+            for (int i = 1; i < lfs.length; i++) {
+              result %= lfs[i];
+            }
+            break;
           default:
             for (int i = 1; i < lfs.length; i++) {
               result /= lfs[i];
@@ -113,6 +124,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
   @Override
   public boolean supports(String name) {
     return SIGN_ADD.equalsIgnoreCase(name) || SIGN_SUB.equalsIgnoreCase(name)
-        || SIGN_MUL.equalsIgnoreCase(name) || SIGN_DIV.equalsIgnoreCase(name);
+        || SIGN_MUL.equalsIgnoreCase(name) || SIGN_DIV.equalsIgnoreCase(name)
+        || SIGN_MOD.equalsIgnoreCase(name);
   }
 }

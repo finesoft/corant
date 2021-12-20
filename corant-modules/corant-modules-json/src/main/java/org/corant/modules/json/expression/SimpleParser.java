@@ -45,7 +45,7 @@ public class SimpleParser {
   public static Node<?> parse(Map<String, Object> map, ASTNodeBuilder builder,
       ASTNodeVisitor visitor) {
     shouldBeTrue(isNotEmpty(map) && sizeOf(map) == 1,
-        () -> new ParseException("The syntax error!"));
+        () -> new ParseException("Syntax error, only one root node is accepted!"));
     final Entry<String, Object> entry = map.entrySet().iterator().next();
     final String key = entry.getKey();
     final Object val = entry.getValue();

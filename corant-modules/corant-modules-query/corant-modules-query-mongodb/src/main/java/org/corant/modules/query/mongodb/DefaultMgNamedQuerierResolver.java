@@ -56,7 +56,7 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
     }
     switch (query.getScript().getType()) {
       case CDI:
-      case JPE:
+      case JSE:
       case JS:
       case KT:
         throw new NotSupportedException("The query script type %s not support!",

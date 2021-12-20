@@ -69,7 +69,7 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
         return createJsBuilder(query);
       case CDI:
         return createJbBuilder(query);
-      case JPE:
+      case JSE:
       case KT:
         throw new NotSupportedException("The query script type %s not support!",
             query.getScript().getType());

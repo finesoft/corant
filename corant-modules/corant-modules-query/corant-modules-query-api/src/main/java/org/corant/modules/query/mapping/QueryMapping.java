@@ -109,7 +109,7 @@ public class QueryMapping {
             "The 'script' element in 'query' element [%s] in query file [%s] can not null!",
             q.getName(), getUrl()));
       }
-      if (q.getScript().getType() == ScriptType.JPE) {
+      if (q.getScript().getType() == ScriptType.JSE) {
         brokens.add(String.format(
             "The type [%s] of the 'script' element of the 'query' element [%s] in the query file [%s] not support!",
             q.getScript().getType().toString(), q.getName(), getUrl()));

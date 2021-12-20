@@ -67,7 +67,7 @@ public class DefaultJpqlNamedQuerierResolver
       case JS:
         return createJsProcessor(query);
       case CDI:
-      case JPE:
+      case JSE:
       case KT:
         throw new NotSupportedException("The query script type %s not support!",
             query.getScript().getType());

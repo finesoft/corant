@@ -105,25 +105,24 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
   @Override
   public boolean supports(Script script) {
-    return script != null && script.getType() == ScriptType.JPE;
+    return script != null && script.getType() == ScriptType.JSE;
   }
 
   @SuppressWarnings("unchecked")
   protected Function<ParameterAndResultPair, Object> createInjectFuns(FetchQuery fetchQuery,
       Script script) {
     final String code = script.getCode();
-    final Pair<Node<Boolean>, BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>>> eval =
-        resolveScript(code);
+    final Pair<Node<Boolean>, BiFunction<List<Object>, QueryObjectMapper, List<Object>>> eval =
+        resolveInjectScript(code);
     return p -> {
       List<Map<Object, Object>> parentResults = (List<Map<Object, Object>>) p.parentResult;
       List<Map<Object, Object>> fetchResults = (List<Map<Object, Object>>) p.fetchedResult;
 
       final Node<Boolean> filter = eval.left();
-      final BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>> projector =
-          eval.right();
+      final BiFunction<List<Object>, QueryObjectMapper, List<Object>> projector = eval.right();
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       for (Map<Object, Object> r : parentResults) {
-        List<Map<Object, Object>> injectResults = new ArrayList<>();
+        List<Object> injectResults = new ArrayList<>();
         if (filter == null) {
           if (!fetchQuery.isMultiRecords()) {
             injectResults.add(fetchResults.get(0));
@@ -132,7 +131,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
           }
         } else {
           for (Map<Object, Object> fr : fetchResults) {
-            if (filter.getValue(evalCtx.reset(r, fr))) {
+            if (filter.getValue(evalCtx.link(r, fr))) {
               injectResults.add(fr);
               if (!fetchQuery.isMultiRecords()) {
                 break;
@@ -162,19 +161,18 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     return p -> {
       Map<Object, Object> r = (Map<Object, Object>) p.result;
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
-      return ast.getValue(evalCtx.reset(r, null));
+      return ast.getValue(evalCtx.link(r, null));
     };
   }
 
   @SuppressWarnings("unchecked")
-  protected Pair<Node<Boolean>, BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>>> resolveScript(
+  protected Pair<Node<Boolean>, BiFunction<List<Object>, QueryObjectMapper, List<Object>>> resolveInjectScript(
       String code) {
     final Map<String, Object> root = Jsons.fromString(code);
     Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
     Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
     Node<Boolean> filter = null;
-    BiFunction<List<Map<Object, Object>>, QueryObjectMapper, List<Map<Object, Object>>> projector =
-        null;
+    BiFunction<List<Object>, QueryObjectMapper, List<Object>> projector = null;
     if (filterMap != null) {
       filter = (Node<Boolean>) SimpleParser.parse(filterMap, MyASTNodeBuilder.INST);
     }
@@ -191,8 +189,8 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       shouldNotEmpty(keys,
           () -> new QueryRuntimeException("The projection can't empty, script:\n %s", code));
       projector = (frs, m) -> {
-        List<Map<Object, Object>> results = new ArrayList<>();
-        for (Map<Object, Object> fr : frs) {
+        List<Object> results = new ArrayList<>();
+        for (Object fr : frs) {
           Map<Object, Object> result = new LinkedHashMap<>();
           for (String[] key : keys) {
             m.putMappedValue(result, key, m.getMappedValue(fr, key));
@@ -279,7 +277,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       this.functionResolvers = functionResolvers;
     }
 
-    public EvaluationContext reset(Map<Object, Object> parentResult,
+    public EvaluationContext link(Map<Object, Object> parentResult,
         Map<Object, Object> fetchResult) {
       this.parentResult = parentResult;
       this.fetchResult = fetchResult;

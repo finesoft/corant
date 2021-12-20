@@ -102,16 +102,6 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   @Any
   protected Instance<ResultBeanMapper> instances;
 
-  @Override
-  public boolean supports(Class<?> resultClass, QueryHint hint) {
-    boolean can = hint != null && areEqual(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
-    if (can) {
-      Named named = resolveBeanNamed(hint);
-      can = named != null && instances.select(named).isResolvable();
-    }
-    return can;
-  }
-
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
@@ -122,18 +112,26 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
     List<Map<Object, Object>> list = null;
     if (result instanceof Map) {
       list = listOf((Map) result);
-    } else {
-      if (result instanceof Forwarding) {
-        list = ((Forwarding) result).getResults();
-      } else if (result instanceof List) {
-        list = (List) result;
-      } else if (result instanceof Paging) {
-        list = ((Paging) result).getResults();
-      }
+    } else if (result instanceof Forwarding) {
+      list = ((Forwarding) result).getResults();
+    } else if (result instanceof List) {
+      list = (List) result;
+    } else if (result instanceof Paging) {
+      list = ((Paging) result).getResults();
     }
     if (!isEmpty(list)) {
       func.accept(query, parameter, resolveExtraParams(qh), list);
     }
+  }
+
+  @Override
+  public boolean supports(Class<?> resultClass, QueryHint hint) {
+    boolean can = hint != null && areEqual(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
+    if (can) {
+      Named named = resolveBeanNamed(hint);
+      can = named != null && instances.select(named).isResolvable();
+    }
+    return can;
   }
 
   @PreDestroy
@@ -144,9 +142,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   }
 
   protected ResultBeanMapper resolveBeanMapper(Annotation named) {
-    if (named == null || instances.isUnsatisfied()) {
-      return null;
-    } else {
+    if (named != null && !instances.isUnsatisfied()) {
       Instance<ResultBeanMapper> matched = instances.select(named);
       if (matched.isResolvable()) {
         return matched.get();

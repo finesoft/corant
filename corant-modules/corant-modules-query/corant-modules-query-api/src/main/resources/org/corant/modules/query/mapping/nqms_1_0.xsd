@@ -458,9 +458,9 @@ In the default implementation, all injections may be only reference injections, 
                     <xsd:documentation><![CDATA[Specify that the script is java CDI named qualifier]]></xsd:documentation>
                 </xsd:annotation>                
             </xsd:enumeration>      
-            <xsd:enumeration value="JPE">
+            <xsd:enumeration value="JSE">
                 <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script is json predicate expression]]></xsd:documentation>
+                    <xsd:documentation><![CDATA[Specify that the script is json expression]]></xsd:documentation>
                 </xsd:annotation>                
             </xsd:enumeration>                     
         </xsd:restriction>

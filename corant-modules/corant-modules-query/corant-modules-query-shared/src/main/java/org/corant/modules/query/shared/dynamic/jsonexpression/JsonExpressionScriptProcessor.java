@@ -14,12 +14,19 @@
 package org.corant.modules.query.shared.dynamic.jsonexpression;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotEmpty;
+import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapMap;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -63,6 +70,9 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
   public static final String FILTER_KEY = "filter";
   public static final String PROJECTION_KEY = "projection";
+  public static final String PROJECTION_RENAME_KEY = "rename";
+  public static final String PROJECTION_TYPE_KEY = "type";
+
   public static final String PARENT_RESULT_VAR_PREFIX =
       RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int PARENT_RESULT_VAR_PREFIX_LEN = PARENT_RESULT_VAR_PREFIX.length();
@@ -108,18 +118,15 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     return script != null && script.getType() == ScriptType.JSE;
   }
 
-  @SuppressWarnings("unchecked")
   protected Function<ParameterAndResultPair, Object> createInjectFuns(FetchQuery fetchQuery,
       Script script) {
     final String code = script.getCode();
-    final Pair<Node<Boolean>, BiFunction<List<Object>, QueryObjectMapper, List<Object>>> eval =
-        resolveInjectScript(code);
+    final Pair<Node<Boolean>, Projector> eval = resolveInjectScript(code);
+    final Node<Boolean> filter = eval.left();
+    final Projector projector = eval.right();
     return p -> {
-      List<Map<Object, Object>> parentResults = (List<Map<Object, Object>>) p.parentResult;
-      List<Map<Object, Object>> fetchResults = (List<Map<Object, Object>>) p.fetchedResult;
-
-      final Node<Boolean> filter = eval.left();
-      final BiFunction<List<Object>, QueryObjectMapper, List<Object>> projector = eval.right();
+      List<Map<Object, Object>> parentResults = forceCast(p.parentResult);
+      List<Map<Object, Object>> fetchResults = forceCast(p.fetchedResult);
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
       for (Map<Object, Object> r : parentResults) {
         List<Object> injectResults = new ArrayList<>();
@@ -139,14 +146,26 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
             }
           }
         }
-        if (projector != null) {
+        if (projector != null && !injectResults.isEmpty()) {
           injectResults = projector.apply(injectResults, mapper);
         }
-        if (fetchQuery.isMultiRecords()) {
-          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
+        if (isNotEmpty(fetchQuery.getInjectPropertyNamePath())) {
+          if (fetchQuery.isMultiRecords()) {
+            mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
+          } else {
+            mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(),
+                isNotEmpty(injectResults) ? injectResults.get(0) : null);
+          }
         } else {
-          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(),
-              isNotEmpty(injectResults) ? injectResults.get(0) : null);
+          for (Object injectResult : injectResults) {
+            if (injectResult != null) {
+              Map<Object, Object> injectResultMap = forceCast(injectResult);
+              r.putAll(injectResultMap);
+              if (!fetchQuery.isMultiRecords()) {
+                break;
+              }
+            }
+          }
         }
       }
       return null;
@@ -165,45 +184,92 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     };
   }
 
-  @SuppressWarnings("unchecked")
-  protected Pair<Node<Boolean>, BiFunction<List<Object>, QueryObjectMapper, List<Object>>> resolveInjectScript(
-      String code) {
+  protected Projector resolveInjectProjector(Map<String, Object> projectionMap) {
+    Set<Mapping> mappings = new LinkedHashSet<>();
+    projectionMap.forEach((k, v) -> {
+      if (k != null && v != null) {
+        String key = k.toString();
+        String[] keyPath = split(key, Names.NAME_SPACE_SEPARATORS, true, true);
+        if (keyPath.length > 0) {
+          if (v instanceof Map) {
+            Map<?, ?> vm = (Map<?, ?>) v;
+            String name = getMapString(vm, PROJECTION_RENAME_KEY, key);
+            String[] rename = split(name, Names.NAME_SPACE_SEPARATORS, true, true);
+            String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
+            Class<?> type = typeName != null ? asClass(typeName) : null;
+            mappings.add(new Mapping(keyPath, rename, type));
+          } else if (toBoolean(v)) {
+            mappings.add(new Mapping(keyPath, keyPath, null));
+          }
+        }
+      }
+    });
+    if (isEmpty(mappings)) {
+      throw new QueryRuntimeException("The projection can't empty!");
+    }
+    return new Projector(mappings);
+  }
+
+  protected Pair<Node<Boolean>, Projector> resolveInjectScript(String code) {
     final Map<String, Object> root = Jsons.fromString(code);
     Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
     Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
     Node<Boolean> filter = null;
-    BiFunction<List<Object>, QueryObjectMapper, List<Object>> projector = null;
+    Projector projector = null;
     if (filterMap != null) {
-      filter = (Node<Boolean>) SimpleParser.parse(filterMap, MyASTNodeBuilder.INST);
+      filter = forceCast(SimpleParser.parse(filterMap, MyASTNodeBuilder.INST));
     }
     if (projectionMap != null) {
-      Set<String[]> keys = new LinkedHashSet<>();
-      projectionMap.forEach((k, v) -> {
-        if (k != null && v != null && toBoolean(v)) {
-          String[] key = split(k.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
-          if (key.length > 0) {
-            keys.add(key);
-          }
-        }
-      });
-      shouldNotEmpty(keys,
-          () -> new QueryRuntimeException("The projection can't empty, script:\n %s", code));
-      projector = (frs, m) -> {
-        List<Object> results = new ArrayList<>();
-        for (Object fr : frs) {
-          Map<Object, Object> result = new LinkedHashMap<>();
-          for (String[] key : keys) {
-            m.putMappedValue(result, key, m.getMappedValue(fr, key));
-          }
-          results.add(result);
-        }
-        return results;
-      };
+      projector = resolveInjectProjector(projectionMap);
     }
     if (filter == null && projector == null) {
-      filter = (Node<Boolean>) SimpleParser.parse(root, MyASTNodeBuilder.INST);
+      filter = forceCast(SimpleParser.parse(root, MyASTNodeBuilder.INST));
     }
     return Pair.of(filter, projector);
+  }
+
+  /**
+   * corant-modules-query-shared
+   *
+   * @author bingo 下午3:13:21
+   *
+   */
+  static class Mapping {
+    final String[] extractPath;
+    final String[] injectPath;
+    final Class<?> type;
+
+    public Mapping(String[] extractPath, String[] injectPath, Class<?> type) {
+      this.extractPath = extractPath;
+      this.injectPath = injectPath;
+      this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      Mapping other = (Mapping) obj;
+      if (!Arrays.equals(extractPath, other.extractPath)) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      return prime * result + Arrays.hashCode(extractPath);
+    }
+
   }
 
   /**
@@ -304,6 +370,39 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
         }
         return objectMapper.getMappedValue(queryParameterMap, myNode.getNamePath());
       }
+    }
+
+  }
+
+  /**
+   * corant-modules-query-shared
+   *
+   * @author bingo 下午3:17:15
+   *
+   */
+  static class Projector implements BiFunction<List<Object>, QueryObjectMapper, List<Object>> {
+
+    final Collection<Mapping> mappings;
+
+    public Projector(Collection<Mapping> mappings) {
+      this.mappings = Collections.unmodifiableCollection(mappings);
+    }
+
+    @Override
+    public List<Object> apply(List<Object> fetchResults, QueryObjectMapper objectMapper) {
+      List<Object> results = new ArrayList<>();
+      for (Object fetchResult : fetchResults) {
+        Map<Object, Object> result = new LinkedHashMap<>();
+        for (Mapping mapping : mappings) {
+          Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
+          if (mapping.type != null) {
+            extracted = toObject(extracted, mapping.type);
+          }
+          objectMapper.putMappedValue(result, mapping.injectPath, extracted);
+        }
+        results.add(result);
+      }
+      return results;
     }
 
   }

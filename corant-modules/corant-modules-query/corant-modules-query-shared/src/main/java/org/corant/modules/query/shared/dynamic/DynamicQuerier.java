@@ -19,6 +19,7 @@ import java.util.Map;
 import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.DefaultQuerierConfig;
 
@@ -69,6 +70,14 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    * thrown.
    */
   int resolveLimit();
+
+  /**
+   * Returns the max fetch size
+   *
+   * @param parentResult
+   * @param fetchQuery
+   */
+  int resolveMaxFetchSize(Object parentResult, FetchQuery fetchQuery);
 
   /**
    * Returns either the value of the query max select size property(the property name is

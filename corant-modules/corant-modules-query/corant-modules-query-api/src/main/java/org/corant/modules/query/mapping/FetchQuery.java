@@ -38,7 +38,7 @@ public class FetchQuery implements Serializable {
   private String injectPropertyName;
   private String[] injectPropertyNamePath = Strings.EMPTY_ARRAY;
   private Class<?> resultClass = Map.class;
-  private int maxSize = 1024;
+  private int maxSize = -1;
   private List<FetchQueryParameter> parameters = new ArrayList<>();
   private boolean multiRecords = true;
   private Script predicateScript = new Script();

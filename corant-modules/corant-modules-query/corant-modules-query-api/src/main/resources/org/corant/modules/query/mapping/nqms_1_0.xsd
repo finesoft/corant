@@ -214,7 +214,10 @@ In the default implementation, all injections may be only reference injections, 
             <xsd:annotation>
                 <xsd:documentation>
                 	<![CDATA[
-                    Note: The max fetch size attribute was deprecated 
+                    Specify the number of records that fetchquery is expected to return. 
+                    less than 1 indicate unlimited (the underlying database may have constraints),
+                    default is unlimited.
+                    Note: Must be careful when using this attribute, as there may be unexpected results. 
                     ]]>
                 </xsd:documentation>
             </xsd:annotation>

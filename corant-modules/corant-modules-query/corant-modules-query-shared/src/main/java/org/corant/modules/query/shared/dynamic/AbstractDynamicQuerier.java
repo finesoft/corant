@@ -20,6 +20,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -164,6 +165,15 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       }
     }
     return limit;
+  }
+
+  @Override
+  public int resolveMaxFetchSize(Object parentResult, FetchQuery fetchQuery) {
+    int maxFetchSize = fetchQuery.getMaxSize();
+    if (maxFetchSize > 0 && parentResult instanceof Collection) {
+      maxFetchSize = maxFetchSize * ((Collection<?>) parentResult).size();
+    }
+    return maxFetchSize;
   }
 
   @Override

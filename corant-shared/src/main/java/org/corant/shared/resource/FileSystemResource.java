@@ -141,15 +141,11 @@ public class FileSystemResource extends URLResource implements WritableResource 
     return FileChannel.open(file.toPath(), StandardOpenOption.WRITE);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (URLResource.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (FileSystemResource.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+    return super.unwrap(cls);
   }
 }

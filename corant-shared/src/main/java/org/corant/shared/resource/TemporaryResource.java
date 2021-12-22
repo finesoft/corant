@@ -121,6 +121,14 @@ public class TemporaryResource implements WritableResource {
     return dfos = new SimpleDeferredFileOutputStream(memoryThreshold, this::createTempFile);
   }
 
+  @Override
+  public <T> T unwrap(Class<T> cls) {
+    if (TemporaryResource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    return WritableResource.super.unwrap(cls);
+  }
+
   protected File createTempFile() {
     File tempDir = new File(this.tempDir);
     String tempFileName = filename.concat("_").concat(UUID.randomUUID().toString());

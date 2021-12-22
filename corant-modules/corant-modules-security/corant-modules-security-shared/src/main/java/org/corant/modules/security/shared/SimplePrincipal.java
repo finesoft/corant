@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.IntFunction;
 import org.corant.modules.security.Principal;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -81,15 +80,11 @@ public class SimplePrincipal implements Principal, Serializable {
     return "SimplePrincipal [name=" + name + ", properties=" + properties + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (Principal.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (SimplePrincipal.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return Principal.super.unwrap(cls);
   }
 }

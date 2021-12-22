@@ -19,7 +19,6 @@ import java.io.ObjectOutputStream;
 import java.util.function.Predicate;
 import org.corant.modules.security.Permission;
 import org.corant.modules.security.shared.util.StringPredicates;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -91,16 +90,12 @@ public class SimplePermission implements Permission {
     return "SimplePermission [name=" + name + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (Permission.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (SimplePermission.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return Permission.super.unwrap(cls);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

@@ -15,7 +15,6 @@ package org.corant.modules.security.shared;
 
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.Principal;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -56,16 +55,12 @@ public class DefaultSecurityContext implements SecurityContext {
         + principal + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (SecurityContext.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (DefaultSecurityContext.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return SecurityContext.super.unwrap(cls);
   }
 
 }

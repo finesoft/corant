@@ -27,6 +27,11 @@ public interface Role extends Serializable {
 
   boolean implies(Role role);
 
-  <T> T unwrap(Class<T> cls);
+  default <T> T unwrap(Class<T> cls) {
+    if (Role.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    throw new IllegalArgumentException("Can't unwrap role to " + cls);
+  }
 
 }

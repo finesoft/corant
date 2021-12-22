@@ -43,4 +43,12 @@ public interface WritableResource extends Resource {
     }
     return null;
   }
+
+  @Override
+  default <T> T unwrap(Class<T> cls) {
+    if (WritableResource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    return Resource.super.unwrap(cls);
+  }
 }

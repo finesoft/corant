@@ -18,6 +18,7 @@
           <artifactId>javax.activation-api</artifactId>
         </exclusion>
       </exclusions>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.alipay.sdk</groupId>
@@ -28,6 +29,7 @@
           <artifactId>javax.activation-api</artifactId>
         </exclusion>
       </exclusions>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.corant</groupId>

@@ -41,6 +41,10 @@ public class CorantConfigSource implements ConfigSource, AutoCloseable {
     }
   }
 
+  public ConfigSource getDelegate() {
+    return delegate;
+  }
+
   @Override
   public String getName() {
     return delegate.getName();
@@ -70,10 +74,12 @@ public class CorantConfigSource implements ConfigSource, AutoCloseable {
     return delegate.getValue(propertyName);
   }
 
-  @SuppressWarnings("unchecked")
   public <T extends ConfigSource> T unwrap(Class<T> type) {
-    if (delegate.getClass().isAssignableFrom(type)) {
-      return (T) delegate;
+    if (CorantConfigSource.class.isAssignableFrom(type)) {
+      return type.cast(this);
+    }
+    if (ConfigSource.class.isAssignableFrom(type)) {
+      return type.cast(this);
     }
     throw new IllegalArgumentException("Can't unwrap ConfigSource to " + type);
   }

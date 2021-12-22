@@ -19,7 +19,6 @@ import java.io.ObjectOutputStream;
 import java.util.function.Predicate;
 import org.corant.modules.security.Role;
 import org.corant.modules.security.shared.util.StringPredicates;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -92,16 +91,12 @@ public class SimpleRole implements Role {
     return "SimpleRole [name=" + name + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (Role.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (SimpleRole.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return Role.super.unwrap(cls);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

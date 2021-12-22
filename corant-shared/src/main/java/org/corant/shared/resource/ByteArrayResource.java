@@ -78,6 +78,14 @@ public class ByteArrayResource implements Resource {
     return new ByteArrayInputStream(byteArray);
   }
 
+  @Override
+  public <T> T unwrap(Class<T> cls) {
+    if (ByteArrayResource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    return Resource.super.unwrap(cls);
+  }
+
   public ByteArrayResource withLocation(String location) {
     return new ByteArrayResource(byteArray, location);
   }

@@ -33,5 +33,10 @@ public interface Realm {
 
   boolean supports(Token token);
 
-  <T> T unwrap(Class<T> cls);
+  default <T> T unwrap(Class<T> cls) {
+    if (Realm.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    throw new IllegalArgumentException("Can't unwrap realm to " + cls);
+  }
 }

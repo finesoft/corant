@@ -112,6 +112,14 @@ public class PathResource implements WritableResource {
     return Files.newByteChannel(path, StandardOpenOption.WRITE);
   }
 
+  @Override
+  public <T> T unwrap(Class<T> cls) {
+    if (PathResource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    return WritableResource.super.unwrap(cls);
+  }
+
   protected boolean isReadOnly() {
     return sizeOf(openOptions) == 1 && openOptions[0] == StandardOpenOption.READ;
   }

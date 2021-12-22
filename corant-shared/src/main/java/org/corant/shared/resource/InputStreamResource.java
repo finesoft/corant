@@ -111,4 +111,13 @@ public class InputStreamResource implements Resource {
   public InputStream openInputStream() throws IOException {
     return inputStream;
   }
+
+  @Override
+  public <T> T unwrap(Class<T> cls) {
+    if (InputStreamResource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    return Resource.super.unwrap(cls);
+  }
+
 }

@@ -30,5 +30,11 @@ public interface Principal extends java.security.Principal, Serializable {
     return subject.getPrincipals().contains(this);
   }
 
-  <T> T unwrap(Class<T> cls);
+  default <T> T unwrap(Class<T> cls) {
+    if (Principal.class.isAssignableFrom(cls)
+        || java.security.Principal.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    throw new IllegalArgumentException("Can't unwrap principal to " + cls);
+  }
 }

@@ -13,8 +13,8 @@
  */
 package org.corant.modules.microprofile.jwt;
 
+import java.util.Set;
 import org.corant.modules.security.Principal;
-import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * @author bingo 上午11:22:36
  *
  */
-public class MpJWTPrincipal implements Principal {
+public class MpJWTPrincipal implements JsonWebToken, Principal {
 
   private static final long serialVersionUID = 684661108279828334L;
 
@@ -31,6 +31,16 @@ public class MpJWTPrincipal implements Principal {
 
   public MpJWTPrincipal(JsonWebToken mpPrincipal) {
     this.mpPrincipal = mpPrincipal;
+  }
+
+  @Override
+  public <T> T getClaim(String claimName) {
+    return mpPrincipal.getClaim(claimName);
+  }
+
+  @Override
+  public Set<String> getClaimNames() {
+    return mpPrincipal.getClaimNames();
   }
 
   public JsonWebToken getMpPrincipal() {
@@ -43,17 +53,13 @@ public class MpJWTPrincipal implements Principal {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> cls) {
-    if (Principal.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (MpJWTPrincipal.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
     if (JsonWebToken.class.isAssignableFrom(cls)) {
-      return (T) mpPrincipal;
+      return cls.cast(mpPrincipal);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return Principal.super.unwrap(cls);
   }
 }

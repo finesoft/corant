@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -63,15 +62,11 @@ public class SimpleSubject implements Subject {
     return "SimpleSubject [id=" + id + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (Subject.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (SimpleSubject.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return Subject.super.unwrap(cls);
   }
 }

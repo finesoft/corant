@@ -15,8 +15,6 @@ package org.corant.modules.security.shared;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.corant.modules.security.Principal;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -47,19 +45,12 @@ public class UserPrincipal extends SimplePrincipal {
     return userId;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (Principal.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
-    if (SimplePrincipal.class.isAssignableFrom(cls)) {
-      return (T) this;
-    }
     if (UserPrincipal.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new NotSupportedException("Can't unwrap %s", cls);
+    return super.unwrap(cls);
   }
 
 }

@@ -40,6 +40,11 @@ public interface Subject extends Serializable {
     return getPrincipals().stream().map(p -> p.unwrap(c)).collect(Collectors.toList());
   }
 
-  <T> T unwrap(Class<T> cls);
+  default <T> T unwrap(Class<T> cls) {
+    if (Subject.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    throw new IllegalArgumentException("Can't unwrap subject to " + cls);
+  }
 
 }

@@ -32,7 +32,6 @@ import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.resource.SourceType;
-import org.corant.shared.resource.WrappedResource;
 import org.corant.shared.util.FileUtils;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
@@ -120,15 +119,11 @@ public class OSSStorageService {
    * @author bingo 下午12:17:51
    *
    */
-  public static class OSSResource implements WrappedResource {
+  public static class OSSResource implements Resource {
 
     protected OSSObject object;
     protected String location;
 
-    /**
-     * @param object
-     * @param location
-     */
     public OSSResource(OSSObject object, String location) {
       this.object = object;
       this.location = location;
@@ -171,13 +166,12 @@ public class OSSStorageService {
       return object.getObjectContent();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T unwrap(Class<T> cls) {
-      if (OSSObject.class.isAssignableFrom(cls)) {
-        return (T) object;
+      if (OSSResource.class.isAssignableFrom(cls)) {
+        return cls.cast(this);
       }
-      throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+      return Resource.super.unwrap(cls);
     }
   }
 }

@@ -132,4 +132,11 @@ public interface Resource {
     }
     return null;
   }
+
+  default <T> T unwrap(Class<T> cls) {
+    if (Resource.class.isAssignableFrom(cls)) {
+      return cls.cast(this);
+    }
+    throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+  }
 }

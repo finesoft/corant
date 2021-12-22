@@ -257,10 +257,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
         return false;
       }
       Mapping other = (Mapping) obj;
-      if (!Arrays.equals(extractPath, other.extractPath)) {
-        return false;
-      }
-      return true;
+      return Arrays.equals(extractPath, other.extractPath);
     }
 
     @Override

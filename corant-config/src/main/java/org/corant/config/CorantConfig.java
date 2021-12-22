@@ -177,11 +177,13 @@ public class CorantConfig implements Config, Serializable {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> type) {
     // TODO MP 2.0
     if (CorantConfig.class.isAssignableFrom(type)) {
-      return (T) this;
+      return type.cast(this);
+    }
+    if (Config.class.isAssignableFrom(type)) {
+      return type.cast(this);
     }
     throw new IllegalArgumentException("Can't unwrap CorantConfig to " + type);
   }

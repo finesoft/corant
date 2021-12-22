@@ -37,7 +37,7 @@ import org.corant.shared.util.FileUtils;
  * @author bingo 下午4:06:15
  *
  */
-public class URLResource implements WrappedResource {
+public class URLResource implements Resource {
   protected final SourceType sourceType;
   protected final URL url;
 
@@ -123,7 +123,7 @@ public class URLResource implements WrappedResource {
         return FileChannel.open(file.toPath(), StandardOpenOption.READ);
       }
     }
-    return WrappedResource.super.openReadableChannel();
+    return Resource.super.openReadableChannel();
   }
 
   @Override
@@ -131,13 +131,12 @@ public class URLResource implements WrappedResource {
     return getClass().getSimpleName() + " [sourceType=" + sourceType + ", url=" + url + "]";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrap(Class<T> cls) {
     if (URLResource.class.isAssignableFrom(cls)) {
-      return (T) this;
+      return cls.cast(this);
     }
-    throw new IllegalArgumentException("Can't unwrap resource to " + cls);
+    return Resource.super.unwrap(cls);
   }
 
 }

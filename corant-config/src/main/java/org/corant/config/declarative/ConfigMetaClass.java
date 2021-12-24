@@ -33,10 +33,12 @@ public class ConfigMetaClass {
   private final boolean ignoreNoAnnotatedItem;
 
   /**
-   * @param keyRoot
-   * @param keyIndex
-   * @param clazz
-   * @param ignoreNoAnnotatedItem
+   * Returns a configuration metadata object
+   *
+   * @param keyRoot the configuration key prefix
+   * @param keyIndex the configuration property index
+   * @param clazz the declarative configuration class
+   * @param ignoreNoAnnotatedItem whether to ignore the field that does not have annotaion.
    */
   protected ConfigMetaClass(String keyRoot, int keyIndex, Class<?> clazz,
       boolean ignoreNoAnnotatedItem) {

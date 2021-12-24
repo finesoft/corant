@@ -31,12 +31,12 @@ public abstract class AbstractCorantConfigSource implements ConfigSource, Serial
 
   protected int ordinal;
 
-  protected AbstractCorantConfigSource() {
-  }
+  protected AbstractCorantConfigSource() {}
 
   /**
-   * @param name
-   * @param ordinal
+   * @param name the name of the configuration source. The name might be used for logging or for
+   *        analysis of configured values,and also may be used in ordering decisions.
+   * @param ordinal the ordinal priority value of this configuration source
    */
   protected AbstractCorantConfigSource(String name, int ordinal) {
     this.name = name;
@@ -52,8 +52,8 @@ public abstract class AbstractCorantConfigSource implements ConfigSource, Serial
    * {@inheritDoc}
    *
    * <p>
-   * <b>The current implementation:</b> Find {@link ConfigSource#CONFIG_ORDINAL} if is existen and
-   * can be converted to Integer then return the value else use {@link #ordinal}
+   * <b>The current implementation:</b> Find {@link ConfigSource#CONFIG_ORDINAL} if is exist and can
+   * be converted to Integer then return the value else use {@link #ordinal}
    * </p>
    */
   @Override

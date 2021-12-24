@@ -43,7 +43,7 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
 
   private static final long serialVersionUID = -3160278341411416013L;
 
-  protected boolean enable;
+  protected boolean enableStorageService;
 
   protected String accessKeyId;
 
@@ -80,8 +80,8 @@ public class OSSClientConfiguration extends ClientBuilderConfiguration
     return securityToken;
   }
 
-  public boolean isEnable() {
-    return enable;
+  public boolean isEnableStorageService() {
+    return enableStorageService;
   }
 
   @Override

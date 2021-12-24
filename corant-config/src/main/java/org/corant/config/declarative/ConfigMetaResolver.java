@@ -14,12 +14,9 @@
 package org.corant.config.declarative;
 
 import static org.corant.config.CorantConfigResolver.concatKey;
-import static org.corant.config.CorantConfigResolver.dashify;
-import static org.corant.config.CorantConfigResolver.splitKey;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Fields.traverseFields;
-import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Field;
@@ -29,6 +26,8 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
+import org.corant.config.declarative.ConfigKeyItem.ConfigKeyItemLiteral;
+import org.corant.config.declarative.ConfigKeyRoot.ConfigKeyRootLiteral;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -43,47 +42,41 @@ public class ConfigMetaResolver {
   /**
    * Create declarative configuration metadata
    *
-   * @param clazz
-   * @return declarative
+   * @param clazz the configuration class
    */
   public static ConfigMetaClass declarative(Class<?> clazz) {
-    ConfigKeyRoot configKeyRoot = findAnnotation(clazz, ConfigKeyRoot.class, true);
-    if (configKeyRoot == null || isBlank(configKeyRoot.value())) {
+    ConfigKeyRoot configKeyRoot = ConfigKeyRootLiteral.of(clazz);
+    if (configKeyRoot == null) {
       return null;
     }
-    String keyRoot = configKeyRoot.value();
-    int keyIndex = configKeyRoot.keyIndex();
-    keyIndex = keyIndex > -1 ? keyIndex : splitKey(keyRoot).length;
-    boolean ignoreNoAnnotatedItem = configKeyRoot.ignoreNoAnnotatedItem();
-    final ConfigMetaClass configClass =
-        new ConfigMetaClass(keyRoot, keyIndex, clazz, ignoreNoAnnotatedItem);
+    String root = configKeyRoot.value();
+    int index = configKeyRoot.keyIndex();
+    boolean ignore = configKeyRoot.ignoreNoAnnotatedItem();
+    final ConfigMetaClass configClass = new ConfigMetaClass(root, index, clazz, ignore);
     traverseFields(clazz, field -> {
       if (!Modifier.isFinal(field.getModifiers())
-          && (!ignoreNoAnnotatedItem || field.getAnnotation(ConfigKeyItem.class) != null)) {
+          && (!ignore || field.getAnnotation(ConfigKeyItem.class) != null)) {
         Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
           field.setAccessible(true);
           return field;
         });
-        ConfigKeyItem configKeyItem =
-            defaultObject(field.getAnnotation(ConfigKeyItem.class), () -> ConfigKeyItem.EMPTY);
-        String keyItem =
-            isBlank(configKeyItem.name()) ? dashify(field.getName()) : configKeyItem.name();
-        DeclarativePattern pattern =
-            defaultObject(configKeyItem.pattern(), () -> DeclarativePattern.SUFFIX);
-        String defaultValue = configKeyItem.defaultValue();
-        String defaultKey = concatKey(keyRoot, keyItem);
+        ConfigKeyItem cfgKeyItem = ConfigKeyItemLiteral.of(theField);
+        String keyItem = cfgKeyItem.name();
+        DeclarativePattern pattern = cfgKeyItem.pattern();
+        String defaultValue = cfgKeyItem.defaultValue();
+        String defaultKey = concatKey(root, keyItem);
         String defaultNull = ConfigKeyItem.NO_DFLT_VALUE;
         if (pattern == DeclarativePattern.PREFIX) {
-          Type fieldType = field.getGenericType();
+          Type fieldType = theField.getGenericType();
           if (fieldType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) fieldType).getRawType();
             shouldBeTrue(rawType.equals(Map.class),
                 "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
-                field.getName());
+                theField.getName());
           } else {
             shouldBeTrue(fieldType.equals(Map.class),
                 "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
-                field.getName());
+                theField.getName());
           }
         }
         configClass.addField(new ConfigMetaField(configClass, theField, keyItem, pattern,
@@ -93,6 +86,12 @@ public class ConfigMetaResolver {
     return configClass;
   }
 
+  /**
+   * Create a micro-profile configuration properties instance
+   *
+   * @param clazz the configuration properties class
+   * @param prefix the configuration property name prefix
+   */
   public static ConfigMetaClass microprofile(Class<?> clazz, String prefix) {
     ConfigProperties configProperties = findAnnotation(clazz, ConfigProperties.class, true);
     if (configProperties == null) {

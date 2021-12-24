@@ -31,15 +31,6 @@ public class ConfigMetaField {
   private final String defaultKey;
   private final String defaultNull;
 
-  /**
-   * @param configClass
-   * @param field
-   * @param keyItem
-   * @param injector
-   * @param defaultValue
-   * @param defaultKey
-   * @param defaultNull
-   */
   protected ConfigMetaField(ConfigMetaClass configClass, Field field, String keyItem,
       ConfigInjector injector, String defaultValue, String defaultKey, String defaultNull) {
     this.configClass = configClass;

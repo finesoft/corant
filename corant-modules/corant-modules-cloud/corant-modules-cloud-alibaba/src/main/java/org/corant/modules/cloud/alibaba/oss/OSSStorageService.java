@@ -54,13 +54,11 @@ public class OSSStorageService {
   protected String bucketName;
   protected OSS oss;
 
-  protected OSSStorageService() {
-
-  }
+  protected OSSStorageService() {}
 
   /**
-   * @param bucketName
-   * @param oss
+   * @param bucketName the oss bucket name
+   * @param oss the oss to use
    */
   protected OSSStorageService(String bucketName, OSS oss) {
     this.bucketName = bucketName;

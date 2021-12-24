@@ -16,13 +16,11 @@ package org.corant.modules.cloud.alibaba.oss;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.strip;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Naming;
 import org.corant.context.qualifier.Qualifiers;
@@ -38,7 +36,8 @@ import com.aliyun.oss.OSSClientBuilder;
 @ApplicationScoped
 public class OSSClientProducer {
 
-  protected Map<String, OSSClientConfiguration> configs = Collections.emptyMap();
+  @Inject
+  OSSClientExtension extension;
 
   protected OSS build(OSSClientConfiguration config) {
     if (isNotBlank(config.getSecurityToken())) {
@@ -48,11 +47,6 @@ public class OSSClientProducer {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
           config.getSecretAccessKey(), config);
     }
-  }
-
-  @PostConstruct
-  protected void onPostConstruct() {
-    configs = Configs.resolveMulti(OSSClientConfiguration.class);
   }
 
   @Produces
@@ -70,7 +64,8 @@ public class OSSClientProducer {
     if (naming != null) {
       name = strip(naming.value());
     }
-    OSSClientConfiguration config = configs.get(Configs.assemblyStringConfigProperty(name));
+    OSSClientConfiguration config =
+        extension.getConfigs().get(Configs.assemblyStringConfigProperty(name));
     if (config != null) {
       return build(config);
     }

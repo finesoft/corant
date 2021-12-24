@@ -97,6 +97,17 @@ public class Configs {
   }
 
   /**
+   * Get the optional configuration property from the {@link ConfigProvider} of Microprofile-config.
+   *
+   * @param <T> the property type
+   * @param propertyName the property name
+   * @param propertyType the property class
+   */
+  public static <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
+    return ConfigProvider.getConfig().getOptionalValue(propertyName, propertyType);
+  }
+
+  /**
    * Get the configuration property from the {@link ConfigProvider} of Microprofile-config, if the
    * property doesn't exist return null.
    *

@@ -63,7 +63,7 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
     private final Properties props;
 
     /**
-     * @param props
+     * @param props the source config properties
      */
     private AdjustConfigSource(Properties props) {
       this.props = props;

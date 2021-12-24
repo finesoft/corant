@@ -13,6 +13,8 @@
  */
 package org.corant.modules.cloud.alibaba.oss;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -35,19 +37,28 @@ public class OSSClientExtension implements Extension {
 
   protected static final Logger logger = Logger.getLogger(OSSClientExtension.class.getName());
 
-  protected OSSClientConfiguration config;
+  protected Map<String, OSSClientConfiguration> configs;
+
+  public Map<String, OSSClientConfiguration> getConfigs() {
+    return configs;
+  }
 
   void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
-    if (config != null && config.isEnable()) {
-      for (String bucket : config.getBuckets()) {
-        event.addBean()
-            .addQualifiers(Default.Literal.INSTANCE, Any.Literal.INSTANCE, NamedLiteral.of(bucket))
-            .scope(ApplicationScoped.class).addTransitiveTypeClosure(OSSStorageService.class)
-            .beanClass(OSSStorageService.class)
-            .produceWith(beans -> new OSSStorageService(bucket, new OSSClientBuilder()
-                .build(config.getEndpoint(), config.getAccessKeyId(), config.getSecretAccessKey())))
-            .destroyWith((b, ctx) -> b.destroy());
-      }
+    if (configs != null) {
+      configs.forEach((name, config) -> {
+        if (config.enableStorageService) {
+          for (String bucket : config.getBuckets()) {
+            event.addBean()
+                .addQualifiers(Default.Literal.INSTANCE, Any.Literal.INSTANCE,
+                    NamedLiteral.of(bucket))
+                .scope(ApplicationScoped.class).addTransitiveTypeClosure(OSSStorageService.class)
+                .beanClass(OSSStorageService.class)
+                .produceWith(beans -> new OSSStorageService(bucket, new OSSClientBuilder().build(
+                    config.getEndpoint(), config.getAccessKeyId(), config.getSecretAccessKey())))
+                .destroyWith((b, ctx) -> b.destroy());
+          }
+        }
+      });
     } else {
       logger.warning(
           "Unable to find the available Alibaba Cloud OSS client configuration information");
@@ -55,6 +66,6 @@ public class OSSClientExtension implements Extension {
   }
 
   void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    config = Configs.resolveSingle(OSSClientConfiguration.class);
+    configs = Collections.unmodifiableMap(Configs.resolveMulti(OSSClientConfiguration.class));
   }
 }

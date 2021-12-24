@@ -90,7 +90,7 @@ public class CorantConfigConversion implements Serializable {
   /**
    * Assembly discovered converters and built in converters
    *
-   * @param converters
+   * @param converters the discovered converters
    */
   CorantConfigConversion(List<OrdinalConverter> converters) {
     converters.sort(Sortable::reverseCompare);
@@ -104,8 +104,8 @@ public class CorantConfigConversion implements Serializable {
   /**
    * Find the customer priority if not found then return CUSTOMER_CONVERTER_ORDINAL
    *
-   * @param clazz
-   * @return findPriority
+   * @param clazz the class with Priority annotation
+   * @return the annotation Priority value or 100(the default customer converter ordinal)
    */
   public static int findPriority(Class<?> clazz) {
     Priority priorityAnnot = clazz.getAnnotation(Priority.class);
@@ -114,9 +114,6 @@ public class CorantConfigConversion implements Serializable {
 
   /**
    * Get target class type from Converter class
-   *
-   * @param clazz
-   * @return getTypeOfConverter
    */
   public static Type getTypeOfConverter(Class<?> clazz) {
     if (clazz.equals(Object.class)) {
@@ -179,13 +176,11 @@ public class CorantConfigConversion implements Serializable {
         } else if (Map.class.isAssignableFrom(typeClass)) {
           result = parameterized ? convertMap(rawValue, (ParameterizedType) type)
               : convertMap(rawValue, (Class<?>) argTypes[0], (Class<?>) argTypes[1]);
+        } else if (!parameterized) {
+          result = convertSingle(rawValue, typeClass);
         } else {
-          if (!parameterized) {
-            result = convertSingle(rawValue, typeClass);
-          } else {
-            throw new IllegalArgumentException(
-                "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
-          }
+          throw new IllegalArgumentException(
+              "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
         }
       } catch (IllegalArgumentException e) {
         throw e;
@@ -201,10 +196,9 @@ public class CorantConfigConversion implements Serializable {
   /**
    * convert array
    *
-   * @param <T>
-   * @param rawValue
-   * @param propertyComponentType
-   * @return convert
+   * @param <T> the array component type
+   * @param rawValue the source config property string to be converted
+   * @param propertyComponentType the array component class
    */
   public <T> T convertArray(String rawValue, Class<T> propertyComponentType) {
     String[] values = CorantConfigResolver.splitValue(rawValue);
@@ -224,12 +218,11 @@ public class CorantConfigConversion implements Serializable {
   /**
    * convert collection
    *
-   * @param <T>
-   * @param <C>
-   * @param rawValue
-   * @param propertyItemType
-   * @param collectionFactory
-   * @return convert
+   * @param <T> the target element type
+   * @param <C> the target collection type
+   * @param rawValue the source config property string to be converted
+   * @param propertyItemType the target element class
+   * @param collectionFactory the target collection constructer
    */
   public <T, C extends Collection<T>> C convertCollection(String rawValue, Type propertyItemType,
       IntFunction<C> collectionFactory) {
@@ -283,9 +276,9 @@ public class CorantConfigConversion implements Serializable {
    * Map&lt;String,String&gt; and then convert Map&lt;String,String&gt; value to the specified
    * {@code keyType} {@code valueType} type.
    *
-   * @param rawValue
-   * @param keyType
-   * @param valueType
+   * @param rawValue the source config property string to be converted
+   * @param keyType the target key type
+   * @param valueType the target value type
    * @return convertMap
    */
   public Map<Object, Object> convertMap(String rawValue, Class<?> keyType, Class<?> valueType) {
@@ -302,8 +295,8 @@ public class CorantConfigConversion implements Serializable {
    *
    * @see #tryConvertStringMap(String)
    *
-   * @param rawValue
-   * @param properyType
+   * @param rawValue the source config property string to be converted
+   * @param properyType the target type
    * @return convertMap
    */
   public Map<Object, Object> convertMap(String rawValue, ParameterizedType properyType) {
@@ -393,7 +386,7 @@ public class CorantConfigConversion implements Serializable {
    * "key1,value1,key2,value2&x=1&y=2"      =>  { "key1":"value1", "key2":"value2&x=1&y=2" }
    * </pre>
    *
-   * @param rawValue
+   * @param rawValue the source config property string to be converted
    * @return tryConvertStringMap
    */
   protected Map<String, String> tryConvertStringMap(String rawValue) {

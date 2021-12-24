@@ -71,7 +71,7 @@ public class CorantConfigSources {
    * Build an instance
    *
    * @param sources the processed configuration resources.
-   * @param expressionsEnabled whether to enabled the el expression.
+   * @param expressionsEnabled whether to enable the el expression.
    * @param profiles the parsed profiles.
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
@@ -127,7 +127,7 @@ public class CorantConfigSources {
         }
       }
     });
-    // collect the profiled microprofile-config-* sources if necessary, may be we can use GLOB
+    // collect the profiled microprofile-config-* sources if necessary, maybe we can use GLOB
     // pattern to collect them in Config Builder
     if (isNotEmpty(profiles.get())) {
       for (String profile : profiles.get()) {
@@ -187,7 +187,7 @@ public class CorantConfigSources {
   /**
    * Returns the profiled and expanded value
    *
-   * @param propertyName
+   * @param propertyName the config property name
    * @return getValue
    */
   public String getValue(String propertyName) {
@@ -204,9 +204,6 @@ public class CorantConfigSources {
 
   /**
    * Returns the processed value of the EL expression
-   *
-   * @param value
-   * @return evaluateValue
    */
   protected String evaluateValue(String value) {
     return elProcessor.evalValue(value);
@@ -261,9 +258,6 @@ public class CorantConfigSources {
 
   /**
    * Returns the expanded value
-   *
-   * @param value
-   * @return resolveValue
    */
   protected String resolveValue(String value) {
     if (expressionsEnabled) {
@@ -275,9 +269,6 @@ public class CorantConfigSources {
 
   /**
    * Return the profiled value if necessary
-   *
-   * @param propertyName
-   * @return retrieveValue
    */
   protected String retrieveValue(String propertyName) {
     return getSourceAndValue(propertyName).getValue();

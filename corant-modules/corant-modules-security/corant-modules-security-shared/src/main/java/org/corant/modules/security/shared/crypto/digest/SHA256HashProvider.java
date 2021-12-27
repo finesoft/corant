@@ -21,7 +21,7 @@ package org.corant.modules.security.shared.crypto.digest;
  */
 public class SHA256HashProvider extends AbstractHashProvider {
 
-  public static final String ALGORITHM = "SHA-384";
+  public static final String ALGORITHM = "SHA-256";
 
   public SHA256HashProvider() {
     super(ALGORITHM, 27500);

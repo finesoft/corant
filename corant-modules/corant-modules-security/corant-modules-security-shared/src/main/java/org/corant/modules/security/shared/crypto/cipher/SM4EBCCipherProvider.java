@@ -15,25 +15,32 @@ package org.corant.modules.security.shared.crypto.cipher;
 
 import static org.corant.shared.util.Sets.immutableSetOf;
 import java.util.Set;
+import org.corant.modules.security.shared.crypto.Providers;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午5:07:56
+ * @author bingo 下午3:50:26
  *
  */
-public class BlowfishCBCCipherProvider extends SymmetricCipherProvider {
-  public static final String ALGORITHM = "Blowfish";
-  public static final String TRANSFORMATION = ALGORITHM + "/CBC/PKCS5Padding";
+public class SM4EBCCipherProvider extends SymmetricCipherProvider {
+  public static final String ALGORITHM = "SM4";
+  public static final String TRANSFORMATION = ALGORITHM + "/EBC/PKCS5Padding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
-  public static final int IV_BIT_SIZE = 64;// always 64
+  public static final int IV_BIT_SIZE = 128;// always 128
 
-  public BlowfishCBCCipherProvider(byte[] key) {
+  public SM4EBCCipherProvider(byte[] key) {
     super(ALGORITHM, key, IV_BIT_SIZE);
+  }
+
+  @Override
+  protected Object getProvider() {
+    return Providers.BOUNCYCASTLE_PROVIDER;
   }
 
   @Override
   protected String getTransformation() {
     return TRANSFORMATION;
   }
+
 }

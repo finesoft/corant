@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
@@ -138,8 +139,6 @@ public class Strings {
    * Strings.asDefaultString("abc") = "abc"
    * Strings.asDefaultString(NonNull) = NonNull.toString()
    * </pre>
-   *
-   * @param obj an object
    */
   public static String asDefaultString(final Object obj) {
     return obj != null ? defaultString(obj.toString()) : EMPTY;
@@ -296,9 +295,8 @@ public class Strings {
   /**
    * Returns the escaped string pattern.
    *
-   * @param escapes
-   * @param quote
-   * @return escapedPattern
+   * @param escapes the escape characters
+   * @param quote the quote string
    */
   public static Pattern escapedPattern(final String escapes, final String quote) {
     if (isNotEmpty(escapes) && isNotEmpty(quote)) {
@@ -317,9 +315,9 @@ public class Strings {
   /**
    * Split string supports escape characters
    *
-   * @param str
-   * @param escapes
-   * @param separator
+   * @param str the string to be separated
+   * @param escapes the separator escape characters
+   * @param separator the separator string
    * @return String[]
    */
   public static String[] escapedSplit(final String str, final String escapes,
@@ -330,10 +328,12 @@ public class Strings {
   /**
    * Split string supports escape characters
    *
-   * @param str
-   * @param escapes
-   * @param separator
-   * @return String[]
+   * @param str the string to be separated
+   * @param escapes the separator escape characters
+   * @param separator the separator string
+   * @param limit the result threshold
+   *
+   * @see String#split(String, int)
    */
   public static String[] escapedSplit(final String str, final String escapes,
       final String separator, final int limit) {
@@ -361,9 +361,6 @@ public class Strings {
    * Strings.isBlank("abc")     = false
    * Strings.isBlank("  abc  ") = false
    * </pre>
-   *
-   * @param cs
-   * @return isBlank
    */
   public static boolean isBlank(final CharSequence cs) {
     int len;
@@ -389,8 +386,6 @@ public class Strings {
    * </pre>
    *
    * @since 1.6.2
-   * @param cs
-   * @return isBlank
    */
   public static boolean isBlank(final String cs) {
     return cs == null || cs.isBlank();
@@ -418,9 +413,6 @@ public class Strings {
    * Strings.isDecimalNumber(" 123")    =false
    * Strings.isDecimalNumber("a123")    =false
    * </pre>
-   *
-   * @param obj
-   * @return isDecimalNumber
    */
   public static boolean isDecimalNumber(final CharSequence obj) {
     int len;
@@ -467,8 +459,6 @@ public class Strings {
    * Strings.isNoneBlank("abc", "123")     = true
    * </pre>
    *
-   * @param css
-   * @return
    */
   public static boolean isNoneBlank(final CharSequence... css) {
     if (css == null || css.length == 0) {
@@ -517,10 +507,6 @@ public class Strings {
    * Strings.left("abc", 2)   = "ab"
    * Strings.left("abc", 4)   = "abc"
    * </pre>
-   *
-   * @param str
-   * @param len
-   * @return left
    */
   public static String left(final String str, final int len) {
     if (str == null) {
@@ -538,9 +524,12 @@ public class Strings {
   /**
    * Checks if the passed string matches all passed regular expressions.
    *
-   * @param seq
-   * @param flags
-   * @param regex
+   * @param seq the char sequence to test matching
+   * @param flags Match flags, a bit mask that may include {@link Pattern#CASE_INSENSITIVE},
+   *        {@link Pattern#MULTILINE}, {@link Pattern#DOTALL}, {@link Pattern#UNICODE_CASE},
+   *        {@link Pattern#CANON_EQ}, {@link Pattern#UNIX_LINES}, {@link Pattern#LITERAL},
+   *        {@link Pattern#UNICODE_CHARACTER_CLASS} and {@link Pattern#COMMENTS}
+   * @param regex the regex for testing
    * @return matchAllRegex
    */
   public static boolean matchAllRegex(final CharSequence seq, final int flags,
@@ -556,9 +545,12 @@ public class Strings {
   /**
    * Checks if the passed string matches any passed regular expressions.
    *
-   * @param seq
-   * @param flags
-   * @param regex
+   * @param seq the char sequence to test matching
+   * @param flags Match flags, a bit mask that may include {@link Pattern#CASE_INSENSITIVE},
+   *        {@link Pattern#MULTILINE}, {@link Pattern#DOTALL}, {@link Pattern#UNICODE_CASE},
+   *        {@link Pattern#CANON_EQ}, {@link Pattern#UNIX_LINES}, {@link Pattern#LITERAL},
+   *        {@link Pattern#UNICODE_CHARACTER_CLASS} and {@link Pattern#COMMENTS}
+   * @param regex the regex for testing
    * @return matchAnyRegex
    */
   public static boolean matchAnyRegex(final CharSequence seq, final int flags,
@@ -574,10 +566,10 @@ public class Strings {
   /**
    * Checks if the passed string matches Glob expressions.
    *
-   * @param str
-   * @param ignoreCase
-   * @param isDos
-   * @param globExpress
+   * @param str the char sequence to test matching
+   * @param ignoreCase whether to ignore case when test matching
+   * @param isDos whether to follow the path rules of windows
+   * @param globExpress the glob expression for testing
    * @return matchGlob
    */
   public static boolean matchGlob(final CharSequence str, final boolean ignoreCase,
@@ -592,10 +584,9 @@ public class Strings {
   /**
    * Checks if the passed string matches Wildcard expressions.
    *
-   * @param str
-   * @param ignoreCase
-   * @param wildcardExpress
-   * @return
+   * @param str the char sequence to test matching
+   * @param ignoreCase whether to ignore case when test matching
+   * @param wildcardExpress the wildcard expression for testing
    * @see WildcardMatcher
    */
   public static boolean matchWildcard(final String str, final boolean ignoreCase,
@@ -618,11 +609,6 @@ public class Strings {
    * Strings.mid("abc", 4, 2)   = ""
    * Strings.mid("abc", -2, 2)  = "ab"
    * </pre>
-   *
-   * @param str
-   * @param start
-   * @param len
-   * @return mid
    */
   public static String mid(final String str, int start, final int len) {
     if (str == null) {
@@ -685,10 +671,6 @@ public class Strings {
    * Strings.remove("123", "")                           = "123"
    * Strings.remove("123", null)                         = "123"
    * </pre>
-   *
-   * @param str
-   * @param remove
-   * @return remove
    */
   public static String remove(final String str, final String remove) {
     int rlen;
@@ -714,8 +696,8 @@ public class Strings {
   /**
    * Use the given character filter to remove characters that meet the filter criteria.
    *
-   * @param str
-   * @param filter
+   * @param str the given string to be adjusted
+   * @param filter the filter used to test whether characters should be deleted
    * @return removeCharIf
    */
   public static String removeCharIf(final String str, final Predicate<Character> filter) {
@@ -735,50 +717,50 @@ public class Strings {
   /**
    * Remove characters that contains in the given sample chars sequence.
    *
-   * @param str
-   * @param sample
+   * @param str the given string to be adjusted
+   * @param sample a string, all characters in the string will be deleted.
    * @return removeCharIf
    */
   public static String removeCharIf(final String str, final String sample) {
     if (str == null || sample == null) {
       return str;
     }
-    return removeCharIf(str, s -> sample.indexOf(s.charValue()) != -1);
+    return removeCharIf(str, s -> sample.indexOf(s) != -1);
   }
 
   /**
    * Replace string use for short string, not regex.
    *
-   * @param source
-   * @param orginal
-   * @param replace
+   * @param original the original string
+   * @param replaced the sequence of char values to be replaced
+   * @param replacement the replacement sequence of char values
    * @return replaced
    */
-  public static String replace(String source, String orginal, String replace) {
-    if (source == null || orginal == null || orginal.length() == 0) {
-      return source;
+  public static String replace(String original, String replaced, String replacement) {
+    if (original == null || replaced == null || replaced.length() == 0) {
+      return original;
     }
-    String replaced = source;
+    String temp = original;
     int i = 0;
-    if ((i = replaced.indexOf(orginal, i)) >= 0) {
-      char[] srcArray = replaced.toCharArray();
-      char[] nsArray = replace.toCharArray();
-      int olen = orginal.length();
+    if ((i = temp.indexOf(replaced, i)) >= 0) {
+      char[] srcArray = temp.toCharArray();
+      char[] nsArray = replacement.toCharArray();
+      int olen = replaced.length();
       int srclen = srcArray.length;
       StringBuilder buf = new StringBuilder(srclen);
       buf.append(srcArray, 0, i).append(nsArray);
       i += olen;
       int j = i;
-      while ((i = replaced.indexOf(orginal, i)) > 0) {
+      while ((i = temp.indexOf(replaced, i)) > 0) {
         buf.append(srcArray, j, i - j).append(nsArray);
         i += olen;
         j = i;
       }
       buf.append(srcArray, j, srclen - j);
-      replaced = buf.toString();
+      temp = buf.toString();
       buf.setLength(0);
     }
-    return replaced;
+    return temp;
   }
 
   /**
@@ -790,10 +772,6 @@ public class Strings {
    * Strings.right("abc", 2)   = "bc"
    * Strings.right("abc", 4)   = "abc"
    * </pre>
-   *
-   * @param str
-   * @param len
-   * @return right
    */
   public static String right(final String str, final int len) {
     if (str == null) {
@@ -816,10 +794,10 @@ public class Strings {
    *
    * @see Strings#segment(String, Predicate)
    *
-   * @param str
-   * @param removeBlank
-   * @param strip
-   * @param predicate
+   * @param str the string to be separated
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @param predicate the delimiting predicate
    * @return segments
    */
   public static String[] segment(final String str, final boolean removeBlank, final boolean strip,
@@ -841,8 +819,8 @@ public class Strings {
    * Strings.segment(null, null)                                =       []
    * </pre>
    *
-   * @param str
-   * @param predicate
+   * @param str the string to be separated
+   * @param predicate the delimiting predicate
    * @return segments
    */
   public static String[] segment(final String str, final Predicate<Character> predicate) {
@@ -892,10 +870,10 @@ public class Strings {
   /**
    * Split the string into a string array, delete blank elements or trim elements as needed.
    *
-   * @param str
-   * @param removeBlank
-   * @param strip
-   * @param p
+   * @param str the string to be separated
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @param p the delimiting predicate
    * @return split
    */
   public static String[] split(final String str, final boolean removeBlank, final boolean strip,
@@ -916,32 +894,62 @@ public class Strings {
    * Strings.split(null, null)                                =       []
    * </pre>
    *
-   * @param str
-   * @param splitor
+   * @param str the string to be separated
+   * @param splitter the delimiting predicate
    * @return split
    */
-  public static String[] split(final String str, final Predicate<Character> splitor) {
+  public static String[] split(final String str, final Predicate<Character> splitter) {
+    return split(str, splitter, -1);
+  }
+
+  /**
+   * Split the string into a string array with the predicate.
+   *
+   * <pre>
+   * Strings.split("abc123efg456", Character::isDigit)        =       ["abc","efg"]
+   * Strings.split("abc,efg", c -> c==',')                    =       ["abc","efg"]
+   * Strings.split("123", Character::isDigit)                 =       []
+   * Strings.split(null, Character::isDigit)                  =       []
+   * Strings.split("abc", Character::isDigit)                 =       ["abc"]
+   * Strings.split("abc", null)                               =       ["abc"]
+   * Strings.split(null, null)                                =       []
+   * </pre>
+   *
+   * @param str the string to be separated
+   * @param splitter the delimiting predicate
+   * @param limit a non-negative integer specifying a limit on the number of substrings to be
+   *        included in the array. If provided, splits the string at each occurrence of the
+   *        specified separator, but stops when limit entries have been placed in the array. Any
+   *        leftover text is not included in the array at all.
+   * @return split
+   */
+  public static String[] split(final String str, final Predicate<Character> splitter, int limit) {
     int len;
     if (str == null || (len = str.length()) == 0) {
       return EMPTY_ARRAY;
     }
-    if (splitor == null) {
+    if (splitter == null) {
       return new String[] {str};
     }
     int i = 0;
     int s = 0;
     int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
+    int l = limit < 1 ? Integer.MAX_VALUE : limit;
     int ai = 0;
     String[] array = new String[g];
     boolean match = false;
     while (i < len) {
-      if (splitor.test(str.charAt(i))) {
+      if (splitter.test(str.charAt(i))) {
         if (match) {
           if (ai == g) {
             array = Arrays.copyOf(array, g += g);
           }
           array[ai++] = str.substring(s, i);
           match = false;
+          // limit size
+          if (l == ai) {
+            break;
+          }
         }
         s = ++i;
         continue;
@@ -961,11 +969,40 @@ public class Strings {
   /**
    * Split the string into a string array with whole separator string, not regex.
    *
-   * @param str
-   * @param wholeSeparator
-   * @return
+   * @param str the string to be separated
+   * @param wholeSeparator the delimiting string
+   * @return string array
    */
   public static String[] split(final String str, final String wholeSeparator) {
+    return split(str, wholeSeparator, -1);
+  }
+
+  /**
+   * Split the string into a string array, delete blank elements or strip elements as needed.
+   *
+   * @param str the string to be separated
+   * @param wholeSeparator the delimiting string
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @return split
+   */
+  public static String[] split(final String str, final String wholeSeparator,
+      final boolean removeBlank, final boolean strip) {
+    return regulateSplits(split(str, wholeSeparator), removeBlank, strip);
+  }
+
+  /**
+   * Split the string into a string array with whole separator string, not regex.
+   *
+   * @param str the string to be separated
+   * @param wholeSeparator the delimiting string
+   * @param limit a non-negative integer specifying a limit on the number of substrings to be
+   *        included in the array. If provided, splits the string at each occurrence of the
+   *        specified separator, but stops when limit entries have been placed in the array. Any
+   *        leftover text is not included in the array at all.
+   * @return string array
+   */
+  public static String[] split(final String str, final String wholeSeparator, int limit) {
     int len;
     int slen;
     if (str == null || (len = str.length()) == 0) {
@@ -976,12 +1013,13 @@ public class Strings {
     }
     if (slen == 1) {
       char wholeChar = wholeSeparator.charAt(0);
-      return split(str, c -> c == wholeChar);
+      return split(str, c -> c == wholeChar, limit);
     }
     int s = 0;
     int e = 0;
     int i = 0;
     int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
+    int l = limit < 1 ? Integer.MAX_VALUE : limit;
     String[] array = new String[g];
     while (e < len) {
       e = str.indexOf(wholeSeparator, s);
@@ -991,12 +1029,20 @@ public class Strings {
             array = Arrays.copyOf(array, g += g);
           }
           array[i++] = str.substring(s, e);
+          // limit size
+          if (i == l) {
+            break;
+          }
         }
         s = e + slen;
       } else {
         if (s < len) {
           array = Arrays.copyOf(array, i + 1);
           array[i++] = str.substring(s);
+          // limit size
+          if (i == l) {
+            break;
+          }
         }
         e = len;
       }
@@ -1005,17 +1051,23 @@ public class Strings {
   }
 
   /**
-   * Split the string into a string array, delete blank elements or strip elements as needed.
+   * Split the string into a list of objects of the given class with the given whole separator
+   * string.
    *
-   * @param str
-   * @param wholeSpreator
-   * @param removeBlank
-   * @param strip
-   * @return split
+   * @param <T> the type of element of the return list
+   * @param str the string to be separated
+   * @param wholeSeparator the delimiting string
+   * @param clazz the class of element of the return list
+   *
+   * @see Strings#split(String, String)
    */
-  public static String[] split(final String str, final String wholeSpreator,
-      final boolean removeBlank, final boolean strip) {
-    return regulateSplits(split(str, wholeSpreator), removeBlank, strip);
+  public static <T> List<T> splitAs(final String str, final String wholeSeparator, Class<T> clazz) {
+    String[] array = split(str, wholeSeparator);
+    List<T> list = new ArrayList<>();
+    for (String ele : array) {
+      list.add(toObject(ele, clazz));
+    }
+    return list;
   }
 
   /**
@@ -1024,8 +1076,7 @@ public class Strings {
    *
    * from JDK-11
    *
-   * @param str
-   * @return strip
+   * @see String#strip()
    */
   public static String strip(final String str) {
     return str == null ? null : str.strip();
@@ -1033,9 +1084,6 @@ public class Strings {
 
   /**
    * Null-safe strip leading
-   *
-   * @param str
-   * @return strip
    */
   public static String stripLeading(final String str) {
     return str == null ? null : str.stripLeading();
@@ -1044,8 +1092,9 @@ public class Strings {
   /**
    * Null-safe strip trainling
    *
-   * @param str
-   * @return strip
+   * from JDK-11
+   *
+   * @see String#strip()
    */
   public static String stripTrailing(final String str) {
     return str == null ? null : str.stripTrailing();
@@ -1105,7 +1154,7 @@ public class Strings {
    */
   public static String substring(final String str, final int fromIndex, final int toIndex) {
     if (str == null) {
-      return str;
+      return null;
     }
     int length = str.length();
     int beginIndex = fromIndex < 0 ? length + fromIndex : fromIndex;
@@ -1189,8 +1238,8 @@ public class Strings {
     private final String wildcardExpress;
 
     /**
-     * @param ignoreCase
-     * @param wildcardExpress
+     * @param ignoreCase whether to ignore case
+     * @param wildcardExpress the wildcard expression
      */
     protected WildcardMatcher(boolean ignoreCase, String wildcardExpress) {
       this.ignoreCase = ignoreCase;
@@ -1342,7 +1391,7 @@ public class Strings {
       if (buffer.length() != 0) {
         list.add(buffer.toString());
       }
-      return list.toArray(new String[list.size()]);
+      return list.toArray(new String[0]);
     }
 
   }

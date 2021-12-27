@@ -11,31 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.cipher;
-
-import static org.corant.shared.util.Sets.immutableSetOf;
-import java.util.Set;
+package org.corant.modules.security.shared.crypto.digest;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午11:35:46
+ * @author bingo 上午10:36:39
  *
  */
-public class TripleDESCTRCipherProvider extends SymmetricCipherProvider {
+public class SHA512HashProvider extends AbstractHashProvider {
 
-  public static final String ALGORITHM = "DESede";
-  public static final String TRANSFORMATION = ALGORITHM + "/CTR/NoPadding";
-  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(112, 168);
-  public static final int IV_BIT_SIZE = 64;
+  public static final String ALGORITHM = "SHA-512";
 
-  public TripleDESCTRCipherProvider(byte[] key) {
-    super(ALGORITHM, key, IV_BIT_SIZE);
+  public SHA512HashProvider() {
+    super(ALGORITHM, 30000);
   }
 
-  @Override
-  protected String getTransformation() {
-    return TRANSFORMATION;
+  public SHA512HashProvider(int iterations) {
+    super(ALGORITHM, iterations);
+  }
+
+  public SHA512HashProvider(int iterations, int saltBitSize) {
+    super(ALGORITHM, iterations, saltBitSize);
   }
 
 }

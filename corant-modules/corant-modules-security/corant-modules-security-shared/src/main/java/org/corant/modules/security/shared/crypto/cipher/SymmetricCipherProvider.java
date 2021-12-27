@@ -43,22 +43,22 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
   protected final int ivByteSize;
   protected SecureRandom ivSecureRandom;
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key) {
-    this(algorithm, provider, key, DEFAULT_KEY_BIT_SIZE);
+  protected SymmetricCipherProvider(String algorithm, byte[] key) {
+    this(algorithm, key, DEFAULT_KEY_BIT_SIZE);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize) {
-    this(algorithm, provider, key, ivBitSize, DEFAULT_STREAMING_BUFFER_SIZE);
+  protected SymmetricCipherProvider(String algorithm, byte[] key, int ivBitSize) {
+    this(algorithm, key, ivBitSize, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize,
+  protected SymmetricCipherProvider(String algorithm, byte[] key, int ivBitSize,
       int streamingBufferSize) {
-    this(algorithm, provider, key, ivBitSize, streamingBufferSize, null, null);
+    this(algorithm, key, ivBitSize, streamingBufferSize, null, null);
   }
 
-  protected SymmetricCipherProvider(String algorithm, String provider, byte[] key, int ivBitSize,
+  protected SymmetricCipherProvider(String algorithm, byte[] key, int ivBitSize,
       int streamingBufferSize, SecureRandom secureRandom, SecureRandom ivSecureRandom) {
-    super(algorithm, provider, streamingBufferSize, secureRandom);
+    super(algorithm, streamingBufferSize, secureRandom);
     this.key = new SecretKeySpec(key, algorithm);
     if (ivBitSize > 0) {
       shouldBeTrue(ivBitSize % Byte.SIZE == 0);

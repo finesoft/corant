@@ -130,7 +130,7 @@ public interface JoseProvider {
 
   JoseSignatureProvider getSignatureProvider();
 
-  public enum ProtectionLevel {
+  enum ProtectionLevel {
     SIGN, ENCRYPT, SIGN_ENCRYPT
   }
 }

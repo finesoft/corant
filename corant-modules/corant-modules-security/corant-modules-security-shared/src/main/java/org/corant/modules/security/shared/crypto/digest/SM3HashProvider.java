@@ -11,29 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.cipher;
+package org.corant.modules.security.shared.crypto.digest;
 
-import static org.corant.shared.util.Sets.immutableSetOf;
-import java.util.Set;
+import org.corant.modules.security.shared.crypto.Providers;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午5:07:56
+ * @author bingo 上午10:36:39
  *
  */
-public class BlowfishCBCCipherProvider extends SymmetricCipherProvider {
-  public static final String ALGORITHM = "Blowfish";
-  public static final String TRANSFORMATION = ALGORITHM + "/CBC/PKCS5Padding";
-  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
-  public static final int IV_BIT_SIZE = 64;// always 64
+public class SM3HashProvider extends AbstractHashProvider {
 
-  public BlowfishCBCCipherProvider(byte[] key) {
-    super(ALGORITHM, key, IV_BIT_SIZE);
+  public static final String ALGORITHM = "SM3";
+
+  public SM3HashProvider() {
+    super(ALGORITHM, 27500);
+  }
+
+  public SM3HashProvider(int iterations) {
+    super(ALGORITHM, iterations);
+  }
+
+  public SM3HashProvider(int iterations, int saltBitSize) {
+    super(ALGORITHM, iterations, saltBitSize);
   }
 
   @Override
-  protected String getTransformation() {
-    return TRANSFORMATION;
+  protected Object getProvider() {
+    return Providers.BOUNCYCASTLE_PROVIDER;
   }
+
 }

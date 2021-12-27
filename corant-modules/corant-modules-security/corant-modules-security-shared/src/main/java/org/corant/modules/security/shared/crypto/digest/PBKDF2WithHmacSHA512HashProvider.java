@@ -49,8 +49,8 @@ public class PBKDF2WithHmacSHA512HashProvider extends PBKDF2HashProvider {
    * @param saltSize the salt bits size, the minimum value is 128
    * @param derivedKeySize the derived key bits size, the minimum value is 512
    */
-  public PBKDF2WithHmacSHA512HashProvider(int iterations, int derivedKeySize, int defaultSaltSize) {
-    super(ALGORITHM, iterations, derivedKeySize, defaultSaltSize);
+  public PBKDF2WithHmacSHA512HashProvider(int iterations, int saltSize, int derivedKeySize) {
+    super(ALGORITHM, iterations, saltSize, derivedKeySize);
   }
 
 }

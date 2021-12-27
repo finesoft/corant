@@ -80,12 +80,8 @@ public class DefaultJoseEncryptionProvider implements JoseEncryptionProvider {
     this.keyId = keyId;
     this.keyManagementKeyPair = keyManagementKeyPair;
     this.keyManagementSecretKey = keyManagementSecretKey;
-    if (keyManagementAlgorithm != null) {
-      headers.put("alg", keyManagementAlgorithm.getAlgorithmName());
-    }
-    if (contentEncryptionAlgorithm != null) {
-      headers.put("enc", contentEncryptionAlgorithm.getAlgorithmName());
-    }
+    headers.put("alg", keyManagementAlgorithm.getAlgorithmName());
+    headers.put("enc", contentEncryptionAlgorithm.getAlgorithmName());
     if (this.keyId != null) {
       headers.put("kid", this.keyId);
     }

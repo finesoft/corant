@@ -19,6 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
@@ -36,33 +37,37 @@ public abstract class JCACipherProvider implements CipherProvider {
   static final int DEFAULT_KEY_BIT_SIZE = 128;
   static final String RANDOM_NUM_GENERATOR_ALGORITHM_NAME = "SHA1PRNG";
 
-  protected final String provider;
   protected final String algorithm;
   protected final int streamingBufferSize;
   protected final SecureRandom secureRandom;
 
-  protected JCACipherProvider(String algorithm, String provider) {
-    this(algorithm, provider, DEFAULT_STREAMING_BUFFER_SIZE);
+  protected JCACipherProvider(String algorithm) {
+    this(algorithm, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected JCACipherProvider(String algorithm, String provider, int streamingBufferSize) {
-    this(algorithm, provider, streamingBufferSize, null);
+  protected JCACipherProvider(String algorithm, int streamingBufferSize) {
+    this(algorithm, streamingBufferSize, null);
   }
 
-  protected JCACipherProvider(String algorithm, String provider, int streamingBufferSize,
+  protected JCACipherProvider(String algorithm, int streamingBufferSize,
       SecureRandom secureRandom) {
     this.algorithm = shouldNotBlank(algorithm, "algorithm can't be null or empty");
-    this.provider = provider;
     this.streamingBufferSize =
         streamingBufferSize <= 0 ? DEFAULT_STREAMING_BUFFER_SIZE : streamingBufferSize;
     this.secureRandom = secureRandom;
   }
 
-  public static Cipher createCipher(String provider, String transformation, int mode, Key key,
+  public static Cipher createCipher(Object provider, String transformation, int mode, Key key,
       AlgorithmParameterSpec algoParamSpec, SecureRandom secureRandom) {
     try {
-      final Cipher cipher = provider == null ? Cipher.getInstance(transformation)
-          : Cipher.getInstance(transformation, provider);
+      final Cipher cipher;
+      if (provider instanceof Provider) {
+        cipher = Cipher.getInstance(transformation, (Provider) provider);
+      } else if (provider instanceof String) {
+        cipher = Cipher.getInstance(transformation, (String) provider);
+      } else {
+        cipher = Cipher.getInstance(transformation);
+      }
       if (secureRandom != null) {
         if (algoParamSpec != null) {
           cipher.init(mode, key, algoParamSpec, secureRandom);
@@ -95,7 +100,7 @@ public abstract class JCACipherProvider implements CipherProvider {
 
   public Cipher createCipher(int mode, Key key, AlgorithmParameterSpec algoParamSpec,
       SecureRandom secureRandom) {
-    return createCipher(provider, getTransformation(), mode, key, algoParamSpec, secureRandom);
+    return createCipher(getProvider(), getTransformation(), mode, key, algoParamSpec, secureRandom);
   }
 
   public String getAlgorithm() {
@@ -106,8 +111,8 @@ public abstract class JCACipherProvider implements CipherProvider {
     return streamingBufferSize;
   }
 
-  protected String getProvider() {
-    return provider;
+  protected Object getProvider() {
+    return null;
   }
 
   protected SecureRandom getSecureRandom() {

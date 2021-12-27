@@ -29,11 +29,7 @@ public class AESCBCCipherProvider extends SymmetricCipherProvider {
   public static final int IV_BIT_SIZE = 128;// always 128
 
   public AESCBCCipherProvider(byte[] key) {
-    this(null, key);
-  }
-
-  public AESCBCCipherProvider(String provider, byte[] key) {
-    super(ALGORITHM, provider, key, IV_BIT_SIZE);
+    super(ALGORITHM, key, IV_BIT_SIZE);
   }
 
   @Override

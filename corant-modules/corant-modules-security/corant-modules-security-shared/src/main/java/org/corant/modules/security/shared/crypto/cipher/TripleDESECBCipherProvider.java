@@ -30,11 +30,7 @@ public class TripleDESECBCipherProvider extends SymmetricCipherProvider {
   public static final int IV_BIT_SIZE = 0;// not support
 
   public TripleDESECBCipherProvider(byte[] key) {
-    this(null, key);
-  }
-
-  public TripleDESECBCipherProvider(String provider, byte[] key) {
-    super(ALGORITHM, provider, key, IV_BIT_SIZE);
+    super(ALGORITHM, key, IV_BIT_SIZE);
   }
 
   @Override

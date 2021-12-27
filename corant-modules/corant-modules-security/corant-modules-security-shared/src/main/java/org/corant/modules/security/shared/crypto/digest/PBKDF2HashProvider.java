@@ -14,21 +14,12 @@
 package org.corant.modules.security.shared.crypto.digest;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNoneNull;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.max;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.Base64;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Bytes;
 
 /**
  * corant-modules-security-shared
@@ -36,23 +27,17 @@ import org.corant.shared.util.Bytes;
  * @author bingo 下午8:24:08
  *
  */
-public abstract class PBKDF2HashProvider implements HashProvider {
+public abstract class PBKDF2HashProvider extends AbstractHashProvider {
 
-  public static final int DEFAULT_ITERATIONS = 1024;
-  public static final int DEFAULT_SALT_SIZE = 128;
   public static final int DEFAULT_DERIVED_KEY_SIZE = 512;
 
-  protected static final SecureRandom secureRandom = new SecureRandom();
-  protected final String algorithm;
-  protected final int iterations;
   protected final int derivedKeyBitSize;
-  protected final int saltBitSize;
 
   /**
    * Specify the secret-key algorithm name and the number of hash iterations times to create an
    * instance.
    *
-   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't not empty
+   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't empty
    * @param iterations the iterations times, the minimum value is 1024
    */
   protected PBKDF2HashProvider(String algorithm, int iterations) {
@@ -63,37 +48,39 @@ public abstract class PBKDF2HashProvider implements HashProvider {
    * Specify the secret-key algorithm name and the number of hash iterations times and salt bits
    * size and derived key bits size to create an instance.
    *
-   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't not empty
+   * @param algorithm the standard secret-key PBKDF2 algorithm name, can't empty
    * @param iterations the iterations times, the minimum value is 1024
    * @param saltBitSize the salt bits size, the minimum value is 128
    * @param derivedKeyBitSize the derived key bits size, the minimum value is 512
    */
   protected PBKDF2HashProvider(String algorithm, int iterations, int saltBitSize,
       int derivedKeyBitSize) {
-    this.algorithm = shouldNotBlank(algorithm);
-    this.iterations = max(DEFAULT_ITERATIONS, iterations);
-    this.saltBitSize = max(DEFAULT_SALT_SIZE, saltBitSize);
+    super(algorithm, iterations, saltBitSize);
     this.derivedKeyBitSize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeyBitSize);
-    shouldBeTrue(this.derivedKeyBitSize % Byte.SIZE == 0 && this.saltBitSize % Byte.SIZE == 0,
-        "The derived key or salt bits size error must be divisible by 8.");
-    shouldNotNull(getSecretKeyFactory(algorithm));// for checking
+    shouldBeTrue(this.derivedKeyBitSize % Byte.SIZE == 0,
+        "The derived key bits size error must be divisible by 8.");
+    shouldNotNull(getSecretKeyFactory(algorithm, getProvider()));// for checking
+  }
+
+  public int getDerivedKeyBitSize() {
+    return derivedKeyBitSize;
   }
 
   /**
    * Encode the given input string to hash digested bytes.
    *
    * @param input the input string that will be encoded
-   * @param algorithm the standard secret-key algorithm name, can't not empty
+   * @param algorithm the standard secret-key algorithm name, can't empty
    * @param iterations the iterations times
    * @param salt the salt bytes
-   * @param derivedKeyBitSize the derived key bits size
    * @return encode
    */
-  protected static byte[] encode(String input, String algorithm, int iterations, byte[] salt,
-      int derivedKeyBitSize) {
-    KeySpec spec = new PBEKeySpec(input.toCharArray(), salt, iterations, derivedKeyBitSize);
+  @Override
+  protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt) {
+    KeySpec spec =
+        new PBEKeySpec(((String) input).toCharArray(), salt, iterations, derivedKeyBitSize);
     try {
-      return getSecretKeyFactory(algorithm).generateSecret(spec).getEncoded();
+      return getSecretKeyFactory(algorithm, getProvider()).generateSecret(spec).getEncoded();
     } catch (InvalidKeySpecException e) {
       throw new CorantRuntimeException(e, "Input could not be encoded");
     } catch (Exception e) {
@@ -101,153 +88,4 @@ public abstract class PBKDF2HashProvider implements HashProvider {
     }
   }
 
-  /**
-   * Parse Base64 string to HashInfo
-   *
-   * @param b64 the bytes
-   * @return fromMergedB64
-   * @see #toMergedB64(String, int, byte[], byte[])
-   */
-  protected static HashInfo fromMergedB64(String b64) {
-    byte[] bytes = Base64.getDecoder().decode(b64);
-    HashInfo info = new HashInfo();
-    int next = 0;
-    int algoSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.iterations = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.saltSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4)) << 3;
-    int digestSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.algorithm = new String(Arrays.copyOfRange(bytes, next, next += algoSize));
-    info.salt = Arrays.copyOfRange(bytes, next, next += info.saltSize >>> 3);
-    info.digested = Arrays.copyOfRange(bytes, next, next += digestSize);
-    info.derivedKeySize = digestSize << 3;
-    return info;
-  }
-
-  protected static SecretKeyFactory getSecretKeyFactory(String algorithm) {
-    try {
-      return SecretKeyFactory.getInstance(algorithm);
-    } catch (NoSuchAlgorithmException e) {
-      throw new CorantRuntimeException(e, "The %s algorithm not found", algorithm);
-    }
-  }
-
-  /**
-   * Compares two byte arrays in length-constant time. This comparison method is used so that
-   * password hashes cannot be extracted from on-line systems using a timing attack and then
-   * attacked off-line.
-   *
-   * @param a
-   * @param b
-   */
-  protected static boolean slowEquals(byte[] a, byte[] b) {
-    int diff = a.length ^ b.length;
-    for (int i = 0; i < a.length && i < b.length; i++) {
-      diff |= a[i] ^ b[i];
-    }
-    return diff == 0;
-  }
-
-  /**
-   * Merge algorithm and iterations and salt and digested to Base64 String
-   *
-   * @param algorithm the algorithm name
-   * @param iterations the hash iterations
-   * @param salt the salt data
-   * @param digested the hashed data
-   * @return toMergedB64
-   */
-  protected static String toMergedB64(String algorithm, int iterations, byte[] salt,
-      byte[] digested) {
-    byte[] algoNameBytes = algorithm.getBytes();
-    byte[] bytes = new byte[(4 << 2) + algoNameBytes.length + salt.length + digested.length];
-    // header length info
-    int next = 0;
-    System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, next, 4);
-    System.arraycopy(Bytes.toBytes(iterations), 0, bytes, next += 4, 4);
-    System.arraycopy(Bytes.toBytes(salt.length), 0, bytes, next += 4, 4);
-    System.arraycopy(Bytes.toBytes(digested.length), 0, bytes, next += 4, 4);
-    // body content info
-    System.arraycopy(algoNameBytes, 0, bytes, next += 4, algoNameBytes.length);
-    System.arraycopy(salt, 0, bytes, next += algoNameBytes.length, salt.length);
-    System.arraycopy(digested, 0, bytes, next += salt.length, digested.length);
-    return Base64.getEncoder().encodeToString(bytes);
-  }
-
-  @Override
-  public Object encode(Object data) {
-    byte[] salt = getSalt();
-    byte[] digested = encode(data.toString(), algorithm, iterations, salt, derivedKeyBitSize);
-    return toMergedB64(algorithm, iterations, salt, digested);
-  }
-
-  public String getAlgorithm() {
-    return algorithm;
-  }
-
-  public int getDerivedKeyBitSize() {
-    return derivedKeyBitSize;
-  }
-
-  public int getIterations() {
-    return iterations;
-  }
-
-  @Override
-  public String getName() {
-    return algorithm;
-  }
-
-  public int getSaltBitSize() {
-    return saltBitSize;
-  }
-
-  @Override
-  public boolean validate(Object input, Object criterion) {
-    shouldNoneNull(input, criterion);
-    HashInfo criterionHash = fromMergedB64(criterion.toString());
-    if (algorithm.equalsIgnoreCase(criterionHash.algorithm)
-        && criterionHash.derivedKeySize == derivedKeyBitSize
-        && criterionHash.iterations == iterations && criterionHash.saltSize == saltBitSize) {
-      return compare(
-          encode(input.toString(), algorithm, iterations, criterionHash.salt, derivedKeyBitSize),
-          criterionHash.digested);
-    }
-    return false;
-  }
-
-  /**
-   * Check whether the byte arrays are the same. Subclasses can modify this method to use algorithms
-   * (such {@link #slowEquals(byte[], byte[])}) that slow down the CPU operation speed and increase
-   * the difficulty of brute force cracking, default use
-   * {@link java.util.Objects#deepEquals(Object, Object)}
-   *
-   * @param encoded the encoded input
-   * @param criterion the criterion
-   *
-   * @see #slowEquals(byte[], byte[])
-   */
-  protected boolean compare(byte[] encoded, byte[] criterion) {
-    return areDeepEqual(encoded, criterion);
-  }
-
-  protected byte[] getSalt() {
-    byte[] buffer = new byte[saltBitSize >>> 3];
-    secureRandom.nextBytes(buffer);
-    return buffer;
-  }
-
-  protected static class HashInfo {
-    protected String algorithm;
-    protected int iterations;
-    protected int derivedKeySize;
-    protected int saltSize;
-    protected byte[] salt;
-    protected byte[] digested;
-
-    @Override
-    public String toString() {
-      return "HashInfo [algorithm=" + algorithm + ", iterations=" + iterations + ", derivedKeySize="
-          + derivedKeySize + ", saltSize=" + saltSize + "]";
-    }
-  }
 }

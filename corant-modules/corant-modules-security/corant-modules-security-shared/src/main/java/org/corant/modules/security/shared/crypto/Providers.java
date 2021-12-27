@@ -11,29 +11,18 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.cipher;
+package org.corant.modules.security.shared.crypto;
 
-import static org.corant.shared.util.Sets.immutableSetOf;
-import java.util.Set;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午5:07:56
+ * @author bingo 上午10:51:14
  *
  */
-public class BlowfishCipherProvider extends SymmetricCipherProvider {
-  public static final String ALGORITHM = "Blowfish";
-  public static final String TRANSFORMATION = ALGORITHM;
-  public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
-  public static final int IV_BIT_SIZE = 0;
+public class Providers {
 
-  public BlowfishCipherProvider(byte[] key) {
-    super(ALGORITHM, key, IV_BIT_SIZE);
-  }
+  public static final BouncyCastleProvider BOUNCYCASTLE_PROVIDER = new BouncyCastleProvider();
 
-  @Override
-  protected String getTransformation() {
-    return TRANSFORMATION;
-  }
 }

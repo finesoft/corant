@@ -35,11 +35,7 @@ public class AESGCMCipherProvider extends SymmetricCipherProvider {
   protected int keyBitSize;
 
   public AESGCMCipherProvider(byte[] key) {
-    this(null, key);
-  }
-
-  public AESGCMCipherProvider(String provider, byte[] key) {
-    super(ALGORITHM, provider, key, key.length << 3);
+    super(ALGORITHM, key, key.length << 3);
     keyBitSize = key.length << 3;
   }
 

@@ -61,7 +61,7 @@ import org.jose4j.lang.HashUtil;
 /**
  * corant-modules-security-shared
  *
- * NOTE: Some code come from keycloak, if there is infringement, please inform
+ * NOTE: Some codes come from keycloak, if there is infringement, please inform
  * me(finesoft@gmail.com).
  *
  * @author bingo 11:04:00
@@ -116,7 +116,6 @@ public class Certificates {
    *
    * @return the x509 certificate
    *
-   * @throws Exception the exception
    */
   public static X509Certificate generateV1SelfSignedCertificate(KeyPair caKeyPair, String subject) {
     return generateV1SelfSignedCertificate(caKeyPair, subject,
@@ -154,7 +153,7 @@ public class Certificates {
    *
    * @return the x509 certificate
    *
-   * @throws Exception the exception
+   * @throws GeneralSecurityException the exception
    */
   public static X509Certificate generateV3Certificate(KeyPair keyPair, PrivateKey caPrivateKey,
       X509Certificate caCert, String subject) throws GeneralSecurityException {
@@ -233,9 +232,9 @@ public class Certificates {
   static String removeCertBeginEnd(String pem) {
     String rpem = pem.replaceAll("-----BEGIN(.*?)CERTIFICATE-----", "");
     rpem = rpem.replaceAll("-----END(.*?)CERTIFICATE-----", "");
-    rpem = rpem.replaceAll("\r\n", "");
-    rpem = rpem.replaceAll("\n", "");
-    rpem = rpem.replaceAll("\\\\n", "");
+    rpem = rpem.replace("\r\n", "");
+    rpem = rpem.replace("\n", "");
+    rpem = rpem.replace("\\n", "");
     return rpem.trim();
   }
 }

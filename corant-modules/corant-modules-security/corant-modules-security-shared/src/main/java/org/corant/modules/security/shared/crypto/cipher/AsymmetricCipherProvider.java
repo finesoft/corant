@@ -37,19 +37,18 @@ public abstract class AsymmetricCipherProvider extends JCACipherProvider {
   protected final PublicKey publicKey;
   protected final PrivateKey privateKey;
 
-  protected AsymmetricCipherProvider(String algorithm, String provider, PublicKey publicKey,
-      PrivateKey privateKey) {
-    this(algorithm, provider, publicKey, privateKey, DEFAULT_STREAMING_BUFFER_SIZE);
+  protected AsymmetricCipherProvider(String algorithm, PublicKey publicKey, PrivateKey privateKey) {
+    this(algorithm, publicKey, privateKey, DEFAULT_STREAMING_BUFFER_SIZE);
   }
 
-  protected AsymmetricCipherProvider(String algorithm, String provider, PublicKey publicKey,
-      PrivateKey privateKey, int streamingBufferSize) {
-    this(algorithm, provider, publicKey, privateKey, streamingBufferSize, null);
+  protected AsymmetricCipherProvider(String algorithm, PublicKey publicKey, PrivateKey privateKey,
+      int streamingBufferSize) {
+    this(algorithm, publicKey, privateKey, streamingBufferSize, null);
   }
 
-  protected AsymmetricCipherProvider(String algorithm, String provider, PublicKey publicKey,
-      PrivateKey privateKey, int streamingBufferSize, SecureRandom secureRandom) {
-    super(algorithm, provider, streamingBufferSize, secureRandom);
+  protected AsymmetricCipherProvider(String algorithm, PublicKey publicKey, PrivateKey privateKey,
+      int streamingBufferSize, SecureRandom secureRandom) {
+    super(algorithm, streamingBufferSize, secureRandom);
     this.publicKey = publicKey;
     this.privateKey = privateKey;
   }

@@ -26,6 +26,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -169,19 +170,17 @@ public class Keys {
     }
   }
 
-  public static SecretKey generateSecretKey(String algo, AlgorithmParameterSpec spec) {
-    return generateSecretKey(null, algo, spec, null);
-  }
-
-  public static SecretKey generateSecretKey(String algo, Integer keyBitSize) {
-    return generateSecretKey(null, algo, keyBitSize, null);
-  }
-
-  public static SecretKey generateSecretKey(String provider, String algo,
+  public static SecretKey generateSecretKey(Object provider, String algo,
       AlgorithmParameterSpec spec, SecureRandom secureRandom) {
     try {
-      KeyGenerator generator = provider != null ? KeyGenerator.getInstance(algo, provider)
-          : KeyGenerator.getInstance(algo);
+      KeyGenerator generator;
+      if (provider instanceof Provider) {
+        generator = KeyGenerator.getInstance(algo, (Provider) provider);
+      } else if (provider instanceof String) {
+        generator = KeyGenerator.getInstance(algo, (String) provider);
+      } else {
+        generator = KeyGenerator.getInstance(algo);
+      }
       if (secureRandom != null) {
         generator.init(spec, secureRandom);
       } else {
@@ -194,11 +193,17 @@ public class Keys {
     }
   }
 
-  public static SecretKey generateSecretKey(String provider, String algo, Integer keyBitSize,
+  public static SecretKey generateSecretKey(Object provider, String algo, Integer keyBitSize,
       SecureRandom secureRandom) {
     try {
-      KeyGenerator generator = provider != null ? KeyGenerator.getInstance(algo, provider)
-          : KeyGenerator.getInstance(algo);
+      KeyGenerator generator;
+      if (provider instanceof Provider) {
+        generator = KeyGenerator.getInstance(algo, (Provider) provider);
+      } else if (provider instanceof String) {
+        generator = KeyGenerator.getInstance(algo, (String) provider);
+      } else {
+        generator = KeyGenerator.getInstance(algo);
+      }
       if (secureRandom != null) {
         generator.init(keyBitSize, secureRandom);
       } else {
@@ -208,6 +213,14 @@ public class Keys {
     } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  public static SecretKey generateSecretKey(String algo, AlgorithmParameterSpec spec) {
+    return generateSecretKey(null, algo, spec, null);
+  }
+
+  public static SecretKey generateSecretKey(String algo, Integer keyBitSize) {
+    return generateSecretKey(null, algo, keyBitSize, null);
   }
 
   public static SecretKey generateSecretKeySpec(String algo, int keyBitSize) {
@@ -273,8 +286,8 @@ public class Keys {
   public static String removePemKeyBeginEnd(String pem) {
     String rpem = pem.replaceAll("-----BEGIN (.*)-----", "");
     rpem = rpem.replaceAll("-----END (.*)----", "");
-    rpem = rpem.replaceAll("\r\n", "");
-    rpem = rpem.replaceAll("\n", "");
+    rpem = rpem.replace("\r\n", "");
+    rpem = rpem.replace("\n", "");
     return rpem.trim();
   }
 

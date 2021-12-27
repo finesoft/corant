@@ -23,13 +23,13 @@ import org.corant.modules.security.shared.crypto.Providers;
  * @author bingo 下午3:50:26
  *
  */
-public class SM4EBCCipherProvider extends SymmetricCipherProvider {
+public class SM4ECBCipherProvider extends SymmetricCipherProvider {
   public static final String ALGORITHM = "SM4";
-  public static final String TRANSFORMATION = ALGORITHM + "/EBC/PKCS5Padding";
+  public static final String TRANSFORMATION = ALGORITHM + "/ECB/PKCS5Padding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128);
-  public static final int IV_BIT_SIZE = 128;// always 128
+  public static final int IV_BIT_SIZE = 0;// do not use iv
 
-  public SM4EBCCipherProvider(byte[] key) {
+  public SM4ECBCipherProvider(byte[] key) {
     super(ALGORITHM, key, IV_BIT_SIZE);
   }
 

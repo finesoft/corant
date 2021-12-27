@@ -25,7 +25,7 @@ import org.corant.modules.security.shared.crypto.cipher.AESGCMCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.BlowfishCBCCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.BlowfishCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.SM4CBCCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.SM4EBCCipherProvider;
+import org.corant.modules.security.shared.crypto.cipher.SM4ECBCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.SymmetricCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.TripleDESCTRCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.TripleDESECBCipherProvider;
@@ -123,12 +123,12 @@ public class JCACipherProviderTest extends TestCase {
   }
 
   @Test
-  public void testSM4EBC() {
+  public void testSM4ECB() {
     SymmetricCipherProvider provider;
-    for (Integer i : SM4EBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
+    for (Integer i : SM4ECBCipherProvider.ALLOW_KEY_BIT_SIZES) {
       byte[] keyBytes = Keys.generateSecretKey(Providers.BOUNCYCASTLE_PROVIDER,
-          SM4EBCCipherProvider.ALGORITHM, i, null).getEncoded();
-      provider = new SM4CBCCipherProvider(keyBytes);
+          SM4ECBCipherProvider.ALGORITHM, i, null).getEncoded();
+      provider = new SM4ECBCipherProvider(keyBytes);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;

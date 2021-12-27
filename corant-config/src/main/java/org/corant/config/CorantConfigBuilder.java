@@ -144,7 +144,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     }
     logger.fine(() -> String.format("The config property expressions is %s.",
         sources.isExpressionsEnabled() ? "enabled" : "disabled"));
-    logger.fine(() -> String.format("Found %s config sources:%n%n[%n  %s%n]%n%n",
+    logger.fine(() -> String.format("config sources found %s:%n%n[%n  %s%n]%n%n",
         sources.getSources().size(), sources.getSources().stream().map(CorantConfigSource::getName)
             .collect(Collectors.joining(",\n  "))));
 
@@ -170,7 +170,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     }
 
     logger.fine(() -> {
-      StringBuilder sb = new StringBuilder("Resolved config properties:\n\n{\n");
+      StringBuilder sb = new StringBuilder("config properties resolved:\n\n{\n");
       sortMap.forEach((k, v) -> sb.append("  ").append(k).append(" : ").append(v).append("\n"));
       sb.append("}\n\n");
       return sb.toString();

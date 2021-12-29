@@ -742,7 +742,7 @@ public class Maps {
    * @param key the key to lookup
    * @return the mapped list maps value
    */
-  public static List<Map<?, ?>> getMapMaps(final Map<?, ?> map, final Object key) {
+  public static <K, V> List<Map<K, V>> getMapMaps(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, Objects::forceCast);
   }
 
@@ -1160,18 +1160,14 @@ public class Maps {
       } else {
         throw new NotSupportedException("We only extract value from map/iterable/array object");
       }
-    } else {
-      if (value instanceof Iterable && flat) {
-        for (Object next : (Iterable<?>) value) {
-          holder.add(next);
-        }
-      } else if (value.getClass().isArray() && flat) {
-        for (Object next : (Object[]) value) {
-          holder.add(next);
-        }
-      } else {
-        holder.add(value);
+    } else if (value instanceof Iterable && flat) {
+      for (Object next : (Iterable<?>) value) {
+        holder.add(next);
       }
+    } else if (value.getClass().isArray() && flat) {
+      Collections.addAll(holder, (Object[]) value);
+    } else {
+      holder.add(value);
     }
   }
 
@@ -1219,8 +1215,7 @@ public class Maps {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + keys.hashCode();
-      return result;
+      return prime * result + keys.hashCode();
     }
 
     FlatMapKey append(Object key) {

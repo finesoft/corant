@@ -11,14 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.hash;
+package org.corant.modules.security.shared.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.stream.IntStream;
-import org.corant.modules.security.shared.crypto.Keys;
-import org.corant.modules.security.shared.crypto.Providers;
 import org.corant.modules.security.shared.crypto.cipher.AESCBCCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.AESCTRCipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.AESGCMCipherProvider;

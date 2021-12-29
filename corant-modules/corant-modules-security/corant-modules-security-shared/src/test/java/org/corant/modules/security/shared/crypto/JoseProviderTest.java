@@ -11,12 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.crypto.hash;
+package org.corant.modules.security.shared.crypto;
 
 import java.security.KeyPair;
 import java.util.Map;
 import javax.crypto.SecretKey;
-import org.corant.modules.security.shared.crypto.Keys;
 import org.corant.modules.security.shared.crypto.jose.DefaultJoseEncryptionProvider;
 import org.corant.modules.security.shared.crypto.jose.DefaultJoseProvider;
 import org.corant.modules.security.shared.crypto.jose.DefaultJoseSignatureProvider;

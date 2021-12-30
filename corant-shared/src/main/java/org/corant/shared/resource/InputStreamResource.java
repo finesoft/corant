@@ -42,14 +42,14 @@ public class InputStreamResource implements Resource {
     this.name = name;
     this.inputStream = inputStream;
     location = null;
-    metadata = resolveMetadata(null, name, null);
+    metadata = resolveMetadata(name, null);
   }
 
   public InputStreamResource(InputStream inputStream, String location, String name) {
     this.name = name;
     this.location = location;
     this.inputStream = inputStream;
-    metadata = resolveMetadata(location, name, null);
+    metadata = resolveMetadata(name, null);
   }
 
   public InputStreamResource(InputStream inputStream, String location, String name,
@@ -57,13 +57,13 @@ public class InputStreamResource implements Resource {
     this.inputStream = inputStream;
     this.name = name;
     this.location = location;
-    this.metadata = resolveMetadata(location, name, metadata);
+    this.metadata = resolveMetadata(name, metadata);
   }
 
   public InputStreamResource(Map<String, Object> metadata, InputStream inputStream) {
     name = getMapString(metadata, "name");
     location = getMapString(metadata, "location");
-    this.metadata = resolveMetadata(location, name, metadata);
+    this.metadata = resolveMetadata(name, metadata);
     this.inputStream = inputStream;
   }
 
@@ -71,16 +71,11 @@ public class InputStreamResource implements Resource {
     location = url.toExternalForm();
     inputStream = url.openStream();
     name = url.getFile();
-    metadata = immutableMapOf("name", url.getFile(), "location", location, "protocol",
-        url.getProtocol(), "path", url.getPath(), "authority", url.getAuthority(), "defaultPort",
-        url.getDefaultPort(), "file", url.getFile(), "host", url.getHost(), "port", url.getPort(),
-        "query", url.getQuery(), "ref", url.getRef(), "userInfo", url.getUserInfo());
+    metadata = immutableMapOf(META_NAME, url.getFile());
   }
 
-  protected static Map<String, Object> resolveMetadata(String location, String name,
-      Map<String, Object> metadata) {
-    Map<String, Object> temp =
-        mapOf("location", location, "sourceType", SourceType.UNKNOWN.name(), "name", name);
+  protected static Map<String, Object> resolveMetadata(String name, Map<String, Object> metadata) {
+    Map<String, Object> temp = mapOf(META_NAME, name);
     if (metadata != null) {
       temp.putAll(metadata);
     }

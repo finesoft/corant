@@ -76,8 +76,8 @@ public class URLResource implements Resource {
 
   @Override
   public Map<String, Object> getMetadata() {
-    return immutableMapOf("location", getLocation(), "sourceType",
-        sourceType == null ? null : sourceType.name(), "url", url.toExternalForm());
+    return immutableMapOf(META_NAME, getName(), META_SOURCE_TYPE,
+        sourceType == null ? null : sourceType.name());
   }
 
   @Override

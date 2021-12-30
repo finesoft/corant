@@ -17,7 +17,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.unmodifiableMap;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static org.corant.modules.servlet.ContentDispositions.parse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -120,9 +119,21 @@ public class ResteasyResource extends AbstractJaxrsResource {
           filename = new String(filename.getBytes(ISO_8859_1), UTF_8);
         }
       }
-      this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
       metaData = new HashMap<>();
-      metaData.put(CONTENT_TYPE, getContentType());
+      this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
+      metaData.put(META_NAME, this.filename);
+      if (inputPart.getMediaType() != null) {
+        if (inputPart.getMediaType().getSubtype() != null) {
+          metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().getSubtype());
+        } else {
+          metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().getType());
+        }
+      }
+      if (disposition.getModificationDate() != null) {
+        metaData.put(META_LAST_MODIFIED,
+            disposition.getModificationDate().toInstant().toEpochMilli());
+      }
+      metaData.put(META_CONTENT_LENGTH, disposition.getSize());
     }
 
     public void addMetadata(String key, Object value) {

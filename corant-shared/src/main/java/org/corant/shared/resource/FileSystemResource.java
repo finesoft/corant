@@ -103,10 +103,9 @@ public class FileSystemResource extends URLResource implements WritableResource 
 
   @Override
   public Map<String, Object> getMetadata() {
-    return immutableMapOf("location", getLocation(), "sourceType", SourceType.FILE_SYSTEM.name(),
-        "path", file.getPath(), "fileName", getName(), META_LAST_MODIFIED, file.lastModified(),
-        META_CONTENT_LENGTH, file.length(), META_CONTENT_TYPE,
-        FileUtils.getContentType(getLocation()));
+    return immutableMapOf(META_SOURCE_TYPE, SourceType.FILE_SYSTEM.name(), META_NAME, getName(),
+        META_LAST_MODIFIED, file.lastModified(), META_CONTENT_LENGTH, file.length(),
+        META_CONTENT_TYPE, FileUtils.getContentType(getLocation()));
   }
 
   @Override

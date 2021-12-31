@@ -26,8 +26,6 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
-import org.corant.config.declarative.ConfigKeyItem.ConfigKeyItemLiteral;
-import org.corant.config.declarative.ConfigKeyRoot.ConfigKeyRootLiteral;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -45,22 +43,23 @@ public class ConfigMetaResolver {
    * @param clazz the configuration class
    */
   public static ConfigMetaClass declarative(Class<?> clazz) {
-    ConfigKeyRoot configKeyRoot = ConfigKeyRootLiteral.of(clazz);
+    Class<?> klass = ConfigClasses.resolveClass(clazz);
+    ConfigKeyRoot configKeyRoot = ConfigClasses.createRoot(klass);
     if (configKeyRoot == null) {
       return null;
     }
     String root = configKeyRoot.value();
     int index = configKeyRoot.keyIndex();
     boolean ignore = configKeyRoot.ignoreNoAnnotatedItem();
-    final ConfigMetaClass configClass = new ConfigMetaClass(root, index, clazz, ignore);
-    traverseFields(clazz, field -> {
+    final ConfigMetaClass configClass = new ConfigMetaClass(root, index, klass, ignore);
+    traverseFields(klass, field -> {
       if (!Modifier.isFinal(field.getModifiers())
           && (!ignore || field.getAnnotation(ConfigKeyItem.class) != null)) {
         Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
           field.setAccessible(true);
           return field;
         });
-        ConfigKeyItem cfgKeyItem = ConfigKeyItemLiteral.of(theField);
+        ConfigKeyItem cfgKeyItem = ConfigClasses.createItem(theField);
         String keyItem = cfgKeyItem.name();
         DeclarativePattern pattern = cfgKeyItem.pattern();
         String defaultValue = cfgKeyItem.defaultValue();
@@ -71,11 +70,11 @@ public class ConfigMetaResolver {
           if (fieldType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) fieldType).getRawType();
             shouldBeTrue(rawType.equals(Map.class),
-                "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
+                "We only support Map field type for PREFIX pattern %s %s.", klass.getName(),
                 theField.getName());
           } else {
             shouldBeTrue(fieldType.equals(Map.class),
-                "We only support Map field type for PREFIX pattern %s %s.", clazz.getName(),
+                "We only support Map field type for PREFIX pattern %s %s.", klass.getName(),
                 theField.getName());
           }
         }

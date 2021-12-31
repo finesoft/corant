@@ -15,16 +15,11 @@ package org.corant.config.declarative;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.corant.config.CorantConfigResolver.dashify;
-import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import javax.enterprise.util.AnnotationLiteral;
-import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -37,10 +32,6 @@ import org.corant.shared.util.Strings;
 @Retention(RUNTIME)
 @Target(FIELD)
 public @interface ConfigKeyItem {
-
-  String SPEC_KEY_ITEM_FMT = "corant.declarative-config-class.%s.key-item.%s";
-  String SPEC_KEY_ITEM_DV_FMT = "corant.declarative-config-class.%s.key-item.%s.default-value";
-  String SPEC_KEY_ITEM_PTN_FMT = "corant.declarative-config-class.%s.key-item.%s.pattern";
 
   String NO_DFLT_VALUE = "$no_default_value$";
 
@@ -59,35 +50,9 @@ public @interface ConfigKeyItem {
     final DeclarativePattern pattern;
 
     public ConfigKeyItemLiteral(String defaultValue, String name, DeclarativePattern pattern) {
-      this.defaultValue = defaultValue;
+      this.defaultValue = defaultObject(defaultValue, NO_DFLT_VALUE);
       this.name = name;
       this.pattern = pattern;
-    }
-
-    public static ConfigKeyItem of(Field field) {
-      String className = getUserClass(field.getDeclaringClass()).getCanonicalName();
-      String fieldName = field.getName();
-      String keyItemCfgKey = String.format(SPEC_KEY_ITEM_FMT, className, fieldName);
-      String dfltValCfgKey = String.format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
-      String ptnCfgKey = String.format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
-      String keyItem = Configs.getValue(keyItemCfgKey, String.class);
-      String defaultValue = Configs.getValue(dfltValCfgKey, String.class);
-      DeclarativePattern pattern = Configs.getValue(ptnCfgKey, DeclarativePattern.class);
-      ConfigKeyItem ann = field.getAnnotation(ConfigKeyItem.class);
-      if (ann != null) {
-        if (keyItem == null) {
-          keyItem = ann.name();
-        }
-        if (defaultValue == null) {
-          defaultValue = ann.defaultValue();
-        }
-        if (pattern == null) {
-          pattern = ann.pattern();
-        }
-      }
-      return new ConfigKeyItemLiteral(defaultObject(defaultValue, NO_DFLT_VALUE),
-          isBlank(keyItem) ? dashify(fieldName) : keyItem,
-          defaultObject(pattern, DeclarativePattern.SUFFIX));
     }
 
     @Override

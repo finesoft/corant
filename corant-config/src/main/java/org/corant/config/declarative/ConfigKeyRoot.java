@@ -15,18 +15,11 @@ package org.corant.config.declarative;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.corant.config.CorantConfigResolver.splitKey;
-import static org.corant.shared.util.Annotations.findAnnotation;
-import static org.corant.shared.util.Classes.getUserClass;
-import static org.corant.shared.util.Conversions.toBoolean;
-import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
-import org.corant.config.Configs;
 
 /**
  * corant-config
@@ -72,10 +65,6 @@ import org.corant.config.Configs;
 @Inherited
 public @interface ConfigKeyRoot {
 
-  String SPEC_KEY_ROOT_FMT = "corant.declarative-config-class.%s.key-root";
-  String SPEC_KEY_ROOT_INDEX_FMT = "corant.declarative-config-class.%s.key-root-index";
-  String SPEC_KEY_ROOT_IG_NOANN_ITEM_FMT = "corant.declarative-config-class.%s.key-root-ignore";
-
   boolean ignoreNoAnnotatedItem() default true;
 
   int keyIndex() default -1;
@@ -94,34 +83,6 @@ public @interface ConfigKeyRoot {
       this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
       this.keyIndex = keyIndex;
       this.value = value;
-    }
-
-    public static ConfigKeyRoot of(Class<?> clazz) {
-      String className = getUserClass(clazz).getCanonicalName();
-      String rootCfgKey = String.format(SPEC_KEY_ROOT_FMT, className);
-      String indexCfgKey = String.format(SPEC_KEY_ROOT_INDEX_FMT, className);
-      String ignoreKey = String.format(SPEC_KEY_ROOT_IG_NOANN_ITEM_FMT, className);
-      String keyRoot = Configs.getValue(rootCfgKey, String.class);
-      Integer keyIndex = Configs.getValue(indexCfgKey, Integer.class);
-      String ignoreNotAnnItem = Configs.getValue(ignoreKey, String.class);
-      ConfigKeyRoot ann = findAnnotation(clazz, ConfigKeyRoot.class, true);
-      Boolean ignore = isNotBlank(ignoreNotAnnItem) ? toBoolean(ignoreNotAnnItem) : null;
-      if (ann != null) {
-        if (keyRoot == null) {
-          keyRoot = ann.value();
-        }
-        if (keyIndex != null) {
-          keyIndex = ann.keyIndex();
-        }
-        if (ignore == null) {
-          ignore = ann.ignoreNoAnnotatedItem();
-        }
-      }
-      if (keyRoot != null) {
-        return new ConfigKeyRootLiteral(defaultObject(ignore, Boolean.FALSE),
-            keyIndex == null || keyIndex < 0 ? splitKey(keyRoot).length : keyIndex, keyRoot);
-      }
-      return null;
     }
 
     @Override

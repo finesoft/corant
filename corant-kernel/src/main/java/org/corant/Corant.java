@@ -604,14 +604,14 @@ public class Corant implements AutoCloseable {
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
       emitter.fire(new PostContainerReadyEvent(arguments));
       stopWatch
-          .stop(t -> logInfo("All modules have been initialized, takes %ss.", t.getTimeSeconds()));
+          .stop(t -> logInfo("All modules have been initialized, takes %s ms.", t.getTimeMillis()));
 
       // handle post started spi
       stopWatch.start();
       invokeBootHandlerAfterStarted();
       stopWatch.stop((tk, sw) -> {
-        logInfo("The post-started spi processing has been completed, takes %ss.",
-            tk.getTimeSeconds());
+        logInfo("The post-started spi processing has been completed, takes %s ms.",
+            tk.getTimeMillis());
         double tt = sw.getTotalTimeSeconds();
         if (tt > 8) {
           logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
@@ -629,8 +629,8 @@ public class Corant implements AutoCloseable {
       // emit post corant ready events
       stopWatch.start();
       emitter.fire(new PostCorantReadyEvent(arguments));
-      stopWatch.destroy(sw -> logInfo("All preparations have been completed, takes %ss.%s",
-          sw.getLastTaskInfo().getTimeSeconds(), boostLine(".")));
+      stopWatch.destroy(sw -> logInfo("All preparations have been completed, takes %s ms.%s",
+          sw.getLastTaskInfo().getTimeMillis(), boostLine(".")));
 
     } catch (Throwable e) {
       log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
@@ -648,7 +648,7 @@ public class Corant implements AutoCloseable {
       stopWatch.stop(t -> {
         Defaults.CORANT_VERSION.ifPresent(v -> logInfo("Corant Version: %s", v));
         logInfo("Starting the %s ...", APP_NAME);
-        logInfo("The pre-start spi processing has been completed, takes %ss.", t.getTimeSeconds());
+        logInfo("The pre-start spi processing has been completed, takes %s ms.", t.getTimeMillis());
       });
       registerMBean();
     } catch (Throwable e) {
@@ -675,8 +675,8 @@ public class Corant implements AutoCloseable {
       Services.select(Configurator.class, classLoader).sorted(Sortable::compare)
           .filter(c -> c.supports(initializer)).forEach(c -> c.accept(initializer));
       container = initializer.initialize();
-      stopWatch
-          .stop(t -> logInfo("The container has been initialized, takes %ss.", t.getTimeSeconds()));
+      stopWatch.stop(
+          t -> logInfo("The container has been initialized, takes %s ms.", t.getTimeMillis()));
     } catch (Throwable e) {
       log(Level.SEVERE, null, "Initialize the %s container occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);

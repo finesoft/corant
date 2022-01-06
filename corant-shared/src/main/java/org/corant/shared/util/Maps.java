@@ -1023,8 +1023,18 @@ public class Maps {
 
   public static Map<String, String> toMap(final Properties properties) {
     Map<String, String> map = new HashMap<>(shouldNotNull(properties).size());
-    if (properties != null) {
-      properties.stringPropertyNames().forEach(name -> map.put(name, properties.getProperty(name)));
+    synchronized (properties) {
+      for (Entry<Object, Object> entry : properties.entrySet()) {
+        Object key = entry.getKey();
+        Object val = entry.getValue();
+        if (key != null && val != null) {
+          map.put(key.toString(), val.toString());
+        } else if (key != null) {
+          map.put(key.toString(), null);
+        } else if (val != null) {
+          map.put(null, val.toString());
+        }
+      }
     }
     return map;
   }
@@ -1032,7 +1042,7 @@ public class Maps {
   public static <K, V> Properties toProperties(final Map<K, V> map) {
     Properties pops = new Properties();
     if (map != null) {
-      map.forEach((k, v) -> pops.getProperty(forceCast(k), forceCast(v)));
+      pops.putAll(map);
     }
     return pops;
   }

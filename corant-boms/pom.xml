@@ -45,6 +45,7 @@
     <version.commons-pool2>2.11.1</version.commons-pool2>
     <version.commons-vfs2>2.9.0</version.commons-vfs2>
     <version.datastax.cassandra>3.7.1</version.datastax.cassandra>
+    <version.eclipse-collections>11.0.0</version.eclipse-collections>
     <version.eclipse.yasson>1.0.8</version.eclipse.yasson>
     <version.ehcache>3.9.0</version.ehcache>
     <version.elasticsearch>6.5.4</version.elasticsearch>
@@ -65,7 +66,7 @@
     <version.hsqldb>2.6.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
     <version.jackson>2.13.1</version.jackson>
-    <version.jandex>2.3.1.Final</version.jandex>
+    <version.jandex>2.4.1.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javassist>3.27.0.GA</version.javassist>
     <version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
@@ -877,6 +878,11 @@
         <groupId>com.carrotsearch</groupId>
         <artifactId>hppc</artifactId>
         <version>${version.hppc}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.collections</groupId>
+        <artifactId>eclipse-collections</artifactId>
+        <version>${version.eclipse-collections}</version>
       </dependency>
       <dependency>
         <groupId>com.esotericsoftware</groupId>

@@ -162,6 +162,10 @@ public interface Tuple {
       return left;
     }
 
+    public Pair<R, L> reverse() {
+      return new Pair<>(getRight(), getLeft());
+    }
+
     public R right() {
       return right;
     }
@@ -450,6 +454,10 @@ public interface Tuple {
 
     public M middle() {
       return middle;
+    }
+
+    public Triple<R, M, L> reverse() {
+      return new Triple<>(getRight(), getMiddle(), getLeft());
     }
 
     public R right() {

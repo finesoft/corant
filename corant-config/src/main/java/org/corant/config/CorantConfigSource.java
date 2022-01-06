@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -57,7 +57,7 @@ public class CorantConfigSource implements ConfigSource, AutoCloseable {
 
   @Override
   public Map<String, String> getProperties() {
-    return new HashMap<>(delegate.getProperties());
+    return Collections.unmodifiableMap(delegate.getProperties());
   }
 
   @Override

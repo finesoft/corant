@@ -14,11 +14,11 @@
 package org.corant.config.source;
 
 import static org.corant.shared.normal.Priorities.ConfigPriorities.SYSTEM_PROPERTIES_ORDINAL;
+import static org.corant.shared.util.Maps.toMap;
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -53,12 +53,10 @@ public class SystemPropertiesConfigSource implements ConfigSource, Serializable 
     return SYSTEM_PROPERTIES_ORDINAL;
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public Map<String, String> getProperties() {
-    Properties properties =
-        AccessController.doPrivileged((PrivilegedAction<Properties>) System::getProperties);
-    return Collections.unmodifiableMap(new HashMap(properties));
+    return Collections.unmodifiableMap(
+        toMap(AccessController.doPrivileged((PrivilegedAction<Properties>) System::getProperties)));
   }
 
   @Override

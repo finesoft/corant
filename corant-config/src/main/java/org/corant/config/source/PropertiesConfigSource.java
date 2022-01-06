@@ -55,8 +55,8 @@ public class PropertiesConfigSource extends AbstractCorantConfigSource {
     }
   }
 
-  public static Properties getProperties(URL url) {
-    try (InputStream is = shouldNotNull(url).openStream()) {
+  protected static Properties getProperties(URL url) {
+    try (InputStream is = url.openStream()) {
       return load(is);
     } catch (IOException e) {
       throw new CorantRuntimeException(e,

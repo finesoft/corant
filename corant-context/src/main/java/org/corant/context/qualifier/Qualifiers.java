@@ -27,7 +27,6 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Named;
 import org.corant.shared.util.Annotations;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-context
@@ -41,7 +40,8 @@ public class Qualifiers {
 
   public static String resolveName(String named) {
     // XXX Is it possible to use configuration?
-    return Strings.defaultString(named);
+    // return Strings.defaultString(named);
+    return named == null ? EMPTY : named;
   }
 
   public static Map<String, Annotation[]> resolveNameds(Set<String> names) {

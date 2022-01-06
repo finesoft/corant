@@ -17,8 +17,10 @@ import static org.corant.shared.normal.Defaults.FOUR_KB;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.isNoneNull;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
@@ -31,10 +33,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -295,6 +305,37 @@ public class FileUtils {
   }
 
   /**
+   * Returns a user defined file attributes map from the given file path if the file system
+   * supports.
+   *
+   * @param path the file path
+   * @throws IOException
+   *
+   * @see UserDefinedFileAttributeView
+   */
+  public static Map<String, String> getUserDefinedAttributes(final Path path) throws IOException {
+    Map<String, String> atts = new LinkedHashMap<>();
+    if (Files.getFileStore(shouldNotNull(path))
+        .supportsFileAttributeView(UserDefinedFileAttributeView.class)) {
+      UserDefinedFileAttributeView view =
+          Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);
+      List<String> attNames = defaultObject(view.list(), Collections::emptyList);
+      for (String attName : attNames) {
+        int attSize = view.size(attName);
+        if (attSize > 0) {
+          ByteBuffer buffer = ByteBuffer.allocate(attSize);
+          view.read(attName, buffer);
+          atts.put(attName, Defaults.DFLT_CHARSET.decode(buffer.flip()).toString());
+          buffer.clear();
+        }
+      }
+    } else {
+      logger.warning(() -> "The file system can't support user defined file attribute!");
+    }
+    return atts;
+  }
+
+  /**
    * Compare whether two files are the same by byte, if the file is a directory or the file is not
    * readable, it returns False.
    *
@@ -325,6 +366,36 @@ public class FileUtils {
       }
     }
     return true;
+  }
+
+  /**
+   * Put the given user defined file attributes map to the given file path if the file system
+   * supports.
+   *
+   * @param path the file path
+   * @param attributes the attributes to put
+   * @param overwrite whether to overwrite an existing attribute with the same name
+   * @throws IOException
+   */
+  public static void putUserDefinedAttributes(final Path path, Map<String, String> attributes,
+      boolean overwrite) throws IOException {
+    if (isEmpty(attributes)) {
+      return;
+    }
+    if (Files.getFileStore(shouldNotNull(path))
+        .supportsFileAttributeView(UserDefinedFileAttributeView.class)) {
+      UserDefinedFileAttributeView view =
+          Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);
+      List<String> exists = defaultObject(view.list(), Collections::emptyList);
+      for (Entry<String, String> entry : attributes.entrySet()) {
+        if (isNoneNull(entry.getKey(), entry.getValue())
+            && (overwrite || !exists.contains(entry.getKey()))) {
+          view.write(entry.getKey(), Defaults.DFLT_CHARSET.encode(entry.getValue()));
+        }
+      }
+    } else {
+      logger.warning(() -> "The file system can't support user defined file attribute!");
+    }
   }
 
 }

@@ -16,8 +16,8 @@ package org.corant.config.source;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.strip;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.corant.config.CorantConfig;
 import org.corant.shared.resource.ClassPathResourceLoader;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -40,7 +40,7 @@ public class MicroprofileConfigSources {
   public static final String MICROPROFILE_CONFIG_EXT = ".properties";
 
   public static List<ConfigSource> get(ClassLoader classLoader, String profile) {
-    List<ConfigSource> sources = new LinkedList<>();
+    List<ConfigSource> sources = new CopyOnWriteArrayList<>();
     String suffix = MICROPROFILE_CONFIG_EXT;
     final int ordinal;
     if (isNotBlank(profile)) {
@@ -51,10 +51,10 @@ public class MicroprofileConfigSources {
     }
     try {
       new ClassPathResourceLoader(classLoader, false)
-          .load(META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream()
+          .load(META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream().parallel()
           .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
       new ClassPathResourceLoader(classLoader, false)
-          .load(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream()
+          .load(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream().parallel()
           .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
     } catch (IOException e) {
       // Noop

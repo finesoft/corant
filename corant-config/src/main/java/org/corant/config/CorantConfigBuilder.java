@@ -33,6 +33,7 @@ import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.StopWatch;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 import org.eclipse.microprofile.config.Config;
@@ -82,12 +83,14 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   @Override
   public Config build() {
+    StopWatch sw = StopWatch.press("Build configurations");
     CorantConfigSources configSources = CorantConfigSources.of(sources, classLoader);
     CorantConfig config = new CorantConfig(new CorantConfigConversion(converters), configSources);
     if (!Systems.getProperty(Names.CORANT_PREFIX + "config.builder.ignore-validate", Boolean.class,
         false)) {
       validate(configSources, config);
     }
+    sw.destroy(logger);
     return config;
   }
 

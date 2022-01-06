@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import org.corant.shared.normal.Defaults;
@@ -84,9 +84,9 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
   }
 
   public static List<PropertyResourceBundle> getBundles(String path, Predicate<Resource> fs) {
-    List<PropertyResourceBundle> list = new ArrayList<>();
+    List<PropertyResourceBundle> list = new CopyOnWriteArrayList<>();
     try {
-      Resources.from(path).filter(fs).forEach(fo -> {
+      Resources.from(path).filter(fs).parallel().forEach(fo -> {
         try {
           list.add(new PropertyResourceBundle(fo));
         } catch (IOException e) {

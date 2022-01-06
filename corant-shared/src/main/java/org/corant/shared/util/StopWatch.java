@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -86,13 +87,19 @@ public class StopWatch {
   }
 
   public void destroy(Logger logger) {
-    destroy(sw -> logger.info(() -> String.format("Task %s take %s ms.",
-        String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
-        sw.getTotalTimeMillis())));
+    destroy(logger, Level.INFO);
+  }
+
+  public void destroy(Logger logger, Level level) {
+    destroy(sw -> logger.log(level,
+        () -> String.format("%s takes %s ms.",
+            String.join(" and ",
+                sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
+            sw.getTotalTimeMillis())));
   }
 
   public void destroy(PrintStream ps) {
-    destroy(sw -> ps.printf("Task %s take %s ms.%n",
+    destroy(sw -> ps.printf("%s takes %s ms.%n",
         String.join(" and ", sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
         sw.getTotalTimeMillis()));
   }

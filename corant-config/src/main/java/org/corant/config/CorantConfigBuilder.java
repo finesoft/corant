@@ -31,7 +31,6 @@ import org.corant.config.CorantConfigConversion.OrdinalConverter;
 import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.StopWatch;
 import org.corant.shared.util.Strings;
@@ -180,14 +179,10 @@ public class CorantConfigBuilder implements ConfigBuilder {
     });
     sortMap.clear();
     if (thrown != null
-        && !Systems.getProperty(Names.CORANT_PREFIX + "config.builder.supress-exception",
+        && !Systems.getProperty(Names.CORANT_PREFIX + "config.builder.suppress-exception",
             Boolean.class, false)) {
       // logger.log(Level.SEVERE, thrown, () -> "Process configurations occurred error");
-      if (thrown instanceof RuntimeException) {
-        throw (RuntimeException) thrown;
-      } else {
-        throw new CorantRuntimeException(thrown);
-      }
+      throw (RuntimeException) thrown;
     }
   }
 

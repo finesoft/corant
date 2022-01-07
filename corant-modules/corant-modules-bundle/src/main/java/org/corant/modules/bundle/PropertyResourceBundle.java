@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,17 +55,17 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
 
   public static final char LOCALE_SPT_CHAR = '_';
 
-  private static Logger logger = Logger.getLogger(PropertyResourceBundle.class.getName());
+  private static final Logger logger = Logger.getLogger(PropertyResourceBundle.class.getName());
 
-  private Map<String, Object> lookup;
+  private final Map<String, Object> lookup;
 
-  private long lastModifiedTime;
+  private final long lastModifiedTime;
 
-  private Locale locale;
+  private final Locale locale;
 
-  private String baseBundleName;
+  private final String baseBundleName;
 
-  private String uri;
+  private final String uri;
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public PropertyResourceBundle(Resource fo) {
@@ -89,7 +88,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
     try {
       List<PropertyResourceBundle> list = Resources.from(path).filter(fs).parallel()
           .map(PropertyResourceBundle::new).collect(Collectors.toList());
-      Collections.sort(list, Sortable::compare);
+      list.sort(Sortable::compare);
       return list;
     } catch (IOException e) {
       throw new NoSuchBundleException(e, "Can not load property resource bundles from paths %s.",
@@ -165,7 +164,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
     /**
      * Constructs a resource bundle enumeration.
      *
-     * @param set an set providing some elements of the enumeration
+     * @param set a set providing some elements of the enumeration
      * @param enumeration an enumeration providing more elements of the enumeration. enumeration may
      *        be null.
      */

@@ -108,7 +108,7 @@ public class FileUtils {
         FileChannel output = fos.getChannel()) {
       final long size = input.size();
       long pos = 0;
-      long count = 0;
+      long count;
       while (pos < size && !Thread.currentThread().isInterrupted()) {
         final long remain = size - pos;
         count = remain > bufferSize ? bufferSize : remain;
@@ -309,7 +309,7 @@ public class FileUtils {
    * supports.
    *
    * @param path the file path
-   * @throws IOException
+   * @throws IOException if an I/O error occurs
    *
    * @see UserDefinedFileAttributeView
    */
@@ -341,7 +341,8 @@ public class FileUtils {
    *
    * @param file1 the file to be compared
    * @param file2 the file to be compared
-   * @throws IOException isSameContent
+   * @throws IOException if the given file does not exist,is a directory rather than a regular
+   *         file,or for some other reason cannot be opened forreading
    */
   public static boolean isSameContent(final File file1, final File file2) throws IOException {
     if (file1 == null || file2 == null || !file1.isFile() || !file2.isFile() || !file1.canRead()
@@ -375,7 +376,7 @@ public class FileUtils {
    * @param path the file path
    * @param attributes the attributes to put
    * @param overwrite whether to overwrite an existing attribute with the same name
-   * @throws IOException
+   * @throws IOException if an I/O error occurs
    */
   public static void putUserDefinedAttributes(final Path path, Map<String, String> attributes,
       boolean overwrite) throws IOException {

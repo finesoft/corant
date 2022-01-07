@@ -118,7 +118,7 @@ public class Qualifiers {
 
     @Override
     public Set<String> getAllDisplayNames() {
-      return objects.keySet().stream().map(n -> isBlank(n) ? "Unamed" : n)
+      return objects.keySet().stream().map(n -> isBlank(n) ? "Unnamed" : n)
           .collect(Collectors.toSet());
     }
 

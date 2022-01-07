@@ -73,7 +73,7 @@ public class CorantConfigConversion implements Serializable {
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
   public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
   private static final long serialVersionUID = -2708805756022227289L;
-  private static Type[] objectClasses = {Object.class};
+  private static final Type[] objectClasses = {Object.class};
   static {
     // FIXME 6.1. Built-in Converters
     List<OrdinalConverter> builtInCvts = new LinkedList<>();
@@ -179,8 +179,8 @@ public class CorantConfigConversion implements Serializable {
         } else if (!parameterized) {
           result = convertSingle(rawValue, typeClass);
         } else {
-          throw new IllegalArgumentException(
-              "Cannot convert config property for type " + typeClass + "<" + argTypes + ">");
+          throw new IllegalArgumentException("Cannot convert config property for type " + typeClass
+              + "<" + Arrays.toString(argTypes) + ">");
         }
       } catch (IllegalArgumentException e) {
         throw e;
@@ -222,7 +222,7 @@ public class CorantConfigConversion implements Serializable {
    * @param <C> the target collection type
    * @param rawValue the source config property string to be converted
    * @param propertyItemType the target element class
-   * @param collectionFactory the target collection constructer
+   * @param collectionFactory the target collection constructor
    */
   public <T, C extends Collection<T>> C convertCollection(String rawValue, Type propertyItemType,
       IntFunction<C> collectionFactory) {
@@ -296,20 +296,20 @@ public class CorantConfigConversion implements Serializable {
    * @see #tryConvertStringMap(String)
    *
    * @param rawValue the source config property string to be converted
-   * @param properyType the target type
+   * @param propertyType the target type
    * @return convertMap
    */
-  public Map<Object, Object> convertMap(String rawValue, ParameterizedType properyType) {
-    if (properyType.getActualTypeArguments().length == 0) {
+  public Map<Object, Object> convertMap(String rawValue, ParameterizedType propertyType) {
+    if (propertyType.getActualTypeArguments().length == 0) {
       return convertMap(rawValue, Object.class, Object.class);
-    } else if (properyType.getActualTypeArguments().length == 2) {
+    } else if (propertyType.getActualTypeArguments().length == 2) {
       Class<?> kt = Object.class;
       Class<?> vt = Object.class;
-      if (properyType.getActualTypeArguments()[0] instanceof Class) {
-        kt = (Class<?>) properyType.getActualTypeArguments()[0];
+      if (propertyType.getActualTypeArguments()[0] instanceof Class) {
+        kt = (Class<?>) propertyType.getActualTypeArguments()[0];
       }
-      if (properyType.getActualTypeArguments()[1] instanceof Class) {
-        kt = (Class<?>) properyType.getActualTypeArguments()[0];
+      if (propertyType.getActualTypeArguments()[1] instanceof Class) {
+        kt = (Class<?>) propertyType.getActualTypeArguments()[0];
       }
       return convertMap(rawValue, kt, vt);
     }
@@ -340,10 +340,12 @@ public class CorantConfigConversion implements Serializable {
       converter = s -> s;
       return Optional.of(forceCast(converter));
     }
-    if (forType.isArray()
-        && (converter = v -> convertArray(v, forType.getComponentType())) != null) {
+
+    if (forType.isArray() && getConverter(forType.getComponentType()).isPresent()) {
+      converter = v -> convertArray(v, forType.getComponentType());
       return Optional.of(forceCast(converter));
     }
+
     if ((converter = converters.get().get(wrap(forType))) != null) {
       return Optional.of(forceCast(converter));
     }
@@ -372,7 +374,7 @@ public class CorantConfigConversion implements Serializable {
    * Use a {@code ','} to cut the string into segments,if each segment contains {@code '='} (and
    * does not start with {@code '='}) then each segment is treated as a key-value pair; otherwise
    * the odd segment is the key of the key-value pair , The next even segment is the value of the
-   * key-value pair. All key and value are trimed.
+   * key-value pair. All key and value are trimmed.
    * </p>
    *
    * <pre>
@@ -408,7 +410,7 @@ public class CorantConfigConversion implements Serializable {
       }
     }
     if (useKvs) {
-      values = vals.toArray(new String[vals.size()]);
+      values = vals.toArray(new String[0]);
       vals.clear();
     }
     return mapOf((Object[]) values);

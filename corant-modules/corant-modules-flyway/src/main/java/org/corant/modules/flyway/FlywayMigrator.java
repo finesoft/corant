@@ -123,7 +123,7 @@ public class FlywayMigrator {
       logger.info(() -> String.format("Build flyway instance from locations [%s]",
           String.join(",", locationsToUse)));
       FluentConfiguration fc = Flyway.configure().configuration(globalFlywayConfig).dataSource(ds)
-          .cleanDisabled(true).locations(locationsToUse.toArray(new String[locationsToUse.size()]));
+          .cleanDisabled(true).locations(locationsToUse.toArray(new String[0]));
       if (!callbacks.isUnsatisfied()) {
         fc.callbacks(callbacks.stream().toArray(Callback[]::new));
       }

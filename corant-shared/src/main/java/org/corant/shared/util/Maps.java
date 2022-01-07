@@ -1113,7 +1113,7 @@ public class Maps {
               throw new NotSupportedException("We only support implants for a map object!");
             }
           }
-        } else if (next != null && next.getClass().isArray()) {
+        } else if (next.getClass().isArray()) {
           for (Object item : wrapArray(next)) {
             if (item instanceof Map) {
               implantMapValue((Map) item, paths, nextDeep, value);

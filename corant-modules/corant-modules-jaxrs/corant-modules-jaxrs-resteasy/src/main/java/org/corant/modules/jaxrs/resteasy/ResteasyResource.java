@@ -123,11 +123,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
       this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
       metaData.put(META_NAME, this.filename);
       if (inputPart.getMediaType() != null) {
-        if (inputPart.getMediaType().getSubtype() != null) {
-          metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().getSubtype());
-        } else {
-          metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().getType());
-        }
+        metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().toString());
       }
       if (disposition.getModificationDate() != null) {
         metaData.put(META_LAST_MODIFIED,

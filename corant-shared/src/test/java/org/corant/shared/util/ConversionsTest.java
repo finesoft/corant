@@ -45,7 +45,6 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -54,13 +53,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
-import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
 import org.corant.shared.resource.SourceType;
-import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.junit.Test;
@@ -73,56 +72,6 @@ import junit.framework.TestCase;
  *
  */
 public class ConversionsTest extends TestCase {
-
-  public static void main(String... args) {
-    List<Converter<?, ?>> cs = new ArrayList<>();
-    cs.add(new Converter<String, Long>() {
-
-      @Override
-      public Long apply(String t, Map<String, ?> hints) {
-        return null;
-      }
-
-      @Override
-      public int getPriority() {
-        return Converter.super.getPriority();
-      }
-
-      @Override
-      public String toString() {
-        return "bingo1";
-      }
-    });
-    cs.add(new Converter<String, Long>() {
-
-      @Override
-      public Long apply(String t, Map<String, ?> hints) {
-        return null;
-      }
-
-      @Override
-      public int getPriority() {
-        return Converter.super.getPriority() - 1;
-      }
-
-      @Override
-      public String toString() {
-        return "bingo2";
-      }
-    });
-    cs.forEach(System.out::println);
-    System.out.println("===============");
-    cs.stream().sorted(Sortable::compare).forEach(System.out::println);
-    System.out.println("===============");
-    cs.stream().sorted(Sortable::reverseCompare).forEach(System.out::println);
-    System.out.println("===============");
-    Collections.sort(cs, (c1, c2) -> Integer.compare(c1.getPriority(), c2.getPriority()));
-    cs.forEach(System.out::println);
-    System.out.println("===============");
-    System.out.println(cs.stream().max(Sortable::compare).get());
-    System.out.println("===============");
-    System.out.println(cs.stream().min(Sortable::compare).get());
-  }
 
   @Test
   public void testDateInstant() {
@@ -371,6 +320,22 @@ public class ConversionsTest extends TestCase {
     assertTrue(toShort(int_1).compareTo((short) 12) == 0);
     assertTrue(toShort(int_2).compareTo((short) 12) == 0);
     assertTrue(toShort(int_3).compareTo((short) -12) == 0);
+  }
+
+  @Test
+  public void testTuple() {
+    long epoMills = System.currentTimeMillis();
+    Pair<String, Instant> pair = Tuple.pairOf("left", Instant.ofEpochMilli(epoMills));
+    Triple<String, String, Instant> triple =
+        Tuple.tripleOf("left", "middle", Instant.ofEpochMilli(epoMills));
+    assertEquals(pair, toObject(mapOf("left", "left", "right", epoMills),
+        new TypeLiteral<Pair<String, Instant>>() {}));
+    assertEquals(triple, toObject(mapOf("left", "left", "middle", "middle", "right", epoMills),
+        new TypeLiteral<Triple<String, String, Instant>>() {}));
+    assertEquals(pair,
+        toObject(new Object[] {"left", epoMills}, new TypeLiteral<Pair<String, Instant>>() {}));
+    assertEquals(triple, toObject(new Object[] {"left", "middle", epoMills},
+        new TypeLiteral<Triple<String, String, Instant>>() {}));
   }
 
   @SuppressWarnings("rawtypes")

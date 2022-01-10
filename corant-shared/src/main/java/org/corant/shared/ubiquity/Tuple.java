@@ -30,6 +30,22 @@ import org.corant.shared.util.Objects;
  */
 public interface Tuple {
 
+  static <L, R> Pair<L, R> pairOf(final L left, final R right) {
+    return Pair.of(left, right);
+  }
+
+  static <L, R> Pair<L, R> pairOf(final Map.Entry<L, R> entry) {
+    return Pair.of(entry.getKey(), entry.getValue());
+  }
+
+  static <T extends Comparable<T>> Range<T> rangeOf(T min, T max) {
+    return Range.of(min, max);
+  }
+
+  static <L, M, R> Triple<L, M, R> tripleOf(final L left, final M middle, final R right) {
+    return Triple.of(left, middle, right);
+  }
+
   /**
    * Returns true if this tuple contains the specified element. More formally, returns true if and
    * only if this tuple contains at least one element e such that Objects.equals(o, e).
@@ -90,14 +106,6 @@ public interface Tuple {
 
     public static <L, R> Pair<L, R> of(final Map.Entry<L, R> entry) {
       return new Pair<>(entry.getKey(), entry.getValue());
-    }
-
-    public static <L, R> Pair<L, R> pairOf(final L left, final R right) {
-      return of(left, right);
-    }
-
-    public static <L, R> Pair<L, R> pairOf(final Map.Entry<L, R> entry) {
-      return of(entry.getKey(), entry.getValue());
     }
 
     public String asString(final String format) {
@@ -227,16 +235,12 @@ public interface Tuple {
     }
 
     @SuppressWarnings("unchecked")
-    public static <X extends Comparable<X>> Range<X> empty() {
+    public static <T extends Comparable<T>> Range<T> empty() {
       return emptyInstance;
     }
 
     public static <T extends Comparable<T>> Range<T> of(T min, T max) {
       return new Range<>(min, max);
-    }
-
-    public static <T extends Comparable<T>> Range<T> rangeOf(T min, T max) {
-      return of(min, max);
     }
 
     public String asString(final String format) {
@@ -394,10 +398,6 @@ public interface Tuple {
 
     public static <L, M, R> Triple<L, M, R> of(final L left, final M middle, final R right) {
       return new Triple<>(left, middle, right);
-    }
-
-    public static <L, M, R> Triple<L, M, R> tripleOf(final L left, final M middle, final R right) {
-      return of(left, middle, right);
     }
 
     public String asString(final String format) {

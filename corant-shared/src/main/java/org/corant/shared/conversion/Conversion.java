@@ -40,6 +40,9 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Tuple;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
@@ -138,9 +141,9 @@ public class Conversion {
           return null;
         }
         final Class<?> nextClass = next.getClass();
-        if (converter == null || sourceClass == null || !sourceClass.equals(nextClass)) {
-          converter = resolveConverter(nextClass, targetClass);
+        if (!nextClass.equals(sourceClass) || converter == null || sourceClass == null) {
           sourceClass = nextClass;
+          converter = resolveConverter(sourceClass, targetClass);
           if (converter == null) {
             tryStringConverter = true;
             converter = resolveConverter(String.class, targetClass);
@@ -443,6 +446,51 @@ public class Conversion {
     throw new IllegalArgumentException("Cannot type for Map<" + keyClass + "," + valueClass + ">");
   }
 
+  static Tuple convertTuple(Object value, Class<? extends Tuple> targetClass, Class<?>[] argClasses,
+      Map<String, ?> hints) {
+    if (Pair.class.isAssignableFrom(targetClass)) {
+      if (value instanceof Map) {
+        Map mapValue = (Map) value;
+        if (mapValue.containsKey("key") && mapValue.containsKey("value")) {
+          return Tuple.pairOf(convert(mapValue.get("key"), argClasses[0], hints),
+              convert(mapValue.get("value"), argClasses[1], hints));
+        } else if (mapValue.containsKey("left") && mapValue.containsKey("right")) {
+          return Tuple.pairOf(convert(mapValue.get("left"), argClasses[0], hints),
+              convert(mapValue.get("right"), argClasses[1], hints));
+        }
+      } else if (value.getClass().isArray()) {
+        Object[] array = wrapArray(value);
+        if (array.length > 1) {
+          return Tuple.pairOf(convert(array[0], argClasses[0], hints),
+              convert(array[1], argClasses[1], hints));
+        }
+      }
+    } else if (Triple.class.isAssignableFrom(targetClass)) {
+      if (value instanceof Map) {
+        Map mapValue = (Map) value;
+        if (mapValue.containsKey("first") && mapValue.containsKey("second")
+            && mapValue.containsKey("third")) {
+          return Tuple.tripleOf(convert(mapValue.get("first"), argClasses[0], hints),
+              convert(mapValue.get("second"), argClasses[1], hints),
+              convert(mapValue.get("third"), argClasses[2], hints));
+        } else if (mapValue.containsKey("left") && mapValue.containsKey("middle")
+            && mapValue.containsKey("right")) {
+          return Tuple.tripleOf(convert(mapValue.get("left"), argClasses[0], hints),
+              convert(mapValue.get("middle"), argClasses[1], hints),
+              convert(mapValue.get("right"), argClasses[2], hints));
+        }
+      } else if (value.getClass().isArray()) {
+        Object[] array = wrapArray(value);
+        if (array.length > 2) {
+          return Tuple.tripleOf(convert(array[0], argClasses[0], hints),
+              convert(array[1], argClasses[1], hints), convert(array[2], argClasses[2], hints));
+        }
+      }
+    }
+    throw new IllegalArgumentException(
+        "Cannot type for " + targetClass + "<" + Arrays.toString(argClasses) + ">");
+  }
+
   /**
    * Convert the given object to the given target type. Note: If the target type is generic, only
    * List/Set/Supplier/Optional/Map, etc. are supported, and the type parameter must be a concrete
@@ -494,13 +542,15 @@ public class Conversion {
           result = (Supplier<?>) () -> convert(value, argClasses[0], hints);
         } else if (Map.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
           result = convertMap(value, argClasses[0], argClasses[1], hints);
+        } else if (Pair.class.isAssignableFrom(typeClass) && argClasses.length == 2) {
+          result = convertTuple(value, Pair.class, argClasses, hints);
+        } else if (Triple.class.isAssignableFrom(typeClass) && argClasses.length == 3) {
+          result = convertTuple(value, Triple.class, argClasses, hints);
+        } else if (argClasses.length == 0) {
+          result = convert(value, typeClass, hints);
         } else {
-          if (argClasses.length == 0) {
-            result = convert(value, typeClass, hints);
-          } else {
-            throw new IllegalArgumentException(
-                "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + ">");
-          }
+          throw new IllegalArgumentException(
+              "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + ">");
         }
       } catch (IllegalArgumentException e) {
         throw e;

@@ -129,11 +129,14 @@
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
-    <version.ojdbc8>19.8.0.0</version.ojdbc8>
     <version.narayana>5.12.4.Final</version.narayana>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
+    <version.ojdbc8>19.8.0.0</version.ojdbc8>
     <version.opencv>3.4.2-2</version.opencv>
+    <version.opentelemetry>1.9.0</version.opentelemetry>
+    <version.opentelemetry.javaagent>1.9.0</version.opentelemetry.javaagent>
+    <version.opentelemetry.instrumentation>1.9.2-alpha</version.opentelemetry.instrumentation>
     <version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>
     <version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
     <version.org.osgi.service.cdi>1.0.0</version.org.osgi.service.cdi>
@@ -1489,12 +1492,6 @@
       </dependency>
 
       <dependency>
-        <groupId>io.prometheus.jmx</groupId>
-        <artifactId>jmx_prometheus_javaagent</artifactId>
-        <version>${version.prometheus}</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${version.slf4j}</version>
@@ -1782,6 +1779,32 @@
         <groupId>org.openpnp</groupId>
         <artifactId>opencv</artifactId>
         <version>${version.opencv}</version>
+      </dependency>
+
+      <!-- apm -->
+      <dependency>
+        <groupId>io.prometheus.jmx</groupId>
+        <artifactId>jmx_prometheus_javaagent</artifactId>
+        <version>${version.prometheus}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>${version.opentelemetry}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+        <version>${version.opentelemetry.instrumentation}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.javaagent</groupId>
+        <artifactId>opentelemetry-javaagent</artifactId>
+        <version>${version.opentelemetry.javaagent}</version>
       </dependency>
 
       <!-- Testing -->

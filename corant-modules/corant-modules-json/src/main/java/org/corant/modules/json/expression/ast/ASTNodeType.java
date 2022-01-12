@@ -30,8 +30,8 @@ import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicAndNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNorNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNotNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicOrNode;
+import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicXorNode;
 import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariableNode;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-json
@@ -82,6 +82,17 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTLogicNorNode();
+    }
+  },
+
+  /**
+   * Performs a XOR operation on an array with at least two expressions and returns the objects that
+   * do not meet any of the expressions.
+   */
+  LG_XOR("$xor", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTLogicXorNode();
     }
   },
 
@@ -163,16 +174,6 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTGreaterThanEqualNode();
-    }
-  },
-
-  /**
-   * The element match operator.
-   */
-  CP_EM("$element", false) {
-    @Override
-    public ASTNode<?> buildNode(Object object) {
-      throw new NotSupportedException();
     }
   },
 

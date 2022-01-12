@@ -80,7 +80,7 @@ public interface ASTLogicNode extends ASTPredicateNode {
 
     @Override
     public Boolean getValue(EvaluationContext ctx) {
-      return Boolean.logicalXor(children.get(0).getValue(ctx), children.get(1).getValue(ctx));
+      return children.stream().allMatch(n -> !n.getValue(ctx));
     }
   }
 
@@ -112,6 +112,18 @@ public interface ASTLogicNode extends ASTPredicateNode {
     @Override
     public Boolean getValue(EvaluationContext ctx) {
       return children.stream().anyMatch(n -> n.getValue(ctx));
+    }
+  }
+
+  class ASTLogicXorNode extends AbstractASTLogicNode {
+
+    public ASTLogicXorNode() {
+      super(ASTNodeType.LG_XOR);
+    }
+
+    @Override
+    public Boolean getValue(EvaluationContext ctx) {
+      return Boolean.logicalXor(children.get(0).getValue(ctx), children.get(1).getValue(ctx));
     }
   }
 

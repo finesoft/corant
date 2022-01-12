@@ -88,6 +88,20 @@ public class Jsons {
   private Jsons() {}
 
   /**
+   * Convert an object to given target class object.
+   *
+   * @param <T> the target type
+   * @param object the object to be convert
+   * @param clazz the target class
+   * @return the converted object
+   *
+   * @see ObjectMapper#convertValue(Object, Class)
+   */
+  public static <T> T convert(Object object, Class<T> clazz) {
+    return objectMapper.convertValue(object, clazz);
+  }
+
+  /**
    * Convert an object to given target type literal object.
    *
    * <p>
@@ -102,7 +116,7 @@ public class Jsons {
    * @param typeLiteral the target type literal
    * @return the converted object
    *
-   * @see ObjectMapper#convertValue(Object, Class)
+   * @see ObjectMapper#convertValue(Object, JavaType)
    */
   public static <T> T convert(Object object, TypeLiteral<T> typeLiteral) {
     return objectMapper.convertValue(object, objectMapper.constructType(typeLiteral.getType()));
@@ -123,17 +137,17 @@ public class Jsons {
    * @param targetTypeRef the target type reference
    * @return the converted object
    *
-   * @see ObjectMapper#convertValue(Object, Class)
+   * @see ObjectMapper#convertValue(Object, TypeReference)
    */
   public static <T> T convert(Object object, TypeReference<T> targetTypeRef) {
     return objectMapper.convertValue(object, targetTypeRef);
   }
 
   /**
-   * Clone a pojo
+   * Clone a POJO
    *
    * <p>
-   * NOTE: This method is experiential.
+   * NOTE: This method is experimental.
    *
    * @param <T> the object type
    * @param pojo the object to clone
@@ -157,10 +171,10 @@ public class Jsons {
   }
 
   /**
-   * Clone a pojo with given type literal
+   * Clone a POJO with given type literal
    *
    * <p>
-   * NOTE: This method is experiential.
+   * NOTE: This method is experimental.
    *
    * @param <T> the object type
    * @param pojo the object to clone
@@ -185,10 +199,10 @@ public class Jsons {
   }
 
   /**
-   * Clone a pojo with given type reference
+   * Clone a POJO with given type reference
    *
    * <p>
-   * NOTE: This method is experiential.
+   * NOTE: This method is experimental.
    *
    * @param <T> the object type
    * @param pojo the object to clone
@@ -224,6 +238,23 @@ public class Jsons {
   }
 
   /**
+   * Returns a Map object from given JSON bytes
+   *
+   * @param jsonBytes the JSON serialized bytes of the object
+   */
+  public static <K, V> Map<K, V> fromBytes(byte[] jsonBytes) {
+    if (isEmpty(jsonBytes)) {
+      return null;
+    } else {
+      try {
+        return mapReader.readValue(jsonBytes);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
    * Returns an typed object from given JSON bytes and class
    *
    * @param <T> the the expected object type
@@ -236,6 +267,45 @@ public class Jsons {
     } else {
       try {
         return objectMapper.readerFor(cls).readValue(jsonBytes);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Returns an typed object from given JSON bytes and type literal
+   *
+   * @param <T> the the expected object type
+   * @param jsonBytes the JSON serialized bytes of the object
+   * @param type the expected object type
+   */
+  public static <T> T fromBytes(byte[] jsonBytes, TypeLiteral<T> type) {
+    if (isEmpty(jsonBytes)) {
+      return null;
+    } else {
+      try {
+        return objectMapper.readerFor(objectMapper.constructType(type.getType()))
+            .readValue(jsonBytes);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Returns an typed object from given JSON bytes and type reference
+   *
+   * @param <T> the the expected object type
+   * @param jsonBytes the JSON serialized bytes of the object
+   * @param type the expected object type
+   */
+  public static <T> T fromBytes(byte[] jsonBytes, TypeReference<T> type) {
+    if (isEmpty(jsonBytes)) {
+      return null;
+    } else {
+      try {
+        return objectMapper.readValue(jsonBytes, type);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }

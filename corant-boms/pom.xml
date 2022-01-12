@@ -66,7 +66,7 @@
     <version.hsqldb>2.6.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
     <version.jackson>2.13.1</version.jackson>
-    <version.jandex>2.4.1.Final</version.jandex>
+    <version.jandex>2.4.2.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javassist>3.27.0.GA</version.javassist>
     <version.jakarta.activation-api>1.2.2</version.jakarta.activation-api>
@@ -91,7 +91,7 @@
     <version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
     <version.jose4j>0.7.9</version.jose4j>
-    <version.jsqlparser>4.1</version.jsqlparser>
+    <version.jsqlparser>4.3</version.jsqlparser>
     <version.jsoup>1.14.2</version.jsoup>
     <version.junit>4.13.2</version.junit>
     <version.jython>2.7.2</version.jython>

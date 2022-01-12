@@ -13,7 +13,6 @@
  */
 package org.corant.kernel.event;
 
-import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -30,11 +29,14 @@ public interface CorantLifecycleEvent {
   class LifecycleEventEmitter {
     @Inject
     protected Event<CorantLifecycleEvent> events;
-    @Inject
-    protected Logger logger;
 
-    public void fire(CorantLifecycleEvent event) {
-      events.fire(event);
+    public void fire(CorantLifecycleEvent event, boolean async) {
+      if (async) {
+        events.fireAsync(event);
+      } else {
+        events.fire(event);
+      }
     }
+
   }
 }

@@ -13,9 +13,10 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Systems;
@@ -123,7 +124,7 @@ public class CorantDeclarativeScheduler {
     }
   }
 
-  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv)
+  protected void onPostCorantReadyEvent(@ObservesAsync final PostCorantReadyAsyncEvent adv)
       throws SchedulerException {
     if (!enable) {
       logger.info(() -> "The bulit-in declarative job scheduler is disabled!");

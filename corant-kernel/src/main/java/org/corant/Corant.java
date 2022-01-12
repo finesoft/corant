@@ -45,6 +45,7 @@ import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerReadyEvent;
+import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.kernel.jmx.Power;
 import org.corant.kernel.logging.LoggerFactory;
@@ -602,7 +603,7 @@ public class Corant implements AutoCloseable {
       // emit post container ready events
       stopWatch.start();
       LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-      emitter.fire(new PostContainerReadyEvent(arguments));
+      emitter.fire(new PostContainerReadyEvent(arguments), false);
       stopWatch
           .stop(t -> logInfo("All modules have been initialized, takes %s ms.", t.getTimeMillis()));
 
@@ -627,10 +628,10 @@ public class Corant implements AutoCloseable {
 
       // emit post corant ready events
       stopWatch.start();
-      emitter.fire(new PostCorantReadyEvent(arguments));
-      stopWatch.destroy(sw -> logInfo("All preparations have been completed, takes %s ms.%s",
+      emitter.fire(new PostCorantReadyEvent(arguments), false);
+      emitter.fire(new PostCorantReadyAsyncEvent(arguments), true);// since 1.8 2022-01-12
+      stopWatch.destroy(sw -> logInfo("All preparations have been triggered, takes %s ms.%s",
           sw.getLastTaskInfo().getTimeMillis(), boostLine(".")));
-
     } catch (Throwable e) {
       log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
       throw new CorantRuntimeException(e);

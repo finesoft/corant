@@ -280,7 +280,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
       if (left instanceof Number && right instanceof Number) {
-        return compare(left, right) == 0;
+        return compare(left, right) != 0;
       }
       return !areEqual(left, right);
     }

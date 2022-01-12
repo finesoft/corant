@@ -27,7 +27,6 @@ public interface ASTNodeVisitor extends Sortable {
 
   ASTNodeVisitor DFLT = node -> {
     switch (node.getType()) {
-      case CP_EM:
       case CP_EQ:
       case CP_GT:
       case CP_GTE:

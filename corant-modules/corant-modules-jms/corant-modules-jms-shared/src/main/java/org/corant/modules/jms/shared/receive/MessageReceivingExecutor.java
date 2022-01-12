@@ -35,12 +35,13 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.ObservesAsync;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
 import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
@@ -144,7 +145,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
         MessageReceivingExecutorConfig.DFLT_INST);
   }
 
-  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
+  protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
     start();
   }
 

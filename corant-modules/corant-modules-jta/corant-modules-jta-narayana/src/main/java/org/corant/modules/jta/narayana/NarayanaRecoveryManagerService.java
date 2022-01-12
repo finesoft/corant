@@ -19,10 +19,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 import org.corant.Corant;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.kernel.event.PostCorantReadyEvent;
+import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jta.shared.TransactionIntegration;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Services;
@@ -90,7 +91,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
     }
   }
 
-  protected void postCorantReadyEvent(@Observes final PostCorantReadyEvent e) {
+  protected void postCorantReadyEvent(@ObservesAsync final PostCorantReadyAsyncEvent e) {
     initialize();
   }
 

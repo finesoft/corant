@@ -16,10 +16,12 @@ package org.corant.context.concurrent.annotation;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
+import org.corant.context.qualifier.Qualifiers;
 
 /**
  * corant-context
@@ -30,7 +32,24 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
+@Inherited
 public @interface Asynchronous {
+
   @Nonbinding
-  boolean fair() default true;
+  String backoffFactor() default "2.0";
+
+  @Nonbinding
+  String executor() default Qualifiers.EMPTY_NAME;
+
+  @Nonbinding
+  String maxRetryInterval() default "PT0S";
+
+  @Nonbinding
+  String retryBackoffAlgo() default "NONE";
+
+  @Nonbinding
+  String retryInterval() default "PT0S";
+
+  @Nonbinding
+  String retryTimes() default "0";
 }

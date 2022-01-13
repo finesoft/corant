@@ -45,7 +45,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
     public RandomWebServerPortConfigSource(final int port) {
       this.port = port;
-      properties.put(WEB_SERVER_PORT_PN, port + "");
+      properties.put(WEB_SERVER_PORT_PN, String.valueOf(port));
     }
 
     @Override

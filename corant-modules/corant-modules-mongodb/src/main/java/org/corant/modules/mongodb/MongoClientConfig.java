@@ -168,7 +168,7 @@ public class MongoClientConfig implements NamedObject {
               set.add(Pair.of(arr[0], DEFAULT_PORT));
             }
           }
-          set.forEach(hp -> mc.hostAndPorts.add(hp));
+          mc.hostAndPorts.addAll(set);
         });
       } else if (pn.endsWith(MC_URI)) {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUri);

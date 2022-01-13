@@ -133,8 +133,8 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
             "The size of query[%s] result is exceeded, the allowable range is %s, the excess records are silently dropped.",
             query.getName(), maxSize));
         do {
-          results.remove(size - 1);
-        } while ((size = sizeOf(results)) > maxSize);
+          results.remove(--size);
+        } while (size > maxSize);
       }
     }
     return size;
@@ -183,7 +183,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
         if (maxSelectSize == null
             && (maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
                 Integer.class, config.getDefaultSelectSize())) <= 0) {
-          maxSelectSize = config.getMaxSelectSize();
+          maxSelectSize = max(config.getMaxSelectSize(), 0);
         }
       }
     }

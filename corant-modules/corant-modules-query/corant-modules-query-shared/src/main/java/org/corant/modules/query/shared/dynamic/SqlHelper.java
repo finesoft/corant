@@ -134,7 +134,8 @@ public class SqlHelper {
     List<Object> fixedParams = new ArrayList<>();
     StringBuilder fixedSql = new StringBuilder();
     int escapes = 0;
-    for (int i = 0; i < sql.length(); i++) {
+    int sqlLen = sql.length();
+    for (int i = 0; i < sqlLen; i++) {
       char c = sql.charAt(i);
       if (c == SQL_PARAM_ESC_C) {
         fixedSql.append(c);
@@ -266,8 +267,9 @@ public class SqlHelper {
 
     int depth = 0;
     int start = -1;
+    int sqlLen = sql.length();
     boolean insideAStringValue = false;
-    for (int i = 0; i < sql.length(); ++i) {
+    for (int i = 0; i < sqlLen; ++i) {
       final char ch = sql.charAt(i);
       if (ch == '\'') {
         insideAStringValue = !insideAStringValue;

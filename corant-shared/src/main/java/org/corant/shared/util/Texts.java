@@ -470,8 +470,9 @@ public class Texts {
     List<String> result = new ArrayList<>();
     if (line != null) {
       StringBuilder buf = new StringBuilder();
+      int len = line.length();
       byte state = 0; // 0:start,1:in field,2:in field quote,3:end field quote
-      for (int i = 0; i < line.length(); i++) {
+      for (int i = 0; i < len; i++) {
         char c = line.charAt(i);
         switch (c) {
           case CSV_FIELD_DELIMITER:

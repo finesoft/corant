@@ -15,10 +15,12 @@ package org.corant.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.shared.util.Methods.MethodSignature;
@@ -70,9 +72,12 @@ public abstract class CDIs {
 
   public static MethodSignature getMethodSignature(AnnotatedMethod<?> method) {
     String methodName = method.getJavaMember().getName();
-    String[] parameterTypes = new String[method.getParameters().size()];
-    for (int i = 0; i < method.getParameters().size(); i++) {
-      parameterTypes[i] = Types.getRawType(method.getParameters().get(i).getBaseType()).getName();
+    List<?> parameters = method.getParameters();
+    int size = parameters.size();
+    String[] parameterTypes = new String[size];
+    for (int i = 0; i < size; i++) {
+      parameterTypes[i] =
+          Types.getRawType(((AnnotatedParameter<?>) parameters.get(i)).getBaseType()).getName();
     }
     return MethodSignature.of(methodName, parameterTypes);
   }

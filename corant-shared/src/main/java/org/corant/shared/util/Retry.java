@@ -193,7 +193,7 @@ public class Retry {
     protected final double backoffFactor;
     protected volatile long base;
 
-    protected DefaultRetryInterval(BackoffAlgorithm backoffAlgo, Duration interval,
+    public DefaultRetryInterval(BackoffAlgorithm backoffAlgo, Duration interval,
         Duration maxInterval, Double backoffFactor) {
       this.backoffAlgo = shouldNotNull(backoffAlgo, "The retry interval algo can't null!");
       shouldBeTrue(interval != null && interval.toMillis() >= 0, "The retry interval error!");

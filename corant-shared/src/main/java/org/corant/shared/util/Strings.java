@@ -431,13 +431,14 @@ public class Strings {
     }
     int point = 0;
     for (int i = idx; i < len; i++) {
-      if (obj.charAt(i) == Chars.DOT) {
+      char ch = obj.charAt(i);
+      if (ch == Chars.DOT) {
         if (++point > 1) {
           return false;
         }
         continue;
       }
-      if (!Character.isDigit(obj.charAt(i))) {
+      if (!Character.isDigit(ch)) {
         return false;
       }
     }
@@ -707,8 +708,9 @@ public class Strings {
     }
     StringBuilder buf = new StringBuilder(len);
     for (int i = 0; i < len; i++) {
-      if (!filter.test(str.charAt(i))) {
-        buf.append(str.charAt(i));
+      char ch = str.charAt(i);
+      if (!filter.test(ch)) {
+        buf.append(ch);
       }
     }
     return buf.toString();

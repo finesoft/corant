@@ -13,16 +13,20 @@
  */
 package org.corant.context.concurrent.interceptor;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.context.concurrent.ConcurrentExtension.ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Priority;
+import javax.interceptor.AroundConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import org.corant.context.AbstractInterceptor;
 import org.corant.context.concurrent.annotation.ConcurrencyThrottle;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.util.Methods.MethodSignature;
 
 /**
@@ -34,14 +38,16 @@ import org.corant.shared.util.Methods.MethodSignature;
 @Interceptor
 @ConcurrencyThrottle
 @Priority(Interceptor.Priority.PLATFORM_BEFORE)
-public class ConcurrencyThrottleInterceptor {
+@RequiredConfiguration(key = ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG,
+    predicate = ValuePredicate.EQ, type = Boolean.class, value = "true")
+public class ConcurrencyThrottleInterceptor extends AbstractInterceptor {
 
   static final Map<MethodSignature, Semaphore> THROTTLES = new ConcurrentHashMap<>();
 
   @AroundInvoke
+  @AroundConstruct
   public Object concurrencyThrottleInvocation(final InvocationContext ctx) throws Exception {
-    ConcurrencyThrottle ann =
-        shouldNotNull(ctx).getMethod().getDeclaredAnnotation(ConcurrencyThrottle.class);
+    ConcurrencyThrottle ann = getInterceptorAnnotation(ctx, ConcurrencyThrottle.class);
     final int max = Integer.max(ann.max(), ConcurrencyThrottle.DFLT_THRON);
     final boolean fair = ann.fair();
     Semaphore counting = ConcurrencyThrottleInterceptor.THROTTLES

@@ -115,8 +115,7 @@ public class JPAConfig {
   }
 
   public static Set<PersistenceUnitInfoMetaData> from(Config config) {
-    Set<PersistenceUnitInfoMetaData> metaDatas = new HashSet<>();
-    generateFromXml().forEach(metaDatas::add);
+    Set<PersistenceUnitInfoMetaData> metaDatas = new HashSet<>(generateFromXml());
     generateFromConfig(config).forEach(u -> {
       if (u.isEnable()) {
         shouldBeTrue(metaDatas.add(u), "The persistence unit name %s is dup!",

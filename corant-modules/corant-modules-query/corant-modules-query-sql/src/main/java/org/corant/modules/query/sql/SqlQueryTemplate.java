@@ -594,7 +594,7 @@ public class SqlQueryTemplate {
       this.tpl = tpl;
       this.config = config;
       retryer = config.retryTimes > 0
-          ? Retry.retryer().times(config.retryTimes).interval(config.retryInterval).thrower(
+          ? Retry.retryer().times(config.retryTimes + 1).interval(config.retryInterval).thrower(
               isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
           : null;
     }

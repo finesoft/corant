@@ -96,15 +96,17 @@ public class SQLServer2005Dialect extends SQLServerDialect {
   protected int advanceOverCTEInnerQuery(StringBuilder sql, int offset) {
     int brackets = 0;
     int index = offset;
+    int length = sql.length();
     boolean inString = false;
-    for (; index < sql.length(); ++index) {
-      if (sql.charAt(index) == '\'') {
+    for (; index < length; ++index) {
+      final char ch = sql.charAt(index);
+      if (ch == '\'') {
         inString = true;
-      } else if (sql.charAt(index) == '\'' && inString) {
+      } else if (ch == '\'' && inString) {
         inString = false;
-      } else if (sql.charAt(index) == '(' && !inString) {
+      } else if (ch == '(' && !inString) {
         brackets++;
-      } else if (sql.charAt(index) == ')' && !inString) {
+      } else if (ch == ')' && !inString) {
         brackets--;
         if (brackets == 0) {
           break;

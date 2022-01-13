@@ -375,7 +375,8 @@ public class JDBCTemplate {
     List<Object> fixedParams = new ArrayList<>();
     StringBuilder fixedSql = new StringBuilder();
     int escapes = 0;
-    for (int i = 0; i < sql.length(); i++) {
+    int sqlLen = sql.length();
+    for (int i = 0; i < sqlLen; i++) {
       char c = sql.charAt(i);
       if (c == SQL_PARAM_ESC_C) {
         fixedSql.append(c);

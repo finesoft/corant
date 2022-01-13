@@ -189,7 +189,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
-          return Retry.retryer().times(parameter.getRetryTimes())
+          return Retry.retryer().times(parameter.getRetryTimes() + 1)
               .interval(parameter.getRetryInterval())
               .breaker(() -> Corant.current() != null && Corant.current().isRunning())
               .execute(() -> forward(queryName, parameter));

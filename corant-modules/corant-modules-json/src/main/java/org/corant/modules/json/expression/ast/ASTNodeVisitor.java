@@ -33,7 +33,7 @@ public interface ASTNodeVisitor extends Sortable {
       case CP_LT:
       case CP_LTE:
       case CP_NE:
-      case LG_NOR:
+      case LG_XOR:
         shouldBeTrue(node.getChildren().size() == 2);
         break;
       case CP_REGEX:
@@ -48,6 +48,7 @@ public interface ASTNodeVisitor extends Sortable {
       case CP_NIN:
       case LG_AND:
       case LG_NOT:
+      case LG_NOR:
       case LG_OR:
         shouldBeTrue(node.getChildren().size() > 0);
         break;

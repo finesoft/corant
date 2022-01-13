@@ -18,6 +18,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import javax.enterprise.inject.Intercepted;
@@ -68,62 +69,60 @@ public abstract class AbstractInterceptor {
           return (T) annotation;
         }
       }
-    } else {
-      T interceptorAnnotation;
-      Set<ElementType> targets = getTarget(interceptorAnnotationType);
-      if (interceptedBean != null) {
-        // for normal CDI
-        AnnotatedType<?> currentAnnotatedType = currentAnnotatedType(ic);
-        Set<Annotation> invocationPointAnnotations = Collections.emptySet();
-        if (ic.getMethod() != null) {
-          for (AnnotatedMethod<?> methodInSearch : currentAnnotatedType.getMethods()) {
-            if (methodInSearch.getJavaMember().equals(ic.getMethod())) {
-              invocationPointAnnotations = methodInSearch.getAnnotations();
-              break;
-            }
-          }
-        } else if (ic.getConstructor() != null) {
-          for (AnnotatedConstructor<?> constructorInSearch : currentAnnotatedType
-              .getConstructors()) {
-            if (constructorInSearch.getJavaMember().equals(ic.getConstructor())) {
-              invocationPointAnnotations = constructorInSearch.getAnnotations();
-              break;
-            }
+    }
+    T interceptorAnnotation;
+    Set<ElementType> targets = getTarget(interceptorAnnotationType);
+    if (interceptedBean != null) {
+      // for normal CDI
+      AnnotatedType<?> currentAnnotatedType = currentAnnotatedType(ic);
+      Set<Annotation> invocationPointAnnotations = Collections.emptySet();
+      if (ic.getMethod() != null) {
+        for (AnnotatedMethod<?> methodInSearch : currentAnnotatedType.getMethods()) {
+          if (methodInSearch.getJavaMember().equals(ic.getMethod())) {
+            invocationPointAnnotations = methodInSearch.getAnnotations();
+            break;
           }
         }
+      } else if (ic.getConstructor() != null) {
+        for (AnnotatedConstructor<?> constructorInSearch : currentAnnotatedType.getConstructors()) {
+          if (constructorInSearch.getJavaMember().equals(ic.getConstructor())) {
+            invocationPointAnnotations = constructorInSearch.getAnnotations();
+            break;
+          }
+        }
+      }
 
-        if ((targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR))
-            && (interceptorAnnotation = getInterceptorAnnotationRecursive(interceptorAnnotationType,
-                invocationPointAnnotations)) != null) {
-          return interceptorAnnotation;
-        }
-        if (targets.contains(ElementType.TYPE)
-            && (interceptorAnnotation = getInterceptorAnnotationRecursive(interceptorAnnotationType,
-                currentAnnotatedType.getAnnotations())) != null) {
-          return interceptorAnnotation;
-        }
-        for (Class<? extends Annotation> stereotype : interceptedBean.getStereotypes()) {
-          interceptorAnnotation = stereotype.getAnnotation(interceptorAnnotationType);
-          if (interceptorAnnotation != null) {
-            return interceptorAnnotation;
-          }
-        }
-      } else // for EE components
-      if (targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR)) {
-        if (ic.getMethod() != null && (interceptorAnnotation =
-            ic.getMethod().getAnnotation(interceptorAnnotationType)) != null) {
-          return interceptorAnnotation;
-        }
-        if (ic.getConstructor() != null && (interceptorAnnotation =
-            ic.getConstructor().getAnnotation(interceptorAnnotationType)) != null) {
-          return interceptorAnnotation;
-        }
-      } else if (targets.contains(ElementType.TYPE) && ic.getTarget() != null) {
-        Class<?> targetClass = getUserClass(ic.getTarget());
-        interceptorAnnotation = targetClass.getAnnotation(interceptorAnnotationType);
+      if ((targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR))
+          && (interceptorAnnotation = getInterceptorAnnotationRecursive(interceptorAnnotationType,
+              invocationPointAnnotations)) != null) {
+        return interceptorAnnotation;
+      }
+      if (targets.contains(ElementType.TYPE)
+          && (interceptorAnnotation = getInterceptorAnnotationRecursive(interceptorAnnotationType,
+              currentAnnotatedType.getAnnotations())) != null) {
+        return interceptorAnnotation;
+      }
+      for (Class<? extends Annotation> stereotype : interceptedBean.getStereotypes()) {
+        interceptorAnnotation = stereotype.getAnnotation(interceptorAnnotationType);
         if (interceptorAnnotation != null) {
           return interceptorAnnotation;
         }
+      }
+    } else // for EE components
+    if (targets.contains(ElementType.METHOD) || targets.contains(ElementType.CONSTRUCTOR)) {
+      if (ic.getMethod() != null && (interceptorAnnotation =
+          ic.getMethod().getAnnotation(interceptorAnnotationType)) != null) {
+        return interceptorAnnotation;
+      }
+      if (ic.getConstructor() != null && (interceptorAnnotation =
+          ic.getConstructor().getAnnotation(interceptorAnnotationType)) != null) {
+        return interceptorAnnotation;
+      }
+    } else if (targets.contains(ElementType.TYPE) && ic.getTarget() != null) {
+      Class<?> targetClass = getUserClass(ic.getTarget());
+      interceptorAnnotation = targetClass.getAnnotation(interceptorAnnotationType);
+      if (interceptorAnnotation != null) {
+        return interceptorAnnotation;
       }
     }
     return null;
@@ -158,7 +157,7 @@ public abstract class AbstractInterceptor {
   }
 
   protected Set<ElementType> getTarget(Class<?> interceptorAnnotationType) {
-    Set<ElementType> targets = new HashSet<>();
+    Set<ElementType> targets = EnumSet.noneOf(ElementType.class);
     for (Target t : interceptorAnnotationType.getAnnotationsByType(Target.class)) {
       Collections.addAll(targets, t.value());
     }

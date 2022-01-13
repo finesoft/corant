@@ -80,7 +80,7 @@ public interface ASTLogicNode extends ASTPredicateNode {
 
     @Override
     public Boolean getValue(EvaluationContext ctx) {
-      return children.stream().allMatch(n -> !n.getValue(ctx));
+      return children.stream().noneMatch(n -> n.getValue(ctx));
     }
   }
 

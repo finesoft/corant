@@ -68,7 +68,6 @@ public class MailSenderTemplate {
       }
       mimeMessage.saveChanges();
       transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
-      System.out.println(String.format("Message is sent using host: %s", config.getHost()));
     }
   }
 }

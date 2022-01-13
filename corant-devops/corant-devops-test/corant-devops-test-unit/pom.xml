@@ -17,10 +17,6 @@
     </dependency>
     <dependency>
       <groupId>org.corant</groupId>
-      <artifactId>corant-kernel</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.corant</groupId>
       <artifactId>corant-context</artifactId>
     </dependency>
     <dependency>

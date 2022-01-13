@@ -122,7 +122,8 @@ public interface PathMatcher extends Predicate<String> {
       return express;
     }
     int idx = -1;
-    for (int i = 0; i < express.length(); i++) {
+    int expressLen = express.length();
+    for (int i = 0; i < expressLen; i++) {
       char c = express.charAt(i);
       if (patternChars.indexOf(c) != -1) {
         idx = i;
@@ -461,12 +462,13 @@ public interface PathMatcher extends Predicate<String> {
       StringBuilder regex = new StringBuilder("^");
 
       int i = 0;
-      while (i < globPattern.length()) {
+      int len = globPattern.length();
+      while (i < len) {
         char c = globPattern.charAt(i++);
         switch (c) {
           case '\\':
             // escape special characters
-            if (i == globPattern.length()) {
+            if (i == len) {
               throw new PatternSyntaxException("No character to escape", globPattern, i - 1);
             }
             char next = globPattern.charAt(i++);
@@ -507,7 +509,7 @@ public interface PathMatcher extends Predicate<String> {
             }
             boolean hasRangeStart = false;
             char last = 0;
-            while (i < globPattern.length()) {
+            while (i < len) {
               c = globPattern.charAt(i++);
               if (c == ']') {
                 break;

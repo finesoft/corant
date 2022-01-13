@@ -43,13 +43,11 @@ public class GlobPatterns {
         return Pattern.compile(toWindowsRegexPattern(globExpress),
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
       }
+    } else if (ignoreCase) {
+      return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
     } else {
-      if (ignoreCase) {
-        return Pattern.compile(toUnixRegexPattern(globExpress), Pattern.UNICODE_CASE);
-      } else {
-        return Pattern.compile(toUnixRegexPattern(globExpress),
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-      }
+      return Pattern.compile(toUnixRegexPattern(globExpress),
+          Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     }
   }
 
@@ -81,7 +79,7 @@ public class GlobPatterns {
     if (patterns == null || patterns.isEmpty()) {
       return false;
     }
-    String usePath = path.replaceAll("\\\\", "/");
+    String usePath = path.replace('\\', '/');
     return patterns.stream().anyMatch(p -> p.matcher(usePath).matches());
   }
 
@@ -110,12 +108,13 @@ public class GlobPatterns {
     StringBuilder regex = new StringBuilder("^");
 
     int i = 0;
-    while (i < globPattern.length()) {
+    int length = globPattern.length();
+    while (i < length) {
       char c = globPattern.charAt(i++);
       switch (c) {
         case '\\':
           // escape special characters
-          if (i == globPattern.length()) {
+          if (i == length) {
             throw new PatternSyntaxException("No character to escape", globPattern, i - 1);
           }
           char next = globPattern.charAt(i++);
@@ -156,7 +155,7 @@ public class GlobPatterns {
           }
           boolean hasRangeStart = false;
           char last = 0;
-          while (i < globPattern.length()) {
+          while (i < length) {
             c = globPattern.charAt(i++);
             if (c == ']') {
               break;
@@ -221,13 +220,11 @@ public class GlobPatterns {
             // crosses directory boundaries
             regex.append(".*");
             i++;
+          } else // within directory boundary
+          if (isDos) {
+            regex.append("[^\\\\]*");
           } else {
-            // within directory boundary
-            if (isDos) {
-              regex.append("[^\\\\]*");
-            } else {
-              regex.append("[^/]*");
-            }
+            regex.append("[^/]*");
           }
           break;
         case '?':

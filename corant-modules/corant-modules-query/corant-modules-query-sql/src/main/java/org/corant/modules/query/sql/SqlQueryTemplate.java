@@ -18,7 +18,6 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Maps.mapOf;
@@ -445,7 +444,7 @@ public class SqlQueryTemplate {
 
     protected BiFunction<Map<String, Object>, Map<String, Object>, Integer> namedParameterReviser;
 
-    protected Set<Class<?>> stopOn;
+    protected Set<Class<? extends Throwable>> stopOn;
 
     /**
      * Set up a named query parameter adjustment consumer, where the first parameter of
@@ -593,10 +592,8 @@ public class SqlQueryTemplate {
     ForwardIterator(SqlQueryTemplate tpl, StreamConfig config) {
       this.tpl = tpl;
       this.config = config;
-      retryer = config.retryTimes > 0
-          ? Retry.retryer().times(config.retryTimes + 1).interval(config.retryInterval).thrower(
-              isNotEmpty(config.stopOn) ? (i, e) -> config.stopOn.contains(e.getClass()) : null)
-          : null;
+      retryer = config.retryTimes > 0 ? Retry.retryer().times(config.retryTimes + 1)
+          .interval(config.retryInterval).abortOn(config.stopOn) : null;
     }
 
     @Override

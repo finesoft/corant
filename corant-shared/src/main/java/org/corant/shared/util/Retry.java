@@ -13,21 +13,32 @@
  */
 package org.corant.shared.util;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableSet;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Objects.min;
+import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.defaultString;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.function.BiConsumer;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Futures.SimpleFuture;
 
 /**
  * corant-shared
@@ -40,18 +51,22 @@ public class Retry {
   static final Logger logger = Logger.getLogger(Retry.class.toString());
 
   /**
+   * Create asynchronous retryer for more granular control retry mechanism with the given executor
+   *
+   * @param executor the schedule executor service use in retry
+   * @return an asynchronous retryer
+   */
+  public static AsynchronousRetryer asynchronousRetryer(ScheduledExecutorService executor) {
+    return new AsynchronousRetryer(shouldNotNull(executor));
+  }
+
+  /**
    * Use Exponential Backoff algorithm to compute the delay. The backoff factor accepted by this
    * method must be greater than 1 or null, default is 2.0.
    *
    * @see <a href=
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
-   *
-   * @param backoffFactor
-   * @param cap
-   * @param base
-   * @param attempts
-   * @return computeExpoBackoff
    */
   public static long computeExpoBackoff(double backoffFactor, long cap, long base, int attempts) {
     long result = min(cap, base * (long) Math.pow(backoffFactor, attempts));
@@ -65,12 +80,6 @@ public class Retry {
    * @see <a href=
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
-   *
-   * @param cap
-   * @param base
-   * @param attempts
-   * @param sleep
-   * @return computeExpoBackoffDecorr
    */
   public static long computeExpoBackoffDecorr(long cap, long base, int attempts, long sleep) {
     long result = min(cap, Randoms.randomLong(base, (sleep <= 0 ? base : sleep) * 3));
@@ -84,12 +93,6 @@ public class Retry {
    * @see <a href=
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
-   *
-   * @param backoffFactor
-   * @param cap
-   * @param base
-   * @param attempts
-   * @return computeExpoBackoffEqualJitter
    */
   public static long computeExpoBackoffEqualJitter(double backoffFactor, long cap, long base,
       int attempts) {
@@ -105,12 +108,6 @@ public class Retry {
    * @see <a href=
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
-   *
-   * @param backoffFactor
-   * @param cap
-   * @param base
-   * @param attempts
-   * @return computeExpoBackoffFullJitter
    */
   public static long computeExpoBackoffFullJitter(double backoffFactor, long cap, long base,
       int attempts) {
@@ -162,6 +159,281 @@ public class Retry {
    */
   public static Retryer retryer() {
     return new Retryer();
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 10:41:29
+   *
+   */
+  @SuppressWarnings("unchecked")
+  public static abstract class AbstractRetryer<R extends AbstractRetryer<R>> {
+
+    protected int times = 8;
+    protected RetryInterval interval = RetryInterval.noBackoff(Duration.ofMillis(2000L));
+    protected Set<Class<? extends Throwable>> retryOn = emptySet();
+    protected Set<Class<? extends Throwable>> abortOn = emptySet();
+    protected BiPredicate<Integer, Throwable> predicate;
+    protected Supplier<Boolean> breaker = () -> true;
+
+    protected static void logRetry(Throwable e, int attempt, long wait) {
+      if (wait >= 0) {
+        logger.log(Level.WARNING, e, () -> String.format(
+            "An exception [%s] occurred during execution, enter the retry phase, the retry attempt [%s], interval [%s], message : [%s]",
+            e.getClass().getName(), attempt, wait, defaultString(e.getMessage(), "unknown")));
+      } else {
+        logger.log(Level.WARNING, e, () -> String.format(
+            "An exception [%s] occurred during execution, interrupt retry, the retry attempt [%s], message : [%s]",
+            e.getClass().getName(), attempt, defaultString(e.getMessage(), "unknown")));
+      }
+    }
+
+    public R abortOn(Class<? extends Throwable>... on) {
+      this.abortOn = immutableSetOf(on);
+      return (R) this;
+    }
+
+    public R abortOn(Set<Class<? extends Throwable>> on) {
+      this.abortOn = on != null ? unmodifiableSet(shouldNotNull(on)) : emptySet();
+      return (R) this;
+    }
+
+    /**
+     * The breaker, it will be called every attempt, if the breaker returns false, it will not enter
+     * the next attempt. Mainly used to terminate the attempt early when the external environment
+     * changes.
+     *
+     * @param breaker force interrupt retry process.
+     */
+    public R breaker(final Supplier<Boolean> breaker) {
+      if (breaker != null) {
+        this.breaker = breaker;
+      }
+      return (R) this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoff(Duration, Duration, Double)
+     */
+    public R expoBackoff(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoff(interval, maxInterval, backoffFactor);
+      return (R) this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoffDecorr(Duration, Duration, Double)
+     */
+    public R expoBackoffDecorr(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffDecorr(interval, maxInterval, backoffFactor);
+      return (R) this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoffEqualJitter(Duration, Duration, Double)
+     */
+    public R expoBackoffEqualJitter(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffEqualJitter(interval, maxInterval, backoffFactor);
+      return (R) this;
+    }
+
+    /**
+     * @see RetryInterval#expoBackoffFullJitter(Duration, Duration, Double)
+     */
+    public R expoBackoffFullJitter(final Duration interval, final Duration maxInterval,
+        final Double backoffFactor) {
+      this.interval = RetryInterval.expoBackoffFullJitter(interval, maxInterval, backoffFactor);
+      return (R) this;
+    }
+
+    /**
+     * Set the retry interval
+     */
+    public R interval(RetryInterval interval) {
+      this.interval = shouldNotNull(interval);
+      return (R) this;
+    }
+
+    /**
+     * No backoff, the same interval between each retry.
+     *
+     * @param interval the retry interval
+     */
+    public R noBackoff(final Duration interval) {
+      this.interval = RetryInterval.noBackoff(interval);
+      return (R) this;
+    }
+
+    public R predicate(BiPredicate<Integer, Throwable> predicate) {
+      this.predicate = predicate;
+      return (R) this;
+    }
+
+    public R retryOn(Class<? extends Throwable>... on) {
+      this.retryOn = immutableSetOf(on);
+      return (R) this;
+    }
+
+    public R retryOn(Set<Class<? extends Throwable>> on) {
+      this.retryOn = on != null ? unmodifiableSet(shouldNotNull(on)) : emptySet();
+      return (R) this;
+    }
+
+    /**
+     * Set the max retry times, if the given times is less than or equals zero means that retry for
+     * ever.
+     *
+     * @param times the max retry times
+     */
+    public R times(final int times) {
+      this.times = times < 0 ? Integer.MAX_VALUE : max(1, times);
+      return (R) this;
+    }
+
+    protected boolean continueIfThrowable(Throwable throwable, int attempts) {
+      if (predicate != null) {
+        return predicate.test(attempts, throwable);
+      }
+      Class<? extends Throwable> throwableClass = throwable.getClass();
+      if (isEmpty(abortOn)) {
+        return isEmpty(retryOn)
+            || retryOn.stream().anyMatch(c -> c.isAssignableFrom(throwableClass));
+      } else {
+        return abortOn.stream().noneMatch(c -> c.isAssignableFrom(throwableClass))
+            && (isEmpty(retryOn)
+                || retryOn.stream().anyMatch(c -> c.isAssignableFrom(throwableClass)));
+      }
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:24:56
+   *
+   */
+  public static class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
+
+    protected final ScheduledExecutorService executor;
+
+    public AsynchronousRetryer(ScheduledExecutorService executor) {
+      this.executor = executor;
+    }
+
+    public <T> Future<T> execute(Callable<T> callable) {
+      final SimpleFuture<T> future = new SimpleFuture<>();
+      executor.schedule(new AsynchronousRetryTask<>(callable, future, this, new AtomicInteger(0)),
+          0, TimeUnit.MILLISECONDS);
+      return future;
+    }
+
+    public void execute(Runnable runnable) {
+      final SimpleFuture<Object> future = new SimpleFuture<>();
+      final Callable<Object> callable = () -> {
+        runnable.run();
+        return null;
+      };
+      final AsynchronousRetryTask<Object> task =
+          new AsynchronousRetryTask<>(callable, future, this, new AtomicInteger(0));
+      executor.schedule(task, 0, TimeUnit.MILLISECONDS);
+    }
+
+    public <T> Future<T> execute(Supplier<T> supplier) {
+      final SimpleFuture<T> future = new SimpleFuture<>();
+      executor.schedule(
+          new AsynchronousRetryTask<>(supplier::get, future, this, new AtomicInteger(0)), 0,
+          TimeUnit.MILLISECONDS);
+      return future;
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午9:22:07
+   *
+   */
+  public static class AsynchronousRetryTask<T> implements Runnable {
+    final SimpleFuture<T> future;
+    final Callable<T> callable;
+    final AsynchronousRetryer retryer;
+    final AtomicInteger attempts;
+
+    AsynchronousRetryTask(Callable<T> callable, SimpleFuture<T> future, AsynchronousRetryer retryer,
+        AtomicInteger attempts) {
+      this.future = future;
+      this.callable = callable;
+      this.retryer = retryer;
+      this.attempts = attempts;
+    }
+
+    @Override
+    public void run() {
+      Throwable throwable = null;
+      T result = null;
+      try {
+        if (preRun()) {
+          result = callable.call();
+        }
+      } catch (Throwable t) {
+        throwable = t;
+      } finally {
+        postRun(result, throwable);
+      }
+    }
+
+    protected void postRun(T result, Throwable t) {
+      if (t != null) {
+        final int currentAttempts = attempts.get();
+        try {
+          // check the breaker
+          if (retryer.breaker != null && !retryer.breaker.get()) {
+            future.cancel(true);
+            return;
+          }
+          // check predicates and exception types
+          if (!retryer.continueIfThrowable(t, currentAttempts)) {
+            if (future.isCancelled()) {
+              return;
+            } else {
+              future.failure(t);
+              AbstractRetryer.logRetry(t, currentAttempts, -1);
+              return;
+            }
+          }
+          // check max retry times
+          if (currentAttempts < retryer.times) {
+            final long delayMillis = retryer.interval.calculateMillis(currentAttempts);
+            final AsynchronousRetryTask<T> next =
+                new AsynchronousRetryTask<>(callable, future, retryer, attempts);
+            retryer.executor.schedule(next, delayMillis, TimeUnit.MILLISECONDS);
+            AbstractRetryer.logRetry(t, currentAttempts, delayMillis);
+          } else if (!future.isCancelled()) {
+            AbstractRetryer.logRetry(t, currentAttempts, -1);
+            future.failure(t);
+          }
+        } catch (Throwable e) {
+          // exception occurred on checking
+          AbstractRetryer.logRetry(t, currentAttempts, -1);
+          future.failure(t);
+        }
+      } else if (!future.isCancelled()) {
+        future.success(result);
+      }
+    }
+
+    protected boolean preRun() {
+      if (retryer.breaker != null && !retryer.breaker.get()) {
+        future.cancel(true);
+        return false;
+      }
+      attempts.incrementAndGet();
+      return true;
+    }
   }
 
   /**
@@ -312,27 +584,7 @@ public class Retry {
    * @author bingo 10:41:29
    *
    */
-  public static class Retryer {
-
-    private int times = 8;
-    private RetryInterval interval = RetryInterval.noBackoff(Duration.ofMillis(2000L));
-    private BiConsumer<Integer, Throwable> thrower;
-    private Supplier<Boolean> breaker = () -> true;
-
-    /**
-     * The breaker, it will be called every attempt, if the breaker returns false, it will not enter
-     * the next attempt. Mainly used to terminate the attempt early when the external environment
-     * changes.
-     *
-     * @param breaker
-     * @return breaker
-     */
-    public Retryer breaker(final Supplier<Boolean> breaker) {
-      if (breaker != null) {
-        this.breaker = breaker;
-      }
-      return this;
-    }
+  public static class Retryer extends AbstractRetryer<Retryer> {
 
     public <T> T execute(Function<Integer, T> executable) {
       return doExecute(executable);
@@ -349,98 +601,6 @@ public class Retry {
       return doExecute(i -> forceCast(supplier.get()));
     }
 
-    /**
-     * @see RetryInterval#expoBackoff(Duration, Duration, Double)
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoff
-     */
-    public Retryer expoBackoff(final Duration interval, final Duration maxInterval,
-        final Double backoffFactor) {
-      this.interval = RetryInterval.expoBackoff(interval, maxInterval, backoffFactor);
-      return this;
-    }
-
-    /**
-     * @see RetryInterval#expoBackoffDecorr(Duration, Duration, Double)
-     *
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffDecorr
-     */
-    public Retryer expoBackoffDecorr(final Duration interval, final Duration maxInterval,
-        final Double backoffFactor) {
-      this.interval = RetryInterval.expoBackoffDecorr(interval, maxInterval, backoffFactor);
-      return this;
-    }
-
-    /**
-     * @see RetryInterval#expoBackoffEqualJitter(Duration, Duration, Double)
-     *
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffEqualJitter
-     */
-    public Retryer expoBackoffEqualJitter(final Duration interval, final Duration maxInterval,
-        final Double backoffFactor) {
-      this.interval = RetryInterval.expoBackoffEqualJitter(interval, maxInterval, backoffFactor);
-      return this;
-    }
-
-    /**
-     * @see RetryInterval#expoBackoffFullJitter(Duration, Duration, Double)
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffFullJitter
-     */
-    public Retryer expoBackoffFullJitter(final Duration interval, final Duration maxInterval,
-        final Double backoffFactor) {
-      this.interval = RetryInterval.expoBackoffFullJitter(interval, maxInterval, backoffFactor);
-      return this;
-    }
-
-    public Retryer interval(RetryInterval interval) {
-      this.interval = shouldNotNull(interval);
-      return this;
-    }
-
-    /**
-     * No backoff, the same interval between each retry.
-     *
-     * @param interval
-     * @return noBackoff
-     */
-    public Retryer noBackoff(final Duration interval) {
-      this.interval = RetryInterval.noBackoff(interval);
-      return this;
-    }
-
-    /**
-     * The exception handler, if the thrower throw any exceptions the attempt will be broken.
-     *
-     * @param thrower
-     * @return thrower
-     */
-    public Retryer thrower(final BiConsumer<Integer, Throwable> thrower) {
-      this.thrower = thrower;
-      return this;
-    }
-
-    /**
-     * The max try times
-     *
-     * @param times
-     * @return times
-     */
-    public Retryer times(final int times) {
-      this.times = max(1, times);
-      return this;
-    }
-
     protected <T> T doExecute(final Function<Integer, T> executable) {
       shouldNotNull(executable);
       interval.reset();
@@ -450,8 +610,9 @@ public class Retry {
         try {
           return executable.apply(attempts);
         } catch (RuntimeException | AssertionError e) {
-          if (thrower != null) {
-            thrower.accept(attempts, e);
+          if (!continueIfThrowable(e, attempts)) {
+            logRetry(e, attempts, -1);
+            throw e;
           }
           remaining--;
           attempts++;
@@ -475,11 +636,6 @@ public class Retry {
       return null;
     }
 
-    void logRetry(Throwable e, int attempt, long wait) {
-      logger.log(Level.WARNING, e, () -> String.format(
-          "An exception [%s] occurred during execution, enter the retry phase, the retry attempt [%s], interval [%s], message : [%s]",
-          e.getClass().getName(), attempt, wait, defaultString(e.getMessage(), "unknown")));
-    }
   }
 
   /**
@@ -498,11 +654,6 @@ public class Retry {
      * @see <a href=
      *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
      *      Backoff And Jitter</a>
-     *
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoff
      */
     static DefaultRetryInterval expoBackoff(final Duration interval, final Duration maxInterval,
         final Double backoffFactor) {
@@ -516,10 +667,6 @@ public class Retry {
      * @see <a href=
      *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
      *      Backoff And Jitter</a>
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffDecorr
      */
     static DefaultRetryInterval expoBackoffDecorr(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
@@ -534,10 +681,6 @@ public class Retry {
      * @see <a href=
      *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
      *      Backoff And Jitter</a>
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffEqualJitter
      */
     static DefaultRetryInterval expoBackoffEqualJitter(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
@@ -552,10 +695,6 @@ public class Retry {
      * @see <a href=
      *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
      *      Backoff And Jitter</a>
-     * @param interval
-     * @param maxInterval
-     * @param backoffFactor
-     * @return expoBackoffFullJitter
      */
     static DefaultRetryInterval expoBackoffFullJitter(final Duration interval,
         final Duration maxInterval, final Double backoffFactor) {
@@ -566,8 +705,7 @@ public class Retry {
     /**
      * No backoff, the same interval between each retry.
      *
-     * @param interval
-     * @return noBackoff
+     * @param interval the retry interval duration
      */
     static DefaultRetryInterval noBackoff(Duration interval) {
       shouldBeTrue(interval != null && interval.toMillis() >= 0);
@@ -577,7 +715,7 @@ public class Retry {
     /**
      * Calculate millis with attempts
      *
-     * @param attempts
+     * @param attempts the current retry attempts
      * @return calculateMillis
      */
     long calculateMillis(int attempts);

@@ -289,8 +289,7 @@ public class ConcurrentExtension implements Extension {
             Asynchronous methodAsync =
                 defaultObject(m.getAnnotation(Asynchronous.class), clazzAsync);
             if (methodAsync != null) {
-              if (!m.getReturnType().equals(Void.TYPE)
-                  && !Future.class.isAssignableFrom(m.getReturnType())) {
+              if (!m.getReturnType().equals(Void.TYPE) && !Future.class.equals(m.getReturnType())) {
                 adv.addDeploymentProblem(new CorantRuntimeException(
                     "The asynchronous method %s return type must be java.util.concurrent.Future or void!",
                     m.getName()));

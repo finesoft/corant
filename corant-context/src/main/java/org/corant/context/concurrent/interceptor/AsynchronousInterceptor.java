@@ -22,23 +22,23 @@ import static org.corant.shared.util.Conversions.toEnum;
 import static org.corant.shared.util.Conversions.toInteger;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.concurrent.ManagedExecutorService;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
 import org.corant.context.concurrent.annotation.Asynchronous;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.service.RequiredConfiguration;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Retry;
+import org.corant.shared.util.Retry.AsynchronousRetryer;
 import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.corant.shared.util.Retry.DefaultRetryInterval;
 import org.corant.shared.util.Retry.RetryInterval;
@@ -56,37 +56,42 @@ import org.corant.shared.util.Retry.RetryInterval;
     type = Boolean.class, value = "true")
 public class AsynchronousInterceptor extends AbstractInterceptor {
 
+  protected static final Logger logger =
+      Logger.getLogger(AsynchronousInterceptor.class.getCanonicalName());
+
   protected static final Map<Asynchronous, Pair<RetryInterval, Integer>> retryConfigs =
       new ConcurrentHashMap<>();
 
   @AroundInvoke
-  public Object concurrencyThrottleInvocation(final InvocationContext ctx) throws Exception {
+  public Object asynchronousInvocation(final InvocationContext ctx) throws Exception {
     final Asynchronous async = getInterceptorAnnotation(ctx, Asynchronous.class);
     final Pair<RetryInterval, Integer> retry = resolveRetryConfig(async);
-    final ManagedExecutorService executor =
-        findNamed(ManagedExecutorService.class, async.executor()).orElseThrow();
-    final Callable<Object> task = retry.isEmpty() ? () -> ctx.proceed()
-        : () -> Retry.retryer().interval(retry.left()).times(retry.right()).execute(() -> {
-          try {
-            return ctx.proceed();
-          } catch (Exception e) {
-            throw new CorantRuntimeException(e);
-          }
-        });
-    return execute(task, executor, ctx.getMethod().getReturnType());
+    if (retry.isEmpty()) {
+      return execute(createCallable(ctx),
+          findNamed(ManagedExecutorService.class, async.executor()).orElseThrow(),
+          ctx.getMethod().getReturnType());
+    } else {
+      return retry(createCallable(ctx),
+          findNamed(ManagedScheduledExecutorService.class, async.executor()).orElseThrow(), retry,
+          ctx.getMethod().getReturnType());
+    }
+  }
+
+  protected Callable<Object> createCallable(InvocationContext ctx) {
+    return () -> {
+      try {
+        return ctx.proceed();
+      } catch (Throwable t) {
+        logger.log(Level.WARNING, t,
+            () -> String.format("Asynchronous invocation %s occurred error!", ctx.getMethod()));
+        throw t;
+      }
+    };
   }
 
   protected Object execute(Callable<Object> task, ManagedExecutorService executor,
       Class<?> returnType) {
-    if (CompletableFuture.class.isAssignableFrom(returnType)) {
-      return CompletableFuture.supplyAsync(() -> {
-        try {
-          return ((Future<?>) task.call()).get();
-        } catch (Throwable ex) {
-          throw new CompletionException(ex);
-        }
-      }, executor);
-    } else if (Future.class.isAssignableFrom(returnType)) {
+    if (Future.class.isAssignableFrom(returnType)) {
       return executor.submit(() -> ((Future<?>) task.call()).get());
     } else {
       executor.submit(task);
@@ -104,5 +109,16 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
                 toDuration(assemblyStringConfigProperty(ann.maxRetryInterval())),
                 toDouble(assemblyStringConfigProperty(ann.backoffFactor()))),
             toInteger(assemblyStringConfigProperty(ann.retryTimes())) + 1) : Pair.empty());
+  }
+
+  protected Object retry(Callable<Object> task, ManagedScheduledExecutorService executor,
+      Pair<RetryInterval, Integer> retry, Class<?> returnType) {
+    if (Future.class.isAssignableFrom(returnType)) {
+      return new AsynchronousRetryer(executor).interval(retry.left()).times(retry.right())
+          .execute((Callable<?>) () -> ((Future<?>) task.call()).get());
+    } else {
+      new AsynchronousRetryer(executor).interval(retry.left()).times(retry.right()).execute(task);
+      return null;
+    }
   }
 }

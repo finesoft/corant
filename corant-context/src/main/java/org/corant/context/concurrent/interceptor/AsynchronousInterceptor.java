@@ -13,35 +13,26 @@
  */
 package org.corant.context.concurrent.interceptor;
 
-import static org.corant.config.Configs.assemblyStringConfigProperty;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.concurrent.ConcurrentExtension.ENABLE_ASYNC_INTERCEPTOR_CFG;
-import static org.corant.shared.util.Conversions.toDouble;
-import static org.corant.shared.util.Conversions.toDuration;
-import static org.corant.shared.util.Conversions.toEnum;
-import static org.corant.shared.util.Conversions.toInteger;
-import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
+import org.corant.context.concurrent.AsynchronousConfig;
+import org.corant.context.concurrent.ConcurrentExtension;
 import org.corant.context.concurrent.annotation.Asynchronous;
+import org.corant.shared.retry.AsynchronousRetryer;
 import org.corant.shared.service.RequiredConfiguration;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
-import org.corant.shared.ubiquity.Tuple;
-import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Retry.AsynchronousRetryer;
-import org.corant.shared.util.Retry.BackoffAlgorithm;
-import org.corant.shared.util.Retry.DefaultRetryInterval;
-import org.corant.shared.util.Retry.RetryInterval;
 
 /**
  * corant-context
@@ -59,20 +50,20 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
   protected static final Logger logger =
       Logger.getLogger(AsynchronousInterceptor.class.getCanonicalName());
 
-  protected static final Map<Asynchronous, Pair<RetryInterval, Integer>> retryConfigs =
-      new ConcurrentHashMap<>();
+  @Inject
+  ConcurrentExtension extension;
 
   @AroundInvoke
   public Object asynchronousInvocation(final InvocationContext ctx) throws Exception {
     final Asynchronous async = getInterceptorAnnotation(ctx, Asynchronous.class);
-    final Pair<RetryInterval, Integer> retry = resolveRetryConfig(async);
-    if (retry.isEmpty()) {
-      return execute(createCallable(ctx),
-          findNamed(ManagedExecutorService.class, async.executor()).orElseThrow(),
+    final AsynchronousConfig config = extension.getAsynchronousConfig(async);
+    if (config.isRetry()) {
+      return retry(createCallable(ctx),
+          findNamed(ManagedScheduledExecutorService.class, async.executor()).orElseThrow(), config,
           ctx.getMethod().getReturnType());
     } else {
-      return retry(createCallable(ctx),
-          findNamed(ManagedScheduledExecutorService.class, async.executor()).orElseThrow(), retry,
+      return execute(createCallable(ctx),
+          findNamed(ManagedExecutorService.class, async.executor()).orElseThrow(),
           ctx.getMethod().getReturnType());
     }
   }
@@ -99,25 +90,15 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
     }
   }
 
-  protected Pair<RetryInterval, Integer> resolveRetryConfig(Asynchronous ann) {
-    return retryConfigs.computeIfAbsent(ann,
-        k -> toInteger(assemblyStringConfigProperty(ann.retryTimes())) > 0 ? Tuple.pairOf(
-            new DefaultRetryInterval(
-                toEnum(assemblyStringConfigProperty(ann.retryBackoffAlgo()),
-                    BackoffAlgorithm.class),
-                toDuration(assemblyStringConfigProperty(ann.retryInterval())),
-                toDuration(assemblyStringConfigProperty(ann.maxRetryInterval())),
-                toDouble(assemblyStringConfigProperty(ann.backoffFactor()))),
-            toInteger(assemblyStringConfigProperty(ann.retryTimes())) + 1) : Pair.empty());
-  }
-
   protected Object retry(Callable<Object> task, ManagedScheduledExecutorService executor,
-      Pair<RetryInterval, Integer> retry, Class<?> returnType) {
+      AsynchronousConfig config, Class<?> returnType) {
     if (Future.class.isAssignableFrom(returnType)) {
-      return new AsynchronousRetryer(executor).interval(retry.left()).times(retry.right())
+      return new AsynchronousRetryer(executor).retryStrategy(config.getRetryStrategy())
+          .backoffStrategy(config.getBackoffStrategy())
           .execute((Callable<?>) () -> ((Future<?>) task.call()).get());
     } else {
-      new AsynchronousRetryer(executor).interval(retry.left()).times(retry.right()).execute(task);
+      new AsynchronousRetryer(executor).retryStrategy(config.getRetryStrategy())
+          .backoffStrategy(config.getBackoffStrategy()).execute(task);
       return null;
     }
   }

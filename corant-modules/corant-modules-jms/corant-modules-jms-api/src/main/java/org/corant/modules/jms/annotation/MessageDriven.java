@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.inject.Stereotype;
 import javax.jms.Session;
-import org.corant.shared.util.Retry.BackoffAlgorithm;
+import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 
 /**
  * corant-modules-ddd-api
@@ -58,7 +58,7 @@ public @interface MessageDriven {
   String acknowledge() default "2";
 
   /**
-   * Returns the Back-off Algorithm, default is {@link BackoffAlgorithm#NONE}
+   * Returns the Back-off Algorithm, default is {@link BackoffAlgorithm#NON}
    * <p>
    * <b>Note:</b> The final value type is <b>{@link BackoffAlgorithm}</b> type; in order to support
    * configurability, the string is used as the value type of annotation property, and the value
@@ -68,7 +68,7 @@ public @interface MessageDriven {
    *
    * @see BackoffAlgorithm
    */
-  String brokenBackoffAlgo() default "NONE";
+  String brokenBackoffAlgo() default "NON";
 
   /**
    * The broken back-off factor, for Exponential back-off + jitter algorithm to compute the delay.

@@ -147,7 +147,7 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.13.4</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.7.4.Final</version.resteasy>
+    <version.resteasy>4.7.5.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.slf4j>1.7.32</version.slf4j>

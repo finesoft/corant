@@ -47,6 +47,7 @@ import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
+import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Retry;
 
@@ -189,9 +190,11 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
 
       private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
-          return Retry.retryer().times(parameter.getRetryTimes() + 1)
-              .interval(parameter.getRetryInterval())
-              .breaker(() -> Corant.current() != null && Corant.current().isRunning())
+          return Retry.synchronousRetryer()
+              .retryStrategy(
+                  new MaxAttemptsRetryStrategy(parameter.getRetryTimes() + 1))
+              .backoffStrategy(parameter.getRetryBackoffStrategy())
+              .retryPrecondition(c -> Corant.current() != null && Corant.current().isRunning())
               .execute(() -> forward(queryName, parameter));
         } else {
           return forward(queryName, parameter);

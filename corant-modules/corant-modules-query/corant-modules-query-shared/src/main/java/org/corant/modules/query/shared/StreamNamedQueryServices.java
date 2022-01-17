@@ -31,7 +31,8 @@ import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter.StreamQueryParameter;
 import org.corant.modules.query.QueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
-import org.corant.shared.util.Retry.RetryInterval;
+import org.corant.shared.retry.BackoffStrategy;
+import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
 import org.corant.shared.util.Streams;
 
 /**
@@ -181,19 +182,18 @@ public class StreamNamedQueryServices {
     return this;
   }
 
-  /**
-   * No backoff interval
-   *
-   * @param retryInterval
-   * @return retryInterval
-   */
-  public StreamNamedQueryServices retryInterval(Duration retryInterval) {
-    parameter.retryInterval(RetryInterval.noBackoff(retryInterval));
+  public StreamNamedQueryServices retryBackoffStrategy(BackoffStrategy backoffStrategy) {
+    parameter.retryBackoffStrategy(backoffStrategy);
     return this;
   }
 
-  public StreamNamedQueryServices retryInterval(RetryInterval retryInterval) {
-    parameter.retryInterval(retryInterval);
+  /**
+   * Fixed back-off strategy
+   *
+   * @param duration
+   */
+  public StreamNamedQueryServices retryBackoffStrategy(Duration duration) {
+    parameter.retryBackoffStrategy(new FixedBackoffStrategy(duration));
     return this;
   }
 

@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2013-2022, Bingo.Chen (finesoft@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -8,12 +21,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.corant.shared.exception.NotSupportedException;
 
+/**
+ * corant-shared
+ *
+ * @author bingo 下午10:26:47
+ *
+ */
 public interface Futures {
 
   static <V> FutureResult<V> complete(V result) {
     return new FutureResult<>(result);
   }
 
+  /**
+   * corant-shared
+   * <p>
+   * This class is use to wrap some asynchronous compute result.
+   *
+   * @author bingo 下午10:26:51
+   *
+   */
   public final class FutureResult<V> implements Future<V> {
 
     private final V resultValue;
@@ -69,6 +96,14 @@ public interface Futures {
 
   }
 
+  /**
+   * corant-shared
+   * <p>
+   * The simple future implementation
+   *
+   * @author bingo 下午10:27:45
+   *
+   */
   class SimpleFuture<V> implements Future<V> {
 
     private volatile boolean completed;

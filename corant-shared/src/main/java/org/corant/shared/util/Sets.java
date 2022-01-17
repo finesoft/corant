@@ -107,6 +107,19 @@ public class Sets {
   }
 
   /**
+   * Constructs a new linked hash set containing the elements in the specified collection, null
+   * safe.
+   *
+   * @see LinkedHashSet#LinkedHashSet(Collection)
+   *
+   * @param <E> the element type
+   * @param initials the collection whose elements are to be placed into the hash set
+   */
+  public static <E> Set<E> newLinkedHashSet(final Collection<E> initials) {
+    return initials == null ? new LinkedHashSet<>() : new LinkedHashSet<>(initials);
+  }
+
+  /**
    * Convert an array to a non-null set
    *
    * @param <E> the element type

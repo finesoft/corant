@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import org.corant.modules.jms.annotation.MessageDriven;
-import org.corant.shared.util.Retry.BackoffAlgorithm;
+import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 
 /**
  * corant-modules-jms-api

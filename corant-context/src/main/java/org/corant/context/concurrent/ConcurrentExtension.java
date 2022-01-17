@@ -22,7 +22,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -112,6 +114,11 @@ public class ConcurrentExtension implements Extension {
   protected volatile InitialContext jndi;
 
   protected Set<Class<?>> asyncBeanClass = new HashSet<>();
+  protected Map<Asynchronous, AsynchronousConfig> asyncConfigs = new ConcurrentHashMap<>();
+
+  public AsynchronousConfig getAsynchronousConfig(Asynchronous ann) {
+    return asyncConfigs.get(ann);
+  }
 
   public NamedQualifierObjectManager<ManagedExecutorConfig> getExecutorConfigs() {
     return executorConfigs;
@@ -297,6 +304,7 @@ public class ConcurrentExtension implements Extension {
                 adv.addDeploymentProblem(new CorantRuntimeException(
                     "The asynchronous method %s executor not found!", m.getName()));
               }
+              asyncConfigs.computeIfAbsent(methodAsync, AsynchronousConfig::new);
             }
           }
         }

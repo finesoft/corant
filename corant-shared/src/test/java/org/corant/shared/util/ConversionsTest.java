@@ -57,11 +57,11 @@ import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
 import org.corant.shared.resource.SourceType;
+import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.TypeLiteral;
-import org.corant.shared.util.Retry.BackoffAlgorithm;
 import org.junit.Test;
 import junit.framework.TestCase;
 

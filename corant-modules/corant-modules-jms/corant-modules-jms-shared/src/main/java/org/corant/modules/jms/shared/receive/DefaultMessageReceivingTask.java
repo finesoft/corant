@@ -32,7 +32,7 @@ import org.corant.modules.jms.receive.ManagedMessageReceiveReplier;
 import org.corant.modules.jms.receive.ManagedMessageReceiver;
 import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
 import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
-import org.corant.shared.util.Retry.RetryInterval;
+import org.corant.shared.retry.BackoffStrategy;
 
 /**
  * corant-modules-jms-shared
@@ -77,7 +77,7 @@ public class DefaultMessageReceivingTask
 
   // control circuit break
   protected final int failureThreshold;
-  protected final RetryInterval brokenInterval;
+  protected final BackoffStrategy backoffStrategy;
   protected final int tryThreshold;
 
   protected volatile byte state = STATE_RUN;
@@ -96,16 +96,16 @@ public class DefaultMessageReceivingTask
   protected final ManagedMessageReceiveReplier messageReplier;
 
   public DefaultMessageReceivingTask(MessageReceivingMetaData metaData) {
-    this(metaData, metaData.getBrokenInterval());
+    this(metaData, metaData.getBrokenBackoffStrategy());
   }
 
   public DefaultMessageReceivingTask(MessageReceivingMetaData metaData,
-      RetryInterval retryInterval) {
+      BackoffStrategy backoffStrategy) {
     meta = metaData;
     loopIntervalMillis = metaData.getLoopIntervalMs();
     failureThreshold = metaData.getFailureThreshold();
     jmsFailureThreshold = max(failureThreshold / 2, 2);
-    brokenInterval = retryInterval;
+    this.backoffStrategy = backoffStrategy;
     tryThreshold = metaData.getTryThreshold();
     messageReplier = new DefaultMessageReplier(meta, this);
     messageHandler = new DefaultMessageHandler(meta, this);
@@ -200,7 +200,7 @@ public class DefaultMessageReceivingTask
           return;
         } else {
           tryFailureCounter.set(0);
-          brokenInterval.reset();
+          backoffStrategy.reset();
           if (tryCounter.incrementAndGet() >= tryThreshold) {
             stateRun();
           }
@@ -248,7 +248,7 @@ public class DefaultMessageReceivingTask
     // TODO To be improved, when entering BROKEN mode, should exit from the executor.
     resetMonitors();
     brokenTimePoint = System.currentTimeMillis();
-    brokenMillis = brokenInterval.calculateMillis(tryFailureCounter.get());
+    brokenMillis = backoffStrategy.computeBackoffMillis(tryFailureCounter.get());
     state = STATE_BRK;
     logger.log(Level.WARNING, () -> String
         .format("The execution enters breaking mode wait for [%s] ms, [%s]!", brokenMillis, meta));

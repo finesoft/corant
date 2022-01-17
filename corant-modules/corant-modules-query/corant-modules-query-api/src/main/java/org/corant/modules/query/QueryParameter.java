@@ -26,7 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import org.corant.shared.util.Retry.RetryInterval;
+import org.corant.shared.retry.BackoffStrategy;
+import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
 
 /**
  * corant-modules-query-api
@@ -261,7 +262,7 @@ public interface QueryParameter extends Serializable {
 
     protected int retryTimes = 0;
 
-    protected RetryInterval retryInterval = RetryInterval.noBackoff(defRtyItl);
+    protected BackoffStrategy retryBackoffStrategy = new FixedBackoffStrategy(defRtyItl);
 
     protected transient BiPredicate<Integer, Object> terminater;
 
@@ -275,8 +276,8 @@ public interface QueryParameter extends Serializable {
 
     public StreamQueryParameter(StreamQueryParameter other) {
       super(other);
-      enhancer(other.enhancer).retryInterval(other.retryInterval).retryTimes(other.retryTimes)
-          .retryInterval(other.retryInterval).terminater(other.terminater);
+      enhancer(other.enhancer).retryBackoffStrategy(other.retryBackoffStrategy)
+          .retryTimes(other.retryTimes).terminater(other.terminater);
     }
 
     @Override
@@ -321,12 +322,10 @@ public interface QueryParameter extends Serializable {
     }
 
     /**
-     * @see #retryInterval(RetryInterval)
-     *
-     * @return getRetryInterval
+     * @see #retryBackoffStrategy(BackoffStrategy)
      */
-    public RetryInterval getRetryInterval() {
-      return retryInterval;
+    public BackoffStrategy getRetryBackoffStrategy() {
+      return retryBackoffStrategy;
     }
 
     /**
@@ -376,14 +375,15 @@ public interface QueryParameter extends Serializable {
     /**
      * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
      * batches, in this process the exception may be occurred, the query may retry after exception
-     * occurred, this method use to set the retry interval. The underly query service implemention
-     * may not support
+     * occurred, this method use to set the retry back-off strategy. The underly query service
+     * implementation may not support
      *
-     * @param retryInterval the retry interval, if given is null, the default interval is 2 seconds.
+     * @param retryBackoffStrategy the retry back-off strategy, if given is null, the default
+     *        interval is 2 seconds.
      */
-    public StreamQueryParameter retryInterval(RetryInterval retryInterval) {
-      this.retryInterval =
-          defaultObject(retryInterval, RetryInterval.noBackoff(Duration.ofMillis(2000L)));
+    public StreamQueryParameter retryBackoffStrategy(BackoffStrategy retryBackoffStrategy) {
+      this.retryBackoffStrategy = defaultObject(retryBackoffStrategy,
+          () -> new FixedBackoffStrategy(Duration.ofSeconds(2L)));
       return this;
     }
 

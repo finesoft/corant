@@ -58,11 +58,15 @@ import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.sql.dialect.Dialect;
 import org.corant.modules.query.sql.dialect.Dialect.DBMS;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.retry.BackoffStrategy;
+import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
+import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
+import org.corant.shared.retry.RetryStrategy.ThrowableClassifierRetryStrategy;
+import org.corant.shared.retry.Retryer;
+import org.corant.shared.retry.SynchronousRetryer;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Retry;
-import org.corant.shared.util.Retry.RetryInterval;
-import org.corant.shared.util.Retry.Retryer;
 
 /**
  * corant-modules-query-sql
@@ -436,7 +440,7 @@ public class SqlQueryTemplate {
 
     protected int retryTimes = 0;
 
-    protected RetryInterval retryInterval = RetryInterval.noBackoff(one_second);
+    protected BackoffStrategy retryBackoffStrategy = new FixedBackoffStrategy(one_second);
 
     protected BiPredicate<Integer, Object> terminater;
 
@@ -511,18 +515,17 @@ public class SqlQueryTemplate {
     }
 
     /**
-     * Set up a retry interval for query retrying, only the {@link #retryTimes} >0 this retry
-     * interval can take effect.
+     * Set up a retry back-off strategy for query retrying, only the {@link #retryTimes} >0 this
+     * retry back-off strategy can take effect.
      *
-     * @param retryInterval the retry interval, default is one second
+     * @param retryBackoffStrategy the retry retry back-off strategy, default is one second
      *
-     * @see Retry
-     * @see Retryer
-     * @see RetryInterval
+     * @see BackoffStrategy
+     * @see SynchronousRetryer
      */
-    public StreamConfig retryInterval(RetryInterval retryInterval) {
-      this.retryInterval =
-          defaultObject(retryInterval, RetryInterval.noBackoff(Duration.ofMillis(2000L)));
+    public StreamConfig retryBackoffStategy(BackoffStrategy retryBackoffStrategy) {
+      this.retryBackoffStrategy = defaultObject(retryBackoffStrategy,
+          () -> new FixedBackoffStrategy(Duration.ofSeconds(2L)));
       return this;
     }
 
@@ -534,7 +537,6 @@ public class SqlQueryTemplate {
      *
      * @see Retry
      * @see Retryer
-     * @see RetryInterval
      */
     public StreamConfig retryTimes(int retryTimes) {
       this.retryTimes = max(retryTimes, 0);
@@ -592,8 +594,13 @@ public class SqlQueryTemplate {
     ForwardIterator(SqlQueryTemplate tpl, StreamConfig config) {
       this.tpl = tpl;
       this.config = config;
-      retryer = config.retryTimes > 0 ? Retry.retryer().times(config.retryTimes + 1)
-          .interval(config.retryInterval).abortOn(config.stopOn) : null;
+      retryer =
+          config.retryTimes > 0
+              ? Retry.synchronousRetryer()
+                  .retryStrategy(new MaxAttemptsRetryStrategy(config.retryTimes + 1)
+                      .and(new ThrowableClassifierRetryStrategy().abortOn(config.stopOn)))
+                  .backoffStrategy(config.retryBackoffStrategy)
+              : null;
     }
 
     @Override
@@ -626,7 +633,7 @@ public class SqlQueryTemplate {
 
     private Forwarding<Map<String, Object>> fetch() {
       if (retryer != null) {
-        return retryer.execute(tpl::forward);
+        return retryer.invoke(tpl::forward);
       } else {
         return tpl.forward();
       }

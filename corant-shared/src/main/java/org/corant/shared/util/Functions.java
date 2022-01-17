@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -52,6 +53,34 @@ public class Functions {
 
   @SuppressWarnings("rawtypes")
   public static final Predicate EMPTY_PREDICATE_FALSE = p -> false;
+
+  public static <T> Callable<T> asCallable(Runnable runnable) {
+    return () -> {
+      shouldNotNull(runnable).run();
+      return null;
+    };
+  }
+
+  public static <T> Callable<T> asCallable(Supplier<T> supplier) {
+    return () -> supplier.get();
+  }
+
+  public static <T> Supplier<T> asSupplier(Callable<T> callable) {
+    return () -> {
+      try {
+        return callable.call();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    };
+  }
+
+  public static <T> Supplier<T> asSupplier(Runnable runnable) {
+    return () -> {
+      shouldNotNull(runnable).run();
+      return null;
+    };
+  }
 
   @SuppressWarnings("unchecked")
   public static <T> Consumer<T> emptyConsumer() {

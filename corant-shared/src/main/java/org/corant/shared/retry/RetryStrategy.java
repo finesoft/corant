@@ -201,7 +201,7 @@ public interface RetryStrategy {
    */
   class TimeoutRetryStrategy implements RetryStrategy {
 
-    protected Duration duration;
+    protected Duration duration = Duration.ZERO;
 
     public TimeoutRetryStrategy() {}
 
@@ -211,8 +211,11 @@ public interface RetryStrategy {
 
     @Override
     public boolean test(RetryContext context) {
+      if (duration.equals(Duration.ZERO)) {
+        return true;
+      }
       Instant timeout = context.getStartTime().plusMillis(duration.toMillis());
-      return Instant.now().compareTo(timeout) >= 0;
+      return Instant.now().compareTo(timeout) <= 0;
     }
 
     public TimeoutRetryStrategy timeout(Duration duration) {

@@ -110,9 +110,9 @@ public interface BackoffStrategy {
    */
   class CappedExpoBackoffStrategy implements BackoffStrategy {
 
-    protected double factor = 2.0;
-    protected long baseDuration;
-    protected long maxDuration = Long.MAX_VALUE;
+    protected volatile double factor = 2.0;
+    protected volatile long baseDuration;
+    protected volatile long maxDuration = Long.MAX_VALUE;
 
     public CappedExpoBackoffStrategy() {}
 

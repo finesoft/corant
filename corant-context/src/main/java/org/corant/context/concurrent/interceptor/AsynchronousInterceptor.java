@@ -58,7 +58,7 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
     final Asynchronous async = getInterceptorAnnotation(ctx, Asynchronous.class);
     final AsynchronousConfig config = extension.getAsynchronousConfig(async);
     if (config.isRetry()) {
-      return retry(createCallable(ctx),
+      return execute(createCallable(ctx),
           findNamed(ManagedScheduledExecutorService.class, async.executor()).orElseThrow(), config,
           ctx.getMethod().getReturnType());
     } else {
@@ -90,7 +90,7 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
     }
   }
 
-  protected Object retry(Callable<Object> task, ManagedScheduledExecutorService executor,
+  protected Object execute(Callable<Object> task, ManagedScheduledExecutorService executor,
       AsynchronousConfig config, Class<?> returnType) {
     if (Future.class.isAssignableFrom(returnType)) {
       return new AsynchronousRetryer(executor).retryStrategy(config.getRetryStrategy())

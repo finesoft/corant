@@ -461,6 +461,47 @@ public class Assertions {
   }
 
   /**
+   * Throw CorantRuntimeException if the given objects are equal.
+   *
+   * @param obj the object to check
+   * @param other the other to compare
+   * @return the given object
+   */
+  public static void shouldNotEquals(Object obj, Object other) {
+    if (Objects.areEqual(obj, other)) {
+      throw new CorantRuntimeException("Objects can't equal");
+    }
+  }
+
+  /**
+   * Throw CorantRuntimeException if given two arguments are equals with given message and message
+   * parameters.
+   *
+   * @param a an object
+   * @param b an object to be compared with {@code a} for equality
+   * @param messageOrFormat the exception message or message format, use for exception messaging
+   * @param args the exception message arguments
+   */
+  public static void shouldNotEquals(Object a, Object b, String messageOrFormat, Object... args) {
+    if (areEqual(a, b)) {
+      throw new CorantRuntimeException(messageOrFormat, args);
+    }
+  }
+
+  /**
+   * Throw a certain runtime exception if given two arguments are equals
+   *
+   * @param a an object
+   * @param b an object to be compared with {@code a} for equality
+   * @param ex the supplying function that produces an exception to be thrown
+   */
+  public static void shouldNotEquals(Object a, Object b, Supplier<? extends RuntimeException> ex) {
+    if (areEqual(a, b)) {
+      throw ex.get();
+    }
+  }
+
+  /**
    * Throw CorantRuntimeException if the given object is null
    *
    * @param <T> the type of the given object

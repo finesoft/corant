@@ -43,7 +43,7 @@ public @interface Asynchronous {
   String backoffFactor() default "2.0";
 
   @Nonbinding
-  String backoffStrategy() default "NON";
+  String backoffStrategy() default "FIXED";
 
   @Nonbinding
   String baseBackoffDuration() default "PT0S";
@@ -60,5 +60,6 @@ public @interface Asynchronous {
   @Nonbinding
   String[] retryOn() default {};
 
+  @Nonbinding
   String timeout() default EMPTY;
 }

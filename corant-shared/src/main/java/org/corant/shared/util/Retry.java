@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Functions.asCallable;
 import java.time.Duration;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,7 +48,47 @@ public class Retry {
   }
 
   /**
-   * Try to execute and return a result
+   * Try to execute runnable asynchronously
+   *
+   * @param executor the schedule executor service use in retry
+   * @param maxAttempts Total number of attempts to execute the {@code runnable}
+   * @param interval Time interval between two attempts
+   * @param runnable The work unit
+   * @param abortOn when a throwable of the given throwable classifier occurs during the retry
+   *        process, terminate the retry
+   */
+  @SafeVarargs
+  public static void executeAsync(ScheduledExecutorService executor, int maxAttempts,
+      Duration interval, Runnable runnable, Class<? extends Throwable>... abortOn) {
+    new AsynchronousRetryer(executor).backoffStrategy(new FixedBackoffStrategy(interval))
+        .retryStrategy(new MaxAttemptsRetryStrategy(maxAttempts)
+            .and(new ThrowableClassifierRetryStrategy().abortOn(abortOn)))
+        .execute(runnable);
+  }
+
+  /**
+   * Try to execute and supply a result asynchronously
+   *
+   * @param <T> The result type
+   * @param executor the schedule executor service use in retry
+   * @param maxAttempts Total number of attempts to execute the {@code supplier}
+   * @param interval Time interval between two attempts
+   * @param supplier The work unit
+   * @param abortOn when a throwable of the given throwable classifier occurs during the retry
+   *        process, terminate the retry
+   * @return The result
+   */
+  @SafeVarargs
+  public static <T> Future<T> executeAsync(ScheduledExecutorService executor, int maxAttempts,
+      Duration interval, Supplier<T> supplier, Class<? extends Throwable>... abortOn) {
+    return new AsynchronousRetryer(executor).backoffStrategy(new FixedBackoffStrategy(interval))
+        .retryStrategy(new MaxAttemptsRetryStrategy(maxAttempts)
+            .and(new ThrowableClassifierRetryStrategy().abortOn(abortOn)))
+        .execute(asCallable(supplier));
+  }
+
+  /**
+   * Try to execute and return a result synchronously
    *
    * @param <T> the result type
    * @param maxAttempts Total number of attempts to execute the {@code runnable}
@@ -57,8 +98,9 @@ public class Retry {
    *        process, terminate the retry
    * @return The result
    */
+  @SafeVarargs
   public static <T> T executeSync(int maxAttempts, Duration interval, Function<Integer, T> function,
-      @SuppressWarnings("unchecked") Class<? extends Throwable>... abortOn) {
+      Class<? extends Throwable>... abortOn) {
     return new SynchronousRetryer().backoffStrategy(new FixedBackoffStrategy(interval))
         .retryStrategy(new MaxAttemptsRetryStrategy(maxAttempts)
             .and(new ThrowableClassifierRetryStrategy().abortOn(abortOn)))
@@ -66,7 +108,7 @@ public class Retry {
   }
 
   /**
-   * Try to execute runnable
+   * Try to execute runnable synchronously
    *
    * @param maxAttempts Total number of attempts to execute the {@code runnable}
    * @param interval Time interval between two attempts
@@ -74,8 +116,9 @@ public class Retry {
    * @param abortOn when a throwable of the given throwable classifier occurs during the retry
    *        process, terminate the retry
    */
+  @SafeVarargs
   public static void executeSync(int maxAttempts, Duration interval, Runnable runnable,
-      @SuppressWarnings("unchecked") Class<? extends Throwable>... abortOn) {
+      Class<? extends Throwable>... abortOn) {
     new SynchronousRetryer().backoffStrategy(new FixedBackoffStrategy(interval))
         .retryStrategy(new MaxAttemptsRetryStrategy(maxAttempts)
             .and(new ThrowableClassifierRetryStrategy().abortOn(abortOn)))
@@ -83,7 +126,7 @@ public class Retry {
   }
 
   /**
-   * Try to execute and supply a result
+   * Try to execute and supply a result synchronously
    *
    * @param <T> The result type
    * @param maxAttempts Total number of attempts to execute the {@code supplier}
@@ -93,8 +136,9 @@ public class Retry {
    *        process, terminate the retry
    * @return The result
    */
+  @SafeVarargs
   public static <T> T executeSync(int maxAttempts, Duration interval, Supplier<T> supplier,
-      @SuppressWarnings("unchecked") Class<? extends Throwable>... abortOn) {
+      Class<? extends Throwable>... abortOn) {
     return new SynchronousRetryer().backoffStrategy(new FixedBackoffStrategy(interval))
         .retryStrategy(new MaxAttemptsRetryStrategy(maxAttempts)
             .and(new ThrowableClassifierRetryStrategy().abortOn(abortOn)))

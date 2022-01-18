@@ -58,7 +58,7 @@ public @interface MessageDriven {
   String acknowledge() default "2";
 
   /**
-   * Returns the Back-off Algorithm, default is {@link BackoffAlgorithm#NON}
+   * Returns the Back-off Algorithm, default is {@link BackoffAlgorithm#FIXED}
    * <p>
    * <b>Note:</b> The final value type is <b>{@link BackoffAlgorithm}</b> type; in order to support
    * configurability, the string is used as the value type of annotation property, and the value
@@ -68,7 +68,7 @@ public @interface MessageDriven {
    *
    * @see BackoffAlgorithm
    */
-  String brokenBackoffAlgo() default "NON";
+  String brokenBackoffAlgo() default "FIXED";
 
   /**
    * The broken back-off factor, for Exponential back-off + jitter algorithm to compute the delay.

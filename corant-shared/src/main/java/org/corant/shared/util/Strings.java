@@ -884,6 +884,19 @@ public class Strings {
   }
 
   /**
+   * Split the string into fixed length chunks array.
+   *
+   * @param str the string to be separated
+   * @param chunkLength the fixed chunk length
+   */
+  public static String[] split(final String str, int chunkLength) {
+    if (chunkLength < 1 || str == null) {
+      return EMPTY_ARRAY;
+    }
+    return str.split("(?<=\\G.{" + chunkLength + "})");
+  }
+
+  /**
    * Split the string into a string array with Predicate.
    *
    * <pre>

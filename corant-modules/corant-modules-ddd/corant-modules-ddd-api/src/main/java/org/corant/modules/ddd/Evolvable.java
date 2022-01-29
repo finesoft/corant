@@ -13,6 +13,8 @@
  */
 package org.corant.modules.ddd;
 
+import org.corant.shared.ubiquity.Sortable;
+
 /**
  * corant-modules-ddd-api
  *
@@ -62,7 +64,7 @@ public interface Evolvable<P, T> {
    *
    */
   @FunctionalInterface
-  interface DestroyingHandler<P, T> {
+  interface DestroyingHandler<P, T> extends Sortable {
     @SuppressWarnings("rawtypes")
     DestroyingHandler EMPTY_INST = (p, t) -> {
     };
@@ -88,7 +90,7 @@ public interface Evolvable<P, T> {
    *
    */
   @FunctionalInterface
-  interface PreservingHandler<P, T> {
+  interface PreservingHandler<P, T> extends Sortable {
     @SuppressWarnings("rawtypes")
     PreservingHandler EMPTY_INST = (p, t) -> {
     };

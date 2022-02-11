@@ -631,6 +631,14 @@ public class Texts {
     }
   }
 
+  public static void tryWriteToFile(File file, Stream<String> data) {
+    try {
+      writeToFile(file, false, data);
+    } catch (IOException e) {
+      // Noop!
+    }
+  }
+
   public static void writeCSVFile(File file, boolean append, Charset charset,
       Stream<List<String>> stream) throws IOException {
     writeToFile(file, append, charset, shouldNotNull(stream).map(Texts::toCSVLine));

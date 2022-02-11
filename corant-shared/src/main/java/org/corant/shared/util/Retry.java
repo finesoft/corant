@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 import org.corant.shared.retry.AsynchronousRetryer;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
 import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
@@ -34,8 +33,6 @@ import org.corant.shared.retry.SynchronousRetryer;
  *
  */
 public class Retry {
-
-  static final Logger logger = Logger.getLogger(Retry.class.toString());
 
   /**
    * Create asynchronous retryer for more granular control retry mechanism with the given executor

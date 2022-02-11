@@ -165,7 +165,7 @@
     <version.snakeyaml>1.27</version.snakeyaml>
     <version.swagger>2.0.8</version.swagger>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.14.Final</version.undertow>
+    <version.undertow>2.2.16.Final</version.undertow>
     <version.vertx>4.1.4</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
@@ -173,7 +173,7 @@
     <version.weld-api>3.1.SP4</version.weld-api>
     <version.wxpay-sdk>3.0.9</version.wxpay-sdk>
     <version.xadisk>1.2.2</version.xadisk>
-    <version.xnio>3.8.4.Final</version.xnio>
+    <version.xnio>3.8.6.Final</version.xnio>
     <version.zxing>3.4.1</version.zxing>
   </properties>
 

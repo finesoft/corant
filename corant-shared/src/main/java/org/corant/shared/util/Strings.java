@@ -661,6 +661,65 @@ public class Strings {
   }
 
   /**
+   * Split the string into fixed length chunks array.
+   *
+   * @param str the string to be separated
+   * @param chunkLength the fixed chunk length
+   */
+  public static String[] partition(final String str, int chunkLength) {
+    if (chunkLength < 1 || str == null) {
+      return EMPTY_ARRAY;
+    }
+    return str.split("(?<=\\G.{" + chunkLength + "})");
+  }
+
+  /**
+   * Split the string into a string array by whole separator string, not regex.
+   * <p>
+   * Note: The difference from {@link #split(String, String)} is that the split does not discard
+   * empty string in two consecutive delimiters, thus can be used to split a format-specific row
+   * string into an array of column strings.
+   *
+   * @param str the string to be separated
+   * @param delimiter the delimiting string
+   * @return string array
+   */
+  public static String[] partition(final String str, final String delimiter) {
+    int len;
+    int slen;
+    if (str == null || (len = str.length()) == 0) {
+      return EMPTY_ARRAY;
+    }
+    if (delimiter == null || (slen = delimiter.length()) == 0) {
+      return new String[] {str};
+    }
+    int s = 0;
+    int e = 0;
+    int i = 0;
+    int g = len > SPLIT_ARRAY_LENGTH ? SPLIT_ARRAY_LENGTH : (len >> 1) + 1;
+    String[] array = new String[g];
+    while (e < len) {
+      e = str.indexOf(delimiter, s);
+      if (e > -1) {
+        if (e >= s) {
+          if (i == g) {
+            array = Arrays.copyOf(array, g += g);
+          }
+          array[i++] = str.substring(s, e);
+        }
+        s = e + slen;
+      } else {
+        if (s <= len) {
+          array = Arrays.copyOf(array, i + 1);
+          array[i++] = str.substring(s);
+        }
+        e = len;
+      }
+    }
+    return Arrays.copyOf(array, i);
+  }
+
+  /**
    * Remove all the given substring in the given string, any one of the parameters is null or the
    * length is 0 then return the given string.
    *
@@ -884,19 +943,6 @@ public class Strings {
   }
 
   /**
-   * Split the string into fixed length chunks array.
-   *
-   * @param str the string to be separated
-   * @param chunkLength the fixed chunk length
-   */
-  public static String[] split(final String str, int chunkLength) {
-    if (chunkLength < 1 || str == null) {
-      return EMPTY_ARRAY;
-    }
-    return str.split("(?<=\\G.{" + chunkLength + "})");
-  }
-
-  /**
    * Split the string into a string array with Predicate.
    *
    * <pre>
@@ -982,7 +1028,7 @@ public class Strings {
   }
 
   /**
-   * Split the string into a string array with whole separator string, not regex.
+   * Split the string into a string array by whole separator string, not regex.
    *
    * @param str the string to be separated
    * @param wholeSeparator the delimiting string
@@ -1007,7 +1053,7 @@ public class Strings {
   }
 
   /**
-   * Split the string into a string array with whole separator string, not regex.
+   * Split the string into a string array by whole separator string, not regex.
    *
    * @param str the string to be separated
    * @param wholeSeparator the delimiting string

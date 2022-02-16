@@ -163,7 +163,7 @@
     <version.smallrye-metrics>3.0.4</version.smallrye-metrics>
     <version.smallrye-opentracing>2.0.1</version.smallrye-opentracing>
     <version.snakeyaml>1.27</version.snakeyaml>
-    <version.swagger>2.0.8</version.swagger>
+    <version.swagger>2.1.12</version.swagger>
     <version.testng>6.9.9</version.testng>
     <version.undertow>2.2.16.Final</version.undertow>
     <version.vertx>4.1.4</version.vertx>

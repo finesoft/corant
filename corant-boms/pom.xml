@@ -63,7 +63,7 @@
     <version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
     <version.hikariCP>3.4.5</version.hikariCP>
     <version.hppc>0.8.2</version.hppc>
-    <version.hsqldb>2.6.0</version.hsqldb>
+    <version.hsqldb>2.6.1</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
     <version.jackson>2.13.1</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
@@ -169,7 +169,7 @@
     <version.vertx>4.1.4</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
-    <version.weld>3.1.8.Final</version.weld>
+    <version.weld>3.1.9.Final</version.weld>
     <version.weld-api>3.1.SP4</version.weld-api>
     <version.wxpay-sdk>3.0.9</version.wxpay-sdk>
     <version.xadisk>1.2.2</version.xadisk>

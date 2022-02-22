@@ -13,7 +13,6 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,6 +33,7 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import org.corant.modules.security.annotation.Secured;
+import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
@@ -84,9 +84,11 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
         registration = new MpJWTRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
       } else if (mpJwtAnnotation instanceof Secured) {
-        Secured secure = (Secured) mpJwtAnnotation;
-        if (secure.type() == SecuredType.PERMIT && isNotEmpty(secure.allowed())) {
-          registration = new MpJWTPermitsAllowedFilter(secure.allowed());
+        Secured secured = SecuredLiteral.of((Secured) mpJwtAnnotation);
+        if (SecuredType.valueOf(secured.type()) == SecuredType.PERMIT) {
+          registration = new MpJWTPermitsAllowedFilter(secured.allowed());
+        } else {
+          registration = new MpJWTRolesAllowedFilter(secured.allowed());
         }
       } else if (mpJwtAnnotation instanceof PermitAll) {
         registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);

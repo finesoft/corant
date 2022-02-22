@@ -17,16 +17,20 @@ import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.config.Configs.resolveVariable;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
+import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -49,22 +53,28 @@ public @interface Secured {
   String runAs() default EMPTY;
 
   @Nonbinding
-  SecuredType type() default SecuredType.ROLE;
+  String type() default "ROLE";
 
-  class SecureLiteral extends AnnotationLiteral<Secured> implements Secured {
+  class SecuredLiteral extends AnnotationLiteral<Secured> implements Secured {
 
     private static final long serialVersionUID = -2874685620910996061L;
 
     String[] allowed;
 
-    SecuredType type;
+    String type;
 
     String runAs;
 
-    public SecureLiteral(SecuredType type, String runAs, String[] allowed) {
-      this.type = defaultObject(type, SecuredType.ROLE);
-      this.runAs = defaultString(runAs);
-      this.allowed = defaultObject(allowed, Strings.EMPTY_ARRAY);
+    public SecuredLiteral(String type, String runAs, String[] allowed) {
+      this.type = defaultBlank(resolveVariable(type), SecuredType.ROLE.name());
+      this.runAs = resolveVariable(defaultString(runAs));
+      this.allowed = Arrays.stream(defaultObject(allowed, Strings.EMPTY_ARRAY))
+          .map(Configs::resolveVariable).toArray(String[]::new);
+    }
+
+    public static Secured of(Secured secured) {
+      return secured == null ? null
+          : new SecuredLiteral(secured.type(), secured.runAs(), secured.allowed());
     }
 
     @Override
@@ -78,7 +88,7 @@ public @interface Secured {
     }
 
     @Override
-    public SecuredType type() {
+    public String type() {
       return type;
     }
 

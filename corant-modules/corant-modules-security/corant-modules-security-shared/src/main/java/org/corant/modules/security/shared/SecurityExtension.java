@@ -28,7 +28,7 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.config.Configs;
 import org.corant.modules.security.annotation.Secure;
 import org.corant.modules.security.annotation.Secured;
-import org.corant.modules.security.annotation.Secured.SecureLiteral;
+import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.interceptor.SecuredInterceptor;
 import org.corant.shared.normal.Priorities;
@@ -80,8 +80,8 @@ public class SecurityExtension implements Extension {
 
   void processPermitAll(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.getAnnotation(PermitAll.class) != null)
-        .forEach(
-            m -> m.add(new SecureLiteral(SecuredType.ROLE, Strings.EMPTY, Strings.EMPTY_ARRAY)));
+        .forEach(m -> m
+            .add(new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, Strings.EMPTY_ARRAY)));
   }
 
   void processRolesAllowed(ProcessAnnotatedType<?> event) {
@@ -91,13 +91,13 @@ public class SecurityExtension implements Extension {
           for (RolesAllowed r : m.getAnnotated().getAnnotations(RolesAllowed.class)) {
             roles = appendIfAbsent(roles, r.value());
           }
-          m.add(new SecureLiteral(SecuredType.ROLE, Strings.EMPTY, roles));
+          m.add(new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, roles));
         });
   }
 
   void processRunAs(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.getAnnotation(RunAs.class) != null)
-        .forEach(m -> m.add(new SecureLiteral(SecuredType.ROLE,
+        .forEach(m -> m.add(new SecuredLiteral(SecuredType.ROLE.name(),
             m.getAnnotated().getAnnotation(RunAs.class).value(), Strings.EMPTY_ARRAY)));
   }
 }

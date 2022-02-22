@@ -28,6 +28,7 @@ import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.SecurityManager;
 import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.annotation.Secured;
+import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.modules.security.shared.SimplePermissions;
@@ -55,7 +56,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
   }
 
   protected void check(InvocationContext invocationContext) throws Exception {
-    Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
+    Secured secured = SecuredLiteral.of(getInterceptorAnnotation(invocationContext, Secured.class));
     if (secured != null) {
       if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
@@ -66,7 +67,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
       }
       if (isEmpty(secured.allowed())) {
         checkAuthenticated();
-      } else if (secured.type() == SecuredType.ROLE) {
+      } else if (SecuredType.valueOf(secured.type()) == SecuredType.ROLE) {
         checkAccess(secured, SimpleRoles::of);
       } else {
         checkAccess(secured, SimplePermissions::of);

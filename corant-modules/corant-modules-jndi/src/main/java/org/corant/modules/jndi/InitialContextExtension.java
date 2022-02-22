@@ -99,8 +99,7 @@ public class InitialContextExtension implements Extension {
       logger.info(() -> String.format("Initial naming context, create subcontexts with %s.",
           String.join(", ", DFLT_SUB_CTX)));
     }
-
-    bm.fireEvent(new PostCorantJNDIReadyEvent(useCorantContext, context));
+    bm.getEvent().fire(new PostCorantJNDIReadyEvent(useCorantContext, context));
   }
 
   void onBeforeShutdown(@Observes BeforeShutdown bs) {

@@ -22,32 +22,32 @@ import java.util.Map;
  * @author bingo 上午10:41:08
  *
  */
-public class UserPrincipal extends SimplePrincipal {
+public class IdentifierPrincipal extends SimplePrincipal {
 
   private static final long serialVersionUID = -6975094126652298173L;
 
-  protected Serializable userId;
+  protected Serializable id;
 
-  public UserPrincipal(Serializable userId, String username) {
-    super(username);
-    this.userId = userId;
+  public IdentifierPrincipal(Serializable id, String name) {
+    super(name);
+    this.id = id;
   }
 
-  public UserPrincipal(Serializable userId, String username,
+  public IdentifierPrincipal(Serializable id, String name,
       Map<String, ? extends Serializable> properties) {
-    super(username, properties);
-    this.userId = userId;
+    super(name, properties);
+    this.id = id;
   }
 
-  protected UserPrincipal() {}
+  protected IdentifierPrincipal() {}
 
-  public Serializable getUserId() {
-    return userId;
+  public Serializable getId() {
+    return id;
   }
 
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (UserPrincipal.class.isAssignableFrom(cls)) {
+    if (IdentifierPrincipal.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return super.unwrap(cls);

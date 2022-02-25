@@ -104,7 +104,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
         proxyType.getSimpleName().concat(Names.NAME_SPACE_SEPARATORS).concat(method.getName());
     QueryWay queryWay;
     if (queryMethod != null) {
-      queryName = defaultBlank(queryMethod.name(), queryName);
+      queryName = defaultBlank(Configs.resolveVariable(queryMethod.name()), queryName);
       queryWay = queryMethod.way();
     } else {
       queryWay = QueryWay.fromMethodName(method.getName());

@@ -15,6 +15,7 @@ package org.corant.modules.security.shared;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import org.corant.modules.security.Principal;
 
 /**
@@ -30,6 +31,12 @@ public class UserAuthcData extends SimpleAuthcData {
   public UserAuthcData(Serializable userId, Object credentials,
       Collection<? extends Principal> principals) {
     super(credentials, principals);
+    this.userId = userId;
+  }
+
+  public UserAuthcData(Serializable userId, Object credentials,
+      Collection<? extends Principal> principals, Map<String, ? extends Serializable> attributes) {
+    super(credentials, principals, attributes);
     this.userId = userId;
   }
 

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;
 
@@ -27,7 +28,7 @@ import org.corant.modules.security.Subject;
  * @author bingo 下午4:22:33
  *
  */
-public class SimpleSubject implements Subject {
+public class SimpleSubject implements Subject, AttributeSet {
 
   private static final long serialVersionUID = 3435651508945136478L;
 
@@ -35,12 +36,27 @@ public class SimpleSubject implements Subject {
 
   protected Collection<Principal> principals;
 
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
+
   public SimpleSubject(Serializable id, Collection<? extends Principal> principals) {
+    this(id, principals, null);
+  }
+
+  public SimpleSubject(Serializable id, Collection<? extends Principal> principals,
+      Map<String, ? extends Serializable> attributes) {
     this.id = id;
     this.principals = Collections.unmodifiableCollection(newArrayList(principals));
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
   }
 
   protected SimpleSubject() {}
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
+  }
 
   @Override
   public Serializable getId() {

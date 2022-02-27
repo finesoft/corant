@@ -14,10 +14,12 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Lists.newArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.corant.modules.security.AuthorizationData;
 import org.corant.modules.security.Role;
@@ -28,23 +30,51 @@ import org.corant.modules.security.Role;
  * @author bingo 下午3:17:41
  *
  */
-public class SimpleAuthzData implements AuthorizationData {
+public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 
   protected List<Role> roles;
 
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
+
   public SimpleAuthzData(Collection<String> roles) {
+    this(roles, null);
+  }
+
+  public SimpleAuthzData(Collection<String> roles, Map<String, ? extends Serializable> attributes) {
     this.roles = roles.stream().map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
   }
 
   public SimpleAuthzData(List<SimpleRole> roles) {
+    this(roles, null);
+  }
+
+  public SimpleAuthzData(List<SimpleRole> roles, Map<String, ? extends Serializable> attributes) {
     this.roles = Collections.unmodifiableList(newArrayList(roles));
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
+  }
+
+  public SimpleAuthzData(Map<String, ? extends Serializable> attributes, String... roles) {
+    this.roles = Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
   }
 
   public SimpleAuthzData(String... roles) {
-    this.roles = Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+    this(null, roles);
   }
 
   protected SimpleAuthzData() {}
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
+  }
 
   public List<String> getRoleNames() {
     return roles.stream().map(Role::getName).collect(Collectors.toList());
@@ -54,5 +84,4 @@ public class SimpleAuthzData implements AuthorizationData {
   public Collection<? extends Role> getRoles() {
     return roles;
   }
-
 }

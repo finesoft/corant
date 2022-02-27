@@ -61,6 +61,7 @@ import org.corant.shared.conversion.converter.factory.ListTemporalConverterFacto
 import org.corant.shared.conversion.converter.factory.MapTemporalConverterFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-shared
@@ -803,6 +804,19 @@ public class Maps {
       final Function<Object, T> converter, final T nvt) {
     Object val = map == null ? null : map.get(key);
     return val != null ? defaultObject(converter.apply(val), nvt) : nvt;
+  }
+
+  /**
+   * Convert and return the value corresponding to the given key in the given map.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param typeLiteral the value type
+   * @return the mapped object
+   */
+  public static <T> T getMapObject(final Map<?, ?> map, final Object key,
+      final TypeLiteral<T> typeLiteral) {
+    return map == null ? null : toObject(map.get(key), typeLiteral);
   }
 
   /**

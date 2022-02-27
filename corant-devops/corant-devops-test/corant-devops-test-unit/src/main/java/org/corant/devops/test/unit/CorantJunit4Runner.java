@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import org.corant.Corant;
 import org.corant.context.Beans;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
 import org.junit.runners.model.Statement;
 
@@ -57,6 +58,9 @@ public interface CorantJunit4Runner {
             CORANTS.get().start(null);
           }
           classBlock.get().evaluate();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new CorantRuntimeException(e);
         } finally {
           if (!isEmbedded()) {
             if (isNotBlank(PROFILES.get())) {

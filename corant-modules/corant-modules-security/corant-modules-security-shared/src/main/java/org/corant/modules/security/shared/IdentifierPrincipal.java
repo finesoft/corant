@@ -15,6 +15,7 @@ package org.corant.modules.security.shared;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * corant-modules-security-shared
@@ -41,8 +42,30 @@ public class IdentifierPrincipal extends SimplePrincipal {
 
   protected IdentifierPrincipal() {}
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    IdentifierPrincipal other = (IdentifierPrincipal) obj;
+    return Objects.equals(id, other.id);
+  }
+
   public Serializable getId() {
     return id;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    return prime * result + Objects.hash(id);
   }
 
   @Override

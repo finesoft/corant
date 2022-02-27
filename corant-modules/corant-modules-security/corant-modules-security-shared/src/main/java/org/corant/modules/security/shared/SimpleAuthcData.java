@@ -14,8 +14,10 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Lists.newArrayList;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.Principal;
 
@@ -25,18 +27,33 @@ import org.corant.modules.security.Principal;
  * @author bingo 下午3:14:35
  *
  */
-public class SimpleAuthcData implements AuthenticationData {
+public class SimpleAuthcData implements AuthenticationData, AttributeSet {
 
   protected Object credentials;
 
   protected Collection<Principal> principals;
 
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
+
   public SimpleAuthcData(Object credentials, Collection<? extends Principal> principals) {
+    this(credentials, principals, null);
+  }
+
+  public SimpleAuthcData(Object credentials, Collection<? extends Principal> principals,
+      Map<String, ? extends Serializable> attributes) {
     this.credentials = credentials;
     this.principals = Collections.unmodifiableCollection(newArrayList(principals));
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
   }
 
   protected SimpleAuthcData() {}
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
+  }
 
   @Override
   public Object getCredentials() {
@@ -47,5 +64,4 @@ public class SimpleAuthcData implements AuthenticationData {
   public Collection<? extends Principal> getPrincipals() {
     return principals;
   }
-
 }

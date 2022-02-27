@@ -27,6 +27,7 @@ public class DefaultSecurityContext implements SecurityContext {
   private static final long serialVersionUID = 4329263253208902621L;
 
   protected final String authenticationScheme;
+
   protected final Principal principal;
 
   public DefaultSecurityContext(String authenticationScheme, Principal principal) {

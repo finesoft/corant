@@ -13,14 +13,10 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Maps.getMapCollection;
-import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.IntFunction;
+import java.util.Objects;
 import org.corant.modules.security.Principal;
 
 /**
@@ -29,55 +25,60 @@ import org.corant.modules.security.Principal;
  * @author bingo 下午4:22:17
  *
  */
-public class SimplePrincipal implements Principal, Serializable {
+public class SimplePrincipal implements Principal, AttributeSet, Serializable {
 
   private static final long serialVersionUID = 282297555381317944L;
 
   protected String name;
-  protected Map<String, ? extends Serializable> properties = Collections.emptyMap();
+
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
   public SimplePrincipal(String name) {
     this(name, null);
   }
 
-  public SimplePrincipal(String name, Map<String, ? extends Serializable> properties) {
+  public SimplePrincipal(String name, Map<String, ? extends Serializable> attributes) {
     this.name = name;
-    if (properties != null) {
-      this.properties = Collections.unmodifiableMap(properties);
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
     }
   }
 
   protected SimplePrincipal() {}
 
   @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    SimplePrincipal other = (SimplePrincipal) obj;
+    return Objects.equals(attributes, other.attributes) && Objects.equals(name, other.name);
+  }
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
+  }
+
+  @Override
   public String getName() {
     return name;
   }
 
-  public Map<String, ? extends Serializable> getProperties() {
-    return properties;
-  }
-
-  public <T> T getProperty(String name, Class<T> type) {
-    Object property;
-    if (properties != null && (property = properties.get(name)) != null) {
-      return toObject(property, type);
-    }
-    return null;
-  }
-
-  public <T> T getProperty(String name, Class<T> type, T alt) {
-    return defaultObject(getProperty(name, type), alt);
-  }
-
-  public <T, C extends Collection<T>> C getProperty(String name, IntFunction<C> collectionFactory,
-      Class<T> itemType) {
-    return getMapCollection(properties, name, collectionFactory, itemType, null);
+  @Override
+  public int hashCode() {
+    return Objects.hash(attributes, name);
   }
 
   @Override
   public String toString() {
-    return "SimplePrincipal [name=" + name + ", properties=" + properties + "]";
+    return "SimplePrincipal [name=" + name + ", attributes=" + attributes + "]";
   }
 
   @Override

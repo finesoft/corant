@@ -65,7 +65,7 @@ public class MpJWTAuthorizer implements Authorizer {
     Collection<SimplePermission> sctxPerms = null;
     if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
       principal = (SimplePrincipal) sctx.getPrincipal();
-      sctxPerms = principal.getProperty("permits", ArrayList::new, SimplePermission.class);
+      sctxPerms = principal.getAttribute("permits", ArrayList::new, SimplePermission.class);
     }
     for (SimplePermission perm : perms) {
       if (perm.equals(ALL_PERMS) && principal != null
@@ -81,7 +81,7 @@ public class MpJWTAuthorizer implements Authorizer {
     Collection<SimpleRole> sctxRoles = null;
     if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
       principal = (SimplePrincipal) sctx.getPrincipal();
-      sctxRoles = principal.getProperty("groups", ArrayList::new, SimpleRole.class);
+      sctxRoles = principal.getAttribute("groups", ArrayList::new, SimpleRole.class);
     }
     for (SimpleRole role : roles) {
       if (role.equals(ALL_ROLES) && principal != null

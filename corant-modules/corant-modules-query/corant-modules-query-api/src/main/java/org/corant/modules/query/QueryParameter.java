@@ -216,7 +216,7 @@ public interface QueryParameter extends Serializable {
 
     @Override
     public GenericQueryParameter<T> offset(Integer offset) {
-      super.offset(limit);
+      super.offset(offset);
       return this;
     }
 

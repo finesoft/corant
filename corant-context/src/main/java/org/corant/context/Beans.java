@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.Set;
@@ -126,6 +127,9 @@ public class Beans {
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
       return Optional.of(inst.get());
+    } else if (!inst.isUnsatisfied() && Sortable.class.isAssignableFrom(instanceClass)) {
+      return forceCast(
+          inst.stream().map(Sortable.class::cast).sorted(Sortable::compare).findFirst());
     } else {
       return isEmpty(qualifiers) ? findService(instanceClass) : Optional.empty();
     }

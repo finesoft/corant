@@ -623,7 +623,7 @@ public class Texts {
     }
   }
 
-  public static void tryWriteToFile(File file, Iterable<String> data) {
+  public static void tryWriteToFile(File file, Iterable<?> data) {
     try {
       writeToFile(file, false, streamOf(data));
     } catch (IOException e) {
@@ -631,7 +631,7 @@ public class Texts {
     }
   }
 
-  public static void tryWriteToFile(File file, Stream<String> data) {
+  public static void tryWriteToFile(File file, Stream<?> data) {
     try {
       writeToFile(file, false, data);
     } catch (IOException e) {
@@ -648,7 +648,7 @@ public class Texts {
     writeToFile(file, false, shouldNotNull(streamOf(data)).map(Texts::toCSVLine));
   }
 
-  public static void writeToFile(File file, boolean append, Charset charset, Stream<String> lines)
+  public static void writeToFile(File file, boolean append, Charset charset, Stream<?> lines)
       throws IOException {
     shouldNotNull(lines);
     if (!file.exists()) {
@@ -659,7 +659,11 @@ public class Texts {
             new OutputStreamWriter(os, defaultObject(charset, StandardCharsets.UTF_8)))) {
       lines.forEach(line -> {
         try {
-          fileWriter.append(line);
+          if (line == null) {
+            fileWriter.append(EMPTY);
+          } else {
+            fileWriter.append(line.toString());
+          }
           fileWriter.newLine();
           fileWriter.flush();
         } catch (Exception e) {
@@ -669,8 +673,7 @@ public class Texts {
     }
   }
 
-  public static void writeToFile(File file, boolean append, Stream<String> lines)
-      throws IOException {
+  public static void writeToFile(File file, boolean append, Stream<?> lines) throws IOException {
     writeToFile(file, append, StandardCharsets.UTF_8, lines);
   }
 
@@ -681,7 +684,7 @@ public class Texts {
    * @param data
    * @throws IOException writeToFile
    */
-  public static void writeToFile(File file, Iterable<String> data) throws IOException {
+  public static void writeToFile(File file, Iterable<?> data) throws IOException {
     writeToFile(file, false, streamOf(data));
   }
 

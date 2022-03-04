@@ -19,12 +19,14 @@ import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_AGG_RESOLVE_MULT
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.persistence.LockModeType;
 import javax.persistence.metamodel.EntityType;
 import org.corant.context.Beans;
 import org.corant.modules.ddd.Aggregate;
@@ -66,10 +68,43 @@ public class Aggregates {
     throw new GeneralRuntimeException(ERR_PARAM);
   }
 
-  public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
+  public static <X extends Aggregate> void lock(Aggregate obj, LockModeType lockModeType,
+      Object... properties) {
+    if (obj != null) {
+      if (properties.length > 0) {
+        resolveRepository(getUserClass(obj)).lock(obj, lockModeType, mapOf(properties));
+      } else {
+        resolveRepository(getUserClass(obj)).lock(obj, lockModeType);
+      }
+    } else {
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
+  }
+
+  public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id,
+      LockModeType lockModeType, Object... properties) {
     if (id != null && cls != null) {
-      return shouldNotNull(resolveRepository(cls).get(cls, id),
-          () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+      if (properties.length > 0) {
+        return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType, mapOf(properties)),
+            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+      } else {
+        return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType),
+            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+      }
+    }
+    throw new GeneralRuntimeException(ERR_PARAM);
+  }
+
+  public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id,
+      Object... properties) {
+    if (id != null && cls != null) {
+      if (properties.length > 0) {
+        return shouldNotNull(resolveRepository(cls).get(cls, id, mapOf(properties)),
+            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+      } else {
+        return shouldNotNull(resolveRepository(cls).get(cls, id),
+            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+      }
     }
     throw new GeneralRuntimeException(ERR_PARAM);
   }

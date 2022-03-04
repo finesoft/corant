@@ -68,6 +68,15 @@ public class Aggregates {
     throw new GeneralRuntimeException(ERR_PARAM);
   }
 
+  public static <R, X extends Aggregate> R get(Class<X> cls, String namedQuery,
+      Map<Object, Object> params) {
+    return resolveRepository(cls).namedQuery(namedQuery).parameters(params).get();
+  }
+
+  public static <R, X extends Aggregate> R get(Class<X> cls, String namedQuery, Object... params) {
+    return resolveRepository(cls).namedQuery(namedQuery).parameters(params).get();
+  }
+
   public static <X extends Aggregate> void lock(Aggregate obj, LockModeType lockModeType,
       Object... properties) {
     if (obj != null) {

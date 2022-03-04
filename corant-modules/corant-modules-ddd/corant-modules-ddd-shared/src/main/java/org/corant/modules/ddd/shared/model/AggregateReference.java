@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.persistence.LockModeType;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.shared.exception.GeneralRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -120,6 +121,11 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
       throw new GeneralRuntimeException(ERR_OBJ_NON_FUD, id);
     }
     return id;
+  }
+
+  default T lockAndGet(LockModeType lockModeType, Object... properties) {
+    return forceCast(
+        Aggregates.resolve(resolveType(getClass()), getId(), lockModeType, properties));
   }
 
   @Override

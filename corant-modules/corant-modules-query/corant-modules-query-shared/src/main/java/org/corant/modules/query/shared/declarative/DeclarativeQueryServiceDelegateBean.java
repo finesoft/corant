@@ -67,7 +67,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
     scope = ApplicationScoped.class;
     DeclarativeQueryService declaratives =
         shouldNotNull(proxyType.getDeclaredAnnotation(DeclarativeQueryService.class));
-    queryQualifier = Configs.resolveVariable(declaratives.qualifier());
+    queryQualifier = Configs.assemblyStringConfigProperty(declaratives.qualifier());
     queryType = declaratives.type();
   }
 
@@ -104,7 +104,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
         proxyType.getSimpleName().concat(Names.NAME_SPACE_SEPARATORS).concat(method.getName());
     QueryWay queryWay;
     if (queryMethod != null) {
-      queryName = defaultBlank(Configs.resolveVariable(queryMethod.name()), queryName);
+      queryName = defaultBlank(Configs.assemblyStringConfigProperty(queryMethod.name()), queryName);
       queryWay = queryMethod.way();
     } else {
       queryWay = QueryWay.fromMethodName(method.getName());

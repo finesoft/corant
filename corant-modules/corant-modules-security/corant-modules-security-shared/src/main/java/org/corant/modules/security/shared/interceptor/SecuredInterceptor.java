@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared.interceptor;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import java.util.Collection;
 import java.util.function.Function;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -28,7 +29,7 @@ import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.SecurityManager;
 import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.annotation.Secured;
-import org.corant.modules.security.annotation.Secured.SecuredLiteral;
+import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.modules.security.shared.SimplePermissions;
@@ -56,7 +57,8 @@ public class SecuredInterceptor extends AbstractInterceptor {
   }
 
   protected void check(InvocationContext invocationContext) throws Exception {
-    Secured secured = SecuredLiteral.of(getInterceptorAnnotation(invocationContext, Secured.class));
+    SecuredMetadata secured =
+        SecuredMetadata.of(getInterceptorAnnotation(invocationContext, Secured.class));
     if (secured != null) {
       if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
@@ -75,7 +77,8 @@ public class SecuredInterceptor extends AbstractInterceptor {
     }
   }
 
-  protected void checkAccess(Secured secured, Function<String[], Object> predicate) {
+  protected void checkAccess(SecuredMetadata secured,
+      Function<Collection<String>, Object> predicate) {
     if (securityManagers.isResolvable()) {
       securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
           predicate.apply(secured.allowed()));

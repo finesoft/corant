@@ -123,14 +123,14 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
     return id;
   }
 
-  default T lockAndGet(LockModeType lockModeType, Object... properties) {
-    return forceCast(
-        Aggregates.resolve(resolveType(getClass()), getId(), lockModeType, properties));
-  }
-
   @Override
   default T retrieve() {
     return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD));
+  }
+
+  default T retrieve(LockModeType lockModeType, Object... properties) {
+    return forceCast(
+        Aggregates.resolve(resolveType(getClass()), getId(), lockModeType, properties));
   }
 
   @Override

@@ -33,7 +33,7 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import org.corant.modules.security.annotation.Secured;
-import org.corant.modules.security.annotation.Secured.SecuredLiteral;
+import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
@@ -84,11 +84,11 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
         registration = new MpJWTRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
       } else if (mpJwtAnnotation instanceof Secured) {
-        Secured secured = SecuredLiteral.of((Secured) mpJwtAnnotation);
+        SecuredMetadata secured = SecuredMetadata.of((Secured) mpJwtAnnotation);
         if (SecuredType.valueOf(secured.type()) == SecuredType.PERMIT) {
-          registration = new MpJWTPermitsAllowedFilter(secured.allowed());
+          registration = new MpJWTPermitsAllowedFilter(secured.allowed().toArray(String[]::new));
         } else {
-          registration = new MpJWTRolesAllowedFilter(secured.allowed());
+          registration = new MpJWTRolesAllowedFilter(secured.allowed().toArray(String[]::new));
         }
       } else if (mpJwtAnnotation instanceof PermitAll) {
         registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);

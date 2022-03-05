@@ -18,7 +18,6 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
-import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.parseDollarTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +67,7 @@ public class Configs {
    */
   public static List<String> assemblyStringConfigProperties(String value) {
     String useKey = assemblyStringConfigProperty(value);
-    if (isNotBlank(useKey)) {
+    if (useKey != null) {
       return new ArrayList<>(Arrays.asList(CorantConfigResolver.splitValue(useKey)));
     }
     return listOf(value);

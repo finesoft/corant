@@ -37,12 +37,12 @@ public class PermissionReference extends SimplePermission {
   }
 
   public PermissionReference(Serializable id, String name,
-      Map<String, ? extends Serializable> properties) {
+      Map<String, ? extends Serializable> attributes) {
     this.id = id;
     this.name = name;
     predicate = ImpliedPredications.predicateOf(id);
     if (attributes != null) {
-      attributes = Collections.unmodifiableMap(attributes);
+      this.attributes = Collections.unmodifiableMap(attributes);
     }
   }
 

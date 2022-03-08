@@ -54,7 +54,7 @@ public @interface Secured {
   String runAs() default EMPTY;
 
   @Nonbinding
-  String type() default "ROLE";
+  String type() default EMPTY;
 
   class SecuredLiteral extends AnnotationLiteral<Secured> implements Secured {
 

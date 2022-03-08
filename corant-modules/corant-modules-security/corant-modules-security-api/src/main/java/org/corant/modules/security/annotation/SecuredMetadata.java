@@ -34,6 +34,8 @@ public class SecuredMetadata implements Serializable {
 
   public static final SecuredMetadata EMPTY_INST = new SecuredMetadata();
 
+  public static final String DEFAULT_SECURED_TYPE = "${corant.secutiry.secured.type:ROLE}";
+
   Collection<String> allowed = Collections.emptyList();
 
   String type = SecuredType.ROLE.name();
@@ -45,7 +47,8 @@ public class SecuredMetadata implements Serializable {
   }
 
   public SecuredMetadata(String type, String runAs, String[] allowed) {
-    this.type = defaultBlank(assemblyStringConfigProperty(type), SecuredType.ROLE.name());
+    this.type = defaultBlank(assemblyStringConfigProperty(type),
+        defaultBlank(assemblyStringConfigProperty(DEFAULT_SECURED_TYPE), SecuredType.ROLE.name()));
     this.runAs = assemblyStringConfigProperty(defaultString(runAs));
     this.allowed = Collections.unmodifiableList(Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)

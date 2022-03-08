@@ -35,8 +35,8 @@ public class PrincipalReference extends SimplePrincipal {
   }
 
   public PrincipalReference(Serializable id, String name,
-      Map<String, ? extends Serializable> properties) {
-    super(name, properties);
+      Map<String, ? extends Serializable> attributes) {
+    super(name, attributes);
     this.id = id;
   }
 

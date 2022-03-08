@@ -32,11 +32,9 @@ public class AESGCMCipherProvider extends SymmetricCipherProvider {
   public static final String TRANSFORMATION = ALGORITHM + "/GCM/NoPadding";
   public static final Set<Integer> ALLOW_KEY_BIT_SIZES = immutableSetOf(128, 192, 256);
   public static final int IV_BIT_SIZE = 128;// always 128
-  protected int keyBitSize;
 
   public AESGCMCipherProvider(byte[] key) {
     super(ALGORITHM, key, key.length << 3);
-    keyBitSize = key.length << 3;
   }
 
   @Override

@@ -57,8 +57,8 @@ public class SecuredInterceptor extends AbstractInterceptor {
   }
 
   protected void check(InvocationContext invocationContext) throws Exception {
-    SecuredMetadata secured =
-        SecuredMetadata.of(getInterceptorAnnotation(invocationContext, Secured.class));
+    SecuredMetadata secured = SecurityExtension
+        .getSecuredMetadata(getInterceptorAnnotation(invocationContext, Secured.class));
     if (secured != null) {
       if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {

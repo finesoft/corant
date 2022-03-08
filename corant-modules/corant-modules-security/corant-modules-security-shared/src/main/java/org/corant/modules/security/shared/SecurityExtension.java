@@ -13,13 +13,16 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.appendIfAbsent;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Priority;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.annotation.security.RunAs;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterTypeDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
@@ -29,10 +32,10 @@ import org.corant.config.Configs;
 import org.corant.modules.security.annotation.Secure;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.Secured.SecuredLiteral;
-import org.corant.modules.security.annotation.SecuredType;
+import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.shared.interceptor.SecuredInterceptor;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-security-shared
@@ -54,13 +57,42 @@ public class SecurityExtension implements Extension {
   public static final boolean FIT_ANY_SECURITY_MANAGER = Configs
       .getValue("corant.security.interceptor.fit-any-sucrity-manager", Boolean.class, Boolean.TRUE);
 
+  protected static final Map<Secured, SecuredMetadata> securedMetaDatas = new ConcurrentHashMap<>();
+
+  private static volatile boolean securedMetaDatasInit = false;
+
+  public static SecuredMetadata getSecuredMetadata(Secured secured) {
+    if (!securedMetaDatasInit) {
+      throw new CorantRuntimeException("The secured metadata not ready yet!");
+    }
+    return secured == null ? SecuredMetadata.EMPTY_INST
+        : securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+  }
+
+  public static Map<Secured, SecuredMetadata> getSecuredMetadatas() {
+    if (!securedMetaDatasInit) {
+      throw new CorantRuntimeException("The secured metadata not ready yet!");
+    }
+    return Collections.unmodifiableMap(securedMetaDatas);
+  }
+
+  void onAfterBeanDiscovery(@Observes AfterBeanDiscovery beforeBeanDiscoveryEvent) {
+    if (!securedMetaDatasInit) {
+      synchronized (this) {
+        if (!securedMetaDatasInit) {
+          securedMetaDatasInit = true;
+        }
+      }
+    }
+  }
+
   void onAfterTypeDiscovery(@Observes AfterTypeDiscovery afterTypeDiscovery) {
     if (ENABLE_INTERCEPTOR) {
       afterTypeDiscovery.getInterceptors().add(SecuredInterceptor.class);
     }
   }
 
-  void onBeforeBeanDiscoveryEvent(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
+  void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
     if (ENABLE_INTERCEPTOR) {
       beforeBeanDiscoveryEvent.addInterceptorBinding(Secured.class);
     }
@@ -68,9 +100,26 @@ public class SecurityExtension implements Extension {
 
   void onProcessAnnotatedType(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
       Secured.class, Secure.class}) ProcessAnnotatedType<?> event) {
-    if (ENABLE_INTERCEPTOR_COMPATIBILITY) {
-      Class<?> beanClass = event.getAnnotatedType().getJavaClass();
-      if (!beanClass.isInterface() && !Modifier.isAbstract(beanClass.getModifiers())) {
+    Class<?> beanClass = event.getAnnotatedType().getJavaClass();
+    if (!beanClass.isInterface() && !Modifier.isAbstract(beanClass.getModifiers())
+        && ENABLE_INTERCEPTOR) {
+      event.configureAnnotatedType().methods().forEach(m -> {
+        Secured secured = m.getAnnotated().getAnnotation(Secured.class);
+        if (secured != null) {
+          securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+        }
+      });
+      event.configureAnnotatedType().filterConstructors(c -> c.isAnnotationPresent(Secured.class))
+          .forEach(c -> {
+            Secured secured = c.getAnnotated().getAnnotation(Secured.class);
+            securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+          });
+      if (event.configureAnnotatedType().getAnnotated().getAnnotation(Secured.class) != null) {
+        securedMetaDatas.computeIfAbsent(
+            event.configureAnnotatedType().getAnnotated().getAnnotation(Secured.class),
+            SecuredMetadata::new);
+      }
+      if (ENABLE_INTERCEPTOR_COMPATIBILITY) {
         processPermitAll(event);
         processRolesAllowed(event);
         processRunAs(event);
@@ -79,25 +128,41 @@ public class SecurityExtension implements Extension {
   }
 
   void processPermitAll(ProcessAnnotatedType<?> event) {
-    event.configureAnnotatedType().filterMethods(m -> m.getAnnotation(PermitAll.class) != null)
-        .forEach(m -> m
-            .add(new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, Strings.EMPTY_ARRAY)));
+    event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(PermitAll.class))
+        .forEach(m -> {
+          Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotation(PermitAll.class));
+          securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+          m.add(secured);
+        });
+    if (event.configureAnnotatedType().getAnnotated().getAnnotation(PermitAll.class) != null) {
+      Secured secured = SecuredLiteral
+          .of(event.configureAnnotatedType().getAnnotated().getAnnotation(PermitAll.class));
+      securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+      event.configureAnnotatedType().add(secured);
+    }
   }
 
   void processRolesAllowed(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(RolesAllowed.class))
         .forEach(m -> {
-          String[] roles = Strings.EMPTY_ARRAY;
-          for (RolesAllowed r : m.getAnnotated().getAnnotations(RolesAllowed.class)) {
-            roles = appendIfAbsent(roles, r.value());
-          }
-          m.add(new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, roles));
+          Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotations(RolesAllowed.class));
+          securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+          m.add(secured);
         });
+    if (event.configureAnnotatedType().getAnnotated().getAnnotation(RolesAllowed.class) != null) {
+      Secured secured = SecuredLiteral
+          .of(event.configureAnnotatedType().getAnnotated().getAnnotations(RolesAllowed.class));
+      securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+      event.configureAnnotatedType().add(secured);
+    }
   }
 
   void processRunAs(ProcessAnnotatedType<?> event) {
-    event.configureAnnotatedType().filterMethods(m -> m.getAnnotation(RunAs.class) != null)
-        .forEach(m -> m.add(new SecuredLiteral(SecuredType.ROLE.name(),
-            m.getAnnotated().getAnnotation(RunAs.class).value(), Strings.EMPTY_ARRAY)));
+    if (event.configureAnnotatedType().getAnnotated().getAnnotation(RunAs.class) != null) {
+      Secured secured = SecuredLiteral
+          .of(event.configureAnnotatedType().getAnnotated().getAnnotation(RunAs.class));
+      securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+      event.configureAnnotatedType().add(secured);
+    }
   }
 }

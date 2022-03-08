@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.lang.ref.Cleaner;
 import java.util.Map;
 import java.util.UUID;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.normal.Names;
 import org.corant.shared.resource.ThresholdingOutputStream.SimpleDeferredFileOutputStream;
@@ -134,8 +135,8 @@ public class TemporaryResource implements WritableResource {
     String tempFileName = filename.concat("_").concat(UUID.randomUUID().toString());
     File tempFile = new File(tempDir, tempFileName);
     Cleaner.create().register(this, () -> {
-      if (tempFile.exists()) {
-        tempFile.delete();
+      if (tempFile.exists() && !tempFile.delete()) {
+        throw new CorantRuntimeException("Can't delete temp file %s!", tempFile.getPath());
       }
     });
     return tempFile;

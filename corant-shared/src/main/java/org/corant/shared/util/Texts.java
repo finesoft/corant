@@ -151,7 +151,7 @@ public class Texts {
    * @return asInputStream
    */
   public static InputStream asInputStream(final String data) {
-    return new ByteArrayInputStream(shouldNotNull(data).getBytes());
+    return asInputStream(data, StandardCharsets.UTF_8);
   }
 
   /**

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import static org.corant.shared.util.Strings.split;
+import java.util.Locale;
 import java.util.Set;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.util.Strings;
@@ -44,7 +45,7 @@ public class Desensitizer {
   public static String desensitize(String propertyName, String propertyValue) {
     if (enable && isNoneBlank(propertyName, propertyValue)) {
       for (String s : sensitives) {
-        if (propertyName.toLowerCase().contains(s)) {
+        if (propertyName.toLowerCase(Locale.ROOT).contains(s)) {
           if (propertyValue.length() > 128) {
             return Strings.ASTERISK.repeat(32).concat("......");
           }

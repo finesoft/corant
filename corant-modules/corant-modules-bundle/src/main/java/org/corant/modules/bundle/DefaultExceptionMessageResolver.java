@@ -21,7 +21,7 @@ import java.util.Locale;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.modules.bundle.MessageResolver.MessageParameter;
-import org.corant.modules.bundle.MessageResolver.MessageSeverity;
+import org.corant.modules.bundle.MessageResolver.MessageCategory;
 import org.corant.shared.exception.ExceptionMessageResolver;
 import org.corant.shared.exception.GeneralRuntimeException;
 
@@ -61,7 +61,7 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
 
     @Override
     public Object getCodes() {
-      return MessageSeverity.ERR.genMessageCode(ex.getCode(), ex.getSubCode());
+      return MessageCategory.ERR.genMessageCode(ex.getCode(), ex.getSubCode());
     }
 
     @Override
@@ -75,8 +75,8 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
     }
 
     @Override
-    public MessageSeverity getMessageSeverity() {
-      return MessageSeverity.ERR;
+    public MessageCategory getMessageCategory() {
+      return MessageCategory.ERR;
     }
 
     @Override

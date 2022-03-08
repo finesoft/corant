@@ -30,7 +30,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.SecurityContextManager;
 import org.corant.modules.security.shared.DefaultSecurityContext;
-import org.corant.modules.security.shared.IdentifierPrincipal;
+import org.corant.modules.security.shared.PrincipalReference;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -58,7 +58,7 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
       }
       SecurityContexts
           .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
-              new IdentifierPrincipal(principal.getSubject(), principal.getName(), map)));
+              new PrincipalReference(principal.getSubject(), principal.getName(), map)));
     } else {
       logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);

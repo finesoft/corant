@@ -35,6 +35,7 @@ import javax.ws.rs.core.FeatureContext;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
+import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Strings;
 import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
@@ -83,15 +84,15 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
         registration = denyAllFilter;
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
         registration = new MpJWTRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
+      } else if (mpJwtAnnotation instanceof PermitAll) {
+        registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       } else if (mpJwtAnnotation instanceof Secured) {
-        SecuredMetadata secured = SecuredMetadata.of((Secured) mpJwtAnnotation);
+        SecuredMetadata secured = SecurityExtension.getSecuredMetadata((Secured) mpJwtAnnotation);
         if (SecuredType.valueOf(secured.type()) == SecuredType.PERMIT) {
           registration = new MpJWTPermitsAllowedFilter(secured.allowed().toArray(String[]::new));
         } else {
           registration = new MpJWTRolesAllowedFilter(secured.allowed().toArray(String[]::new));
         }
-      } else if (mpJwtAnnotation instanceof PermitAll) {
-        registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       }
     } else if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {
       registration = denyAllFilter;

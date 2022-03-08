@@ -30,8 +30,7 @@ public interface Authenticator extends Sortable {
   AuthenticationData authenticate(Token token) throws AuthenticationException;
 
   default boolean authenticated(Object object) {
-    return object instanceof SecurityContext && object != null
-        && ((SecurityContext) object).getPrincipal() != null;
+    return object instanceof SecurityContext && ((SecurityContext) object).getPrincipal() != null;
   }
 
   default void checkAuthenticated(Object object) throws AuthenticationException {

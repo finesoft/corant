@@ -13,10 +13,8 @@
  */
 package org.corant.modules.security.shared.util;
 
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Strings.strip;
+import static org.corant.shared.util.Objects.areEqual;
 import java.util.function.Predicate;
-import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings.WildcardMatcher;
 
 /**
@@ -25,16 +23,21 @@ import org.corant.shared.util.Strings.WildcardMatcher;
  * @author bingo 上午10:57:31
  *
  */
-public class StringPredicates {
+public class ImpliedPredications {
 
-  public static Predicate<String> predicateOf(String t) {
-    String use = strip(t);
-    if (isEmpty(use)) {
+  public static Predicate<Object> predicateOf(Object t) {
+    if (t == null) {
       return s -> true;
-    } else if (WildcardMatcher.hasWildcard(use)) {
-      return WildcardMatcher.of(false, use);
-    } else {
-      return s -> Objects.areEqual(s, use);
+    } else if (t instanceof String) {
+      String sut = ((String) t).strip();
+      if (WildcardMatcher.hasWildcard(sut)) {
+        return s -> {
+          final WildcardMatcher wm = WildcardMatcher.of(true, sut);
+          return wm.test(sut);
+        };
+      }
     }
+    return s -> areEqual(s, t);
   }
+
 }

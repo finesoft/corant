@@ -24,9 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.corant.config.Configs;
 
@@ -36,13 +34,15 @@ public class SecuredMetadata implements Serializable {
 
   public static final SecuredMetadata EMPTY_INST = new SecuredMetadata();
 
-  protected static final Map<Secured, SecuredMetadata> caches = new ConcurrentHashMap<>();
-
   Collection<String> allowed = Collections.emptyList();
 
   String type = SecuredType.ROLE.name();
 
   String runAs = EMPTY;
+
+  public SecuredMetadata(Secured secured) {
+    this(secured.type(), secured.runAs(), secured.allowed());
+  }
 
   public SecuredMetadata(String type, String runAs, String[] allowed) {
     this.type = defaultBlank(assemblyStringConfigProperty(type), SecuredType.ROLE.name());
@@ -53,12 +53,6 @@ public class SecuredMetadata implements Serializable {
   }
 
   protected SecuredMetadata() {}
-
-  public static SecuredMetadata of(Secured secured) {
-    return secured == null ? EMPTY_INST
-        : caches.computeIfAbsent(secured,
-            k -> new SecuredMetadata(k.type(), k.runAs(), k.allowed()));
-  }
 
   public Collection<String> allowed() {
     return allowed;

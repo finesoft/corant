@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.max;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -88,7 +89,8 @@ public abstract class AbstractHashProvider implements HashProvider {
     info.iterations = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
     info.saltSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4)) << 3;
     int digestSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.algorithm = new String(Arrays.copyOfRange(bytes, next, next += algoSize));
+    info.algorithm =
+        new String(Arrays.copyOfRange(bytes, next, next += algoSize), StandardCharsets.UTF_8);
     info.salt = Arrays.copyOfRange(bytes, next, next += info.saltSize >>> 3);
     info.digested = Arrays.copyOfRange(bytes, next, next + digestSize);
     return info;
@@ -149,7 +151,7 @@ public abstract class AbstractHashProvider implements HashProvider {
    */
   protected static String toMergedB64(String algorithm, int iterations, byte[] salt,
       byte[] digested) {
-    byte[] algoNameBytes = algorithm.getBytes();
+    byte[] algoNameBytes = algorithm.getBytes(StandardCharsets.UTF_8);
     byte[] bytes = new byte[(4 << 2) + algoNameBytes.length + salt.length + digested.length];
     // header length info
     int next = 0;

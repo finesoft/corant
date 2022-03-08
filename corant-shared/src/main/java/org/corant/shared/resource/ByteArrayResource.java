@@ -54,8 +54,7 @@ public class ByteArrayResource implements Resource {
     }
   }
 
-  @Override
-  public ByteArrayResource clone() throws CloneNotSupportedException {
+  public ByteArrayResource copy() {
     return new ByteArrayResource(Arrays.copyOf(byteArray, byteArray.length), location);
   }
 

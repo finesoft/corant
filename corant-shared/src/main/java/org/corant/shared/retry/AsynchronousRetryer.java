@@ -15,10 +15,7 @@ package org.corant.shared.retry;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Functions.asCallable;
-import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -91,7 +88,6 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
     final RetryStrategy retryStrategy;
     final BackoffStrategy backoffStrategy;
     final RetryPrecondition retryPrecondition;
-    final Collection<? extends RetryListener> retryListeners;
     final RecoveryCallback recoverCallback;
 
     public AsynchronousRetryTask(SimpleFuture<T> future, Callable<T> callable,
@@ -103,7 +99,6 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
       this.retryStrategy = retryer.getRetryStrategy();
       this.backoffStrategy = retryer.getBackoffStrategy();
       this.retryPrecondition = retryer.getRetryPrecondition();
-      this.retryListeners = defaultObject(retryer.getRetryListeners(), Collections.emptyList());
       this.recoverCallback = retryer.getRecoveryCallback();
     }
 

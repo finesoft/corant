@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import org.corant.modules.security.Role;
-import org.corant.modules.security.shared.util.StringPredicates;
+import org.corant.modules.security.shared.util.ImpliedPredications;
 
 /**
  * corant-modules-security-shared
@@ -36,7 +36,7 @@ public class SimpleRole implements Role, AttributeSet {
 
   protected String name;
 
-  protected transient Predicate<String> predicate;
+  protected transient Predicate<Object> predicate;
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
@@ -46,7 +46,7 @@ public class SimpleRole implements Role, AttributeSet {
 
   public SimpleRole(String name, Map<String, ? extends Serializable> attributes) {
     this.name = name;
-    predicate = StringPredicates.predicateOf(name);
+    predicate = ImpliedPredications.predicateOf(name);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
@@ -93,7 +93,7 @@ public class SimpleRole implements Role, AttributeSet {
     if (!(role instanceof SimpleRole)) {
       return false;
     }
-    return predicate.test(((SimpleRole) role).name);
+    return predicate.test(role.getName());
   }
 
   @Override
@@ -111,7 +111,7 @@ public class SimpleRole implements Role, AttributeSet {
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-    predicate = StringPredicates.predicateOf(name);
+    predicate = ImpliedPredications.predicateOf(name);
   }
 
   private void writeObject(ObjectOutputStream stream) throws IOException {

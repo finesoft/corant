@@ -20,101 +20,85 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
-import org.corant.modules.security.Permission;
+import org.corant.modules.security.Role;
 import org.corant.modules.security.shared.util.ImpliedPredications;
 
 /**
  * corant-modules-security-shared
  *
- * @author bingo 下午4:33:46
+ * @author bingo 上午10:41:08
  *
  */
-public class SimplePermission implements Permission, AttributeSet {
+public class RoleReference extends SimpleRole {
 
-  private static final long serialVersionUID = 3701989330265355350L;
+  private static final long serialVersionUID = 4147350908179493589L;
 
-  protected String name;
+  protected Serializable id;
 
-  protected transient Predicate<Object> predicate;
-
-  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
-
-  public SimplePermission(String name) {
-    this(name, null);
+  public RoleReference(Serializable id, String name) {
+    this(id, name, null);
   }
 
-  public SimplePermission(String name, Map<String, ? extends Serializable> attributes) {
+  public RoleReference(Serializable id, String name,
+      Map<String, ? extends Serializable> properties) {
+    this.id = id;
     this.name = name;
-    predicate = ImpliedPredications.predicateOf(name);
+    predicate = ImpliedPredications.predicateOf(id);
     if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
+      attributes = Collections.unmodifiableMap(attributes);
     }
   }
 
-  protected SimplePermission() {}
-
-  public static SimplePermission of(String name) {
-    return new SimplePermission(name);
-  }
+  protected RoleReference() {}
 
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
+    if (!super.equals(obj)) {
       return false;
     }
     if (getClass() != obj.getClass()) {
       return false;
     }
-    SimplePermission other = (SimplePermission) obj;
-    return Objects.equals(attributes, other.attributes) && Objects.equals(name, other.name);
+    RoleReference other = (RoleReference) obj;
+    return Objects.equals(id, other.id);
   }
 
-  @Override
-  public Map<String, ? extends Serializable> getAttributes() {
-    return attributes;
-  }
-
-  public String getName() {
-    return name;
+  public Serializable getId() {
+    return id;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(attributes, name);
+    final int prime = 31;
+    int result = super.hashCode();
+    return prime * result + Objects.hash(id);
   }
 
   @Override
-  public boolean implies(Permission permission) {
-    if (!(permission instanceof SimplePermission)) {
+  public boolean implies(Role role) {
+    if (!(role instanceof RoleReference)) {
       return false;
     }
-    return predicate.test(((SimplePermission) permission).name);
-  }
-
-  @Override
-  public String toString() {
-    return "SimplePermission [name=" + name + "]";
+    return predicate.test(((RoleReference) role).id);
   }
 
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (SimplePermission.class.isAssignableFrom(cls)) {
+    if (RoleReference.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
-    return Permission.super.unwrap(cls);
+    return super.unwrap(cls);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-    predicate = ImpliedPredications.predicateOf(name);
+    predicate = ImpliedPredications.predicateOf(id);
   }
 
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
   }
-
 }

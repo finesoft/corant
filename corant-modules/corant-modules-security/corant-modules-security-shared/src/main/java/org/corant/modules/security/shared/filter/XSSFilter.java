@@ -40,7 +40,7 @@ public class XSSFilter implements Function<String, String> {
   @Any
   protected Instance<XSSFilterHandler> handlers;
 
-  protected Function<String, String> chainHandler;
+  protected volatile Function<String, String> chainHandler;
 
   @Override
   public String apply(String content) {

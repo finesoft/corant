@@ -17,6 +17,7 @@ import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Lists.appendIfAbsent;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import java.lang.annotation.Documented;
@@ -24,9 +25,14 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.Set;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.RunAs;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-security-api
@@ -66,9 +72,25 @@ public @interface Secured {
       this.allowed = allowed == null ? EMPTY_ARRAY : Arrays.copyOf(allowed, allowed.length);
     }
 
+    public static Secured of(PermitAll permitAll) {
+      return new SecuredLiteral(SecuredType.ROLE.name(), EMPTY, EMPTY_ARRAY);
+    }
+
+    public static Secured of(RunAs runas) {
+      return new SecuredLiteral(SecuredType.ROLE.name(), runas.value(), Strings.EMPTY_ARRAY);
+    }
+
     public static Secured of(Secured secured) {
       return secured == null ? null
           : new SecuredLiteral(secured.type(), secured.runAs(), secured.allowed());
+    }
+
+    public static Secured of(Set<RolesAllowed> rolesAlloweds) {
+      String[] roles = Strings.EMPTY_ARRAY;
+      for (RolesAllowed r : rolesAlloweds) {
+        roles = appendIfAbsent(roles, r.value());
+      }
+      return new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, roles);
     }
 
     @Override

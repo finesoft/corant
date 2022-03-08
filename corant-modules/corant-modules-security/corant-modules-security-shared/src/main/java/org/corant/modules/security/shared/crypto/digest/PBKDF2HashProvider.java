@@ -59,6 +59,8 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
     this.derivedKeyBitSize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeyBitSize);
     shouldBeTrue(this.derivedKeyBitSize % Byte.SIZE == 0,
         "The derived key bits size error must be divisible by 8.");
+    // FIXME Calling an overridable method during in a constructor may result in the use of
+    // uninitialized data
     shouldNotNull(getSecretKeyFactory(algorithm, getProvider()));// for checking
   }
 

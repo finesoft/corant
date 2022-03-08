@@ -188,12 +188,11 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     Set<Mapping> mappings = new LinkedHashSet<>();
     projectionMap.forEach((k, v) -> {
       if (k != null && v != null) {
-        String key = k.toString();
-        String[] keyPath = split(key, Names.NAME_SPACE_SEPARATORS, true, true);
+        String[] keyPath = split(k, Names.NAME_SPACE_SEPARATORS, true, true);
         if (keyPath.length > 0) {
           if (v instanceof Map) {
             Map<?, ?> vm = (Map<?, ?>) v;
-            String name = getMapString(vm, PROJECTION_RENAME_KEY, key);
+            String name = getMapString(vm, PROJECTION_RENAME_KEY, k);
             String[] rename = split(name, Names.NAME_SPACE_SEPARATORS, true, true);
             String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
             Class<?> type = typeName != null ? asClass(typeName) : null;

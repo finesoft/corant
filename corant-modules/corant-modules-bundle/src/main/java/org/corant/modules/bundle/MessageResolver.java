@@ -27,7 +27,7 @@ import org.corant.shared.normal.Names;
  */
 public interface MessageResolver {
 
-  static String genMessageCode(MessageSeverity severity, Object... codes) {
+  static String genMessageCode(MessageCategory severity, Object... codes) {
     StringBuilder sb = new StringBuilder(severity.name());
     for (Object code : codes) {
       String cs;
@@ -44,10 +44,19 @@ public interface MessageResolver {
 
   String getMessage(Locale locale, Object codes, Object[] params, Function<Locale, String> dfltMsg);
 
+  enum MessageCategory {
+    INF, ERR, DES;
+
+    public String genMessageCode(Object... codes) {
+      return MessageResolver.genMessageCode(this, codes);
+    }
+  }
+
   interface MessageParameter {
 
     String UNKNOW_INF_CODE = "INF.message.unknow";
     String UNKNOW_ERR_CODE = "ERR.message.unknow";
+    String UNKNOW_DES_CODE = "DES.message.unknow";
 
     Object getCodes();
 
@@ -55,18 +64,10 @@ public interface MessageResolver {
       return String.format("Can't find any message for %s.", getCodes());
     }
 
-    MessageSeverity getMessageSeverity();
+    MessageCategory getMessageCategory();
 
     default Object[] getParameters() {
       return EMPTY_ARRAY;
-    }
-  }
-
-  enum MessageSeverity {
-    INF, ERR;
-
-    public String genMessageCode(Object... codes) {
-      return MessageResolver.genMessageCode(this, codes);
     }
   }
 

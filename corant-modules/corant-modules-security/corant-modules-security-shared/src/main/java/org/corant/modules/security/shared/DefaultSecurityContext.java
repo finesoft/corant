@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared;
 
-import java.beans.Transient;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;

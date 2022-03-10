@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
  */
 public interface Subject extends Serializable {
 
-  Serializable getId();
-
   Principal getPrincipal(String name);
 
   default <T> T getPrincipal(String name, Class<T> c) {
@@ -38,6 +36,14 @@ public interface Subject extends Serializable {
 
   default <T> Collection<T> getPrincipals(Class<T> c) {
     return getPrincipals().stream().map(p -> p.unwrap(c)).collect(Collectors.toList());
+  }
+
+  default boolean hasRole(Role role) {
+    return false;
+  }
+
+  default boolean isPermitted(Permission permission) {
+    return false;
   }
 
   default <T> T unwrap(Class<T> cls) {

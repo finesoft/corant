@@ -20,9 +20,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import org.corant.modules.security.Role;
-import org.corant.modules.security.shared.util.ImpliedPredications;
 
 /**
  * corant-modules-security-shared
@@ -30,13 +28,11 @@ import org.corant.modules.security.shared.util.ImpliedPredications;
  * @author bingo 下午4:33:46
  *
  */
-public class SimpleRole implements Role, AttributeSet {
+public class SimpleRole extends Implication implements Role, AttributeSet {
 
   private static final long serialVersionUID = 1585708942349545935L;
 
   protected String name;
-
-  protected transient Predicate<Object> predicate;
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
@@ -45,8 +41,8 @@ public class SimpleRole implements Role, AttributeSet {
   }
 
   public SimpleRole(String name, Map<String, ? extends Serializable> attributes) {
+    super(name);
     this.name = name;
-    predicate = ImpliedPredications.predicateOf(name);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
@@ -111,7 +107,7 @@ public class SimpleRole implements Role, AttributeSet {
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-    predicate = ImpliedPredications.predicateOf(name);
+    predicate = predicateOf(name);
   }
 
   private void writeObject(ObjectOutputStream stream) throws IOException {

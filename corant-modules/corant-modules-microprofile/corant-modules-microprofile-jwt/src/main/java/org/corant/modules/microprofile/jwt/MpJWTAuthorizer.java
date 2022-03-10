@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.Authorizer;
+import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.shared.SimplePermission;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimplePrincipal;
@@ -34,8 +35,8 @@ import org.corant.modules.security.shared.SimpleRoles;
  */
 public class MpJWTAuthorizer implements Authorizer {
 
-  public static final SimpleRole ALL_ROLES = new SimpleRole("*");
-  public static final SimplePermission ALL_PERMS = new SimplePermission("*");
+  public static final SimpleRole ALL_ROLES = new SimpleRole(Secured.ALLOWED_ALL_SIGN);
+  public static final SimplePermission ALL_PERMS = new SimplePermission(Secured.ALLOWED_ALL_SIGN);
   public static final MpJWTAuthorizer DFLT_INST = new MpJWTAuthorizer();
 
   @Override

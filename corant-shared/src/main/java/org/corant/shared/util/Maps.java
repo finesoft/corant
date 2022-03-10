@@ -274,6 +274,14 @@ public class Maps {
   }
 
   /**
+   * {@link #getMapCollection(Map, Object, IntFunction, Class, Map)}
+   */
+  public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
+      final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz) {
+    return getMapCollection(map, key, collectionFactory, elementClazz, null);
+  }
+
+  /**
    * Return and convert the collection value mapped to the given key in the given Map or
    * {@code null} if the given map is {@code null} or the map contains no mapping for the key or the
    * mapped value is {@code null}.

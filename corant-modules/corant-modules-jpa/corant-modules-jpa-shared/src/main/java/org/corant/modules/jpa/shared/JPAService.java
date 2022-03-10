@@ -70,6 +70,10 @@ public class JPAService implements PersistenceService {
   @Any
   protected TsEntityManagerManager tsEmManager;
 
+  @Inject
+  @Any
+  protected Instance<EntityManagerConfigurator> emConfigurator;
+
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
     if (pc.type() == PersistenceContextType.TRANSACTION) {
@@ -97,11 +101,8 @@ public class JPAService implements PersistenceService {
   protected ExtendedEntityManager createJTAManagedEntityManager(PersistenceContext pc) {
     shouldBeTrue(TransactionService.isCurrentTransactionActive(),
         "Unable to obtain the transaction scope entity manager, the transaction isn't active!");// FIXME
-    final ExtendedEntityManager em = tsEmManager.computeIfAbsent(pc,
-        p -> new ExtendedEntityManager(
-            getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
-                p.synchronization(), PersistenceContextLiteral.extractProperties(pc.properties())),
-            true));
+    final ExtendedEntityManager em =
+        tsEmManager.computeIfAbsent(pc, p -> newEntityManager(p, true));
     logger.fine(() -> String.format(
         "Get transactional scope entity manager [%s] for persistence unit [%s].", em,
         pc.unitName()));
@@ -116,11 +117,8 @@ public class JPAService implements PersistenceService {
           .ifPresent(p -> shouldBeTrue(areEqual(p.synchronization(), pc.synchronization()),
               "Get entity manager error, the synchronization of persistence context must be equal with the already exist one that has same unit name."));
     }
-    final ExtendedEntityManager em = rsEmManager.computeIfAbsent(pc,
-        p -> new ExtendedEntityManager(
-            getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
-                p.synchronization(), PersistenceContextLiteral.extractProperties(pc.properties())),
-            false));
+    final ExtendedEntityManager em =
+        rsEmManager.computeIfAbsent(pc, p -> newEntityManager(p, false));
     if (pc.synchronization() == SynchronizationType.SYNCHRONIZED
         && TransactionService.isCurrentTransactionActive() && !em.isJoinedToTransaction()) {
       shouldBeNull(tsEmManager.get(pc), "");// TODO FIXME
@@ -129,6 +127,16 @@ public class JPAService implements PersistenceService {
     logger.fine(() -> String.format(
         "Get request scope entity manager [%s] for persistence unit [%s].", em, pc.unitName()));
     return em;
+  }
+
+  protected ExtendedEntityManager newEntityManager(PersistenceContext p, boolean transaction) {
+    final EntityManager delegate =
+        getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
+            p.synchronization(), PersistenceContextLiteral.extractProperties(p.properties()));
+    if (!emConfigurator.isUnsatisfied()) {
+      emConfigurator.stream().forEach(c -> c.accept(delegate));
+    }
+    return new ExtendedEntityManager(delegate, transaction);
   }
 
   @PreDestroy

@@ -47,11 +47,12 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
     }
   }
 
-  public SimpleAuthzData(List<SimpleRole> roles) {
+  public SimpleAuthzData(List<? extends Role> roles) {
     this(roles, null);
   }
 
-  public SimpleAuthzData(List<SimpleRole> roles, Map<String, ? extends Serializable> attributes) {
+  public SimpleAuthzData(List<? extends Role> roles,
+      Map<String, ? extends Serializable> attributes) {
     this.roles = Collections.unmodifiableList(newArrayList(roles));
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);

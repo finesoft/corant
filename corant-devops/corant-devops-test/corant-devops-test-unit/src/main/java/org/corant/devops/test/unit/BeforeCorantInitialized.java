@@ -11,10 +11,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.devops.test.unit;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**
- * corant-modules-security-shared
+ * corant-devops-test-unit
  *
- * @author bingo 上午10:57:10
+ * @author bingo 下午4:27:13
  *
  */
-package org.corant.modules.security.shared.util;
+@Target(METHOD)
+@Retention(RUNTIME)
+public @interface BeforeCorantInitialized {
+  int order() default 0;
+}

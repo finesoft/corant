@@ -17,15 +17,25 @@ import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PA
 import static org.corant.shared.normal.Names.ConfigNames.CFG_PROFILE_KEY;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Supplier;
 import org.corant.Corant;
 import org.corant.context.Beans;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Tuple;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Classes;
+import org.corant.shared.util.Methods;
 import org.corant.shared.util.Strings;
 import org.junit.runners.model.Statement;
 
@@ -53,6 +63,7 @@ public interface CorantJunit4Runner {
       public void evaluate() throws Throwable {
         try {
           if (CORANTS.get() == null) {
+            handleBeforeCorantInitialized(testClass);
             configTestClass(testClass, suiteClasses);
             CORANTS.set(new Corant(BEAN_CLASSES.get(), testClass.getClassLoader(), ARGS.get()));
             CORANTS.get().start(null);
@@ -133,6 +144,47 @@ public interface CorantJunit4Runner {
     }
     return TEST_OBJECTS.get().computeIfAbsent(clazz, Beans::resolve);
     /* cls -> new UnmanageableInstance<>(cls).produce().inject().postConstruct() ).get(); */
+  }
+
+  default void handleBeforeCorantInitialized(final Class<?> testClass) {
+    Stack<Class<?>> testClasses = new Stack<>();
+    testClasses.push(testClass);
+    Classes.traverseAllSuperClasses(testClass, cls -> {
+      if (cls.equals(Object.class)) {
+        return false;
+      }
+      testClasses.push(cls);
+      return true;
+    });
+    while (!testClasses.isEmpty()) {
+      Class<?> tc = testClasses.pop();
+      List<Pair<Method, BeforeCorantInitialized>> ms = new ArrayList<>();
+      Methods.traverseLocalMethods(tc, m -> {
+        if (m.isAnnotationPresent(BeforeCorantInitialized.class)) {
+          if (m.getParameters().length > 0 || !Modifier.isStatic(m.getModifiers())) {
+            throw new CorantRuntimeException(
+                "The method [%s] which annotated with BeforeCorantInitialized can't have parameters and must be a static method.",
+                m.getName());
+          }
+          ms.add(Tuple.pairOf(m, m.getAnnotation(BeforeCorantInitialized.class)));
+        }
+        return true;
+      });
+      if (isNotEmpty(ms)) {
+        ms.sort((m1, m2) -> {
+          int r = Integer.compare(m1.right().order(), m2.right().order());
+          return r != 0 ? r : m1.left().getName().compareTo(m2.left().getName());
+        });
+        for (Pair<Method, BeforeCorantInitialized> m : ms) {
+          try {
+            m.left().invoke(tc);
+          } catch (IllegalAccessException | IllegalArgumentException
+              | InvocationTargetException e) {
+            throw new CorantRuntimeException(e);
+          }
+        }
+      }
+    }
   }
 
   default boolean isEmbedded() {

@@ -14,11 +14,8 @@
 package org.corant.modules.security.shared;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import org.corant.modules.security.Permission;
-import org.corant.modules.security.shared.util.ImpliedPredications;
 
 /**
  * corant-modules-security-shared
@@ -26,27 +23,24 @@ import org.corant.modules.security.shared.util.ImpliedPredications;
  * @author bingo 上午10:41:08
  *
  */
-public class PermissionReference extends SimplePermission {
+public class IdentifiablePrincipal extends SimplePrincipal {
 
-  private static final long serialVersionUID = 4147350908179493589L;
+  private static final long serialVersionUID = -6975094126652298173L;
 
   protected Serializable id;
 
-  public PermissionReference(Serializable id, String name) {
-    this(id, name, null);
-  }
-
-  public PermissionReference(Serializable id, String name,
-      Map<String, ? extends Serializable> attributes) {
+  public IdentifiablePrincipal(Serializable id, String name) {
+    super(name);
     this.id = id;
-    this.name = name;
-    predicate = ImpliedPredications.predicateOf(id);
-    if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
-    }
   }
 
-  protected PermissionReference() {}
+  public IdentifiablePrincipal(Serializable id, String name,
+      Map<String, ? extends Serializable> attributes) {
+    super(name, attributes);
+    this.id = id;
+  }
+
+  protected IdentifiablePrincipal() {}
 
   @Override
   public boolean equals(Object obj) {
@@ -59,7 +53,7 @@ public class PermissionReference extends SimplePermission {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    PermissionReference other = (PermissionReference) obj;
+    IdentifiablePrincipal other = (IdentifiablePrincipal) obj;
     return Objects.equals(id, other.id);
   }
 
@@ -75,16 +69,13 @@ public class PermissionReference extends SimplePermission {
   }
 
   @Override
-  public boolean implies(Permission permission) {
-    if (!(permission instanceof PermissionReference)) {
-      return false;
-    }
-    return predicate.test(((PermissionReference) permission).id);
+  public String toString() {
+    return "IdentifiablePrincipal [id=" + id + "]";
   }
 
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (PermissionReference.class.isAssignableFrom(cls)) {
+    if (IdentifiablePrincipal.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return super.unwrap(cls);

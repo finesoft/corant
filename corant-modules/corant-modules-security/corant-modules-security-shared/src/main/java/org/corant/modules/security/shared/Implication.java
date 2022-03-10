@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.util;
+package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Objects.areEqual;
 import java.util.function.Predicate;
@@ -20,10 +20,20 @@ import org.corant.shared.util.Strings.WildcardMatcher;
 /**
  * corant-modules-security-shared
  *
- * @author bingo 上午10:57:31
+ * @author bingo 上午11:56:47
  *
  */
-public class ImpliedPredications {
+public abstract class Implication {
+
+  protected transient Predicate<Object> predicate;
+
+  protected Implication() {
+    predicate = t -> true;
+  }
+
+  protected Implication(Object predicatable) {
+    predicate = predicateOf(predicatable);
+  }
 
   public static Predicate<Object> predicateOf(Object t) {
     if (t == null) {
@@ -39,5 +49,4 @@ public class ImpliedPredications {
     }
     return s -> areEqual(s, t);
   }
-
 }

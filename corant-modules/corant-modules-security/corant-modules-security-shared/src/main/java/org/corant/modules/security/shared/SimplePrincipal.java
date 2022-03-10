@@ -78,7 +78,7 @@ public class SimplePrincipal implements Principal, AttributeSet, Serializable {
 
   @Override
   public String toString() {
-    return "SimplePrincipal [name=" + name + ", attributes=" + attributes + "]";
+    return "SimplePrincipal [name=" + name + "]";
   }
 
   @Override

@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.corant.modules.security.Role;
 
 /**
  * corant-modules-security-shared
@@ -38,11 +39,11 @@ public class UserAuthzData extends SimpleAuthzData {
     this.userId = userId;
   }
 
-  public UserAuthzData(Serializable userId, List<SimpleRole> roles) {
+  public UserAuthzData(Serializable userId, List<? extends Role> roles) {
     this(userId, roles, null);
   }
 
-  public UserAuthzData(Serializable userId, List<SimpleRole> roles,
+  public UserAuthzData(Serializable userId, List<? extends Role> roles,
       Map<String, ? extends Serializable> attributes) {
     super(roles, attributes);
     this.userId = userId;

@@ -13,15 +13,11 @@
  */
 package org.corant.modules.security.shared;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import org.corant.modules.security.Role;
-import org.corant.modules.security.shared.util.ImpliedPredications;
+import org.corant.modules.security.Permission;
 
 /**
  * corant-modules-security-shared
@@ -29,27 +25,27 @@ import org.corant.modules.security.shared.util.ImpliedPredications;
  * @author bingo 上午10:41:08
  *
  */
-public class RoleReference extends SimpleRole {
+public class IdentifiablePermission extends SimplePermission {
 
   private static final long serialVersionUID = 4147350908179493589L;
 
   protected Serializable id;
 
-  public RoleReference(Serializable id, String name) {
+  public IdentifiablePermission(Serializable id, String name) {
     this(id, name, null);
   }
 
-  public RoleReference(Serializable id, String name,
+  public IdentifiablePermission(Serializable id, String name,
       Map<String, ? extends Serializable> attributes) {
     this.id = id;
     this.name = name;
-    predicate = ImpliedPredications.predicateOf(id);
+    predicate = predicateOf(id);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
   }
 
-  protected RoleReference() {}
+  protected IdentifiablePermission() {}
 
   @Override
   public boolean equals(Object obj) {
@@ -62,7 +58,7 @@ public class RoleReference extends SimpleRole {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    RoleReference other = (RoleReference) obj;
+    IdentifiablePermission other = (IdentifiablePermission) obj;
     return Objects.equals(id, other.id);
   }
 
@@ -78,27 +74,24 @@ public class RoleReference extends SimpleRole {
   }
 
   @Override
-  public boolean implies(Role role) {
-    if (!(role instanceof RoleReference)) {
+  public boolean implies(Permission permission) {
+    if (!(permission instanceof IdentifiablePermission)) {
       return false;
     }
-    return predicate.test(((RoleReference) role).id);
+    return predicate.test(((IdentifiablePermission) permission).id);
+  }
+
+  @Override
+  public String toString() {
+    return "IdentifiablePermission [id=" + id + "]";
   }
 
   @Override
   public <T> T unwrap(Class<T> cls) {
-    if (RoleReference.class.isAssignableFrom(cls)) {
+    if (IdentifiablePermission.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return super.unwrap(cls);
   }
 
-  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    stream.defaultReadObject();
-    predicate = ImpliedPredications.predicateOf(id);
-  }
-
-  private void writeObject(ObjectOutputStream stream) throws IOException {
-    stream.defaultWriteObject();
-  }
 }

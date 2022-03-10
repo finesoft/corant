@@ -13,8 +13,10 @@
  */
 package org.corant.modules.security.shared;
 
+import java.beans.Transient;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.Principal;
+import org.corant.modules.security.Subject;
 
 /**
  * corant-modules-security-shared
@@ -30,9 +32,18 @@ public class DefaultSecurityContext implements SecurityContext {
 
   protected final Principal principal;
 
-  public DefaultSecurityContext(String authenticationScheme, Principal principal) {
+  protected final Subject subject;
+
+  public DefaultSecurityContext(String authenticationScheme, Principal principal, Subject subject) {
     this.authenticationScheme = authenticationScheme;
     this.principal = principal;
+    this.subject = subject;
+  }
+
+  public DefaultSecurityContext(String authenticationScheme, Subject subject) {
+    this.authenticationScheme = authenticationScheme;
+    principal = subject.getPrincipals().iterator().next();
+    this.subject = subject;
   }
 
   @Override
@@ -48,6 +59,10 @@ public class DefaultSecurityContext implements SecurityContext {
   @Override
   public <T> T getPrincipal(Class<T> cls) {
     return principal == null ? null : principal.unwrap(cls);
+  }
+
+  public Subject getSubject() {
+    return subject;
   }
 
   @Override

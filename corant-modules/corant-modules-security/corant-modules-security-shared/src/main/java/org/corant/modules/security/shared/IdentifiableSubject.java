@@ -13,16 +13,14 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.newArrayList;
 import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import org.corant.modules.security.Permission;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Role;
-import org.corant.modules.security.Subject;
 
 /**
  * corant-modules-security-shared
@@ -30,43 +28,54 @@ import org.corant.modules.security.Subject;
  * @author bingo 下午4:22:33
  *
  */
-public class SimpleSubject implements Subject, AttributeSet {
+public class IdentifiableSubject extends SimpleSubject {
 
-  private static final long serialVersionUID = -2622944157923465303L;
+  private static final long serialVersionUID = 3435651508945136478L;
 
-  protected Collection<Principal> principals;
+  protected Serializable id;
 
-  protected Collection<Role> roles = Collections.emptyList();
-
-  protected Collection<Permission> permissions = Collections.emptyList();
-
-  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
-
-  public SimpleSubject(Collection<? extends Principal> principals) {
-    this.principals = Collections.unmodifiableCollection(newArrayList(principals));
+  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals) {
+    super(principals);
+    this.id = id;
   }
 
-  public SimpleSubject(Collection<? extends Principal> principals, Collection<? extends Role> roles,
-      Collection<? extends Permission> permissions,
+  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
+      Collection<? extends Role> roles, Collection<? extends Permission> permissions,
       Map<String, ? extends Serializable> attributes) {
-    this.principals = Collections.unmodifiableCollection(newArrayList(principals));
-    this.roles = Collections.unmodifiableCollection(newArrayList(roles));
-    this.permissions = Collections.unmodifiableCollection(newArrayList(permissions));
-    if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
+    super(principals, roles, permissions, attributes);
+    this.id = id;
+  }
+
+  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
+      Collection<? extends Role> roles, Map<String, ? extends Serializable> attributes) {
+    super(principals, roles, attributes);
+    this.id = id;
+  }
+
+  protected IdentifiableSubject() {}
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    IdentifiableSubject other = (IdentifiableSubject) obj;
+    return Objects.equals(id, other.id);
   }
-
-  public SimpleSubject(Collection<? extends Principal> principals, Collection<? extends Role> roles,
-      Map<String, ? extends Serializable> attributes) {
-    this(principals, roles, null, attributes);
-  }
-
-  protected SimpleSubject() {}
 
   @Override
   public Map<String, ? extends Serializable> getAttributes() {
     return attributes;
+  }
+
+  public Serializable getId() {
+    return id;
   }
 
   @Override
@@ -80,6 +89,11 @@ public class SimpleSubject implements Subject, AttributeSet {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
+
+  @Override
   public boolean hasRole(Role role) {
     return roles.stream().anyMatch(r -> r.implies(role));
   }
@@ -90,10 +104,15 @@ public class SimpleSubject implements Subject, AttributeSet {
   }
 
   @Override
+  public String toString() {
+    return "IdentifiableSubject [id=" + id + "]";
+  }
+
+  @Override
   public <T> T unwrap(Class<T> cls) {
-    if (SimpleSubject.class.isAssignableFrom(cls)) {
+    if (IdentifiableSubject.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
-    return Subject.super.unwrap(cls);
+    return super.unwrap(cls);
   }
 }

@@ -20,9 +20,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import org.corant.modules.security.Permission;
-import org.corant.modules.security.shared.util.ImpliedPredications;
 
 /**
  * corant-modules-security-shared
@@ -30,13 +28,11 @@ import org.corant.modules.security.shared.util.ImpliedPredications;
  * @author bingo 下午4:33:46
  *
  */
-public class SimplePermission implements Permission, AttributeSet {
+public class SimplePermission extends Implication implements Permission, AttributeSet {
 
   private static final long serialVersionUID = 3701989330265355350L;
 
   protected String name;
-
-  protected transient Predicate<Object> predicate;
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
@@ -45,8 +41,8 @@ public class SimplePermission implements Permission, AttributeSet {
   }
 
   public SimplePermission(String name, Map<String, ? extends Serializable> attributes) {
+    super(name);
     this.name = name;
-    predicate = ImpliedPredications.predicateOf(name);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
@@ -110,7 +106,7 @@ public class SimplePermission implements Permission, AttributeSet {
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-    predicate = ImpliedPredications.predicateOf(name);
+    predicate = predicateOf(name);
   }
 
   private void writeObject(ObjectOutputStream stream) throws IOException {

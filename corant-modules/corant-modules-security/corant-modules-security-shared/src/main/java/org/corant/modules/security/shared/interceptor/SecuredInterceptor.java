@@ -13,9 +13,6 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
-import static org.corant.shared.util.Empties.isEmpty;
-import java.util.Collection;
-import java.util.function.Function;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -24,6 +21,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
+import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.SecurityManager;
@@ -45,6 +43,8 @@ import org.corant.modules.security.shared.SimpleRoles;
 @Secured
 public class SecuredInterceptor extends AbstractInterceptor {
 
+  protected static final SecurityManager[] emptySecurityManagers = {};
+
   @Inject
   @Any
   protected Instance<SecurityManager> securityManagers;
@@ -52,58 +52,60 @@ public class SecuredInterceptor extends AbstractInterceptor {
   @AroundInvoke
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
-    check(invocationContext);
-    return invocationContext.proceed();
+    SecurityManager[] sms = emptySecurityManagers;
+    try {
+      sms = check(invocationContext);
+      return invocationContext.proceed();
+    } finally {
+      for (SecurityManager sm : sms) {
+        sm.postCheckAccess();
+      }
+    }
   }
 
-  protected void check(InvocationContext invocationContext) throws Exception {
-    SecuredMetadata secured = SecurityExtension
-        .getSecuredMetadata(getInterceptorAnnotation(invocationContext, Secured.class));
+  protected SecurityManager[] check(InvocationContext invocationContext) throws Exception {
+    Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
     if (secured != null) {
+      SecuredMetadata meta = SecurityExtension.getSecuredMetadata(secured);
       if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
           throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
         } else {
-          return;
+          return emptySecurityManagers;
         }
       }
-      if (isEmpty(secured.allowed())) {
-        checkAuthenticated();
-      } else if (SecuredType.valueOf(secured.type()) == SecuredType.ROLE) {
-        checkAccess(secured, SimpleRoles::of);
+      if (SecuredType.valueOf(meta.type()) == SecuredType.ROLE) {
+        return checkAccess(SimpleRoles.of(meta.allowed()));
       } else {
-        checkAccess(secured, SimplePermissions::of);
+        return checkAccess(SimplePermissions.of(meta.allowed()));
       }
     }
+    return emptySecurityManagers;
   }
 
-  protected void checkAccess(SecuredMetadata secured,
-      Function<Collection<String>, Object> predicate) {
+  protected SecurityManager[] checkAccess(Object rolesOrPerms) {
+    SecurityContext sctx = SecurityContexts.getCurrent();
     if (securityManagers.isResolvable()) {
-      securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
-          predicate.apply(secured.allowed()));
-    } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
-      if (securityManagers.stream().noneMatch(
-          sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
+      SecurityManager used = securityManagers.get();
+      if (!used.testAccess(sctx, rolesOrPerms)) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-    } else if (!securityManagers.stream().allMatch(
-        sm -> sm.testAccess(SecurityContexts.getCurrent(), predicate.apply(secured.allowed())))) {
-      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-    }
-  }
-
-  protected void checkAuthenticated() {
-    if (securityManagers.isResolvable()) {
-      securityManagers.get().checkAuthenticated(SecurityContexts.getCurrent());
+      return new SecurityManager[] {used};
     } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
-      if (securityManagers.stream()
-          .noneMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
+      SecurityManager used = securityManagers.stream().filter(sm -> sm.testAccess(sm, rolesOrPerms))
+          .findFirst().orElse(null);
+      if (used == null) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-    } else if (!securityManagers.stream()
-        .allMatch(sm -> sm.authenticated(SecurityContexts.getCurrent()))) {
-      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      return new SecurityManager[] {used};
+    } else {
+      SecurityManager[] used = securityManagers.stream().toArray(SecurityManager[]::new);
+      for (SecurityManager sm : used) {
+        if (!sm.testAccess(sctx, rolesOrPerms)) {
+          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+        }
+      }
+      return used;
     }
   }
 

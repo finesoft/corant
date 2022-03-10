@@ -14,11 +14,14 @@
 package org.corant.modules.security.annotation;
 
 import static org.corant.config.Configs.assemblyStringConfigProperty;
+import static org.corant.config.Configs.getValue;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,13 +37,16 @@ public class SecuredMetadata implements Serializable {
 
   public static final SecuredMetadata EMPTY_INST = new SecuredMetadata();
 
-  public static final String DEFAULT_SECURED_TYPE = "${corant.secutiry.secured.type:ROLE}";
+  public static final String DEFAULT_SECURED_TYPE_CFG_NAME = "corant.secutiry.secured.type";
 
-  Collection<String> allowed = Collections.emptyList();
+  public static final Collection<String> ALLOWED_ALL =
+      Collections.unmodifiableCollection(listOf(Secured.ALLOWED_ALL_SIGN));
 
-  String type = SecuredType.ROLE.name();
+  final Collection<String> allowed;
 
-  String runAs = EMPTY;
+  final String type;
+
+  final String runAs;
 
   public SecuredMetadata(Secured secured) {
     this(secured.type(), secured.runAs(), secured.allowed());
@@ -48,14 +54,17 @@ public class SecuredMetadata implements Serializable {
 
   public SecuredMetadata(String type, String runAs, String[] allowed) {
     this.type = defaultBlank(assemblyStringConfigProperty(type),
-        defaultBlank(assemblyStringConfigProperty(DEFAULT_SECURED_TYPE), SecuredType.ROLE.name()));
-    this.runAs = assemblyStringConfigProperty(defaultString(runAs));
-    this.allowed = Collections.unmodifiableList(Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
+        getValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name())).strip();
+    this.runAs = defaultTrim(assemblyStringConfigProperty(defaultString(runAs)));
+    Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
-        .collect(Collectors.toList()));
+        .collect(Collectors.toList());
+    this.allowed = isEmpty(aws) ? ALLOWED_ALL : Collections.unmodifiableCollection(aws);
   }
 
-  protected SecuredMetadata() {}
+  protected SecuredMetadata() {
+    this(null, null, null);
+  }
 
   public Collection<String> allowed() {
     return allowed;

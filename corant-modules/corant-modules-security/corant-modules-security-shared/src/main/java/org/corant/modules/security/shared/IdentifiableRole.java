@@ -13,9 +13,14 @@
  */
 package org.corant.modules.security.shared;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import org.corant.modules.security.Role;
 
 /**
  * corant-modules-security-shared
@@ -23,24 +28,27 @@ import java.util.Objects;
  * @author bingo 上午10:41:08
  *
  */
-public class PrincipalReference extends SimplePrincipal {
+public class IdentifiableRole extends SimpleRole {
 
-  private static final long serialVersionUID = -6975094126652298173L;
+  private static final long serialVersionUID = 3771872966822697648L;
 
   protected Serializable id;
 
-  public PrincipalReference(Serializable id, String name) {
-    super(name);
-    this.id = id;
+  public IdentifiableRole(Serializable id, String name) {
+    this(id, name, null);
   }
 
-  public PrincipalReference(Serializable id, String name,
+  public IdentifiableRole(Serializable id, String name,
       Map<String, ? extends Serializable> attributes) {
-    super(name, attributes);
     this.id = id;
+    this.name = name;
+    predicate = predicateOf(id);
+    if (attributes != null) {
+      this.attributes = Collections.unmodifiableMap(attributes);
+    }
   }
 
-  protected PrincipalReference() {}
+  protected IdentifiableRole() {}
 
   @Override
   public boolean equals(Object obj) {
@@ -53,7 +61,7 @@ public class PrincipalReference extends SimplePrincipal {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    PrincipalReference other = (PrincipalReference) obj;
+    IdentifiableRole other = (IdentifiableRole) obj;
     return Objects.equals(id, other.id);
   }
 
@@ -69,11 +77,32 @@ public class PrincipalReference extends SimplePrincipal {
   }
 
   @Override
+  public boolean implies(Role role) {
+    if (!(role instanceof IdentifiableRole)) {
+      return false;
+    }
+    return predicate.test(((IdentifiableRole) role).id);
+  }
+
+  @Override
+  public String toString() {
+    return "IdentifiableRole [id=" + id + "]";
+  }
+
+  @Override
   public <T> T unwrap(Class<T> cls) {
-    if (PrincipalReference.class.isAssignableFrom(cls)) {
+    if (IdentifiableRole.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return super.unwrap(cls);
   }
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    predicate = predicateOf(id);
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

@@ -14,9 +14,12 @@
 package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
+import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.getMapCollection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
@@ -28,9 +31,14 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.ws.rs.core.SecurityContext;
 import org.corant.context.security.SecurityContexts;
+import org.corant.modules.security.Principal;
 import org.corant.modules.security.SecurityContextManager;
+import org.corant.modules.security.Subject;
 import org.corant.modules.security.shared.DefaultSecurityContext;
-import org.corant.modules.security.shared.PrincipalReference;
+import org.corant.modules.security.shared.IdentifiablePrincipal;
+import org.corant.modules.security.shared.IdentifiableSubject;
+import org.corant.modules.security.shared.SimplePermission;
+import org.corant.modules.security.shared.SimpleRole;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -47,18 +55,25 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
   public void bind(SecurityContext securityContext) {
     if (securityContext != null && securityContext.getUserPrincipal() != null) {
       logger.fine(() -> "Bind current microprofile-JWT principal to SecurityContexts.");
-      JsonWebToken principal =
+      JsonWebToken userPrincipal =
           shouldInstanceOf(securityContext.getUserPrincipal(), JsonWebToken.class);
       Map<String, Serializable> map = new HashMap<>();
-      for (String cn : principal.getClaimNames()) {
-        Object co = principal.getClaim(cn);
+      for (String cn : userPrincipal.getClaimNames()) {
+        Object co = userPrincipal.getClaim(cn);
         if (!"raw_token".equals(cn)) {
           map.put(cn, convert(co));
         }
       }
-      SecurityContexts
-          .setCurrent(new DefaultSecurityContext(securityContext.getAuthenticationScheme(),
-              new PrincipalReference(principal.getSubject(), principal.getName(), map)));
+
+      String authName = securityContext.getAuthenticationScheme();
+      Serializable id = userPrincipal.getSubject();
+      String name = userPrincipal.getName();
+      Principal principal = new IdentifiablePrincipal(id, name, map);
+      List<SimpleRole> roles = getMapCollection(map, "groups", ArrayList::new, SimpleRole.class);
+      List<SimplePermission> permits =
+          getMapCollection(map, "permits", ArrayList::new, SimplePermission.class);
+      Subject subject = new IdentifiableSubject(id, listOf(principal), roles, permits, map);
+      SecurityContexts.setCurrent(new DefaultSecurityContext(authName, principal, subject));
     } else {
       logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);
@@ -71,12 +86,7 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
     SecurityContexts.setCurrent(null);
   }
 
-  @PreDestroy
-  void onPreDestroy() {
-    unbind();
-  }
-
-  private Serializable convert(Object claimValue) {
+  protected Serializable convert(Object claimValue) {
     if (claimValue instanceof JsonString) {
       return ((JsonString) claimValue).getString();
     } else if (claimValue instanceof JsonNumber) {
@@ -105,5 +115,10 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
     } else {
       return claimValue != null ? claimValue.toString() : null;
     }
+  }
+
+  @PreDestroy
+  protected void onPreDestroy() {
+    unbind();
   }
 }

@@ -17,6 +17,7 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.getMapCollection;
 import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -54,6 +55,7 @@ public interface AttributeSet {
     return getMapObject(getAttributes(), name, type);
   }
 
+  @Transient
   default Set<String> getAttributeNames() {
     Map<String, ? extends Serializable> atts = getAttributes();
     if (atts != null) {

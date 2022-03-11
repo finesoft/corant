@@ -15,12 +15,15 @@ package org.corant.modules.microprofile.jwt.jaxrs;
 
 import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Empties.isEmpty;
+import java.io.IOException;
 import javax.annotation.Priority;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.microprofile.jwt.MpJWTAuthorizer;
 import org.corant.modules.security.Authorizer;
@@ -33,7 +36,7 @@ import org.corant.modules.security.shared.SimpleRoles;
  *
  */
 @Priority(Priorities.AUTHORIZATION)
-public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
+public class MpJWTRolesAllowedFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
   private final SimpleRoles allowedRoles;
 
@@ -63,6 +66,12 @@ public class MpJWTRolesAllowedFilter implements ContainerRequestFilter {
         throw new ForbiddenException(e);
       }
     }
+  }
+
+  @Override
+  public void filter(ContainerRequestContext requestContext,
+      ContainerResponseContext responseContext) throws IOException {
+    authorizer.postCheckAccess();
   }
 
   protected Authorizer authorizer() {

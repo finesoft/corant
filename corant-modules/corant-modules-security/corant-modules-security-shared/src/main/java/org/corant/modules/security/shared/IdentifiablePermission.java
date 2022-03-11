@@ -13,6 +13,9 @@
  */
 package org.corant.modules.security.shared;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
@@ -94,4 +97,12 @@ public class IdentifiablePermission extends SimplePermission {
     return super.unwrap(cls);
   }
 
+  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    predicate = predicateOf(id);
+  }
+
+  private void writeObject(ObjectOutputStream stream) throws IOException {
+    stream.defaultWriteObject();
+  }
 }

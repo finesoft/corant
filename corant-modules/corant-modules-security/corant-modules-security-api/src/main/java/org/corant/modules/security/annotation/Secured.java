@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Set;
+import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.annotation.security.RunAs;
@@ -53,6 +54,9 @@ public @interface Secured {
   String[] allowed() default {};
 
   @Nonbinding
+  boolean denyAll() default false;
+
+  @Nonbinding
   String runAs() default EMPTY;
 
   @Nonbinding
@@ -68,23 +72,29 @@ public @interface Secured {
 
     String runAs;
 
-    public SecuredLiteral(String type, String runAs, String[] allowed) {
+    boolean denyAll;
+
+    public SecuredLiteral(String type, String runAs, String[] allowed, boolean denyAll) {
       this.type = type;
       this.runAs = runAs;
       this.allowed = allowed == null ? EMPTY_ARRAY : Arrays.copyOf(allowed, allowed.length);
     }
 
+    public static Secured of(DenyAll denyAll) {
+      return new SecuredLiteral(EMPTY, EMPTY, EMPTY_ARRAY, true);
+    }
+
     public static Secured of(PermitAll permitAll) {
-      return new SecuredLiteral(SecuredType.ROLE.name(), EMPTY, EMPTY_ARRAY);
+      return new SecuredLiteral(SecuredType.ROLE.name(), EMPTY, EMPTY_ARRAY, false);
     }
 
     public static Secured of(RunAs runas) {
-      return new SecuredLiteral(SecuredType.ROLE.name(), runas.value(), Strings.EMPTY_ARRAY);
+      return new SecuredLiteral(SecuredType.ROLE.name(), runas.value(), Strings.EMPTY_ARRAY, false);
     }
 
     public static Secured of(Secured secured) {
       return secured == null ? null
-          : new SecuredLiteral(secured.type(), secured.runAs(), secured.allowed());
+          : new SecuredLiteral(secured.type(), secured.runAs(), secured.allowed(), false);
     }
 
     public static Secured of(Set<RolesAllowed> rolesAlloweds) {
@@ -92,12 +102,17 @@ public @interface Secured {
       for (RolesAllowed r : rolesAlloweds) {
         roles = appendIfAbsent(roles, r.value());
       }
-      return new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, roles);
+      return new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, roles, false);
     }
 
     @Override
     public String[] allowed() {
       return allowed;
+    }
+
+    @Override
+    public boolean denyAll() {
+      return denyAll;
     }
 
     @Override

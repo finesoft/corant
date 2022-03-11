@@ -67,6 +67,9 @@ public class SecuredInterceptor extends AbstractInterceptor {
     Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
     if (secured != null) {
       SecuredMetadata meta = SecurityExtension.getSecuredMetadata(secured);
+      if (meta.denyAll()) {
+        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+      }
       if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
           throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);

@@ -21,6 +21,7 @@ import java.util.function.Function;
  * @author bingo 上午10:17:44
  *
  */
+@FunctionalInterface
 public interface CredentialUpdater {
 
   boolean update(Object input, Function<Object, Boolean> application);

@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Priority;
+import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.annotation.security.RunAs;
@@ -123,7 +124,23 @@ public class SecurityExtension implements Extension {
         processPermitAll(event);
         processRolesAllowed(event);
         processRunAs(event);
+        processDenyAll(event);
       }
+    }
+  }
+
+  void processDenyAll(ProcessAnnotatedType<?> event) {
+    event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(DenyAll.class))
+        .forEach(m -> {
+          Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotation(DenyAll.class));
+          securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+          m.add(secured);
+        });
+    if (event.configureAnnotatedType().getAnnotated().getAnnotation(DenyAll.class) != null) {
+      Secured secured = SecuredLiteral
+          .of(event.configureAnnotatedType().getAnnotated().getAnnotation(DenyAll.class));
+      securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
+      event.configureAnnotatedType().add(secured);
     }
   }
 

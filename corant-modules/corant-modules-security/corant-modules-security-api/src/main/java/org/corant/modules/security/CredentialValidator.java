@@ -19,6 +19,7 @@ package org.corant.modules.security;
  * @author bingo 上午10:17:44
  *
  */
+@FunctionalInterface
 public interface CredentialValidator {
 
   boolean validate(Object input, Object criterion);

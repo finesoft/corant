@@ -19,6 +19,7 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 import org.corant.modules.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension;
+import org.corant.modules.security.shared.SecurityExtension;
 import org.eclipse.microprofile.auth.LoginConfig;
 import org.jboss.logging.Logger;
 
@@ -40,7 +41,9 @@ public class MpJWTAuthJaxRsFeature implements Feature {
   public boolean configure(FeatureContext context) {
     boolean enabled = mpJwtEnabled();
     if (enabled) {
-      context.register(MpJWTAuthorizationFilterRegistrar.class);
+      if (mpAuthzEnabled()) {
+        context.register(MpJWTAuthorizationFilterRegistrar.class);
+      }
       context.register(MpJWTBlackListFilter.class);
       if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {
         context.register(MpJWTAuthenticationFilter.class);
@@ -55,7 +58,11 @@ public class MpJWTAuthJaxRsFeature implements Feature {
     return enabled;
   }
 
-  boolean mpJwtEnabled() {
+  protected boolean mpAuthzEnabled() {
+    return !SecurityExtension.ENABLE_INTERCEPTOR;
+  }
+
+  protected boolean mpJwtEnabled() {
     boolean enabled = false;
     if (restApplication != null) {
       Class<?> applicationClass = restApplication.getClass();

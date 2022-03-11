@@ -162,7 +162,7 @@ public class Certificates {
 
       // Serial Number
       SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-      BigInteger serialNumber = BigInteger.valueOf(Math.abs(random.nextInt()));
+      BigInteger serialNumber = BigInteger.valueOf(random.nextInt(Integer.MAX_VALUE));
 
       // Validity
       Date notBefore = new Date(System.currentTimeMillis());

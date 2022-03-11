@@ -48,11 +48,13 @@ public class SecuredMetadata implements Serializable {
 
   final String runAs;
 
+  final boolean denyAll;
+
   public SecuredMetadata(Secured secured) {
-    this(secured.type(), secured.runAs(), secured.allowed());
+    this(secured.type(), secured.runAs(), secured.allowed(), secured.denyAll());
   }
 
-  public SecuredMetadata(String type, String runAs, String[] allowed) {
+  public SecuredMetadata(String type, String runAs, String[] allowed, boolean denyAll) {
     this.type = defaultBlank(assemblyStringConfigProperty(type),
         getValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name())).strip();
     this.runAs = defaultTrim(assemblyStringConfigProperty(defaultString(runAs)));
@@ -60,14 +62,19 @@ public class SecuredMetadata implements Serializable {
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
         .collect(Collectors.toList());
     this.allowed = isEmpty(aws) ? ALLOWED_ALL : Collections.unmodifiableCollection(aws);
+    this.denyAll = denyAll;
   }
 
   protected SecuredMetadata() {
-    this(null, null, null);
+    this(null, null, null, false);
   }
 
   public Collection<String> allowed() {
     return allowed;
+  }
+
+  public boolean denyAll() {
+    return denyAll;
   }
 
   @Override
@@ -82,13 +89,13 @@ public class SecuredMetadata implements Serializable {
       return false;
     }
     SecuredMetadata other = (SecuredMetadata) obj;
-    return Objects.equals(allowed, other.allowed) && Objects.equals(runAs, other.runAs)
-        && Objects.equals(type, other.type);
+    return Objects.equals(allowed, other.allowed) && denyAll == other.denyAll
+        && Objects.equals(runAs, other.runAs) && Objects.equals(type, other.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(allowed, runAs, type);
+    return Objects.hash(allowed, denyAll, runAs, type);
   }
 
   public String runAs() {
@@ -97,12 +104,11 @@ public class SecuredMetadata implements Serializable {
 
   @Override
   public String toString() {
-    return "SecuredMetadata [allowed=[" + String.join(",", allowed) + "], type=" + type + ", runAs="
-        + runAs + "]";
+    return "SecuredMetadata [allowed=" + allowed + ", type=" + type + ", runAs=" + runAs
+        + ", denyAll=" + denyAll + "]";
   }
 
   public String type() {
     return type;
   }
-
 }

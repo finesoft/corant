@@ -50,7 +50,7 @@
     <version.ehcache>3.9.0</version.ehcache>
     <version.elasticsearch>6.5.4</version.elasticsearch>
     <version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
-    <version.feign>11.6</version.feign>
+    <version.feign>11.8</version.feign>
     <version.flatten-maven-plugin>1.2.2</version.flatten-maven-plugin>
     <version.flyway>6.0.6</version.flyway>
     <version.freemarker>2.3.31</version.freemarker>
@@ -62,10 +62,10 @@
     <version.hibernate-orm-core>5.3.25.Final</version.hibernate-orm-core>
     <version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
     <version.hikariCP>3.4.5</version.hikariCP>
-    <version.hppc>0.8.2</version.hppc>
+    <version.hppc>0.9.1</version.hppc>
     <version.hsqldb>2.6.1</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
-    <version.jackson>2.13.1</version.jackson>
+    <version.jackson>2.13.2</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javassist>3.27.0.GA</version.javassist>

@@ -38,6 +38,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -58,6 +59,10 @@ import org.corant.shared.util.Texts;
  */
 public class Keys {
 
+  private static final Pattern PEM_BEG_PTN = Pattern.compile("-----BEGIN (.*)-----");
+  private static final String PEM_BEG_FMT = "-----BEGIN %s-----%n";
+  private static final Pattern PEM_END_PTN = Pattern.compile("-----END (.*)-----");
+  private static final String PEM_END_FMT = "-----END %s-----%n";
   static SecureRandom secureRandom = new SecureRandom();
 
   static {
@@ -284,8 +289,8 @@ public class Keys {
   }
 
   public static String removePemKeyBeginEnd(String pem) {
-    String rpem = pem.replaceAll("-----BEGIN (.*)-----", "");
-    rpem = rpem.replaceAll("-----END (.*)----", "");
+    String rpem = PEM_BEG_PTN.matcher(pem).replaceAll("");
+    rpem = PEM_END_PTN.matcher(rpem).replaceAll("");
     rpem = rpem.replace("\r\n", "");
     rpem = rpem.replace("\n", "");
     return rpem.trim();
@@ -297,9 +302,9 @@ public class Keys {
       name = name.substring(0, name.length() - 3).concat(" KEY");
     }
     StringBuilder sb = new StringBuilder();
-    sb.append("-----BEGIN ").append(name).append("-----\n");
+    sb.append(String.format(PEM_BEG_FMT, name));
     sb.append(encodeBase64(key.getEncoded())).append("\n");
-    sb.append("-----END ").append(name).append("-----\n");
+    sb.append(String.format(PEM_END_FMT, name));
     return sb.toString();
   }
 }

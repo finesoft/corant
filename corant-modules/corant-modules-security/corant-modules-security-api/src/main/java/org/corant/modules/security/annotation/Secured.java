@@ -78,6 +78,7 @@ public @interface Secured {
       this.type = type;
       this.runAs = runAs;
       this.allowed = allowed == null ? EMPTY_ARRAY : Arrays.copyOf(allowed, allowed.length);
+      this.denyAll = denyAll;
     }
 
     public static Secured of(DenyAll denyAll) {

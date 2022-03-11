@@ -13,10 +13,12 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import static org.corant.context.Beans.find;
 import java.io.IOException;
 import java.security.Principal;
+import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -28,6 +30,7 @@ import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
 import org.corant.modules.microprofile.jwt.MpJWTSecurityContextManager;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.Authenticator;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.AbstractBearerTokenExtractor;
@@ -47,17 +50,23 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
 
   public static final String JTW_EXCEPTION_KEY = "___JWT-EX___";
 
-  private static Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
-  private static boolean debugLogging = logger.isDebugEnabled();
+  protected static final Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
+  protected static final boolean debugLogging = logger.isDebugEnabled();
 
   @Inject
-  private JWTAuthContextInfo authContextInfo;
+  protected JWTAuthContextInfo authContextInfo;
 
   @Inject
-  private PrincipalProducer producer;
+  protected PrincipalProducer producer;
 
   @Inject
-  private MpJWTSecurityContextManager securityManager;
+  protected MpJWTSecurityContextManager securityManager;
+
+  @Inject
+  @Any
+  protected Instance<Authenticator> authenticatorInstance;
+
+  protected Authenticator authenticator = MpJWTAuthenticator.DFLT_INST;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -70,8 +79,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
       if (bearerToken != null) {
         try {
           AuthenticationData authcData =
-              find(Authenticator.class).orElse(MpJWTAuthenticator.DFLT_INST)
-                  .authenticate(new MpJWTJsonWebToken(bearerToken));
+              authenticator.authenticate(new MpJWTJsonWebToken(bearerToken));
           JsonWebToken jwtPrincipal =
               authcData.getPrincipals().iterator().next().unwrap(JsonWebToken.class);
           producer.setJsonWebToken(jwtPrincipal);
@@ -89,6 +97,15 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           requestContext.setProperty(JTW_EXCEPTION_KEY, e);
         }
       }
+    }
+  }
+
+  @PostConstruct
+  protected void onPostConstruct() {
+    if (authenticatorInstance.isResolvable()) {
+      authenticator = authenticatorInstance.get();
+    } else if (!authenticatorInstance.isUnsatisfied()) {
+      authenticator = authenticatorInstance.stream().sorted(Sortable::compare).findFirst().get();
     }
   }
 

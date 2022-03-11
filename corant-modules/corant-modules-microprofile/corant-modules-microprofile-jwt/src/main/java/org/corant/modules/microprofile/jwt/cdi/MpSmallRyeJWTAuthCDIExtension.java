@@ -17,10 +17,10 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthJaxRsFeature;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
+import org.corant.modules.microprofile.jwt.jaxrs.MpJWTHttpAuthenticationMechanism;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;
@@ -30,7 +30,6 @@ import io.smallrye.jwt.auth.cdi.JsonValueProducer;
 import io.smallrye.jwt.auth.cdi.OptionalClaimTypeProducer;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.cdi.RawClaimTypeProducer;
-import io.smallrye.jwt.auth.mechanism.JWTHttpAuthenticationMechanism;
 import io.smallrye.jwt.auth.principal.DefaultJWTParser;
 import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
 
@@ -47,13 +46,6 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
   private static Logger logger = Logger.getLogger(MpSmallRyeJWTAuthCDIExtension.class);
 
   public static boolean isHttpAuthMechanismEnabled() {
-    if (isEESecurityAvailable()) {
-      return !CDI.current().select(JWTHttpAuthenticationMechanism.class).isUnsatisfied();
-    }
-    return false;
-  }
-
-  private static boolean isEESecurityAvailable() {
     return tryAsClass(
         "javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism") != null
         && ConfigProvider.getConfig().getOptionalValue(ENABLE_EE_SECURITY, Boolean.class)
@@ -85,12 +77,10 @@ public class MpSmallRyeJWTAuthCDIExtension implements Extension {
     if (registerOptionalClaimTypeProducer()) {
       addAnnotatedType(event, beanManager, OptionalClaimTypeProducer.class);
     }
-
-    if (isEESecurityAvailable()) {
-      addAnnotatedType(event, beanManager, JWTHttpAuthenticationMechanism.class);
+    if (isHttpAuthMechanismEnabled()) {
+      addAnnotatedType(event, beanManager, MpJWTHttpAuthenticationMechanism.class);
       logger.debugf("EE Security is available, JWTHttpAuthenticationMechanism has been registered");
     } else {
-      // EE Security is not available, register the JAX-RS authentication filter.
       addAnnotatedType(event, beanManager, MpJWTAuthJaxRsFeature.class);
       addAnnotatedType(event, beanManager, MpJWTAuthenticationFilter.class);
       logger.infof(

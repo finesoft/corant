@@ -32,6 +32,7 @@ import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-security-shared
@@ -96,13 +97,14 @@ public class SecuredInterceptor extends AbstractInterceptor {
       return new SecurityManager[] {used};
     } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
       SecurityManager used = securityManagers.stream().filter(sm -> sm.testAccess(sm, rolesOrPerms))
-          .findFirst().orElse(null);
+          .sorted(Sortable::compare).findFirst().orElse(null);
       if (used == null) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
       return new SecurityManager[] {used};
     } else {
-      SecurityManager[] used = securityManagers.stream().toArray(SecurityManager[]::new);
+      SecurityManager[] used =
+          securityManagers.stream().sorted(Sortable::compare).toArray(SecurityManager[]::new);
       for (SecurityManager sm : used) {
         if (!sm.testAccess(sctx, rolesOrPerms)) {
           throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);

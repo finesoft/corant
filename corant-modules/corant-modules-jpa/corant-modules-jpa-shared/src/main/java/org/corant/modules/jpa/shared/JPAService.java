@@ -49,6 +49,7 @@ import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-jpa-shared
@@ -134,7 +135,7 @@ public class JPAService implements PersistenceService {
         getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
             p.synchronization(), PersistenceContextLiteral.extractProperties(p.properties()));
     if (!emConfigurator.isUnsatisfied()) {
-      emConfigurator.stream().forEach(c -> c.accept(delegate));
+      emConfigurator.stream().sorted(Sortable::compare).forEachOrdered(c -> c.accept(delegate));
     }
     return new ExtendedEntityManager(delegate, transaction);
   }

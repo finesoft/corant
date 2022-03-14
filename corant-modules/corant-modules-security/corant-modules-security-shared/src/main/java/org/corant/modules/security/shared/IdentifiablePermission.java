@@ -81,7 +81,7 @@ public class IdentifiablePermission extends SimplePermission {
     if (!(permission instanceof IdentifiablePermission)) {
       return false;
     }
-    return predicate.test(((IdentifiablePermission) permission).id);
+    return test(((IdentifiablePermission) permission).id);
   }
 
   @Override

@@ -28,7 +28,7 @@ import org.corant.modules.security.Role;
  * @author bingo 下午4:33:46
  *
  */
-public class SimpleRole extends Implication implements Role, AttributeSet {
+public class SimpleRole extends Predication implements Role, AttributeSet {
 
   private static final long serialVersionUID = 1585708942349545935L;
 
@@ -89,7 +89,7 @@ public class SimpleRole extends Implication implements Role, AttributeSet {
     if (!(role instanceof SimpleRole)) {
       return false;
     }
-    return predicate.test(role.getName());
+    return test(role.getName());
   }
 
   @Override

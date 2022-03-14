@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security;
 
+import static org.corant.shared.util.Sets.newHashSet;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -24,6 +25,10 @@ import java.util.stream.Collectors;
  *
  */
 public interface Subject extends Serializable {
+
+  default javax.security.auth.Subject asSubject() {
+    return new javax.security.auth.Subject(true, newHashSet(getPrincipals()), null, null);
+  }
 
   Principal getPrincipal(String name);
 

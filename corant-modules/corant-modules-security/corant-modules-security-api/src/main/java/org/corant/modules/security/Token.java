@@ -16,6 +16,7 @@ package org.corant.modules.security;
 import static org.corant.shared.util.Conversions.toObject;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * corant-modules-security-api
@@ -25,17 +26,17 @@ import java.util.Arrays;
  */
 public interface Token extends Serializable {
 
-  class IdentifierToken implements Token {
+  class IdentifiableToken implements Token {
 
     private static final long serialVersionUID = 4564497446521891392L;
 
     protected Serializable id;
 
-    public IdentifierToken(Serializable id) {
+    public IdentifiableToken(Serializable id) {
       this.id = id;
     }
 
-    protected IdentifierToken() {}
+    protected IdentifiableToken() {}
 
     @Override
     public boolean equals(Object obj) {
@@ -48,7 +49,7 @@ public interface Token extends Serializable {
       if (getClass() != obj.getClass()) {
         return false;
       }
-      IdentifierToken other = (IdentifierToken) obj;
+      IdentifiableToken other = (IdentifiableToken) obj;
       if (id == null) {
         if (other.id != null) {
           return false;
@@ -119,6 +120,47 @@ public interface Token extends Serializable {
       final int prime = 31;
       int result = 1;
       return prime * result + (data == null ? 0 : data.hashCode());
+    }
+
+  }
+
+  class RoleIdentifiableToken extends IdentifiableToken {
+
+    private static final long serialVersionUID = -789668601949961939L;
+
+    protected Serializable roleId;
+
+    public RoleIdentifiableToken(Serializable id, Serializable roleId) {
+      super(id);
+      this.roleId = roleId;
+    }
+
+    protected RoleIdentifiableToken() {}
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!super.equals(obj)) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      RoleIdentifiableToken other = (RoleIdentifiableToken) obj;
+      return Objects.equals(roleId, other.roleId);
+    }
+
+    public Serializable getRoleId() {
+      return roleId;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      return prime * result + Objects.hash(roleId);
     }
 
   }

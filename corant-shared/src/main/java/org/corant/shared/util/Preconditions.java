@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.contains;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -239,12 +240,13 @@ public class Preconditions {
    * @param code
    * @param parameters requireInstanceOf
    */
-  public static <T> T requireInstanceOf(Class<?> cls, T obj, Object code, Object... parameters) {
+  public static <T> T requireInstanceOf(Class<?> cls, Object obj, Object code,
+      Object... parameters) {
     requireNotNull(cls, code, parameters);
     if (!cls.isInstance(obj)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return obj;
+    return forceCast(obj);
   }
 
   /**

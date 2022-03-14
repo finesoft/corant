@@ -23,6 +23,14 @@ import java.io.Serializable;
  */
 public interface Principal extends java.security.Principal, Serializable {
 
+  @Override
+  default boolean implies(javax.security.auth.Subject subject) {
+    if (subject == null) {
+      return false;
+    }
+    return subject.getPrincipals().contains(this);
+  }
+
   default boolean implies(Subject subject) {
     if (subject == null) {
       return false;

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.corant.modules.security.AuthorizationData;
+import org.corant.modules.security.Permission;
 import org.corant.modules.security.Role;
 
 /**
@@ -32,49 +33,92 @@ import org.corant.modules.security.Role;
  */
 public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 
-  protected List<Role> roles;
+  protected List<Role> roles = Collections.emptyList();
+
+  protected List<Permission> permissions = Collections.emptyList();
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
-  public SimpleAuthzData(Collection<String> roles) {
-    this(roles, null);
+  public SimpleAuthzData(Collection<String> roles, Collection<String> permissions) {
+    this(roles, permissions, null);
   }
 
-  public SimpleAuthzData(Collection<String> roles, Map<String, ? extends Serializable> attributes) {
-    this.roles = roles.stream().map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+  public SimpleAuthzData(Collection<String> roles, Collection<String> permissions,
+      Map<String, ? extends Serializable> attributes) {
+    if (roles != null) {
+      this.roles = roles.stream().map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+    }
+    if (permissions != null) {
+      this.permissions =
+          permissions.stream().map(SimplePermission::of).collect(Collectors.toUnmodifiableList());
+    }
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
   }
 
-  public SimpleAuthzData(List<? extends Role> roles) {
-    this(roles, null);
+  public SimpleAuthzData(List<? extends Role> roles, List<? extends Permission> permission) {
+    this(roles, permission, null);
   }
 
-  public SimpleAuthzData(List<? extends Role> roles,
+  public SimpleAuthzData(List<? extends Role> roles, List<? extends Permission> permissions,
       Map<String, ? extends Serializable> attributes) {
     this.roles = Collections.unmodifiableList(newArrayList(roles));
+    this.permissions = Collections.unmodifiableList(newArrayList(permissions));
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }
-  }
-
-  public SimpleAuthzData(Map<String, ? extends Serializable> attributes, String... roles) {
-    this.roles = Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
-    if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
-    }
-  }
-
-  public SimpleAuthzData(String... roles) {
-    this(null, roles);
   }
 
   protected SimpleAuthzData() {}
 
+  public static SimpleAuthzData ofPermissions(List<? extends Permission> permissions) {
+    return ofPermissions(permissions, null);
+  }
+
+  public static SimpleAuthzData ofPermissions(List<? extends Permission> permissions,
+      Map<String, ? extends Serializable> attributes) {
+    return new SimpleAuthzData(null, permissions, attributes);
+  }
+
+  public static SimpleAuthzData ofPermissions(Map<String, ? extends Serializable> attributes,
+      String... permissions) {
+    return ofPermissions(
+        Arrays.stream(permissions).map(SimplePermission::of).collect(Collectors.toList()),
+        attributes);
+  }
+
+  public static SimpleAuthzData ofPermissions(String... permissions) {
+    return ofPermissions(null, permissions);
+  }
+
+  public static SimpleAuthzData ofRoles(List<? extends Role> roles) {
+    return ofRoles(roles, null);
+  }
+
+  public static SimpleAuthzData ofRoles(List<? extends Role> roles,
+      Map<String, ? extends Serializable> attributes) {
+    return new SimpleAuthzData(roles, null, attributes);
+  }
+
+  public static SimpleAuthzData ofRoles(Map<String, ? extends Serializable> attributes,
+      String... roles) {
+    return new SimpleAuthzData(
+        Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toList()), null, attributes);
+  }
+
+  public static SimpleAuthzData ofRoles(String... roles) {
+    return ofRoles(null, roles);
+  }
+
   @Override
   public Map<String, ? extends Serializable> getAttributes() {
     return attributes;
+  }
+
+  @Override
+  public List<Permission> getPermissions() {
+    return permissions;
   }
 
   public List<String> getRoleNames() {
@@ -85,4 +129,5 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
   public Collection<? extends Role> getRoles() {
     return roles;
   }
+
 }

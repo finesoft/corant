@@ -81,7 +81,7 @@ public class IdentifiableRole extends SimpleRole {
     if (!(role instanceof IdentifiableRole)) {
       return false;
     }
-    return predicate.test(((IdentifiableRole) role).id);
+    return test(((IdentifiableRole) role).id);
   }
 
   @Override

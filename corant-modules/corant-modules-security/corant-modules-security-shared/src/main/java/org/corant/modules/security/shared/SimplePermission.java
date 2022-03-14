@@ -28,7 +28,7 @@ import org.corant.modules.security.Permission;
  * @author bingo 下午4:33:46
  *
  */
-public class SimplePermission extends Implication implements Permission, AttributeSet {
+public class SimplePermission extends Predication implements Permission, AttributeSet {
 
   private static final long serialVersionUID = 3701989330265355350L;
 
@@ -88,7 +88,7 @@ public class SimplePermission extends Implication implements Permission, Attribu
     if (!(permission instanceof SimplePermission)) {
       return false;
     }
-    return predicate.test(((SimplePermission) permission).name);
+    return test(((SimplePermission) permission).name);
   }
 
   @Override

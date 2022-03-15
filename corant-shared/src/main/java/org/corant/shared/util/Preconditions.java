@@ -240,7 +240,7 @@ public class Preconditions {
    * @param code
    * @param parameters requireInstanceOf
    */
-  public static <T> T requireInstanceOf(Class<?> cls, Object obj, Object code,
+  public static <T> T requireInstanceOf(Class<T> cls, Object obj, Object code,
       Object... parameters) {
     requireNotNull(cls, code, parameters);
     if (!cls.isInstance(obj)) {

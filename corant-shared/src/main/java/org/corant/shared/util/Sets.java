@@ -58,6 +58,23 @@ public class Sets {
   }
 
   /**
+   * Null safe immutable set converter
+   *
+   * @param <E> the element type
+   * @param collection the collection to get a value from
+   * @return an immutable set that combined by the passed in collection
+   */
+  public static <E> Set<E> immutableSet(Collection<? extends E> collection) {
+    if (collection == null) {
+      return Collections.emptySet();
+    } else if (collection instanceof Set) {
+      return Collections.unmodifiableSet((Set<? extends E>) collection);
+    } else {
+      return Collections.unmodifiableSet(newHashSet(collection));
+    }
+  }
+
+  /**
    * Convert an array to a non-null immutable set
    *
    * @param <E> the element type

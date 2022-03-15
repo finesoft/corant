@@ -220,6 +220,23 @@ public class Lists {
   }
 
   /**
+   * Null safe immutable list converter
+   *
+   * @param <E> the element type
+   * @param collection the collection to get a value from
+   * @return an immutable list that combined by the passed in collection
+   */
+  public static <E> List<E> immutableList(Collection<? extends E> collection) {
+    if (collection == null) {
+      return Collections.emptyList();
+    } else if (collection instanceof List) {
+      return Collections.unmodifiableList((List<? extends E>) collection);
+    } else {
+      return Collections.unmodifiableList(newArrayList(collection));
+    }
+  }
+
+  /**
    * Convert an array to a non-null immutable list
    *
    * @param <E> the element type

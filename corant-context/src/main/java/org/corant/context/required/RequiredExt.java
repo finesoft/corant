@@ -14,8 +14,11 @@
 package org.corant.context.required;
 
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import java.util.Collection;
 import javax.enterprise.inject.spi.AnnotatedType;
+import org.corant.config.CorantConfigResolver;
 import org.corant.shared.service.Required;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -41,6 +44,9 @@ public class RequiredExt extends Required {
 
   @Override
   protected Object getConvertValue(String value, Class<?> valueType) {
+    if (Collection.class.isAssignableFrom(valueType)) {
+      return listOf(CorantConfigResolver.splitValue(value));
+    }
     return toObject(value, valueType);
   }
 

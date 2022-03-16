@@ -16,6 +16,7 @@ package org.corant.shared.service;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.compare;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -24,9 +25,13 @@ import static org.corant.shared.util.Objects.isNull;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.matchAnyRegex;
+import static org.corant.shared.util.Strings.split;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.corant.shared.conversion.converter.factory.StringObjectConverterFactory;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import org.corant.shared.util.Strings.WildcardMatcher;
@@ -95,6 +100,9 @@ public class Required {
   }
 
   protected Object getConvertValue(String value, Class<?> valueType) {
+    if (Collection.class.isAssignableFrom(valueType)) {
+      return listOf(split(value, ",", true, true));
+    }
     return StringObjectConverterFactory.convert(value, valueType);
   }
 
@@ -152,6 +160,29 @@ public class Required {
             break;
           case NO_EQ:
             match = areEqual(value, configValue);
+            break;
+          case INC:
+            if (value instanceof Collection && configValue instanceof Collection) {
+              match = !((Collection) configValue).containsAll((Collection) value);
+            } else if (value instanceof String && configValue instanceof String) {
+              match = !((String) configValue).contains((String) value);
+            } else {
+              match = true;
+            }
+            break;
+          case EXC:
+            if (value instanceof Collection && configValue instanceof Collection) {
+              match = ((Collection) configValue).containsAll((Collection) value);
+            } else if (value instanceof String && configValue instanceof String) {
+              match = ((String) configValue).contains((String) value);
+            } else {
+              match = true;
+            }
+            break;
+          case REGEX:
+            match = configValue == null || value == null ? true
+                : !matchAnyRegex(value.toString(), Pattern.CASE_INSENSITIVE,
+                    configValue.toString());
             break;
           default:
             match = !areEqual(value, configValue);

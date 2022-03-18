@@ -50,6 +50,7 @@ public class Query implements Serializable {
   private List<QueryHint> hints = new ArrayList<>();
   private String version = EMPTY;
   private Map<String, ParameterMapping> paramMappings = new HashMap<>();
+  private Map<String, Class<?>> paramConvertSchema = new HashMap<>();
   private Map<String, String> properties = new HashMap<>();
   private String mappingFilePath;
   private String macroScript;// FIXME temporary
@@ -176,8 +177,7 @@ public class Query implements Serializable {
   }
 
   public Map<String, Class<?>> getParamConvertSchema() {
-    return Collections.unmodifiableMap(getParamMappings().entrySet().stream()
-        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getType())));
+    return paramConvertSchema;
   }
 
   /**
@@ -352,6 +352,8 @@ public class Query implements Serializable {
 
   protected void setParamMappings(Map<String, ParameterMapping> paramMappings) {
     this.paramMappings.putAll(paramMappings);
+    paramConvertSchema = Collections.unmodifiableMap(paramMappings.entrySet().stream()
+        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getType())));
   }
 
   protected void setProperties(Map<String, String> properties) {

@@ -88,7 +88,7 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
         registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
       } else if (mpJwtAnnotation instanceof Secured) {
         SecuredMetadata secured = SecurityExtension.getSecuredMetadata((Secured) mpJwtAnnotation);
-        if (SecuredType.valueOf(secured.type()) == SecuredType.PERMIT) {
+        if (secured.type() == SecuredType.PERMIT) {
           registration = new MpJWTPermitsAllowedFilter(secured.allowed().toArray(String[]::new));
         } else {
           registration = new MpJWTRolesAllowedFilter(secured.allowed().toArray(String[]::new));

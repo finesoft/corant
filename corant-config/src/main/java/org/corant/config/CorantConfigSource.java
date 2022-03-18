@@ -57,7 +57,7 @@ public class CorantConfigSource implements ConfigSource, AutoCloseable {
 
   @Override
   public Map<String, String> getProperties() {
-    return Collections.unmodifiableMap(delegate.getProperties());
+    return Collections.unmodifiableMap(delegate.getProperties());// FIXME whether to wrap each call?
   }
 
   @Override

@@ -15,7 +15,6 @@ package org.corant.modules.jaxrs.resteasy;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.unmodifiableMap;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static org.corant.modules.servlet.ContentDispositions.parse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -132,10 +131,6 @@ public class ResteasyResource extends AbstractJaxrsResource {
       metaData.put(META_CONTENT_LENGTH, disposition.getSize());
     }
 
-    public void addMetadata(String key, Object value) {
-      metaData.put(key, value);
-    }
-
     public String getContentType() {
       return inputPart.getMediaType().toString();
     }
@@ -151,7 +146,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     @Override
     public Map<String, Object> getMetadata() {
-      return unmodifiableMap(metaData);
+      return metaData;
     }
 
     @Override

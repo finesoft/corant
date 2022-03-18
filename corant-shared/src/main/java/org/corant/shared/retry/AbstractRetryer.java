@@ -13,7 +13,6 @@
  */
 package org.corant.shared.retry;
 
-import static java.util.Collections.unmodifiableList;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +67,7 @@ public abstract class AbstractRetryer<R extends AbstractRetryer<R>> implements R
 
   @Override
   public Collection<? extends RetryListener> getRetryListeners() {
-    return unmodifiableList(retryListeners);
+    return retryListeners;
   }
 
   @Override

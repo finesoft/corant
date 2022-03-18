@@ -27,14 +27,37 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface Authenticator extends Sortable {
 
+  /**
+   * Authenticate according to the given token. If the authentication is successful, return an
+   * {@link AuthenticationData} that represents the data relevant to the principals, This returned
+   * object is generally used to construct a Subject. If the authentication is failure or there is
+   * any problem during the authentication process throw an authentication exception.
+   *
+   * @param token the consolidation of an account's principals and supporting credentials
+   * @return the authenticationData represents the data relevant to the principals is generally used
+   *         in turn to construct a Subject
+   * @throws AuthenticationException If the authentication is failure
+   */
   AuthenticationData authenticate(Token token) throws AuthenticationException;
 
-  default boolean authenticated(Object object) {
-    return object instanceof SecurityContext && ((SecurityContext) object).getPrincipal() != null;
+  /**
+   * Determine whether the given context has been authenticated.
+   *
+   * @param context in general, the context is current SecurityContext
+   * @return true if it has been authenticated otherwise false
+   */
+  default boolean authenticated(Object context) {
+    return context instanceof SecurityContext && ((SecurityContext) context).getPrincipal() != null;
   }
 
-  default void checkAuthenticated(Object object) throws AuthenticationException {
-    if (!authenticated(object)) {
+  /**
+   * Check whether the given context has been authenticated, if not throws an authentication
+   * exception.
+   *
+   * @param context in general, the context is current SecurityContext
+   */
+  default void checkAuthenticated(Object context) throws AuthenticationException {
+    if (!authenticated(context)) {
       throw new AuthenticationException((Object) SecurityMessageCodes.UNAUTHC_ACCESS);
     }
   }

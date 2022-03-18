@@ -26,7 +26,6 @@ import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -83,11 +82,11 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       PARAMETER_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
   public static final int PARAMETER_VAR_PREFIX_LEN = PARAMETER_VAR_PREFIX.length();
 
-  static final Map<String, Function<ParameterAndResultPair, Object>> injFuns =
+  protected static final Map<String, Function<ParameterAndResultPair, Object>> injFuns =
       new ConcurrentHashMap<>();
-  static final Map<String, Function<ParameterAndResult, Object>> pedFuns =
+  protected static final Map<String, Function<ParameterAndResult, Object>> pedFuns =
       new ConcurrentHashMap<>();
-  static final List<FunctionResolver> functionResolvers =
+  protected static final List<FunctionResolver> functionResolvers =
       SimpleParser.resolveFunction().collect(Collectors.toList());
 
   @Inject
@@ -238,7 +237,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     final String[] injectPath;
     final Class<?> type;
 
-    public Mapping(String[] extractPath, String[] injectPath, Class<?> type) {
+    Mapping(String[] extractPath, String[] injectPath, Class<?> type) {
       this.extractPath = extractPath;
       this.injectPath = injectPath;
       this.type = type;
@@ -299,7 +298,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
     private final Object[] namePath;
 
-    public MyASTVariableNode(String name) {
+    MyASTVariableNode(String name) {
       super(name);
       if (name.startsWith(PARENT_RESULT_VAR_PREFIX)) {
         namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
@@ -332,18 +331,11 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     final QueryObjectMapper objectMapper;
     final List<FunctionResolver> functionResolvers;
 
-    public MyEvaluationContext(QueryObjectMapper objectMapper, Object queryParameter,
+    MyEvaluationContext(QueryObjectMapper objectMapper, Object queryParameter,
         List<FunctionResolver> functionResolvers) {
       this.objectMapper = objectMapper;
       this.queryParameter = queryParameter;
       this.functionResolvers = functionResolvers;
-    }
-
-    public EvaluationContext link(Map<Object, Object> parentResult,
-        Map<Object, Object> fetchResult) {
-      this.parentResult = parentResult;
-      this.fetchResult = fetchResult;
-      return this;
     }
 
     @Override
@@ -368,6 +360,12 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       }
     }
 
+    EvaluationContext link(Map<Object, Object> parentResult, Map<Object, Object> fetchResult) {
+      this.parentResult = parentResult;
+      this.fetchResult = fetchResult;
+      return this;
+    }
+
   }
 
   /**
@@ -380,8 +378,8 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
     final Collection<Mapping> mappings;
 
-    public Projector(Collection<Mapping> mappings) {
-      this.mappings = Collections.unmodifiableCollection(mappings);
+    Projector(Collection<Mapping> mappings) {
+      this.mappings = mappings;
     }
 
     @Override

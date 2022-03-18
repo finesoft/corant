@@ -44,7 +44,7 @@ public class SecuredMetadata implements Serializable {
 
   final Collection<String> allowed;
 
-  final String type;
+  final SecuredType type;
 
   final String runAs;
 
@@ -55,8 +55,8 @@ public class SecuredMetadata implements Serializable {
   }
 
   public SecuredMetadata(String type, String runAs, String[] allowed, boolean denyAll) {
-    this.type = defaultBlank(assemblyStringConfigProperty(type),
-        getValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name())).strip();
+    this.type = SecuredType.valueOf(defaultBlank(assemblyStringConfigProperty(type),
+        getValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name())).strip());
     this.runAs = defaultTrim(assemblyStringConfigProperty(defaultString(runAs)));
     Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
@@ -90,7 +90,7 @@ public class SecuredMetadata implements Serializable {
     }
     SecuredMetadata other = (SecuredMetadata) obj;
     return Objects.equals(allowed, other.allowed) && denyAll == other.denyAll
-        && Objects.equals(runAs, other.runAs) && Objects.equals(type, other.type);
+        && Objects.equals(runAs, other.runAs) && type == other.type;
   }
 
   @Override
@@ -108,7 +108,7 @@ public class SecuredMetadata implements Serializable {
         + ", denyAll=" + denyAll + "]";
   }
 
-  public String type() {
+  public SecuredType type() {
     return type;
   }
 }

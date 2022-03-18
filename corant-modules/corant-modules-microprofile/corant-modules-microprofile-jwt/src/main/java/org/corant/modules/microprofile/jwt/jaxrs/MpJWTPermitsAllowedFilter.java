@@ -55,10 +55,11 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter, Contai
     try {
       authorizer().checkAccess(SecurityContexts.getCurrent(), allowedPermits);
     } catch (Exception e) {
+      requestContext.setProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY, e);
       if (requestContext.getSecurityContext().getUserPrincipal() == null) {
-        Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
+        Object ex = requestContext.getProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
         if (ex instanceof Exception) {
-          requestContext.removeProperty(MpJWTAuthenticationFilter.JTW_EXCEPTION_KEY);
+          requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
           e.addSuppressed((Exception) ex);
         }
         throw new NotAuthorizedException(e, "Bearer");
@@ -71,7 +72,12 @@ public class MpJWTPermitsAllowedFilter implements ContainerRequestFilter, Contai
   @Override
   public void filter(ContainerRequestContext requestContext,
       ContainerResponseContext responseContext) throws IOException {
-    authorizer.postCheckAccess();
+    boolean success =
+        requestContext.getProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY) == null
+            && requestContext.getProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY) == null;
+    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY);
+    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
+    authorizer.postCheckAccess(success);
   }
 
   protected Authorizer authorizer() {

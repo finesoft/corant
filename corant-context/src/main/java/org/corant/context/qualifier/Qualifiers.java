@@ -124,17 +124,17 @@ public class Qualifiers {
 
     @Override
     public Set<String> getAllNames() {
-      return Collections.unmodifiableSet(objects.keySet());
+      return Collections.unmodifiableSet(objects.keySet()); // FIXME whether to wrap each call
     }
 
     @Override
     public Map<String, T> getAllWithNames() {
-      return Collections.unmodifiableMap(objects);
+      return Collections.unmodifiableMap(objects); // FIXME whether to wrap each call
     }
 
     @Override
     public Map<T, Annotation[]> getAllWithQualifiers() {
-      return Collections.unmodifiableMap(objectAndQualifiers);
+      return Collections.unmodifiableMap(objectAndQualifiers); // FIXME whether to wrap each call
     }
 
     @Override

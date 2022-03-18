@@ -29,9 +29,8 @@ import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
+import org.corant.modules.security.shared.SecuredAllowsResolver;
 import org.corant.modules.security.shared.SecurityExtension;
-import org.corant.modules.security.shared.SimplePermissions;
-import org.corant.modules.security.shared.SimpleRoles;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -44,27 +43,22 @@ import org.corant.shared.ubiquity.Sortable;
 @Secured
 public class SecuredInterceptor extends AbstractInterceptor {
 
-  protected static final SecurityManager[] emptySecurityManagers = {};
-
   @Inject
   @Any
   protected Instance<SecurityManager> securityManagers;
 
+  @Inject
+  @Any
+  protected Instance<SecuredAllowsResolver> securedAllowsResolver;
+
   @AroundInvoke
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
-    SecurityManager[] sms = emptySecurityManagers;
-    try {
-      sms = check(invocationContext);
-      return invocationContext.proceed();
-    } finally {
-      for (SecurityManager sm : sms) {
-        sm.postCheckAccess();
-      }
-    }
+    check(invocationContext);
+    return invocationContext.proceed();
   }
 
-  protected SecurityManager[] check(InvocationContext invocationContext) throws Exception {
+  protected void check(InvocationContext invocationContext) throws Exception {
     Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
     if (secured != null) {
       SecuredMetadata meta = SecurityExtension.getSecuredMetadata(secured);
@@ -75,43 +69,38 @@ public class SecuredInterceptor extends AbstractInterceptor {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
           throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
         } else {
-          return emptySecurityManagers;
+          return;
         }
       }
-      if (SecuredType.valueOf(meta.type()) == SecuredType.ROLE) {
-        return checkAccess(SimpleRoles.of(meta.allowed()));
+      final SecuredAllowsResolver allowsResolver = getSecuredAllowResolver();
+      if (meta.type() == SecuredType.ROLE) {
+        checkAccess(allowsResolver.resolveAllowedRole(meta));
       } else {
-        return checkAccess(SimplePermissions.of(meta.allowed()));
+        checkAccess(allowsResolver.resolveAllowedPermission(meta));
       }
     }
-    return emptySecurityManagers;
   }
 
-  protected SecurityManager[] checkAccess(Object rolesOrPerms) {
+  protected void checkAccess(Object rolesOrPerms) {
     SecurityContext sctx = SecurityContexts.getCurrent();
     if (securityManagers.isResolvable()) {
-      SecurityManager used = securityManagers.get();
-      if (!used.testAccess(sctx, rolesOrPerms)) {
+      if (!securityManagers.get().testAccess(sctx, rolesOrPerms)) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-      return new SecurityManager[] {used};
     } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
-      SecurityManager used = securityManagers.stream().filter(sm -> sm.testAccess(sm, rolesOrPerms))
-          .sorted(Sortable::compare).findFirst().orElse(null);
-      if (used == null) {
+      if (securityManagers.stream().sorted(Sortable::compare)
+          .noneMatch(sm -> sm.testAccess(sctx, rolesOrPerms))) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-      return new SecurityManager[] {used};
-    } else {
-      SecurityManager[] used =
-          securityManagers.stream().sorted(Sortable::compare).toArray(SecurityManager[]::new);
-      for (SecurityManager sm : used) {
-        if (!sm.testAccess(sctx, rolesOrPerms)) {
-          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-        }
-      }
-      return used;
+    } else if (securityManagers.stream().sorted(Sortable::compare)
+        .anyMatch(sm -> !sm.testAccess(sctx, rolesOrPerms))) {
+      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
     }
+  }
+
+  protected SecuredAllowsResolver getSecuredAllowResolver() {
+    return securedAllowsResolver.isResolvable() ? securedAllowsResolver.get()
+        : SecuredAllowsResolver.DEFAULT_INST;
   }
 
 }

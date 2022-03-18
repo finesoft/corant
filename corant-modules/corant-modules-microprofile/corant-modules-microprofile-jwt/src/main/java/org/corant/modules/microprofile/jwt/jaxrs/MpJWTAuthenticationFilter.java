@@ -48,7 +48,8 @@ import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 @Priority(Priorities.AUTHENTICATION)
 public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
 
-  public static final String JTW_EXCEPTION_KEY = "___JWT-EX___";
+  public static final String AUTHC_EXCEPTION_KEY = "___AUTHC-EX___";
+  public static final String AUTHZ_EXCEPTION_KEY = "___AUTHZ-EX___";
 
   protected static final Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
   protected static final boolean debugLogging = logger.isDebugEnabled();
@@ -94,7 +95,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           } else {
             logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
           }
-          requestContext.setProperty(JTW_EXCEPTION_KEY, e);
+          requestContext.setProperty(AUTHC_EXCEPTION_KEY, e);
         }
       }
     }

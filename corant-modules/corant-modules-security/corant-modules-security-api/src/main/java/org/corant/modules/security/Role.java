@@ -23,8 +23,6 @@ import java.io.Serializable;
  */
 public interface Role extends Serializable {
 
-  String getName();
-
   boolean implies(Role role);
 
   default <T> T unwrap(Class<T> cls) {

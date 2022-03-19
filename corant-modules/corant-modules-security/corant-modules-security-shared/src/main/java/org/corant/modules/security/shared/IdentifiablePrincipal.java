@@ -29,6 +29,10 @@ public class IdentifiablePrincipal extends SimplePrincipal {
 
   protected Serializable id;
 
+  public IdentifiablePrincipal(Serializable id) {
+    this(id, null);
+  }
+
   public IdentifiablePrincipal(Serializable id, String name) {
     super(name);
     this.id = id;

@@ -28,20 +28,20 @@ import org.corant.modules.security.Permission;
  * @author bingo 上午10:41:08
  *
  */
-public class IdentifiablePermission extends SimplePermission {
+public class IdentifiablePermission extends Predication implements Permission, AttributeSet {
 
   private static final long serialVersionUID = 4147350908179493589L;
 
   protected Serializable id;
 
-  public IdentifiablePermission(Serializable id, String name) {
-    this(id, name, null);
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
+
+  public IdentifiablePermission(Serializable id) {
+    this(id, null);
   }
 
-  public IdentifiablePermission(Serializable id, String name,
-      Map<String, ? extends Serializable> attributes) {
+  public IdentifiablePermission(Serializable id, Map<String, ? extends Serializable> attributes) {
     this.id = id;
-    this.name = name;
     predicate = predicateOf(id);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
@@ -63,6 +63,11 @@ public class IdentifiablePermission extends SimplePermission {
     }
     IdentifiablePermission other = (IdentifiablePermission) obj;
     return Objects.equals(id, other.id);
+  }
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
   }
 
   public Serializable getId() {
@@ -94,7 +99,7 @@ public class IdentifiablePermission extends SimplePermission {
     if (IdentifiablePermission.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
-    return super.unwrap(cls);
+    return Permission.super.unwrap(cls);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

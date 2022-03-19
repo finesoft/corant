@@ -20,6 +20,8 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -177,7 +179,10 @@ public interface CorantJunit4Runner {
         });
         for (Pair<Method, BeforeCorantInitialized> m : ms) {
           try {
-            m.left().invoke(tc);
+            AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
+              m.left().setAccessible(true);
+              return m.left();
+            }).invoke(tc);
           } catch (IllegalAccessException | IllegalArgumentException
               | InvocationTargetException e) {
             throw new CorantRuntimeException(e);

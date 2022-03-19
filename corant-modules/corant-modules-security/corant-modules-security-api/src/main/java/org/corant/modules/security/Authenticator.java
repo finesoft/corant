@@ -14,6 +14,7 @@
 package org.corant.modules.security;
 
 import org.corant.context.security.SecurityContext;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -38,7 +39,9 @@ public interface Authenticator extends Sortable {
    *         in turn to construct a Subject
    * @throws AuthenticationException If the authentication is failure
    */
-  AuthenticationData authenticate(Token token) throws AuthenticationException;
+  default AuthenticationData authenticate(Token token) throws AuthenticationException {
+    throw new NotSupportedException();
+  }
 
   /**
    * Determine whether the given context has been authenticated.
@@ -61,4 +64,18 @@ public interface Authenticator extends Sortable {
       throw new AuthenticationException((Object) SecurityMessageCodes.UNAUTHC_ACCESS);
     }
   }
+
+  /**
+   * A callback after authenticated.
+   *
+   * @param authenticationData the authentication result, if null means authentication is failure.
+   */
+  default void postAuthenticated(AuthenticationData authenticationData) {}
+
+  /**
+   * A callback before authenticate, can be used for multi-factor authentication and more
+   *
+   * @param token the consolidation of an account's principals and supporting credentials
+   */
+  default void preAuthenticate(Token token) {}
 }

@@ -69,6 +69,10 @@ public class SimpleSubject implements Subject, AttributeSet {
     return attributes;
   }
 
+  public Collection<? extends Permission> getPermissions() {
+    return permissions;
+  }
+
   @Override
   public Principal getPrincipal(String name) {
     return principals.stream().filter(p -> areEqual(name, p.getName())).findFirst().orElse(null);
@@ -77,6 +81,10 @@ public class SimpleSubject implements Subject, AttributeSet {
   @Override
   public Collection<? extends Principal> getPrincipals() {
     return principals;
+  }
+
+  public Collection<? extends Role> getRoles() {
+    return roles;
   }
 
   @Override

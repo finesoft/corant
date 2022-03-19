@@ -14,12 +14,9 @@
 package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
-import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Maps.getMapCollection;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
@@ -33,12 +30,8 @@ import javax.ws.rs.core.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.SecurityContextManager;
-import org.corant.modules.security.Subject;
 import org.corant.modules.security.shared.DefaultSecurityContext;
 import org.corant.modules.security.shared.IdentifiablePrincipal;
-import org.corant.modules.security.shared.IdentifiableSubject;
-import org.corant.modules.security.shared.SimplePermission;
-import org.corant.modules.security.shared.SimpleRole;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -69,11 +62,7 @@ public class MpJWTSecurityContextManager implements SecurityContextManager<Secur
       Serializable id = userPrincipal.getSubject();
       String name = userPrincipal.getName();
       Principal principal = new IdentifiablePrincipal(id, name, map);
-      List<SimpleRole> roles = getMapCollection(map, "groups", ArrayList::new, SimpleRole.class);
-      List<SimplePermission> permits =
-          getMapCollection(map, "permits", ArrayList::new, SimplePermission.class);
-      Subject subject = new IdentifiableSubject(id, listOf(principal), roles, permits, map);
-      SecurityContexts.setCurrent(new DefaultSecurityContext(authName, principal, subject));
+      SecurityContexts.setCurrent(new DefaultSecurityContext(authName, principal));
     } else {
       logger.fine(() -> "Bind empty security context to SecurityContexts.");
       SecurityContexts.setCurrent(null);

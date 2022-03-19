@@ -116,7 +116,7 @@ public class Methods {
 
   public static void traverseLocalMethods(Class<?> clazz, Function<Method, Boolean> visitor) {
     if (clazz != null) {
-      for (Method method : clazz.getMethods()) {
+      for (Method method : clazz.getDeclaredMethods()) {
         if (!visitor.apply(method)) {
           break;
         }
@@ -126,7 +126,7 @@ public class Methods {
 
   public static void traverseMethods(Class<?> clazz, Consumer<Method> visitor) {
     if (clazz != null) {
-      for (Method method : clazz.getMethods()) {
+      for (Method method : clazz.getDeclaredMethods()) {
         visitor.accept(method);
       }
       if (clazz.getSuperclass() != null) {

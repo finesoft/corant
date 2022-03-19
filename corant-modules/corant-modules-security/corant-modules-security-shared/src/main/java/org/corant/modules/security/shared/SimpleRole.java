@@ -74,7 +74,6 @@ public class SimpleRole extends Predication implements Role, AttributeSet {
     return attributes;
   }
 
-  @Override
   public String getName() {
     return name;
   }
@@ -89,7 +88,7 @@ public class SimpleRole extends Predication implements Role, AttributeSet {
     if (!(role instanceof SimpleRole)) {
       return false;
     }
-    return test(role.getName());
+    return test(((SimpleRole) role).getName());
   }
 
   @Override

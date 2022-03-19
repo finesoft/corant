@@ -31,18 +31,14 @@ public class DefaultSecurityContext implements SecurityContext {
 
   protected final Principal principal;
 
-  protected final Subject subject;
-
-  public DefaultSecurityContext(String authenticationScheme, Principal principal, Subject subject) {
+  public DefaultSecurityContext(String authenticationScheme, Principal principal) {
     this.authenticationScheme = authenticationScheme;
     this.principal = principal;
-    this.subject = subject;
   }
 
   public DefaultSecurityContext(String authenticationScheme, Subject subject) {
     this.authenticationScheme = authenticationScheme;
     principal = subject.getPrincipals().iterator().next();
-    this.subject = subject;
   }
 
   @Override
@@ -58,10 +54,6 @@ public class DefaultSecurityContext implements SecurityContext {
   @Override
   public <T> T getPrincipal(Class<T> cls) {
     return principal == null ? null : principal.unwrap(cls);
-  }
-
-  public Subject getSubject() {
-    return subject;
   }
 
   @Override

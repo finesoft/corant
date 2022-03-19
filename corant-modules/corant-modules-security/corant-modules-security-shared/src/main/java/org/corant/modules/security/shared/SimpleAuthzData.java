@@ -121,10 +121,6 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
     return permissions;
   }
 
-  public List<String> getRoleNames() {
-    return roles.stream().map(Role::getName).collect(Collectors.toList());
-  }
-
   @Override
   public Collection<? extends Role> getRoles() {
     return roles;

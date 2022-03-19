@@ -28,20 +28,20 @@ import org.corant.modules.security.Role;
  * @author bingo 上午10:41:08
  *
  */
-public class IdentifiableRole extends SimpleRole {
+public class IdentifiableRole extends Predication implements Role, AttributeSet {
 
   private static final long serialVersionUID = 3771872966822697648L;
 
   protected Serializable id;
 
-  public IdentifiableRole(Serializable id, String name) {
-    this(id, name, null);
+  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
+
+  public IdentifiableRole(Serializable id) {
+    this(id, null);
   }
 
-  public IdentifiableRole(Serializable id, String name,
-      Map<String, ? extends Serializable> attributes) {
+  public IdentifiableRole(Serializable id, Map<String, ? extends Serializable> attributes) {
     this.id = id;
-    this.name = name;
     predicate = predicateOf(id);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
@@ -63,6 +63,11 @@ public class IdentifiableRole extends SimpleRole {
     }
     IdentifiableRole other = (IdentifiableRole) obj;
     return Objects.equals(id, other.id);
+  }
+
+  @Override
+  public Map<String, ? extends Serializable> getAttributes() {
+    return attributes;
   }
 
   public Serializable getId() {
@@ -94,7 +99,7 @@ public class IdentifiableRole extends SimpleRole {
     if (IdentifiableRole.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
-    return super.unwrap(cls);
+    return Role.super.unwrap(cls);
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

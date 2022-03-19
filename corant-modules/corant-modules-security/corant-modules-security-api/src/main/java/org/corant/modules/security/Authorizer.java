@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security;
 
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -35,16 +36,7 @@ public interface Authorizer extends Sortable {
    *         permissions acquired by the context.
    */
   default void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {
-    boolean success = false;
-    try {
-      preCheckAccess(context, roleOrPermit);
-      if (!testAccess(context, roleOrPermit)) {
-        throw new AuthorizationException((Object) SecurityMessageCodes.UNAUTHZ_ACCESS);
-      }
-      success = true;
-    } finally {
-      postCheckAccess(success);
-    }
+    throw new NotSupportedException();
   }
 
   /**
@@ -73,6 +65,8 @@ public interface Authorizer extends Sortable {
    *        caller context.
    * @return whether have access permissions
    */
-  boolean testAccess(Object context, Object roleOrPermit);
+  default boolean testAccess(Object context, Object roleOrPermit) {
+    return false;
+  }
 
 }

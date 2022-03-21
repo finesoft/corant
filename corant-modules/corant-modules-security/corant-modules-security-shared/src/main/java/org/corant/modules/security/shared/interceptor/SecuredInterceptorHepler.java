@@ -11,9 +11,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared;
+package org.corant.modules.security.shared.interceptor;
 
 import org.corant.modules.security.annotation.SecuredMetadata;
+import org.corant.modules.security.shared.SimplePermissions;
+import org.corant.modules.security.shared.SimpleRoles;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-security-shared
@@ -21,9 +24,9 @@ import org.corant.modules.security.annotation.SecuredMetadata;
  * @author bingo 下午11:48:56
  *
  */
-public interface SecuredAllowsResolver {
+public interface SecuredInterceptorHepler {
 
-  SecuredAllowsResolver DEFAULT_INST = new SecuredAllowsResolver() {
+  SecuredInterceptorHepler DEFAULT_INST = new SecuredInterceptorHepler() {
 
     @Override
     public Object resolveAllowedPermission(SecuredMetadata meta) {
@@ -35,6 +38,11 @@ public interface SecuredAllowsResolver {
       return SimpleRoles.of(meta.allowed());
     }
   };
+
+  default void handleRunAs(String runAs) {
+    throw new NotSupportedException(
+        "Runas is not currently supported, implementers can implement it themselves");
+  }
 
   Object resolveAllowedPermission(SecuredMetadata meta);
 

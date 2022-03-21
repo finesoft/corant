@@ -13,6 +13,8 @@
  */
 package org.corant.modules.security;
 
+import org.corant.context.security.SecurityContext;
+
 /**
  * corant-modules-security-api
  *
@@ -20,6 +22,8 @@ package org.corant.modules.security;
  *
  */
 public interface SecurityManager extends Authenticator, Authorizer {
+
+  Subject getSubject(SecurityContext securityContext);
 
   Subject login(Token token);
 

@@ -88,16 +88,6 @@ public class SimpleSubject implements Subject, AttributeSet {
   }
 
   @Override
-  public boolean hasRole(Role role) {
-    return roles.stream().anyMatch(r -> r.implies(role));
-  }
-
-  @Override
-  public boolean isPermitted(Permission permission) {
-    return permissions.stream().anyMatch(r -> r.implies(permission));
-  }
-
-  @Override
   public <T> T unwrap(Class<T> cls) {
     if (SimpleSubject.class.isAssignableFrom(cls)) {
       return cls.cast(this);

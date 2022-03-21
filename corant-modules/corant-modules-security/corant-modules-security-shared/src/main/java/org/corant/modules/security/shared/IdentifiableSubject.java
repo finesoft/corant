@@ -94,16 +94,6 @@ public class IdentifiableSubject extends SimpleSubject {
   }
 
   @Override
-  public boolean hasRole(Role role) {
-    return roles.stream().anyMatch(r -> r.implies(role));
-  }
-
-  @Override
-  public boolean isPermitted(Permission permission) {
-    return permissions.stream().anyMatch(r -> r.implies(permission));
-  }
-
-  @Override
   public String toString() {
     return "IdentifiableSubject [id=" + id + "]";
   }

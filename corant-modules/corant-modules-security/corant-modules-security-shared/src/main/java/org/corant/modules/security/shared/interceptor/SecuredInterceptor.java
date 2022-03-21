@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
+import static org.corant.shared.util.Strings.isNotBlank;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -29,7 +30,6 @@ import org.corant.modules.security.SecurityMessageCodes;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
-import org.corant.modules.security.shared.SecuredAllowsResolver;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -49,7 +49,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
 
   @Inject
   @Any
-  protected Instance<SecuredAllowsResolver> securedAllowsResolver;
+  protected Instance<SecuredInterceptorHepler> assistant;
 
   @AroundInvoke
   @AroundConstruct
@@ -72,11 +72,15 @@ public class SecuredInterceptor extends AbstractInterceptor {
           return;
         }
       }
-      final SecuredAllowsResolver allowsResolver = getSecuredAllowResolver();
-      if (meta.type() == SecuredType.ROLE) {
-        checkAccess(allowsResolver.resolveAllowedRole(meta));
+      if (isNotBlank(secured.runAs())) {
+        getAssistant().handleRunAs(secured.runAs());
       } else {
-        checkAccess(allowsResolver.resolveAllowedPermission(meta));
+        final SecuredInterceptorHepler allowsResolver = getAssistant();
+        if (meta.type() == SecuredType.ROLE) {
+          checkAccess(allowsResolver.resolveAllowedRole(meta));
+        } else {
+          checkAccess(allowsResolver.resolveAllowedPermission(meta));
+        }
       }
     }
   }
@@ -98,9 +102,8 @@ public class SecuredInterceptor extends AbstractInterceptor {
     }
   }
 
-  protected SecuredAllowsResolver getSecuredAllowResolver() {
-    return securedAllowsResolver.isResolvable() ? securedAllowsResolver.get()
-        : SecuredAllowsResolver.DEFAULT_INST;
+  protected SecuredInterceptorHepler getAssistant() {
+    return assistant.isResolvable() ? assistant.get() : SecuredInterceptorHepler.DEFAULT_INST;
   }
 
 }

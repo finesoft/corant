@@ -16,6 +16,7 @@ package org.corant.modules.security;
 import static org.corant.shared.util.Sets.newHashSet;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +26,21 @@ import java.util.stream.Collectors;
  *
  */
 public interface Subject extends Serializable {
+
+  Subject EMPTY_INST = new Subject() {
+
+    private static final long serialVersionUID = 4617421960094030872L;
+
+    @Override
+    public Principal getPrincipal(String name) {
+      return null;
+    }
+
+    @Override
+    public Collection<? extends Principal> getPrincipals() {
+      return Collections.emptyList();
+    }
+  };
 
   default javax.security.auth.Subject asSubject() {
     return new javax.security.auth.Subject(true, newHashSet(getPrincipals()), null, null);
@@ -41,14 +57,6 @@ public interface Subject extends Serializable {
 
   default <T> Collection<T> getPrincipals(Class<T> c) {
     return getPrincipals().stream().map(p -> p.unwrap(c)).collect(Collectors.toList());
-  }
-
-  default boolean hasRole(Role role) {
-    return false;
-  }
-
-  default boolean isPermitted(Permission permission) {
-    return false;
   }
 
   default <T> T unwrap(Class<T> cls) {

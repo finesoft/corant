@@ -117,7 +117,7 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
   }
 
   @Override
-  public List<Permission> getPermissions() {
+  public Collection<? extends Permission> getPermissions() {
     return permissions;
   }
 

@@ -11,18 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security;
+package org.corant.modules.security.shared.interceptor;
+
+import org.corant.shared.ubiquity.Sortable;
 
 /**
- * corant-modules-security-api
+ * corant-modules-security-shared
  *
- * @author bingo 下午7:35:16
+ * @author bingo 下午7:42:06
  *
  */
-public interface SecurityManager extends Authenticator, Authorizer {
+@FunctionalInterface
+public interface SecuredInterceptorCallback extends Sortable {
 
-  Subject login(Token token);
-
-  void logout(Subject subject);
+  void postSecuredCheck(boolean success);
 
 }

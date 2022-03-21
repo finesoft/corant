@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.corant.config.Configs;
+import org.corant.shared.util.Strings;
 
 public class SecuredMetadata implements Serializable {
 
@@ -60,7 +61,7 @@ public class SecuredMetadata implements Serializable {
     this.runAs = defaultTrim(assemblyStringConfigProperty(defaultString(runAs)));
     Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
-        .collect(Collectors.toList());
+        .filter(Strings::isNotBlank).map(String::strip).collect(Collectors.toList());
     this.allowed = isEmpty(aws) ? ALLOWED_ALL : Collections.unmodifiableCollection(aws);
     this.denyAll = denyAll;
   }

@@ -55,8 +55,6 @@ public class SecurityExtension implements Extension {
       .getValue("corant.security.interceptor.compatibility", Boolean.class, ENABLE_INTERCEPTOR);
   public static final boolean DENY_ALL_NO_SECURITY_MANAGER = Configs.getValue(
       "corant.security.interceptor.deny-all-if-no-security-manager", Boolean.class, Boolean.FALSE);
-  public static final boolean FIT_ANY_SECURITY_MANAGER = Configs.getValue(
-      "corant.security.interceptor.fit-any-security-manager", Boolean.class, Boolean.TRUE);
 
   protected static final Map<Secured, SecuredMetadata> securedMetaDatas = new ConcurrentHashMap<>();
 

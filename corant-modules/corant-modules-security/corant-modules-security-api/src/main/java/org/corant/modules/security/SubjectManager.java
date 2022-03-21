@@ -13,16 +13,18 @@
  */
 package org.corant.modules.security;
 
+import org.corant.context.security.SecurityContext;
+
 /**
  * corant-modules-security-api
  *
- * @author bingo 下午7:35:16
+ * @author bingo 下午11:45:42
  *
  */
-public interface SecurityManager extends Authenticator, Authorizer {
+public interface SubjectManager {
 
-  Subject login(Token token);
+  Subject createSubject(AuthenticationData authcData, AuthorizationData authzData);
 
-  void logout(Subject subject);
+  Subject getCurrentSubject(SecurityContext context);
 
 }

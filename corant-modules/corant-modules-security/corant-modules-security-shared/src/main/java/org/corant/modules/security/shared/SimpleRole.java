@@ -88,7 +88,7 @@ public class SimpleRole extends Predication implements Role, AttributeSet {
     if (!(role instanceof SimpleRole)) {
       return false;
     }
-    return test(((SimpleRole) role).getName());
+    return test(((SimpleRole) role).name);
   }
 
   @Override

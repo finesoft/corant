@@ -22,7 +22,6 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
-import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.SecurityManager;
@@ -49,13 +48,26 @@ public class SecuredInterceptor extends AbstractInterceptor {
 
   @Inject
   @Any
+  protected Instance<SecuredInterceptorCallback> callbacks;
+
+  @Inject
+  @Any
   protected Instance<SecuredInterceptorHepler> helpers;
 
   @AroundInvoke
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
-    check(invocationContext);
-    return invocationContext.proceed();
+    boolean success = false;
+    try {
+      check(invocationContext);
+      success = true;
+      return invocationContext.proceed();
+    } finally {
+      if (!callbacks.isUnsatisfied()) {
+        final boolean sus = success;
+        callbacks.stream().sorted(Sortable::compare).forEach(cb -> cb.postSecuredCheck(sus));
+      }
+    }
   }
 
   protected void check(InvocationContext invocationContext) throws Exception {
@@ -65,38 +77,18 @@ public class SecuredInterceptor extends AbstractInterceptor {
       if (meta.denyAll()) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-      if (securityManagers.isUnsatisfied()) {
-        if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
-          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-        } else {
-          return;
-        }
-      }
       final SecuredInterceptorHepler helper = getHelper();
       if (isNotBlank(secured.runAs())) {
         helper.handleRunAs(secured.runAs());
-      } else if (meta.type() == SecuredType.ROLE) {
-        checkAccess(helper.resolveAllowedRole(meta));
+      } else if (securityManagers.isUnsatisfied()) {
+        if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
+          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+        }
       } else {
-        checkAccess(helper.resolveAllowedPermission(meta));
+        securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
+            meta.type() == SecuredType.ROLE ? helper.resolveAllowedRole(meta)
+                : helper.resolveAllowedPermission(meta));
       }
-    }
-  }
-
-  protected void checkAccess(Object rolesOrPerms) {
-    SecurityContext sctx = SecurityContexts.getCurrent();
-    if (securityManagers.isResolvable()) {
-      if (!securityManagers.get().testAccess(sctx, rolesOrPerms)) {
-        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-      }
-    } else if (SecurityExtension.FIT_ANY_SECURITY_MANAGER) {
-      if (securityManagers.stream().sorted(Sortable::compare)
-          .noneMatch(sm -> sm.testAccess(sctx, rolesOrPerms))) {
-        throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-      }
-    } else if (securityManagers.stream().sorted(Sortable::compare)
-        .anyMatch(sm -> !sm.testAccess(sctx, rolesOrPerms))) {
-      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
     }
   }
 

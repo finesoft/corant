@@ -17,6 +17,7 @@ import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-security-shared
@@ -24,7 +25,7 @@ import org.corant.shared.exception.NotSupportedException;
  * @author bingo 下午11:48:56
  *
  */
-public interface SecuredInterceptorHepler {
+public interface SecuredInterceptorHepler extends Sortable {
 
   SecuredInterceptorHepler DEFAULT_INST = new SecuredInterceptorHepler() {
 

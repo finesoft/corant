@@ -49,7 +49,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
 
   @Inject
   @Any
-  protected Instance<SecuredInterceptorHepler> assistant;
+  protected Instance<SecuredInterceptorHepler> helpers;
 
   @AroundInvoke
   @AroundConstruct
@@ -72,15 +72,13 @@ public class SecuredInterceptor extends AbstractInterceptor {
           return;
         }
       }
+      final SecuredInterceptorHepler helper = getHelper();
       if (isNotBlank(secured.runAs())) {
-        getAssistant().handleRunAs(secured.runAs());
+        helper.handleRunAs(secured.runAs());
+      } else if (meta.type() == SecuredType.ROLE) {
+        checkAccess(helper.resolveAllowedRole(meta));
       } else {
-        final SecuredInterceptorHepler allowsResolver = getAssistant();
-        if (meta.type() == SecuredType.ROLE) {
-          checkAccess(allowsResolver.resolveAllowedRole(meta));
-        } else {
-          checkAccess(allowsResolver.resolveAllowedPermission(meta));
-        }
+        checkAccess(helper.resolveAllowedPermission(meta));
       }
     }
   }
@@ -102,8 +100,12 @@ public class SecuredInterceptor extends AbstractInterceptor {
     }
   }
 
-  protected SecuredInterceptorHepler getAssistant() {
-    return assistant.isResolvable() ? assistant.get() : SecuredInterceptorHepler.DEFAULT_INST;
+  protected SecuredInterceptorHepler getHelper() {
+    if (helpers.isUnsatisfied()) {
+      return SecuredInterceptorHepler.DEFAULT_INST;
+    } else {
+      return helpers.stream().sorted(Sortable::compare).findFirst().get();
+    }
   }
 
 }

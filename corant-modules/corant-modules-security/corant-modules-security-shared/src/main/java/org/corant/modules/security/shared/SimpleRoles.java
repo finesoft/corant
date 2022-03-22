@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 
 /**
@@ -35,8 +36,8 @@ public class SimpleRoles implements Iterable<SimpleRole> {
   protected final Collection<SimpleRole> roles;
 
   public SimpleRoles(Collection<SimpleRole> roles) {
-    this.roles =
-        roles == null ? Collections.emptyList() : Collections.unmodifiableCollection(roles);
+    this.roles = roles == null ? Collections.emptyList()
+        : roles.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
   public static SimpleRoles of(Collection<String> names) {

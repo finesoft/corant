@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
 import java.util.Collection;
@@ -36,20 +37,20 @@ public class IdentifiableSubject extends SimpleSubject {
 
   public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals) {
     super(principals);
-    this.id = id;
+    this.id = shouldNotNull(id);
   }
 
   public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
       Collection<? extends Role> roles, Collection<? extends Permission> permissions,
       Map<String, ? extends Serializable> attributes) {
     super(principals, roles, permissions, attributes);
-    this.id = id;
+    this.id = shouldNotNull(id);
   }
 
   public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
       Collection<? extends Role> roles, Map<String, ? extends Serializable> attributes) {
     super(principals, roles, attributes);
-    this.id = id;
+    this.id = shouldNotNull(id);
   }
 
   protected IdentifiableSubject() {}

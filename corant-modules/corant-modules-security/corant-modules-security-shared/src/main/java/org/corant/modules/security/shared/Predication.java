@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.util.function.Predicate;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings.WildcardMatcher;
@@ -26,7 +27,7 @@ import org.corant.shared.util.Strings.WildcardMatcher;
  */
 public abstract class Predication {
 
-  protected transient Predicate<Object> predicate = Functions.emptyPredicate(true);
+  protected transient Predicate<Object> predicate;
 
   protected Predication() {}
 
@@ -38,12 +39,12 @@ public abstract class Predication {
     if (t == null) {
       return Functions.emptyPredicate(true);
     } else if (t instanceof String) {
-      String sut = ((String) t).strip();
+      final String sut = ((String) t).strip();
       if (WildcardMatcher.hasWildcard(sut)) {
-        return s -> {
-          final WildcardMatcher wm = WildcardMatcher.of(true, sut);
-          return wm.test(sut);
-        };
+        final WildcardMatcher wm = WildcardMatcher.of(true, sut);
+        return s -> wm.test(asDefaultString(s));
+      } else {
+        return s -> sut.equalsIgnoreCase(asDefaultString(s));
       }
     }
     return s -> areEqual(s, t);

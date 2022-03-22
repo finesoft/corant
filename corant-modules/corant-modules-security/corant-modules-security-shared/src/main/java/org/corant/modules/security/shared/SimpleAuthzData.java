@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.newArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 import org.corant.modules.security.AuthorizationData;
 import org.corant.modules.security.Permission;
 import org.corant.modules.security.Role;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-modules-security-shared
@@ -33,9 +33,9 @@ import org.corant.modules.security.Role;
  */
 public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 
-  protected List<Role> roles = Collections.emptyList();
+  protected Collection<Role> roles = Collections.emptyList();
 
-  protected List<Permission> permissions = Collections.emptyList();
+  protected Collection<Permission> permissions = Collections.emptyList();
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
@@ -46,11 +46,12 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
   public SimpleAuthzData(Collection<String> roles, Collection<String> permissions,
       Map<String, ? extends Serializable> attributes) {
     if (roles != null) {
-      this.roles = roles.stream().map(SimpleRole::of).collect(Collectors.toUnmodifiableList());
+      this.roles = roles.stream().filter(Objects::isNotNull).map(SimpleRole::of)
+          .collect(Collectors.toUnmodifiableList());
     }
     if (permissions != null) {
-      this.permissions =
-          permissions.stream().map(SimplePermission::of).collect(Collectors.toUnmodifiableList());
+      this.permissions = permissions.stream().filter(Objects::isNotNull).map(SimplePermission::of)
+          .collect(Collectors.toUnmodifiableList());
     }
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
@@ -63,8 +64,10 @@ public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 
   public SimpleAuthzData(List<? extends Role> roles, List<? extends Permission> permissions,
       Map<String, ? extends Serializable> attributes) {
-    this.roles = Collections.unmodifiableList(newArrayList(roles));
-    this.permissions = Collections.unmodifiableList(newArrayList(permissions));
+    this.roles = roles == null ? Collections.emptyList()
+        : roles.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
+    this.permissions = permissions == null ? Collections.emptyList()
+        : permissions.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }

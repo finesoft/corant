@@ -43,13 +43,15 @@ public class SecuredMetadata implements Serializable {
   public static final Collection<String> ALLOWED_ALL =
       Collections.unmodifiableCollection(listOf(Secured.ALLOWED_ALL_SIGN));
 
-  final Collection<String> allowed;
+  private final Collection<String> allowed;
 
-  final SecuredType type;
+  private final SecuredType type;
 
-  final String runAs;
+  private final String runAs;
 
-  final boolean denyAll;
+  private final boolean denyAll;
+
+  private final int hash;
 
   public SecuredMetadata(Secured secured) {
     this(secured.type(), secured.runAs(), secured.allowed(), secured.denyAll());
@@ -64,6 +66,7 @@ public class SecuredMetadata implements Serializable {
         .filter(Strings::isNotBlank).map(String::strip).collect(Collectors.toList());
     this.allowed = isEmpty(aws) ? ALLOWED_ALL : Collections.unmodifiableCollection(aws);
     this.denyAll = denyAll;
+    hash = Objects.hash(allowed, denyAll, runAs, type);
   }
 
   protected SecuredMetadata() {
@@ -96,7 +99,7 @@ public class SecuredMetadata implements Serializable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(allowed, denyAll, runAs, type);
+    return hash;
   }
 
   public String runAs() {

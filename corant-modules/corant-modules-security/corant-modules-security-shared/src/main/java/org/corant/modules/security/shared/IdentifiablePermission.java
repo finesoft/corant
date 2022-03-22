@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -41,8 +42,8 @@ public class IdentifiablePermission extends Predication implements Permission, A
   }
 
   public IdentifiablePermission(Serializable id, Map<String, ? extends Serializable> attributes) {
+    super(shouldNotNull(id));
     this.id = id;
-    predicate = predicateOf(id);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }

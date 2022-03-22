@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
@@ -30,18 +31,17 @@ public class IdentifiablePrincipal extends SimplePrincipal {
   protected Serializable id;
 
   public IdentifiablePrincipal(Serializable id) {
-    this(id, null);
+    this(id, null, null);
   }
 
   public IdentifiablePrincipal(Serializable id, String name) {
-    super(name);
-    this.id = id;
+    this(id, name, null);
   }
 
   public IdentifiablePrincipal(Serializable id, String name,
       Map<String, ? extends Serializable> attributes) {
     super(name, attributes);
-    this.id = id;
+    this.id = shouldNotNull(id);
   }
 
   protected IdentifiablePrincipal() {}

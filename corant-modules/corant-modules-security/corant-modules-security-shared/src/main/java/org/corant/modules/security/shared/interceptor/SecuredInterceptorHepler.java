@@ -13,6 +13,8 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
@@ -29,14 +31,17 @@ public interface SecuredInterceptorHepler extends Sortable {
 
   SecuredInterceptorHepler DEFAULT_INST = new SecuredInterceptorHepler() {
 
+    Map<SecuredMetadata, Object> roles = new ConcurrentHashMap<>();
+    Map<SecuredMetadata, Object> perms = new ConcurrentHashMap<>();
+
     @Override
     public Object resolveAllowedPermission(SecuredMetadata meta) {
-      return SimplePermissions.of(meta.allowed());
+      return perms.computeIfAbsent(meta, k -> SimplePermissions.of(k.allowed()));
     }
 
     @Override
     public Object resolveAllowedRole(SecuredMetadata meta) {
-      return SimpleRoles.of(meta.allowed());
+      return roles.computeIfAbsent(meta, k -> SimpleRoles.of(k.allowed()));
     }
   };
 

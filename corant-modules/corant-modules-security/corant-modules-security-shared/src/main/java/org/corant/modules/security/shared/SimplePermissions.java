@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 
 /**
@@ -34,8 +35,8 @@ public class SimplePermissions implements Iterable<SimplePermission> {
   protected final Collection<SimplePermission> perms;
 
   public SimplePermissions(Collection<SimplePermission> perms) {
-    this.perms =
-        perms == null ? Collections.emptyList() : Collections.unmodifiableCollection(perms);
+    this.perms = perms == null ? Collections.emptyList()
+        : perms.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
   public static SimplePermissions of(Collection<String> names) {

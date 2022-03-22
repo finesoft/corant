@@ -18,7 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-modules-security-shared
@@ -32,7 +34,7 @@ public class SimplePrincipals implements Iterable<SimplePrincipal> {
 
   public SimplePrincipals(Collection<SimplePrincipal> principals) {
     this.principals = principals == null ? Collections.emptyList()
-        : Collections.unmodifiableCollection(principals);
+        : principals.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
   @Override

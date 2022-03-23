@@ -103,6 +103,8 @@ public class MpJWTAuthorizationFilter implements ContainerRequestFilter, Contain
     boolean success =
         requestContext.getProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY) == null
             && requestContext.getProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY) == null;
+    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY);
+    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
     callbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(success));
   }
 

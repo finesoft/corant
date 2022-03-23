@@ -43,6 +43,10 @@ public class MpJWTAuthJaxRsFeature implements Feature {
     if (enabled) {
       if (mpAuthzEnabled()) {
         context.register(MpJWTAuthorizationFilterRegistrar.class);
+        logger.infof("Use MP-JWT authorization filter, %s has been registered.",
+            MpJWTAuthorizationFilterRegistrar.class.getSimpleName());
+      } else {
+        logger.infof("Use corant security interceptor.");
       }
       context.register(MpJWTBlackListFilter.class);
       if (!MpSmallRyeJWTAuthCDIExtension.isHttpAuthMechanismEnabled()) {

@@ -14,6 +14,8 @@
 package org.corant.modules.microprofile.jwt.jaxrs;
 
 import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -33,12 +35,10 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import org.corant.modules.security.annotation.Secured;
+import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredMetadata;
-import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Strings;
-import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
 
 /**
  * corant-modules-microprofile-jwt
@@ -48,7 +48,6 @@ import io.smallrye.jwt.auth.jaxrs.DenyAllFilter;
  */
 public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 
-  private static final DenyAllFilter denyAllFilter = new DenyAllFilter();
   private static final Map<ResourceInfo, Consumer<FeatureContext>> handlers =
       new ConcurrentHashMap<>();// static?
   private static final Set<Class<? extends Annotation>> mpJwtAnnotations =
@@ -77,27 +76,22 @@ public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
   }
 
   Object resolveRegistration(ResourceInfo resourceInfo) {
-    Object registration = null;
     Annotation mpJwtAnnotation = getMpJwtAnnotation(resourceInfo);
+    SecuredMetadata secured = null;
     if (mpJwtAnnotation != null) {
       if (mpJwtAnnotation instanceof DenyAll) {
-        registration = denyAllFilter;
+        secured = new SecuredMetadata(SecuredLiteral.of((DenyAll) mpJwtAnnotation));
       } else if (mpJwtAnnotation instanceof RolesAllowed) {
-        registration = new MpJWTRolesAllowedFilter(((RolesAllowed) mpJwtAnnotation).value());
+        secured = new SecuredMetadata(SecuredLiteral.of((RolesAllowed) mpJwtAnnotation));
       } else if (mpJwtAnnotation instanceof PermitAll) {
-        registration = new MpJWTRolesAllowedFilter(Strings.EMPTY_ARRAY);
+        secured = new SecuredMetadata(SecuredLiteral.of((PermitAll) mpJwtAnnotation));
       } else if (mpJwtAnnotation instanceof Secured) {
-        SecuredMetadata secured = SecurityExtension.getSecuredMetadata((Secured) mpJwtAnnotation);
-        if (secured.type() == SecuredType.PERMIT) {
-          registration = new MpJWTPermitsAllowedFilter(secured.allowed().toArray(String[]::new));
-        } else {
-          registration = new MpJWTRolesAllowedFilter(secured.allowed().toArray(String[]::new));
-        }
+        secured = SecurityExtension.getSecuredMetadata((Secured) mpJwtAnnotation);
       }
     } else if (hasSecurityAnnotations(resourceInfo) && shouldNonannotatedMethodsBeDenied()) {
-      registration = denyAllFilter;
+      secured = new SecuredMetadata(EMPTY, EMPTY, EMPTY_ARRAY, true);
     }
-    return registration;
+    return secured == null ? null : new MpJWTAuthorizationFilter(secured);
   }
 
   boolean shouldNonannotatedMethodsBeDenied() {

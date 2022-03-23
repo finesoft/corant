@@ -89,6 +89,11 @@ public @interface Secured {
       return new SecuredLiteral(SecuredType.ROLE.name(), EMPTY, EMPTY_ARRAY, false);
     }
 
+    public static Secured of(RolesAllowed rolesAllowed) {
+      return new SecuredLiteral(SecuredType.ROLE.name(), Strings.EMPTY, rolesAllowed.value(),
+          false);
+    }
+
     public static Secured of(RunAs runas) {
       return new SecuredLiteral(SecuredType.ROLE.name(), runas.value(), Strings.EMPTY_ARRAY, false);
     }

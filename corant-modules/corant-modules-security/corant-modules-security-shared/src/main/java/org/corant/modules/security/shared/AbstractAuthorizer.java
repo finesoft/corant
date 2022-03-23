@@ -13,9 +13,12 @@
  */
 package org.corant.modules.security.shared;
 
+import java.util.stream.Stream;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.Authorizer;
+import org.corant.modules.security.AuthorizerCallback;
 import org.corant.modules.security.SecurityMessageCodes;
+import org.corant.shared.ubiquity.Mutable.MutableBoolean;
 
 /**
  * corant-modules-security-shared
@@ -27,16 +30,18 @@ public abstract class AbstractAuthorizer implements Authorizer {
 
   @Override
   public void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {
-    boolean success = false;
+    MutableBoolean success = new MutableBoolean(false);
     try {
-      preCheckAccess(context, roleOrPermit);
+      resolveCallbacks().forEachOrdered(cb -> cb.preCheckAccess(context, roleOrPermit));
       if (!testAccess(context, roleOrPermit)) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-      success = true;
+      success.set(true);
     } finally {
-      postCheckAccess(success);
+      resolveCallbacks().forEachOrdered(cb -> cb.postCheckAccess(success.get()));
     }
   }
+
+  protected abstract Stream<AuthorizerCallback> resolveCallbacks();
 
 }

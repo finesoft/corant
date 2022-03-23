@@ -17,10 +17,11 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 import org.corant.context.security.SecurityContext;
-import org.corant.modules.security.AuthorizationException;
-import org.corant.modules.security.Authorizer;
+import org.corant.modules.security.AuthorizerCallback;
 import org.corant.modules.security.annotation.Secured;
+import org.corant.modules.security.shared.AbstractAuthorizer;
 import org.corant.modules.security.shared.SimplePermission;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimplePrincipal;
@@ -33,18 +34,11 @@ import org.corant.modules.security.shared.SimpleRoles;
  * @author bingo 上午10:23:37
  *
  */
-public class MpJWTAuthorizer implements Authorizer {
+public class MpJWTAuthorizer extends AbstractAuthorizer {
 
   public static final SimpleRole ALL_ROLES = new SimpleRole(Secured.ALLOWED_ALL_SIGN);
   public static final SimplePermission ALL_PERMS = new SimplePermission(Secured.ALLOWED_ALL_SIGN);
   public static final MpJWTAuthorizer DFLT_INST = new MpJWTAuthorizer();
-
-  @Override
-  public void checkAccess(Object context, Object roleOrPermit) throws AuthorizationException {
-    if (!testAccess(context, roleOrPermit)) {
-      throw new AuthorizationException();
-    }
-  }
 
   @Override
   public boolean testAccess(Object context, Object roleOrPermit) {
@@ -59,6 +53,11 @@ public class MpJWTAuthorizer implements Authorizer {
       }
     }
     return false;
+  }
+
+  @Override
+  protected Stream<AuthorizerCallback> resolveCallbacks() {
+    return Stream.empty();
   }
 
   protected boolean testPermAccess(SecurityContext sctx, SimplePermissions perms) {

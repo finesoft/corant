@@ -13,7 +13,9 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
+import static org.corant.modules.security.shared.SecurityExtension.getSecuredMetadata;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.util.stream.Stream;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SecurityExtension;
+import org.corant.shared.ubiquity.Mutable.MutableBoolean;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -57,29 +60,26 @@ public class SecuredInterceptor extends AbstractInterceptor {
   @AroundInvoke
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
-    boolean success = false;
+    MutableBoolean success = new MutableBoolean(false);
     try {
-      check(invocationContext);
-      success = true;
+      SecuredMetadata secured = resolveMeta(invocationContext);
+      resolveCallbacks().forEachOrdered(cb -> cb.preSecuredIntercept(secured));
+      check(secured);
+      success.set(true);
       return invocationContext.proceed();
     } finally {
-      if (!callbacks.isUnsatisfied()) {
-        final boolean sus = success;
-        callbacks.stream().sorted(Sortable::compare).forEach(cb -> cb.postSecuredCheck(sus));
-      }
+      resolveCallbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(success.get()));
     }
   }
 
-  protected void check(InvocationContext invocationContext) throws Exception {
-    Secured secured = getInterceptorAnnotation(invocationContext, Secured.class);
-    if (secured != null) {
-      SecuredMetadata meta = SecurityExtension.getSecuredMetadata(secured);
+  protected void check(SecuredMetadata meta) throws Exception {
+    if (!meta.equals(SecuredMetadata.EMPTY_INST)) {
       if (meta.denyAll()) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
       final SecuredInterceptorHepler helper = getHelper();
-      if (isNotBlank(secured.runAs())) {
-        helper.handleRunAs(secured.runAs());
+      if (isNotBlank(meta.runAs())) {
+        helper.handleRunAs(meta.runAs());
       } else if (securityManagers.isUnsatisfied()) {
         if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
           throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
@@ -98,6 +98,17 @@ public class SecuredInterceptor extends AbstractInterceptor {
     } else {
       return helpers.stream().sorted(Sortable::compare).findFirst().get();
     }
+  }
+
+  protected Stream<SecuredInterceptorCallback> resolveCallbacks() {
+    if (!callbacks.isUnsatisfied()) {
+      return callbacks.stream().sorted(Sortable::compare);
+    }
+    return Stream.empty();
+  }
+
+  protected SecuredMetadata resolveMeta(InvocationContext invocationContext) {
+    return getSecuredMetadata(getInterceptorAnnotation(invocationContext, Secured.class));
   }
 
 }

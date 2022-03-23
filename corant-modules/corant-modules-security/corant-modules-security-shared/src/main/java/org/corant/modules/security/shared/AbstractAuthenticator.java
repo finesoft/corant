@@ -13,9 +13,11 @@
  */
 package org.corant.modules.security.shared;
 
+import java.util.stream.Stream;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.AuthenticationException;
 import org.corant.modules.security.Authenticator;
+import org.corant.modules.security.AuthenticatorCallback;
 import org.corant.modules.security.Token;
 
 /**
@@ -30,13 +32,14 @@ public abstract class AbstractAuthenticator implements Authenticator {
   public AuthenticationData authenticate(Token token) throws AuthenticationException {
     AuthenticationData data = null;
     try {
-      preAuthenticate(token);
+      resolveCallbacks().forEachOrdered(cb -> cb.preAuthenticate(token));
       return doAuthenticate(token);
     } finally {
-      postAuthenticated(data);
+      resolveCallbacks().forEachOrdered(cb -> cb.postAuthenticated(data));
     }
   }
 
   protected abstract AuthenticationData doAuthenticate(Token token) throws AuthenticationException;
 
+  protected abstract Stream<AuthenticatorCallback> resolveCallbacks();
 }

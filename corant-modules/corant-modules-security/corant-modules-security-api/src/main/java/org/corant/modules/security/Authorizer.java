@@ -40,23 +40,6 @@ public interface Authorizer extends Sortable {
   }
 
   /**
-   * A callback after access check.
-   *
-   * @param success true means pass the access check, false means access check failed
-   */
-  default void postCheckAccess(boolean success) {}
-
-  /**
-   * A callback before access check.
-   *
-   * @param context the caller context, in general the context is current SecurityContext.
-   * @param roleOrPermit the necessary (pre-configured) roles or permissions, used to compute
-   *        whether the caller has access privileges with the roles or permissions acquired by the
-   *        caller context.
-   */
-  default void preCheckAccess(Object context, Object roleOrPermit) {}
-
-  /**
    * Tests whether the current context has access.
    *
    * @param context the caller context, in general the context is current SecurityContext.

@@ -11,21 +11,29 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared.interceptor;
+package org.corant.modules.security;
 
-import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
- * corant-modules-security-shared
+ * corant-modules-security-api
  *
- * @author bingo 下午7:42:06
+ * @author bingo 下午11:56:54
  *
  */
-public interface SecuredInterceptorCallback extends Sortable {
+public interface AuthenticatorCallback extends Sortable {
 
-  void postSecuredIntercepted(boolean success);
+  /**
+   * A callback after authenticated.
+   *
+   * @param authenticationData the authentication result, if null means authentication is failure.
+   */
+  default void postAuthenticated(AuthenticationData authenticationData) {}
 
-  void preSecuredIntercept(SecuredMetadata secured);
-
+  /**
+   * A callback before authenticate, can be used for multi-factor authentication and more
+   *
+   * @param token the consolidation of an account's principals and supporting credentials
+   */
+  default void preAuthenticate(Token token) {}
 }

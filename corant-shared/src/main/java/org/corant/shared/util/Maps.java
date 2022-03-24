@@ -18,6 +18,7 @@ import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Conversions.toSet;
 import static org.corant.shared.util.Objects.asString;
+import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.wrapArray;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
@@ -1132,7 +1134,9 @@ public class Maps {
             if (item instanceof Map) {
               implantMapValue((Map) item, paths, nextDeep, value);
             } else if (item != null) {
-              throw new NotSupportedException("We only support implants for a map object!");
+              throw new NotSupportedException(
+                  "We only support implants for a map object! error path: [%s]",
+                  String.join(" -> ", asStrings(Arrays.copyOf(paths, deep))));
             }
           }
         } else if (next.getClass().isArray()) {
@@ -1140,11 +1144,15 @@ public class Maps {
             if (item instanceof Map) {
               implantMapValue((Map) item, paths, nextDeep, value);
             } else if (item != null) {
-              throw new NotSupportedException("We only support implants for a map object!");
+              throw new NotSupportedException(
+                  "We only support implants for a map object! error path: [%s]",
+                  String.join(" -> ", asStrings(Arrays.copyOf(paths, deep))));
             }
           }
         } else {
-          throw new NotSupportedException("We only support implants for a map object!");
+          throw new NotSupportedException(
+              "We only support implants for a map object! error path: [%s]",
+              String.join(" -> ", asStrings(Arrays.copyOf(paths, deep))));
         }
       }
     }
@@ -1190,7 +1198,9 @@ public class Maps {
          * isEmptyOrNull(arrayValue[i])) { arrayValue[i] = null; } }
          */
       } else {
-        throw new NotSupportedException("We only extract value from map/iterable/array object");
+        throw new NotSupportedException(
+            "We only extract value from map/iterable/array object, error path: [%s]",
+            String.join(" -> ", asStrings(Arrays.copyOf(keyPath, deep))));
       }
     } else if (value instanceof Iterable && flat) {
       for (Object next : (Iterable<?>) value) {

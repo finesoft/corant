@@ -198,7 +198,7 @@ public class HibernateOrmDeveloperKits {
     LoggerFactory.disableAccessWarnings();
     LoggerFactory.disableLogger();
     CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
-        "corant.flyway.migrate.enable", "false");
+        "corant.flyway.migrate.enable", "false", "corant.jta.transaction.auto-recovery", "false");
     return Corant.startup(HibernateOrmDeveloperKits.class,
         new String[] {Corant.DISABLE_BOOST_LINE_CMD,
             new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,

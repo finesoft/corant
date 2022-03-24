@@ -26,6 +26,8 @@ import org.corant.modules.security.Principal;
  */
 public class UserAuthcData extends SimpleAuthcData {
 
+  private static final long serialVersionUID = -7319705255292058038L;
+
   protected Serializable userId;
 
   public UserAuthcData(Serializable userId, Object credentials,

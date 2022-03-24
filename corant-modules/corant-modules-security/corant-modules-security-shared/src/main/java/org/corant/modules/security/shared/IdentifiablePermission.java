@@ -56,7 +56,7 @@ public class IdentifiablePermission extends Predication implements Permission, A
     if (this == obj) {
       return true;
     }
-    if (!super.equals(obj)) {
+    if (obj == null) {
       return false;
     }
     if (getClass() != obj.getClass()) {
@@ -77,9 +77,7 @@ public class IdentifiablePermission extends Predication implements Permission, A
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    return prime * result + Objects.hash(id);
+    return Objects.hash(id);
   }
 
   @Override

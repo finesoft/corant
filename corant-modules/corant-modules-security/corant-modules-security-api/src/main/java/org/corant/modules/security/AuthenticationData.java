@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Collection;
  * @author bingo 上午10:18:25
  *
  */
-public interface AuthenticationData {
+public interface AuthenticationData extends Serializable {
 
   Object getCredentials();
 

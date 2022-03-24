@@ -30,6 +30,8 @@ import org.corant.modules.security.Role;
  */
 public class UserAuthzData extends SimpleAuthzData {
 
+  private static final long serialVersionUID = -6102518515337436642L;
+
   protected Serializable userId;
 
   public UserAuthzData(Serializable userId) {

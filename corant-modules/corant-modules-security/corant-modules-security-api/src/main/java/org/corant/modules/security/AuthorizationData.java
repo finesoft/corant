@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -22,7 +23,7 @@ import java.util.Collections;
  * @author bingo 上午10:19:23
  *
  */
-public interface AuthorizationData {
+public interface AuthorizationData extends Serializable {
 
   default Collection<? extends Permission> getPermissions() {
     return Collections.emptySet();

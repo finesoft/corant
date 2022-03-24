@@ -33,6 +33,8 @@ import org.corant.shared.util.Objects;
  */
 public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 
+  private static final long serialVersionUID = -7901225699993579260L;
+
   protected Collection<Role> roles = Collections.emptyList();
 
   protected Collection<Permission> permissions = Collections.emptyList();

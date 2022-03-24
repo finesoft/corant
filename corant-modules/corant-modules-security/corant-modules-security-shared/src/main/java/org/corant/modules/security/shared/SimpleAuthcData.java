@@ -29,6 +29,8 @@ import org.corant.modules.security.Principal;
  */
 public class SimpleAuthcData implements AuthenticationData, AttributeSet {
 
+  private static final long serialVersionUID = -187218108099683055L;
+
   protected Object credentials;
 
   protected Collection<Principal> principals;

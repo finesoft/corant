@@ -13,14 +13,8 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
 import org.corant.modules.security.Permission;
 
 /**
@@ -29,84 +23,23 @@ import org.corant.modules.security.Permission;
  * @author bingo 上午10:41:08
  *
  */
-public class IdentifiablePermission extends Predication implements Permission, AttributeSet {
+public interface IdentifiablePermission extends Permission {
 
-  private static final long serialVersionUID = 4147350908179493589L;
-
-  protected Serializable id;
-
-  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
-
-  public IdentifiablePermission(Serializable id) {
-    this(id, null);
-  }
-
-  public IdentifiablePermission(Serializable id, Map<String, ? extends Serializable> attributes) {
-    super(shouldNotNull(id));
-    this.id = id;
-    if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
-    }
-  }
-
-  protected IdentifiablePermission() {}
+  Serializable getId();
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    IdentifiablePermission other = (IdentifiablePermission) obj;
-    return Objects.equals(id, other.id);
-  }
-
-  @Override
-  public Map<String, ? extends Serializable> getAttributes() {
-    return attributes;
-  }
-
-  public Serializable getId() {
-    return id;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  @Override
-  public boolean implies(Permission permission) {
+  default boolean implies(Permission permission) {
     if (!(permission instanceof IdentifiablePermission)) {
       return false;
     }
-    return test(((IdentifiablePermission) permission).id);
+    return areEqual(getId(), ((IdentifiablePermission) permission).getId());
   }
 
   @Override
-  public String toString() {
-    return "IdentifiablePermission [id=" + id + "]";
-  }
-
-  @Override
-  public <T> T unwrap(Class<T> cls) {
+  default <T> T unwrap(Class<T> cls) {
     if (IdentifiablePermission.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return Permission.super.unwrap(cls);
-  }
-
-  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    stream.defaultReadObject();
-    predicate = predicateOf(id);
-  }
-
-  private void writeObject(ObjectOutputStream stream) throws IOException {
-    stream.defaultWriteObject();
   }
 }

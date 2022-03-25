@@ -13,15 +13,8 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import org.corant.modules.security.Permission;
-import org.corant.modules.security.Principal;
-import org.corant.modules.security.Role;
+import org.corant.modules.security.Subject;
 
 /**
  * corant-modules-security-shared
@@ -29,81 +22,15 @@ import org.corant.modules.security.Role;
  * @author bingo 下午4:22:33
  *
  */
-public class IdentifiableSubject extends SimpleSubject {
+public interface IdentifiableSubject extends Subject {
 
-  private static final long serialVersionUID = 3435651508945136478L;
-
-  protected Serializable id;
-
-  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals) {
-    super(principals);
-    this.id = shouldNotNull(id);
-  }
-
-  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
-      Collection<? extends Role> roles, Collection<? extends Permission> permissions,
-      Map<String, ? extends Serializable> attributes) {
-    super(principals, roles, permissions, attributes);
-    this.id = shouldNotNull(id);
-  }
-
-  public IdentifiableSubject(Serializable id, Collection<? extends Principal> principals,
-      Collection<? extends Role> roles, Map<String, ? extends Serializable> attributes) {
-    super(principals, roles, attributes);
-    this.id = shouldNotNull(id);
-  }
-
-  protected IdentifiableSubject() {}
+  Serializable getId();
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    IdentifiableSubject other = (IdentifiableSubject) obj;
-    return Objects.equals(id, other.id);
-  }
-
-  @Override
-  public Map<String, ? extends Serializable> getAttributes() {
-    return attributes;
-  }
-
-  public Serializable getId() {
-    return id;
-  }
-
-  @Override
-  public Principal getPrincipal(String name) {
-    return principals.stream().filter(p -> areEqual(name, p.getName())).findFirst().orElse(null);
-  }
-
-  @Override
-  public Collection<? extends Principal> getPrincipals() {
-    return principals;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  @Override
-  public String toString() {
-    return "IdentifiableSubject [id=" + id + "]";
-  }
-
-  @Override
-  public <T> T unwrap(Class<T> cls) {
+  default <T> T unwrap(Class<T> cls) {
     if (IdentifiableSubject.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
-    return super.unwrap(cls);
+    return Subject.super.unwrap(cls);
   }
 }

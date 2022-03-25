@@ -13,14 +13,8 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import static org.corant.shared.util.Objects.areEqual;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
 import org.corant.modules.security.Role;
 
 /**
@@ -29,84 +23,24 @@ import org.corant.modules.security.Role;
  * @author bingo 上午10:41:08
  *
  */
-public class IdentifiableRole extends Predication implements Role, AttributeSet {
+public interface IdentifiableRole extends Role {
 
-  private static final long serialVersionUID = 3771872966822697648L;
-
-  protected Serializable id;
-
-  protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
-
-  public IdentifiableRole(Serializable id) {
-    this(id, null);
-  }
-
-  public IdentifiableRole(Serializable id, Map<String, ? extends Serializable> attributes) {
-    super(shouldNotNull(id));
-    this.id = id;
-    if (attributes != null) {
-      this.attributes = Collections.unmodifiableMap(attributes);
-    }
-  }
-
-  protected IdentifiableRole() {}
+  Serializable getId();
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    IdentifiableRole other = (IdentifiableRole) obj;
-    return Objects.equals(id, other.id);
-  }
-
-  @Override
-  public Map<String, ? extends Serializable> getAttributes() {
-    return attributes;
-  }
-
-  public Serializable getId() {
-    return id;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  @Override
-  public boolean implies(Role role) {
+  default boolean implies(Role role) {
     if (!(role instanceof IdentifiableRole)) {
       return false;
     }
-    return test(((IdentifiableRole) role).id);
+    return areEqual(getId(), ((IdentifiableRole) role).getId());
   }
 
   @Override
-  public String toString() {
-    return "IdentifiableRole [id=" + id + "]";
-  }
-
-  @Override
-  public <T> T unwrap(Class<T> cls) {
+  default <T> T unwrap(Class<T> cls) {
     if (IdentifiableRole.class.isAssignableFrom(cls)) {
       return cls.cast(this);
     }
     return Role.super.unwrap(cls);
   }
 
-  private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    stream.defaultReadObject();
-    predicate = predicateOf(id);
-  }
-
-  private void writeObject(ObjectOutputStream stream) throws IOException {
-    stream.defaultWriteObject();
-  }
 }

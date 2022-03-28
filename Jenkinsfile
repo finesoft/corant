@@ -8,8 +8,8 @@ pipeline {
     stage('Build') {
       agent {
         docker {
-          image 'maven:3.6.3-openjdk-11'
-          args '-u root -v $HOME/devops/dev/settings-docker.xml:/usr/share/maven/ref/settings.xml -v maven-data:/root/.m2/repository'
+          image 'maven:3.8.4-openjdk-11'
+          args '-u root -v $HOME/devops/dev/settings-docker38.xml:/usr/share/maven/ref/settings.xml -v maven-data:/root/.m2/repository'
         }
       }
       steps {

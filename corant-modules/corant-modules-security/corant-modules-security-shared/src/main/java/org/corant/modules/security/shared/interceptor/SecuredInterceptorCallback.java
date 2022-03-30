@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
-import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -26,6 +25,6 @@ public interface SecuredInterceptorCallback extends Sortable {
 
   void postSecuredIntercepted(boolean success);
 
-  void preSecuredIntercept(SecuredMetadata secured);
+  void preSecuredIntercept(SecuredInterceptionContext secured);
 
 }

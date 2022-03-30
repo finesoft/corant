@@ -15,7 +15,6 @@ package org.corant.modules.microprofile.jwt.jaxrs;
 
 import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.select;
-import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.util.stream.Stream;
 import javax.annotation.Priority;
@@ -31,10 +30,9 @@ import org.corant.context.security.SecurityContexts;
 import org.corant.modules.microprofile.jwt.MpJWTAuthorizer;
 import org.corant.modules.security.Authorizer;
 import org.corant.modules.security.annotation.SecuredMetadata;
-import org.corant.modules.security.annotation.SecuredType;
-import org.corant.modules.security.shared.SimplePermissions;
-import org.corant.modules.security.shared.SimpleRoles;
+import org.corant.modules.security.shared.interceptor.SecuredInterceptionContext;
 import org.corant.modules.security.shared.interceptor.SecuredInterceptorCallback;
+import org.corant.modules.security.shared.interceptor.SecuredInterceptorHelper;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -46,34 +44,22 @@ import org.corant.shared.ubiquity.Sortable;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTAuthorizationFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-  private final SecuredMetadata meta;
-  private final SimplePermissions allowedPermits;
-  private final SimpleRoles allowedRoles;
+  private final SecuredInterceptionContext context;
   volatile Authorizer authorizer;
 
   public MpJWTAuthorizationFilter(SecuredMetadata meta) {
-    this.meta = meta;
-    if (meta.denyAll()) {
-      allowedPermits = null;
-      allowedRoles = null;
-    } else if (meta.type() == SecuredType.ROLE) {
-      allowedRoles = SimpleRoles.of(meta.allowed());
-      allowedPermits = null;
-    } else {
-      allowedPermits = SimplePermissions.of(meta.allowed());
-      allowedRoles = null;
-    }
+    context = SecuredInterceptorHelper.DEFAULT_INST.resolveContext(meta);
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    callbacks().forEachOrdered(cb -> cb.preSecuredIntercept(meta));
+    callbacks().forEachOrdered(cb -> cb.preSecuredIntercept(context));
     Throwable throwable = null;
     try {
-      if (meta.denyAll()) {
+      if (context.isDenyAll()) {
         throwable = new ForbiddenException();
-      } else {
-        Object roleOrPermit = defaultObject(allowedRoles, allowedPermits);
+      } else if (!context.isAllowedAll()) {
+        Object roleOrPermit = context.getAllowed();
         authorizer().checkAccess(SecurityContexts.getCurrent(), roleOrPermit);
       }
     } catch (Exception e) {

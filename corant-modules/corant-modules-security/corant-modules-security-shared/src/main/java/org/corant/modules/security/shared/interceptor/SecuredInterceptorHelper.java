@@ -16,6 +16,7 @@ package org.corant.modules.security.shared.interceptor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.corant.modules.security.annotation.SecuredMetadata;
+import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
 import org.corant.shared.exception.NotSupportedException;
@@ -27,21 +28,23 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 下午11:48:56
  *
  */
-public interface SecuredInterceptorHepler extends Sortable {
+public interface SecuredInterceptorHelper extends Sortable {
 
-  SecuredInterceptorHepler DEFAULT_INST = new SecuredInterceptorHepler() {
+  SecuredInterceptorHelper DEFAULT_INST = new SecuredInterceptorHelper() {
 
-    Map<SecuredMetadata, Object> roles = new ConcurrentHashMap<>();
-    Map<SecuredMetadata, Object> perms = new ConcurrentHashMap<>();
-
-    @Override
-    public Object resolveAllowedPermission(SecuredMetadata meta) {
-      return perms.computeIfAbsent(meta, k -> SimplePermissions.of(k.allowed()));
-    }
+    final Map<SecuredMetadata, SecuredInterceptionContext> caches = new ConcurrentHashMap<>();
 
     @Override
-    public Object resolveAllowedRole(SecuredMetadata meta) {
-      return roles.computeIfAbsent(meta, k -> SimpleRoles.of(k.allowed()));
+    public SecuredInterceptionContext resolveContext(SecuredMetadata meta) {
+      return caches.computeIfAbsent(meta, m -> {
+        if (!m.equals(SecuredMetadata.EMPTY_INST)) {
+          return new SecuredInterceptionContext(
+              meta.type() == SecuredType.ROLE ? SimpleRoles.of(m.allowed())
+                  : SimplePermissions.of(m.allowed()),
+              meta.type(), meta.runAs(), meta.denyAll());
+        }
+        return SecuredInterceptionContext.ALLOWED_ALL;
+      });
     }
   };
 
@@ -50,8 +53,6 @@ public interface SecuredInterceptorHepler extends Sortable {
         "Runas is not currently supported, implementers can implement it themselves");
   }
 
-  Object resolveAllowedPermission(SecuredMetadata meta);
-
-  Object resolveAllowedRole(SecuredMetadata meta);
+  SecuredInterceptionContext resolveContext(SecuredMetadata meta);
 
 }

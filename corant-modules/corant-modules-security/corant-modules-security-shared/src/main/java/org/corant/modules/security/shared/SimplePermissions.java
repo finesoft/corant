@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared;
 
 import static org.corant.shared.util.Lists.listOf;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +31,9 @@ import org.corant.shared.util.Strings;
  * @author bingo 下午4:22:11
  *
  */
-public class SimplePermissions implements Iterable<SimplePermission> {
+public class SimplePermissions implements Iterable<SimplePermission>, Serializable {
+
+  private static final long serialVersionUID = -7538549347440416322L;
 
   protected final Collection<SimplePermission> perms;
 

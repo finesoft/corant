@@ -13,17 +13,15 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.listOf;
+import static java.util.Collections.emptyList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.util.Empties;
 import org.corant.shared.util.Objects;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-security-shared
@@ -35,28 +33,49 @@ public class SimplePermissions implements Iterable<SimplePermission>, Serializab
 
   private static final long serialVersionUID = -7538549347440416322L;
 
+  public static final SimplePermissions EMPTY_INST = new SimplePermissions(null);
+
   protected final Collection<SimplePermission> perms;
 
-  public SimplePermissions(Collection<SimplePermission> perms) {
-    this.perms = Empties.isEmpty(perms) ? Collections.emptyList()
+  public SimplePermissions(Collection<? extends SimplePermission> perms) {
+    this.perms = Empties.isEmpty(perms) ? emptyList()
         : perms.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
   public static SimplePermissions of(Collection<String> names) {
     if (names != null) {
-      return new SimplePermissions(names.stream().filter(Strings::isNotBlank)
-          .map(SimplePermission::new).collect(Collectors.toList()));
+      return new SimplePermissions(
+          names.stream().map(SimplePermission::new).collect(Collectors.toList()));
     }
-    return new SimplePermissions((Collection<SimplePermission>) null);
-  }
-
-  public static SimplePermissions of(SimplePermission... perms) {
-    return new SimplePermissions(listOf(perms));
+    return EMPTY_INST;
   }
 
   public static SimplePermissions of(String... name) {
+    if (name.length == 0) {
+      return EMPTY_INST;
+    }
     return new SimplePermissions(
         Arrays.stream(name).map(SimplePermission::new).collect(Collectors.toList()));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    SimplePermissions other = (SimplePermissions) obj;
+    return java.util.Objects.equals(perms, other.perms);
+  }
+
+  @Override
+  public int hashCode() {
+    return java.util.Objects.hash(perms);
   }
 
   public boolean isEmpty() {

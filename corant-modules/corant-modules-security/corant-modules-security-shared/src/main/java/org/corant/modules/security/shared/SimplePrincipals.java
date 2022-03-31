@@ -13,13 +13,14 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.listOf;
+import static java.util.Collections.emptyList;
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Empties;
 import org.corant.shared.util.Objects;
 
 /**
@@ -28,13 +29,52 @@ import org.corant.shared.util.Objects;
  * @author bingo 下午4:22:22
  *
  */
-public class SimplePrincipals implements Iterable<SimplePrincipal> {
+public class SimplePrincipals implements Iterable<SimplePrincipal>, Serializable {
+
+  private static final long serialVersionUID = -5640320901365165346L;
 
   protected final Collection<SimplePrincipal> principals;
 
-  public SimplePrincipals(Collection<SimplePrincipal> principals) {
-    this.principals = principals == null ? Collections.emptyList()
+  public SimplePrincipals(Collection<? extends SimplePrincipal> principals) {
+    this.principals = Empties.isEmpty(principals) ? emptyList()
         : principals.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
+  }
+
+  public static SimplePrincipals of(Collection<String> names) {
+    if (names != null) {
+      return new SimplePrincipals(
+          names.stream().map(SimplePrincipal::new).collect(Collectors.toList()));
+    }
+    return new SimplePrincipals(null);
+  }
+
+  public static SimplePrincipals of(String... name) {
+    return new SimplePrincipals(
+        Arrays.stream(name).map(SimplePrincipal::new).collect(Collectors.toList()));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    SimplePrincipals other = (SimplePrincipals) obj;
+    return java.util.Objects.equals(principals, other.principals);
+  }
+
+  @Override
+  public int hashCode() {
+    return java.util.Objects.hash(principals);
+  }
+
+  public boolean isEmpty() {
+    return principals.isEmpty();
   }
 
   @Override
@@ -46,7 +86,4 @@ public class SimplePrincipals implements Iterable<SimplePrincipal> {
     return principals.stream();
   }
 
-  public List<SimplePrincipal> toList() {
-    return listOf(this);
-  }
 }

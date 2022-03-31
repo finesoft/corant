@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.listOf;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.util.Empties;
 import org.corant.shared.util.Objects;
-import org.corant.shared.util.Strings;
 
 /**
  *
@@ -36,26 +34,26 @@ public class SimpleRoles implements Iterable<SimpleRole>, Serializable {
 
   private static final long serialVersionUID = -7033501395362107655L;
 
+  public static final SimpleRoles EMPTY_INST = new SimpleRoles(null);
+
   protected final Collection<SimpleRole> roles;
 
-  public SimpleRoles(Collection<SimpleRole> roles) {
+  public SimpleRoles(Collection<? extends SimpleRole> roles) {
     this.roles = Empties.isEmpty(roles) ? Collections.emptyList()
         : roles.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
   public static SimpleRoles of(Collection<String> names) {
     if (names != null) {
-      return new SimpleRoles(names.stream().filter(Strings::isNotBlank).map(SimpleRole::new)
-          .collect(Collectors.toList()));
+      return new SimpleRoles(names.stream().map(SimpleRole::new).collect(Collectors.toList()));
     }
-    return new SimpleRoles((Collection<SimpleRole>) null);
-  }
-
-  public static SimpleRoles of(SimpleRole... role) {
-    return new SimpleRoles(listOf(role));
+    return EMPTY_INST;
   }
 
   public static SimpleRoles of(String... name) {
+    if (name.length == 0) {
+      return EMPTY_INST;
+    }
     return new SimpleRoles(Arrays.stream(name).map(SimpleRole::new).collect(Collectors.toList()));
   }
 

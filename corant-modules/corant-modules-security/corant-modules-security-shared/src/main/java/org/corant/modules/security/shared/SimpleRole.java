@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -41,7 +42,7 @@ public class SimpleRole extends Predication implements Role, AttributeSet {
   }
 
   public SimpleRole(String name, Map<String, ? extends Serializable> attributes) {
-    super(name);
+    super(shouldNotBlank(name, "The name of simple role can't blank!"));
     this.name = name;
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);

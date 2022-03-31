@@ -13,14 +13,12 @@
  */
 package org.corant.modules.microprofile.jwt;
 
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.AuthorizerCallback;
-import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.shared.AbstractAuthorizer;
 import org.corant.modules.security.shared.SimplePermission;
 import org.corant.modules.security.shared.SimplePermissions;
@@ -36,17 +34,13 @@ import org.corant.modules.security.shared.SimpleRoles;
  */
 public class MpJWTAuthorizer extends AbstractAuthorizer {
 
-  public static final SimpleRole ALL_ROLES = new SimpleRole(Secured.ALLOWED_ALL_SIGN);
-  public static final SimplePermission ALL_PERMS = new SimplePermission(Secured.ALLOWED_ALL_SIGN);
   public static final MpJWTAuthorizer DFLT_INST = new MpJWTAuthorizer();
 
   @Override
   public boolean testAccess(Object context, Object roleOrPermit) {
     if (context instanceof SecurityContext) {
       SecurityContext sctx = (SecurityContext) context;
-      if (isEmpty(roleOrPermit)) {
-        return sctx.getPrincipal() != null;
-      } else if (roleOrPermit instanceof SimpleRoles) {
+      if (roleOrPermit instanceof SimpleRoles) {
         return testRoleAccess(sctx, (SimpleRoles) roleOrPermit);
       } else if (roleOrPermit instanceof SimplePermissions) {
         return testPermAccess(sctx, (SimplePermissions) roleOrPermit);
@@ -61,32 +55,32 @@ public class MpJWTAuthorizer extends AbstractAuthorizer {
   }
 
   protected boolean testPermAccess(SecurityContext sctx, SimplePermissions perms) {
-    SimplePrincipal principal = null;
-    Collection<SimplePermission> sctxPerms = null;
-    if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
-      principal = (SimplePrincipal) sctx.getPrincipal();
-      sctxPerms = principal.getAttribute("permits", ArrayList::new, SimplePermission.class);
+    if (perms.isEmpty()) {
+      return sctx.getPrincipal() != null;
     }
-    for (SimplePermission perm : perms) {
-      if (perm.equals(ALL_PERMS) && principal != null
-          || isNotEmpty(sctxPerms) && sctxPerms.stream().anyMatch(perm::implies)) {
-        return true;
+    Collection<SimplePermission> sctxPerms = sctx.getPrincipal(SimplePrincipal.class)
+        .getAttribute("permits", ArrayList::new, p -> new SimplePermission(p.toString()));
+    if (isNotEmpty(sctxPerms)) {
+      for (SimplePermission perm : perms) {
+        if (sctxPerms.stream().anyMatch(p -> p.implies(perm))) {
+          return true;
+        }
       }
     }
     return false;
   }
 
   protected boolean testRoleAccess(SecurityContext sctx, SimpleRoles roles) {
-    SimplePrincipal principal = null;
-    Collection<SimpleRole> sctxRoles = null;
-    if (sctx != null && sctx.getPrincipal() instanceof SimplePrincipal) {
-      principal = (SimplePrincipal) sctx.getPrincipal();
-      sctxRoles = principal.getAttribute("groups", ArrayList::new, SimpleRole.class);
+    if (roles.isEmpty()) {
+      return sctx.getPrincipal() != null;
     }
-    for (SimpleRole role : roles) {
-      if (role.equals(ALL_ROLES) && principal != null
-          || isNotEmpty(sctxRoles) && sctxRoles.stream().anyMatch(role::implies)) {
-        return true;
+    Collection<SimpleRole> sctxRoles = sctx.getPrincipal(SimplePrincipal.class)
+        .getAttribute("groups", ArrayList::new, r -> new SimpleRole(r.toString()));
+    if (isNotEmpty(sctxRoles)) {
+      for (SimpleRole role : roles) {
+        if (sctxRoles.stream().anyMatch(role::implies)) {
+          return true;
+        }
       }
     }
     return false;

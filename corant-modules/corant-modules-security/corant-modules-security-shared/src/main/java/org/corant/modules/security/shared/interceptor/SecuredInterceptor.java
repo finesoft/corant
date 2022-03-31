@@ -15,8 +15,6 @@ package org.corant.modules.security.shared.interceptor;
 
 import static org.corant.modules.security.shared.SecurityExtension.getSecuredMetadata;
 import static org.corant.shared.util.Strings.isNotBlank;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -45,9 +43,6 @@ import org.corant.shared.ubiquity.Sortable;
 @Interceptor
 @Secured
 public class SecuredInterceptor extends AbstractInterceptor {
-
-  protected static final Map<SecuredMetadata, SecuredInterceptionContext> contexts =
-      new ConcurrentHashMap<>();
 
   @Inject
   @Any
@@ -79,19 +74,18 @@ public class SecuredInterceptor extends AbstractInterceptor {
 
   protected void check(SecuredInterceptionContext context, SecuredInterceptorHelper helper)
       throws Exception {
-    if (!context.isAllowedAll()) {
-      if (context.isDenyAll()) {
+    if (context.isDenyAll()) {
+      throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
+    }
+    if (isNotBlank(context.getRunAs())) {
+      helper.handleRunAs(context.getRunAs());
+    } else if (securityManagers.isUnsatisfied()) {
+      if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
-      if (isNotBlank(context.getRunAs())) {
-        helper.handleRunAs(context.getRunAs());
-      } else if (securityManagers.isUnsatisfied()) {
-        if (SecurityExtension.DENY_ALL_NO_SECURITY_MANAGER) {
-          throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
-        }
-      } else {
-        securityManagers.get().checkAccess(SecurityContexts.getCurrent(), context.getAllowed());
-      }
+    } else {
+      securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
+          context.getResolvedAllowed());
     }
   }
 

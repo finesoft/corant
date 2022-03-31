@@ -13,11 +13,11 @@
  */
 package org.corant.modules.security.annotation;
 
+import static java.util.Collections.unmodifiableCollection;
 import static org.corant.config.Configs.assemblyStringConfigProperty;
 import static org.corant.config.Configs.getValue;
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.defaultString;
@@ -25,7 +25,6 @@ import static org.corant.shared.util.Strings.defaultTrim;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,12 +35,13 @@ public class SecuredMetadata implements Serializable {
 
   private static final long serialVersionUID = -2874685620910996061L;
 
-  public static final SecuredMetadata EMPTY_INST = new SecuredMetadata();
+  public static final SecuredMetadata ALLOW_ALL_INST =
+      new SecuredMetadata(EMPTY, EMPTY, EMPTY_ARRAY, false);
+
+  public static final SecuredMetadata DENY_ALL_INST =
+      new SecuredMetadata(EMPTY, EMPTY, EMPTY_ARRAY, true);
 
   public static final String DEFAULT_SECURED_TYPE_CFG_NAME = "corant.secutiry.secured.type";
-
-  public static final Collection<String> ALLOWED_ALL =
-      Collections.unmodifiableCollection(listOf(Secured.ALLOWED_ALL_SIGN));
 
   private final Collection<String> allowed;
 
@@ -64,13 +64,9 @@ public class SecuredMetadata implements Serializable {
     Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
         .filter(Strings::isNotBlank).map(String::strip).collect(Collectors.toList());
-    this.allowed = isEmpty(aws) ? ALLOWED_ALL : Collections.unmodifiableCollection(aws);
+    this.allowed = unmodifiableCollection(aws);
     this.denyAll = denyAll;
-    hash = Objects.hash(allowed, denyAll, runAs, type);
-  }
-
-  protected SecuredMetadata() {
-    this(null, null, null, false);
+    hash = Objects.hash(this.allowed, this.denyAll, this.runAs, this.type);
   }
 
   public Collection<String> allowed() {

@@ -58,8 +58,8 @@ public class MpJWTAuthorizationFilter implements ContainerRequestFilter, Contain
     try {
       if (context.isDenyAll()) {
         throwable = new ForbiddenException();
-      } else if (!context.isAllowedAll()) {
-        Object roleOrPermit = context.getAllowed();
+      } else {
+        Object roleOrPermit = context.getResolvedAllowed();
         authorizer().checkAccess(SecurityContexts.getCurrent(), roleOrPermit);
       }
     } catch (Exception e) {

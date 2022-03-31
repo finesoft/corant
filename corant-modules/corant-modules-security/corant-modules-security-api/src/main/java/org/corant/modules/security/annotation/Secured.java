@@ -48,8 +48,6 @@ import org.corant.shared.util.Strings;
 @Inherited
 public @interface Secured {
 
-  String ALLOWED_ALL_SIGN = Strings.ASTERISK;
-
   @Nonbinding
   String[] allowed() default {};
 

@@ -18,10 +18,10 @@ import static org.corant.shared.util.Maps.getMapCollection;
 import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.beans.Transient;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import org.corant.shared.ubiquity.TypeLiteral;
 
@@ -33,9 +33,14 @@ import org.corant.shared.ubiquity.TypeLiteral;
  */
 public interface AttributeSet {
 
+  default Object getAttribute(String name) {
+    Map<String, ?> atts = getAttributes();
+    return atts != null ? atts.get(name) : null;
+  }
+
   default <T> T getAttribute(String name, Class<T> type) {
     Object att;
-    Map<String, ? extends Serializable> atts = getAttributes();
+    Map<String, ?> atts = getAttributes();
     if (atts != null && (att = atts.get(name)) != null) {
       return toObject(att, type);
     }
@@ -46,9 +51,23 @@ public interface AttributeSet {
     return defaultObject(getAttribute(name, type), alt);
   }
 
+  default <T> T getAttribute(String name, Function<Object, T> converter) {
+    Object att;
+    Map<String, ?> atts = getAttributes();
+    if (atts != null && (att = atts.get(name)) != null) {
+      return converter.apply(att);
+    }
+    return null;
+  }
+
   default <T, C extends Collection<T>> C getAttribute(String name, IntFunction<C> collectionFactory,
       Class<T> itemType) {
     return getMapCollection(getAttributes(), name, collectionFactory, itemType, null);
+  }
+
+  default <T, C extends Collection<T>> C getAttribute(String name, IntFunction<C> collectionFactory,
+      Function<Object, T> converter) {
+    return getMapCollection(getAttributes(), name, collectionFactory, converter);
   }
 
   default <T> T getAttribute(String name, TypeLiteral<T> type) {
@@ -57,13 +76,13 @@ public interface AttributeSet {
 
   @Transient
   default Set<String> getAttributeNames() {
-    Map<String, ? extends Serializable> atts = getAttributes();
+    Map<String, ?> atts = getAttributes();
     if (atts != null) {
       return atts.keySet();
     }
     return null;
   }
 
-  Map<String, ? extends Serializable> getAttributes();
+  Map<String, ?> getAttributes();
 
 }

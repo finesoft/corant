@@ -36,8 +36,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -317,6 +319,52 @@ public class Maps {
       return Conversion.convert(obj, elementClazz, collectionFactory, hints);
     } else {
       return null;
+    }
+  }
+
+  public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
+      final Object key, final IntFunction<C> collectionFactory,
+      final Function<Object, T> converter) {
+    Object obj = map == null ? null : map.get(key);
+    if (obj instanceof Collection) {
+      Collection<?> vals = (Collection<?>) obj;
+      C results = collectionFactory.apply(vals.size());
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj != null && obj.getClass().isArray()) {
+      Object[] vals = wrapArray(obj);
+      C results = collectionFactory.apply(vals.length);
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj instanceof Iterable) {
+      Iterable<?> vals = (Iterable<?>) obj;
+      C results = collectionFactory.apply(10);
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj instanceof Iterator) {
+      Iterator<?> vals = (Iterator<?>) obj;
+      C results = collectionFactory.apply(10);
+      while (vals.hasNext()) {
+        results.add(converter.apply(vals.next()));
+      }
+      return results;
+    } else if (obj instanceof Enumeration) {
+      Enumeration<?> vals = (Enumeration<?>) obj;
+      C results = collectionFactory.apply(10);
+      while (vals.hasMoreElements()) {
+        results.add(converter.apply(vals.nextElement()));
+      }
+      return results;
+    } else if(obj == null){
+      return null;
+    }else {
+      throw new NotSupportedException();
     }
   }
 

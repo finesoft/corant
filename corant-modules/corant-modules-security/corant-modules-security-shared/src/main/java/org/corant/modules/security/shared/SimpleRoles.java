@@ -19,9 +19,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Empties;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 
@@ -39,7 +39,7 @@ public class SimpleRoles implements Iterable<SimpleRole>, Serializable {
   protected final Collection<SimpleRole> roles;
 
   public SimpleRoles(Collection<SimpleRole> roles) {
-    this.roles = roles == null ? Collections.emptyList()
+    this.roles = Empties.isEmpty(roles) ? Collections.emptyList()
         : roles.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
@@ -59,6 +59,10 @@ public class SimpleRoles implements Iterable<SimpleRole>, Serializable {
     return new SimpleRoles(Arrays.stream(name).map(SimpleRole::new).collect(Collectors.toList()));
   }
 
+  public boolean isEmpty() {
+    return roles.isEmpty();
+  }
+
   @Override
   public Iterator<SimpleRole> iterator() {
     return roles.iterator();
@@ -66,9 +70,5 @@ public class SimpleRoles implements Iterable<SimpleRole>, Serializable {
 
   public Stream<SimpleRole> stream() {
     return roles.stream();
-  }
-
-  public List<SimpleRole> toList() {
-    return listOf(this);
   }
 }

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.parseDollarTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,9 @@ public class Configs {
    * @see Config
    */
   public static String assemblyStringConfigProperty(String value) {
+    if (isBlank(value)) {
+      return value;
+    }
     CorantConfigSources cs = ((CorantConfig) ConfigProvider.getConfig()).getCorantConfigSources();
     if (cs.isExpressionsEnabled()) {
       return cs.resolveValue(value);

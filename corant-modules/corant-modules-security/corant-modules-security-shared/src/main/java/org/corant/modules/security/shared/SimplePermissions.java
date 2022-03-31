@@ -19,9 +19,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.corant.shared.util.Empties;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 
@@ -38,7 +38,7 @@ public class SimplePermissions implements Iterable<SimplePermission>, Serializab
   protected final Collection<SimplePermission> perms;
 
   public SimplePermissions(Collection<SimplePermission> perms) {
-    this.perms = perms == null ? Collections.emptyList()
+    this.perms = Empties.isEmpty(perms) ? Collections.emptyList()
         : perms.stream().filter(Objects::isNotNull).collect(Collectors.toUnmodifiableList());
   }
 
@@ -59,6 +59,10 @@ public class SimplePermissions implements Iterable<SimplePermission>, Serializab
         Arrays.stream(name).map(SimplePermission::new).collect(Collectors.toList()));
   }
 
+  public boolean isEmpty() {
+    return perms.isEmpty();
+  }
+
   @Override
   public Iterator<SimplePermission> iterator() {
     return perms.iterator();
@@ -67,9 +71,4 @@ public class SimplePermissions implements Iterable<SimplePermission>, Serializab
   public Stream<SimplePermission> stream() {
     return perms.stream();
   }
-
-  public List<SimplePermission> toList() {
-    return listOf(this);
-  }
-
 }

@@ -64,7 +64,7 @@ public class SecurityExtension implements Extension {
     if (!securedMetaDatasInit) {
       throw new CorantRuntimeException("The secured metadata not ready yet!");
     }
-    return secured == null ? SecuredMetadata.EMPTY_INST
+    return secured == null ? SecuredMetadata.ALLOW_ALL_INST
         : securedMetaDatas.computeIfAbsent(secured, SecuredMetadata::new);
   }
 

@@ -13,12 +13,14 @@
  */
 package org.corant.modules.security.shared.interceptor;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimpleRoles;
+import org.corant.modules.security.shared.interceptor.SecuredInterceptionContext.DefaultSecuredInterceptionContext;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -32,19 +34,13 @@ public interface SecuredInterceptorHelper extends Sortable {
 
   SecuredInterceptorHelper DEFAULT_INST = new SecuredInterceptorHelper() {
 
-    final Map<SecuredMetadata, SecuredInterceptionContext> caches = new ConcurrentHashMap<>();
+    final Map<SecuredMetadata, Serializable> alloweds = new ConcurrentHashMap<>();
 
     @Override
-    public SecuredInterceptionContext resolveContext(SecuredMetadata meta) {
-      return caches.computeIfAbsent(meta, m -> {
-        if (!m.equals(SecuredMetadata.EMPTY_INST)) {
-          return new SecuredInterceptionContext(
-              meta.type() == SecuredType.ROLE ? SimpleRoles.of(m.allowed())
-                  : SimplePermissions.of(m.allowed()),
-              meta.type(), meta.runAs(), meta.denyAll());
-        }
-        return SecuredInterceptionContext.ALLOWED_ALL;
-      });
+    public Serializable resolveAllowed(SecuredMetadata meta) {
+      return alloweds.computeIfAbsent(meta,
+          m -> meta.type() == SecuredType.ROLE ? SimpleRoles.of(m.allowed())
+              : SimplePermissions.of(m.allowed()));
     }
   };
 
@@ -53,6 +49,10 @@ public interface SecuredInterceptorHelper extends Sortable {
         "Runas is not currently supported, implementers can implement it themselves");
   }
 
-  SecuredInterceptionContext resolveContext(SecuredMetadata meta);
+  Serializable resolveAllowed(SecuredMetadata meta);
+
+  default SecuredInterceptionContext resolveContext(SecuredMetadata meta) {
+    return new DefaultSecuredInterceptionContext(resolveAllowed(meta), meta);
+  }
 
 }

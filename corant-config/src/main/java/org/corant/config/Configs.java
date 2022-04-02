@@ -15,10 +15,13 @@ package org.corant.config;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
+import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.parseDollarTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,12 +29,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.corant.config.declarative.ConfigInstances;
 import org.corant.config.declarative.ConfigMetaClass;
 import org.corant.config.declarative.ConfigMetaResolver;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.TypeLiteral;
+import org.corant.shared.util.Strings.WildcardMatcher;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
@@ -292,6 +298,31 @@ public class Configs {
    */
   public static String resolveVariable(String propertyName) {
     return parseDollarTemplate(propertyName, k -> getValue(k, String.class));
+  }
+
+  /**
+   * Returns all raw configuration property values that match any given property name or property
+   * name wildcard.
+   *
+   * @param propertyNameOrWildcards property name or property name wildcard
+   * @return the matched raw stream
+   */
+  public static Stream<String> searchValues(String... propertyNameOrWildcards) {
+    if (propertyNameOrWildcards.length == 0) {
+      return Stream.empty();
+    }
+    Predicate<String> predicate = s -> false;
+    for (String pnow : propertyNameOrWildcards) {
+      if (WildcardMatcher.hasWildcard(pnow)) {
+        predicate = predicate.or(WildcardMatcher.of(false, pnow));
+      } else if (isNotBlank(pnow)) {
+        predicate = predicate.or(t -> areEqual(t, pnow));
+      }
+    }
+    final Config config = ConfigProvider.getConfig();
+    return streamOf(config.getPropertyNames()).filter(predicate::test)
+        .map(pn -> config.getOptionalValue(pn, String.class)).filter(Optional::isPresent)
+        .map(Optional::get);
   }
 
 }

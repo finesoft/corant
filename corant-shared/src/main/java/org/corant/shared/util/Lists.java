@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.corant.shared.ubiquity.Immutable.ImmutableListBuilder;
 import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
@@ -234,6 +235,16 @@ public class Lists {
     } else {
       return Collections.unmodifiableList(newArrayList(collection));
     }
+  }
+
+  public static <E> ImmutableListBuilder<E> immutableListBuilder(
+      Collection<? extends E> collection) {
+    return new ImmutableListBuilder<>(collection);
+  }
+
+  @SafeVarargs
+  public static <E> ImmutableListBuilder<E> immutableListBuilder(final E... objects) {
+    return new ImmutableListBuilder<>(objects);
   }
 
   /**

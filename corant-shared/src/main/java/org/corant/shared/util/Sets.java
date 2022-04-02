@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import org.corant.shared.ubiquity.Immutable.ImmutableSetBuilder;
 
 /**
  * corant-shared
@@ -72,6 +73,15 @@ public class Sets {
     } else {
       return Collections.unmodifiableSet(newHashSet(collection));
     }
+  }
+
+  public static <E> ImmutableSetBuilder<E> immutableSetBuilder(Collection<E> collection) {
+    return new ImmutableSetBuilder<>(collection);
+  }
+
+  @SafeVarargs
+  public static <E> ImmutableSetBuilder<E> immutableSetBuilder(final E... objects) {
+    return new ImmutableSetBuilder<>(objects);
   }
 
   /**
@@ -214,4 +224,5 @@ public class Sets {
     }
     return union;
   }
+
 }

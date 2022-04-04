@@ -36,6 +36,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.JMSConnectionFactory;
+import javax.jms.Session;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.context.required.RequiredExt;
@@ -144,9 +145,17 @@ public abstract class AbstractJMSExtension implements Extension {
       }
     }
     receiveMethods.forEach((m, mds) -> {
-      if (m.getMethod().getParameters().length != 1) {
+      // inject session to handler method 2022-04-04
+      if (m.getMethod().getParameterCount() != 1 && m.getMethod().getParameterCount() != 2) {
         adv.addDeploymentProblem(new CorantRuntimeException(
-            "The message driven method [%s] must have only one parameter.", m.getMethod()));
+            "The message driven method [%s] must have one or two parameter.", m.getMethod()));
+      }
+      if (m.getMethod().getParameterCount() == 2
+          && !Session.class.isAssignableFrom(m.getMethod().getParameters()[1].getType())) {
+        // inject session 2022-04-04
+        adv.addDeploymentProblem(new CorantRuntimeException(
+            "The message driven method [%s] second parameter type must be session.",
+            m.getMethod()));
       }
       if (isNotEmpty(mds.key()) && isNotEmpty(mds.value())) {
         adv.addDeploymentProblem(new CorantRuntimeException(

@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
@@ -41,19 +42,26 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
   final ContextualMethodHandler method;
   final MessageReceivingMediator mediator;
   final Class<?> messageClass;
+  final MessageReceivingExecutorConfig config;
 
   protected DefaultMessageHandler(MessageReceivingMetaData meta,
       MessageReceivingMediator mediator) {
     method = meta.getMethod();
+    config = MessageReceivingExecutorConfig.getExecutorConfig(meta.getConnectionFactoryId());
     messageClass = method.getMethod().getParameterTypes()[0];
     this.mediator = mediator;
   }
 
+  @SuppressWarnings("resource")
   @Override
-  public Object onMessage(Message message) {
+  public Object onMessage(Message message, Session session) {
     try {
       resolveSecurityContext(message);
-      return method.invoke(resolvePayload(message));
+      if (method.getMethod().getParameterCount() > 1) {
+        return method.invoke(resolvePayload(message), new MessageReceivingSession(session, config));
+      } else {
+        return method.invoke(resolvePayload(message));
+      }
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | JMSException e) {
       throw new CorantRuntimeException(e);

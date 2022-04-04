@@ -136,6 +136,9 @@ public class CorantConfigConversion implements Serializable {
   }
 
   public Object convert(String rawValue, Type type) {
+    if (type == String.class || type == Object.class || type == CharSequence.class) {
+      return rawValue;// fast return
+    }
     Object result = null;
     if (isNotEmpty(rawValue)) {
       final Class<?> typeClass;

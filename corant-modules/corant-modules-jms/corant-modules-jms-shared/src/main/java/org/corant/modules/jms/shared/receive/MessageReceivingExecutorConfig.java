@@ -13,15 +13,19 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isBlank;
 import java.time.Duration;
+import java.util.Map;
+import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Qualifiers.NamedObject;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutorConfig;
+import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -39,6 +43,24 @@ public class MessageReceivingExecutorConfig
   public final static MessageReceivingExecutorConfig DFLT_INST =
       new MessageReceivingExecutorConfig();
 
+  public final static Map<String, MessageReceivingExecutorConfig> CONFIGS =
+      unmodifiableMap(Configs.resolveMulti(MessageReceivingExecutorConfig.class));
+
+  @ConfigKeyItem(name = "allow-create-consumer-on-receiving-method", defaultValue = "false")
+  protected boolean allowCreateConsumerOnReceivingMethod;
+
+  @ConfigKeyItem(name = "allow-create-subscriber-on-receiving-method", defaultValue = "false")
+  protected boolean allowCreateSubscriberOnReceivingMethod;
+
+  @ConfigKeyItem(name = "allow-create-queue-on-receiving-method", defaultValue = "false")
+  protected boolean allowCreateQueueOnReceivingMethod;
+
+  @ConfigKeyItem(name = "allow-create-topic-on-receiving-method", defaultValue = "false")
+  protected boolean allowCreateTopicOnReceivingMethod;
+
+  @ConfigKeyItem(name = "allow-unsubscriber-on-receiving-method", defaultValue = "false")
+  protected boolean allowUnsubscriberOnReceivingMethod;
+
   protected String connectionFactoryId;
 
   @ConfigKeyItem(name = "receive-task-initial-delay", defaultValue = "PT30S")
@@ -52,6 +74,15 @@ public class MessageReceivingExecutorConfig
 
   @ConfigKeyItem(name = "receive-executor-cor-pool-size", defaultValue = "2")
   protected Integer corePoolSize = max(2, Runtime.getRuntime().availableProcessors());
+
+  public static MessageReceivingExecutorConfig getExecutorConfig(AbstractJMSConfig config) {
+    return CONFIGS.getOrDefault(config.getConnectionFactoryId(),
+        MessageReceivingExecutorConfig.DFLT_INST);
+  }
+
+  public static MessageReceivingExecutorConfig getExecutorConfig(String connectionFactoryId) {
+    return CONFIGS.getOrDefault(connectionFactoryId, MessageReceivingExecutorConfig.DFLT_INST);
+  }
 
   @Override
   public Duration getAwaitTermination() {
@@ -80,6 +111,26 @@ public class MessageReceivingExecutorConfig
   @Override
   public String getName() {
     return connectionFactoryId;
+  }
+
+  public boolean isAllowCreateConsumerOnReceivingMethod() {
+    return allowCreateConsumerOnReceivingMethod;
+  }
+
+  public boolean isAllowCreateQueueOnReceivingMethod() {
+    return allowCreateQueueOnReceivingMethod;
+  }
+
+  public boolean isAllowCreateSubscriberOnReceivingMethod() {
+    return allowCreateSubscriberOnReceivingMethod;
+  }
+
+  public boolean isAllowCreateTopicOnReceivingMethod() {
+    return allowCreateTopicOnReceivingMethod;
+  }
+
+  public boolean isAllowUnsubscriberOnReceivingMethod() {
+    return allowUnsubscriberOnReceivingMethod;
   }
 
   @Override

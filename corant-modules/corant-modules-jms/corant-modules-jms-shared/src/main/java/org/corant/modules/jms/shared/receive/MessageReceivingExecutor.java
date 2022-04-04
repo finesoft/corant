@@ -39,7 +39,6 @@ import javax.enterprise.event.ObservesAsync;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
@@ -80,9 +79,6 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
 
   protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
 
-  protected final Map<String, MessageReceivingExecutorConfig> executorConfigs =
-      Configs.resolveMulti(MessageReceivingExecutorConfig.class);
-
   @Override
   public void start() {
     Set<Pair<String, String>> anycasts = new HashSet<>();
@@ -122,8 +118,8 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
       Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
       try {
         entry.getValue().shutdown();
-        entry.getValue().awaitTermination(
-            getExecutorConfig(entry.getKey()).getAwaitTermination().toMillis(),
+        entry.getValue().awaitTermination(MessageReceivingExecutorConfig
+            .getExecutorConfig(entry.getKey()).getAwaitTermination().toMillis(),
             TimeUnit.MICROSECONDS);
         logger.info(() -> String.format("The message receiving executor service %s was stopped.",
             entry.getKey().getConnectionFactoryId()));
@@ -138,11 +134,6 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
     logger.info(() -> "All message receiving executor services were stopped.");
     connections.shutdown();
     logger.info(() -> "All message receiving connections were released.");
-  }
-
-  protected MessageReceivingExecutorConfig getExecutorConfig(AbstractJMSConfig config) {
-    return executorConfigs.getOrDefault(config.getConnectionFactoryId(),
-        MessageReceivingExecutorConfig.DFLT_INST);
   }
 
   protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
@@ -166,7 +157,8 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
     }
     ScheduledExecutorService service = shouldNotNull(executors.get(config),
         "Can't find any scheduled executore service! message receiver [%s].", meta);
-    final MessageReceivingExecutorConfig executorConfig = getExecutorConfig(config);
+    final MessageReceivingExecutorConfig executorConfig =
+        MessageReceivingExecutorConfig.getExecutorConfig(config);
     final ManagedMessageReceivingTask task = taskFactory.create(meta);
     final ScheduledFuture<?> future =
         service.scheduleWithFixedDelay(task, executorConfig.getInitialDelay().toMillis(),
@@ -202,7 +194,8 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
 
       if (!configs.isEmpty()) {
         configs.forEach(cfg -> {
-          MessageReceivingExecutorConfig executorConfig = getExecutorConfig(cfg);
+          MessageReceivingExecutorConfig executorConfig =
+              MessageReceivingExecutorConfig.getExecutorConfig(cfg);
           ScheduledThreadPoolExecutor executor =
               new ScheduledThreadPoolExecutor(executorConfig.getCorePoolSize(),
                   new MessageReceivingThreadFactory(cfg.getConnectionFactoryId()));

@@ -14,6 +14,7 @@
 package org.corant.modules.jms.receive;
 
 import javax.jms.Message;
+import javax.jms.Session;
 
 /**
  * corant-modules-jms-api
@@ -23,6 +24,10 @@ import javax.jms.Message;
  */
 public interface ManagedMessageReceivingHandler {
 
-  Object onMessage(Message message);
+  default Object onMessage(Message message) {
+    return onMessage(message, null);
+  }
+
+  Object onMessage(Message message, Session session);
 
 }

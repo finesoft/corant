@@ -51,7 +51,8 @@ public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
         String marshallerName =
             defaultString(originalMessage.getStringProperty(REPLY_MSG_MARSHAL_SCHEMA),
                 MSG_MARSHAL_SCHEMA_STD_JAVA);
-        Message msg = mediator.getMessageMarshaller(marshallerName).serialize(session, payload);
+        Message msg = payload instanceof Message ? (Message) payload
+            : mediator.getMessageMarshaller(marshallerName).serialize(session, payload);
         String clid;
         if ((clid = originalMessage.getJMSCorrelationID()) != null) {
           msg.setJMSCorrelationID(clid);
@@ -68,8 +69,8 @@ public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
         for (MessageReplyMetaData rd : meta.getReplies()) {
           Destination dest = rd.isMulticast() ? session.createTopic(rd.getDestination())
               : session.createQueue(rd.getDestination());
-          Message msg =
-              mediator.getMessageMarshaller(rd.getMarshaller()).serialize(session, payload);
+          Message msg = payload instanceof Message ? (Message) payload
+              : mediator.getMessageMarshaller(rd.getMarshaller()).serialize(session, payload);
           if (sctx != null) {
             msg.setStringProperty(SECURITY_CONTEXT_PROPERTY_NAME, sctx);
           }

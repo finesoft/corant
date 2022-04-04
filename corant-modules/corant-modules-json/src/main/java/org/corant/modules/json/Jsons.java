@@ -15,7 +15,6 @@ package org.corant.modules.json;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
@@ -98,7 +97,7 @@ public class Jsons {
    * @see ObjectMapper#convertValue(Object, Class)
    */
   public static <T> T convert(Object object, Class<T> clazz) {
-    return objectMapper.convertValue(object, clazz);
+    return object == null ? null : objectMapper.convertValue(object, clazz);
   }
 
   /**
@@ -119,7 +118,8 @@ public class Jsons {
    * @see ObjectMapper#convertValue(Object, JavaType)
    */
   public static <T> T convert(Object object, TypeLiteral<T> typeLiteral) {
-    return objectMapper.convertValue(object, objectMapper.constructType(typeLiteral.getType()));
+    return object == null ? null
+        : objectMapper.convertValue(object, objectMapper.constructType(typeLiteral.getType()));
   }
 
   /**
@@ -140,7 +140,107 @@ public class Jsons {
    * @see ObjectMapper#convertValue(Object, TypeReference)
    */
   public static <T> T convert(Object object, TypeReference<T> targetTypeRef) {
-    return objectMapper.convertValue(object, targetTypeRef);
+    return object == null ? null : objectMapper.convertValue(object, targetTypeRef);
+  }
+
+  /**
+   * Clone a POJO with given type literal and object mapper
+   *
+   * <p>
+   * NOTE: This method is experimental.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param objectMapper the given object mapper use for handling
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T copy(Object pojo, ObjectMapper objectMapper, TypeLiteral<T> type) {
+    if (pojo == null) {
+      return null;
+    } else {
+      try {
+        TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+        objectMapper.writeValue(tb, pojo);
+        if (type == null) {
+          return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
+        } else {
+          return objectMapper.readValue(tb.asParser(), objectMapper.constructType(type.getType()));
+        }
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Clone a POJO with given type reference and object mapper
+   *
+   * <p>
+   * NOTE: This method is experimental.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param objectMapper the given object mapper use for handling
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T copy(Object pojo, ObjectMapper objectMapper, TypeReference<T> type) {
+    if (pojo == null) {
+      return null;
+    } else {
+      try {
+        TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
+        objectMapper.writeValue(tb, pojo);
+        if (type == null) {
+          return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
+        } else {
+          return objectMapper.readValue(tb.asParser(), type);
+        }
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Clone a POJO with given type literal
+   *
+   * <p>
+   * NOTE: This method is experimental.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  public static <T> T copy(Object pojo, TypeLiteral<T> type) {
+    return copy(pojo, objectMapper, type);
+  }
+
+  /**
+   * Clone a POJO with given type reference
+   *
+   * <p>
+   * NOTE: This method is experimental.
+   *
+   * @param <T> the object type
+   * @param pojo the object to clone
+   * @param type the object type
+   * @return object clone
+   *
+   * @see TokenBuffer
+   */
+  public static <T> T copy(Object pojo, TypeReference<T> type) {
+    return copy(pojo, objectMapper, type);
   }
 
   /**
@@ -164,66 +264,6 @@ public class Jsons {
         TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
         objectMapper.writeValue(tb, pojo);
         return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-  }
-
-  /**
-   * Clone a POJO with given type literal
-   *
-   * <p>
-   * NOTE: This method is experimental.
-   *
-   * @param <T> the object type
-   * @param pojo the object to clone
-   * @param type the object type
-   * @return object clone
-   *
-   * @see TokenBuffer
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T copy(T pojo, TypeLiteral<T> type) {
-    try {
-      TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
-      objectMapper.writeValue(tb, pojo);
-      if (type == null) {
-        return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
-      } else {
-        return objectMapper.readValue(tb.asParser(), objectMapper.constructType(type.getType()));
-      }
-    } catch (IOException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  /**
-   * Clone a POJO with given type reference
-   *
-   * <p>
-   * NOTE: This method is experimental.
-   *
-   * @param <T> the object type
-   * @param pojo the object to clone
-   * @param type the object type
-   * @return object clone
-   *
-   * @see TokenBuffer
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T copy(T pojo, TypeReference<T> type) {
-    if (pojo == null) {
-      return null;
-    } else {
-      try {
-        TokenBuffer tb = new TokenBuffer(objectMapper.getFactory().getCodec(), false);
-        objectMapper.writeValue(tb, pojo);
-        if (type == null) {
-          return (T) objectMapper.readValue(tb.asParser(), pojo.getClass());
-        } else {
-          return objectMapper.readValue(tb.asParser(), type);
-        }
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
@@ -322,7 +362,7 @@ public class Jsons {
    * @param jsonString the JSON serialized string
    */
   public static <K, V> Map<K, V> fromString(Class<K> keyCls, Class<V> valueCls, String jsonString) {
-    if (!isNotBlank(jsonString)) {
+    if (jsonString == null) {
       return null;
     }
     try {
@@ -340,7 +380,7 @@ public class Jsons {
    */
   public static <K, V> Map<K, V> fromString(String jsonString) {
     try {
-      return mapReader.readValue(jsonString);
+      return jsonString == null ? null : mapReader.readValue(jsonString);
     } catch (JsonProcessingException e) {
       throw new CorantRuntimeException(e);
     }
@@ -353,7 +393,7 @@ public class Jsons {
    * @param clazz the expected object class
    */
   public static <T> T fromString(String jsonString, Class<T> clazz) {
-    if (isNotBlank(jsonString)) {
+    if (jsonString != null) {
       try {
         return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {
@@ -371,7 +411,7 @@ public class Jsons {
    * @param targetTypeLiteral the target type literal
    */
   public static <T> T fromString(String jsonString, TypeLiteral<T> targetTypeLiteral) {
-    if (!isNotBlank(jsonString)) {
+    if (jsonString == null) {
       return null;
     }
     try {
@@ -389,7 +429,7 @@ public class Jsons {
    * @param targetTypeRef the target type reference
    */
   public static <T> T fromString(String jsonString, TypeReference<T> targetTypeRef) {
-    if (!isNotBlank(jsonString)) {
+    if (jsonString == null) {
       return null;
     }
     try {
@@ -475,7 +515,7 @@ public class Jsons {
    * @param clazz the expected object class
    */
   public static <T> T tryFromString(String jsonString, Class<T> clazz) {
-    if (isNotBlank(jsonString)) {
+    if (jsonString != null) {
       try {
         return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {

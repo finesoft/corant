@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
-import static org.corant.context.Beans.select;
+import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -21,12 +21,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -34,6 +35,7 @@ import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
 import org.corant.shared.util.Classes;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyDeploymentImpl;
@@ -49,6 +51,20 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
  */
 @ApplicationScoped
 public class ResteasyProvider implements WebMetaDataProvider {
+
+  public static final Application DEFAULT_APPLICATION = new Application() {};
+
+  @Inject
+  @ConfigProperty(name = "corant.resteasy.application.use-default-if-absent", defaultValue = "true")
+  protected Boolean useDefaultApplicationIfAbsend;
+
+  @Inject
+  @ConfigProperty(name = "corant.resteasy.veto-resource-classes")
+  protected Optional<Set<String>> vetoResourceClasses;
+
+  @Inject
+  @ConfigProperty(name = "corant.resteasy.veto-provider-classes")
+  protected Optional<Set<String>> vetoProviderClasses;
 
   @Inject
   protected ResteasyCdiExtension extension;
@@ -69,9 +85,16 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
   @PostConstruct
   protected void onPostConstruct() {
-    Instance<Application> applications = select(Application.class);
-    if (applications.isResolvable()) {
-      ApplicationInfo appInfo = new ApplicationInfo(applications.get());
+
+    vetoResourceClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
+        .forEach(v -> extension.getResources().removeIf(v::isAssignableFrom)));
+    vetoProviderClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
+        .forEach(v -> extension.getProviders().removeIf(v::isAssignableFrom)));
+
+    Application application = find(Application.class)
+        .orElseGet(() -> useDefaultApplicationIfAbsend ? DEFAULT_APPLICATION : null);
+    if (application != null) {
+      ApplicationInfo appInfo = new ApplicationInfo(application);
       servletMetaDatas.add(appInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
           appInfo.toResteasyDeployment(d -> {

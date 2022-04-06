@@ -41,9 +41,20 @@ public class ContainerEvents {
 
   protected void onContainerInitialized(@Observes ContainerInitialized e) {
     events.fire(new PostContainerStartedEvent(e.getContainerId()));
+    events.fireAsync(new PostContainerStartedAsyncEvent(e.getContainerId()));
   }
 
   public interface ContainerEvent {
+  }
+
+  public static class PostContainerStartedAsyncEvent implements ContainerEvent {
+
+    public final String containerId;
+
+    public PostContainerStartedAsyncEvent(String containerId) {
+      this.containerId = containerId;
+    }
+
   }
 
   public static class PostContainerStartedEvent implements ContainerEvent {

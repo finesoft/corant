@@ -15,6 +15,7 @@ package org.corant.modules.webserver.undertow;
 
 import static org.corant.shared.util.Objects.max;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -87,6 +88,11 @@ public class UndertowWebServerConfig {
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.back-log", defaultValue = "1000")
   protected int backLog;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.welcome-pages",
+      defaultValue = "index.html,index.htm,default.html,default.htm")
+  protected Set<String> welcomePages;
 
   @Inject
   @ConfigProperty(name = "corant.webserver.undertow.jsp-content-path")
@@ -246,6 +252,10 @@ public class UndertowWebServerConfig {
    */
   public Optional<String> getStaticServingPath() {
     return staticServingPath;
+  }
+
+  public Set<String> getWelcomePages() {
+    return welcomePages;
   }
 
   /**

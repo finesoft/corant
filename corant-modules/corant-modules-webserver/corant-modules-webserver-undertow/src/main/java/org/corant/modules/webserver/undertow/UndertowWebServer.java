@@ -23,6 +23,7 @@ import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,12 +56,11 @@ import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.builder.PredicatedHandler;
 import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.handlers.resource.PathResourceManager;
-import io.undertow.server.handlers.resource.ResourceHandler;
+import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -220,11 +220,7 @@ public class UndertowWebServer extends AbstractWebServer {
     try {
       deploymentManager.getDeployment().getSessionManager()
           .setDefaultSessionTimeout(config.getSessionTimeout());
-      HttpHandler servletHandler = deploymentManager.start();
-      PathHandler pathHandler =
-          Handlers.path(Handlers.redirect("/")).addPrefixPath("/", servletHandler);
-      resolveStaticContent(pathHandler);
-      HttpHandler handler = pathHandler;
+      HttpHandler handler = deploymentManager.start();
       Optional<ClassPathResource> predicateHandlersConfig =
           Resources.fromClassPath(this.getClass().getClassLoader(), HANDLERS_CONF).findAny();
       if (predicateHandlersConfig.isPresent()) {
@@ -251,9 +247,10 @@ public class UndertowWebServer extends AbstractWebServer {
     di.setDefaultResponseEncoding(specConfig.getDefaultResponseCharset().orElse(DFLT_CHARSET_STR));
     di.setDefaultEncoding(config.getDefaultCharset().orElse(DFLT_CHARSET_STR));
     di.setDisplayName(config.getDisplayName().orElse(name));
-    di.setResourceManager(new ClassPathResourceManager(getClass().getClassLoader()));
     di.setClassLoader(getClass().getClassLoader());
     di.setEagerFilterInit(specConfig.isEagerFilterInit());
+    di.setPreservePathOnForward(false);
+    di.addWelcomePages(specConfig.getWelcomePages());
     di.setEscapeErrorMessage(specConfig.isEscapeErrorMessage());// careful
     if (specConfig.isPersistenceSession() && sessionPersistenceManager.isResolvable()) {
       di.setSessionPersistenceManager(sessionPersistenceManager.get());
@@ -272,6 +269,8 @@ public class UndertowWebServer extends AbstractWebServer {
       additionalConfigurators.stream().sorted()
           .forEachOrdered(cfgr -> cfgr.configureDeployment(di));
     }
+    // static content
+    resolveStaticContent(di);
     // listener
     resolveListener(di);
     // web socket endpoint
@@ -347,7 +346,9 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected void resolveStaticContent(PathHandler handler) {
+  protected void resolveStaticContent(DeploymentInfo di) {
+    List<ResourceManager> managers = new ArrayList<>();
+    managers.add(new ClassPathResourceManager(getClass().getClassLoader()));
     Map<String, String> paths = new HashMap<>();
     if (specConfig.getStaticContentPath().isPresent()
         && specConfig.getStaticServingPath().isPresent()) {
@@ -367,14 +368,13 @@ public class UndertowWebServer extends AbstractWebServer {
       logger.fine(() -> String.format("Resolve static content path [%s].", contentPath));
       logger.fine(() -> String.format("Resolve static serving path [%s].", servingPath));
       if (st == SourceType.FILE_SYSTEM) {
-        handler.addPrefixPath(servingPath,
-            new ResourceHandler(new PathResourceManager(Paths.get(contentPath))));
+        managers.add(new PathResourceManager(Paths.get(contentPath)));
       } else {
-        // TODO FIXME virtual path handler...
-        handler.addPrefixPath(servingPath, new ResourceHandler(
-            new ClassPathResourceManager(this.getClass().getClassLoader(), contentPath)));
+        managers.add(new UndertowClassPathResourceManager(this.getClass().getClassLoader(),
+            servingPath, contentPath));
       }
     });
+    di.setResourceManager(new UndertowMixedResourceManager(managers));
   }
 
   protected void resolveTransportGuaranteeType(ServletSecurityInfo ssi, TransportGuarantee std) {

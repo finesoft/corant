@@ -59,6 +59,10 @@ public class ResteasyProvider implements WebMetaDataProvider {
   protected Boolean useDefaultApplicationIfAbsend;
 
   @Inject
+  @ConfigProperty(name = "corant.resteasy.application.default-path", defaultValue = "rest")
+  protected String defaultApplicationPath;
+
+  @Inject
   @ConfigProperty(name = "corant.resteasy.veto-resource-classes")
   protected Optional<Set<String>> vetoResourceClasses;
 
@@ -72,6 +76,12 @@ public class ResteasyProvider implements WebMetaDataProvider {
   protected final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
 
   protected final Map<String, Object> servletContextAttributes = new HashMap<>();
+
+  protected volatile String applicationPath;
+
+  public String getApplicationPath() {
+    return applicationPath;
+  }
 
   @Override
   public Map<String, Object> servletContextAttributes() {
@@ -94,7 +104,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
     Application application = find(Application.class)
         .orElseGet(() -> useDefaultApplicationIfAbsend ? DEFAULT_APPLICATION : null);
     if (application != null) {
-      ApplicationInfo appInfo = new ApplicationInfo(application);
+      ApplicationInfo appInfo = new ApplicationInfo(application, defaultApplicationPath);
+      applicationPath = appInfo.getContextPath();
       servletMetaDatas.add(appInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
           appInfo.toResteasyDeployment(d -> {
@@ -120,14 +131,11 @@ public class ResteasyProvider implements WebMetaDataProvider {
     final String contextPath;
     final int loadOnStartup;
 
-    /**
-     * @param application
-     */
-    public ApplicationInfo(Application application) {
+    public ApplicationInfo(Application application, String defaultPath) {
       this.application = application;
       applicationClass = getUserClass(application.getClass());
       ApplicationPath ap = findAnnotation(applicationClass, ApplicationPath.class, true);
-      String cp = ap == null ? "/" : ap.value();
+      String cp = ap == null ? defaultPath : ap.value();
       if (isNotEmpty(cp) && cp.charAt(0) != '/') {
         cp = "/" + cp;
       }

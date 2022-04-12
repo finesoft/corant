@@ -365,8 +365,8 @@ public class UndertowWebServer extends AbstractWebServer {
       SourceType st = SourceType.decide(c).orElse(SourceType.CLASS_PATH);
       String contentPath = st.resolve(c);
       String servingPath = s;
-      logger.fine(() -> String.format("Resolve static content path [%s].", contentPath));
-      logger.fine(() -> String.format("Resolve static serving path [%s].", servingPath));
+      logger.fine(() -> String.format("Resolve static content path [%s] -> serving path [%s].",
+          contentPath, servingPath));
       if (st == SourceType.FILE_SYSTEM) {
         managers.add(new PathResourceManager(Paths.get(contentPath)));
       } else {

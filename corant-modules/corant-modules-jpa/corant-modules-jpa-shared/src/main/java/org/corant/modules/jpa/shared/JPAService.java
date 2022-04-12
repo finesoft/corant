@@ -13,8 +13,6 @@
  */
 package org.corant.modules.jpa.shared;
 
-import static org.corant.context.Beans.resolveApply;
-import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -65,6 +63,14 @@ public class JPAService implements PersistenceService {
 
   @Inject
   @Any
+  protected JPAExtension extension;
+
+  @Inject
+  @Any
+  protected Instance<JPAProvider> providers;
+
+  @Inject
+  @Any
   protected RsEntityManagerManager rsEmManager;
 
   @Inject
@@ -89,10 +95,9 @@ public class JPAService implements PersistenceService {
   @Override
   public EntityManagerFactory getEntityManagerFactory(PersistenceUnit pu) {
     return emfs.computeIfAbsent(pu, p -> {
-      PersistenceUnitInfoMetaData puim =
-          resolveApply(JPAExtension.class, b -> b.getPersistenceUnitInfoMetaData(pu));
+      PersistenceUnitInfoMetaData puim = extension.getPersistenceUnitInfoMetaData(pu);
       Named jp = NamedLiteral.of(puim.getPersistenceProviderClassName());
-      Instance<JPAProvider> provider = select(JPAProvider.class, jp);
+      Instance<JPAProvider> provider = providers.select(jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
       return provider.get().buildEntityManagerFactory(puim,
           mapOf(PersistenceNames.PU_NME_KEY, pu.unitName()));

@@ -52,15 +52,11 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 @ApplicationScoped
 public class ResteasyProvider implements WebMetaDataProvider {
 
-  public static final Application DEFAULT_APPLICATION = new Application() {};
+  public static final Application DEFAULT_APPLICATION = new DefaultApplication() {};
 
   @Inject
   @ConfigProperty(name = "corant.resteasy.application.use-default-if-absent", defaultValue = "true")
   protected Boolean useDefaultApplicationIfAbsend;
-
-  @Inject
-  @ConfigProperty(name = "corant.resteasy.application.default-path", defaultValue = "rest")
-  protected String defaultApplicationPath;
 
   @Inject
   @ConfigProperty(name = "corant.resteasy.veto-resource-classes")
@@ -77,10 +73,10 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
   protected final Map<String, Object> servletContextAttributes = new HashMap<>();
 
-  protected volatile String applicationPath;
+  protected volatile ApplicationInfo applicationInfo;
 
-  public String getApplicationPath() {
-    return applicationPath;
+  public ApplicationInfo getApplicationInfo() {
+    return applicationInfo;
   }
 
   @Override
@@ -104,11 +100,10 @@ public class ResteasyProvider implements WebMetaDataProvider {
     Application application = find(Application.class)
         .orElseGet(() -> useDefaultApplicationIfAbsend ? DEFAULT_APPLICATION : null);
     if (application != null) {
-      ApplicationInfo appInfo = new ApplicationInfo(application, defaultApplicationPath);
-      applicationPath = appInfo.getContextPath();
-      servletMetaDatas.add(appInfo.toWebServletMetaData());
+      applicationInfo = new ApplicationInfo(application);
+      servletMetaDatas.add(applicationInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
-          appInfo.toResteasyDeployment(d -> {
+          applicationInfo.toResteasyDeployment(d -> {
             d.setScannedResourceClasses(extension.getResources().stream().map(Classes::getUserClass)
                 .map(Class::getName).collect(Collectors.toList()));
             d.setScannedProviderClasses(extension.getProviders().stream().map(Classes::getUserClass)
@@ -128,18 +123,18 @@ public class ResteasyProvider implements WebMetaDataProvider {
     final Application application;
     final Class<?> applicationClass;
     final Class<? extends HttpServletDispatcher> dispatcherClass;
-    final String contextPath;
+    final String applicationPath;
     final int loadOnStartup;
 
-    public ApplicationInfo(Application application, String defaultPath) {
+    public ApplicationInfo(Application application) {
       this.application = application;
       applicationClass = getUserClass(application.getClass());
       ApplicationPath ap = findAnnotation(applicationClass, ApplicationPath.class, true);
-      String cp = ap == null ? defaultPath : ap.value();
+      String cp = ap == null ? "/" : ap.value();
       if (isNotEmpty(cp) && cp.charAt(0) != '/') {
         cp = "/" + cp;
       }
-      contextPath = cp;
+      applicationPath = cp;
       ResteasyApplication restApp =
           findAnnotation(applicationClass, ResteasyApplication.class, true);
       dispatcherClass = restApp == null ? org.corant.modules.jaxrs.resteasy.ResteasyServlet.class
@@ -159,52 +154,32 @@ public class ResteasyProvider implements WebMetaDataProvider {
         return false;
       }
       ApplicationInfo other = (ApplicationInfo) obj;
-      if (contextPath == null) {
-        if (other.contextPath != null) {
+      if (applicationPath == null) {
+        if (other.applicationPath != null) {
           return false;
         }
-      } else if (!contextPath.equals(other.contextPath)) {
+      } else if (!applicationPath.equals(other.applicationPath)) {
         return false;
       }
       return true;
     }
 
-    /**
-     *
-     * @return the application
-     */
     public Application getApplication() {
       return application;
     }
 
-    /**
-     *
-     * @return the applicationClass
-     */
     public Class<?> getApplicationClass() {
       return applicationClass;
     }
 
-    /**
-     *
-     * @return the contextPath
-     */
-    public String getContextPath() {
-      return contextPath;
+    public String getApplicationPath() {
+      return applicationPath;
     }
 
-    /**
-     *
-     * @return the dispatcherClass
-     */
     public Class<? extends HttpServletDispatcher> getDispatcherClass() {
       return dispatcherClass;
     }
 
-    /**
-     *
-     * @return the loadOnStartup
-     */
     public int getLoadOnStartup() {
       return loadOnStartup;
     }
@@ -213,7 +188,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      return prime * result + (contextPath == null ? 0 : contextPath.hashCode());
+      return prime * result + (applicationPath == null ? 0 : applicationPath.hashCode());
     }
 
     public ResteasyDeployment toResteasyDeployment(Consumer<ResteasyDeployment> handler) {
@@ -229,16 +204,27 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
     public WebServletMetaData toWebServletMetaData() {
       String pattern =
-          contextPath.endsWith("/") ? contextPath.concat("*") : contextPath.concat("/*");
+          applicationPath.endsWith("/") ? applicationPath.concat("*") : applicationPath.concat("/*");
       String diapatchName = dispatcherClass.getSimpleName();
       String appName = getUserClass(applicationClass.getClass()).getSimpleName();
       WebInitParamMetaData[] ipmds =
           {new WebInitParamMetaData(ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX,
-              contextPath, null)};
+              applicationPath, null)};
       return new WebServletMetaData(diapatchName, new String[] {pattern}, new String[] {pattern},
           loadOnStartup, ipmds, true, null, null, null, diapatchName.concat("-").concat(appName),
           dispatcherClass, null, null);
     }
+
+  }
+
+  /**
+   * corant-modules-jaxrs-resteasy
+   *
+   * @author bingo 下午3:14:28
+   *
+   */
+  @ApplicationPath("jaxrs")
+  public static class DefaultApplication extends Application {
 
   }
 }

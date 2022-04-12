@@ -15,6 +15,7 @@ package org.corant.modules.jaxrs.resteasy;
 
 import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Annotations.findAnnotation;
+import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
@@ -35,6 +37,7 @@ import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
 import org.corant.shared.util.Classes;
+import org.corant.shared.util.Objects;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
@@ -55,8 +58,16 @@ public class ResteasyProvider implements WebMetaDataProvider {
   public static final Application DEFAULT_APPLICATION = new DefaultApplication() {};
 
   @Inject
-  @ConfigProperty(name = "corant.resteasy.application.use-default-if-absent", defaultValue = "true")
-  protected Boolean useDefaultApplicationIfAbsend;
+  protected Logger logger;
+
+  @Inject
+  @ConfigProperty(name = "corant.resteasy.application.use-default-if-unresolved",
+      defaultValue = "true")
+  protected Boolean useDefaultApplicationIfUnresolved;
+
+  @Inject
+  @ConfigProperty(name = "corant.resteasy.application.alternative-if-unresolved")
+  protected Optional<String> alternativeApplicationIfUnresolved;
 
   @Inject
   @ConfigProperty(name = "corant.resteasy.veto-resource-classes")
@@ -97,9 +108,18 @@ public class ResteasyProvider implements WebMetaDataProvider {
     vetoProviderClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
         .forEach(v -> extension.getProviders().removeIf(v::isAssignableFrom)));
 
-    Application application = find(Application.class)
-        .orElseGet(() -> useDefaultApplicationIfAbsend ? DEFAULT_APPLICATION : null);
+    Application application = find(Application.class).orElseGet(() -> {
+      if (alternativeApplicationIfUnresolved.isPresent()) {
+        return (Application) Objects.newInstance(asClass(alternativeApplicationIfUnresolved.get()));
+      } else if (useDefaultApplicationIfUnresolved) {
+        return DEFAULT_APPLICATION;
+      } else {
+        return null;
+      }
+    });
     if (application != null) {
+      logger.info(() -> String.format("The jaxrs application is %s",
+          getUserClass(application).getCanonicalName()));
       applicationInfo = new ApplicationInfo(application);
       servletMetaDatas.add(applicationInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),
@@ -109,6 +129,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
             d.setScannedProviderClasses(extension.getProviders().stream().map(Classes::getUserClass)
                 .map(Class::getName).collect(Collectors.toList()));
           }));
+    } else {
+      logger.info(() -> String.format("The jaxrs application not found!"));
     }
   }
 
@@ -203,8 +225,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
     }
 
     public WebServletMetaData toWebServletMetaData() {
-      String pattern =
-          applicationPath.endsWith("/") ? applicationPath.concat("*") : applicationPath.concat("/*");
+      String pattern = applicationPath.endsWith("/") ? applicationPath.concat("*")
+          : applicationPath.concat("/*");
       String diapatchName = dispatcherClass.getSimpleName();
       String appName = getUserClass(applicationClass.getClass()).getSimpleName();
       WebInitParamMetaData[] ipmds =

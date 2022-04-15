@@ -42,6 +42,7 @@ import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.modules.query.spi.ResultHintHandler;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-query-shared
@@ -105,10 +106,6 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
-    ResultBeanMapper func = resolveBeanMapper(resolveBeanNamed(qh));
-    if (func == null) {
-      return;
-    }
     List<Map<Object, Object>> list = null;
     if (result instanceof Map) {
       list = listOf((Map) result);
@@ -120,7 +117,13 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
       list = ((Paging) result).getResults();
     }
     if (!isEmpty(list)) {
-      func.accept(query, parameter, resolveExtraParams(qh), list);
+      List<ResultBeanMapper> mappers = resolveBeanMapper(resolveBeanNamed(qh));
+      if (mappers.isEmpty()) {
+        return;
+      }
+      for (ResultBeanMapper mapper : mappers) {
+        mapper.accept(query, parameter, resolveExtraParams(qh), list);
+      }
     }
   }
 
@@ -129,7 +132,10 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
     boolean can = hint != null && areEqual(hint.getKey(), HINT_NAME) && !instances.isUnsatisfied();
     if (can) {
       Named named = resolveBeanNamed(hint);
-      can = named != null && instances.select(named).isResolvable();
+      can = named != null && !instances.select(named).isUnsatisfied();
+      if (!can && named != null) {
+        logger.warning(String.format("Can't find any result bean mapper named %s", named.value()));
+      }
     }
     return can;
   }
@@ -141,14 +147,14 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
     logger.fine(() -> "Clear result bean mapper hint handler caches.");
   }
 
-  protected ResultBeanMapper resolveBeanMapper(Annotation named) {
+  protected List<ResultBeanMapper> resolveBeanMapper(Annotation named) {
     if (named != null && !instances.isUnsatisfied()) {
       Instance<ResultBeanMapper> matched = instances.select(named);
-      if (matched.isResolvable()) {
-        return matched.get();
+      if (!matched.isUnsatisfied()) {
+        return matched.stream().sorted(Sortable::compare).collect(Collectors.toList());
       }
     }
-    return null;
+    return Collections.emptyList();
   }
 
   protected Named resolveBeanNamed(QueryHint qh) {
@@ -191,7 +197,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
    *
    */
   @FunctionalInterface
-  public interface ResultBeanMapper {
+  public interface ResultBeanMapper extends Sortable {
 
     /**
      * Handle query result hint

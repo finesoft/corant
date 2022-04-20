@@ -77,7 +77,7 @@ public class MongoClientConfig implements NamedObject {
   public static final String MC_URI = ".uri";
   public static final String MC_OPTS = ".option";
   public static final String MC_AUTH_DB = ".auth-database";
-  public static final String MC_AUTH_ME = "auth.mechanism";
+  public static final String MC_AUTH_ME = "auth-mechanism";
   public static final String MC_USER_NAME = ".username";
   public static final String MC_PASSWORD = ".password";
   public static final String MC_DATABASES = ".databases";

@@ -13,6 +13,7 @@
   <modules>
     <module>corant-devops-maven</module>
     <module>corant-devops-test</module>
+    <module>corant-devops-docs</module>
   </modules>
   <build>
     <plugins>

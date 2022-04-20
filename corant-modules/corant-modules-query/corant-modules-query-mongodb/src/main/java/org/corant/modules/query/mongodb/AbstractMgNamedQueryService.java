@@ -73,7 +73,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_MAX_TIMEMS = "mg.maxTimeMs";
   public static final String PRO_KEY_MAX_AWAIT_TIMEMS = "mg.maxAwaitTimeMs";
   public static final String PRO_KEY_NO_CURSOR_TIMEOUT = "mg.noCursorTimeout";
-  public static final String PRO_KEY_OPLOG_REPLAY = "mg.oplogReplay";
+  // public static final String PRO_KEY_OPLOG_REPLAY = "mg.oplogReplay"; deprecated in MongoDB 4.4.
   public static final String PRO_KEY_PARTIAL = "mg.partial";
   public static final String PRO_KEY_CURSOR_TYPE = "mg.cursorType";
   public static final String PRO_KEY_BATCH_SIZE = "mg.batchSize";
@@ -406,7 +406,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     getOptMapObject(pros, PRO_KEY_NO_CURSOR_TIMEOUT, Conversions::toBoolean)
         .ifPresent(fi::noCursorTimeout);
-    getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY, Conversions::toBoolean).ifPresent(fi::oplogReplay);
+    // getOptMapObject(pros, PRO_KEY_OPLOG_REPLAY,
+    // Conversions::toBoolean).ifPresent(fi::oplogReplay);// deprecated in MongoDB 4.4.
     getOptMapObject(pros, PRO_KEY_PARTIAL, Conversions::toBoolean).ifPresent(fi::partial);
     getOptMapObject(pros, PRO_KEY_RETURN_KEY, Conversions::toBoolean).ifPresent(fi::returnKey);
     getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, Conversions::toBoolean)

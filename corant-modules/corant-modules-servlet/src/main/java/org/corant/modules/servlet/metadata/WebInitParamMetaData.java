@@ -16,6 +16,7 @@ package org.corant.modules.servlet.metadata;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Arrays;
 import javax.servlet.annotation.WebInitParam;
+import org.corant.config.Configs;
 
 /**
  * corant-modules-servlet
@@ -83,7 +84,7 @@ public class WebInitParamMetaData {
   }
 
   protected void setValue(String value) {
-    this.value = value;
+    this.value = Configs.assemblyStringConfigProperty(value);
   }
 
 }

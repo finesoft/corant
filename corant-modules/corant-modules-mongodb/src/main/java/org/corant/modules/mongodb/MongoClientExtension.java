@@ -18,6 +18,7 @@ import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
@@ -61,11 +62,11 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Priorities;
 import org.eclipse.microprofile.config.ConfigProvider;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.MongoClientSettings.Builder;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
@@ -124,7 +125,6 @@ public class MongoClientExtension implements Extension {
   }
 
   /**
-   *
    * @return the clientConfigManager
    */
   public NamedQualifierObjectManager<MongoClientConfig> getClientConfigManager() {
@@ -192,14 +192,20 @@ public class MongoClientExtension implements Extension {
       Annotation[] qualifiers) {
     List<ServerAddress> seeds = cfg.getHostAndPorts().stream()
         .map(hnp -> new ServerAddress(hnp.getLeft(), hnp.getRight())).collect(Collectors.toList());
-    MongoCredential credential = cfg.produceCredential();
     Builder builder = cfg.produceBuiler();
+    if (isNotEmpty(seeds)) {
+      builder.applyToClusterSettings(b -> b.hosts(seeds));
+    } else {
+      builder.applyConnectionString(cfg.getUri());
+    }
+    MongoCredential credential = cfg.produceCredential();
+    if (credential != null) {
+      builder.credential(credential);
+    }
     if (!beans.select(MongoClientConfigurator.class).isUnsatisfied()) {
       beans.select(MongoClientConfigurator.class, qualifiers).forEach(h -> h.configure(builder));
     }
-    MongoClientOptions clientOptions = builder.build();
-    return credential == null ? new MongoClient(seeds, clientOptions)
-        : new MongoClient(seeds, credential, clientOptions);
+    return MongoClients.create(builder.build());
   }
 
   protected MongoDatabase produceDatabase(Instance<Object> beans, MongodbConfig cfg) {

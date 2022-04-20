@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.annotation.WebFilter;
+import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -258,11 +259,11 @@ public class WebFilterMetaData {
    * @param servletNames the servletNames to set
    */
   protected void setServletNames(String[] servletNames) {
-    this.servletNames = defaultObject(servletNames, () -> Strings.EMPTY_ARRAY);
+    this.servletNames = defaultObject(Configs.assemblyStringConfigProperties(servletNames),
+        () -> Strings.EMPTY_ARRAY);
   }
 
   /**
-   *
    * @param smallIcon the smallIcon to set
    */
   protected void setSmallIcon(String smallIcon) {
@@ -270,11 +271,10 @@ public class WebFilterMetaData {
   }
 
   /**
-   *
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, () -> Strings.EMPTY_ARRAY);
+    this.urlPatterns = Configs.assemblyStringConfigProperties(urlPatterns);
   }
 
   /**
@@ -282,7 +282,8 @@ public class WebFilterMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, () -> Strings.EMPTY_ARRAY);
+    this.value =
+        defaultObject(Configs.assemblyStringConfigProperties(value), () -> Strings.EMPTY_ARRAY);
   }
 
 }

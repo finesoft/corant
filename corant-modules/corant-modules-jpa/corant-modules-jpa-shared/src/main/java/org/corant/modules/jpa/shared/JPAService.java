@@ -52,6 +52,8 @@ import org.corant.shared.ubiquity.Sortable;
 /**
  * corant-modules-jpa-shared
  *
+ * TODO FIXME Need to readjust how em and emf lookup
+ *
  * @author bingo 下午2:10:42
  *
  */
@@ -81,6 +83,10 @@ public class JPAService implements PersistenceService {
   @Any
   protected Instance<EntityManagerConfigurator> emConfigurator;
 
+  @Inject
+  @Any
+  protected Instance<EntityManagerFactoryConfigurator> emfConfigurator;
+
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
     if (pc.type() == PersistenceContextType.TRANSACTION) {
@@ -99,8 +105,12 @@ public class JPAService implements PersistenceService {
       Named jp = NamedLiteral.of(puim.getPersistenceProviderClassName());
       Instance<JPAProvider> provider = providers.select(jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());
-      return provider.get().buildEntityManagerFactory(puim,
+      final EntityManagerFactory emf = provider.get().buildEntityManagerFactory(puim,
           mapOf(PersistenceNames.PU_NME_KEY, pu.unitName()));
+      if (!emfConfigurator.isUnsatisfied()) {
+        emfConfigurator.stream().sorted(Sortable::compare).forEachOrdered(c -> c.accept(emf));
+      }
+      return emf;
     });
   }
 

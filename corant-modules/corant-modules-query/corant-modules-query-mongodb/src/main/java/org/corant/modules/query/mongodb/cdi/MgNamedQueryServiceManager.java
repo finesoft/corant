@@ -13,13 +13,10 @@
  */
 package org.corant.modules.query.mongodb.cdi;
 
-import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
-import java.lang.ref.Cleaner;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,11 +34,10 @@ import org.corant.modules.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.modules.query.mongodb.Decimal128Utils;
 import org.corant.modules.query.mongodb.MgNamedQuerier;
 import org.corant.modules.query.mongodb.MgNamedQueryService;
+import org.corant.modules.query.mongodb.MongoDatabases;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -133,7 +129,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
      * @param manager
      */
     public DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
-      this.dataBase = shouldNotNull(resolveDataBase(dataBase),
+      this.dataBase = shouldNotNull(MongoDatabases.resolveDatabase(dataBase),
           "Can't build default mongo named query, the data base named %s not found.", dataBase);
       resolver = manager.resolver;
       convertDecimal = manager.convertDecimal;
@@ -170,23 +166,6 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     @Override
     protected AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver() {
       return resolver;
-    }
-
-    protected MongoDatabase resolveDataBase(String dataBase) {
-      if (isNotBlank(dataBase)
-          && (dataBase.startsWith("mongodb+srv://") || dataBase.startsWith("mongodb://"))) {
-        String db = dataBase.substring(dataBase.lastIndexOf('/'));
-        MongoClient client = new MongoClient(new MongoClientURI(dataBase));
-        MongoDatabase database = client.getDatabase(db);
-        Cleaner.create().register(database, () -> {
-          if (client != null) {
-            client.close(); // FIXME release mongodb client
-          }
-        });
-        return database;
-      } else {
-        return findNamed(MongoDatabase.class, dataBase).orElse(null);
-      }
     }
   }
 }

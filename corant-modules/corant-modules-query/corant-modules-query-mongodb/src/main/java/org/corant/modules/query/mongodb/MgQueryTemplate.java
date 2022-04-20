@@ -16,7 +16,6 @@ package org.corant.modules.query.mongodb;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
@@ -45,10 +44,9 @@ import org.corant.modules.query.mongodb.converter.Bsons;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -92,12 +90,7 @@ public class MgQueryTemplate {
   }
 
   public static MgQueryTemplate database(String database) {
-    return new MgQueryTemplate(database);
-  }
-
-  public static MgQueryTemplate database(String mongoClientUri, String queryDatabase) {
-    MongoClient mc = new MongoClient(new MongoClientURI(shouldNotBlank(mongoClientUri)));
-    return new MgQueryTemplate(shouldNotNull(mc).getDatabase(shouldNotBlank(queryDatabase)));
+    return new MgQueryTemplate(MongoDatabases.resolveDatabase(database));
   }
 
   public List<Map<?, ?>> aggregate() {

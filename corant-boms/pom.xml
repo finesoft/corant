@@ -125,7 +125,7 @@
     <version.microprofile-lra-api>1.0</version.microprofile-lra-api>
     <version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
     <version.minio>8.3.0</version.minio>
-    <version.mongodb>3.9.1</version.mongodb>
+    <version.mongodb>4.5.1</version.mongodb>
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
@@ -164,8 +164,9 @@
     <version.smallrye-opentracing>2.0.1</version.smallrye-opentracing>
     <version.snakeyaml>1.27</version.snakeyaml>
     <version.swagger>2.1.12</version.swagger>
+    <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.16.Final</version.undertow>
+    <version.undertow>2.2.17.Final</version.undertow>
     <version.vertx>4.1.4</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
@@ -1224,6 +1225,11 @@
         <artifactId>swagger-annotations</artifactId>
         <version>${version.swagger}</version>
       </dependency>
+      <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>swagger-ui</artifactId>
+        <version>${version.swagger-ui-webjars}</version>
+      </dependency>
 
       <!-- Json -->
       <dependency>
@@ -1338,9 +1344,14 @@
       </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
-        <artifactId>mongodb-driver</artifactId>
+        <artifactId>mongodb-driver-sync</artifactId>
         <version>${version.mongodb}</version>
       </dependency>
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongodb-driver-reactivestreams</artifactId>
+        <version>${revision}</version>
+      </dependency>      
       <dependency>
         <groupId>redis.clients</groupId>
         <artifactId>jedis</artifactId>
@@ -1815,6 +1826,11 @@
         <version>${revision}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-devops-docs-swagger</artifactId>
+        <version>${revision}</version>
+      </dependency>      
       <dependency>
         <groupId>io.rest-assured</groupId>
         <artifactId>rest-assured</artifactId>

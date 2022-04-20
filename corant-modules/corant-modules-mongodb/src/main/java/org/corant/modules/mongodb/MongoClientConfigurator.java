@@ -17,8 +17,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoClientSettings.Builder;
 
 /**
  * corant-modules-mongodb
@@ -30,7 +30,7 @@ public interface MongoClientConfigurator {
 
   static Map<String, Pair<Method, Class<?>[]>> createSettingsMap() {
     Map<String, Pair<Method, Class<?>[]>> settingsMap = new HashMap<>();
-    Method[] methods = MongoClientOptions.Builder.class.getDeclaredMethods();
+    Method[] methods = MongoClientSettings.Builder.class.getDeclaredMethods();
     for (Method method : methods) {
       if (method.getParameterCount() == 1) {
         Class<?>[] parameterTypes = method.getParameterTypes();

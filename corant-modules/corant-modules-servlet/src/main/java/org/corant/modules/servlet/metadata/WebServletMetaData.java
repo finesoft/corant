@@ -22,6 +22,7 @@ import javax.servlet.Servlet;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
+import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -288,7 +289,8 @@ public class WebServletMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(urlPatterns, () -> Strings.EMPTY_ARRAY);
+    this.urlPatterns = defaultObject(Configs.assemblyStringConfigProperties(urlPatterns),
+        () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -296,7 +298,8 @@ public class WebServletMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value = defaultObject(value, () -> Strings.EMPTY_ARRAY);
+    this.value =
+        defaultObject(Configs.assemblyStringConfigProperties(value), () -> Strings.EMPTY_ARRAY);
   }
 
 }

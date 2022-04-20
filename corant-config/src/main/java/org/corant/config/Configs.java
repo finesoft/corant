@@ -81,12 +81,33 @@ public class Configs {
   }
 
   /**
-   * Returns an assembled configuration property from Microprofile-config. According to the input
-   * value, and analyze whether the value contains the configuration property name variable, for
+   * Returns an assembled configuration properties from Microprofile-config. According to the input
+   * values, and analyze whether the values contains the configuration property name variable, for
    * example:'${property.name}'. If the property name variable exists, replace the name variable
    * with the relevant configuration property value, and then return the assembled value, If there
-   * is no property name variable, it doesn't change the passed value and directly return it. This
+   * are no property name variable, it doesn't change the passed value and directly return it. This
    * is use for enhance some annotated configuration flexibility.
+   *
+   * @param originals
+   * @return assemblyStringConfigProperty
+   */
+  public static String[] assemblyStringConfigProperties(String[] originals) {
+    if (isEmpty(originals)) {
+      return originals;
+    } else {
+      String[] resolves = new String[originals.length];
+      Arrays.setAll(resolves, i -> Configs.assemblyStringConfigProperty(originals[i]));
+      return resolves;
+    }
+  }
+
+  /**
+   * Returns the assembled configuration properties from Microprofile-config. According to the input
+   * string array, analyze whether the value contains the configuration property name variable one
+   * by one in order, for example: '${property.name}', if the property name variable exists, replace
+   * the name variable with the relevant configuration property value, if without the property name
+   * variable, the passed value is not changed, and the parsed-replaced array is finally returned,
+   * which is used to enhance some of the annotated configuration flexibility.
    *
    * @param value the configuration property key or the original value
    * @return the assembled value or the original given value if it can't expand

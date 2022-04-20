@@ -13,12 +13,15 @@
  */
 package org.corant.modules.mongodb;
 
+import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;
 import static org.corant.shared.util.Streams.batchStream;
 import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.isNotBlank;
+import java.lang.ref.Cleaner;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -27,6 +30,9 @@ import java.util.function.Supplier;
 import javax.enterprise.inject.literal.NamedLiteral;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -136,6 +142,23 @@ public class Mongos {
       String srcGridFSBucketName, String destGridFSBucketName, int batchSize) {
     copyGridFSBucket(srcDatabaseNameSpace, destDatabaseNameSpace, srcGridFSBucketName,
         destGridFSBucketName, null, batchSize);
+  }
+
+  public static MongoDatabase resolveDatabase(String database) {
+    if (isNotBlank(database)
+        && (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://"))) {
+      ConnectionString cs = new ConnectionString(database);
+      MongoClient client = MongoClients.create(cs);
+      MongoDatabase mongoDatabase = client.getDatabase(cs.getDatabase());
+      Cleaner.create().register(mongoDatabase, () -> {
+        if (client != null) {
+          client.close(); // FIXME release mongodb client
+        }
+      });
+      return mongoDatabase;
+    } else {
+      return findNamed(MongoDatabase.class, database).orElse(null);
+    }
   }
 
 }

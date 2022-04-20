@@ -40,8 +40,8 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
 public class SwaggerOpenApiExtension implements Extension {
 
   final static Logger logger = Logger.getLogger(SwaggerOpenApiExtension.class.getName());
-  final static AnncySwaggerConfiguration config =
-      Configs.resolveSingle(AnncySwaggerConfiguration.class);
+  final static CorantSwaggerConfiguration config =
+      Configs.resolveSingle(CorantSwaggerConfiguration.class);
 
   protected void beforeBeanDiscovery(@Observes BeforeBeanDiscovery event) {
     if (config == null) {
@@ -73,7 +73,7 @@ public class SwaggerOpenApiExtension implements Extension {
   }
 
   @ConfigKeyRoot(value = "corant.devops.docs.swagger.openapi", ignoreNoAnnotatedItem = false)
-  public static class AnncySwaggerConfiguration extends SwaggerConfiguration
+  public static class CorantSwaggerConfiguration extends SwaggerConfiguration
       implements DeclarativeConfig {
 
     private static final long serialVersionUID = -8860138727231236968L;

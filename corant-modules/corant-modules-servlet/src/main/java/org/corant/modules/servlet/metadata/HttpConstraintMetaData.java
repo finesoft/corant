@@ -13,10 +13,12 @@
  */
 package org.corant.modules.servlet.metadata;
 
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -82,7 +84,8 @@ public class HttpConstraintMetaData {
    * @param rolesAllowed the rolesAllowed to set
    */
   protected void setRolesAllowed(String[] rolesAllowed) {
-    this.rolesAllowed = Arrays.stream(rolesAllowed).toArray(String[]::new);
+    this.rolesAllowed = defaultObject(Configs.assemblyStringConfigProperties(rolesAllowed),
+        () -> Strings.EMPTY_ARRAY);
   }
 
   /**

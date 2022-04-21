@@ -89,6 +89,7 @@
     <version.jakarta.websocket-api>1.1.2</version.jakarta.websocket-api>
     <version.jakarta.ws.rs-api>2.1.6</version.jakarta.ws.rs-api>
     <version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
+    <version.jakarta.jnosql>1.0.0-b3</version.jakarta.jnosql>
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
     <version.jose4j>0.7.9</version.jose4j>
     <version.jsqlparser>4.3</version.jsqlparser>
@@ -125,7 +126,7 @@
     <version.microprofile-lra-api>1.0</version.microprofile-lra-api>
     <version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
     <version.minio>8.3.0</version.minio>
-    <version.mongodb>4.5.1</version.mongodb>
+    <version.mongodb>3.12.10</version.mongodb>
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
@@ -147,7 +148,7 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.13.4</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.7.5.Final</version.resteasy>
+    <version.resteasy>4.7.6.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.slf4j>1.7.32</version.slf4j>
@@ -1344,9 +1345,19 @@
       </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
+        <artifactId>mongodb-driver</artifactId>
+        <version>${version.mongodb}</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
         <version>${version.mongodb}</version>
       </dependency>
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongodb-driver-async</artifactId>
+        <version>${version.mongodb}</version>
+      </dependency>      
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-reactivestreams</artifactId>
@@ -1388,7 +1399,7 @@
         <artifactId>jsqlparser</artifactId>
         <version>${version.jsqlparser}</version>
       </dependency>
-
+   
       <!-- ORM -->
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -1411,6 +1422,12 @@
         <groupId>org.hibernate.ogm</groupId>
         <artifactId>hibernate-ogm-mongodb</artifactId>
         <version>${version.hibernate-ogm-core}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.hibernate.ogm</groupId>
@@ -1427,7 +1444,47 @@
         <artifactId>hibernate-validator-cdi</artifactId>
         <version>${version.hibernate-validator-cdi}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.eclipse.jnosql.mapping</groupId>
+        <artifactId>mapping-document</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jnosql.mapping</groupId>
+        <artifactId>mapping-key-value</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.eclipse.jnosql.mapping</groupId>
+        <artifactId>mapping-column</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency>   
+      <dependency>
+        <groupId>org.eclipse.jnosql.mapping</groupId>
+        <artifactId>mapping-graph</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency>               
+      <dependency>
+        <groupId>org.eclipse.jnosql.communication</groupId>
+        <artifactId>mongodb-driver</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>      
+      <dependency>
+        <groupId>org.eclipse.jnosql.communication</groupId>
+        <artifactId>redis-driver</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency> 
+      <dependency>
+        <groupId>org.eclipse.jnosql.communication</groupId>
+        <artifactId>hbase-driver</artifactId>
+        <version>${version.jakarta.jnosql}</version>
+      </dependency>    
       <!-- Cache -->
       <dependency>
         <groupId>org.jsr107.ri</groupId>

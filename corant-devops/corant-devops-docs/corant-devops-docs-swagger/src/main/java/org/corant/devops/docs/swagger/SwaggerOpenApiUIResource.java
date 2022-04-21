@@ -13,59 +13,64 @@
  */
 package org.corant.devops.docs.swagger;
 
+import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.corant.modules.jaxrs.resteasy.ResteasyProvider;
+import org.corant.modules.jaxrs.resteasy.ResteasyResource;
+import org.corant.shared.resource.URLResource;
 import org.corant.shared.service.RequiredConfiguration;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
+import org.corant.shared.util.Resources;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-devops-docs-swagger
  *
- * @author bingo 下午3:18:12
+ * @author bingo 下午3:03:08
  *
  */
 @ApplicationScoped
+@Path("/openapi-ui")
 @RequiredConfiguration(key = "corant.devops.docs.swagger.openapi.enable",
     predicate = ValuePredicate.EQ, type = Boolean.class, value = "true")
-@WebFilter(filterName = "SwaggerUITamper",
-    urlPatterns = {"${corant.devops.docs.swagger.openapi.visit-path}*"})
-public class SwaggerUITamper implements Filter {
+public class SwaggerOpenApiUIResource extends ResteasyResource {
 
-  static final String jsfmt = "window.onload = function() { " + " window.ui = SwaggerUIBundle({"
+  static final String initjs = "window.onload = function() { " + " window.ui = SwaggerUIBundle({"
       + "url: \"%s/openapi.json\"," + "dom_id: '#swagger-ui'," + "deepLinking: true,"
       + "presets: [SwaggerUIBundle.presets.apis,SwaggerUIStandalonePreset],"
       + "plugins: [SwaggerUIBundle.plugins.DownloadUrl]," + "layout: \"StandaloneLayout\" " + "});"
       + "};";
 
   @Inject
+  @ConfigProperty(name = "corant.devops.docs.swagger.openapi.ui.content.path")
+  protected String contentRoot;
+
+  @Inject
   protected ResteasyProvider restProvider;
 
-  @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-      throws IOException, ServletException {
-    String pathInfo = ((HttpServletRequest) request).getRequestURI();
-    if (pathInfo.endsWith("swagger-initializer.js")) {
-      response.setContentType("application/javascript");
-      response.getWriter()
-          .append(String.format(jsfmt, restProvider.getApplicationInfo().getApplicationPath()));
+  @GET
+  @Path("{path:.*}")
+  public Response get(@PathParam("path") String path) throws IOException {
+    String realPath = contentRoot + (isBlank(path) || "/".equals(path) ? "index.html" : path);
+    if (realPath.endsWith("/swagger-initializer.js")) {
+      return Response
+          .ok(String.format(initjs, restProvider.getApplicationInfo().getApplicationPath()),
+              "application/javascript")
+          .build();
     } else {
-      chain.doFilter(request, response);
+      URLResource resource = Resources.from(realPath).findFirst().orElse(null);
+      if (resource != null) {
+        return Response.ok(resource.openInputStream()).build();
+      } else {
+        return Response.status(Status.NOT_FOUND).build();
+      }
     }
   }
-
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
-    Filter.super.init(filterConfig);
-  }
-
 }

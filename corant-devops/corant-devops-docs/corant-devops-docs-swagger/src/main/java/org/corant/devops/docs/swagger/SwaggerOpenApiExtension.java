@@ -13,13 +13,13 @@
  */
 package org.corant.devops.docs.swagger;
 
+import static org.corant.config.Configs.resolveSingle;
 import static org.corant.context.Beans.resolve;
 import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.ObservesAsync;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
@@ -39,9 +39,9 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
  */
 public class SwaggerOpenApiExtension implements Extension {
 
-  final static Logger logger = Logger.getLogger(SwaggerOpenApiExtension.class.getName());
-  final static CorantSwaggerConfiguration config =
-      Configs.resolveSingle(CorantSwaggerConfiguration.class);
+  static final Logger logger = Logger.getLogger(SwaggerOpenApiExtension.class.getName());
+  static final String visitPath = "/openapi-ui/index.html";
+  static final CorantSwaggerConfiguration config = resolveSingle(CorantSwaggerConfiguration.class);
 
   protected void beforeBeanDiscovery(@Observes BeforeBeanDiscovery event) {
     if (config == null) {
@@ -56,12 +56,11 @@ public class SwaggerOpenApiExtension implements Extension {
   protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
     if (config != null) {
       try {
-        logger
-            .info(() -> String.format("Initialize swagger open api context, the visite path is %s",
-                config.getVisitPath()));
-        JaxrsOpenApiContextBuilder<?> builder =
-            new JaxrsOpenApiContextBuilder<>().openApiConfiguration(config);
         ApplicationInfo appInfo = resolve(ResteasyProvider.class).getApplicationInfo();
+        logger.info(() -> String.format("Initialize swagger open api context, the visit path is %s",
+            appInfo != null ? appInfo.getApplicationPath() + visitPath : visitPath));
+        JaxrsOpenApiContextBuilder<?> builder = new JaxrsOpenApiContextBuilder<>();
+        builder.openApiConfiguration(config);
         if (appInfo != null) {
           builder.setApplication(appInfo.getApplication());
         }
@@ -79,12 +78,6 @@ public class SwaggerOpenApiExtension implements Extension {
     private static final long serialVersionUID = -8860138727231236968L;
 
     private boolean enable;
-
-    private String visitPath;
-
-    public String getVisitPath() {
-      return visitPath;
-    }
 
     public boolean isEnable() {
       return enable;

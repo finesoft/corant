@@ -22,6 +22,6 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 下午8:07:55
  *
  */
-public interface XSSFilterHandler extends Sortable, Function<String, String> {
+public interface SecuredContentFilterHandler extends Sortable, Function<String, String> {
 
 }

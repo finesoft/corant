@@ -17,10 +17,10 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -30,15 +30,15 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 下午8:09:10
  *
  */
-@Singleton
-public class XSSFilter implements Function<String, String> {
+@ApplicationScoped
+public class SecuredContentFilter implements Function<String, String> {
 
   @Inject
   protected Logger logger;
 
   @Inject
   @Any
-  protected Instance<XSSFilterHandler> handlers;
+  protected Instance<SecuredContentFilterHandler> handlers;
 
   protected volatile Function<String, String> chainHandler;
 

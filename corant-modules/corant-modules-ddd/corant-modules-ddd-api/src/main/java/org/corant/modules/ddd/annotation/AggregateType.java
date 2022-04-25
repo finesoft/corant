@@ -18,6 +18,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Objects.forceCast;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -46,13 +48,17 @@ public @interface AggregateType {
     private final Class<? extends Aggregate> value;
 
     private AggregateTypeLiteral(Class<? extends Aggregate> value) {
-      this.value = value;
+      this.value = forceCast(getUserClass(value));
     }
 
     @SuppressWarnings("unchecked")
     public static AggregateTypeLiteral[] from(Class<? extends Aggregate>... values) {
       return Arrays.stream(values).map(AggregateTypeLiteral::of)
           .toArray(AggregateTypeLiteral[]::new);
+    }
+
+    public static AggregateTypeLiteral of(Aggregate aggregate) {
+      return new AggregateTypeLiteral(aggregate.getClass());
     }
 
     public static AggregateTypeLiteral of(Class<? extends Aggregate> value) {

@@ -15,7 +15,6 @@ package org.corant.modules.query.shared.dynamic.freemarker;
 
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.defaultString;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
@@ -30,6 +29,7 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import org.corant.modules.query.spi.ParameterReviser;
 import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.util.Services;
 import freemarker.core.Environment;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
@@ -49,6 +49,10 @@ import freemarker.template.TemplateModelException;
 public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
+  protected static final FreemarkerDynamicQueryScriptResolver scriptResolver =
+      Services.find(FreemarkerDynamicQueryScriptResolver.class)
+          .orElse(FreemarkerDynamicQueryScriptResolver.DEFAULT_INST);
+
   protected final Template execution;
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
@@ -64,8 +68,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
     try {
-      String scriptSource =
-          defaultString(query.getMacroScript()).concat(query.getScript().getCode());// FIXME
+      String scriptSource = scriptResolver.resolve(query);// FIXME
       execution = new Template(query.getName(), scriptSource, FreemarkerConfigurations.FM_CFG);
     } catch (IOException e) {
       throw new QueryRuntimeException(e,

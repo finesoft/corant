@@ -13,18 +13,22 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -497,6 +501,52 @@ public class Strings {
    */
   public static boolean isNotBlank(final String cs) {
     return cs != null && !cs.isBlank();
+  }
+
+  /**
+   * Returns a new String composed of copies of the Object elements joined together with a copy of
+   * the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String join(CharSequence delimiter, Iterable<?> elements) {
+    shouldNoneNull(delimiter, elements);
+    return String.join(delimiter, () -> new Iterator<>() {
+      final Iterator<?> iterator = elements.iterator();
+
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public String next() {
+        return asString(iterator.next());
+      }
+    });
+  }
+
+  /**
+   * Returns a new String composed of copies of the Object elements joined together with a copy of
+   * the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String join(CharSequence delimiter, Object... elements) {
+    shouldNoneNull(delimiter, elements);
+    StringJoiner joiner = new StringJoiner(delimiter);
+    for (Object cs : elements) {
+      joiner.add(asString(cs));
+    }
+    return joiner.toString();
   }
 
   /**

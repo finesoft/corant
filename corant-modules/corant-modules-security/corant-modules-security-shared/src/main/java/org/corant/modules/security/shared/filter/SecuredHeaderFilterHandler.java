@@ -26,8 +26,4 @@ import org.corant.shared.ubiquity.Sortable;
 @FunctionalInterface
 public interface SecuredHeaderFilterHandler extends Sortable, Consumer<BiConsumer<String, String>> {
 
-  default boolean isMandatory() {
-    return true;
-  }
-
 }

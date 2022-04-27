@@ -95,6 +95,40 @@ public interface Immutable {
         return Collections.unmodifiableList(list);
       }
     }
+
+    public ImmutableListBuilder<E> clear() {
+      this.list.clear();
+      return this;
+    }
+
+    public ImmutableListBuilder<E> remove(final E ele) {
+      list.remove(ele);
+      return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ImmutableListBuilder<E> removeAll(final E... eles) {
+      if (eles.length > 0) {
+        for (E ele : eles) {
+          list.remove(ele);
+        }
+      }
+      return this;
+    }
+
+    public ImmutableListBuilder<E> removeAll(final ImmutableListBuilder<? extends E> other) {
+      if (other != null) {
+        list.removeAll(other.list);
+      }
+      return this;
+    }
+
+    public ImmutableListBuilder<E> removeAll(final ImmutableSetBuilder<? extends E> other) {
+      if (other != null) {
+        list.removeAll(other.set);
+      }
+      return this;
+    }
   }
 
   /**
@@ -126,6 +160,16 @@ public interface Immutable {
       }
     }
 
+    public ImmutableMapBuilder<K, V> clear() {
+      this.map.clear();
+      return this;
+    }
+
+    public ImmutableMapBuilder<K, V> put(K k, V v) {
+      this.map.put(k, v);
+      return this;
+    }
+
     public ImmutableMapBuilder<K, V> putAll(
         final ImmutableMapBuilder<? extends K, ? extends V> other) {
       if (other != null) {
@@ -146,6 +190,11 @@ public interface Immutable {
         Map<K, V> newMap = mapOf(eles);
         putAll(newMap);
       }
+      return this;
+    }
+
+    public ImmutableMapBuilder<K, V> remove(K k) {
+      this.map.remove(k);
       return this;
     }
   }
@@ -213,6 +262,40 @@ public interface Immutable {
       } else {
         return Collections.unmodifiableSet(set);
       }
+    }
+
+    public ImmutableSetBuilder<E> clear() {
+      this.set.clear();
+      return this;
+    }
+
+    public ImmutableSetBuilder<E> remove(final E ele) {
+      set.remove(ele);
+      return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ImmutableSetBuilder<E> removeAll(final E... eles) {
+      if (eles.length > 0) {
+        for (E ele : eles) {
+          set.remove(ele);
+        }
+      }
+      return this;
+    }
+
+    public ImmutableSetBuilder<E> removeAll(final ImmutableListBuilder<? extends E> other) {
+      if (other != null) {
+        set.removeAll(other.list);
+      }
+      return this;
+    }
+
+    public ImmutableSetBuilder<E> removeAll(final ImmutableSetBuilder<? extends E> other) {
+      if (other != null) {
+        set.removeAll(other.set);
+      }
+      return this;
     }
   }
 }

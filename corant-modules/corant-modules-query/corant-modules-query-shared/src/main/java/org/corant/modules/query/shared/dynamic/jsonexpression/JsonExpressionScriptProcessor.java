@@ -19,6 +19,7 @@ import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.forceCast;
@@ -69,6 +70,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
   public static final String FILTER_KEY = "filter";
   public static final String PROJECTION_KEY = "projection";
+  public static final String SINGLE_KEY = "single";
   public static final String PROJECTION_RENAME_KEY = "rename";
   public static final String PROJECTION_TYPE_KEY = "type";
 
@@ -84,7 +86,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
 
   protected static final Map<String, Function<ParameterAndResultPair, Object>> injFuns =
       new ConcurrentHashMap<>();
-  protected static final Map<String, Function<ParameterAndResult, Object>> pedFuns =
+  protected static final Map<String, Function<ParameterAndResult, Object>> preFuns =
       new ConcurrentHashMap<>();
   protected static final List<FunctionResolver> functionResolvers =
       SimpleParser.resolveFunction().collect(Collectors.toList());
@@ -107,7 +109,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     final Script script = fetchQuery.getPredicateScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return pedFuns.computeIfAbsent(script.getId(), k -> createPreFetchFuns(fetchQuery, script));
+      return preFuns.computeIfAbsent(script.getId(), k -> createPreFetchFuns(fetchQuery, script));
     }
     return null;
   }
@@ -183,7 +185,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     };
   }
 
-  protected Projector resolveInjectProjector(Map<String, Object> projectionMap) {
+  protected Projector resolveInjectProjector(Map<String, Object> projectionMap, boolean single) {
     Set<Mapping> mappings = new LinkedHashSet<>();
     projectionMap.forEach((k, v) -> {
       if (k != null && v != null) {
@@ -204,21 +206,25 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     });
     if (isEmpty(mappings)) {
       throw new QueryRuntimeException("The projection can't empty!");
+    } else if (single && mappings.size() > 1) {
+      throw new QueryRuntimeException(
+          "In a single case, the projection can't contain multi fields mapping!");
     }
-    return new Projector(mappings);
+    return new Projector(mappings, single);
   }
 
   protected Pair<Node<Boolean>, Projector> resolveInjectScript(String code) {
     final Map<String, Object> root = Jsons.fromString(code);
     Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
     Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
+    boolean single = getMapBoolean(root, SINGLE_KEY, Boolean.FALSE);
     Node<Boolean> filter = null;
     Projector projector = null;
     if (filterMap != null) {
       filter = forceCast(SimpleParser.parse(filterMap, MyASTNodeBuilder.INST));
     }
     if (projectionMap != null) {
-      projector = resolveInjectProjector(projectionMap);
+      projector = resolveInjectProjector(projectionMap, single);
     }
     if (filter == null && projector == null) {
       filter = forceCast(SimpleParser.parse(root, MyASTNodeBuilder.INST));
@@ -377,24 +383,37 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
   static class Projector implements BiFunction<List<Object>, QueryObjectMapper, List<Object>> {
 
     final Collection<Mapping> mappings;
+    final boolean single;
 
-    Projector(Collection<Mapping> mappings) {
+    Projector(Collection<Mapping> mappings, boolean single) {
       this.mappings = mappings;
+      this.single = single;
     }
 
     @Override
     public List<Object> apply(List<Object> fetchResults, QueryObjectMapper objectMapper) {
       List<Object> results = new ArrayList<>();
-      for (Object fetchResult : fetchResults) {
-        Map<Object, Object> result = new LinkedHashMap<>();
-        for (Mapping mapping : mappings) {
+      if (single) {
+        final Mapping mapping = mappings.iterator().next();
+        for (Object fetchResult : fetchResults) {
           Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
           if (mapping.type != null) {
             extracted = toObject(extracted, mapping.type);
           }
-          objectMapper.putMappedValue(result, mapping.injectPath, extracted);
+          results.add(extracted);
         }
-        results.add(result);
+      } else {
+        for (Object fetchResult : fetchResults) {
+          Map<Object, Object> result = new LinkedHashMap<>();
+          for (Mapping mapping : mappings) {
+            Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
+            if (mapping.type != null) {
+              extracted = toObject(extracted, mapping.type);
+            }
+            objectMapper.putMappedValue(result, mapping.injectPath, extracted);
+          }
+          results.add(result);
+        }
       }
       return results;
     }

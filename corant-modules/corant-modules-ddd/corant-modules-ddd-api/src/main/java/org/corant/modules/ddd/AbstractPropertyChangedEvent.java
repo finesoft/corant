@@ -11,15 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd.shared.event;
+package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Objects.forceCast;
-import org.corant.modules.ddd.AbstractEvent;
-import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.annotation.Events;
 
 /**
- * corant-modules-ddd-shared
+ * corant-modules-ddd-api
  *
  * @author bingo 下午5:57:36
  */

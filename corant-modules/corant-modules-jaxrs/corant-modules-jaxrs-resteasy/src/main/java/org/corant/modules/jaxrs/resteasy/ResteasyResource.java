@@ -99,7 +99,9 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     protected String filename;
 
-    protected Map<String, Object> metaData;
+    protected String fieldName;
+
+    protected Map<String, Object> metadata;
 
     public InputPartResource(InputPart inputPart) {
       this(shouldNotNull(inputPart), parse(inputPart.getHeaders().getFirst(CONTENT_DISPOSITION)));
@@ -107,6 +109,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     InputPartResource(InputPart inputPart, ContentDisposition disposition) {
       this.inputPart = inputPart;
+      fieldName = disposition.getName();
       String filename = disposition.getFilename();
       if (filename != null) {
         if (filename.startsWith("=?") && filename.endsWith("?=")) {
@@ -118,21 +121,29 @@ public class ResteasyResource extends AbstractJaxrsResource {
           filename = new String(filename.getBytes(ISO_8859_1), UTF_8);
         }
       }
-      metaData = new HashMap<>();
+      metadata = new HashMap<>();
       this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
-      metaData.put(META_NAME, this.filename);
+      metadata.put(META_NAME, this.filename);
       if (inputPart.getMediaType() != null) {
-        metaData.put(META_CONTENT_TYPE, inputPart.getMediaType().toString());
+        metadata.put(META_CONTENT_TYPE, inputPart.getMediaType().toString());
       }
       if (disposition.getModificationDate() != null) {
-        metaData.put(META_LAST_MODIFIED,
+        metadata.put(META_LAST_MODIFIED,
             disposition.getModificationDate().toInstant().toEpochMilli());
       }
-      metaData.put(META_CONTENT_LENGTH, disposition.getSize());
+      metadata.put(META_CONTENT_LENGTH, disposition.getSize());
     }
 
     public String getContentType() {
       return inputPart.getMediaType().toString();
+    }
+
+    public String getFieldName() {
+      return fieldName;
+    }
+
+    public String getFilename() {
+      return filename;
     }
 
     public InputPart getInputPart() {
@@ -146,7 +157,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     @Override
     public Map<String, Object> getMetadata() {
-      return metaData;
+      return metadata;
     }
 
     @Override

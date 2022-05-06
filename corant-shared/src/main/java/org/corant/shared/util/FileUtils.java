@@ -94,7 +94,6 @@ public class FileUtils {
   public static void copyFile(final File srcFile, final File destFile,
       final boolean preserveFileDate) throws IOException {
     copyFile(srcFile, destFile, FILE_COPY_BUFFER_SIZE, preserveFileDate);
-
   }
 
   public static void copyFile(final File srcFile, final File destFile, final long bufferSize,
@@ -140,6 +139,13 @@ public class FileUtils {
       throws IOException {
     try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
       Streams.copy(in, out, bufferSize);
+    }
+  }
+
+  public static void copyToFile(final InputStream source, final File destination, int bufferSize,
+      Checksum checksum) throws IOException {
+    try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
+      Streams.copy(in, out, bufferSize, checksum);
     }
   }
 

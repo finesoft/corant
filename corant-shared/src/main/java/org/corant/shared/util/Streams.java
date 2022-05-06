@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.zip.Checksum;
 import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
@@ -191,6 +192,37 @@ public class Streams {
     int n;
     for (count = 0L; -1 != (n = input.read(buffer))
         && !Thread.currentThread().isInterrupted(); count += n) {
+      output.write(buffer, 0, n);
+    }
+    return count;
+  }
+
+  /**
+   * Copy the given input stream to the given output stream without closing the streams and update
+   * the given checksum.
+   *
+   * <p>
+   * Note: If the current thread is in an interrupted state, the copy will be stopped and finally
+   * exit.
+   *
+   * @param input the input stream
+   * @param output the output stream
+   * @param bufferSize the buffer size
+   * @param checksum the data checksum
+   * @return the bytes length
+   * @throws IOException If I/O errors occur
+   */
+  public static long copy(InputStream input, OutputStream output, int bufferSize, Checksum checksum)
+      throws IOException {
+    if (checksum == null) {
+      return copy(input, output, bufferSize);
+    }
+    byte[] buffer = new byte[max(1, bufferSize)];
+    long count;
+    int n;
+    for (count = 0L; -1 != (n = input.read(buffer))
+        && !Thread.currentThread().isInterrupted(); count += n) {
+      checksum.update(buffer, 0, n);
       output.write(buffer, 0, n);
     }
     return count;
@@ -431,5 +463,4 @@ public class Streams {
     }
 
   }
-
 }

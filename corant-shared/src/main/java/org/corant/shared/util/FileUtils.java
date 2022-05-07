@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.normal.Defaults.FOUR_KB;
+import static org.corant.shared.normal.Defaults.SIXTEEN_KBS;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -52,6 +53,7 @@ import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-shared
@@ -82,7 +84,7 @@ public class FileUtils {
       throw new IllegalArgumentException("Checksums can't be computed on directories");
     }
     try (InputStream is = new FileInputStream(file)) {
-      byte[] buffer = new byte[8192];
+      byte[] buffer = new byte[SIXTEEN_KBS];
       int length;
       while ((length = is.read(buffer)) != -1) {
         checksum.update(buffer, 0, length);
@@ -347,8 +349,8 @@ public class FileUtils {
    *
    * @param file1 the file to be compared
    * @param file2 the file to be compared
-   * @throws IOException if the given file does not exist,is a directory rather than a regular
-   *         file,or for some other reason cannot be opened forreading
+   * @throws IOException if the given file does not exist, is a directory rather than a regular
+   *         file, or for some other reason cannot be opened for reading
    */
   public static boolean isSameContent(final File file1, final File file2) throws IOException {
     if (file1 == null || file2 == null || !file1.isFile() || !file2.isFile() || !file1.canRead()
@@ -402,6 +404,21 @@ public class FileUtils {
       }
     } else {
       logger.warning(() -> "The file system can't support user defined file attribute!");
+    }
+  }
+
+  /**
+   * Save the given resource to file.
+   *
+   * @param resource the resource to save
+   * @param destination the destination file which resource save to
+   * @throws IOException if an I/O error occurs
+   */
+  public static void saveToFile(final Resource resource, final File destination)
+      throws IOException {
+    try (InputStream in = shouldNotNull(resource).openInputStream();
+        OutputStream out = new FileOutputStream(shouldNotNull(destination))) {
+      Streams.copy(in, out, SIXTEEN_KBS);
     }
   }
 

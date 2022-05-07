@@ -361,9 +361,9 @@ public class Maps {
         results.add(converter.apply(vals.nextElement()));
       }
       return results;
-    } else if(obj == null){
+    } else if (obj == null) {
       return null;
-    }else {
+    } else {
       throw new NotSupportedException();
     }
   }
@@ -1005,6 +1005,10 @@ public class Maps {
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);
+  }
+
+  public static <K, V> Map<K, V> immutableMap(Map<? extends K, ? extends V> map) {
+    return map == null ? Collections.emptyMap() : Collections.unmodifiableMap(map);
   }
 
   public static <K, V> Map<K, V> immutableMapOf(Object... objects) {

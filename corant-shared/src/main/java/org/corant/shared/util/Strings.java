@@ -1288,6 +1288,20 @@ public class Strings {
     return str == null ? null : str.trim();
   }
 
+  public static String trimLeadingIf(final String str, final Predicate<Character> stripIf) {
+    int len;
+    if (str == null || (len = str.length()) == 0) {
+      return EMPTY;
+    }
+    int i = 0;
+    for (; i < len; i++) {
+      if (!stripIf.test(str.charAt(i))) {
+        break;
+      }
+    }
+    return str.substring(i);
+  }
+
   static List<Pair<Boolean, String>> segment(final String str, final String wholeSeparator) {
     int len;
     int slen;

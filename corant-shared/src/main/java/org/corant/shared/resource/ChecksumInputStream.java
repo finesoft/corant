@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2022, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -40,6 +40,10 @@ public class ChecksumInputStream extends FilterInputStream {
     return new DigestInputStream(is, md);
   }
 
+  public Checksum getChecksum() {
+    return checksum;
+  }
+
   public void on(boolean on) {
     this.on = on;
   }
@@ -60,5 +64,20 @@ public class ChecksumInputStream extends FilterInputStream {
       checksum.update(b, off, ret);
     }
     return ret;
+  }
+
+  @Override
+  public long skip(long n) throws IOException {
+    byte[] buf = new byte[512];
+    long total = 0;
+    while (total < n) {
+      long len = n - total;
+      len = read(buf, 0, len < buf.length ? (int) len : buf.length);
+      if (len == -1) {
+        return total;
+      }
+      total += len;
+    }
+    return total;
   }
 }

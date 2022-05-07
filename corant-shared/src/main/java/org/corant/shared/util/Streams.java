@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.Checksum;
+import org.corant.shared.resource.ChecksumInputStream;
 import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
@@ -173,6 +174,23 @@ public class Streams {
   }
 
   /**
+   * Copy the given input stream to the given output stream with checksum and without closing the
+   * streams, the buffer size is 4kbs.
+   *
+   * @param input the input stream
+   * @param output the output stream
+   * @param checksum the data checksum
+   * @return the bytes length
+   * @throws IOException If I/O errors occur
+   *
+   * @see #copy(InputStream, OutputStream, int)
+   */
+  public static long copy(InputStream input, OutputStream output, Checksum checksum)
+      throws IOException {
+    return copy(input, output, FOUR_KB, checksum);
+  }
+
+  /**
    * Copy the given input stream to the given output stream without closing the streams.
    *
    * <p>
@@ -216,16 +234,9 @@ public class Streams {
       throws IOException {
     if (checksum == null) {
       return copy(input, output, bufferSize);
+    } else {
+      return copy(new ChecksumInputStream(input, checksum), output, bufferSize);
     }
-    byte[] buffer = new byte[max(1, bufferSize)];
-    long count;
-    int n;
-    for (count = 0L; -1 != (n = input.read(buffer))
-        && !Thread.currentThread().isInterrupted(); count += n) {
-      checksum.update(buffer, 0, n);
-      output.write(buffer, 0, n);
-    }
-    return count;
   }
 
   /**
@@ -239,7 +250,7 @@ public class Streams {
    * @see #copy(Reader, Writer, int)
    */
   public static long copy(Reader reader, Writer writer) throws IOException {
-    return copy(reader, writer, 2048);
+    return copy(reader, writer, FOUR_KB);
   }
 
   /**

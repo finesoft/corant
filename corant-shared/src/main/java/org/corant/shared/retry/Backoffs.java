@@ -16,6 +16,12 @@ package org.corant.shared.retry;
 import static org.corant.shared.util.Objects.min;
 import org.corant.shared.util.Randoms;
 
+/**
+ * corant-shared
+ *
+ * @author bingo 上午11:20:04
+ *
+ */
 public class Backoffs {
 
   /**

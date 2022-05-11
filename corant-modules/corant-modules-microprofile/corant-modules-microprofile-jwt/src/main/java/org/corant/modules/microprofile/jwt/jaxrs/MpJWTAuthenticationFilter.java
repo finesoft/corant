@@ -102,7 +102,13 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
             }
             requestContext.setProperty(AUTHC_EXCEPTION_KEY, e);
           } else {
-            throw new NotAuthorizedException(e);
+            // A server using HTTP authentication will respond with a 401 Unauthorized response to a
+            // request for a protected resource. This response must include at least one
+            // WWW-Authenticate header and at least one challenge, to indicate what authentication
+            // schemes can be used to access the resource (and any additional data that each
+            // particular scheme needs). See also
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+            throw new NotAuthorizedException(e, "Bearer");
           }
         }
       }

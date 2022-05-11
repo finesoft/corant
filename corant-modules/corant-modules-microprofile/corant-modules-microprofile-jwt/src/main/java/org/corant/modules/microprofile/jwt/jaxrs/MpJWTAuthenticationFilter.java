@@ -20,11 +20,13 @@ import javax.annotation.Priority;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.SecurityContext;
+import org.corant.config.Configs;
 import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
 import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
 import org.corant.modules.microprofile.jwt.MpJWTSecurityContextManager;
@@ -50,6 +52,8 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
 
   public static final String AUTHC_EXCEPTION_KEY = "___AUTHC-EX___";
   public static final String AUTHZ_EXCEPTION_KEY = "___AUTHZ-EX___";
+  public static final boolean SUPPRESS_UNAUTHENTICATED =
+      Configs.getValue("corant.microprofile.jwt.suppress-unauthenticated", Boolean.class, false);
 
   protected static final Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
   protected static final boolean debugLogging = logger.isDebugEnabled();
@@ -90,12 +94,16 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
           requestContext.setSecurityContext(jwtSctx);
           logger.debugf("JWT authentication filter handle successfully");
         } catch (Exception e) {
-          if (debugLogging) {
-            logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
+          if (SUPPRESS_UNAUTHENTICATED) {
+            if (debugLogging) {
+              logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
+            } else {
+              logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
+            }
+            requestContext.setProperty(AUTHC_EXCEPTION_KEY, e);
           } else {
-            logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
+            throw new NotAuthorizedException(e);
           }
-          requestContext.setProperty(AUTHC_EXCEPTION_KEY, e);
         }
       }
     }

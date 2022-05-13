@@ -14,6 +14,7 @@
 package org.corant.modules.security.shared.crypto.digest;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.max;
 import java.security.spec.InvalidKeySpecException;
@@ -61,11 +62,31 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
         "The derived key bits size error must be divisible by 8.");
     // FIXME Calling an overridable method during in a constructor may result in the use of
     // uninitialized data
-    shouldNotNull(getSecretKeyFactory(algorithm, getProvider()));// for checking
+    shouldNotNull(HashProvider.getSecretKeyFactory(algorithm, getProvider()));// for checking
+  }
+
+  @Override
+  public Object encode(Object data) {
+    byte[] salt = getSalt();
+    byte[] digested = encode(data, algorithm, iterations, salt);
+    return toCiphertext(algorithm, iterations, salt, digested);
   }
 
   public int getDerivedKeyBitSize() {
     return derivedKeyBitSize;
+  }
+
+  @Override
+  public boolean validate(Object input, Object criterion) {
+    shouldNoneNull(input, criterion);
+    HashInfo criterionHash = fromCiphertext(criterion.toString());
+    if (algorithm.equalsIgnoreCase(criterionHash.getAlgorithm())
+        && criterionHash.getIterations() == iterations
+        && criterionHash.getSaltSize() == saltBitSize) {
+      return compare(encode(input, algorithm, iterations, criterionHash.getSalt()),
+          criterionHash.getDigested());
+    }
+    return false;
   }
 
   /**
@@ -77,12 +98,12 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
    * @param salt the salt bytes
    * @return encode
    */
-  @Override
   protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt) {
     KeySpec spec =
         new PBEKeySpec(((String) input).toCharArray(), salt, iterations, derivedKeyBitSize);
     try {
-      return getSecretKeyFactory(algorithm, getProvider()).generateSecret(spec).getEncoded();
+      return HashProvider.getSecretKeyFactory(algorithm, getProvider()).generateSecret(spec)
+          .getEncoded();
     } catch (InvalidKeySpecException e) {
       throw new CorantRuntimeException(e, "Input could not be encoded");
     } catch (Exception e) {

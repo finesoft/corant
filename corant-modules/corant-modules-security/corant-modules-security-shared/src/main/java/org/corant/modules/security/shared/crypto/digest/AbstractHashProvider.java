@@ -18,16 +18,8 @@ import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.max;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
-import javax.crypto.SecretKeyFactory;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Bytes;
 
 /**
@@ -75,56 +67,6 @@ public abstract class AbstractHashProvider implements HashProvider {
   }
 
   /**
-   * Parse Base64 string to HashInfo
-   *
-   * @param b64 the bytes
-   * @return fromMergedB64
-   * @see #toMergedB64(String, int, byte[], byte[])
-   */
-  protected static HashInfo fromMergedB64(String b64) {
-    byte[] bytes = Base64.getDecoder().decode(b64);
-    HashInfo info = new HashInfo();
-    int next = 0;
-    int algoSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.iterations = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.saltSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4)) << 3;
-    int digestSize = Bytes.toInt(Arrays.copyOfRange(bytes, next, next += 4));
-    info.algorithm =
-        new String(Arrays.copyOfRange(bytes, next, next += algoSize), StandardCharsets.UTF_8);
-    info.salt = Arrays.copyOfRange(bytes, next, next += info.saltSize >>> 3);
-    info.digested = Arrays.copyOfRange(bytes, next, next + digestSize);
-    return info;
-  }
-
-  protected static MessageDigest getDigest(String algorithm, Object provider) {
-    try {
-      if (provider instanceof Provider) {
-        return MessageDigest.getInstance(algorithm, (Provider) provider);
-      } else if (provider instanceof String) {
-        return MessageDigest.getInstance(algorithm, (String) provider);
-      } else {
-        return MessageDigest.getInstance(algorithm);
-      }
-    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  protected static SecretKeyFactory getSecretKeyFactory(String algorithm, Object provider) {
-    try {
-      if (provider instanceof Provider) {
-        return SecretKeyFactory.getInstance(algorithm, (Provider) provider);
-      } else if (provider instanceof String) {
-        return SecretKeyFactory.getInstance(algorithm, (String) provider);
-      } else {
-        return SecretKeyFactory.getInstance(algorithm);
-      }
-    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-      throw new CorantRuntimeException(e, "The %s algorithm not found", algorithm);
-    }
-  }
-
-  /**
    * Compares two byte arrays in length-constant time. This comparison method is used so that
    * password hashes cannot be extracted from on-line systems using a timing attack and then
    * attacked off-line.
@@ -140,37 +82,11 @@ public abstract class AbstractHashProvider implements HashProvider {
     return diff == 0;
   }
 
-  /**
-   * Merge algorithm and iterations and salt and digested to Base64 String
-   *
-   * @param algorithm the algorithm name
-   * @param iterations the hash iterations
-   * @param salt the salt data
-   * @param digested the hashed data
-   * @return toMergedB64
-   */
-  protected static String toMergedB64(String algorithm, int iterations, byte[] salt,
-      byte[] digested) {
-    byte[] algoNameBytes = algorithm.getBytes(StandardCharsets.UTF_8);
-    byte[] bytes = new byte[(4 << 2) + algoNameBytes.length + salt.length + digested.length];
-    // header length info
-    int next = 0;
-    System.arraycopy(Bytes.toBytes(algoNameBytes.length), 0, bytes, next, 4);
-    System.arraycopy(Bytes.toBytes(iterations), 0, bytes, next += 4, 4);
-    System.arraycopy(Bytes.toBytes(salt.length), 0, bytes, next += 4, 4);
-    System.arraycopy(Bytes.toBytes(digested.length), 0, bytes, next += 4, 4);
-    // body content info
-    System.arraycopy(algoNameBytes, 0, bytes, next += 4, algoNameBytes.length);
-    System.arraycopy(salt, 0, bytes, next += algoNameBytes.length, salt.length);
-    System.arraycopy(digested, 0, bytes, next + salt.length, digested.length);
-    return Base64.getEncoder().encodeToString(bytes);
-  }
-
   @Override
   public Object encode(Object data) {
     byte[] salt = getSalt();
-    byte[] digested = encode(data, algorithm, iterations, salt);
-    return toMergedB64(algorithm, iterations, salt, digested);
+    byte[] digested = HashProvider.encode(data, algorithm, iterations, salt, getProvider());
+    return toCiphertext(algorithm, iterations, salt, digested);
   }
 
   public String getAlgorithm() {
@@ -193,11 +109,13 @@ public abstract class AbstractHashProvider implements HashProvider {
   @Override
   public boolean validate(Object input, Object criterion) {
     shouldNoneNull(input, criterion);
-    HashInfo criterionHash = fromMergedB64(criterion.toString());
-    if (algorithm.equalsIgnoreCase(criterionHash.algorithm)
-        && criterionHash.iterations == iterations && criterionHash.saltSize == saltBitSize) {
-      return compare(encode(input, algorithm, iterations, criterionHash.salt),
-          criterionHash.digested);
+    HashInfo criterionHash = fromCiphertext(criterion.toString());
+    if (algorithm.equalsIgnoreCase(criterionHash.getAlgorithm())
+        && criterionHash.getIterations() == iterations
+        && criterionHash.getSaltSize() == saltBitSize) {
+      return compare(
+          HashProvider.encode(input, algorithm, iterations, criterionHash.getSalt(), getProvider()),
+          criterionHash.getDigested());
     }
     return false;
   }
@@ -218,27 +136,15 @@ public abstract class AbstractHashProvider implements HashProvider {
   }
 
   /**
-   * Encode the given input string to hash digested bytes.
+   * Parse the given ciphertext to HashInfo
    *
-   * @param input the input string that will be encoded
-   * @param algorithm the hash algorithm name, can't empty
-   * @param iterations the iterations times
-   * @param salt the salt bytes
-   * @return encode
+   * @param text the ciphertext, default is base 64 string.
+   * @return a Hash info object containing the data related to the hash operation.
+   * @see #toCiphertext(String, int, byte[], byte[])
    */
-  protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt) {
-    MessageDigest digest = getDigest(algorithm, getProvider());
-    if (salt.length != 0) {
-      digest.reset();
-      digest.update(salt);
-    }
-    byte[] hashed = digest.digest((byte[]) input);
-    int itr = iterations - 1;
-    for (int i = 0; i < itr; i++) {
-      digest.reset();
-      hashed = digest.digest(hashed);
-    }
-    return hashed;
+  protected HashInfo fromCiphertext(String text) {
+    byte[] bytes = Base64.getDecoder().decode(text);
+    return HashInfo.fromDefaultLayoutBytes(bytes);
   }
 
   protected Object getProvider() {
@@ -255,17 +161,18 @@ public abstract class AbstractHashProvider implements HashProvider {
     }
   }
 
-  protected static class HashInfo {
-    protected String algorithm;
-    protected int iterations;
-    protected int saltSize;
-    protected byte[] salt;
-    protected byte[] digested;
-
-    @Override
-    public String toString() {
-      return "HashInfo [algorithm=" + algorithm + ", iterations=" + iterations + ", saltSize="
-          + saltSize + "]";
-    }
+  /**
+   * Merge algorithm and iterations and salt and digested to String, default use base 64.
+   *
+   * @param algorithm the algorithm name
+   * @param iterations the hash iterations
+   * @param salt the salt data
+   * @param digested the hashed data
+   * @return the ciphertext
+   */
+  protected String toCiphertext(String algorithm, int iterations, byte[] salt, byte[] digested) {
+    byte[] bytes =
+        HashInfo.toDefaultLayoutBytes(new HashInfo(algorithm, iterations, salt, digested));
+    return Base64.getEncoder().encodeToString(bytes);
   }
 }

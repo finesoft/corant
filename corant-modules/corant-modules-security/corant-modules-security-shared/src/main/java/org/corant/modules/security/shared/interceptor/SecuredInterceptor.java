@@ -24,7 +24,6 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import org.corant.context.AbstractInterceptor;
-import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.AuthorizationException;
 import org.corant.modules.security.SecurityManager;
 import org.corant.modules.security.SecurityMessageCodes;
@@ -60,15 +59,15 @@ public class SecuredInterceptor extends AbstractInterceptor {
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
     MutableBoolean success = new MutableBoolean(false);
+    final SecuredInterceptorHelper helper = getHelper();
+    final SecuredInterceptionContext ctx = helper.resolveContext(resolveMeta(invocationContext));
     try {
-      final SecuredInterceptorHelper helper = getHelper();
-      SecuredInterceptionContext context = helper.resolveContext(resolveMeta(invocationContext));
-      resolveCallbacks().forEachOrdered(cb -> cb.preSecuredIntercept(context));
-      check(context, helper);
+      resolveCallbacks().forEachOrdered(cb -> cb.preSecuredIntercept(ctx));
+      check(ctx, helper);
       success.set(true);
       return invocationContext.proceed();
     } finally {
-      resolveCallbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(success.get()));
+      resolveCallbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(ctx, success.get()));
     }
   }
 
@@ -84,7 +83,7 @@ public class SecuredInterceptor extends AbstractInterceptor {
         throw new AuthorizationException(SecurityMessageCodes.UNAUTHZ_ACCESS);
       }
     } else {
-      securityManagers.get().checkAccess(SecurityContexts.getCurrent(),
+      securityManagers.get().checkAccess(context.getSecurityContext(),
           context.getResolvedAllowed());
     }
   }

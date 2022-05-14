@@ -18,6 +18,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.corant.context.security.SecurityContext;
+import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
 import org.corant.modules.security.shared.AttributeSet;
@@ -37,6 +39,10 @@ public interface SecuredInterceptionContext extends Serializable, AttributeSet {
   Serializable getResolvedAllowed();
 
   String getRunAs();
+
+  default SecurityContext getSecurityContext() {
+    return SecurityContexts.getCurrent();
+  }
 
   SecuredType getType();
 

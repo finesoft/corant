@@ -23,7 +23,7 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface SecuredInterceptorCallback extends Sortable {
 
-  void postSecuredIntercepted(boolean success);
+  void postSecuredIntercepted(SecuredInterceptionContext secured, boolean success);
 
   void preSecuredIntercept(SecuredInterceptionContext secured);
 

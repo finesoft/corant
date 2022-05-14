@@ -44,15 +44,17 @@ import org.corant.shared.ubiquity.Sortable;
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTAuthorizationFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-  private final SecuredInterceptionContext context;
-  volatile Authorizer authorizer;
+  protected static final ThreadLocal<SecuredInterceptionContext> contexts = new ThreadLocal<>();
+  protected final SecuredMetadata meta;
+  protected volatile Authorizer authorizer;
 
   public MpJWTAuthorizationFilter(SecuredMetadata meta) {
-    context = SecuredInterceptorHelper.DEFAULT_INST.resolveContext(meta);
+    this.meta = meta;
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
+    final SecuredInterceptionContext context = getCurrentSecuredInterceptionContext();
     callbacks().forEachOrdered(cb -> cb.preSecuredIntercept(context));
     Throwable throwable = null;
     try {
@@ -86,12 +88,17 @@ public class MpJWTAuthorizationFilter implements ContainerRequestFilter, Contain
   @Override
   public void filter(ContainerRequestContext requestContext,
       ContainerResponseContext responseContext) throws IOException {
-    boolean success =
-        requestContext.getProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY) == null
-            && requestContext.getProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY) == null;
-    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY);
-    requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
-    callbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(success));
+    try {
+      boolean success =
+          requestContext.getProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY) == null
+              && requestContext.getProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY) == null;
+      requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHZ_EXCEPTION_KEY);
+      requestContext.removeProperty(MpJWTAuthenticationFilter.AUTHC_EXCEPTION_KEY);
+      callbacks().forEachOrdered(
+          cb -> cb.postSecuredIntercepted(getCurrentSecuredInterceptionContext(), success));
+    } finally {
+      contexts.set(null);
+    }
   }
 
   protected Authorizer authorizer() {
@@ -111,6 +118,13 @@ public class MpJWTAuthorizationFilter implements ContainerRequestFilter, Contain
       return callback.stream().sorted(Sortable::compare);
     }
     return Stream.empty();
+  }
+
+  protected SecuredInterceptionContext getCurrentSecuredInterceptionContext() {
+    if (contexts.get() == null) {
+      contexts.set(SecuredInterceptorHelper.DEFAULT_INST.resolveContext(meta));
+    }
+    return contexts.get();
   }
 
 }

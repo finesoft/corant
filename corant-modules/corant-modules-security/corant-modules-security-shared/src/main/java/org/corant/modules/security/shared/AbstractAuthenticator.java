@@ -37,7 +37,7 @@ public abstract class AbstractAuthenticator implements Authenticator {
       data.set(doAuthenticate(token));
       return data.get();
     } finally {
-      resolveCallbacks().forEachOrdered(cb -> cb.postAuthenticated(data.get()));
+      resolveCallbacks().forEachOrdered(cb -> cb.postAuthenticated(token, data.get()));
     }
   }
 

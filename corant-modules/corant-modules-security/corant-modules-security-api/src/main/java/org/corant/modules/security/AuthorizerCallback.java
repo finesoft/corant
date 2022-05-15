@@ -25,9 +25,10 @@ public interface AuthorizerCallback extends Sortable {
   /**
    * A callback after access check.
    *
+   * @param context the caller context, in general the context is current SecurityContext.
    * @param success true means pass the access check, false means access check failed
    */
-  default void postCheckAccess(boolean success) {}
+  default void postCheckAccess(Object context, boolean success) {}
 
   /**
    * A callback before access check.

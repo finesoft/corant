@@ -38,7 +38,7 @@ public abstract class AbstractAuthorizer implements Authorizer {
       }
       success.set(true);
     } finally {
-      resolveCallbacks().forEachOrdered(cb -> cb.postCheckAccess(success.get()));
+      resolveCallbacks().forEachOrdered(cb -> cb.postCheckAccess(context, success.get()));
     }
   }
 

@@ -26,9 +26,10 @@ public interface AuthenticatorCallback extends Sortable {
   /**
    * A callback after authenticated.
    *
+   * @param token the consolidation of an account's principals and supporting credentials
    * @param authenticationData the authentication result, if null means authentication is failure.
    */
-  default void postAuthenticated(AuthenticationData authenticationData) {}
+  default void postAuthenticated(Token token, AuthenticationData authenticationData) {}
 
   /**
    * A callback before authenticate, can be used for multi-factor authentication and more

@@ -84,7 +84,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
       if (bearerToken != null) {
         try {
           AuthenticationData authcData =
-              authenticator.authenticate(new MpJWTJsonWebToken(bearerToken));
+              authenticator.authenticate(new MpJWTJsonWebToken(bearerToken, requestContext));
           JsonWebToken jwtPrincipal =
               authcData.getPrincipals().iterator().next().unwrap(JsonWebToken.class);
           producer.setJsonWebToken(jwtPrincipal);

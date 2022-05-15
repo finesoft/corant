@@ -31,6 +31,7 @@ import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.corant.shared.ubiquity.Mutable.MutableBoolean;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -58,16 +59,17 @@ public class SecuredInterceptor extends AbstractInterceptor {
   @AroundInvoke
   @AroundConstruct
   public Object secured(InvocationContext invocationContext) throws Exception {
-    MutableBoolean success = new MutableBoolean(false);
-    final SecuredInterceptorHelper helper = getHelper();
-    final SecuredInterceptionContext ctx = helper.resolveContext(resolveMeta(invocationContext));
+    final MutableBoolean success = new MutableBoolean(false);
+    final MutableObject<SecuredInterceptionContext> ctxs = new MutableObject<>();
     try {
-      resolveCallbacks().forEachOrdered(cb -> cb.preSecuredIntercept(ctx));
-      check(ctx, helper);
+      SecuredInterceptorHelper helper = getHelper();
+      ctxs.set(helper.resolveContext(resolveMeta(invocationContext)));
+      resolveCallbacks().forEachOrdered(cb -> cb.preSecuredIntercept(ctxs.get()));
+      check(ctxs.get(), helper);
       success.set(true);
       return invocationContext.proceed();
     } finally {
-      resolveCallbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(ctx, success.get()));
+      resolveCallbacks().forEachOrdered(cb -> cb.postSecuredIntercepted(ctxs.get(), success.get()));
     }
   }
 

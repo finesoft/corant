@@ -25,8 +25,19 @@ public class MpJWTJsonWebToken extends JsonWebToken {
 
   private static final long serialVersionUID = 8645607501689631137L;
 
+  protected final Object requestContext;
+
   public MpJWTJsonWebToken(String data) {
+    this(data, null);
+  }
+
+  public MpJWTJsonWebToken(String data, Object requestContext) {
     super(data);
+    this.requestContext = requestContext;
+  }
+
+  public Object getRequestContext() {
+    return requestContext;
   }
 
 }

@@ -19,6 +19,7 @@ import org.corant.modules.security.AuthenticationException;
 import org.corant.modules.security.Authenticator;
 import org.corant.modules.security.AuthenticatorCallback;
 import org.corant.modules.security.Token;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 
 /**
  * corant-modules-security-shared
@@ -30,12 +31,13 @@ public abstract class AbstractAuthenticator implements Authenticator {
 
   @Override
   public AuthenticationData authenticate(Token token) throws AuthenticationException {
-    AuthenticationData data = null;
+    final MutableObject<AuthenticationData> data = new MutableObject<>();
     try {
       resolveCallbacks().forEachOrdered(cb -> cb.preAuthenticate(token));
-      return doAuthenticate(token);
+      data.set(doAuthenticate(token));
+      return data.get();
     } finally {
-      resolveCallbacks().forEachOrdered(cb -> cb.postAuthenticated(data));
+      resolveCallbacks().forEachOrdered(cb -> cb.postAuthenticated(data.get()));
     }
   }
 

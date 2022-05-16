@@ -27,15 +27,6 @@ public class ResteasyCorsProvider implements Feature {
   @ConfigProperty(name = "corant.rs.cors.origin", defaultValue = "*")
   protected String origin;
   @Inject
-  @ConfigProperty(name = "corant.rs.cors.headers", defaultValue = "")
-  protected String headers;
-  @Inject
-  @ConfigProperty(name = "corant.rs.cors.credentials", defaultValue = "false")
-  protected boolean credentials;
-  @Inject
-  @ConfigProperty(name = "corant.rs.cors.methods", defaultValue = "GET, POST, OPTIONS")
-  protected String methods;
-  @Inject
   @ConfigProperty(name = "corant.rs.cors.maxAge", defaultValue = "86400")
   protected int maxAge;
 
@@ -44,7 +35,6 @@ public class ResteasyCorsProvider implements Feature {
     if (isEnable()) {
       CorsFilter corsFilter = new CorsFilter();
       corsFilter.getAllowedOrigins().add(getOrigin());
-      corsFilter.setAllowCredentials(getCredentials());
       corsFilter.setCorsMaxAge(getMaxAge());
       context.register(corsFilter);
       return true;
@@ -53,20 +43,8 @@ public class ResteasyCorsProvider implements Feature {
     }
   }
 
-  public boolean getCredentials() {
-    return credentials;
-  }
-
-  public String getHeaders() {
-    return headers;
-  }
-
   public int getMaxAge() {
     return maxAge;
-  }
-
-  public String getMethods() {
-    return methods;
   }
 
   public String getOrigin() {

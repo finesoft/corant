@@ -16,8 +16,8 @@ package org.corant.modules.security.shared.crypto.digest;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.max;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 import org.corant.shared.util.Bytes;
@@ -28,7 +28,7 @@ import org.corant.shared.util.Bytes;
  * @author bingo 下午8:24:08
  *
  */
-public abstract class AbstractHashProvider implements HashProvider {
+public abstract class AbstractHashProvider implements DigestProvider {
 
   public static final int DEFAULT_ITERATIONS = 1024;
   public static final int DEFAULT_SALT_SIZE = 128;
@@ -58,7 +58,7 @@ public abstract class AbstractHashProvider implements HashProvider {
    * @param saltBitSize the salt bits size, the minimum value is 128
    */
   protected AbstractHashProvider(String algorithm, int iterations, int saltBitSize) {
-    this.algorithm = shouldNotBlank(algorithm);
+    this.algorithm = shouldNotBlank(algorithm, "The algorithm can't empty!");
     this.iterations = max(DEFAULT_ITERATIONS, iterations);
     this.saltBitSize = max(DEFAULT_SALT_SIZE, saltBitSize);
     shouldBeTrue(this.saltBitSize % Byte.SIZE == 0,
@@ -85,7 +85,7 @@ public abstract class AbstractHashProvider implements HashProvider {
   @Override
   public Object encode(Object data) {
     byte[] salt = getSalt();
-    byte[] digested = HashProvider.encode(data, algorithm, iterations, salt, getProvider());
+    byte[] digested = encode(data, algorithm, iterations, salt, getProvider());
     return toCiphertext(algorithm, iterations, salt, digested);
   }
 
@@ -113,8 +113,7 @@ public abstract class AbstractHashProvider implements HashProvider {
     if (algorithm.equalsIgnoreCase(criterionHash.getAlgorithm())
         && criterionHash.getIterations() == iterations
         && criterionHash.getSaltSize() == saltBitSize) {
-      return compare(
-          HashProvider.encode(input, algorithm, iterations, criterionHash.getSalt(), getProvider()),
+      return compare(encode(input, algorithm, iterations, criterionHash.getSalt(), getProvider()),
           criterionHash.getDigested());
     }
     return false;
@@ -124,7 +123,7 @@ public abstract class AbstractHashProvider implements HashProvider {
    * Check whether the byte arrays are the same. Subclasses can modify this method to use algorithms
    * (such {@link #slowEquals(byte[], byte[])}) that slow down the CPU operation speed and increase
    * the difficulty of brute force cracking, default use
-   * {@link java.util.Objects#deepEquals(Object, Object)}
+   * {@link MessageDigest#isEqual(byte[], byte[])}
    *
    * @param encoded the encoded input
    * @param criterion the criterion
@@ -132,7 +131,34 @@ public abstract class AbstractHashProvider implements HashProvider {
    * @see #slowEquals(byte[], byte[])
    */
   protected boolean compare(byte[] encoded, byte[] criterion) {
-    return areDeepEqual(encoded, criterion);
+    return MessageDigest.isEqual(encoded, criterion);
+  }
+
+  /**
+   * Encode the given input string to hash digested bytes.
+   *
+   * @param input the input string that will be encoded
+   * @param algorithm the hash algorithm name, can't empty
+   * @param iterations the iterations times
+   * @param salt the salt bytes
+   * @param the instance of {@link java.security.Provider} or the name of
+   *        {@link java.security.Provider} or use system default provider if null.
+   * @return encode
+   */
+  protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt,
+      Object provider) {
+    MessageDigest digest = DigestProvider.getDigest(algorithm, provider);
+    if (salt.length != 0) {
+      digest.reset();
+      digest.update(salt);
+    }
+    byte[] hashed = digest.digest((byte[]) input);
+    int itr = iterations - 1;
+    for (int i = 0; i < itr; i++) {
+      digest.reset();
+      hashed = digest.digest(hashed);
+    }
+    return hashed;
   }
 
   /**

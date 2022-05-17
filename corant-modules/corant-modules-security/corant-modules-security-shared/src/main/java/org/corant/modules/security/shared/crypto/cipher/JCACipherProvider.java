@@ -57,17 +57,10 @@ public abstract class JCACipherProvider implements CipherProvider {
     this.secureRandom = secureRandom;
   }
 
-  public static Cipher createCipher(Object provider, String transformation, int mode, Key key,
+  public static Cipher buildCipher(Object provider, String transformation, int mode, Key key,
       AlgorithmParameterSpec algoParamSpec, SecureRandom secureRandom) {
     try {
-      final Cipher cipher;
-      if (provider instanceof Provider) {
-        cipher = Cipher.getInstance(transformation, (Provider) provider);
-      } else if (provider instanceof String) {
-        cipher = Cipher.getInstance(transformation, (String) provider);
-      } else {
-        cipher = Cipher.getInstance(transformation);
-      }
+      final Cipher cipher = createCipher(provider, transformation);
       if (secureRandom != null) {
         if (algoParamSpec != null) {
           cipher.init(mode, key, algoParamSpec, secureRandom);
@@ -80,8 +73,23 @@ public abstract class JCACipherProvider implements CipherProvider {
         cipher.init(mode, key);
       }
       return cipher;
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
-        | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+    } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static Cipher createCipher(Object provider, String transformation) {
+    try {
+      final Cipher cipher;
+      if (provider instanceof Provider) {
+        cipher = Cipher.getInstance(transformation, (Provider) provider);
+      } else if (provider instanceof String) {
+        cipher = Cipher.getInstance(transformation, (String) provider);
+      } else {
+        cipher = Cipher.getInstance(transformation);
+      }
+      return cipher;
+    } catch (NoSuchAlgorithmException | NoSuchPaddingException | NoSuchProviderException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -94,13 +102,13 @@ public abstract class JCACipherProvider implements CipherProvider {
     }
   }
 
-  public Cipher createCipher(int mode, Key key) {
-    return createCipher(mode, key, null, null);
+  public Cipher buildCipher(int mode, Key key) {
+    return buildCipher(mode, key, null, null);
   }
 
-  public Cipher createCipher(int mode, Key key, AlgorithmParameterSpec algoParamSpec,
+  public Cipher buildCipher(int mode, Key key, AlgorithmParameterSpec algoParamSpec,
       SecureRandom secureRandom) {
-    return createCipher(getProvider(), getTransformation(), mode, key, algoParamSpec, secureRandom);
+    return buildCipher(getProvider(), getTransformation(), mode, key, algoParamSpec, secureRandom);
   }
 
   public String getAlgorithm() {

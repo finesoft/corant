@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.corant.modules.security.shared.crypto.digest.DigestProvider;
-import org.corant.modules.security.shared.crypto.digest.HashProviderFactory;
+import org.corant.modules.security.shared.crypto.digest.PBKFD2ProviderFactory;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -30,36 +30,27 @@ import junit.framework.TestCase;
  * @author bingo 上午10:40:54
  *
  */
-public class HashProviderTest extends TestCase {
+public class PBKFD2ProviderTest extends TestCase {
 
   @Test
   public void test() {
-    for (HashProviderFactory fac : HashProviderFactory.values()) {
-      testBytesHashProvider(() -> fac.createProvider(0, 0), () -> fac.createProvider(10000, 0),
-          () -> fac.createProvider(10000, 256));
+    for (PBKFD2ProviderFactory fac : PBKFD2ProviderFactory.values()) {
+      testPBKDHashProvider(
+          new DigestProvider[] {fac.createProvider(0, 0), fac.createProvider(10000, 0),
+              fac.createProvider(10000, 256), fac.createProvider(10000, 256, 1024)});
     }
   }
 
-  void testBytesHashProvider(final Supplier<DigestProvider> s1, final Supplier<DigestProvider> s2,
-      final Supplier<DigestProvider> s3) {
+  void testPBKDHashProvider(final DigestProvider[] providers) {
     String data = "123456";
-    byte[] bytes = data.getBytes();
-    DigestProvider provider = s1.get();
-    String encoded = provider.encode(bytes).toString();
-    assertTrue(provider.validate(bytes, encoded));
-    // System.out.println(encoded);
-    provider = s2.get();
-    encoded = provider.encode(bytes).toString();
-    assertTrue(provider.validate(bytes, encoded));
-    // System.out.println(encoded);
-    provider = s3.get();
-    encoded = provider.encode(bytes).toString();
-    assertTrue(provider.validate(bytes, encoded));
-    // System.out.println(encoded);
+    for (DigestProvider provider : providers) {
+      String encoded = provider.encode(data).toString();
+      assertTrue(provider.validate(data, encoded));
+    }
   }
 
-  void testHashProviderTimeuse(final Supplier<DigestProvider> s1, int timesPerThread, int threads)
-      throws InterruptedException {
+  void testPBKDHashProviderTimeuse(final Supplier<DigestProvider> s1, int timesPerThread,
+      int threads) throws InterruptedException {
     final String data = UUID.randomUUID().toString();
     final DigestProvider provider = s1.get();
     IntStream.of(min(32, timesPerThread)).forEach(i -> provider.encode(data));
@@ -77,22 +68,5 @@ public class HashProviderTest extends TestCase {
     System.out.format("%s threads: %d, times-per-thread: %d, timeuse(ms): %s%n",
         provider.getClass().getSimpleName(), threads, timesPerThread,
         System.currentTimeMillis() - st).flush();
-  }
-
-  void testPBKDHashProvider(final Supplier<DigestProvider> s1, final Supplier<DigestProvider> s2,
-      final Supplier<DigestProvider> s3) {
-    String data = "123456";
-    DigestProvider provider = s1.get();
-    String encoded = provider.encode(data).toString();
-    assertTrue(provider.validate(data, encoded));
-    // System.out.println(encoded);
-    provider = s2.get();
-    encoded = provider.encode(data).toString();
-    assertTrue(provider.validate(data, encoded));
-    // System.out.println(encoded);
-    provider = s3.get();
-    encoded = provider.encode(data).toString();
-    assertTrue(provider.validate(data, encoded));
-    // System.out.println(encoded);
   }
 }

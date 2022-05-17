@@ -16,17 +16,20 @@ package org.corant.modules.security.shared.crypto;
 import static org.junit.Assert.assertArrayEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.stream.IntStream;
-import org.corant.modules.security.shared.crypto.cipher.AESCBCCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.AESCTRCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.AESGCMCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.BlowfishCBCCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.BlowfishCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.SM4CBCCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.SM4ECBCipherProvider;
+import org.corant.modules.security.shared.crypto.cipher.AsymmetricCipherProvider;
+import org.corant.modules.security.shared.crypto.cipher.AsymmetricCipherProviderFactory;
+import org.corant.modules.security.shared.crypto.cipher.JCACipherProvider;
 import org.corant.modules.security.shared.crypto.cipher.SymmetricCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.TripleDESCTRCipherProvider;
-import org.corant.modules.security.shared.crypto.cipher.TripleDESECBCipherProvider;
+import org.corant.modules.security.shared.crypto.cipher.SymmetricCipherProviderFactory;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Randoms;
 import org.junit.Test;
 import junit.framework.TestCase;
@@ -42,11 +45,25 @@ public class JCACipherProviderTest extends TestCase {
   private static final String content = "Fake content for testing! bingo~bingo~chen";
 
   @Test
-  public void testAESCBC() {
+  public void testASymmetric() {
+    AsymmetricCipherProvider provider;
+    for (AsymmetricCipherProviderFactory fac : AsymmetricCipherProviderFactory.values()) {
+      provider = (AsymmetricCipherProvider) fac.createProvider(fac.createKeyPair());
+      testJCA("", provider);
+      if (fac.getKeyBits() > 2048) {
+        testJCA(content, provider);
+      } else {
+        testJCA(content.substring(0, 30), provider);
+      }
+    }
+  }
+
+  @Test
+  public void testSymmetric() {
     SymmetricCipherProvider provider;
-    for (Integer i : AESCBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(AESCBCCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESCBCCipherProvider(keyBytes);
+    for (SymmetricCipherProviderFactory fac : SymmetricCipherProviderFactory.values()) {
+      provider = (SymmetricCipherProvider) fac.createProvider(fac.createKey());
+      System.out.println(fac);
       testJCA("", provider);
       testJCA(content, provider);
       final SymmetricCipherProvider itp = provider;
@@ -55,114 +72,28 @@ public class JCACipherProviderTest extends TestCase {
   }
 
   @Test
-  public void testAESCTR() {
+  public void testSymmetricStream() throws IOException {
     SymmetricCipherProvider provider;
-    for (Integer i : AESCTRCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(AESCTRCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESCTRCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
+    for (SymmetricCipherProviderFactory fac : SymmetricCipherProviderFactory.values()) {
+      provider = (SymmetricCipherProvider) fac.createProvider(fac.createKey());
+      try (InputStream fis = new FileInputStream("d:/corant-1.9.0_20220505.txt");
+          OutputStream fos = new FileOutputStream("d:/" + fac.name() + "_en.txt")) {
+        provider.encrypt(fis, fos);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+      try (InputStream fis = new FileInputStream("d:/" + fac.name() + "_en.txt");
+          OutputStream fos = new FileOutputStream("d:/" + fac.name() + "_de.txt")) {
+        provider.decrypt(fis, fos);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+      assertTrue(FileUtils.isSameContent(new File("d:/corant-1.9.0_20220505.txt"),
+          new File("d:/" + fac.name() + "_de.txt")));
     }
   }
 
-  @Test
-  public void testAESGMC() {
-    SymmetricCipherProvider provider;
-    for (Integer i : AESGCMCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(AESGCMCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new AESGCMCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testBlowfish() {
-    SymmetricCipherProvider provider;
-    for (Integer i : BlowfishCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(BlowfishCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new BlowfishCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testBlowfishCBC() {
-    SymmetricCipherProvider provider;
-    for (Integer i : BlowfishCBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(BlowfishCBCCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new BlowfishCBCCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testSM4CBC() {
-    SymmetricCipherProvider provider;
-    for (Integer i : SM4CBCCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(Providers.BOUNCYCASTLE_PROVIDER,
-          SM4CBCCipherProvider.ALGORITHM, i, null).getEncoded();
-      provider = new SM4CBCCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testSM4ECB() {
-    SymmetricCipherProvider provider;
-    for (Integer i : SM4ECBCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes = Keys.generateSecretKey(Providers.BOUNCYCASTLE_PROVIDER,
-          SM4ECBCipherProvider.ALGORITHM, i, null).getEncoded();
-      provider = new SM4ECBCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testTripleDESCTR() {
-    SymmetricCipherProvider provider;
-    for (Integer i : TripleDESCTRCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes =
-          Keys.generateSecretKey(TripleDESCTRCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new TripleDESCTRCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  @Test
-  public void testTripleDESECB() {
-    SymmetricCipherProvider provider;
-    for (Integer i : TripleDESECBCipherProvider.ALLOW_KEY_BIT_SIZES) {
-      byte[] keyBytes =
-          Keys.generateSecretKey(TripleDESECBCipherProvider.ALGORITHM, i).getEncoded();
-      provider = new TripleDESECBCipherProvider(keyBytes);
-      testJCA("", provider);
-      testJCA(content, provider);
-      final SymmetricCipherProvider itp = provider;
-      IntStream.range(0, 20).forEach(x -> testJCA(content.repeat(Randoms.randomInt(x, 1000)), itp));
-    }
-  }
-
-  void testJCA(String content, SymmetricCipherProvider provider) {
+  void testJCA(String content, JCACipherProvider provider) {
     final byte[] contentBytes = content.getBytes();
     byte[] encrypted = provider.encrypt(contentBytes);
     byte[] decrypted = provider.decrypt(encrypted);

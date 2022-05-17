@@ -17,6 +17,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.Signature;
+import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -26,34 +28,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午8:31:04
  *
  */
-public interface HashProvider {
-
-  /**
-   * Encode the given input string to hash digested bytes.
-   *
-   * @param input the input string that will be encoded
-   * @param algorithm the hash algorithm name, can't empty
-   * @param iterations the iterations times
-   * @param salt the salt bytes
-   * @param the instance of {@link java.security.Provider} or the name of
-   *        {@link java.security.Provider} or use system default provider if null.
-   * @return encode
-   */
-  static byte[] encode(Object input, String algorithm, int iterations, byte[] salt,
-      Object provider) {
-    MessageDigest digest = getDigest(algorithm, provider);
-    if (salt.length != 0) {
-      digest.reset();
-      digest.update(salt);
-    }
-    byte[] hashed = digest.digest((byte[]) input);
-    int itr = iterations - 1;
-    for (int i = 0; i < itr; i++) {
-      digest.reset();
-      hashed = digest.digest(hashed);
-    }
-    return hashed;
-  }
+public interface DigestProvider {
 
   /**
    * Returns a message digest with algorithm and provider.
@@ -71,6 +46,28 @@ public interface HashProvider {
         return MessageDigest.getInstance(algorithm, (String) provider);
       } else {
         return MessageDigest.getInstance(algorithm);
+      }
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns a "Message Authentication Code"(MAC) with algorithm and provider.
+   *
+   * @param algorithm the MAC algorithm name, can't empty
+   * @param provider the instance of {@link java.security.Provider} or the name of
+   *        {@link java.security.Provider} or use system default provider if null.
+   * @return the "Message Authentication Code"(MAC)
+   */
+  static Mac getMac(String algorithm, Object provider) {
+    try {
+      if (provider instanceof Provider) {
+        return Mac.getInstance(algorithm, (Provider) provider);
+      } else if (provider instanceof String) {
+        return Mac.getInstance(algorithm, (String) provider);
+      } else {
+        return Mac.getInstance(algorithm);
       }
     } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new CorantRuntimeException(e);
@@ -96,6 +93,28 @@ public interface HashProvider {
       }
     } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
       throw new CorantRuntimeException(e, "The %s algorithm not found", algorithm);
+    }
+  }
+
+  /**
+   * Returns a signature with algorithm and provider.
+   *
+   * @param algorithm the signature algorithm name, can't empty
+   * @param provider the instance of {@link java.security.Provider} or the name of
+   *        {@link java.security.Provider} or use system default provider if null.
+   * @return the signature
+   */
+  static Signature getSignature(String algorithm, Object provider) {
+    try {
+      if (provider instanceof Provider) {
+        return Signature.getInstance(algorithm, (Provider) provider);
+      } else if (provider instanceof String) {
+        return Signature.getInstance(algorithm, (String) provider);
+      } else {
+        return Signature.getInstance(algorithm);
+      }
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new CorantRuntimeException(e);
     }
   }
 

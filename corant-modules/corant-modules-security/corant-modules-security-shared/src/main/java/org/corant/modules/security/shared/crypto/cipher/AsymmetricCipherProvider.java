@@ -56,7 +56,7 @@ public abstract class AsymmetricCipherProvider extends JCACipherProvider {
   @Override
   public byte[] decrypt(byte[] encrypted) {
     try {
-      return createCipher(Cipher.DECRYPT_MODE, privateKey).doFinal(encrypted);
+      return buildCipher(Cipher.DECRYPT_MODE, privateKey).doFinal(encrypted);
     } catch (IllegalBlockSizeException | BadPaddingException e) {
       throw new CorantRuntimeException(e);
     }
@@ -65,7 +65,7 @@ public abstract class AsymmetricCipherProvider extends JCACipherProvider {
   @Override
   public void decrypt(InputStream is, OutputStream os) {
     try (CipherOutputStream cos =
-        new CipherOutputStream(os, createCipher(Cipher.DECRYPT_MODE, privateKey))) {
+        new CipherOutputStream(os, buildCipher(Cipher.DECRYPT_MODE, privateKey))) {
       byte[] buffer = new byte[streamingBufferSize];
       int bytesRead;
       while ((bytesRead = is.read(buffer)) != -1) {
@@ -79,7 +79,7 @@ public abstract class AsymmetricCipherProvider extends JCACipherProvider {
   @Override
   public byte[] encrypt(byte[] unencrypted) {
     try {
-      return createCipher(Cipher.ENCRYPT_MODE, publicKey).doFinal(unencrypted);
+      return buildCipher(Cipher.ENCRYPT_MODE, publicKey).doFinal(unencrypted);
     } catch (IllegalBlockSizeException | BadPaddingException e) {
       throw new CorantRuntimeException(e);
     }
@@ -88,7 +88,7 @@ public abstract class AsymmetricCipherProvider extends JCACipherProvider {
   @Override
   public void encrypt(InputStream is, OutputStream os) {
     try (CipherInputStream cis =
-        new CipherInputStream(is, createCipher(Cipher.ENCRYPT_MODE, publicKey))) {
+        new CipherInputStream(is, buildCipher(Cipher.ENCRYPT_MODE, publicKey))) {
       byte[] buffer = new byte[streamingBufferSize];
       int bytesRead;
       while ((bytesRead = cis.read(buffer)) != -1) {

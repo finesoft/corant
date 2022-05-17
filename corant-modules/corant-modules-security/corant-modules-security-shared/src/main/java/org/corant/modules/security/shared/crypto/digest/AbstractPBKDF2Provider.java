@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2022, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,8 +14,6 @@
 package org.corant.modules.security.shared.crypto.digest;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNoneNull;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.max;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -28,7 +26,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午8:24:08
  *
  */
-public abstract class PBKDF2HashProvider extends AbstractHashProvider {
+public abstract class AbstractPBKDF2Provider extends AbstractHashProvider {
 
   public static final int DEFAULT_DERIVED_KEY_SIZE = 512;
 
@@ -41,7 +39,7 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
    * @param algorithm the standard secret-key PBKDF2 algorithm name, can't empty
    * @param iterations the iterations times, the minimum value is 1024
    */
-  protected PBKDF2HashProvider(String algorithm, int iterations) {
+  protected AbstractPBKDF2Provider(String algorithm, int iterations) {
     this(algorithm, iterations, 0, 0);
   }
 
@@ -54,7 +52,7 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
    * @param saltBitSize the salt bits size, the minimum value is 128
    * @param derivedKeyBitSize the derived key bits size, the minimum value is 512
    */
-  protected PBKDF2HashProvider(String algorithm, int iterations, int saltBitSize,
+  protected AbstractPBKDF2Provider(String algorithm, int iterations, int saltBitSize,
       int derivedKeyBitSize) {
     super(algorithm, iterations, saltBitSize);
     this.derivedKeyBitSize = max(DEFAULT_DERIVED_KEY_SIZE, derivedKeyBitSize);
@@ -62,14 +60,7 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
         "The derived key bits size error must be divisible by 8.");
     // FIXME Calling an overridable method during in a constructor may result in the use of
     // uninitialized data
-    shouldNotNull(HashProvider.getSecretKeyFactory(algorithm, getProvider()));// for checking
-  }
-
-  @Override
-  public Object encode(Object data) {
-    byte[] salt = getSalt();
-    byte[] digested = encode(data, algorithm, iterations, salt);
-    return toCiphertext(algorithm, iterations, salt, digested);
+    // shouldNotNull(DigestProvider.getSecretKeyFactory(algorithm, getProvider()));// for checking
   }
 
   public int getDerivedKeyBitSize() {
@@ -77,32 +68,12 @@ public abstract class PBKDF2HashProvider extends AbstractHashProvider {
   }
 
   @Override
-  public boolean validate(Object input, Object criterion) {
-    shouldNoneNull(input, criterion);
-    HashInfo criterionHash = fromCiphertext(criterion.toString());
-    if (algorithm.equalsIgnoreCase(criterionHash.getAlgorithm())
-        && criterionHash.getIterations() == iterations
-        && criterionHash.getSaltSize() == saltBitSize) {
-      return compare(encode(input, algorithm, iterations, criterionHash.getSalt()),
-          criterionHash.getDigested());
-    }
-    return false;
-  }
-
-  /**
-   * Encode the given input string to hash digested bytes.
-   *
-   * @param input the input string that will be encoded
-   * @param algorithm the standard secret-key algorithm name, can't empty
-   * @param iterations the iterations times
-   * @param salt the salt bytes
-   * @return encode
-   */
-  protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt) {
+  protected byte[] encode(Object input, String algorithm, int iterations, byte[] salt,
+      Object provider) {
     KeySpec spec =
         new PBEKeySpec(((String) input).toCharArray(), salt, iterations, derivedKeyBitSize);
     try {
-      return HashProvider.getSecretKeyFactory(algorithm, getProvider()).generateSecret(spec)
+      return DigestProvider.getSecretKeyFactory(algorithm, provider).generateSecret(spec)
           .getEncoded();
     } catch (InvalidKeySpecException e) {
       throw new CorantRuntimeException(e, "Input could not be encoded");

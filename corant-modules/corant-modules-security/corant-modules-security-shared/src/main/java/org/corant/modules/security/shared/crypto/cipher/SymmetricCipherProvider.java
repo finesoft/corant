@@ -40,7 +40,7 @@ import org.corant.shared.util.Bytes;
 public abstract class SymmetricCipherProvider extends JCACipherProvider {
 
   protected final SecretKeySpec key;
-  protected final int ivByteSize;
+  protected final int ivBitSize;
   protected SecureRandom ivSecureRandom;
 
   protected SymmetricCipherProvider(String algorithm, byte[] key) {
@@ -56,17 +56,28 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
     this(algorithm, key, ivBitSize, streamingBufferSize, null, null);
   }
 
+  /**
+   * Create symmetric cipher provider
+   *
+   * @param algorithm the symmetric cipher algorithm
+   * @param key the secret key
+   * @param ivBitSize the initial vector bit size, if the given size is greater than 0, use the
+   *        given size as the initial vector size, when the given size is equal to 0, it means use
+   *        the cipher block size as the size of the initial vector, and when it is less than 0, it
+   *        means do not use the initial vector.
+   * @param streamingBufferSize the streaming buffer size use for encrypt and decrypt stream.
+   * @param secureRandom secure random use for cipher.
+   * @param ivSecureRandom initial vector secure random use for initial vector bytes.
+   */
   protected SymmetricCipherProvider(String algorithm, byte[] key, int ivBitSize,
       int streamingBufferSize, SecureRandom secureRandom, SecureRandom ivSecureRandom) {
     super(algorithm, streamingBufferSize, secureRandom);
     this.key = new SecretKeySpec(key, algorithm);
-    if (ivBitSize > 0) {
+    this.ivBitSize = ivBitSize;
+    if (ivBitSize >= 0) {
       shouldBeTrue(ivBitSize % Byte.SIZE == 0);
       this.ivSecureRandom =
           defaultObject(ivSecureRandom, JCACipherProvider::getDefaultSecureRandom);
-      ivByteSize = ivBitSize >>> 3;
-    } else {
-      ivByteSize = 0;
     }
   }
 
@@ -106,12 +117,22 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
     }
   }
 
+  public int getIvBitSize() {
+    return ivBitSize;
+  }
+
   public int getIvByteSize() {
-    return ivByteSize;
+    if (ivBitSize > 0) {
+      return ivBitSize >>> 3;
+    } else if (ivBitSize == 0) {
+      return createCipher(getProvider(), getTransformation()).getBlockSize();
+    } else {
+      return 0;
+    }
   }
 
   protected Cipher createCipher(int mode, Key key, byte[] iv, boolean streaming) {
-    return createCipher(mode, key, createParameterSpec(iv, streaming), secureRandom);
+    return buildCipher(mode, key, createParameterSpec(iv, streaming), secureRandom);
   }
 
   protected AlgorithmParameterSpec createParameterSpec(byte[] iv, boolean streaming) {
@@ -137,9 +158,9 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
 
   protected void decryptStream(InputStream is, OutputStream os) throws IOException {
     byte[] iv = Bytes.EMPTY_ARRAY;
-    if (ivByteSize > 0) {
-      iv = new byte[ivByteSize];
-      if (is.read(iv) != ivByteSize) {
+    if (getIvByteSize() > 0) {
+      iv = new byte[getIvByteSize()];
+      if (is.read(iv) != getIvByteSize()) {
         throw new CorantRuntimeException();
       }
     }
@@ -190,12 +211,12 @@ public abstract class SymmetricCipherProvider extends JCACipherProvider {
 
   protected byte[] resolveIvBytes(byte[] encrypted) {
     byte[] iv = Bytes.EMPTY_ARRAY;
-    if (ivByteSize > 0) {
+    if (getIvByteSize() > 0) {
       if (encrypted.length > 0) {
-        iv = new byte[ivByteSize];
-        System.arraycopy(encrypted, 0, iv, 0, ivByteSize);
+        iv = new byte[getIvByteSize()];
+        System.arraycopy(encrypted, 0, iv, 0, getIvByteSize());
       } else {
-        iv = new byte[ivByteSize];
+        iv = new byte[getIvByteSize()];
         ivSecureRandom.nextBytes(iv);
       }
     }

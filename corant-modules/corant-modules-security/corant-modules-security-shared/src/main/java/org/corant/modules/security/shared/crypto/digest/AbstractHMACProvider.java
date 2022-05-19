@@ -30,19 +30,20 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class AbstractHMACProvider implements DigestProvider {
 
-  protected final byte[] secret;
+  protected final SecretKeySpec secret;
   protected final String algorithm;
 
   public AbstractHMACProvider(String algorithm, byte[] secret) {
     this.algorithm = shouldNotBlank(algorithm, "The algorithm can't empty!");
-    this.secret = Arrays.copyOf(shouldNotEmpty(secret, "The secret can't empty!"), secret.length);
+    this.secret = new SecretKeySpec(
+        Arrays.copyOf(shouldNotEmpty(secret, "The secret can't empty!"), secret.length), algorithm);
   }
 
   @Override
   public byte[] encode(Object data) {
     try {
       Mac mac = DigestProvider.getMac(algorithm, getProvider());
-      mac.init(new SecretKeySpec(secret, algorithm));
+      mac.init(secret);
       return mac.doFinal((byte[]) data);
     } catch (InvalidKeyException e) {
       throw new CorantRuntimeException(e, "Could not create hmac digest, algorithm %s", algorithm);

@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Texts;
@@ -67,7 +66,7 @@ public class Keys {
 
   static {
     if (Security.getProvider("BC") == null) {
-      Security.addProvider(new BouncyCastleProvider());
+      Security.addProvider(Providers.BOUNCYCASTLE_PROVIDER);
     }
   }
 

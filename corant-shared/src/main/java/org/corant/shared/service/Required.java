@@ -38,7 +38,7 @@ import org.corant.shared.util.Strings.WildcardMatcher;
 import org.corant.shared.util.Systems;
 
 /**
- * corant-context
+ * corant-shared
  *
  * @author bingo 下午9:24:34
  *

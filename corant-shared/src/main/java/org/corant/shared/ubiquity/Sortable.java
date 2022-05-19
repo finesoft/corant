@@ -72,7 +72,7 @@ public interface Sortable {
   }
 
   /**
-   * Returns the converter priority, used to identify the priority , the smaller the value, the more
+   * Returns the priority, used to identify the priority , the smaller the value, the more
    * preferred. Default is {@link Priorities#FRAMEWORK_LOWER}
    *
    * @return the priority

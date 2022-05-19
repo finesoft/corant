@@ -18,6 +18,7 @@ import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
+import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -121,6 +122,16 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
       throw new GeneralRuntimeException(ERR_OBJ_NON_FUD, id);
     }
     return id;
+  }
+
+  @Transient
+  @javax.persistence.Transient
+  default boolean exists() {
+    return Aggregates.exists(resolveType(getClass()), getId());
+  }
+
+  default void lock(LockModeType lockModeType, Object... properties) {
+    Aggregates.lock(retrieve(), lockModeType, properties);
   }
 
   @Override

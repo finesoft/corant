@@ -59,7 +59,7 @@
     <version.grpc>1.40.1</version.grpc>
     <version.hanlp>portable-1.7.8</version.hanlp>
     <version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-    <version.hibernate-orm-core>5.3.25.Final</version.hibernate-orm-core>
+    <version.hibernate-orm-core>5.3.26.Final</version.hibernate-orm-core>
     <version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
     <version.hikariCP>3.4.5</version.hikariCP>
     <version.hppc>0.9.1</version.hppc>

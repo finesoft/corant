@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * corant-context
+ * corant-shared
  *
  * <p>
  * Annotation which may be placed upon an SPI implementation class, use to conditionally veto it if

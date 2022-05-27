@@ -19,6 +19,7 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Functions.uncheckedConsumer;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
@@ -385,7 +387,10 @@ public class FileUtils {
    * @param attributes the attributes to put
    * @param overwrite whether to overwrite an existing attribute with the same name
    * @throws IOException if an I/O error occurs
+   *
+   * @deprecated use {@link #updateUserDefinedAttributes(Path, UnaryOperator)}
    */
+  @Deprecated
   public static void putUserDefinedAttributes(final Path path, Map<String, String> attributes,
       boolean overwrite) throws IOException {
     if (isEmpty(attributes)) {
@@ -422,4 +427,50 @@ public class FileUtils {
     }
   }
 
+  /**
+   * Update the user defined attributes of the specified path file with given update function, if
+   * the file system supports.
+   *
+   * @param path the specified file path
+   * @param operator the update function, the input of the function is the current exists user
+   *        defined attributes of the file and the output is the new user defined attributes that
+   *        will be apply to the file, if the output is empty or null then means clear all user
+   *        defined attributes.
+   * @throws IOException if error occurred
+   */
+  public static void updateUserDefinedAttributes(final Path path,
+      UnaryOperator<Map<String, String>> operator) throws IOException {
+    if (operator != null && path.toFile().exists()) {
+      if (Files.getFileStore(shouldNotNull(path))
+          .supportsFileAttributeView(UserDefinedFileAttributeView.class)) {
+        UserDefinedFileAttributeView view =
+            Files.getFileAttributeView(path, UserDefinedFileAttributeView.class);
+        final Map<String, String> olds = new LinkedHashMap<>();
+        List<String> oldAttNames = defaultObject(view.list(), Collections::emptyList);
+        for (String attName : oldAttNames) {
+          int attSize = view.size(attName);
+          if (attSize > 0) {
+            ByteBuffer buffer = ByteBuffer.allocate(attSize);
+            view.read(attName, buffer);
+            olds.put(attName, Defaults.DFLT_CHARSET.decode(buffer.flip()).toString());
+            buffer.clear();
+          }
+        }
+        final Map<String, String> news = operator.apply(olds);
+        if (isEmpty(news)) {
+          oldAttNames.stream().forEach(uncheckedConsumer(view::delete));
+        } else {
+          oldAttNames.stream().filter(atn -> !news.containsKey(atn))
+              .forEach(uncheckedConsumer(view::delete));
+          for (Entry<String, String> entry : news.entrySet()) {
+            if (isNoneNull(entry.getKey(), entry.getValue())) {
+              view.write(entry.getKey(), Defaults.DFLT_CHARSET.encode(entry.getValue()));
+            }
+          }
+        }
+      } else {
+        logger.warning(() -> "The file system can't support user defined file attribute!");
+      }
+    }
+  }
 }

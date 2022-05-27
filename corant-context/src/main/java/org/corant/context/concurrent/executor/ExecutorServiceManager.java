@@ -17,10 +17,10 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -47,11 +47,16 @@ public class ExecutorServiceManager {
 
   protected static final Logger logger = Logger.getLogger(ExecutorServiceManager.class.getName());
 
-  protected static final List<DefaultManagedExecutorService> executorService = new ArrayList<>();
-  protected static final List<DefaultManagedScheduledExecutorService> scheduledExecutorService =
-      new ArrayList<>();
+  protected final List<DefaultManagedExecutorService> executorService =
+      new CopyOnWriteArrayList<>();
+  protected final List<DefaultManagedScheduledExecutorService> scheduledExecutorService =
+      new CopyOnWriteArrayList<>();
+
+  protected final Object monitor = new Object();
 
   protected HungLogger hungLogger;
+
+  protected volatile boolean running = false;
 
   @Inject
   protected ConcurrentExtension extension;
@@ -66,31 +71,43 @@ public class ExecutorServiceManager {
     initializeHungLoggerIfNecessary();
   }
 
-  protected synchronized void initializeHungLoggerIfNecessary() {
-    if (logger.getLevel() == Level.OFF || !ConcurrentExtension.ENABLE_HUNG_TASK_LOGGER
-        || hungLogger != null) {
-      return;
-    }
-    long checkPeriod = Stream
-        .concat(extension.getExecutorConfigs().getAllWithNames().values().stream(),
-            extension.getScheduledExecutorConfigs().getAllWithNames().values().stream())
-        .filter(c -> !c.isLongRunningTasks() && c.isValid())
-        .map(ManagedExecutorConfig::getHungTaskThreshold).min(Long::compare).orElse(0L);
-    if (checkPeriod > 0) {
-      checkPeriod = checkPeriod / 2;
-      final long useCheckPeriod = max(checkPeriod, 16000L);
-      hungLogger = new HungLogger(useCheckPeriod);
-      hungLogger.start();
-      logger.info(() -> String.format(
-          "Initialized the hung threads logger for all managed executor services, check period %sms.",
-          useCheckPeriod));
+  protected List<DefaultManagedExecutorService> getExecutorService() {
+    return executorService;
+  }
+
+  protected List<DefaultManagedScheduledExecutorService> getScheduledExecutorService() {
+    return scheduledExecutorService;
+  }
+
+  protected void initializeHungLoggerIfNecessary() {
+    synchronized (monitor) {
+      if (logger.getLevel() == Level.OFF || !ConcurrentExtension.ENABLE_HUNG_TASK_LOGGER
+          || hungLogger != null) {
+        return;
+      }
+      long checkPeriod = Stream
+          .concat(extension.getExecutorConfigs().getAllWithNames().values().stream(),
+              extension.getScheduledExecutorConfigs().getAllWithNames().values().stream())
+          .filter(c -> !c.isLongRunningTasks() && c.isValid())
+          .map(ManagedExecutorConfig::getHungTaskThreshold).min(Long::compare).orElse(0L);
+      if (checkPeriod > 0) {
+        checkPeriod = checkPeriod / 2;
+        final long useCheckPeriod = max(checkPeriod, 1000L);
+        hungLogger = new HungLogger(this, useCheckPeriod);
+        hungLogger.start();
+        logger.info(() -> String.format(
+            "Initialized the hung task logger for all managed executor services, check period %sms.",
+            useCheckPeriod));
+      }
     }
   }
 
-  protected synchronized void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
-    if (hungLogger != null) {
-      hungLogger.terminate();
-    }
+  protected boolean isRunning() {
+    return running;
+  }
+
+  protected void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
+    releaseHungLoggerIfNecessary();
     for (DefaultManagedExecutorService service : executorService) {
       logger.info(() -> String.format("The managed executor service %s will be shutdown!",
           service.getName()));
@@ -105,6 +122,29 @@ public class ExecutorServiceManager {
     scheduledExecutorService.clear();
   }
 
+  protected void releaseHungLoggerIfNecessary() {
+    synchronized (monitor) {
+      if (hungLogger != null) {
+        logger.fine("Uninstall the hung task logger.");
+        while (isRunning()) {
+          setRunning(false);
+          try {
+            monitor.wait();
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.log(Level.WARNING, "Uninstall the hung task logger raise error!", e);
+          }
+        }
+        hungLogger = null;
+        logger.fine("The hung task logger was Uninstalled.");
+      }
+    }
+  }
+
+  protected void setRunning(boolean running) {
+    this.running = running;
+  }
+
   /**
    * corant-context
    *
@@ -116,33 +156,47 @@ public class ExecutorServiceManager {
     private final Logger logger = Logger.getLogger(HungLogger.class.getName());
     private final boolean dumpStack = logger.isLoggable(Level.FINE);
     private final long checkPeriod;
-    private volatile boolean running = true;
+    private final ExecutorServiceManager manager;
 
-    public HungLogger(long checkPeriod) {
+    public HungLogger(ExecutorServiceManager manager, long checkPeriod) {
       super("corant-es-hung");
+      this.manager = manager;
       this.checkPeriod = checkPeriod;
+      this.manager.setRunning(true);
       setDaemon(true);
     }
 
     @Override
     public void run() {
-      while (running) {
-        Threads.tryThreadSleep(checkPeriod);
-        if (!executorService.isEmpty()) {
-          for (AbstractManagedExecutorService es : executorService) {
-            if (!running) {
-              break;
+      try {
+        while (manager.isRunning()) {
+          Threads.tryThreadSleep(checkPeriod);
+          if (!manager.getExecutorService().isEmpty() && manager.isRunning()) {
+            for (AbstractManagedExecutorService es : manager.getExecutorService()) {
+              if (!manager.isRunning()) {
+                break;
+              }
+              log(es);
             }
-            log(es);
+          }
+          if (!manager.getScheduledExecutorService().isEmpty() && manager.isRunning()) {
+            for (AbstractManagedExecutorService es : manager.getScheduledExecutorService()) {
+              if (!manager.isRunning()) {
+                break;
+              }
+              log(es);
+            }
           }
         }
-        if (!scheduledExecutorService.isEmpty()) {
-          for (AbstractManagedExecutorService es : scheduledExecutorService) {
-            if (!running) {
-              break;
-            }
-            log(es);
+      } finally {
+        synchronized (manager.monitor) {
+          logger.fine("The hung task logger is about to exit.");
+          if (!manager.isRunning()) {
+            manager.monitor.notifyAll();
+          } else {
+            manager.setRunning(false);
           }
+          logger.fine("The hung task logger exits.");
         }
       }
     }
@@ -161,7 +215,7 @@ public class ExecutorServiceManager {
 
     void log(String esname, AbstractManagedThread t, long now) {
       if (dumpStack) {
-        logger.warning(() -> String.format(
+        logger.info(() -> String.format(
             "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms, the stack:%n\t%s.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
@@ -169,7 +223,7 @@ public class ExecutorServiceManager {
             String.join(Strings.NEWLINE.concat(Strings.TAB),
                 Arrays.stream(t.getStackTrace()).map(Objects::asString).toArray(String[]::new))));
       } else {
-        logger.warning(() -> String.format(
+        logger.info(() -> String.format(
             "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
@@ -177,8 +231,5 @@ public class ExecutorServiceManager {
       }
     }
 
-    void terminate() {
-      running = false;
-    }
   }
 }

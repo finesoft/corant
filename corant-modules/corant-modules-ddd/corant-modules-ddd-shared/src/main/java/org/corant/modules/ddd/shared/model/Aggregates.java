@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static java.util.Collections.singletonMap;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
 import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_AGG_RESOLVE_MULTI;
@@ -63,7 +64,7 @@ public class Aggregates {
             .append(idAttrName).append(" FROM ").append(entityName).append(" A WHERE A.")
             .append(idAttrName).append(" =:id").toString();
       });
-      return resolveRepository(cls).query(existQl).parameters(Map.of("id", id)).get() != null;
+      return resolveRepository(cls).query(existQl).parameters(singletonMap("id", id)).get() != null;
     }
     throw new GeneralRuntimeException(ERR_PARAM);
   }
@@ -88,6 +89,11 @@ public class Aggregates {
     } else {
       throw new GeneralRuntimeException(ERR_PARAM);
     }
+  }
+
+  public static <X extends Aggregate> void lock(Class<X> cls, Serializable id,
+      LockModeType lockModeType, Object... properties) {
+    resolve(cls, id, lockModeType, properties);
   }
 
   public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id,

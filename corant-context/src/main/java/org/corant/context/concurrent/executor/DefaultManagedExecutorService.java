@@ -100,16 +100,22 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
   }
 
   void stop() {
+    // FIXME serialize the runnable task?
     try {
       super.shutdown();
       if (awaitTermination != null
           && !super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
-        logger.log(Level.WARNING,
-            () -> String.format("Shutdown managed executor service %s timeout!", name));
+        super.shutdownNow();
+        if (!super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
+          logger.log(Level.WARNING,
+              () -> String.format("Shutdown managed executor service %s timeout!", name));
+        }
       }
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, e,
           () -> String.format("Shutdown managed executor service %s occurred error!", name));
+      super.shutdownNow();
+      Thread.currentThread().interrupt();
     }
   }
 }

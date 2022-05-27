@@ -58,7 +58,7 @@ public class SecurityExtension implements Extension {
 
   protected static final Map<Secured, SecuredMetadata> securedMetaDatas = new ConcurrentHashMap<>();
 
-  private static volatile boolean securedMetaDatasInit = false;
+  protected static volatile boolean securedMetaDatasInit = false;
 
   public static SecuredMetadata getSecuredMetadata(Secured secured) {
     if (!securedMetaDatasInit) {
@@ -75,9 +75,9 @@ public class SecurityExtension implements Extension {
     return Collections.unmodifiableMap(securedMetaDatas);
   }
 
-  void onAfterBeanDiscovery(@Observes AfterBeanDiscovery beforeBeanDiscoveryEvent) {
+  protected void onAfterBeanDiscovery(@Observes AfterBeanDiscovery beforeBeanDiscoveryEvent) {
     if (!securedMetaDatasInit) {
-      synchronized (this) {
+      synchronized (SecurityExtension.class) {
         if (!securedMetaDatasInit) {
           securedMetaDatasInit = true;
         }
@@ -85,20 +85,21 @@ public class SecurityExtension implements Extension {
     }
   }
 
-  void onAfterTypeDiscovery(@Observes AfterTypeDiscovery afterTypeDiscovery) {
+  protected void onAfterTypeDiscovery(@Observes AfterTypeDiscovery afterTypeDiscovery) {
     if (ENABLE_INTERCEPTOR) {
       afterTypeDiscovery.getInterceptors().add(SecuredInterceptor.class);
     }
   }
 
-  void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
+  protected void onBeforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
     if (ENABLE_INTERCEPTOR) {
       beforeBeanDiscoveryEvent.addInterceptorBinding(Secured.class);
     }
   }
 
-  void onProcessAnnotatedType(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
-      Secured.class, Secure.class}) ProcessAnnotatedType<?> event) {
+  protected void onProcessAnnotatedType(
+      @Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({Secured.class,
+          Secure.class}) ProcessAnnotatedType<?> event) {
     Class<?> beanClass = event.getAnnotatedType().getJavaClass();
     if (!beanClass.isInterface() && !Modifier.isAbstract(beanClass.getModifiers())
         && ENABLE_INTERCEPTOR) {
@@ -127,7 +128,7 @@ public class SecurityExtension implements Extension {
     }
   }
 
-  void processDenyAll(ProcessAnnotatedType<?> event) {
+  protected void processDenyAll(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(DenyAll.class))
         .forEach(m -> {
           Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotation(DenyAll.class));
@@ -142,7 +143,7 @@ public class SecurityExtension implements Extension {
     }
   }
 
-  void processPermitAll(ProcessAnnotatedType<?> event) {
+  protected void processPermitAll(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(PermitAll.class))
         .forEach(m -> {
           Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotation(PermitAll.class));
@@ -157,7 +158,7 @@ public class SecurityExtension implements Extension {
     }
   }
 
-  void processRolesAllowed(ProcessAnnotatedType<?> event) {
+  protected void processRolesAllowed(ProcessAnnotatedType<?> event) {
     event.configureAnnotatedType().filterMethods(m -> m.isAnnotationPresent(RolesAllowed.class))
         .forEach(m -> {
           Secured secured = SecuredLiteral.of(m.getAnnotated().getAnnotations(RolesAllowed.class));
@@ -172,7 +173,7 @@ public class SecurityExtension implements Extension {
     }
   }
 
-  void processRunAs(ProcessAnnotatedType<?> event) {
+  protected void processRunAs(ProcessAnnotatedType<?> event) {
     if (event.configureAnnotatedType().getAnnotated().getAnnotation(RunAs.class) != null) {
       Secured secured = SecuredLiteral
           .of(event.configureAnnotatedType().getAnnotated().getAnnotation(RunAs.class));

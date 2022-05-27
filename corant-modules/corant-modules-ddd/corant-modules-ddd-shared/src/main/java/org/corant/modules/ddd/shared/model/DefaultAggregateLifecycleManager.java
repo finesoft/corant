@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static org.corant.shared.util.Maps.mapOf;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -25,6 +26,7 @@ import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
 import org.corant.modules.ddd.AggregateLifecycleManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
+import org.corant.modules.ddd.shared.event.AggregateLockEvent;
 import org.corant.modules.ddd.shared.repository.EntityManagers;
 import org.corant.shared.normal.Priorities;
 
@@ -79,6 +81,20 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
       }
     } else {
       em.refresh(entity);
+    }
+  }
+
+  protected void onAggregateLock(@Observes(
+      during = TransactionPhase.IN_PROGRESS) @Priority(Priorities.FRAMEWORK_LOWER) AggregateLockEvent e) {
+    Aggregate source;
+    if (e != null && (source = e.getSource()) != null && !source.isPhantom()) {
+      Object[] pros = e.getProperties();
+      if (pros.length == 0) {
+        entityManagers.getEntityManager(source.getClass()).lock(source, e.getLockModeType());
+      } else {
+        entityManagers.getEntityManager(source.getClass()).lock(source, e.getLockModeType(),
+            mapOf(pros));
+      }
     }
   }
 

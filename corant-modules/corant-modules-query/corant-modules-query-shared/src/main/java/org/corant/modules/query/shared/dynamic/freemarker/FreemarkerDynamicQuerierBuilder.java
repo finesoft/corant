@@ -88,11 +88,17 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       // Inject query criteria
       Environment e = execution.createProcessingEnvironment(param.getCriteria(), sw);
 
-      // Inject template method model
+      // Inject default template method model
       DynamicTemplateMethodModelEx<P> tmm = getTemplateMethodModelEx();
       String tmmTyp = tmm.getType();
       checkVarNames(e, tmmTyp);
       e.setVariable(tmmTyp, tmm);
+
+      // Inject configuration retrieve template method model
+      DynamicTemplateMethodModelEx<Object> cmm = DynamicTemplateMethodModelEx.CONFIG_TMM_INST;
+      String cmmTyp = cmm.getType();
+      checkVarNames(e, cmmTyp);
+      e.setVariable(cmmTyp, cmm);
 
       // Inject query limit & offset
 

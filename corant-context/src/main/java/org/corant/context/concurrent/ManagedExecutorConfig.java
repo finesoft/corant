@@ -39,12 +39,12 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
 
   private static final long serialVersionUID = -1732163277606881747L;
 
-  public static final long DFLT_HUNG_TAK_THRESHOLD = 60000L;
+  public static final long DFLT_HUNG_TASK_THRESHOLD = 60000L;
   public static final String DFLT_NAME = Names.CORANT.toUpperCase(Locale.ROOT).concat("(ES)");
   public static final ManagedExecutorConfig DFLT_INST = new ManagedExecutorConfig(DFLT_NAME);
 
   protected boolean longRunningTasks = false;
-  protected long hungTaskThreshold = DFLT_HUNG_TAK_THRESHOLD;// millis
+  protected long hungTaskThreshold = DFLT_HUNG_TASK_THRESHOLD;// millis
   protected int corePoolSize = Systems.getCPUs() << 1;
   protected int maxPoolSize = Systems.getCPUs() << 2;
   protected Duration keepAliveTime = Duration.ofSeconds(5L);
@@ -81,7 +81,7 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   }
 
   public long getHungTaskThreshold() {
-    return hungTaskThreshold <= 0 ? DFLT_HUNG_TAK_THRESHOLD : hungTaskThreshold;
+    return hungTaskThreshold <= 0 ? DFLT_HUNG_TASK_THRESHOLD : hungTaskThreshold;
   }
 
   public Duration getKeepAliveTime() {

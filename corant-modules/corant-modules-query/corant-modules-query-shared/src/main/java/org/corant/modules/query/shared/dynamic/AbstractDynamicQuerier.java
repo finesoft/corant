@@ -227,7 +227,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       if (cls.isInstance(pro)) {
         return forceCast(pro);
       }
-      return defaultObject(toObject(pro, cls), dflt);
+      return toObject(pro, cls);
     }
     return dflt;
   }

@@ -23,12 +23,12 @@ import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.StringJoiner;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -514,20 +514,7 @@ public class Strings {
    * @return join
    */
   public static String join(CharSequence delimiter, Iterable<?> elements) {
-    shouldNoneNull(delimiter, elements);
-    return String.join(delimiter, () -> new Iterator<>() {
-      final Iterator<?> iterator = elements.iterator();
-
-      @Override
-      public boolean hasNext() {
-        return iterator.hasNext();
-      }
-
-      @Override
-      public String next() {
-        return asString(iterator.next());
-      }
-    });
+    return joinIf(delimiter, elements, null);
   }
 
   /**
@@ -542,11 +529,65 @@ public class Strings {
    */
   public static String join(CharSequence delimiter, Object... elements) {
     shouldNoneNull(delimiter, elements);
-    StringJoiner joiner = new StringJoiner(delimiter);
-    for (Object cs : elements) {
-      joiner.add(asString(cs));
-    }
-    return joiner.toString();
+    return joinIf(delimiter, Iterables.iterableOf(elements), null);
+  }
+
+  /**
+   * Returns a new String composed of copies of the not null and not blank object elements joined
+   * together with a copy of the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String joinIfNotBlank(CharSequence delimiter, Iterable<?> elements) {
+    return joinIf(delimiter, elements, (e, s) -> e != null && isNotBlank(s));
+  }
+
+  /**
+   * Returns a new String composed of copies of the not null and not blank object elements joined
+   * together with a copy of the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String joinIfNotBlank(CharSequence delimiter, Object... elements) {
+    shouldNoneNull(delimiter, elements);
+    return joinIf(delimiter, Iterables.iterableOf(elements), (e, s) -> e != null && isNotBlank(s));
+  }
+
+  /**
+   * Returns a new String composed of copies of the not null and not empty object elements joined
+   * together with a copy of the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String joinIfNotEmpty(CharSequence delimiter, Iterable<?> elements) {
+    return joinIf(delimiter, elements, (e, s) -> e != null && isNotEmpty(s));
+  }
+
+  /**
+   * Returns a new String composed of copies of the not null and not empty object elements joined
+   * together with a copy of the specified delimiter.
+   *
+   * @see Objects#asString(Object)
+   *
+   * @param delimiter
+   * @param elements
+   * @return join
+   */
+  public static String joinIfNotEmpty(CharSequence delimiter, Object... elements) {
+    shouldNoneNull(delimiter, elements);
+    return joinIf(delimiter, Iterables.iterableOf(elements), (e, s) -> e != null && isNotEmpty(s));
   }
 
   /**
@@ -1300,6 +1341,25 @@ public class Strings {
       }
     }
     return str.substring(i);
+  }
+
+  static String joinIf(CharSequence delimiter, Iterable<?> elements,
+      BiFunction<Object, String, Boolean> op) {
+    shouldNoneNull(delimiter, elements);
+    StringJoiner joiner = new StringJoiner(delimiter);
+    if (op == null) {
+      for (Object ele : elements) {
+        joiner.add(asString(ele));
+      }
+    } else {
+      for (Object ele : elements) {
+        String cs = asString(ele);
+        if (op.apply(ele, cs)) {
+          joiner.add(cs);
+        }
+      }
+    }
+    return joiner.toString();
   }
 
   static List<Pair<Boolean, String>> segment(final String str, final String wholeSeparator) {

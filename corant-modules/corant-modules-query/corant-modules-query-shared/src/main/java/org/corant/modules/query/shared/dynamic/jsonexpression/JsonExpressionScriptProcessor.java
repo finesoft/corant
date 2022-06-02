@@ -310,8 +310,11 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
         namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
       } else if (name.startsWith(FETCH_RESULT_VAR_PREFIX)) {
         namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
-      } else {
+      } else if (name.startsWith(PARAMETER_VAR_PREFIX)) {
         namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
+      } else {
+        throw new NotSupportedException(
+            "Dynamic query json expression variable with name [%s] is not supported!", name);
       }
     }
 
@@ -361,6 +364,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       } else {
         if (!queryParamMapResolved) {
           queryParameterMap = objectMapper.toObject(queryParameter, Map.class);
+          queryParamMapResolved = true;
         }
         return objectMapper.getMappedValue(queryParameterMap, myNode.getNamePath());
       }

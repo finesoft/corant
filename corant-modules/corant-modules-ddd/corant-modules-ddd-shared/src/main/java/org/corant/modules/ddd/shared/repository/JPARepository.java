@@ -59,8 +59,6 @@ public interface JPARepository extends Repository<Query> {
 
   /**
    * {@link EntityManager#detach(Object)}
-   *
-   * @param entity detach
    */
   default void detach(Object entity) {
     getEntityManager().detach(entity);
@@ -69,8 +67,6 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Remove the data for entities of the specified class (and its subclasses) from the cache.
    * {@link Cache#evict(Class)}
-   *
-   * @param entityClass evictCache
    */
   default void evictCache(Class<?> entityClass) {
     Cache cache = getEntityManagerFactory().getCache();
@@ -84,8 +80,8 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Remove the data for the given entity from the cache. {@link Cache#evict(Class, Object)}
    *
-   * @param entityClass
-   * @param id evictCache
+   * @param entityClass entity class
+   * @param id entity instance primary key
    */
   default void evictCache(Class<?> entityClass, Serializable id) {
     Cache cache = getEntityManagerFactory().getCache();
@@ -99,7 +95,7 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Remove the data for the given entity from the cache.
    *
-   * @param entity evictCache
+   * @param entity entity to be evict
    */
   default void evictCache(Entity entity) {
     if (entity == null || entity.getId() == null) {
@@ -293,10 +289,16 @@ public interface JPARepository extends Repository<Query> {
         .entityManager(this::getEntityManager);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * {@link EntityManager#persist(Object)}
+   *
+   */
   @Override
-  default <T> boolean persist(T entity) {
+  default <T> T persist(T entity) {
     getEntityManager().persist(entity);
-    return true;
+    return entity;
   }
 
   /**
@@ -321,13 +323,75 @@ public interface JPARepository extends Repository<Query> {
   /**
    * {@link JPAQueries#query(String, Class)}
    *
-   * @param <T>
+   * @param <T> the entity type
    * @param qlString a Jakarta Persistence query string
    * @param type the type of the query result
    * @return TypedJPAQuery
    */
   default <T> TypedJPAQuery<T> query(final String qlString, final Class<T> type) {
     return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
+  }
+
+  /**
+   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * any. {@link EntityManager#refresh(Object)}
+   *
+   * @param <T> the entity type
+   * @param entity entity instance
+   * @return refreshed entity
+   */
+  default <T> T refresh(T entity) {
+    getEntityManager().refresh(entity);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * any, and lock it with respect to given lock mode type.
+   *
+   * {@link EntityManager#refresh(Object, LockModeType)}
+   *
+   * @param <T> the entity type
+   * @param entity entity instance
+   * @param lockMode lock mode
+   * @return refreshed entity
+   */
+  default <T> T refresh(T entity, LockModeType lockMode) {
+    getEntityManager().refresh(entity, lockMode);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
+   * any, and lock it with respect to given lock mode type and with specified properties.
+   *
+   * {@link EntityManager#refresh(Object, LockModeType, Map)}
+   *
+   * @param <T> the entity type
+   * @param entity entity instance
+   * @param lockMode lock mode
+   * @param properties standard and vendor-specific properties and hints
+   * @return refreshed entity
+   */
+  default <T> T refresh(T entity, LockModeType lockMode, Map<String, Object> properties) {
+    getEntityManager().refresh(entity, lockMode, properties);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database, usingthe specified properties, and
+   * overwriting changes made to the entity, if any.
+   *
+   * {@link EntityManager#refresh(Object, Map)}
+   *
+   * @param <T> the entity type
+   * @param entity entity instance
+   * @param properties standard and vendor-specific properties and hints
+   * @return refreshed entity
+   */
+  default <T> T refresh(T entity, Map<String, Object> properties) {
+    getEntityManager().refresh(entity, properties);
+    return entity;
   }
 
   @Override
@@ -362,15 +426,58 @@ public interface JPARepository extends Repository<Query> {
     return defaultObject(query.getResultList(), ArrayList::new);
   }
 
+  /**
+   * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
+   *
+   * Parameters must be registered before the stored procedure can be executed.
+   *
+   * If the stored procedure returns one or more result sets, any result set will be returned as a
+   * list of type Object[].
+   *
+   * {@link EntityManager#createStoredProcedureQuery(String)}
+   *
+   * @param procedureName name of the stored procedure in the database
+   * @return storedProcedureQuery
+   */
   default JPAQuery storedProcedureQuery(final String procedureName) {
     return JPAQueries.storedProcedureQuery(procedureName).entityManager(this::getEntityManager);
   }
 
+  /**
+   * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
+   *
+   * Parameters must be registered before the stored procedure can be executed.
+   *
+   * The resultClass arguments must be specified in the order in which the result sets will be
+   * returned by the stored procedure invocation.
+   *
+   * {@link EntityManager#createStoredProcedureQuery(String, Class...)}
+   *
+   * @param procedureName name of the stored procedure in the database
+   * @param type classes to which the result sets produced by the stored procedure are to be mapped
+   * @return storedProcedureQuery
+   */
   default JPAQuery storedProcedureQuery(final String procedureName, final Class<?>... type) {
     return JPAQueries.storedProcedureQuery(procedureName, type)
         .entityManager(this::getEntityManager);
   }
 
+  /**
+   *
+   * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
+   *
+   * Parameters must be registered before the stored procedure can be executed.
+   *
+   * The resultClass arguments must be specified in the order in which the result sets will be
+   * returned by the stored procedure invocation.
+   *
+   * {@link EntityManager#createStoredProcedureQuery(String, String...)}
+   *
+   * @param procedureName name of the stored procedure in the database
+   * @param resultSetMappings the names of the result set mappings to be used in mapping result sets
+   *        returned by the stored procedureReturns:
+   * @return storedProcedureQuery
+   */
   default JPAQuery storedProcedureQuery(final String procedureName,
       final String... resultSetMappings) {
     return JPAQueries.storedProcedureQuery(procedureName, resultSetMappings)

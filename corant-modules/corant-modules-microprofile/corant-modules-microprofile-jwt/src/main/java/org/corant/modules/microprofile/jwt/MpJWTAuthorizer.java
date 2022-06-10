@@ -13,10 +13,12 @@
  */
 package org.corant.modules.microprofile.jwt;
 
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
+import javax.enterprise.inject.Instance;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.AuthorizerCallback;
 import org.corant.modules.security.shared.AbstractAuthorizer;
@@ -25,6 +27,7 @@ import org.corant.modules.security.shared.SimplePermissions;
 import org.corant.modules.security.shared.SimplePrincipal;
 import org.corant.modules.security.shared.SimpleRole;
 import org.corant.modules.security.shared.SimpleRoles;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-microprofile-jwt
@@ -51,6 +54,10 @@ public class MpJWTAuthorizer extends AbstractAuthorizer {
 
   @Override
   protected Stream<AuthorizerCallback> resolveCallbacks() {
+    Instance<AuthorizerCallback> cbs = select(AuthorizerCallback.class);
+    if (!cbs.isUnsatisfied()) {
+      cbs.stream().sorted(Sortable::compare);
+    }
     return Stream.empty();
   }
 

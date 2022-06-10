@@ -45,8 +45,9 @@ public interface TypedRepository<T, Q> {
    * Save the state of the given object into repository
    *
    * @param obj the entity instance
+   * @return the persisted entity
    */
-  boolean persist(T obj);
+  T persist(T obj);
 
   /**
    * Remove the object from repository

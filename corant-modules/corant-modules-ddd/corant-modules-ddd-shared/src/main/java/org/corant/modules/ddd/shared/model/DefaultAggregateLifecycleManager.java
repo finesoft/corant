@@ -21,6 +21,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
@@ -42,6 +43,9 @@ import org.corant.shared.normal.Priorities;
 @ApplicationScoped
 @InfrastructureServices
 public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
+
+  protected static final boolean forceMerge = Configs
+      .<Boolean>getValue("corant.ddd.aggregate.lifecycle.force-merge", Boolean.class, Boolean.TRUE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -69,7 +73,9 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
           em.flush();
         }
       } else {
-        em.merge(entity);
+        if (!em.contains(entity) || forceMerge) {
+          em.merge(entity); // performance turning
+        }
         if (effectImmediately) {
           em.flush();
         }

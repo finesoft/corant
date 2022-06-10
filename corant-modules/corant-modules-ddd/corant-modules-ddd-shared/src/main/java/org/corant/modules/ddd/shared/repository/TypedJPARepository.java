@@ -20,6 +20,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
@@ -55,8 +57,9 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    *
    * @param entity detach
    */
-  default void detach(T entity) {
+  default T detach(T entity) {
     getEntityManager().detach(entity);
+    return entity;
   }
 
   /**
@@ -70,7 +73,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Remove the data for the given entity from the cache.
    *
-   * @param entity evictCache
+   * @param entity the given entity from the cache to be removed
    */
   default void evictCache(Entity entity) {
     if (entity == null || entity.getId() == null) {
@@ -82,7 +85,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Remove the data for the given entity from the cache. {@link Cache#evict(Class, Object)}
    *
-   * @param id evictCache
+   * @param id the given entity id from the cache to be removed
    */
   void evictCache(Serializable id);
 
@@ -133,19 +136,17 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * {@link EntityManager#lock(Object, LockModeType)}
    */
-  default void lock(T object, LockModeType lockModeType) {
-    if (getEntityManager().contains(object)) {
-      getEntityManager().lock(object, lockModeType);
-    }
+  default T lock(T object, LockModeType lockModeType) {
+    getEntityManager().lock(object, lockModeType);
+    return object;
   }
 
   /**
    * {@link EntityManager#lock(Object, LockModeType, Map)}
    */
-  default void lock(T object, LockModeType lockModeType, Map<String, Object> properties) {
-    if (getEntityManager().contains(object)) {
-      getEntityManager().lock(object, lockModeType, properties);
-    }
+  default T lock(T object, LockModeType lockModeType, Map<String, Object> properties) {
+    getEntityManager().lock(object, lockModeType, properties);
+    return object;
   }
 
   /**
@@ -158,6 +159,32 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   @Override
   default T merge(T obj) {
     return getEntityManager().merge(obj);
+  }
+
+  /**
+   * Merge the state of the given objects into repository.
+   *
+   * @param objs the objects to be saved
+   * @param preHandler merge operation preprocessor, used to configure the entity manager, such as
+   *        setting batch size, etc. This is related to the Hints provided by the JPA provider.
+   * @param postHandler merge operation post-processor, use to configure the entity manager, such as
+   *        flushing to underlying data base,etc.
+   */
+  default void mergeAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
+      Consumer<EntityManager> postHandler) {
+    if (objs != null) {
+      final EntityManager em =
+          preHandler != null ? preHandler.apply(getEntityManager()) : getEntityManager();
+      try {
+        for (T obj : objs) {
+          em.merge(obj);
+        }
+      } finally {
+        if (postHandler != null) {
+          postHandler.accept(em);
+        }
+      }
+    }
   }
 
   /**
@@ -199,9 +226,36 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @param obj the entity instance
    */
   @Override
-  default boolean persist(T obj) {
+  default T persist(T obj) {
     getEntityManager().persist(obj);
-    return true;
+    return obj;
+  }
+
+  /**
+   * Save the state of the given objects into repository.
+   *
+   * @param objs the objects to be saved
+   * @param preHandler persistence operation preprocessor, used to configure the entity manager,
+   *        such as setting batch size, etc. This is related to the Hints provided by the JPA
+   *        provider.
+   * @param postHandler persistence operation post-processor, use to configure the entity manager,
+   *        such as flushing to underlying data base,etc.
+   */
+  default void persistAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
+      Consumer<EntityManager> postHandler) {
+    if (objs != null) {
+      final EntityManager em =
+          preHandler != null ? preHandler.apply(getEntityManager()) : getEntityManager();
+      try {
+        for (T obj : objs) {
+          em.persist(obj);
+        }
+      } finally {
+        if (postHandler != null) {
+          postHandler.accept(em);
+        }
+      }
+    }
   }
 
   /**
@@ -229,6 +283,64 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @return TypedJPAQuery
    */
   <X> TypedJPAQuery<X> query(final String qlString, Class<X> type);
+
+  /**
+   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * any. {@link EntityManager#refresh(Object)}
+   *
+   * @param entity entity instance
+   * @return refreshed entity
+   */
+  default T refresh(T entity) {
+    getEntityManager().refresh(entity);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * any, and lock it with respect to given lock mode type.
+   *
+   * {@link EntityManager#refresh(Object, LockModeType)}
+   *
+   * @param entity entity instance
+   * @param lockMode lock mode
+   * @return refreshed entity
+   */
+  default T refresh(T entity, LockModeType lockMode) {
+    getEntityManager().refresh(entity, lockMode);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
+   * any, and lock it with respect to given lock mode type and with specified properties.
+   *
+   * {@link EntityManager#refresh(Object, LockModeType, Map)}
+   *
+   * @param entity entity instance
+   * @param lockMode lock mode
+   * @param properties standard and vendor-specific properties and hints
+   * @return refreshed entity
+   */
+  default T refresh(T entity, LockModeType lockMode, Map<String, Object> properties) {
+    getEntityManager().refresh(entity, lockMode, properties);
+    return entity;
+  }
+
+  /**
+   * Refresh the state of the instance from the database, usingthe specified properties, and
+   * overwriting changes made to the entity, if any.
+   *
+   * {@link EntityManager#refresh(Object, Map)}
+   *
+   * @param entity entity instance
+   * @param properties standard and vendor-specific properties and hints
+   * @return refreshed entity
+   */
+  default T refresh(T entity, Map<String, Object> properties) {
+    getEntityManager().refresh(entity, properties);
+    return entity;
+  }
 
   /**
    * Remove the entity from repository

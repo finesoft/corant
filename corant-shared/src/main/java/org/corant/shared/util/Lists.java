@@ -28,7 +28,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Immutable.ImmutableListBuilder;
@@ -356,23 +355,6 @@ public class Lists {
   }
 
   /**
-   * Break a collection into smaller non-null pieces
-   *
-   * @param <E> the element type
-   * @param collection the elements that the smaller list should contain
-   * @param size the pieces list size
-   */
-  public static <E> List<List<E>> partition(final Collection<E> collection, int size) {
-    List<List<E>> result = new ArrayList<>();
-    if (collection != null) {
-      final AtomicInteger counter = new AtomicInteger(0);
-      result.addAll(collection.stream()
-          .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size)).values());
-    }
-    return result;
-  }
-
-  /**
    * Null safe removeIf, execution begins only if the parameters passed in are not null.
    *
    * @param <C> the collection type
@@ -424,7 +406,10 @@ public class Lists {
    * @param collection the collection to split
    */
   public static <E> List<List<E>> split(int size, Collection<E> collection) {
-    shouldBeTrue(size > 0 && collection != null);
+    shouldBeTrue(size > 0);
+    if (collection == null || collection.isEmpty()) {
+      return new ArrayList<>();
+    }
     final MutableInteger counter = new MutableInteger(0);
     return new ArrayList<>(collection.stream()
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size)).values());

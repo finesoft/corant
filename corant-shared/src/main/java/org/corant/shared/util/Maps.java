@@ -313,7 +313,7 @@ public class Maps {
     Object obj = map == null ? null : map.get(key);
     if (obj instanceof Collection) {
       return Conversion.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
-    } else if (obj != null && obj.getClass().isArray()) {
+    } else if (obj instanceof Object[] || obj != null && obj.getClass().isArray()) {
       return Conversion.convert(wrapArray(obj), collectionFactory, elementClazz, hints);
     } else if (obj != null) {
       return Conversion.convert(obj, elementClazz, collectionFactory, hints);
@@ -333,7 +333,7 @@ public class Maps {
         results.add(converter.apply(val));
       }
       return results;
-    } else if (obj != null && obj.getClass().isArray()) {
+    } else if (obj instanceof Object[] || obj != null && obj.getClass().isArray()) {
       Object[] vals = wrapArray(obj);
       C results = collectionFactory.apply(vals.length);
       for (Object val : vals) {
@@ -1075,6 +1075,10 @@ public class Maps {
     return map != null ? new HashMap<>(map) : new HashMap<>();
   }
 
+  public static <K, V> Map<K, V> newLinkedHashMap(Map<? extends K, ? extends V> map) {
+    return map != null ? new LinkedHashMap<>(map) : new LinkedHashMap<>();
+  }
+
   public static Properties propertiesOf(String... strings) {
     Properties result = new Properties();
     result.putAll(mapOf((Object[]) strings));
@@ -1156,7 +1160,7 @@ public class Maps {
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
-    } else if (val != null && val.getClass().isArray()) {
+    } else if (val instanceof Object[] || val != null && val.getClass().isArray()) {
       int idx = 0;
       Object[] vals = wrapArray(val);
       for (Object obj : vals) {

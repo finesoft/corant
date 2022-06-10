@@ -48,8 +48,9 @@ public interface Repository<Q> {
    *
    * @param <T> the entity type
    * @param obj the entity instance
+   * @return the persisted entity
    */
-  <T> boolean persist(T obj);
+  <T> T persist(T obj);
 
   /**
    * Remove the object from repository

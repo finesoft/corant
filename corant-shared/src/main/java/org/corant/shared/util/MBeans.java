@@ -37,6 +37,11 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class MBeans {
 
+  /**
+   * Deregisters the given object instances from MBean server if it is already registered.
+   *
+   * @param objectInstances the object instances to be deregistered.
+   */
   public static void deregisterFromMBean(ObjectInstance... objectInstances) {
     if (isEmpty(objectInstances)) {
       return;
@@ -55,16 +60,21 @@ public class MBeans {
     }
   }
 
-  public static void deregisterFromMBean(String... objectNamings) {
-    if (isEmpty(objectNamings)) {
+  /**
+   * Deregisters the given object name from MBean server if it is already registered.
+   *
+   * @param names the object names to be deregistered.
+   */
+  public static void deregisterFromMBean(String... names) {
+    if (isEmpty(names)) {
       return;
     }
     MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-    for (String objectNaming : objectNamings) {
-      if (isNotBlank(objectNaming)) {
+    for (String name : names) {
+      if (isNotBlank(name)) {
         ObjectName objectName;
         try {
-          objectName = new ObjectName(objectNaming);
+          objectName = new ObjectName(name);
         } catch (MalformedObjectNameException ex) {
           throw new CorantRuntimeException(ex);
         }
@@ -79,40 +89,60 @@ public class MBeans {
     }
   }
 
-  public static boolean isRegistered(String objectNaming) {
-    if (isBlank(objectNaming)) {
+  /**
+   * Returns true if the given object name is already registered with the MBean server, false
+   * otherwise.
+   *
+   * @param name the object name to be checked
+   * @return true if the given object name is already registered otherwise false.
+   */
+  public static boolean isRegistered(String name) {
+    if (isBlank(name)) {
       return false;
     }
     try {
       MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-      return server.isRegistered(new ObjectName(objectNaming));
+      return server.isRegistered(new ObjectName(name));
     } catch (MalformedObjectNameException ex) {
       throw new CorantRuntimeException(ex);
     }
   }
 
-  public static ObjectInstance registerToMBean(String objectNaming, Object object) {
-    return registerToMBean(objectNaming, object, true);
+  /**
+   * Register the given object to MBean server by the given object name and return the MBean object
+   * instance.
+   * <p>
+   * Note: if the given name was already registered with MBean server, then this method will
+   * de-register the exists MBean with same name and then register the given object to MBean server
+   * by the name.
+   *
+   * @param name the object name to be registered
+   * @param object the object to be registered
+   * @return the MBean object instance
+   */
+  public static ObjectInstance registerToMBean(String name, Object object) {
+    return registerToMBean(name, object, true);
   }
 
   /**
-   * Register to the MBean server, can re-register if necessary.
+   * Register to the MBean server, may re-register if necessary.
    *
-   * @param objectNaming
-   * @param object
-   * @param reregister If the object has already registered with the object naming, if this
-   *        parameter is true then return the registered object instance else the object will be
-   *        unregistered and then re-register and return the object instance.
-   * @return registerToMBean
+   * @param name the object name to be registered
+   * @param object the object to be registered
+   * @param reregister If the given name is already registered with the MBean server, if the
+   *        parameter is false, it will return the registered object instance with the same name,
+   *        otherwise the registered object with the same name will be deregistered from the MBean
+   *        server, and then the given object will be registered with the MBean server by the given
+   *        name and return the object instance.
+   * @return the MBean object instance
    */
-  public static ObjectInstance registerToMBean(String objectNaming, Object object,
-      boolean reregister) {
-    if (object == null || isBlank(objectNaming)) {
+  public static ObjectInstance registerToMBean(String name, Object object, boolean reregister) {
+    if (object == null || isBlank(name)) {
       return null;
     }
     ObjectName objectName;
     try {
-      objectName = new ObjectName(objectNaming);
+      objectName = new ObjectName(name);
     } catch (MalformedObjectNameException ex) {
       throw new CorantRuntimeException(ex);
     }

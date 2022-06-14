@@ -55,7 +55,7 @@ public class StringShortConverter extends AbstractNumberConverter<String, Short>
       return getDefaultValue();
     } else {
       String val = stripTrailingZeros(value);
-      if (hasPrefix(val)) {
+      if (isDecodable(val, hints)) {
         return Short.decode(val);
       } else {
         return Short.valueOf(val, getHintsRadix(hints));

@@ -58,13 +58,16 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
    * Check if the string starts with the prefix of the number.
    *
    * @param value the string to check
+   * @param hints the hints may disable decode
    */
-  public static boolean hasPrefix(String value) {
-    if (value != null) {
-      for (String hp : NUMERIC_PREFIXES) {
-        if (value.startsWith(hp)) {
-          return true;
-        }
+  public static boolean isDecodable(String value, Map<String, ?> hints) {
+    if (value == null
+        || ConverterHints.getHint(hints, ConverterHints.CVT_NUMBER_NOT_DECODE_KEY, false)) {
+      return false;
+    }
+    for (String hp : NUMERIC_PREFIXES) {
+      if (value.startsWith(hp)) {
+        return true;
       }
     }
     return false;

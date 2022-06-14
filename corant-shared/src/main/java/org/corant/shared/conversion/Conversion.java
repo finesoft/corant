@@ -464,7 +464,7 @@ public class Conversion {
           return Tuple.pairOf(convert(list.get(0), argClasses[0], hints),
               convert(list.get(1), argClasses[1], hints));
         }
-      } else if (value.getClass().isArray()) {
+      } else if (value instanceof Object[] || value.getClass().isArray()) {
         Object[] array = wrapArray(value);
         if (array.length > 1) {
           return Tuple.pairOf(convert(array[0], argClasses[0], hints),
@@ -474,8 +474,7 @@ public class Conversion {
     } else if (Triple.class.isAssignableFrom(targetClass)) {
       if (value instanceof Map) {
         Map map = (Map) value;
-        if (map.containsKey("first") && map.containsKey("second")
-            && map.containsKey("third")) {
+        if (map.containsKey("first") && map.containsKey("second") && map.containsKey("third")) {
           return Tuple.tripleOf(convert(map.get("first"), argClasses[0], hints),
               convert(map.get("second"), argClasses[1], hints),
               convert(map.get("third"), argClasses[2], hints));
@@ -488,11 +487,11 @@ public class Conversion {
       } else if (value instanceof List) {
         List<?> list = (List<?>) value;
         if (list.size() > 2) {
-          Tuple.tripleOf(convert(list.get(0), argClasses[0], hints),
+          return Tuple.tripleOf(convert(list.get(0), argClasses[0], hints),
               convert(list.get(1), argClasses[1], hints),
               convert(list.get(2), argClasses[2], hints));
         }
-      } else if (value.getClass().isArray()) {
+      } else if (value instanceof Object[] || value.getClass().isArray()) {
         Object[] array = wrapArray(value);
         if (array.length > 2) {
           return Tuple.tripleOf(convert(array[0], argClasses[0], hints),

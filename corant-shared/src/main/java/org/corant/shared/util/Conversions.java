@@ -506,7 +506,7 @@ public class Conversions {
    * @return the converted target object
    */
   public static <T> T toObject(Object obj, Class<T> clazz) {
-    return toObject(obj, clazz, null);
+    return toObject(obj, clazz, null, null);
   }
 
   /**
@@ -524,11 +524,30 @@ public class Conversions {
    * @see ConverterFactory
    */
   public static <T> T toObject(Object obj, Class<T> clazz, Map<String, ?> hints) {
+    return toObject(obj, clazz, null, hints);
+  }
+
+  /**
+   * Converts the given original object to given target type with hints. if the given target type is
+   * an array, and the given original object is an array or a collection object, each element is
+   * converted, otherwise the overall conversion is performed.
+   *
+   * @param <T> the target type
+   * @param obj the original object that will be converted
+   * @param clazz the target class
+   * @param altVal the alternative object if converted object is null
+   * @param hints the conversion hints use to intervene in the conversion process
+   * @return the converted target object
+   * @see Conversion#convert(Object, Class, Map)
+   * @see Converter
+   * @see ConverterFactory
+   */
+  public static <T> T toObject(Object obj, Class<T> clazz, T altVal, Map<String, ?> hints) {
     if (clazz != null && clazz.isArray() && !clazz.getComponentType().isPrimitive()
         && (obj instanceof Object[] || obj instanceof Collection)) {
-      return forceCast(toArray(obj, clazz.getComponentType(), hints));
+      return defaultObject(forceCast(toArray(obj, clazz.getComponentType(), hints)), altVal);
     }
-    return Conversion.convert(obj, clazz, hints);
+    return defaultObject(Conversion.convert(obj, clazz, hints), altVal);
   }
 
   public static Object toObject(Object obj, String className) {
@@ -549,6 +568,21 @@ public class Conversions {
    */
   public static <T> T toObject(Object obj, TypeLiteral<T> typeLiteral, Map<String, ?> hints) {
     return Conversion.convert(obj, typeLiteral, hints);
+  }
+
+  /**
+   * Converts the given original object to given target type. if the given target type is an array,
+   * and the given original object is an array or a collection object, each element is converted,
+   * otherwise the overall conversion is performed.
+   *
+   * @param <T> the target type
+   * @param obj the original object that will be converted
+   * @param clazz the target class
+   * @param altVal the alternative object if converted object is null
+   * @return the converted target object
+   */
+  public static <T> T toObjectOrElse(Object obj, Class<T> clazz, T altVal) {
+    return toObject(obj, clazz, altVal, null);
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz) {

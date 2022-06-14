@@ -55,14 +55,12 @@ public class StringIntegerConverter extends AbstractNumberConverter<String, Inte
       return getDefaultValue();
     } else {
       String val = stripTrailingZeros(value);
-      if (hasPrefix(val)) {
+      if (isDecodable(val, hints)) {
         return Integer.decode(val);
+      } else if (isHintsUnsigned(hints)) {
+        return Integer.parseUnsignedInt(val, getHintsRadix(hints));
       } else {
-        if (isHintsUnsigned(hints)) {
-          return Integer.parseUnsignedInt(val, getHintsRadix(hints));
-        } else {
-          return Integer.valueOf(val, getHintsRadix(hints));
-        }
+        return Integer.valueOf(val, getHintsRadix(hints));
       }
     }
   }

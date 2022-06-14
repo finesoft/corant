@@ -16,8 +16,10 @@ package org.corant.shared.ubiquity;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.compare;
+import static org.corant.shared.util.Strings.join;
 import java.beans.Transient;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Objects;
@@ -30,6 +32,22 @@ import org.corant.shared.util.Objects;
  */
 public interface Tuple {
 
+  static <A, B, C, D, E, F, G, H, I, J> Dectet<A, B, C, D, E, F, G, H, I, J> dectetOf(final A a,
+      final B b, final C c, final D d, final E e, final F f, final G g, final H h, final I i,
+      final J j) {
+    return new Dectet<>(a, b, c, d, e, f, g, h, i, j);
+  }
+
+  static <A, B, C, D, E, F, G, H, I> Nonet<A, B, C, D, E, F, G, H, I> nonetOf(final A a, final B b,
+      final C c, final D d, final E e, final F f, final G g, final H h, final I i) {
+    return new Nonet<>(a, b, c, d, e, f, g, h, i);
+  }
+
+  static <A, B, C, D, E, F, G, H> Octet<A, B, C, D, E, F, G, H> octetOf(final A a, final B b,
+      final C c, final D d, final E e, final F f, final G g, final H h) {
+    return new Octet<>(a, b, c, d, e, f, g, h);
+  }
+
   static <L, R> Pair<L, R> pairOf(final L left, final R right) {
     return Pair.of(left, right);
   }
@@ -38,8 +56,27 @@ public interface Tuple {
     return Pair.of(entry.getKey(), entry.getValue());
   }
 
-  static <T extends Comparable<T>> Range<T> rangeOf(T min, T max) {
+  static <A, B, C, D> Quartet<A, B, C, D> quartetOf(final A a, final B b, final C c, final D d) {
+    return new Quartet<>(a, b, c, d);
+  }
+
+  static <A, B, C, D, E> Quintet<A, B, C, D, E> quintetOf(final A a, final B b, final C c,
+      final D d, final E e) {
+    return new Quintet<>(a, b, c, d, e);
+  }
+
+  static <T extends Comparable<T>> Range<T> rangeOf(final T min, final T max) {
     return Range.of(min, max);
+  }
+
+  static <A, B, C, D, E, F, G> Septet<A, B, C, D, E, F, G> septetOf(final A a, final B b, final C c,
+      final D d, final E e, final F f, final G g) {
+    return new Septet<>(a, b, c, d, e, f, g);
+  }
+
+  static <A, B, C, D, E, F> Sextet<A, B, C, D, E, F> sextetOf(final A a, final B b, final C c,
+      final D d, final E e, final F f) {
+    return new Sextet<>(a, b, c, d, e, f);
   }
 
   static <L, M, R> Triple<L, M, R> tripleOf(final L left, final M middle, final R right) {
@@ -72,6 +109,152 @@ public interface Tuple {
 
   /**
    * corant-shared
+   *
+   * @author bingo 下午4:48:38
+   *
+   */
+  abstract class AbstractSeries implements Tuple {
+
+    final Object[] series;
+
+    protected AbstractSeries(Object... objects) {
+      series = objects;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return series != null && Arrays.stream(series).anyMatch(a -> Objects.areEqual(a, o));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      AbstractSeries other = (AbstractSeries) obj;
+      return Arrays.deepEquals(series, other.series);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      return prime * result + Arrays.deepHashCode(series);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      for (Object o : series) {
+        if (o != null) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    @Override
+    public Object[] toArray() {
+      return Arrays.copyOf(series, series.length);
+    }
+
+    @Override
+    public String toString() {
+      return join(",", series);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <E> E elementAt(int index) {
+      // java.util.Objects.checkIndex(index, series.length);
+      return (E) series[index];
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of ten elements
+   *
+   * @author bingo 下午5:14:17
+   *
+   */
+  class Dectet<A, B, C, D, E, F, G, H, I, J> extends Nonet<A, B, C, D, E, F, G, H, I> {
+
+    public Dectet(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j) {
+      this(new Object[] {a, b, c, d, e, f, g, h, i, j});
+    }
+
+    protected Dectet(Object... datas) {
+      super(datas);
+    }
+
+    public J tenth() {
+      return elementAt(9);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of nine elements
+   *
+   * @author bingo 下午5:13:20
+   *
+   */
+  class Nonet<A, B, C, D, E, F, G, H, I> extends Octet<A, B, C, D, E, F, G, H> {
+
+    public Nonet(A a, B b, C c, D d, E e, F f, G g, H h, I i) {
+      this(new Object[] {a, b, c, d, e, f, g, h, i});
+    }
+
+    protected Nonet(Object... datas) {
+      super(datas);
+    }
+
+    public I ninth() {
+      return elementAt(8);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of eight elements
+   *
+   * @author bingo 下午5:09:43
+   *
+   */
+  class Octet<A, B, C, D, E, F, G, H> extends Septet<A, B, C, D, E, F, G> {
+
+    public Octet(A a, B b, C c, D d, E e, F f, G g, H h) {
+      this(new Object[] {a, b, c, d, e, f, g, h});
+    }
+
+    protected Octet(Object... datas) {
+      super(datas);
+    }
+
+    public H eighth() {
+      return elementAt(7);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of two elements
    *
    * @author bingo 上午10:37:41
    *
@@ -129,6 +312,10 @@ public interface Tuple {
       return false;
     }
 
+    public L first() {
+      return left;
+    }
+
     @Override
     @Transient
     public L getKey() {
@@ -178,6 +365,10 @@ public interface Tuple {
       return right;
     }
 
+    public R second() {
+      return right;
+    }
+
     @Override
     public R setValue(R value) {
       throw new NotSupportedException();
@@ -216,6 +407,71 @@ public interface Tuple {
 
   /**
    * corant-shared
+   *
+   * <p>
+   * Tuple of four elements
+   *
+   * @author bingo 下午4:28:52
+   *
+   */
+  class Quartet<A, B, C, D> extends AbstractSeries {
+
+    public Quartet(A a, B b, C c, D d) {
+      super(new Object[] {a, b, c, d});
+    }
+
+    protected Quartet(Object... objects) {
+      super(objects);
+    }
+
+    public A first() {
+      return elementAt(0);
+    }
+
+    public D fourth() {
+      return elementAt(3);
+    }
+
+    public B second() {
+      return elementAt(1);
+    }
+
+    public C third() {
+      return elementAt(2);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of five elements
+   *
+   * @author bingo 下午4:52:00
+   *
+   */
+  class Quintet<A, B, C, D, E> extends Quartet<A, B, C, D> {
+
+    public Quintet(A a, B b, C c, D d, E e) {
+      super(new Object[] {a, b, c, d, e});
+    }
+
+    protected Quintet(Object... objects) {
+      super(objects);
+    }
+
+    public E fifth() {
+      return elementAt(4);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of two comparable elements
    *
    * @author bingo 20:26:59
    *
@@ -367,6 +623,57 @@ public interface Tuple {
   /**
    * corant-shared
    *
+   * <p>
+   * Tuple of seven elements
+   *
+   * @author bingo 下午4:57:02
+   *
+   */
+  class Septet<A, B, C, D, E, F, G> extends Sextet<A, B, C, D, E, F> {
+
+    public Septet(A a, B b, C c, D d, E e, F f, G g) {
+      super(new Object[] {a, b, c, d, e, f, g});
+    }
+
+    protected Septet(Object... objects) {
+      super(objects);
+    }
+
+    public G seventh() {
+      return elementAt(6);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of six elements
+   *
+   * @author bingo 下午4:57:02
+   *
+   */
+  class Sextet<A, B, C, D, E, F> extends Quintet<A, B, C, D, E> {
+
+    public Sextet(A a, B b, C c, D d, E e, F f) {
+      super(new Object[] {a, b, c, d, e, f});
+    }
+
+    protected Sextet(Object... objects) {
+      super(objects);
+    }
+
+    public F sixth() {
+      return elementAt(5);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * <p>
+   * Tuple of three elements
+   *
    * @author bingo 上午10:37:46
    *
    */
@@ -422,6 +729,10 @@ public interface Tuple {
       return false;
     }
 
+    public L first() {
+      return left;
+    }
+
     public L getLeft() {
       return left;
     }
@@ -461,6 +772,14 @@ public interface Tuple {
     }
 
     public R right() {
+      return right;
+    }
+
+    public M second() {
+      return middle;
+    }
+
+    public R third() {
       return right;
     }
 

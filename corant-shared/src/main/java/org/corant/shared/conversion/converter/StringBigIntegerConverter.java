@@ -57,7 +57,7 @@ public class StringBigIntegerConverter extends AbstractNumberConverter<String, B
       return getDefaultValue();
     } else {
       String val = stripTrailingZeros(value);
-      if (hasPrefix(val)) {
+      if (isDecodable(val, hints)) {
         return BigInteger.valueOf(Long.decode(val));
       }
       return new BigInteger(val, getHintsRadix(hints));

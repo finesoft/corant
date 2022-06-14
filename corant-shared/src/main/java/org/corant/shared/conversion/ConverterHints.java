@@ -39,6 +39,8 @@ public class ConverterHints {
 
   public static final String CVT_NUMBER_RADIX_KEY = "converter.number.radix";
 
+  public static final String CVT_NUMBER_NOT_DECODE_KEY = "converter.number.no-decode";
+
   public static final String CVT_NUMBER_UNSIGNED_KEY = "converter.number.unsigned";
 
   public static final String CVT_TEMPORAL_FMT_PTN_KEY = "converter.temporal.formatter.pattern";
@@ -99,6 +101,7 @@ public class ConverterHints {
     resolveSysProHints(map, CVT_TEMPORAL_EPOCH_KEY, ChronoUnit::valueOf);
     resolveSysProHints(map, CVT_TEMPORAL_STRICTLY_KEY, Boolean::valueOf);
     resolveSysProHints(map, CVT_BYTES_PRIMITIVE_STRICTLY_KEY, Boolean::valueOf);
+    resolveSysProHints(map, CVT_NUMBER_NOT_DECODE_KEY, Boolean::valueOf);
     return map;
   }
 

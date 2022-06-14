@@ -55,14 +55,12 @@ public class StringLongConverter extends AbstractNumberConverter<String, Long> {
       return getDefaultValue();
     } else {
       String val = stripTrailingZeros(value);
-      if (hasPrefix(val)) {
+      if (isDecodable(val, hints)) {
         return Long.decode(val);
+      } else if (isHintsUnsigned(hints)) {
+        return Long.parseUnsignedLong(val, getHintsRadix(hints));
       } else {
-        if (isHintsUnsigned(hints)) {
-          return Long.parseUnsignedLong(val, getHintsRadix(hints));
-        } else {
-          return Long.valueOf(val, getHintsRadix(hints));
-        }
+        return Long.valueOf(val, getHintsRadix(hints));
       }
     }
   }

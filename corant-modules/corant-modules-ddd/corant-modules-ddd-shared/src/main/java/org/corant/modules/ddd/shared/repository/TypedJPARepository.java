@@ -15,23 +15,16 @@ package org.corant.modules.ddd.shared.repository;
 
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
-import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
 import org.corant.modules.jpa.shared.JPAQueries;
@@ -381,34 +374,4 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
     return defaultObject(q.getResultList(), ArrayList::new);
   }
 
-  @ApplicationScoped
-  class TypedJPARepositoryProducer {
-
-    @SuppressWarnings("unchecked")
-    @Produces
-    @Dependent
-    @AutoCreated
-    <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
-      final Type type = ip.getType();
-      final ParameterizedType parameterizedType = (ParameterizedType) type;
-      final Type argType = parameterizedType.getActualTypeArguments()[0];
-      final Class<T> entityClass = (Class<T>) argType;
-      return new TypedJPARepositoryTemplate<>(entityClass);
-    }
-  }
-
-  /**
-   * corant-modules-ddd-shared
-   *
-   * @author bingo 下午9:15:00
-   *
-   */
-  public static class TypedJPARepositoryTemplate<T extends Entity>
-      extends AbstractTypedJPARepository<T> {
-
-    public TypedJPARepositoryTemplate(Class<T> entityClass) {
-      super(entityClass);
-    }
-
-  }
 }

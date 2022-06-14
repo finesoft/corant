@@ -55,7 +55,7 @@ public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
       return getDefaultValue();
     } else {
       String val = stripTrailingZeros(value);
-      if (hasPrefix(val)) {
+      if (isDecodable(val, hints)) {
         return Byte.decode(val);
       } else {
         return Byte.valueOf(val, getHintsRadix(hints));

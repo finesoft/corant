@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-shared
@@ -256,7 +257,7 @@ public class Texts {
   }
 
   /**
-   * Convert input stream to string
+   * Reads a string from given input stream with 'UTF-8' charset.
    *
    * Note: The caller must maintain resource release by himself
    *
@@ -269,25 +270,43 @@ public class Texts {
   }
 
   /**
-   * Convert input stream to string
+   * Reads a string from given input stream with given charset.
    *
    * Note: The caller must maintain resource release by himself
    *
    * @param is the input stream
-   * @param charset
+   * @param charset the charset used by input stream reader
    * @return
    * @throws IOException fromInputStream
    */
   public static String fromInputStream(final InputStream is, final Charset charset)
       throws IOException {
     StringBuilder sb = new StringBuilder();
-    try (Reader reader = new BufferedReader(new InputStreamReader(is, charset))) {
+    try (Reader reader = new BufferedReader(
+        new InputStreamReader(is, defaultObject(charset, StandardCharsets.UTF_8)))) {
       int c;
       while ((c = reader.read()) != -1) {
         sb.append((char) c);
       }
     }
     return sb.toString();
+  }
+
+  /**
+   * Reads a string from given resource with given charset.
+   *
+   * @param resource the resource to be read
+   * @param charset the charset used by input stream reader
+   * @throws IOException fromInputStream
+   */
+  public static String fromResource(final Resource resource, final Charset charset)
+      throws IOException {
+    if (resource == null) {
+      throw new IOException("The resource to be read can't null!");
+    }
+    try (InputStream is = resource.openInputStream()) {
+      return fromInputStream(is, charset);
+    }
   }
 
   public static <T> Stream<T> lines(final BufferedReader reader, final int offset,

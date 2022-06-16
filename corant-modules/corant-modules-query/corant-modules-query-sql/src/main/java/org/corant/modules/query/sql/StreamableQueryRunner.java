@@ -57,7 +57,7 @@ public class StreamableQueryRunner extends QueryRunner {
 
   <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
       ResultSetHandler<T> resultSetHandler, BiPredicate<Integer, Object> terminater,
-      Object... params) throws SQLException {
+      boolean autoClose, Object... params) throws SQLException {
     preCondition(conn, closeConn, sql, resultSetHandler);
     Releaser releaser = null;
     try {
@@ -67,7 +67,9 @@ public class StreamableQueryRunner extends QueryRunner {
       Stream<T> stream = StreamSupport
           .stream(new ResultSetSpliterator<>(releaser, resultSetHandler, terminater), false)
           .onClose(releaser);
-      Cleaner.create().register(resultSet, releaser::run);// JDK9+
+      if (autoClose) {
+        Cleaner.create().register(resultSet, releaser::run);// JDK9+
+      }
       return stream;
     } catch (Exception e) {
       if (releaser != null) {

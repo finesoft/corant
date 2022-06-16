@@ -105,10 +105,11 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
   @Override
   public Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminater,
-      Duration timeout, Object... args) {
+      Duration timeout, boolean autoClose, Object... args) {
     try {
       return new StreamableQueryRunner(confiuration, timeout).streamQuery(
-          confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, terminater, args);
+          confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, terminater,
+          autoClose, args);
     } catch (SQLException e) {
       throw new CorantRuntimeException(e);
     }

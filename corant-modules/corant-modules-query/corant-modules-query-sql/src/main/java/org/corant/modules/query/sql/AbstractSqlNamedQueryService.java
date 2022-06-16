@@ -89,8 +89,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       String sql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
       log(queryName, scriptParameter, sql);
-      return batchStream(querier.getQueryParameter().getLimit(),
-          getExecutor().stream(sql, useQueryParam.getTerminater(), timeout, scriptParameter))
+      return batchStream(querier.getQueryParameter().getLimit(), getExecutor().stream(sql,
+          useQueryParam.getTerminater(), timeout, useQueryParam.isAutoClose(), scriptParameter))
               .flatMap(list -> {
                 this.fetch(list, querier);
                 List<T> results = querier.handleResults(list);
@@ -100,7 +100,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
+  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws SQLException {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
@@ -125,7 +125,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> T doGet(String queryName, Object parameter) throws Exception {
+  protected <T> T doGet(String queryName, Object parameter) throws SQLException {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
@@ -138,7 +138,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
+  protected <T> Paging<T> doPage(String queryName, Object parameter) throws SQLException {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
@@ -166,7 +166,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
+  protected <T> List<T> doSelect(String queryName, Object parameter) throws SQLException {
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();

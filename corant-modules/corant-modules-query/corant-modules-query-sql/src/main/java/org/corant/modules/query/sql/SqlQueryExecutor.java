@@ -42,6 +42,6 @@ public interface SqlQueryExecutor {
       throws SQLException;
 
   Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminater,
-      Duration timeout, Object... args);
+      Duration timeout, boolean autoClose, Object... args);
 
 }

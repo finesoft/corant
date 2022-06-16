@@ -100,10 +100,10 @@ public class SQLServer2005Dialect extends SQLServerDialect {
     boolean inString = false;
     for (; index < length; ++index) {
       final char ch = sql.charAt(index);
-      if (ch == '\'') {
-        inString = true;
-      } else if (ch == '\'' && inString) {
+      if (ch == '\'' && inString) {
         inString = false;
+      } else if (ch == '\'') {
+        inString = true;
       } else if (ch == '(' && !inString) {
         brackets++;
       } else if (ch == ')' && !inString) {

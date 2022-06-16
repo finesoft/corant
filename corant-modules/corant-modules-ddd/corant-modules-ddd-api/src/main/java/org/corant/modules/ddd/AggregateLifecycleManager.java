@@ -27,6 +27,6 @@ public interface AggregateLifecycleManager {
   void handle(AggregateLifecycleManageEvent e);
 
   enum LifecycleAction {
-    PERSIST, RECOVER, REMOVE
+    PERSIST, RECOVER, REMOVE, LOCK
   }
 }

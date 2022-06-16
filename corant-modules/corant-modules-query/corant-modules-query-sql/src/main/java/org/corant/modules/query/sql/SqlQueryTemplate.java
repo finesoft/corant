@@ -383,7 +383,8 @@ public class SqlQueryTemplate {
               : SqlStatements.normalize(sql, ordinaryParameters);
       try {
         return new StreamableQueryRunner(null, limit, null, null, null).streamQuery(
-            dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater, ps.value());
+            dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater,
+            config.autoClose, ps.value());
       } catch (SQLException e) {
         throw new CorantRuntimeException(e);
       }
@@ -449,6 +450,17 @@ public class SqlQueryTemplate {
     protected BiFunction<Map<String, Object>, Map<String, Object>, Integer> namedParameterReviser;
 
     protected Set<Class<? extends Throwable>> stopOn;
+
+    protected boolean autoClose = false;
+
+    public StreamConfig autoClose(boolean autoClose) {
+      this.autoClose = autoClose;
+      return this;
+    }
+
+    public boolean isAutoClose() {
+      return autoClose;
+    }
 
     /**
      * Set up a named query parameter adjustment consumer, where the first parameter of

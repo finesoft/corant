@@ -283,6 +283,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
+    final boolean autoClose = parameter.isAutoClose();
     final Iterator<T> iterator = new Iterator<>() {
       int counter = 0;
       Forwarding<T> buffer = null;
@@ -337,11 +338,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       }
     };
     Stream<T> stream = streamOf(iterator).onClose(cursor::close);
-    Cleaner.create().register(iterator, () -> {
-      if (cursor != null) {
-        cursor.close();
-      }
-    });// JDK9+
+    if (autoClose) {
+      Cleaner.create().register(iterator, () -> {
+        if (cursor != null) {
+          cursor.close();
+        }
+      });// JDK9+
+    }
     return stream;
   }
 

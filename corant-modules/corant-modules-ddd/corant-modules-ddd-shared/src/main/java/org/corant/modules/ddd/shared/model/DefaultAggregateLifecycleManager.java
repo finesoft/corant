@@ -13,7 +13,6 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import static org.corant.shared.util.Maps.mapOf;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -21,13 +20,13 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
 import org.corant.modules.ddd.AggregateLifecycleManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
-import org.corant.modules.ddd.shared.event.AggregateLockEvent;
 import org.corant.modules.ddd.shared.repository.EntityManagers;
 import org.corant.shared.normal.Priorities;
 
@@ -44,8 +43,8 @@ import org.corant.shared.normal.Priorities;
 @InfrastructureServices
 public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
 
-  protected static final boolean forceMerge = Configs
-      .<Boolean>getValue("corant.ddd.aggregate.lifecycle.force-merge", Boolean.class, Boolean.TRUE);
+  protected static final boolean forceMerge = Configs.<Boolean>getValue(
+      "corant.ddd.aggregate.lifecycle.force-merge", Boolean.class, Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -57,14 +56,14 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
       during = TransactionPhase.IN_PROGRESS) @Priority(Priorities.FRAMEWORK_HIGHER) AggregateLifecycleManageEvent e) {
     if (e.getSource() != null) {
       Aggregate entity = e.getSource();
-      boolean effectImmediately = e.isEffectImmediately();
-      handle(entity, e.getAction(), effectImmediately);
+      handle(entity, e.getAction(), e.isEffectImmediately(), e.getLockModeType());
       logger.fine(() -> String.format("Handle %s %s %s.", entity.getClass().getName(),
           e.getAction().name(), entity.getId()));
     }
   }
 
-  protected void handle(Aggregate entity, LifecycleAction action, boolean effectImmediately) {
+  protected void handle(Aggregate entity, LifecycleAction action, boolean effectImmediately,
+      LockModeType lockModeType) {
     EntityManager em = entityManagers.getEntityManager(entity.getClass());
     if (action == LifecycleAction.PERSIST) {
       if (entity.getLifecycle() == Lifecycle.INITIAL) {
@@ -85,22 +84,10 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
       if (effectImmediately) {
         em.flush();
       }
-    } else {
+    } else if (action == LifecycleAction.RECOVER) {
       em.refresh(entity);
-    }
-  }
-
-  protected void onAggregateLock(@Observes(
-      during = TransactionPhase.IN_PROGRESS) @Priority(Priorities.FRAMEWORK_LOWER) AggregateLockEvent e) {
-    Aggregate source;
-    if (e != null && (source = e.getSource()) != null && !source.isPhantom()) {
-      Object[] pros = e.getProperties();
-      if (pros.length == 0) {
-        entityManagers.getEntityManager(source.getClass()).lock(source, e.getLockModeType());
-      } else {
-        entityManagers.getEntityManager(source.getClass()).lock(source, e.getLockModeType(),
-            mapOf(pros));
-      }
+    } else if (!entity.isPhantom()) {
+      em.lock(entity, lockModeType);
     }
   }
 

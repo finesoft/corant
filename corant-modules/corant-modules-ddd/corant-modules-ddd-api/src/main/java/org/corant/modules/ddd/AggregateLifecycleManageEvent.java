@@ -14,6 +14,8 @@
 package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Objects.forceCast;
+import java.util.function.Supplier;
+import javax.persistence.LockModeType;
 import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.annotation.Events;
 
@@ -21,7 +23,7 @@ import org.corant.modules.ddd.annotation.Events;
  * corant-modules-ddd-api
  *
  * <p>
- * The lifecycle manage event, the infrastructure service will listen this event and do persist or
+ * The life cycle manage event, the infrastructure service will listen this event and do persist or
  * destroy the aggregate.
  *
  * @author bingo 上午9:39:28
@@ -35,19 +37,39 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   private final boolean effectImmediately;
 
+  private final LockModeType lockModeType;
+
   public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action) {
     this(source, action, false);
   }
 
   public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action,
       boolean effectImmediately) {
+    this(source, action, effectImmediately, null);
+  }
+
+  public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action,
+      boolean effectImmediately, LockModeType lockModeType) {
     super(source);
     this.action = action;
     this.effectImmediately = effectImmediately;
+    this.lockModeType = lockModeType;
+  }
+
+  public AggregateLifecycleManageEvent(Aggregate source, LockModeType lockModeType) {
+    this(source, LifecycleAction.LOCK, false, lockModeType);
+  }
+
+  public AggregateLifecycleManageEvent(Supplier<Aggregate> supplier, LockModeType lockModeType) {
+    this(supplier.get(), lockModeType);
   }
 
   public LifecycleAction getAction() {
     return action;
+  }
+
+  public LockModeType getLockModeType() {
+    return lockModeType;
   }
 
   @Override
@@ -61,9 +83,8 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "AggregateLifecycleManageEvent [getAction()=" + action + ", getSource()="
-        + (getSource() == null ? null : getSource().getId()) + ", isEffectImmediately()="
-        + effectImmediately + "]";
+    return "AggregateLifecycleManageEvent [action=" + action + ", effectImmediately="
+        + effectImmediately + ", lockModeType=" + lockModeType + "]";
   }
 
 }

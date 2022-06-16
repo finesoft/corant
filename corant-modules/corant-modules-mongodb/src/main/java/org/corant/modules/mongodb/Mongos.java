@@ -152,7 +152,7 @@ public class Mongos {
       MongoDatabase mongoDatabase = client.getDatabase(cs.getDatabase());
       Cleaner.create().register(mongoDatabase, () -> {
         if (client != null) {
-          client.close(); // FIXME release mongodb client
+          client.close(); // Do we need to automatically close the mongodb client here
         }
       });
       return mongoDatabase;

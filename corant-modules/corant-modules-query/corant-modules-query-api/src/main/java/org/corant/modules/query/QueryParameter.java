@@ -268,6 +268,8 @@ public interface QueryParameter extends Serializable {
 
     protected transient BiConsumer<Object, StreamQueryParameter> enhancer;
 
+    protected boolean autoClose = false;
+
     public StreamQueryParameter() {}
 
     public StreamQueryParameter(QueryParameter other) {
@@ -278,6 +280,11 @@ public interface QueryParameter extends Serializable {
       super(other);
       enhancer(other.enhancer).retryBackoffStrategy(other.retryBackoffStrategy)
           .retryTimes(other.retryTimes).terminater(other.terminater);
+    }
+
+    public StreamQueryParameter autoClose(boolean autoClose) {
+      this.autoClose = autoClose;
+      return this;
     }
 
     @Override
@@ -345,6 +352,10 @@ public interface QueryParameter extends Serializable {
      */
     public BiPredicate<Integer, Object> getTerminater() {
       return terminater;
+    }
+
+    public boolean isAutoClose() {
+      return autoClose;
     }
 
     /**

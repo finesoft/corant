@@ -28,7 +28,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午8:24:08
  *
  */
-public class AbstractHMACProvider implements DigestProvider {
+public abstract class AbstractHMACProvider implements DigestProvider {
 
   protected final SecretKeySpec secret;
   protected final String algorithm;

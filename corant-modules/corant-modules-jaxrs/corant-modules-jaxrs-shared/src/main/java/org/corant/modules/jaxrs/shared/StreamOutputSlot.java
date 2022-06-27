@@ -16,6 +16,7 @@ package org.corant.modules.jaxrs.shared;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * corant-modules-jaxrs-shared
@@ -28,11 +29,11 @@ public class StreamOutputSlot extends AbstractStreamOutputHandler<StreamOutputSl
   public StreamOutputSlot() {}
 
   public Response connect(Consumer<OutputStream> consumer) {
-    return connect(consumer, false);
+    return super.handle(consumer::accept);
   }
 
-  public Response connect(Consumer<OutputStream> consumer, boolean loose) {
-    return super.handle(consumer::accept, loose);
+  public Response connect(ResponseBuilder builer, Consumer<OutputStream> consumer) {
+    return super.handle(builer, consumer::accept);
   }
 
   @Override

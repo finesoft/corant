@@ -28,6 +28,7 @@ org.corant.shared.conversion.converter.StringCharacterConverter
 org.corant.shared.conversion.converter.StringCharArrayConverter
 org.corant.shared.conversion.converter.StringCharsetConverter
 org.corant.shared.conversion.converter.StringCurrencyConverter
+org.corant.shared.conversion.converter.StringDateConverter
 org.corant.shared.conversion.converter.StringDoubleConverter
 org.corant.shared.conversion.converter.StringDurationConverter
 org.corant.shared.conversion.converter.StringFloatConverter

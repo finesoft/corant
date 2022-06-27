@@ -38,6 +38,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -53,9 +54,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
+import org.corant.shared.conversion.converter.StringDateConverter;
 import org.corant.shared.resource.SourceType;
 import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 import org.corant.shared.ubiquity.Tuple;
@@ -179,6 +182,21 @@ public class ConversionsTest extends TestCase {
     assertTrue(toObject(i, Integer.class).compareTo(i) == 0);
     assertTrue(toObject(l, Integer.class).compareTo((int) l) == 0);
 
+  }
+
+  @Test
+  public void testPatternStringDate() {
+    Date date = new Date();
+    for (Pair<Pattern, String> p : StringDateConverter.PATTERNS) {
+      SimpleDateFormat fmt =
+          p.right().contains("MMM") || p.right().contains("EEE") || p.right().contains(" G ")
+              ? new SimpleDateFormat(p.right(), Locale.US)
+              : new SimpleDateFormat(p.right());
+      String ds = fmt.format(date);
+      // System.out.println(
+      // ds + "\t <=> \t" + fmt.format(toObject(ds, Date.class)) + "\t ::: \t" + p.right());
+      assertTrue(fmt.format(toObject(ds, Date.class)).equals(ds));
+    }
   }
 
   @Test

@@ -66,8 +66,6 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
 
       immutableListOf(
 
-          new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false),
-
           new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy", false),
 
           new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}(\\+\\d{2}:\\d{2})?$",
@@ -94,7 +92,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
           new TemporalFormatter("^\\d{1,2}-[a-zA-Z]{3}-\\d{4}$", "dd-MMM-yyyy", Locale.US, false),
 
           // 14 November 1979 only for US
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}$", "dd MMMM yyyy", Locale.US,
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4,9}$", "dd MMMM yyyy", Locale.US,
               false),
 
           // ISO Week dates
@@ -108,8 +106,6 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .appendLiteral("W").appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR, 2)
                   .appendValue(DAY_OF_WEEK, 1).toFormatter(),
               "yyyyWwwD", false),
-
-          new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true),
 
           new TemporalFormatter("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm", true),
 
@@ -133,6 +129,10 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
 
           new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
               "dd MMMM yyyy HH:mm", Locale.US, true),
+
+          new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false),
+
+          new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true),
 
           new TemporalFormatter("^\\d{14}$", "yyyyMMddHHmmss", true),
 
@@ -276,9 +276,9 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     if (dtf == null) {
       String dtfPtn = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY);
       if (dtfPtn != null) {
-        if (ConverterHints.getHint(hints, ConverterHints.CVT_LOCAL_KEY) != null) {
+        if (ConverterHints.getHint(hints, ConverterHints.CVT_LOCALE_KEY) != null) {
           dtf = DateTimeFormatter.ofPattern(dtfPtn,
-              ConverterHints.getHint(hints, ConverterHints.CVT_LOCAL_KEY));
+              ConverterHints.getHint(hints, ConverterHints.CVT_LOCALE_KEY));
         } else {
           dtf = DateTimeFormatter.ofPattern(dtfPtn);
         }

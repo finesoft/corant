@@ -163,7 +163,7 @@ public class StringTemplate {
             .concat(template.substring(position[1] + 1)), provider, stacks);
       } else {
         throw new NoSuchElementException(String.format(
-            "Can not expanded the variable value, the extracted not found, the expanded path [%s].",
+            "Can not expand the variable value, the extracted not found, the expanded path [%s].",
             String.join(" -> ", stacks)));
       }
     }
@@ -196,7 +196,7 @@ public class StringTemplate {
       Collection<String> stacks) {
     if (stacks.size() > expandedLimit) {
       throw new IllegalArgumentException(String.format(
-          "Can not expanded the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
+          "Can not expand the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           expandedLimit, String.join(" -> ", stacks)));
     }
     String actualKey = macroDefault == null ? key : replace(key, escapedMacroDefault, macroDefault);

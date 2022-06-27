@@ -43,6 +43,10 @@ public class Functions {
   };
 
   @SuppressWarnings("rawtypes")
+  public static final BiConsumer EMPTY_BICONSUMER = (a, b) -> {
+  };
+
+  @SuppressWarnings("rawtypes")
   public static final Supplier EMPTY_SUPPLIER = () -> null;
 
   @SuppressWarnings("rawtypes")
@@ -80,6 +84,11 @@ public class Functions {
       shouldNotNull(runnable).run();
       return null;
     };
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <A, B> BiConsumer<A, B> emptyBiConsumer() {
+    return EMPTY_BICONSUMER;
   }
 
   @SuppressWarnings("unchecked")

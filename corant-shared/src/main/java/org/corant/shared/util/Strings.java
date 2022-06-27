@@ -202,7 +202,7 @@ public class Strings {
    * @param str the string
    * @param supplier the supplier used to provide the default value
    */
-  public static <T extends CharSequence> T defaultBlank(final T str, final Supplier<T> supplier) {
+  public static String defaultBlank(final String str, final Supplier<String> supplier) {
     return isBlank(str) ? supplier == null ? null : supplier.get() : str;
   }
 

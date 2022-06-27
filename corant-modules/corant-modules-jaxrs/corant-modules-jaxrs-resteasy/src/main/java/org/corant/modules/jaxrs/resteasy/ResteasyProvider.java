@@ -33,6 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import org.corant.context.required.RequiredExtension;
 import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
@@ -103,10 +104,14 @@ public class ResteasyProvider implements WebMetaDataProvider {
   @PostConstruct
   protected void onPostConstruct() {
 
+    // module bean vetos;
     vetoResourceClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
         .forEach(v -> extension.getResources().removeIf(v::isAssignableFrom)));
     vetoProviderClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
         .forEach(v -> extension.getProviders().removeIf(v::isAssignableFrom)));
+    // global bean vetos
+    extension.getResources().removeIf(RequiredExtension::isVetoed);
+    extension.getProviders().removeIf(RequiredExtension::isVetoed);
 
     Application application = find(Application.class).orElseGet(() -> {
       if (alternativeApplicationIfUnresolved.isPresent()) {

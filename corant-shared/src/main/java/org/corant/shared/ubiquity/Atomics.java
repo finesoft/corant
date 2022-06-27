@@ -42,7 +42,7 @@ public class Atomics {
    * Return the atomic instance supplier. Suitable for singleton object construction in
    * multi-threaded scenarios; in most cases, it can replace those code blocks that use the volatile
    * or synchronized keywords for one-off singleton object construction.
-   *
+   * <p>
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
    * called, otherwise an exception will be thrown, the {@code supplier} may be called more than
    * once.
@@ -77,7 +77,7 @@ public class Atomics {
    * called once. Suitable for singleton object construction inmulti-threaded scenarios; in most
    * cases, it can replace those code blocks that use the volatile or synchronized keywords for
    * one-off singleton object construction.
-   *
+   * <p>
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
    * called, otherwise an exception will be thrown.
    *

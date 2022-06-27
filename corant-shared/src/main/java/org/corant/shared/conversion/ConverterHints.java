@@ -56,7 +56,9 @@ public class ConverterHints {
 
   public static final String CVT_ZONE_ID_KEY = "converter.zone-id";
 
-  public static final String CVT_LOCAL_KEY = "converter.local";
+  public static final String CVT_TIME_ZONE_KEY = "converter.time-zone";
+
+  public static final String CVT_LOCALE_KEY = "converter.locale";
 
   public static final String CVT_CHARSET = "converter.charset";
 
@@ -92,11 +94,11 @@ public class ConverterHints {
     Map<String, Object> map = new HashMap<>();
     resolveSysProHints(map, CVT_NEST_DEPT_KEY, Integer::valueOf);
     resolveSysProHints(map, CVT_ZONE_ID_KEY, ZoneId::of);
-    resolveSysProHints(map, CVT_LOCAL_KEY, Locale::forLanguageTag);
+    resolveSysProHints(map, CVT_LOCALE_KEY, Locale::forLanguageTag);
     resolveSysProHints(map, CVT_TEMPORAL_FMT_PTN_KEY, s -> s);
     resolveSysProHints(map, CVT_TEMPORAL_FMT_KEY,
-        s -> map.get(CVT_LOCAL_KEY) != null
-            ? DateTimeFormatter.ofPattern(s, (Locale) map.get(CVT_LOCAL_KEY))
+        s -> map.get(CVT_LOCALE_KEY) != null
+            ? DateTimeFormatter.ofPattern(s, (Locale) map.get(CVT_LOCALE_KEY))
             : DateTimeFormatter.ofPattern(s));
     resolveSysProHints(map, CVT_TEMPORAL_EPOCH_KEY, ChronoUnit::valueOf);
     resolveSysProHints(map, CVT_TEMPORAL_STRICTLY_KEY, Boolean::valueOf);

@@ -43,7 +43,7 @@ public class RequiredExtension implements Extension {
     return beanType != null && vetoes.contains(beanType);
   }
 
-  public void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({
+  public void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_LOWER) @WithAnnotations({
       RequiredClassNotPresent.class, RequiredClassPresent.class,
       RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
     AnnotatedType<?> type = event.getAnnotatedType();

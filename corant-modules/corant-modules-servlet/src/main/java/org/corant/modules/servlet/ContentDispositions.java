@@ -25,7 +25,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * corant-modules-servlet
@@ -37,69 +40,8 @@ import java.util.List;
  */
 public class ContentDispositions {
 
-  public static String decodeHeaderFieldParam(String input) {
-    shouldNotNull(input, "Input String should not be null");
-    int firstQuoteIndex = input.indexOf(0x27);
-    int secondQuoteIndex = input.indexOf(0x27, firstQuoteIndex + 1);
-    // US_ASCII
-    if (firstQuoteIndex == -1 || secondQuoteIndex == -1) {
-      return input;
-    }
-    Charset charset = Charset.forName(input.substring(0, firstQuoteIndex));
-    shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-        "Charset should be UTF-8 or ISO-8859-1");
-    byte[] value = input.substring(secondQuoteIndex + 1).getBytes(charset);
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    int index = 0;
-    while (index < value.length) {
-      byte b = value[index];
-      if (isRFC5987AttrChar(b)) {
-        bos.write((char) b);
-        index++;
-      } else if (b == '%' && index + 3 < value.length) {
-        char[] array = {(char) value[index + 1], (char) value[index + 2]};
-        bos.write(Integer.parseInt(String.valueOf(array), 16));
-        index += 3;
-      } else {
-        throw new IllegalArgumentException(
-            "Invalid header field parameter format (as defined in RFC 5987)");
-      }
-    }
-    return bos.toString(charset);
-  }
-
-  public static String encodeHeaderFieldParam(String input, Charset charset) {
-    shouldNotNull(input, "The input string should not be null");
-    shouldNotNull(charset, "The charset should not be null");
-    if (StandardCharsets.US_ASCII.equals(charset)) {
-      return input;
-    }
-    shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-        "the charset should be UTF-8 or ISO-8859-1");
-    byte[] source = input.getBytes(charset);
-    int len = source.length;
-    StringBuilder sb = new StringBuilder(len << 1);
-    sb.append(charset.name());
-    sb.append("''");
-    for (byte b : source) {
-      if (isRFC5987AttrChar(b)) {
-        sb.append((char) b);
-      } else {
-        sb.append('%');
-        char hex1 = Character.toUpperCase(Character.forDigit(b >> 4 & 0xF, 16));
-        char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-        sb.append(hex1);
-        sb.append(hex2);
-      }
-    }
-    return sb.toString();
-  }
-
-  public static boolean isRFC5987AttrChar(byte c) {
-    return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '!'
-        || c == '#' || c == '$' || c == '&' || c == '+' || c == '-' || c == '.' || c == '^'
-        || c == '_' || c == '`' || c == '|' || c == '~';
-  }
+  final static Pattern BASE64_ENCODED_PATTERN =
+      Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
 
   public static ContentDisposition parse(String contentDisposition) {
     List<String> parts = tokenize(contentDisposition);
@@ -122,12 +64,29 @@ public class ContentDispositions {
         if ("name".equals(attribute)) {
           name = value;
         } else if ("filename*".equals(attribute)) {
-          filename = decodeHeaderFieldParam(value);
-          charset = Charset.forName(value.substring(0, value.indexOf(0x27)));
-          shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-              "Charset should be UTF-8 or ISO-8859-1");
+          int firstQuoteIndex = value.indexOf(0x27);
+          int secondQuoteIndex = value.indexOf(0x27, firstQuoteIndex + 1);
+          if (firstQuoteIndex != -1 && secondQuoteIndex != -1) {
+            charset = Charset.forName(value.substring(0, firstQuoteIndex));
+            shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+                "Charset should be UTF-8 or ISO-8859-1");
+            filename = decodeFileName(value.substring(secondQuoteIndex + 1), charset);
+          } else {
+            filename = decodeFileName(value, StandardCharsets.US_ASCII);
+          }
         } else if ("filename".equals(attribute) && filename == null) {
-          filename = value;
+          if (value.startsWith("=?")) {
+            Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
+            if (matcher.find()) {
+              String match1 = matcher.group(1);
+              String match2 = matcher.group(2);
+              filename = new String(Base64.getDecoder().decode(match2), Charset.forName(match1));
+            } else {
+              filename = value;
+            }
+          } else {
+            filename = value;
+          }
         } else if ("size".equals(attribute)) {
           size = Long.parseLong(value);
         } else if ("creation-date".equals(attribute)) {
@@ -155,6 +114,82 @@ public class ContentDispositions {
     }
     return new ContentDisposition(type, name, filename, charset, size, creationDate,
         modificationDate, readDate);
+  }
+
+  static String decodeFileName(String input, Charset charset) {
+    shouldNotNull(input, "Input String should not be null");
+    byte[] value = input.getBytes(charset);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    int index = 0;
+    while (index < value.length) {
+      byte b = value[index];
+      if (isRFC5987AttrChar(b)) {
+        bos.write((char) b);
+        index++;
+      } else if (b == '%' && index + 3 < value.length) {
+        char[] array = {(char) value[index + 1], (char) value[index + 2]};
+        bos.write(Integer.parseInt(String.valueOf(array), 16));
+        index += 3;
+      } else {
+        throw new IllegalArgumentException(
+            "Invalid header field parameter format (as defined in RFC 5987)");
+      }
+    }
+    return bos.toString(charset);
+  }
+
+  static String encodeFileName(String input, Charset charset) {
+    shouldNotNull(input, "The input string should not be null");
+    shouldNotNull(charset, "The charset should not be null");
+    if (StandardCharsets.US_ASCII.equals(charset)) {
+      return input;
+    }
+    shouldBeTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
+        "the charset should be UTF-8 or ISO-8859-1");
+    byte[] source = input.getBytes(charset);
+    int len = source.length;
+    StringBuilder sb = new StringBuilder(len << 1);
+    sb.append(charset.name());
+    sb.append("''");
+    for (byte b : source) {
+      if (isRFC5987AttrChar(b)) {
+        sb.append((char) b);
+      } else {
+        sb.append('%');
+        char hex1 = Character.toUpperCase(Character.forDigit(b >> 4 & 0xF, 16));
+        char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+        sb.append(hex1);
+        sb.append(hex2);
+      }
+    }
+    return sb.toString();
+  }
+
+  static String escapeQuotationsInFilename(String filename) {
+    if (filename.indexOf('"') == -1 && filename.indexOf('\\') == -1) {
+      return filename;
+    }
+    boolean escaped = false;
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < filename.length(); i++) {
+      char c = filename.charAt(i);
+      if (!escaped && c == '"') {
+        sb.append("\\\"");
+      } else {
+        sb.append(c);
+      }
+      escaped = !escaped && c == '\\';
+    }
+    if (escaped) {
+      sb.deleteCharAt(sb.length() - 1);
+    }
+    return sb.toString();
+  }
+
+  static boolean isRFC5987AttrChar(byte c) {
+    return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '!'
+        || c == '#' || c == '$' || c == '&' || c == '+' || c == '-' || c == '.' || c == '^'
+        || c == '_' || c == '`' || c == '|' || c == '~';
   }
 
   static List<String> tokenize(String headerValue) {
@@ -321,10 +356,10 @@ public class ContentDispositions {
           sb.append("; filename=").append(filename);
         } else if (charset == null || US_ASCII.equals(charset)) {
           sb.append("; filename=\"");
-          sb.append(filename).append('\"');
+          sb.append(escapeQuotationsInFilename(filename)).append('\"');
         } else {
           sb.append("; filename*=");
-          sb.append(encodeHeaderFieldParam(filename, charset));
+          sb.append(encodeFileName(filename, charset));
         }
       }
       if (size != null) {

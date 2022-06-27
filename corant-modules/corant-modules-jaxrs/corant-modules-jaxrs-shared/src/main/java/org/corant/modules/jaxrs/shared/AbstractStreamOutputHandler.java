@@ -46,6 +46,7 @@ public abstract class AbstractStreamOutputHandler<T extends AbstractStreamOutput
   protected ZonedDateTime readDate;
   protected String contentType;
   protected Map<String, Object> additionalHeaders = new HashMap<>();
+  protected boolean loose;
 
   protected AbstractStreamOutputHandler() {}
 
@@ -75,13 +76,13 @@ public abstract class AbstractStreamOutputHandler<T extends AbstractStreamOutput
     return me();
   }
 
-  public String getContentDisposition(boolean loose) {
-    return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size,
-        creationDate, modificationDate, readDate, loose).toString();
-  }
-
   public T inline(boolean inline) {
     this.inline = inline;
+    return me();
+  }
+
+  public T loose(boolean loose) {
+    this.loose = loose;
     return me();
   }
 
@@ -105,27 +106,36 @@ public abstract class AbstractStreamOutputHandler<T extends AbstractStreamOutput
     return me();
   }
 
-  protected Response handle(StreamingOutput stm, boolean loose) {
+  protected Response handle(ResponseBuilder responseBuilder, StreamingOutput streamingOutput) {
     if (isBlank(contentType)) {
       if (isNotBlank(fileName)) {
         contentType = FileUtils.getContentType(fileName);
       }
       contentType = defaultObject(contentType, MediaType.APPLICATION_OCTET_STREAM);
     }
-    ResponseBuilder rb = Response.ok(stm, contentType);
+    responseBuilder.type(contentType).entity(streamingOutput);
     if (inline) {
-      rb.header(HttpHeaders.CONTENT_TYPE, contentType);
+      responseBuilder.header(HttpHeaders.CONTENT_TYPE, contentType);
     } else {
-      rb.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+      responseBuilder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
     }
     if (size != null) {
-      rb.header(HttpHeaders.CONTENT_LENGTH, size);
+      responseBuilder.header(HttpHeaders.CONTENT_LENGTH, size);
     }
-    rb.header(HttpHeaders.CONTENT_DISPOSITION, getContentDisposition(loose));
-    rb.header(HttpHeaders.LAST_MODIFIED, modificationDate);
-    additionalHeaders.forEach(rb::header);
-    return rb.build();
+    responseBuilder.header(HttpHeaders.CONTENT_DISPOSITION, resolveContentDisposition());
+    responseBuilder.header(HttpHeaders.LAST_MODIFIED, modificationDate);
+    additionalHeaders.forEach(responseBuilder::header);
+    return responseBuilder.build();
+  }
+
+  protected Response handle(StreamingOutput streamingOutput) {
+    return handle(Response.ok(), streamingOutput);
   }
 
   protected abstract T me();
+
+  protected String resolveContentDisposition() {
+    return new ContentDisposition(inline ? "inline" : "attachment", name, fileName, charset, size,
+        creationDate, modificationDate, readDate, loose).toString();
+  }
 }

@@ -20,8 +20,15 @@ import static org.corant.shared.util.Maps.getMapString;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
+import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
+import org.corant.modules.servlet.HttpStreamOutput;
+import org.corant.modules.servlet.HttpStreamOutput.HttpStreamOutputResult;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.FileSystemResource;
 import org.corant.shared.resource.InputStreamResource;
@@ -39,6 +46,8 @@ public class StreamOutputBuilder extends AbstractStreamOutputHandler<StreamOutpu
 
   protected Resource resource;
   protected File[] files = FileUtils.EMPTY_ARRAY;
+
+  protected StreamOutputBuilder() {}
 
   protected StreamOutputBuilder(File... files) {
     this.files = shouldNotEmpty(files);
@@ -62,28 +71,69 @@ public class StreamOutputBuilder extends AbstractStreamOutputHandler<StreamOutpu
         .contentType(getMapString(resource.getMetadata(), Resource.META_CONTENT_TYPE));
   }
 
+  public static Response responseOf(boolean supportRange, InputStream content, String contentType,
+      ContentDisposition contentDisposition, boolean autoCloseInputStream,
+      HttpHeaders requestHeadlers) {
+    HttpStreamOutput output = new HttpStreamOutput(requestHeadlers::getHeaderString, contentType,
+        contentDisposition, autoCloseInputStream, supportRange);
+    HttpStreamOutputResult outputResult = output.handle();
+    ResponseBuilder responseBuilder = Response.status(outputResult.getStatus());
+    outputResult.getHeaders().forEach(responseBuilder::header);
+    return responseBuilder
+        .entity((StreamingOutput) os -> outputResult.getWriter().accept(content, os)).build();
+  }
+
+  public static Response responseOf(boolean supportRange, InputStream input, String contentType,
+      String type, String filename, Charset charset, Long size, ZonedDateTime modificationDate,
+      boolean loose, boolean autoCloseInputStream, HttpHeaders requestHeadlers) {
+    HttpStreamOutput output = new HttpStreamOutput(requestHeadlers::getHeaderString, contentType,
+        type, filename, charset, size, modificationDate, loose, autoCloseInputStream, supportRange);
+    HttpStreamOutputResult outputResult = output.handle();
+    ResponseBuilder responseBuilder = Response.status(outputResult.getStatus());
+    outputResult.getHeaders().forEach(responseBuilder::header);
+    return responseBuilder.entity((StreamingOutput) os -> {
+      try (InputStream is = input) {
+        outputResult.getWriter().accept(is, os);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }).build();
+  }
+
+  public static Response responseOf(boolean supportRange, Resource resource, boolean inline,
+      HttpHeaders requestHeadlers) {
+    HttpStreamOutput output = new HttpStreamOutput(requestHeadlers::getHeaderString, resource,
+        inline, true, supportRange);
+    HttpStreamOutputResult outputResult = output.handle();
+    ResponseBuilder responseBuilder = Response.status(outputResult.getStatus());
+    outputResult.getHeaders().forEach(responseBuilder::header);
+    return responseBuilder.entity((StreamingOutput) os -> {
+      try (InputStream is = resource.openInputStream()) {
+        outputResult.getWriter().accept(is, os);
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }).build();
+  }
+
   public static StreamOutputBuilder zipFiles(File... files) {
     return new StreamOutputBuilder(files);
   }
 
   public Response build() {
-    return build(false);
-  }
-
-  public Response build(boolean loose) {
-    final StreamingOutput stm;
+    final StreamingOutput sop;
     if (resource != null) {
-      stm = output -> {
+      sop = op -> {
         try (InputStream input = resource.openInputStream()) {
-          Streams.copy(input, output);
+          Streams.copy(input, op);
         } catch (IOException e) {
           throw new CorantRuntimeException(e);
         }
       };
     } else {
-      stm = output -> Compressors.zip(output, files);
+      sop = op -> Compressors.zip(op, files);
     }
-    return super.handle(stm, loose);
+    return super.handle(sop);
   }
 
   @Override

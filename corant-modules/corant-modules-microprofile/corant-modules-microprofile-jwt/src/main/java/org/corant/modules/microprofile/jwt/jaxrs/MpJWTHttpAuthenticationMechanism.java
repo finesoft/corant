@@ -50,7 +50,7 @@ import io.smallrye.jwt.auth.principal.JWTParser;
  */
 public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMechanism {
 
-  protected static final Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
+  protected static final Logger logger = Logger.getLogger(MpJWTHttpAuthenticationMechanism.class);
   protected static final boolean debugLogging = logger.isDebugEnabled();
 
   @Inject

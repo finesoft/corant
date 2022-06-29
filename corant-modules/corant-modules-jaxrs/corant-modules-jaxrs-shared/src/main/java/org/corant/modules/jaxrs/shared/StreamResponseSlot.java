@@ -17,28 +17,25 @@ import java.io.OutputStream;
 import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
+import org.corant.modules.servlet.HttpStreamOutput;
 
 /**
  * corant-modules-jaxrs-shared
  *
- * @author bingo 上午1:38:31
+ * @author bingo 上午11:44:46
  *
  */
-public class StreamOutputSlot extends AbstractStreamOutputHandler<StreamOutputSlot> {
+public class StreamResponseSlot {
 
-  public StreamOutputSlot() {}
-
-  public Response connect(Consumer<OutputStream> consumer) {
-    return super.handle(consumer::accept);
+  public static Response connect(HttpStreamOutput output, Consumer<OutputStream> consumer) {
+    ResponseBuilder responseBuilder = Response.ok();
+    output.getOutputHeaders().forEach(responseBuilder::header);
+    return connect(responseBuilder, consumer);
   }
 
-  public Response connect(ResponseBuilder builer, Consumer<OutputStream> consumer) {
-    return super.handle(builer, consumer::accept);
-  }
-
-  @Override
-  protected StreamOutputSlot me() {
-    return this;
+  public static Response connect(ResponseBuilder builer, Consumer<OutputStream> consumer) {
+    return builer.entity((StreamingOutput) os -> consumer.accept(os)).build();
   }
 
 }

@@ -96,6 +96,10 @@ public class Aggregates {
     resolve(cls, id, lockModeType, properties);
   }
 
+  public static <X extends Aggregate> X reference(Class<X> cls, Serializable id) {
+    return tryRefernce(cls, id).orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
+  }
+
   public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id,
       LockModeType lockModeType, Object... properties) {
     if (id != null && cls != null) {
@@ -159,6 +163,13 @@ public class Aggregates {
   public static <X extends Aggregate> List<X> select(Class<X> cls, String namedQuery,
       Object... params) {
     return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
+  }
+
+  public static <X extends Aggregate> Optional<X> tryRefernce(Class<X> cls, Serializable id) {
+    if (id != null && cls != null) {
+      return Optional.ofNullable(resolveRepository(cls).getEntityManager().getReference(cls, id));
+    }
+    return Optional.empty();
   }
 
   public static <X extends Aggregate> Optional<X> tryResolve(Class<X> cls, Serializable id) {

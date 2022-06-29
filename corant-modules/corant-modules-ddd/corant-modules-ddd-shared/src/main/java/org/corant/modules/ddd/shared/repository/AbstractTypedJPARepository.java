@@ -87,6 +87,11 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
   }
 
   @Override
+  public T getReference(Serializable id) {
+    return getEntityManager().getReference(entityClass, id);
+  }
+
+  @Override
   public TypedJPAQuery<T> namedQuery(String name) {
     return JPAQueries.namedQuery(name, entityClass).entityManager(this::getEntityManager);
   }

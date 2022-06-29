@@ -13,6 +13,7 @@
  */
 package org.corant.shared.resource;
 
+import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Maps.immutableMapOf;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +78,7 @@ public interface Resource {
   String getLocation();
 
   /**
-   * Return the meta information of this resource. For example: author, date created and date
+   * Returns the meta information of this resource. For example: author, date created and date
    * modified,size etc.
    *
    * @return getMetadata
@@ -85,6 +86,18 @@ public interface Resource {
   default Map<String, Object> getMetadata() {
     return immutableMapOf(META_SOURCE_TYPE, getSourceType() == null ? null : getSourceType().name(),
         META_NAME, getName());
+  }
+
+  /**
+   * Returns metadata information for this resource's corresponding name with the given name and
+   * type.
+   *
+   * @param <T>
+   * @param name the metadata key
+   * @param type the metadata value type, may involve type conversion
+   */
+  default <T> T getMetadataValue(String name, Class<T> type) {
+    return getMapObject(getMetadata(), name, type);
   }
 
   /**

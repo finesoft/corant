@@ -22,6 +22,7 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
+import org.corant.context.required.RequiredExtension;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jaxrs.resteasy.ResteasyProvider;
 import org.corant.modules.jaxrs.resteasy.ResteasyProvider.ApplicationInfo;
@@ -45,8 +46,7 @@ public class SwaggerOpenApiExtension implements Extension {
 
   protected void beforeBeanDiscovery(@Observes BeforeBeanDiscovery event) {
     if (config == null) {
-      Systems.setProperty("corant.resteasy.veto-resource-classes",
-          BaseOpenApiResource.class.getCanonicalName());
+      RequiredExtension.addVeto(BaseOpenApiResource.class);
     } else {
       Systems.setProperty("corant.resteasy.application.alternative-if-unresolved",
           SwaggerOpenApiApp.class.getCanonicalName());

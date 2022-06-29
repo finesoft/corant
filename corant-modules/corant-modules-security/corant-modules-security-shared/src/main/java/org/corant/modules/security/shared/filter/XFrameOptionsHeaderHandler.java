@@ -50,8 +50,7 @@ public class XFrameOptionsHeaderHandler implements SecuredHeaderFilterHandler {
   public static final String X_FRAME_OPTIONS_STRING = "X-Frame-Options";
 
   @Inject
-  @ConfigProperty(name = "corant.security.filter.header.x-frame-options.type",
-      defaultValue = "false")
+  @ConfigProperty(name = "corant.security.filter.header.x-frame-options.type")
   protected Optional<XFrameOptionType> type;
 
   @Inject

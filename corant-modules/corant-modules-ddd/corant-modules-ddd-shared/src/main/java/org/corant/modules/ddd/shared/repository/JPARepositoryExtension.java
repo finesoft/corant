@@ -88,7 +88,7 @@ public class JPARepositoryExtension implements Extension {
    * @author bingo 下午5:06:40
    *
    */
-  public static final class DefaultJPARepository extends AbstractJPARepository {
+  public static class DefaultJPARepository extends AbstractJPARepository {
 
     protected DefaultJPARepository() {}
 

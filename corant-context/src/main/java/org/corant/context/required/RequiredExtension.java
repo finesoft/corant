@@ -13,19 +13,25 @@
  */
 package org.corant.context.required;
 
+import static org.corant.context.Beans.select;
+import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Sets.newConcurrentHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.WithAnnotations;
+import javax.enterprise.inject.spi.ProcessBean;
+import javax.inject.Singleton;
 import org.corant.shared.normal.Priorities;
-import org.corant.shared.service.RequiredClassNotPresent;
-import org.corant.shared.service.RequiredClassPresent;
-import org.corant.shared.service.RequiredConfiguration;
 
 /**
  * corant-context
@@ -38,20 +44,59 @@ public class RequiredExtension implements Extension {
   static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
 
   private static final Set<Class<?>> vetoes = newConcurrentHashSet();
+  private static final Set<Bean<?>> startups = newConcurrentHashSet();
 
-  public static boolean isVetoed(Class<?> beanType) {
-    return beanType != null && vetoes.contains(beanType);
+  private static volatile boolean afterBeanDiscovery = false;
+
+  public static boolean addVeto(Class<?> beanType) {
+    shouldBeFalse(afterBeanDiscovery,
+        "Unable to add the veto bean [%s], the bean processing phase has passed!", beanType);
+    return beanType != null && vetoes.add(getUserClass(beanType));
   }
 
-  public void checkRequired(@Observes @Priority(Priorities.FRAMEWORK_LOWER) @WithAnnotations({
-      RequiredClassNotPresent.class, RequiredClassPresent.class,
-      RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
+  public static boolean cancelVeto(Class<?> beanType) {
+    shouldBeFalse(afterBeanDiscovery,
+        "Unable to cancel the veto bean [%s], the bean processing phase has passed!", beanType);
+    return beanType != null && vetoes.remove(getUserClass(beanType));
+  }
+
+  public static boolean isVetoed(Class<?> beanType) {
+    return beanType != null && vetoes.contains(getUserClass(beanType));
+  }
+
+  // @WithAnnotations({ RequiredClassNotPresent.class, RequiredClassPresent.class,
+  // RequiredConfiguration.class})
+  protected void onProcessAnnotatedType(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) ProcessAnnotatedType<?> event) {
     AnnotatedType<?> type = event.getAnnotatedType();
-    if (RequiredExt.INSTANCE.shouldVeto(type)) {
-      vetoes.add(event.getAnnotatedType().getJavaClass());
+    if (isVetoed(type.getJavaClass()) || RequiredExt.INSTANCE.shouldVeto(type)) {
+      vetoes.add(type.getJavaClass());
       event.veto();
       logger.info(() -> String.format("The bean type %s was ignored!",
           event.getAnnotatedType().getJavaClass().getName()));
+    }
+  }
+
+  protected void onProcessBean(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) ProcessBean<?> event) {
+    if ((event.getBean().getScope().equals(ApplicationScoped.class)
+        || event.getBean().getScope().equals(Singleton.class))
+        && event.getAnnotated().isAnnotationPresent(Startup.class)) {
+      startups.add(event.getBean());
+    }
+  }
+
+  void afterBeanDiscovery(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterBeanDiscovery e) {
+    afterBeanDiscovery = true;
+  }
+
+  void afterDeploymentValidation(
+      @Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterDeploymentValidation e,
+      BeanManager manager) {
+    for (Bean<?> bean : startups) {
+      if (!isVetoed(bean.getBeanClass())) {
+        select(bean.getBeanClass()).stream().forEach(Object::toString); // FIXME toString()??
+      }
     }
   }
 }

@@ -199,6 +199,13 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
+   * {@link EntityManager#getReference(Class, Object)}
+   */
+  default <T> T getReference(Class<T> entityClass, Serializable id) {
+    return getEntityManager().getReference(entityClass, id);
+  }
+
+  /**
    * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}
    */
   default boolean isLoaded(Object object) {

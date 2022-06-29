@@ -92,7 +92,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Retrieve object from repository by id and object class
    *
-   * @param id the entity i
+   * @param id the entity identifier
    * @return the entity
    */
   @Override
@@ -117,6 +117,16 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * Returns the JPA entity manager used for this repository
    */
   EntityManager getEntityManager();
+
+  /**
+   * Retrieve object reference from repository by id and object class
+   *
+   * {@link EntityManager#getReference(Class, Object)}
+   *
+   * @param id the entity identifier
+   * @return the entity reference
+   */
+  T getReference(Serializable id);
 
   /**
    * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}

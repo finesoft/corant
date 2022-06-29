@@ -97,6 +97,11 @@ public class Functions {
   }
 
   @SuppressWarnings("unchecked")
+  public static <P, R> Function<P, R> emptyFunction() {
+    return EMPTY_FUNCTION;
+  }
+
+  @SuppressWarnings("unchecked")
   public static <T> Predicate<T> emptyPredicate(boolean bool) {
     return bool ? EMPTY_PREDICATE_TRUE : EMPTY_PREDICATE_FALSE;
   }

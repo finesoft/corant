@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -71,14 +70,6 @@ public class ResteasyProvider implements WebMetaDataProvider {
   protected Optional<String> alternativeApplicationIfUnresolved;
 
   @Inject
-  @ConfigProperty(name = "corant.resteasy.veto-resource-classes")
-  protected Optional<Set<String>> vetoResourceClasses;
-
-  @Inject
-  @ConfigProperty(name = "corant.resteasy.veto-provider-classes")
-  protected Optional<Set<String>> vetoProviderClasses;
-
-  @Inject
   protected ResteasyCdiExtension extension;
 
   protected final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
@@ -104,11 +95,6 @@ public class ResteasyProvider implements WebMetaDataProvider {
   @PostConstruct
   protected void onPostConstruct() {
 
-    // module bean vetos;
-    vetoResourceClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
-        .forEach(v -> extension.getResources().removeIf(v::isAssignableFrom)));
-    vetoProviderClasses.ifPresent(cs -> cs.stream().map(Classes::tryAsClass)
-        .forEach(v -> extension.getProviders().removeIf(v::isAssignableFrom)));
     // global bean vetos
     extension.getResources().removeIf(RequiredExtension::isVetoed);
     extension.getProviders().removeIf(RequiredExtension::isVetoed);

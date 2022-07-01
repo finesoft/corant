@@ -22,9 +22,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Functions.emptyBiConsumer;
 import static org.corant.shared.util.Functions.emptyFunction;
 import static org.corant.shared.util.Functions.uncheckedBiConsumer;
-import static org.corant.shared.util.Maps.getMapLong;
-import static org.corant.shared.util.Maps.getMapString;
-import static org.corant.shared.util.Maps.getMapZonedDateTime;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.copy;
 import static org.corant.shared.util.Strings.defaultString;
@@ -122,6 +119,10 @@ public class HttpStreamOutput {
 
   protected HttpStreamOutput() {}
 
+  public static HttpStreamOutputBuilder builder() {
+    return new HttpStreamOutputBuilder();
+  }
+
   public Map<String, Object> getAdditionalHeaders() {
     return unmodifiableMap(additionalHeaders);
   }
@@ -150,35 +151,8 @@ public class HttpStreamOutput {
     return name;
   }
 
-  public Map<String, Object> getOutputHeaders() {
-    return resolveCommonHeaders();
-  }
-
   public String getOutputType() {
     return outputType;
-  }
-
-  public HttpStreamOutputResult getRangeOutputResult() {
-    shouldBeGreater(size, 0L);
-    Date mdate = modificationDate == null ? null : Date.from(modificationDate.toInstant());
-    if (HttpRanges.requireRange(requestHeaders, mdate)) {
-      List<HttpRange> ranges;
-      try {
-        ranges = HttpRanges.parseRanges(requestHeaders, size);
-        Collections.sort(ranges);
-      } catch (Exception ex) {
-        return getNotSatisfiableRangeOutputResult();
-      }
-      if (fullRangeOutput(ranges)) {
-        return getFullRangeOutputResult();
-      } else if (ranges.size() > 1) {
-        return getMultiRangesOutputResult(ranges);
-      } else {
-        return getSingleRangeOutputResult(ranges);
-      }
-    } else {
-      return getFullRangeOutputResult();
-    }
   }
 
   public ZonedDateTime getReadDate() {
@@ -197,6 +171,53 @@ public class HttpStreamOutput {
     return loose;
   }
 
+  public Map<String, Object> resolveOutputHeaders() {
+    Map<String, Object> headers = new HashMap<>();
+    String useContentType = contentType;
+    if (isBlank(useContentType)) {
+      if (isNotBlank(fileName)) {
+        useContentType = FileUtils.getContentType(fileName);
+      }
+      useContentType = defaultObject(useContentType, DEFAULT_CONTENT_TYPE);
+    }
+    headers.put(HEADER_NAME_CONTENT_TYPE, useContentType);
+    if (size != null) {
+      headers.put(HEADER_NAME_CONTENT_LENGTH, size.toString());
+    }
+    headers.put(HEADER_NAME_CONTENT_DISPOSITION, resolveContentDisposition());
+    if (modificationDate != null) {
+      headers.put(HEADER_NAME_LAST_MODIFIED,
+          DateTimeFormatter.RFC_1123_DATE_TIME.format(modificationDate));
+    }
+    if (additionalHeaders != null) {
+      headers.putAll(additionalHeaders);
+    }
+    return headers;
+  }
+
+  public HttpStreamOutputResult resolveRangeOutputResult() {
+    shouldBeGreater(size, 0L);
+    Date mdate = modificationDate == null ? null : Date.from(modificationDate.toInstant());
+    if (HttpRanges.requireRange(requestHeaders, mdate)) {
+      List<HttpRange> ranges;
+      try {
+        ranges = HttpRanges.parseRanges(requestHeaders, size);
+        Collections.sort(ranges);
+      } catch (Exception ex) {
+        return resolveNotSatisfiableRangeOutputResult();
+      }
+      if (fullRangeOutput(ranges)) {
+        return resolveFullRangeOutputResult();
+      } else if (ranges.size() > 1) {
+        return resolveMultiRangesOutputResult(ranges);
+      } else {
+        return resolveSingleRangeOutputResult(ranges);
+      }
+    } else {
+      return resolveFullRangeOutputResult();
+    }
+  }
+
   protected boolean fullRangeOutput(List<HttpRange> ranges) {
     if (ranges.size() > 1) {
       return false;
@@ -206,14 +227,19 @@ public class HttpStreamOutput {
     }
   }
 
-  protected HttpStreamOutputResult getFullRangeOutputResult() {
+  protected String resolveContentDisposition() {
+    return new ContentDisposition(defaultString(outputType, "attachment"), name, fileName, charset,
+        size, creationDate, modificationDate, readDate, loose).toString();
+  }
+
+  protected HttpStreamOutputResult resolveFullRangeOutputResult() {
     logger.fine("Handle full output result!");
-    Map<String, Object> headers = resolveCommonHeaders();
+    Map<String, Object> headers = resolveOutputHeaders();
     headers.put(HEADER_NAME_ACCEPT_RANGES, HEADER_VALUE_ACCEPT_RANGES);
     return new HttpStreamOutputResult(STATUS_OF_OK, headers, uncheckedBiConsumer(Streams::copy));
   }
 
-  protected HttpStreamOutputResult getMultiRangesOutputResult(List<HttpRange> ranges) {
+  protected HttpStreamOutputResult resolveMultiRangesOutputResult(List<HttpRange> ranges) {
     Map<String, Object> headers = new HashMap<>();
     headers.put(HEADER_NAME_ACCEPT_RANGES, HEADER_VALUE_ACCEPT_RANGES);
     logger.fine(() -> format("Handle multi ranges %s output result!", join(",", ranges)));
@@ -239,7 +265,7 @@ public class HttpStreamOutput {
         }));
   }
 
-  protected HttpStreamOutputResult getNotSatisfiableRangeOutputResult() {
+  protected HttpStreamOutputResult resolveNotSatisfiableRangeOutputResult() {
     logger.fine("Handle not satisfiable range output result!");
     Map<String, Object> headers = new HashMap<>();
     headers.put(HEADER_NAME_ACCEPT_RANGES, HEADER_VALUE_ACCEPT_RANGES);
@@ -250,7 +276,7 @@ public class HttpStreamOutput {
     return new HttpStreamOutputResult(headers, STATUS_OF_REQUESTED_RANGE_NOT_SATISFIABLE);
   }
 
-  protected HttpStreamOutputResult getSingleRangeOutputResult(List<HttpRange> ranges) {
+  protected HttpStreamOutputResult resolveSingleRangeOutputResult(List<HttpRange> ranges) {
     Map<String, Object> headers = new HashMap<>();
     headers.put(HEADER_NAME_ACCEPT_RANGES, HEADER_VALUE_ACCEPT_RANGES);
     HttpRange range = ranges.get(0);
@@ -263,35 +289,6 @@ public class HttpStreamOutput {
     }
     return new HttpStreamOutputResult(STATUS_OF_PARTIAL_CONTENT, headers, uncheckedBiConsumer(
         (is, os) -> copy(new RangedInputStream(is, range.start(), range.size()), os)));
-  }
-
-  protected Map<String, Object> resolveCommonHeaders() {
-    Map<String, Object> headers = new HashMap<>();
-    String useContentType = contentType;
-    if (isBlank(useContentType)) {
-      if (isNotBlank(fileName)) {
-        useContentType = FileUtils.getContentType(fileName);
-      }
-      useContentType = defaultObject(useContentType, DEFAULT_CONTENT_TYPE);
-    }
-    headers.put(HEADER_NAME_CONTENT_TYPE, useContentType);
-    if (size != null) {
-      headers.put(HEADER_NAME_CONTENT_LENGTH, size.toString());
-    }
-    headers.put(HEADER_NAME_CONTENT_DISPOSITION, resolveContentDisposition());
-    if (modificationDate != null) {
-      headers.put(HEADER_NAME_LAST_MODIFIED,
-          DateTimeFormatter.RFC_1123_DATE_TIME.format(modificationDate));
-    }
-    if (additionalHeaders != null) {
-      headers.putAll(additionalHeaders);
-    }
-    return headers;
-  }
-
-  protected String resolveContentDisposition() {
-    return new ContentDisposition(defaultString(outputType, "attachment"), name, fileName, charset,
-        size, creationDate, modificationDate, readDate, loose).toString();
   }
 
   /**
@@ -349,11 +346,13 @@ public class HttpStreamOutput {
     }
 
     public HttpStreamOutputBuilder fromResource(Resource resource) {
-      contentType = getMapString(resource.getMetadata(), Resource.META_CONTENT_TYPE);
-      name = getMapString(resource.getMetadata(), Resource.META_NAME);
-      fileName = getMapString(resource.getMetadata(), Resource.META_NAME);
-      size = getMapLong(resource.getMetadata(), Resource.META_CONTENT_LENGTH);
-      modificationDate = getMapZonedDateTime(resource.getMetadata(), Resource.META_LAST_MODIFIED);
+      shouldNotNull(resource);
+      contentType = resource.getMetadataValue(Resource.META_CONTENT_TYPE, String.class);
+      name = resource.getMetadataValue(Resource.META_NAME, String.class);
+      fileName = resource.getMetadataValue(Resource.META_NAME, String.class);
+      size = resource.getMetadataValue(Resource.META_CONTENT_LENGTH, Long.class);
+      modificationDate =
+          resource.getMetadataValue(Resource.META_LAST_MODIFIED, ZonedDateTime.class);
       return this;
     }
 

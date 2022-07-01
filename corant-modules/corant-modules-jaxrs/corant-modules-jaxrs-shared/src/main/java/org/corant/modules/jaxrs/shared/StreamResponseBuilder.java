@@ -87,7 +87,7 @@ public class StreamResponseBuilder {
   public Response build() {
     if (resource != null) {
       if (output.getSize() != null && output.getSize() > 0 && supportRange) {
-        HttpStreamOutputResult outputResult = output.getRangeOutputResult();
+        HttpStreamOutputResult outputResult = output.resolveRangeOutputResult();
         ResponseBuilder responseBuilder = Response.status(outputResult.getStatus());
         outputResult.getHeaders().forEach(responseBuilder::header);
         return responseBuilder.entity((StreamingOutput) os -> {
@@ -99,7 +99,7 @@ public class StreamResponseBuilder {
         }).build();
       } else {
         ResponseBuilder responseBuilder = Response.ok();
-        output.getOutputHeaders().forEach(responseBuilder::header);
+        output.resolveOutputHeaders().forEach(responseBuilder::header);
         return responseBuilder.entity((StreamingOutput) os -> {
           try (InputStream is = resource.openInputStream()) {
             copy(is, os);
@@ -110,7 +110,7 @@ public class StreamResponseBuilder {
       }
     } else {
       ResponseBuilder responseBuilder = Response.ok();
-      output.getOutputHeaders().forEach(responseBuilder::header);
+      output.resolveOutputHeaders().forEach(responseBuilder::header);
       return responseBuilder.entity((StreamingOutput) os -> Compressors.zip(os, files)).build();
     }
   }

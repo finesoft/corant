@@ -30,7 +30,7 @@ public class StreamResponseSlot {
 
   public static Response connect(HttpStreamOutput output, Consumer<OutputStream> consumer) {
     ResponseBuilder responseBuilder = Response.ok();
-    output.getOutputHeaders().forEach(responseBuilder::header);
+    output.resolveOutputHeaders().forEach(responseBuilder::header);
     return connect(responseBuilder, consumer);
   }
 

@@ -225,6 +225,12 @@ public class ContentDispositions {
     return parts;
   }
 
+  /**
+   * corant-modules-servlet
+   *
+   * @author bingo 上午9:32:46
+   *
+   */
   public static class ContentDisposition {
 
     private final String type;

@@ -13,8 +13,13 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Lists.immutableListOf;
+import static org.corant.shared.util.Maps.getMapBoolean;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
+import org.corant.modules.query.sql.SqlStatements;
 
 /**
  * corant-modules-query-sql
@@ -24,7 +29,11 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  */
 public interface Dialect {
 
+  List<String> AGGREGATE_FUNCTIONS = immutableListOf("AVG", "COUNT", "MAX", "MIN", "SUM");
+
   String COUNT_FIELD_NAME = "total_";
+  String COUNT_TEMP_TABLE_NAME = "tmp_count_";
+  String USE_DEFAULT_COUNT_SQL_HINT_KEY = "_use_default_count_sql";
 
   String H2_JDBC_URL_PREFIX = "jdbc:h2";
   String HSQL_JDBC_URL_PREFIX = "jdbc:hsqldb";
@@ -40,6 +49,31 @@ public interface Dialect {
   String SQLSERVER_JDBC_URL_PREFIX = "jdbc:sqlserver:";
   String SYBASE_JDBC_URL_PREFIX = "jdbc:sybase:";
 
+  default Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
+
+  /**
+   * Convert SQL statement to Count SQL statement, optimized statements can be reorganized by
+   * CCJSqlParserUtil parsing.
+   *
+   * @param sql to convert SQL
+   * @param hints the hints use to improve the execution process
+   * @return Count SQL statement
+   */
+  default String getCountSql(String sql, Map<String, ?> hints) {
+    if (!getMapBoolean(hints, USE_DEFAULT_COUNT_SQL_HINT_KEY, false)) {
+      try {
+        return SqlStatements.resolveCountSql(sql, "1", COUNT_FIELD_NAME, COUNT_TEMP_TABLE_NAME,
+            getAggregationFunctionNames());
+      } catch (Exception ex) {
+        return getDefaultCountSql(sql, hints);
+      }
+    } else {
+      return getDefaultCountSql(sql, hints);
+    }
+  }
+
   /**
    * Convert SQL statement to Count SQL statement
    *
@@ -47,9 +81,10 @@ public interface Dialect {
    * @param hints the hints use to improve the execution process
    * @return Count SQL statement
    */
-  default String getCountSql(String sql, Map<String, ?> hints) {
-    return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
-        .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) AS tmp_count_").toString();
+  default String getDefaultCountSql(String sql, Map<String, ?> hints) {
+    return new StringBuilder(sql.length() + 64).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
+        .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) ")
+        .append(COUNT_TEMP_TABLE_NAME).toString();
   }
 
   /**
@@ -80,11 +115,18 @@ public interface Dialect {
   }
 
   /**
+   * Return whether the underling data base supports limitation sql.
    *
    * @return supportsLimit
    */
   boolean supportsLimit();
 
+  /**
+   * corant-modules-query-sql
+   *
+   * @author bingo 上午11:25:32
+   *
+   */
   enum DBMS {
 
     MYSQL() {

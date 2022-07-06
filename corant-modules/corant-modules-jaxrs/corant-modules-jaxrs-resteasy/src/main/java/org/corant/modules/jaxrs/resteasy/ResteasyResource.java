@@ -112,11 +112,13 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     protected Map<String, Object> metadata;
 
+    protected ContentDisposition disposition;
+
     public InputPartResource(InputPart inputPart) {
       this(shouldNotNull(inputPart), parse(inputPart.getHeaders().getFirst(CONTENT_DISPOSITION)));
     }
 
-    InputPartResource(InputPart inputPart, ContentDisposition disposition) {
+    protected InputPartResource(InputPart inputPart, ContentDisposition disposition) {
       this.inputPart = inputPart;
       fieldName = disposition.getName();
       String filename = disposition.getFilename();
@@ -130,6 +132,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
           filename = new String(filename.getBytes(ISO_8859_1), UTF_8);
         }
       }
+      this.disposition = disposition;
       metadata = new HashMap<>();
       this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
       metadata.put(META_NAME, this.filename);
@@ -145,6 +148,10 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     public String getContentType() {
       return inputPart.getMediaType().toString();
+    }
+
+    public ContentDisposition getDisposition() {
+      return disposition;
     }
 
     public String getFieldName() {

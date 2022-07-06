@@ -46,7 +46,7 @@ public class RequiredServiceLoader {
   /**
    * Returns an appropriate {@link Optional} service instance that matches the given service class
    * and {@link Classes#defaultClassLoader()} from {@link ServiceLoader} or return an empty
-   * {@link Optional} if not found or not meet the conditions.
+   * {@link Optional} if not found or found multiple instances or not meet the conditions.
    *
    * <p>
    * Note: The required conditions ({@link RequiredClassNotPresent},{@link RequiredClassPresent},
@@ -71,7 +71,7 @@ public class RequiredServiceLoader {
   /**
    * Returns an appropriate {@link Optional} service instance that matches the given service class
    * and the given class loader from {@link ServiceLoader} or return an empty {@link Optional} if
-   * not found or not meet the conditions.
+   * not found or found multiple instances or not meet the conditions.
    *
    * <p>
    * Note: The required conditions ({@link RequiredClassNotPresent},{@link RequiredClassPresent},
@@ -100,7 +100,7 @@ public class RequiredServiceLoader {
   /**
    * Returns an appropriate {@link Optional} service instance that matches the given service class
    * and the given module layer from {@link ServiceLoader} or return an empty {@link Optional} if
-   * not found or not meet the conditions.
+   * not found or found multiple instances or not meet the conditions.
    *
    * <p>
    * Note: The required conditions ({@link RequiredClassNotPresent},{@link RequiredClassPresent},
@@ -126,7 +126,7 @@ public class RequiredServiceLoader {
   /**
    * Returns an appropriate service instances stream that matches the given service class and
    * {@link Classes#defaultClassLoader()} from {@link ServiceLoader} or return an empty stream if
-   * not found or not meet the conditions.
+   * not found or found multiple instances or not meet the conditions.
    *
    * <p>
    * Note: The required conditions ({@link RequiredClassNotPresent},{@link RequiredClassPresent},

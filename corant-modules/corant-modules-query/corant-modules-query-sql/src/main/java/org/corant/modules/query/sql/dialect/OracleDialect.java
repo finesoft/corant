@@ -33,12 +33,6 @@ public class OracleDialect implements Dialect {
       SqlHelper.buildShallowIndexPattern(ORDER_SIBLINGS_BY, true);
 
   @Override
-  public String getCountSql(String sql, Map<String, ?> hints) {
-    return new StringBuilder(sql.length() + 40).append("SELECT COUNT(1) ").append(COUNT_FIELD_NAME)
-        .append(" FROM ( ").append(getNonOrderByPart(sql)).append(" ) tmp_count_").toString();
-  }
-
-  @Override
   public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {
     return getLimitString(sql, offset, limit, hints);
   }

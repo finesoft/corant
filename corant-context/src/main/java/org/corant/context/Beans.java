@@ -181,7 +181,8 @@ public class Beans {
 
   /**
    * Returns an {@link Optional} instance that matches the given instance class from ServiceLoader
-   * or return an empty {@link Optional} if not found.
+   * or return an empty {@link Optional} if not found or found multiple instances or not meet the
+   * conditions.
    *
    * Note: If there are multiple service instances found by ServiceLoader and given instance class
    * is {@link Sortable} then return the highest priority instance.

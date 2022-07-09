@@ -281,13 +281,13 @@ public class Streams {
   }
 
   /**
-   * {@link #inputStreamOf(List)}
+   * {@link #concat(List)}
    *
    * @param inputStreams the input streams.
    * @return {@link SequenceInputStream}
    */
-  public static InputStream inputStreamOf(InputStream... inputStreams) {
-    return inputStreamOf(listOf(inputStreams));
+  public static InputStream concat(InputStream... inputStreams) {
+    return concat(listOf(inputStreams));
   }
 
   /**
@@ -306,7 +306,7 @@ public class Streams {
    * @param inputStreams a list of input streams.
    * @return {@link SequenceInputStream}
    */
-  public static InputStream inputStreamOf(List<InputStream> inputStreams) {
+  public static InputStream concat(List<InputStream> inputStreams) {
     int size = sizeOf(inputStreams);
     if (size == 0) {
       return InputStream.nullInputStream();

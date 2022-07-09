@@ -100,6 +100,24 @@ public class Sets {
   }
 
   /**
+   * The intersection of the specified left and right set. Namely, the resulting set contains all
+   * the elements that belong to both the left set and the right set. Neither input is mutated by
+   * this operation, an entirely new set is returned.
+   *
+   * @param <E> the element type
+   * @param left the source of the elements
+   * @param right the set for comparison
+   * @return a new set contains the elements that belong to both the left set and the right set.
+   */
+  public static <E> Set<E> intersection(Set<? extends E> left, Set<? extends E> right) {
+    Set<E> intersections = new HashSet<>();
+    if (isNotEmpty(left) && isNotEmpty(right)) {
+      left.stream().filter(k -> right.contains(k)).forEach(intersections::add);
+    }
+    return intersections;
+  }
+
+  /**
    * Convert an array to a non-null linked hash set
    *
    * @param <E> the element type

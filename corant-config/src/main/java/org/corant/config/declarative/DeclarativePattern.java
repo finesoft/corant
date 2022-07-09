@@ -49,7 +49,7 @@ public enum DeclarativePattern implements ConfigInjector {
       Field field = configField.getField();
       String key = ConfigInjector.resolveInfixKey(infix, configField);
       Object obj = corantConfig.getConvertedValue(key, field.getGenericType(),
-          configField.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE);
+          configField.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE); // FIXME NO_DFLT_VALUE
       if (obj != null) {
         field.set(configObject, obj);
       }

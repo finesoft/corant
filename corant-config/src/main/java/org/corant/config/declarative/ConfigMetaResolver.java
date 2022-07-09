@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -43,11 +44,12 @@ public class ConfigMetaResolver {
    * @param clazz the configuration class
    */
   public static ConfigMetaClass declarative(Class<?> clazz) {
-    Class<?> klass = ConfigClasses.resolveClass(clazz);
-    ConfigKeyRoot configKeyRoot = ConfigClasses.createRoot(klass);
-    if (configKeyRoot == null) {
+    Pair<Class<?>, ConfigKeyRoot> resolved = ConfigClasses.resolveRoot(clazz);
+    if (resolved.isEmpty()) {
       return null;
     }
+    Class<?> klass = resolved.left();
+    ConfigKeyRoot configKeyRoot = resolved.right();
     String root = configKeyRoot.value();
     int index = configKeyRoot.keyIndex();
     boolean ignore = configKeyRoot.ignoreNoAnnotatedItem();
@@ -59,7 +61,7 @@ public class ConfigMetaResolver {
           field.setAccessible(true);
           return field;
         });
-        ConfigKeyItem cfgKeyItem = ConfigClasses.createItem(theField);
+        ConfigKeyItem cfgKeyItem = ConfigClasses.resolveItem(theField);
         String keyItem = cfgKeyItem.name();
         DeclarativePattern pattern = cfgKeyItem.pattern();
         String defaultValue = cfgKeyItem.defaultValue();

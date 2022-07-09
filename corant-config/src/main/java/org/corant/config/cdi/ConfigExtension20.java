@@ -13,8 +13,8 @@
  */
 package org.corant.config.cdi;
 
+import static java.util.Collections.singleton;
 import static org.corant.shared.util.Primitives.wrap;
-import static org.corant.shared.util.Sets.setOf;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -59,7 +59,7 @@ public class ConfigExtension20 implements Extension {
     configPropertyInjectionPoints.stream()
         .map(ip -> ip.getType() instanceof Class<?> ? wrap((Class<?>) ip.getType()) : ip.getType())
         .collect(Collectors.toSet())
-        .forEach(type -> abd.addBean(new ConfigPropertyBean<>(bm, setOf(type))));
+        .forEach(type -> abd.addBean(new ConfigPropertyBean<>(bm, singleton(type))));
     declarativeConfigInjectionPoints.stream().map(ip -> (Class<?>) ip.getType())
         .collect(Collectors.toSet())
         .forEach(type -> abd.addBean(new DeclarativeConfigBean<>(bm, type)));

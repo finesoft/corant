@@ -27,6 +27,8 @@ import java.lang.reflect.Field;
 import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigKeyItem.ConfigKeyItemLiteral;
 import org.corant.config.declarative.ConfigKeyRoot.ConfigKeyRootLiteral;
+import org.corant.shared.ubiquity.Tuple;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-config
@@ -48,7 +50,20 @@ public class ConfigClasses {
   public static final String SPEC_KEY_ITEM_DV_FMT = SPEC_KEY_ITEM_FMT + ".default-value";
   public static final String SPEC_KEY_ITEM_PTN_FMT = SPEC_KEY_ITEM_FMT + ".pattern";
 
-  public static ConfigKeyItem createItem(Field field) {
+  public static Class<?> resolveClass(Class<?> clazz) {
+    Class<?> klass = getUserClass(clazz);
+    String classNameKey = String.format(SPEC_REAL, klass.getCanonicalName());
+    String className = Configs.getValue(classNameKey, String.class);
+    if (isNotBlank(className)) {
+      Class<?> realClass = asClass(className);
+      shouldBeTrue(klass.isAssignableFrom(realClass), "The config class %s must be derived from %s",
+          className, klass.getCanonicalName());
+      return realClass;
+    }
+    return klass;
+  }
+
+  public static ConfigKeyItem resolveItem(Field field) {
     String className = getUserClass(field.getDeclaringClass()).getCanonicalName();
     String fieldName = field.getName();
     String keyItemCfgKey = String.format(SPEC_KEY_ITEM_FMT, className, fieldName);
@@ -73,9 +88,9 @@ public class ConfigClasses {
         defaultObject(pattern, DeclarativePattern.SUFFIX));
   }
 
-  public static ConfigKeyRoot createRoot(Class<?> cls) {
+  public static Pair<Class<?>, ConfigKeyRoot> resolveRoot(Class<?> cls) {
     Class<?> clazz = resolveClass(cls);
-    String className = getUserClass(clazz).getCanonicalName();
+    String className = clazz.getCanonicalName();
     String rootCfgKey = String.format(SPEC_KEY_ROOT_FMT, className);
     String indexCfgKey = String.format(SPEC_KEY_ROOT_INDEX_FMT, className);
     String ignoreKey = String.format(SPEC_KEY_ROOT_IG_NOANN_ITEM_FMT, className);
@@ -96,22 +111,9 @@ public class ConfigClasses {
       }
     }
     if (keyRoot != null) {
-      return new ConfigKeyRootLiteral(defaultObject(ignore, Boolean.FALSE),
-          keyIndex == null || keyIndex < 0 ? splitKey(keyRoot).length : keyIndex, keyRoot);
+      return Tuple.pairOf(clazz, new ConfigKeyRootLiteral(defaultObject(ignore, Boolean.FALSE),
+          keyIndex == null || keyIndex < 0 ? splitKey(keyRoot).length : keyIndex, keyRoot));
     }
-    return null;
-  }
-
-  public static Class<?> resolveClass(Class<?> clazz) {
-    Class<?> klass = getUserClass(clazz);
-    String classNameKey = String.format(SPEC_REAL, klass.getCanonicalName());
-    String className = Configs.getValue(classNameKey, String.class);
-    if (isNotBlank(className)) {
-      Class<?> realClass = asClass(className);
-      shouldBeTrue(klass.isAssignableFrom(realClass), "The config class %s must be derived from %s",
-          className, klass.getCanonicalName());
-      return realClass;
-    }
-    return klass;
+    return Pair.empty();
   }
 }

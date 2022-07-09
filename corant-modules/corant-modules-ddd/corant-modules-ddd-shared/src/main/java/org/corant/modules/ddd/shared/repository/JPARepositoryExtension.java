@@ -13,9 +13,9 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
+import static java.util.Collections.singleton;
 import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Sets.setOf;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class JPARepositoryExtension implements Extension {
     qualifiers.putAll(Qualifiers.resolveNameds(names));
     qualifiers.forEach((k, v) -> abd.<JPARepository>addBean().addQualifiers(v)
         .addTransitiveTypeClosure(DefaultJPARepository.class).beanClass(DefaultJPARepository.class)
-        .scope(ApplicationScoped.class).stereotypes(setOf(Repositories.class))
+        .scope(ApplicationScoped.class).stereotypes(singleton(Repositories.class))
         .produceWith(beans -> produce(beans, k)).disposeWith((repo, beans) -> {
         }));
   }

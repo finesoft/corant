@@ -56,7 +56,7 @@ public class HttpRangeOutputTest extends TestCase {
     }
     final String md = "D:\\bingo_new___merged";
     try (
-        InputStream isx = Streams.inputStreamOf(paths.stream()
+        InputStream isx = Streams.concat(paths.stream()
             .map(uncheckedFunction(FileInputStream::new)).collect(Collectors.toList()));
         FileOutputStream fos = new FileOutputStream(md)) {
       Streams.copy(isx, fos);

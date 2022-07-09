@@ -22,9 +22,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.ubiquity.Tuple.Range;
-import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.ubiquity.Tuple;
 
 /**
  * corant-shared
@@ -116,12 +114,8 @@ public class Empties {
       return isEmpty((Iterable<?>) object);
     } else if (object instanceof Enumeration<?>) {
       return isEmpty((Enumeration<?>) object);
-    } else if (object instanceof Pair<?, ?>) {
-      return isEmpty((Pair<?, ?>) object);
-    } else if (object instanceof Triple<?, ?, ?>) {
-      return isEmpty((Triple<?, ?, ?>) object);
-    } else if (object instanceof Range<?>) {
-      return isEmpty((Range<?>) object);
+    } else if (object instanceof Tuple) {
+      return isEmpty((Tuple) object);
     } else if (object instanceof Optional<?>) {
       return isEmpty((Optional<?>) object);
     } else {
@@ -167,30 +161,10 @@ public class Empties {
   /**
    * Return true if object is null and object.isEmpty() == true
    *
-   * @param object the tuple pair object to check
-   * @return isEmpty
-   */
-  public static boolean isEmpty(final Pair<?, ?> object) {
-    return object == null || object.isEmpty();
-  }
-
-  /**
-   * Return true if object is null and object.isEmpty() == true
-   *
-   * @param object the tuple range object to check
-   * @return isEmpty
-   */
-  public static boolean isEmpty(final Range<? extends Comparable<?>> object) {
-    return object == null || object.isEmpty();
-  }
-
-  /**
-   * Return true if object is null and object.isEmpty() == true
-   *
    * @param object the tuple triple object to check
    * @return isEmpty
    */
-  public static boolean isEmpty(final Triple<?, ?, ?> object) {
+  public static boolean isEmpty(final Tuple object) {
     return object == null || object.isEmpty();
   }
 
@@ -284,27 +258,7 @@ public class Empties {
    * @param object the tuple pair object to check
    * @return isNotEmpty
    */
-  public static boolean isNotEmpty(final Pair<?, ?> object) {
-    return !isEmpty(object);
-  }
-
-  /**
-   * Return true if and only if object is not null and object.isEmpty() == false
-   *
-   * @param object the tuple range object to check
-   * @return isNotEmpty
-   */
-  public static boolean isNotEmpty(final Range<? extends Comparable<?>> object) {
-    return !isEmpty(object);
-  }
-
-  /**
-   * Return true if and only if object is not null and object.isEmpty() == false
-   *
-   * @param object the tuple triple object to check
-   * @return isNotEmpty
-   */
-  public static boolean isNotEmpty(final Triple<?, ?, ?> object) {
+  public static boolean isNotEmpty(final Tuple object) {
     return !isEmpty(object);
   }
 

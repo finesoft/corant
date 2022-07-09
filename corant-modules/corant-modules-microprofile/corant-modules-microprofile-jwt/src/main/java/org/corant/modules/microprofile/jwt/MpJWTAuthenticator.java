@@ -13,9 +13,9 @@
  */
 package org.corant.modules.microprofile.jwt;
 
+import static java.util.Collections.singletonList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.context.Beans.select;
-import static org.corant.shared.util.Lists.listOf;
 import java.util.stream.Stream;
 import javax.enterprise.inject.Instance;
 import org.corant.modules.security.AuthenticationData;
@@ -47,7 +47,7 @@ public class MpJWTAuthenticator extends AbstractAuthenticator {
     if (bearerToken != null) {
       try {
         JsonWebToken jwtPrincipal = resolve(JWTParser.class).parse(bearerToken);
-        return new SimpleAuthcData(bearerToken, listOf(new MpJWTPrincipal(jwtPrincipal)));
+        return new SimpleAuthcData(bearerToken, singletonList(new MpJWTPrincipal(jwtPrincipal)));
       } catch (Exception e) {
         throw new AuthenticationException(e);
       }

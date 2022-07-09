@@ -38,6 +38,10 @@ public interface Tuple {
     return new Dectet<>(a, b, c, d, e, f, g, h, i, j);
   }
 
+  static <A, B> Duet<A, B> duetOf(final A a, final B b) {
+    return new Duet<>(a, b);
+  }
+
   static <A, B, C, D, E, F, G, H, I> Nonet<A, B, C, D, E, F, G, H, I> nonetOf(final A a, final B b,
       final C c, final D d, final E e, final F f, final G g, final H h, final I i) {
     return new Nonet<>(a, b, c, d, e, f, g, h, i);
@@ -81,6 +85,10 @@ public interface Tuple {
 
   static <L, M, R> Triple<L, M, R> tripleOf(final L left, final M middle, final R right) {
     return Triple.of(left, middle, right);
+  }
+
+  static <A, B, C> Triplet<A, B, C> tripletOf(final A a, final B b, final C c) {
+    return new Triplet<>(a, b, c);
   }
 
   /**
@@ -197,6 +205,32 @@ public interface Tuple {
 
     public J tenth() {
       return elementAt(9);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午2:46:46
+   *
+   */
+  class Duet<A, B> extends AbstractSeries {
+
+    public Duet(A a, B b) {
+      this(new Object[] {a, b});
+    }
+
+    protected Duet(Object... datas) {
+      super(datas);
+    }
+
+    public A first() {
+      return elementAt(0);
+    }
+
+    public B second() {
+      return elementAt(1);
     }
 
   }
@@ -379,6 +413,10 @@ public interface Tuple {
       return new Object[] {left, right};
     }
 
+    public Duet<L, R> toDuet() {
+      return new Duet<>(left, right);
+    }
+
     @Override
     public String toString() {
       return asString("[%s,%s]");
@@ -414,7 +452,7 @@ public interface Tuple {
    * @author bingo 下午4:28:52
    *
    */
-  class Quartet<A, B, C, D> extends AbstractSeries {
+  class Quartet<A, B, C, D> extends Triplet<A, B, C> {
 
     public Quartet(A a, B b, C c, D d) {
       super(new Object[] {a, b, c, d});
@@ -424,22 +462,9 @@ public interface Tuple {
       super(objects);
     }
 
-    public A first() {
-      return elementAt(0);
-    }
-
     public D fourth() {
       return elementAt(3);
     }
-
-    public B second() {
-      return elementAt(1);
-    }
-
-    public C third() {
-      return elementAt(2);
-    }
-
   }
 
   /**
@@ -793,6 +818,10 @@ public interface Tuple {
       return asString("[%s,%s,%s]");
     }
 
+    public Triplet<L, M, R> toTriplet() {
+      return new Triplet<>(left, middle, right);
+    }
+
     public Triple<L, M, R> withLeft(final L left) {
       return new Triple<>(left, middle, right);
     }
@@ -803,6 +832,27 @@ public interface Tuple {
 
     public Triple<L, M, R> withRight(final R right) {
       return new Triple<>(left, middle, right);
+    }
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午2:47:13
+   *
+   */
+  class Triplet<A, B, C> extends Duet<A, B> {
+
+    public Triplet(A a, B b, C c) {
+      this(new Object[] {a, b, c});
+    }
+
+    protected Triplet(Object... datas) {
+      super(datas);
+    }
+
+    public C third() {
+      return elementAt(2);
     }
   }
 }

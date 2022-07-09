@@ -124,17 +124,10 @@ public class MongoClientExtension implements Extension {
     return resolve(MongoClientExtension.class).produceGridFSBucket(namespace);
   }
 
-  /**
-   * @return the clientConfigManager
-   */
   public NamedQualifierObjectManager<MongoClientConfig> getClientConfigManager() {
     return clientConfigManager;
   }
 
-  /**
-   *
-   * @return the databaseConfigManager
-   */
   public NamedQualifierObjectManager<MongodbConfig> getDatabaseConfigManager() {
     return databaseConfigManager;
   }

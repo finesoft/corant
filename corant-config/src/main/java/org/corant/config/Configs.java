@@ -13,17 +13,16 @@
  */
 package org.corant.config;
 
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.immutableMap;
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.parseDollarTemplate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,9 +74,9 @@ public class Configs {
   public static List<String> assemblyStringConfigProperties(String value) {
     String useKey = assemblyStringConfigProperty(value);
     if (useKey != null) {
-      return new ArrayList<>(Arrays.asList(CorantConfigResolver.splitValue(useKey)));
+      return Arrays.asList(CorantConfigResolver.splitValue(useKey));
     }
-    return listOf(value);
+    return singletonList(value);
   }
 
   /**
@@ -247,7 +246,7 @@ public class Configs {
       Config config = ConfigProvider.getConfig();
       try {
         // FIXME EMPTY?
-        map = ConfigInstances.resolveConfigInstances(config, setOf(EMPTY), configClass);
+        map = ConfigInstances.resolveConfigInstances(config, singleton(EMPTY), configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -258,7 +257,7 @@ public class Configs {
   /**
    * Returns the declarative configuration instances map by given configuration instance class. The
    * key of returns maps is the configuration instance qualifier, and the value of returns map is
-   * the configuration instance.
+   * the configuration instance. The returns map is not null and immutable.
    *
    * @param <T> the configuration instance type
    * @param cls the configuration instance class
@@ -276,7 +275,7 @@ public class Configs {
         throw new CorantRuntimeException(e);
       }
     }
-    return defaultObject(configMaps, HashMap::new);
+    return immutableMap(configMaps);
   }
 
   /**
@@ -295,8 +294,8 @@ public class Configs {
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
-        map = ConfigInstances.resolveConfigInstances(config, setOf(EMPTY), configClass); // FIXME
-        // EMPTY?
+        // FIXME EMPTY?
+        map = ConfigInstances.resolveConfigInstances(config, singleton(EMPTY), configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }

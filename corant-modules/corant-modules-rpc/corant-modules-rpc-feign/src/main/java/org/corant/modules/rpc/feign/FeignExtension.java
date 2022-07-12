@@ -21,7 +21,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
-import org.corant.context.required.RequiredExt;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-rpc-feign
@@ -42,7 +42,7 @@ public class FeignExtension implements Extension {
 
   public void onProcessAnnotatedType(
       @Observes @WithAnnotations(RegisterFeignClient.class) ProcessAnnotatedType<?> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     feignClientBeanClasses.add(pat.getAnnotatedType().getJavaClass());

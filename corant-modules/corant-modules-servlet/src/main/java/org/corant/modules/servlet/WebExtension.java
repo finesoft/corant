@@ -32,12 +32,12 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import org.corant.config.Configs;
-import org.corant.context.required.RequiredExt;
 import org.corant.modules.servlet.metadata.WebFilterMetaData;
 import org.corant.modules.servlet.metadata.WebListenerMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-servlet
@@ -81,7 +81,7 @@ public class WebExtension implements Extension, WebMetaDataProvider {
 
   void findFilterMetaDatas(
       @Observes @WithAnnotations({WebFilter.class}) ProcessAnnotatedType<? extends Filter> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     filterMetaDatas.add(new WebFilterMetaData(pat.getAnnotatedType().getAnnotation(WebFilter.class),
@@ -90,7 +90,7 @@ public class WebExtension implements Extension, WebMetaDataProvider {
 
   void findListenerMetaDatas(@Observes @WithAnnotations({
       WebListener.class}) ProcessAnnotatedType<? extends ServletContextListener> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     listenerMetaDatas.add(new WebListenerMetaData(pat.getAnnotatedType().getJavaClass()));
@@ -98,7 +98,7 @@ public class WebExtension implements Extension, WebMetaDataProvider {
 
   void findServletMetaDatas(@Observes @WithAnnotations({
       WebServlet.class}) ProcessAnnotatedType<? extends HttpServlet> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     ServletSecurity servletSecurity = null;

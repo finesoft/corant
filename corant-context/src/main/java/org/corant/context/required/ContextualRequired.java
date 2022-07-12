@@ -19,7 +19,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Collection;
 import javax.enterprise.inject.spi.AnnotatedType;
 import org.corant.config.CorantConfigResolver;
-import org.corant.shared.service.Required;
+import org.corant.shared.service.SimpleRequired;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -28,12 +28,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * @author bingo 下午9:24:34
  *
  */
-public class RequiredExt extends Required {
-
-  public static final RequiredExt INSTANCE = new RequiredExt();
+public class ContextualRequired extends SimpleRequired {
 
   public boolean shouldVeto(AnnotatedType<?> type) {
-    return shouldVeto(type.getJavaClass());
+    return super.shouldVeto(type.getJavaClass());
   }
 
   @Override

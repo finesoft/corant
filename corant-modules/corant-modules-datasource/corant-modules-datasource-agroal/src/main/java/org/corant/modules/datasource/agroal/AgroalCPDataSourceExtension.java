@@ -40,9 +40,9 @@ import org.corant.modules.datasource.agroal.patch.MyNarayanaTransactionIntegrati
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;
+import org.corant.shared.util.Services;
 import io.agroal.api.AgroalDataSource;
 import io.agroal.api.configuration.AgroalConnectionFactoryConfiguration.TransactionIsolation;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
@@ -166,7 +166,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
     if (!cfg.getValidationTimeout().equals(Duration.ZERO)) {
       Optional<ConnectionValidator> validators =
-          RequiredServiceLoader.find(ConnectionValidator.class, defaultClassLoader());
+          Services.findRequired(ConnectionValidator.class, defaultClassLoader());
       if (validators.isEmpty()) {
         cfgs.connectionPoolConfiguration().connectionValidator(
             AgroalConnectionPoolConfiguration.ConnectionValidator.defaultValidator());
@@ -174,7 +174,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         cfgs.connectionPoolConfiguration().connectionValidator(validators.get());
       }
     }
-    RequiredServiceLoader.load(AgroalCPDataSourceConfigurator.class, defaultClassLoader())
+    Services.selectRequired(AgroalCPDataSourceConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, cfgs));
     AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
     if (cfg.isEnableMetrics()) {

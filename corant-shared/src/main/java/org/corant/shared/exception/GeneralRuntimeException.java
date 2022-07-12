@@ -52,7 +52,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   protected static final String UN_KNOW_EXMSG = "An unknown exception has occurred!";
 
   protected static final ExceptionMessageResolver messageResolver =
-      Services.find(ExceptionMessageResolver.class, defaultClassLoader())
+      Services.findRequired(ExceptionMessageResolver.class, defaultClassLoader())
           .orElseGet(SimpleExceptionMessageResolver::new);
 
   private static final long serialVersionUID = -3720369148530068164L;

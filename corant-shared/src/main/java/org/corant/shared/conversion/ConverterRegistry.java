@@ -232,9 +232,9 @@ public class ConverterRegistry {
 
   static synchronized void load() {
     ObjectPrimitiveArrayConverterFactories.FACTORIES.forEach(ConverterRegistry::register);
-    Services.select(Converter.class).sorted(Sortable::reverseCompare)
+    Services.selectRequired(Converter.class).sorted(Sortable::reverseCompare)
         .forEach(ConverterRegistry::register);
-    Services.select(ConverterFactory.class).sorted(Sortable::reverseCompare)
+    Services.selectRequired(ConverterFactory.class).sorted(Sortable::reverseCompare)
         .forEach(ConverterRegistry::register);
   }
 

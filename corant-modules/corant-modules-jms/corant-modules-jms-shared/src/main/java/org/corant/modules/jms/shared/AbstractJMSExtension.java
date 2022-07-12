@@ -39,7 +39,6 @@ import javax.jms.JMSConnectionFactory;
 import javax.jms.Session;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
-import org.corant.context.required.RequiredExt;
 import org.corant.modules.jms.annotation.MessageContext;
 import org.corant.modules.jms.annotation.MessageDestination;
 import org.corant.modules.jms.annotation.MessageDriven;
@@ -49,6 +48,7 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-jms-shared
@@ -97,7 +97,7 @@ public abstract class AbstractJMSExtension implements Extension {
   protected void onProcessAnnotatedType(
       @Observes @WithAnnotations({MessageSend.class, MessageContext.class, MessageDriven.class,
           JMSConnectionFactory.class, MessageDestination.class}) ProcessAnnotatedType<?> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();

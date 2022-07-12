@@ -78,7 +78,7 @@ public class Jsons {
     objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
     objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    Services.select(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
+    Services.selectRequired(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
         .forEach(c -> c.configure(objectMapper));
   }
   static final JavaType mapType = objectMapper.constructType(Map.class);

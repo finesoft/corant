@@ -50,7 +50,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
   protected static final FreemarkerDynamicQueryScriptResolver scriptResolver =
-      Services.find(FreemarkerDynamicQueryScriptResolver.class)
+      Services.findRequired(FreemarkerDynamicQueryScriptResolver.class)
           .orElse(FreemarkerDynamicQueryScriptResolver.DEFAULT_INST);
 
   protected final Template execution;

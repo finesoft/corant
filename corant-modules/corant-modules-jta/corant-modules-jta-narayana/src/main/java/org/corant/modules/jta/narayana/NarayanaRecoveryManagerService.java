@@ -75,7 +75,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
           }
           create();
           helpers.clear();
-          Services.select(TransactionIntegration.class, Corant.current().getClassLoader())
+          Services.selectRequired(TransactionIntegration.class, Corant.current().getClassLoader())
               .map(NarayanaXAResourceRecoveryHelper::new).forEach(helpers::add);
           XARecoveryModule xaRecoveryModule = XARecoveryModule.getRegisteredXARecoveryModule();
           if (xaRecoveryModule != null && isNotEmpty(helpers)) {

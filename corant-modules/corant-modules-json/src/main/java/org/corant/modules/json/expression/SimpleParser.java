@@ -73,15 +73,15 @@ public class SimpleParser {
   }
 
   public static ASTNodeBuilder resolveBuilder() {
-    return Services.find(ASTNodeBuilder.class).orElse(ASTNodeBuilder.DFLT);
+    return Services.findRequired(ASTNodeBuilder.class).orElse(ASTNodeBuilder.DFLT);
   }
 
   public static Stream<FunctionResolver> resolveFunction() {
-    return Services.select(FunctionResolver.class);
+    return Services.selectRequired(FunctionResolver.class);
   }
 
   public static ASTNodeVisitor resolveVisitor() {
-    return Services.find(ASTNodeVisitor.class).orElse(ASTNodeVisitor.DFLT);
+    return Services.findRequired(ASTNodeVisitor.class).orElse(ASTNodeVisitor.DFLT);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

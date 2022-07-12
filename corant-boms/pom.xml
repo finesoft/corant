@@ -131,7 +131,7 @@
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
-    <version.narayana>5.12.4.Final</version.narayana>
+    <version.narayana>5.12.7.Final</version.narayana>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>

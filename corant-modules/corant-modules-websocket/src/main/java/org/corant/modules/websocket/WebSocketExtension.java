@@ -21,7 +21,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.websocket.server.ServerEndpoint;
-import org.corant.context.required.RequiredExt;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-websocket
@@ -35,7 +35,7 @@ public class WebSocketExtension implements Extension {
 
   public void findWebSocketServers(
       @Observes @WithAnnotations(ServerEndpoint.class) ProcessAnnotatedType<?> pat) {
-    if (RequiredExt.INSTANCE.shouldVeto(pat.getAnnotatedType())) {
+    if (Services.shouldVeto(pat.getAnnotatedType().getJavaClass())) {
       return;
     }
     endpointClasses.add(pat.getAnnotatedType().getJavaClass());

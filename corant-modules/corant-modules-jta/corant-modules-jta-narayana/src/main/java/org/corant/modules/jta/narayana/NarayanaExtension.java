@@ -137,7 +137,7 @@ public class NarayanaExtension implements TransactionExtension {
     final JTAEnvironmentBean jtaBean = BeanPopulator.getDefaultInstance(JTAEnvironmentBean.class);
     final RecoveryEnvironmentBean recoveryBean =
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
-    Services.select(NarayanaConfigurator.class, defaultClassLoader())
+    Services.selectRequired(NarayanaConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(cfgr -> {
           logger.fine(() -> String.format("Use customer narayana configurator %s.",
               cfgr.getClass().getName()));

@@ -40,7 +40,7 @@ public class DbUtilBasicRowProcessor extends BasicRowProcessor {
   public static final DbUtilBasicRowProcessor INST = new DbUtilBasicRowProcessor();
 
   public static final List<DbUtilBasicFieldProcessor> FIELD_PROCESSORS =
-      Services.select(DbUtilBasicFieldProcessor.class).sorted(Sortable::compare)
+      Services.selectRequired(DbUtilBasicFieldProcessor.class).sorted(Sortable::compare)
           .collect(Collectors.toList());
 
   @Override
@@ -109,7 +109,7 @@ public class DbUtilBasicRowProcessor extends BasicRowProcessor {
      * </ul>
      * </p>
      */
-    private final Map<String, String> lowerCaseMap = new HashMap<String, String>();
+    private final Map<String, String> lowerCaseMap = new HashMap<>();
 
     /** {@inheritDoc} */
     @Override

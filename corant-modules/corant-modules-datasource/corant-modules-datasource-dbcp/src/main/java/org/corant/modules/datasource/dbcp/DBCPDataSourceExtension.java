@@ -35,8 +35,8 @@ import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.arjPropertyManager;
 import com.arjuna.ats.arjuna.common.recoveryPropertyManager;
@@ -156,7 +156,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
     ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
 
-    RequiredServiceLoader.load(DBCPDataSourceConfigurator.class, defaultClassLoader())
+    Services.selectRequired(DBCPDataSourceConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, ds));
     return ds;
   }

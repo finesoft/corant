@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import org.corant.Corant;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
-import org.corant.shared.service.RequiredServiceLoader;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Services;
 
@@ -38,19 +37,19 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
 
   /**
    * Return the sorted CorantBootHandler instance stream, using {@link java.util.ServiceLoader} and
-   * {@link RequiredServiceLoader} mechanism to load.
+   * {@link org.corant.shared.util.Services#selectRequired(Class,ClassLoader)} mechanism to load.
    *
    * @param classLoader the class loader use for load the CorantBootHandler
    * @param excludeClassNames the excluded handler class names
    *
    * @see Sortable#compare(Sortable, Sortable)
-   * @see Services#select(Class, ClassLoader)
+   * @see Services#selectRequired(Class, ClassLoader)
    */
   static Stream<CorantBootHandler> load(ClassLoader classLoader, String... excludeClassNames) {
     if (excludeClassNames.length == 0) {
-      return Services.select(CorantBootHandler.class, classLoader);
+      return Services.selectRequired(CorantBootHandler.class, classLoader);
     } else {
-      return Services.select(CorantBootHandler.class, classLoader)
+      return Services.selectRequired(CorantBootHandler.class, classLoader)
           .filter(h -> Arrays.binarySearch(excludeClassNames, h.getClass().getName()) == -1);
     }
   }

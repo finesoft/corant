@@ -114,8 +114,9 @@ public class Beans {
    *
    * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
    * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
-   * {@link org.corant.shared.service.RequiredServiceLoader}. If there are multiple instances and
-   * the given instance class is {@link Sortable}, then return the one with the highest priority.
+   * {@link org.corant.shared.util.Services#findRequired(Class)}. If there are multiple instances
+   * and the given instance class is {@link Sortable}, then return the one with the highest
+   * priority.
    *
    * @param <T> the bean type to be resolved
    * @param instanceClass the bean instance class to be resolved
@@ -193,7 +194,7 @@ public class Beans {
    * @see Sortable#compare(Sortable, Sortable)
    */
   public static <T> Optional<T> findService(Class<T> instanceClass) {
-    return Services.find(instanceClass);
+    return Services.findRequired(instanceClass);
   }
 
   public static boolean isManagedBean(Object object, Annotation... qualifiers) {
@@ -261,9 +262,9 @@ public class Beans {
    * <p>
    * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
    * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
-   * {@link org.corant.shared.service.RequiredServiceLoader}. If there are multiple instances and
-   * the given instance class is {@link Sortable}, then return the one with the highest priority; If
-   * none of the above searches are found, an exception is thrown.
+   * {@link org.corant.shared.util.Services#findRequired(Class)}. If there are multiple instances
+   * and the given instance class is {@link Sortable}, then return the one with the highest
+   * priority; If none of the above searches are found, an exception is thrown.
    *
    * Use with care, there may be a memory leak.
    *

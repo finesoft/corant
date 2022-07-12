@@ -71,11 +71,12 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
   static Logger logger = Logger.getLogger(HibernateSnowflakeIdGenerator.class.getName());
 
-  static final HibernateSnowflakeIdTimeService specTimeGenerator =
-      Services.select(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).findFirst()
-          .orElse((u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
-  static final List<HibernateSessionTimeService> sessionTimeServices = Services
-      .select(HibernateSessionTimeService.class, defaultClassLoader()).collect(Collectors.toList());
+  static final HibernateSnowflakeIdTimeService specTimeGenerator = Services
+      .selectRequired(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).findFirst()
+      .orElse((u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+  static final List<HibernateSessionTimeService> sessionTimeServices =
+      Services.selectRequired(HibernateSessionTimeService.class, defaultClassLoader())
+          .collect(Collectors.toList());
 
   static Map<String, Generator> generators = new ConcurrentHashMap<>();
 

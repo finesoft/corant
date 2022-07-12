@@ -672,7 +672,7 @@ public class Corant implements AutoCloseable {
         preInitializer.accept(initializer);
       }
       // Get an additional configurator from SPI to configure the initializer
-      Services.select(Configurator.class, classLoader).sorted(Sortable::compare)
+      Services.selectRequired(Configurator.class, classLoader).sorted(Sortable::compare)
           .filter(c -> c.supports(initializer)).forEach(c -> c.accept(initializer));
       container = initializer.initialize();
       stopWatch.stop(

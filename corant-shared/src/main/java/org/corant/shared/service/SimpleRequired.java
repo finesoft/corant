@@ -18,7 +18,6 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.areEqual;
-import static org.corant.shared.util.Objects.compare;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNotNull;
 import static org.corant.shared.util.Objects.isNull;
@@ -38,6 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import org.corant.shared.conversion.converter.factory.StringObjectConverterFactory;
 import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings.WildcardMatcher;
 import org.corant.shared.util.Systems;
 
@@ -189,16 +189,16 @@ public class SimpleRequired implements Required {
             match = isNull(configValue);
             break;
           case GTE:
-            match = compare((Comparable) configValue, (Comparable) value) < 0;
+            match = Objects.compare((Comparable) configValue, (Comparable) value) < 0;
             break;
           case GT:
-            match = compare((Comparable) configValue, (Comparable) value) <= 0;
+            match = Objects.compare((Comparable) configValue, (Comparable) value) <= 0;
             break;
           case LT:
-            match = compare((Comparable) configValue, (Comparable) value) > 0;
+            match = Objects.compare((Comparable) configValue, (Comparable) value) > 0;
             break;
           case LTE:
-            match = compare((Comparable) configValue, (Comparable) value) >= 0;
+            match = Objects.compare((Comparable) configValue, (Comparable) value) >= 0;
             break;
           case NO_EQ:
             match = areEqual(value, configValue);

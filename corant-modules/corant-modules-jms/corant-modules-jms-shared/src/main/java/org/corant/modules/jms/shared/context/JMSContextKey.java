@@ -109,6 +109,10 @@ public class JMSContextKey implements Serializable {
 
   }
 
+  public AbstractJMSConfig getConfig() {
+    return config;
+  }
+
   public String getConnectionFactoryId() {
     return connectionFactoryId;
   }

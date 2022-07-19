@@ -55,6 +55,9 @@ public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, Decla
   @ConfigKeyItem
   protected boolean xa = true;
 
+  @ConfigKeyItem
+  protected boolean propagateSecurityContext = false;
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -83,14 +86,16 @@ public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, Decla
   }
 
   /**
-   *
-   * @return the connectionFactoryId
+   * @return the connection factory id, the connection factory id means a broker server or cluster.
    */
   @Override
   public String getConnectionFactoryId() {
     return connectionFactoryId;
   }
 
+  /**
+   * Same as {@link #getConnectionFactoryId()}
+   */
   @Override
   public String getName() {
     return connectionFactoryId;
@@ -114,6 +119,10 @@ public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, Decla
   @Override
   public boolean isEnable() {
     return enable;
+  }
+
+  public boolean isPropagateSecurityContext() {
+    return propagateSecurityContext;
   }
 
   @Override

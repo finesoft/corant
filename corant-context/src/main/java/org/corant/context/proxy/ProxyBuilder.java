@@ -32,12 +32,15 @@ public class ProxyBuilder {
   /**
    * Build normal Interface-based dynamic proxy instance.
    *
-   * @see MethodInvoker
    *
-   * @param <T>
-   * @param interfaceType
-   * @param invokerHandler
-   * @return build
+   * @param <T> interface type
+   * @param interfaceType interface for the proxy class to implement
+   * @param invokerHandler the invocation handler creator, used to create concrete implementation
+   *        from a method.
+   * @return a dynamic proxy instance for the specified interface that dispatches method invocations
+   *         to the specified invocation handler.
+   *
+   * @see MethodInvoker
    */
   @SuppressWarnings("unchecked")
   public static <T> T build(final Class<?> interfaceType,
@@ -49,11 +52,15 @@ public class ProxyBuilder {
   /**
    * Build contextual Interface-based dynamic proxy instance.
    *
-   * @param <T>
-   * @param beanManager
-   * @param interfaceType
-   * @param invokerHandler
-   * @return buildContextual
+   * @param <T> interface type
+   * @param beanManager bean manager for contextual bean handling
+   * @param interfaceType interface for the proxy class to implement
+   * @param invokerHandler the invocation handler creator, used to create concrete implementation
+   *        from a method.
+   * @return a dynamic proxy contextual instance for the specified interface that dispatches method
+   *         invocations to the specified invocation handler.
+   *
+   * @see MethodInvoker
    */
   @SuppressWarnings("unchecked")
   public static <T> T buildContextual(final BeanManager beanManager, final Class<?> interfaceType,
@@ -63,12 +70,15 @@ public class ProxyBuilder {
   }
 
   /**
-   * Build contextual bean method handler instance.
+   * Build contextual bean method handler instance from the declared methods of the given bean
+   * class.
    *
-   * @param clazz
-   * @param methodPredicate
-   * @param appendQualifiers
-   * @return buildDeclaredMethods
+   * @param clazz bean class
+   * @param methodPredicate the method predicate use for method selecting
+   * @param appendQualifiers the append qualifiers for bean instance selecting
+   * @return a contextual method handlers
+   *
+   * @see Class#getDeclaredMethods()
    */
   public static Set<ContextualMethodHandler> buildDeclaredMethods(final Class<?> clazz,
       Predicate<Method> methodPredicate, Annotation... appendQualifiers) {
@@ -76,12 +86,14 @@ public class ProxyBuilder {
   }
 
   /**
-   * Build contextual bean method handler instance.
+   * Build contextual bean method handler instance from the methods of the given bean class.
    *
-   * @param clazz
-   * @param methodPredicate
-   * @param appendQualifiers
-   * @return buildMethods
+   * @param clazz bean class
+   * @param methodPredicate the method predicate use for method selecting
+   * @param appendQualifiers the append qualifiers for bean instance selecting
+   * @return a contextual method handlers
+   *
+   * @see Class#getMethods()
    */
   public static Set<ContextualMethodHandler> buildMethods(final Class<?> clazz,
       Predicate<Method> methodPredicate, Annotation... appendQualifiers) {

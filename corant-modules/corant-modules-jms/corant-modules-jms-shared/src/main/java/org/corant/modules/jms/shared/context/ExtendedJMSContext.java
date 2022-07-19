@@ -188,8 +188,10 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   @Override
   public JMSProducer createProducer() {
     JMSProducer producer = context().createProducer();
-    find(SecurityContextPropagator.class).orElse(SimpleSecurityContextPropagator.INSTANCE)
-        .propagate(producer);
+    if (key.getConfig().isPropagateSecurityContext()) {
+      find(SecurityContextPropagator.class).orElse(SimpleSecurityContextPropagator.INSTANCE)
+          .propagate(producer);
+    }
     return producer;
   }
 

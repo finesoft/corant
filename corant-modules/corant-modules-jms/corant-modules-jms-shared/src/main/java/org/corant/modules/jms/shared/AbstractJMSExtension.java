@@ -38,6 +38,7 @@ import javax.enterprise.inject.spi.WithAnnotations;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.Session;
 import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.context.proxy.ProxyBuilder;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.modules.jms.annotation.MessageContext;
 import org.corant.modules.jms.annotation.MessageDestination;
@@ -109,7 +110,7 @@ public abstract class AbstractJMSExtension implements Extension {
       }
     }
     logger.fine(() -> String.format("Scanning message driven on bean: %s.", beanClass.getName()));
-    ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(MessageDriven.class))
+    ProxyBuilder.buildDeclaredMethods(beanClass, m -> m.isAnnotationPresent(MessageDriven.class))
         .forEach(cm -> {
           Method method = cm.getMethod();
           logger.fine(() -> String.format("Found message driven method %s.", method.getName()));

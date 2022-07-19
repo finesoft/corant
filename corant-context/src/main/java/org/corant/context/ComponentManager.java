@@ -29,6 +29,11 @@ import org.jboss.weld.environment.se.contexts.ThreadScoped;
 
 /**
  * corant-context
+ * <p>
+ * A CDI component management class for hosting the creation and destruction of various bean
+ * instances using CDI-related scopes. These instances can be obtained by specifying a unique name
+ * key. These instances are also destroyed through the scope of CDI, and manual destruction is also
+ * supported.
  *
  * @author bingo 下午5:29:56
  *
@@ -86,21 +91,53 @@ public interface ComponentManager<N, C> extends Serializable {
     }
   }
 
+  /**
+   * corant-context
+   * <p>
+   * Request scoped component manager
+   *
+   * @author bingo 上午10:50:08
+   *
+   */
   @RequestScoped
   abstract class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2588026760995417834L;
   }
 
+  /**
+   * corant-context
+   * <p>
+   * Session scoped component manager
+   *
+   * @author bingo 上午10:50:29
+   *
+   */
   @SessionScoped
   abstract class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = 7462742316873226368L;
   }
 
+  /**
+   * corant-context
+   * <p>
+   * Thread scoped component manager
+   *
+   * @author bingo 上午10:50:50
+   *
+   */
   @ThreadScoped
-  abstract class thComponentManager<N, C> extends AbstractComponentManager<N, C> {
+  abstract class ThComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -5758319290954516372L;
   }
 
+  /**
+   * corant-context
+   * <p>
+   * Transaction scoped component manager
+   *
+   * @author bingo 上午10:51:21
+   *
+   */
   @TransactionScoped
   abstract class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {
     private static final long serialVersionUID = -2804585149568989342L;

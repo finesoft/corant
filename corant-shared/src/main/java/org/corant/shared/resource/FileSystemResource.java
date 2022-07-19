@@ -22,8 +22,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -131,12 +129,12 @@ public class FileSystemResource extends URLResource implements WritableResource 
   }
 
   @Override
-  public ReadableByteChannel openReadableChannel() throws IOException {
+  public FileChannel openReadableChannel() throws IOException {
     return FileChannel.open(file.toPath(), StandardOpenOption.READ);
   }
 
   @Override
-  public WritableByteChannel openWritableChannel() throws IOException {
+  public FileChannel openWritableChannel() throws IOException {
     return FileChannel.open(file.toPath(), StandardOpenOption.WRITE);
   }
 

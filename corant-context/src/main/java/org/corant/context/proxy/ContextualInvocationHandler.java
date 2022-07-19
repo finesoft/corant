@@ -24,6 +24,8 @@ import javax.enterprise.inject.spi.BeanManager;
 /**
  * corant-context
  *
+ * <p>
+ * A simple CDI base invocation handler implementation, supports method interceptor.
  *
  * @author bingo 下午2:12:51
  *
@@ -54,13 +56,13 @@ public class ContextualInvocationHandler extends ProxyInvocationHandler {
   }
 
   @Override
-  public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+  public Object invoke(Object target, Method method, Object[] args) throws Throwable {
     List<InterceptorInvocation> interceptorInvocations = interceptorChains.get(method);
     if (isNotEmpty(interceptorInvocations)) {
-      return new InvocationContextImpl(clazz, o, method, invokers.get(method), args,
+      return new InvocationContextImpl(clazz, target, method, invokers.get(method), args,
           interceptorInvocations).proceed();
     } else {
-      return new InvocationContextImpl(clazz, o, method, invokers.get(method), args,
+      return new InvocationContextImpl(clazz, target, method, invokers.get(method), args,
           Collections.emptyList()).proceed();
     }
   }

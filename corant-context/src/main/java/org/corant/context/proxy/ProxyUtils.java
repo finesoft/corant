@@ -47,6 +47,13 @@ public class ProxyUtils {
 
   static final Map<Method, MethodHandle> defaultMethodHandleCache = new ConcurrentHashMap<>();
 
+  /**
+   * Returns interceptor bindings from the given annotations and the given bean manager.
+   *
+   * @param annotations the annotations to find out interceptor bindings
+   * @param beanManager the bean manager use to filter
+   * @return a annotations list in the given annotation that match the interceptor binding
+   */
   public static List<Annotation> getInterceptorBindings(Annotation[] annotations,
       BeanManager beanManager) {
     if (annotations.length == 0) {
@@ -61,16 +68,34 @@ public class ProxyUtils {
     return bindings;
   }
 
+  /**
+   * Resolve bean methods and their interceptor invocations from the given bean type with the given
+   * bean manager and the given creational context.
+   * <p>
+   * Note: Currently we do not support resolving static methods.
+   * <p>
+   * FIXME for now I am not sure yet, the default method interceptor?
+   *
+   * @param beanManager bean manager to handle interceptors
+   * @param creationalContext the creational context use for interceptor instantiation
+   * @param beanType the target bean interface type with some interceptors
+   * @return a maps that key is the method of target bean interface and value is the interceptor
+   *         invocations of the method， the interceptor invocation contains interceptor instance and
+   *         the meta object of the interceptor.
+   *
+   * @see BeanManager#resolveInterceptors(InterceptionType, Annotation...)
+   * @see InterceptorInvocation
+   */
   public static Map<Method, List<InterceptorInvocation>> getInterceptorChains(
-      BeanManager beanManager, CreationalContext<?> creationalContext, Class<?> interfaceType) {
+      BeanManager beanManager, CreationalContext<?> creationalContext, Class<?> beanType) {
     Map<Method, List<InterceptorInvocation>> chains = new HashMap<>();
     Map<Interceptor<?>, Object> interceptorInstances = new HashMap<>();
     List<Annotation> classLevelBindings =
-        getInterceptorBindings(interfaceType.getAnnotations(), beanManager);
+        getInterceptorBindings(beanType.getAnnotations(), beanManager);
 
-    for (Method method : interfaceType.getMethods()) {
+    for (Method method : beanType.getMethods()) {
       if ( /* method.isDefault() || */ Modifier.isStatic(method.getModifiers())) {
-        continue; // FIXME for now I am not sure yet, the default method interceptor?
+        continue;
       }
       List<Annotation> methodLevelBindings =
           getInterceptorBindings(method.getAnnotations(), beanManager);
@@ -94,14 +119,18 @@ public class ProxyUtils {
   }
 
   /**
-   * FIXME UNFINISH YET! NOTE: FOR JAVA 8 ONLY!
+   * Returns the result of calling the given default method on the given target object with the
+   * given method arguments.
    *
-   * @param o
-   * @param method
-   * @param args
-   * @return invokeDefaultMethod
+   * <p>
+   * FIXME UNFINISHED YET!
+   *
+   * @param target target object
+   * @param method target object default method
+   * @param args target object default method parameters
+   * @return invoke default method result
    */
-  public static Object invokeDefaultMethod(Object o, Method method, Object[] args) {
+  public static Object invokeDefaultMethod(Object target, Method method, Object[] args) {
     try {
       return defaultMethodHandleCache.computeIfAbsent(method, m -> {
         try {
@@ -121,7 +150,7 @@ public class ProxyUtils {
         } catch (Throwable e) {
           throw new CorantRuntimeException(e);
         }
-      }).bindTo(o).invokeWithArguments(args);
+      }).bindTo(target).invokeWithArguments(args);
     } catch (Throwable e) {
       throw new CorantRuntimeException(e);
     }

@@ -35,6 +35,10 @@ import org.corant.shared.util.Methods.MethodSignature;
 /**
  * corant-context
  *
+ * <p>
+ * A simple contextual method handler, use for constructs a contextual CDI invocation from a method
+ * object.
+ *
  * @author bingo 下午2:26:15
  *
  */
@@ -47,34 +51,34 @@ public class ContextualMethodHandler implements Serializable {
   protected transient Method method; // ?? use java.lang.invoke.MethodHandle
   protected MethodSignature methodSignature;
 
-  public ContextualMethodHandler(Class<?> beanClass, Method beanMethod, Annotation... qualifiers) {
+  public ContextualMethodHandler(Method method, Annotation... qualifiers) {
+    this(method.getDeclaringClass(), method, qualifiers);
+  }
+
+  protected ContextualMethodHandler(Class<?> beanClass, Method beanMethod,
+      Annotation... qualifiers) {
     method = shouldNotNull(beanMethod);
     methodSignature = MethodSignature.of(method);
     clazz = defaultObject(beanClass, beanMethod::getDeclaringClass);
     this.qualifiers = qualifiers;
   }
 
-  public ContextualMethodHandler(Method method) {
-    this(null, method);
-  }
-
   public static Set<ContextualMethodHandler> from(Class<?> clazz, Predicate<Method> methodPredicate,
       Annotation... qualifiers) {
-    Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
+    Set<ContextualMethodHandler> handlers = new LinkedHashSet<>();
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getMethods()) {
         if (methodPredicate.test(m)) {
-          annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
+          handlers.add(new ContextualMethodHandler(clazz, m, qualifiers));
         }
       }
     }
-    return annotatedMethods;
+    return handlers;
   }
 
   public static Set<ContextualMethodHandler> fromDeclared(Class<?> clazz,
       Predicate<Method> methodPredicate, Annotation... qualifiers) {
-    Set<ContextualMethodHandler> annotatedMethods = new LinkedHashSet<>();
-    // FIXME the class qualifiers
+    Set<ContextualMethodHandler> handlers = new LinkedHashSet<>();
     if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
       for (Method m : clazz.getDeclaredMethods()) {
         if (methodPredicate.test(m)) {
@@ -85,11 +89,11 @@ public class ContextualMethodHandler implements Serializable {
               return null;
             });
           }
-          annotatedMethods.add(new ContextualMethodHandler(clazz, m, qualifiers));
+          handlers.add(new ContextualMethodHandler(clazz, m, qualifiers));
         }
       }
     }
-    return annotatedMethods;
+    return handlers;
   }
 
   @Override
@@ -119,7 +123,6 @@ public class ContextualMethodHandler implements Serializable {
   }
 
   /**
-   *
    * @return the clazz
    */
   public Class<?> getClazz() {
@@ -127,7 +130,6 @@ public class ContextualMethodHandler implements Serializable {
   }
 
   /**
-   *
    * @return the method
    */
   public Method getMethod() {

@@ -16,6 +16,9 @@ package org.corant.context.proxy;
 /**
  * corant-context
  *
+ * <p>
+ * A simple implementation interface, use for proxy invoking.
+ *
  * @author bingo 上午10:38:27
  *
  */

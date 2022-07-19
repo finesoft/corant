@@ -47,19 +47,20 @@ public interface QueryParameter extends Serializable {
   String CTX_QHH_DONT_CONVERT_RESULT = "__QHH_DONT_CONVERT_RESULT";
 
   /**
-   * Return the query context that may be contain current user context or security context.
+   * Returns the query context that may be contain current caller context, the context information
+   * may include the security context information of the caller, etc.
    *
-   * @return getContext
+   * @return the context maps
    */
   default Map<String, Object> getContext() {
     return Collections.emptyMap();
   }
 
   /**
-   * Return query criteria. The criteria can be Map or POJO that are used to construct query
-   * conditions or specifications for construct query conditions or specifications.
+   * Returns the query criteria, the criteria can be a Map or a POJO that are used to construct
+   * query conditions or specifications.
    *
-   * @return getCriteria
+   * @return the criteria object or null
    */
   Object getCriteria();
 
@@ -69,8 +70,7 @@ public interface QueryParameter extends Serializable {
    * specified forwarding range queries({@link QueryService#forward(Object, Object)}) or select
    * queries({@link QueryService#select(Object, Object)}) , but in streaming
    * queries({@link QueryService#stream(Object, Object)}), this value represents the size of the
-   * result set fetched from the underlying database in each iteration. Default is null, means that
-   * if it is used in paging/forwarding/streaming query value is 16.
+   * result set fetched from the underlying database in each iteration.
    *
    *
    * @return The expected number of query result set or the expected size of the result set of each

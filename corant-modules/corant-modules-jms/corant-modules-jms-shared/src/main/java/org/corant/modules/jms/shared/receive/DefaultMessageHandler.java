@@ -26,6 +26,7 @@ import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.jms.JMSNames;
 import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
+import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -43,12 +44,15 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
   final MessageReceivingMediator mediator;
   final Class<?> messageClass;
   final MessageReceivingExecutorConfig config;
+  final boolean propagateSecurityContext;
 
   protected DefaultMessageHandler(MessageReceivingMetaData meta,
       MessageReceivingMediator mediator) {
     method = meta.getMethod();
     config = MessageReceivingExecutorConfig.getExecutorConfig(meta.getConnectionFactoryId());
     messageClass = method.getMethod().getParameterTypes()[0];
+    propagateSecurityContext = AbstractJMSExtension.getConfig(config.getConnectionFactoryId())
+        .isPropagateSecurityContext();
     this.mediator = mediator;
   }
 
@@ -81,6 +85,9 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
   }
 
   protected void resolveSecurityContext(Message message) {
+    if (!propagateSecurityContext) {
+      return;
+    }
     try {
       SecurityContext ctx = find(SecurityContextPropagator.class)
           .orElse(SimpleSecurityContextPropagator.INSTANCE).extract(message);

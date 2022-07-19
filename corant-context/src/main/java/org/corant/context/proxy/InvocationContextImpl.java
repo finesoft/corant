@@ -25,6 +25,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 /**
  * corant-context
  *
+ * <p>
+ * A simple interceptor call context implementation that works with {@link InterceptorInvocation}.
+ *
  * @author bingo 上午11:10:02
  *
  */
@@ -47,12 +50,14 @@ public class InvocationContextImpl implements InvocationContext {
   private final MethodInvoker methodInvoker;
 
   /**
-   * @param targetClass
-   * @param target
-   * @param method
-   * @param methodInvoker
-   * @param args
-   * @param chain
+   * Build a simple invocation context
+   *
+   * @param targetClass the invocation target class
+   * @param target the invocation target object
+   * @param method the invocation method
+   * @param methodInvoker the method implementation
+   * @param args the method parameters
+   * @param chain the interceptor chain
    */
   public InvocationContextImpl(final Class<?> targetClass, final Object target, final Method method,
       final MethodInvoker methodInvoker, final Object[] args,
@@ -61,18 +66,17 @@ public class InvocationContextImpl implements InvocationContext {
   }
 
   /**
-   * @param targetClass
-   * @param target
-   * @param method
-   * @param args
-   * @param chain
+   * Build a simple invocation context with interceptor chain position
+   *
+   * @param targetClass the invocation target class
+   * @param target the invocation target object
+   * @param method the invocation method
+   * @param methodInvoker the method implementation
+   * @param args the method parameters
+   * @param chain the interceptor chain
+   * @param position the current interceptor chain position
    */
-  public InvocationContextImpl(final Class<?> targetClass, final Object target, final Method method,
-      final Object[] args, final List<InterceptorInvocation> chain) {
-    this(targetClass, target, method, null, args, chain, 0);
-  }
-
-  private InvocationContextImpl(final Class<?> targetClass, final Object target,
+  protected InvocationContextImpl(final Class<?> targetClass, final Object target,
       final Method method, final MethodInvoker methodInvoker, final Object[] args,
       final List<InterceptorInvocation> chain, final int position) {
     this.targetClass = targetClass;

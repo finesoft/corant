@@ -20,8 +20,8 @@ import org.corant.modules.query.mapping.FetchQuery;
  * corant-modules-query-api
  *
  * <p>
- * This interface is used to process fetch queries, provide the query parameters of the fetch query,
- * and provide processing of the fetch query result set.
+ * This interface is used to process fetch queries, provide query parameters and query result
+ * handling for fetch query.
  *
  * @author bingo 上午10:03:39
  *

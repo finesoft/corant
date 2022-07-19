@@ -10,7 +10,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.context.proxy.ContextualMethodHandler;
+import org.corant.context.proxy.ProxyBuilder;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.util.Services;
 
@@ -40,7 +40,7 @@ public class CorantSchedulerExtension implements Extension {
       return;
     }
     final Class<?> beanClass = pat.getAnnotatedType().getJavaClass();
-    ContextualMethodHandler.fromDeclared(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
+    ProxyBuilder.buildDeclaredMethods(beanClass, m -> m.isAnnotationPresent(CorantTrigger.class))
         .stream().map(CorantDeclarativeJobMetaData::of).forEach(declarativeJobMetaDatas::add);
   }
 }

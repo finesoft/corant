@@ -20,6 +20,13 @@ import javax.interceptor.InvocationContext;
 /**
  * corant-context
  *
+ * <p>
+ * An object representing an interceptor meta object and an interceptor instance, while providing an
+ * interceptor to call the entry method.
+ *
+ * <p>
+ * Note: Only supports {@code InterceptionType.AROUND_INVOKE}
+ *
  * @author bingo 上午10:41:54
  *
  */

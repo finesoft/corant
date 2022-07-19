@@ -26,6 +26,8 @@ import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-context
+ * <p>
+ * A simple invocation handler implementation.
  *
  * @author bingo 下午3:20:16
  *
@@ -79,18 +81,18 @@ public class ProxyInvocationHandler implements InvocationHandler {
   }
 
   @Override
-  public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+  public Object invoke(Object target, Method method, Object[] args) throws Throwable {
     MethodInvoker methodInvoker = invokers.get(method);
     if (methodInvoker == null) {
       // The default method and java.lang.Object methods use for hq in Collection
       if (method.isDefault()) {
-        return ProxyUtils.invokeDefaultMethod(o, method, args);
+        return ProxyUtils.invokeDefaultMethod(target, method, args);
       } else if ("equals".equals(method.getName()) && method.getParameterTypes()[0] == Object.class
           && args != null && args.length == 1) {
         if (args[0] == null) {
           return false;
         }
-        if (o == args[0]) {
+        if (target == args[0]) {
           return true;
         }
         return ProxyUtils.isProxyOfSameInterfaces(args[0], clazz)
@@ -103,7 +105,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
         throw new CorantRuntimeException("Can not find method %s.", method);
       }
     }
-    return methodInvoker.invoke(o, args);
+    return methodInvoker.invoke(target, args);
 
   }
 

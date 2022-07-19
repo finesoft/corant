@@ -22,7 +22,7 @@ import org.corant.modules.ddd.annotation.Events;
  * @author bingo 下午5:57:36
  */
 @Events
-public abstract class AbstractPropertyChangedEvent<T extends Aggregate, P> extends AbstractEvent {
+public abstract class AbstractPropertyChangedEvent<T, P> extends AbstractEvent {
 
   private static final long serialVersionUID = 6311499831097921960L;
 

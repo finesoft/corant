@@ -13,41 +13,43 @@
  */
 package org.corant.shared.conversion.converter;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
 /**
  * corant-shared
  *
+ * <p>
+ * FIXME to be removed, since we have date temporal converter factory
+ *
  * @author bingo 上午10:49:23
  *
  */
-public class DateInstantConverter extends AbstractConverter<Date, Instant> {
+public class DateSqlDateConverter extends AbstractConverter<Date, java.sql.Date> {
 
   /**
    * @see AbstractConverter#AbstractConverter()
    */
-  public DateInstantConverter() {}
+  public DateSqlDateConverter() {}
 
   /**
    * @see AbstractConverter#AbstractConverter(boolean)
    */
-  public DateInstantConverter(boolean throwException) {
+  public DateSqlDateConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
    * @see AbstractConverter#AbstractConverter(Object)
    */
-  public DateInstantConverter(Instant defaultValue) {
+  public DateSqlDateConverter(java.sql.Date defaultValue) {
     super(defaultValue);
   }
 
   /**
    * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
-  public DateInstantConverter(Instant defaultValue, boolean throwException) {
+  public DateSqlDateConverter(java.sql.Date defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }
 
@@ -57,8 +59,8 @@ public class DateInstantConverter extends AbstractConverter<Date, Instant> {
   }
 
   @Override
-  protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
-    return value.toInstant();
+  protected java.sql.Date convert(Date value, Map<String, ?> hints) throws Exception {
+    return value == null ? null : new java.sql.Date(value.getTime());
   }
 
 }

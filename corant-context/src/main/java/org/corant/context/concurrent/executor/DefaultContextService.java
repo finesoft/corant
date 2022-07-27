@@ -13,7 +13,10 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
 import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
@@ -28,14 +31,31 @@ public class DefaultContextService extends ContextServiceImpl {
 
   private static final long serialVersionUID = -2380561596716132958L;
 
+  /**
+   * Create a context service with given context setup provider
+   *
+   * @param name use for CDI Named qualifier or JNDI lookup
+   * @param contextSetupProvider a provider for setting up proper executioncontext before running a
+   *        task, and also for resetting the execution contextafter running a task.
+   *
+   * @see DefaultContextService#DefaultContextService(String, ContextSetupProvider,
+   *      TransactionSetupProvider)
+   */
   public DefaultContextService(String name, ContextSetupProvider contextSetupProvider) {
     super(name, contextSetupProvider);
   }
 
   /**
-   * @param name
-   * @param contextSetupProvider
-   * @param transactionSetupProvider
+   * Create a context service with given context setup provider and transaction setup provider
+   *
+   * @param name use for CDI Named qualifier or JNDI lookup
+   * @param contextSetupProvider a provider for setting up proper executioncontext before running a
+   *        task, and also for resetting the execution contextafter running a task.
+   * @param transactionSetupProvider a provider for performing proper transactionsetup before
+   *        invoking a proxy method of a contextual proxy object
+   * 
+   * @see ContextSetupProvider
+   * @see TransactionSetupProvider
    */
   public DefaultContextService(String name, ContextSetupProvider contextSetupProvider,
       TransactionSetupProvider transactionSetupProvider) {
@@ -52,6 +72,26 @@ public class DefaultContextService extends ContextServiceImpl {
   public <T> T createContextualProxy(T instance, Map<String, String> executionProperties,
       Class<T> intf) {
     return super.createContextualProxy(instance, executionProperties, intf);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> Callable<T> wrapContextualCallable(Callable<T> original,
+      Map<String, String> executionProperties) {
+    shouldNotNull(original, "The original callable can't null!");
+    return createContextualProxy(original::call, executionProperties, Callable.class);
+  }
+
+  public Runnable wrapContextualRunnable(Runnable original,
+      Map<String, String> executionProperties) {
+    shouldNotNull(original, "The original runnable can't null!");
+    return createContextualProxy(original::run, executionProperties, Runnable.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> Supplier<T> wrapContextualSupplier(Supplier<T> original,
+      Map<String, String> executionProperties) {
+    shouldNotNull(original, "The original supplier can't null!");
+    return createContextualProxy(original::get, executionProperties, Supplier.class);
   }
 
 }

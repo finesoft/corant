@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,23 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.context.concurrent.executor;
-
-import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
-
 /**
- * corant-context
- *
- * @author bingo 上午10:24:41
+ * corant-modules-json
+ * 
+ * @author bingo 上午10:47:09
  *
  */
-public class DefaultManagedThreadFactory extends ManagedThreadFactoryImpl {
-
-  /**
-   * @param name thread factory name
-   */
-  public DefaultManagedThreadFactory(String name) {
-    super(name);
-  }
-
-}
+package org.corant.modules.bson;

@@ -14,8 +14,6 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Empties.sizeOf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +25,6 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 
 /**
  * corant-shared
@@ -37,23 +34,21 @@ import java.util.Arrays;
  */
 public class PathResource implements WritableResource {
 
-  public static final OpenOption[] EMPTY_ARRAY = {};
-
-  protected final OpenOption[] openOptions;
-
   protected final Path path;
 
-  public PathResource(Path path, OpenOption... ops) {
+  protected final boolean readOnly;
+
+  public PathResource(Path path, boolean readOnly) {
     this.path = shouldNotNull(path).normalize();
-    openOptions = isEmpty(ops) ? EMPTY_ARRAY : Arrays.copyOf(ops, ops.length);
+    this.readOnly = readOnly;
   }
 
-  public PathResource(String path, OpenOption... ops) {
-    this(Paths.get(path).normalize(), ops);
+  public PathResource(String path, boolean readOnly) {
+    this(Paths.get(path).normalize(), readOnly);
   }
 
-  public PathResource(URI path, OpenOption... ops) {
-    this(Paths.get(path).normalize(), ops);
+  public PathResource(URI path, boolean readOnly) {
+    this(Paths.get(path).normalize(), readOnly);
   }
 
   @Override
@@ -80,12 +75,16 @@ public class PathResource implements WritableResource {
     return SourceType.UNKNOWN;
   }
 
+  public boolean isReadOnly() {
+    return readOnly;
+  }
+
   @Override
   public InputStream openInputStream() throws IOException {
     if (!Files.exists(path) || Files.isDirectory(path)) {
       throw new IOException(path + " doesn't exist or is a directory.");
     }
-    return Files.newInputStream(path, openOptions);
+    return Files.newInputStream(path, StandardOpenOption.READ);
   }
 
   @Override
@@ -105,11 +104,11 @@ public class PathResource implements WritableResource {
   }
 
   @Override
-  public WritableByteChannel openWritableChannel() throws IOException {
+  public WritableByteChannel openWritableChannel(OpenOption... openOptions) throws IOException {
     if (isReadOnly()) {
       throw new IOException(path + " is read only.");
     }
-    return Files.newByteChannel(path, StandardOpenOption.WRITE);
+    return Files.newByteChannel(path, openOptions);
   }
 
   @Override
@@ -120,7 +119,4 @@ public class PathResource implements WritableResource {
     return WritableResource.super.unwrap(cls);
   }
 
-  protected boolean isReadOnly() {
-    return sizeOf(openOptions) == 1 && openOptions[0] == StandardOpenOption.READ;
-  }
 }

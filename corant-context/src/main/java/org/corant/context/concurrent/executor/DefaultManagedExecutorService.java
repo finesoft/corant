@@ -34,22 +34,6 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
 
   final Duration awaitTermination;
 
-  /**
-   * @param name
-   * @param managedThreadFactory
-   * @param hungTaskThreshold
-   * @param longRunningTasks
-   * @param corePoolSize
-   * @param maxPoolSize
-   * @param keepAliveTime
-   * @param keepAliveTimeUnit
-   * @param threadLifeTime
-   * @param awaitTermination
-   * @param contextService
-   * @param rejectPolicy
-   * @param retryDelay
-   * @param queue
-   */
   public DefaultManagedExecutorService(String name, ManagedThreadFactoryImpl managedThreadFactory,
       long hungTaskThreshold, boolean longRunningTasks, int corePoolSize, int maxPoolSize,
       long keepAliveTime, TimeUnit keepAliveTimeUnit, long threadLifeTime,
@@ -67,22 +51,6 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
     // TODO Auto-generated constructor stub
   }
 
-  /**
-   * @param name
-   * @param managedThreadFactory
-   * @param hungTaskThreshold
-   * @param longRunningTasks
-   * @param corePoolSize
-   * @param maxPoolSize
-   * @param keepAliveTime
-   * @param keepAliveTimeUnit
-   * @param threadLifeTime
-   * @param awaitTermination
-   * @param queueCapacity
-   * @param contextService
-   * @param rejectPolicy
-   * @param retryDelay
-   */
   public DefaultManagedExecutorService(String name, ManagedThreadFactoryImpl managedThreadFactory,
       long hungTaskThreshold, boolean longRunningTasks, int corePoolSize, int maxPoolSize,
       long keepAliveTime, TimeUnit keepAliveTimeUnit, long threadLifeTime,

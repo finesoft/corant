@@ -34,19 +34,6 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
 
   final Duration awaitTermination;
 
-  /**
-   * @param name
-   * @param managedThreadFactory
-   * @param hungTaskThreshold
-   * @param longRunningTasks
-   * @param corePoolSize
-   * @param keepAliveTime
-   * @param keepAliveTimeUnit
-   * @param threadLifeTime
-   * @param contextService
-   * @param rejectPolicy
-   * @param retryDelay
-   */
   public DefaultManagedScheduledExecutorService(String name,
       ManagedThreadFactoryImpl managedThreadFactory, long hungTaskThreshold,
       boolean longRunningTasks, int corePoolSize, long keepAliveTime, TimeUnit keepAliveTimeUnit,

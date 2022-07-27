@@ -11,25 +11,27 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.mongodb.converter;
+package org.corant.modules.bson.converter;
 
+import static org.corant.shared.util.Strings.isBlank;
 import java.util.Map;
-import org.bson.BsonTimestamp;
+import org.bson.BsonSymbol;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
- * corant-modules-query-mongodb
+ * corant-modules-json
  *
- * @author bingo 上午10:43:57
+ * @author bingo 下午4:02:44
  *
  */
-public class LongBsonTimeStampConverter extends AbstractConverter<Long, BsonTimestamp> {
+public class StringBsonSymbolConverter extends AbstractConverter<String, BsonSymbol> {
 
   @Override
-  protected BsonTimestamp convert(Long value, Map<String, ?> hints) throws Exception {
-    if (value == null) {
-      return getDefaultValue();
+  protected BsonSymbol convert(String value, Map<String, ?> hints) throws Exception {
+    if (isBlank(value)) {
+      return null;
     }
-    return new BsonTimestamp(value);
+    return new BsonSymbol(value);
   }
+
 }

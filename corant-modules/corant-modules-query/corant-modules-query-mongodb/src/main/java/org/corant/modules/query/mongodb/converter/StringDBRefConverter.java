@@ -17,6 +17,7 @@ import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
 import java.util.Map;
 import org.bson.types.ObjectId;
+import org.corant.modules.bson.converter.StringBsonDbPointerConverter;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;

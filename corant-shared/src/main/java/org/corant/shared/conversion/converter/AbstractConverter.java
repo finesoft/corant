@@ -72,7 +72,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
     this.throwException = throwException;
   }
 
-  protected static boolean isStrict(Map<String, ?> hints) {
+  public static boolean isStrict(Map<String, ?> hints) {
     if (ConverterHints.containsKey(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY)) {
       return ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_STRICTLY_KEY);
     }

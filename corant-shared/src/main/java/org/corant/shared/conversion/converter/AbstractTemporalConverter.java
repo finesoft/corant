@@ -271,7 +271,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     return DEFAULT_FORMATTERS.stream().filter(tm -> tm.match(value));
   }
 
-  protected static Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
+  public static Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
     DateTimeFormatter dtf = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_KEY);
     if (dtf == null) {
       String dtfPtn = ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_FMT_PTN_KEY);
@@ -287,7 +287,7 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     return Optional.ofNullable(dtf);
   }
 
-  protected static Optional<ZoneId> resolveHintZoneId(Map<String, ?> hints) {
+  public static Optional<ZoneId> resolveHintZoneId(Map<String, ?> hints) {
     ZoneId zoneId = null;
     Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
     if (hintZoneId instanceof ZoneId) {

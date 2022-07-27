@@ -1,9 +1,1 @@
-org.corant.modules.query.mongodb.converter.LongBsonDateTimeConverter
-org.corant.modules.query.mongodb.converter.LongBsonTimeStampConverter
-org.corant.modules.query.mongodb.converter.MapBsonRegexConverter
-org.corant.modules.query.mongodb.converter.StringBsonObjectIdConverter
-org.corant.modules.query.mongodb.converter.StringBsonRegexConverter
-org.corant.modules.query.mongodb.converter.TemporalBsonDateTimeConverter
-org.corant.modules.query.mongodb.converter.StringBsonDbPointerConverter
 org.corant.modules.query.mongodb.converter.StringDBRefConverter
-org.corant.modules.query.mongodb.converter.StringBsonSymbolConverter

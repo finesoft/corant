@@ -315,6 +315,7 @@ public class ConcurrentExtension implements Extension {
   DefaultContextService createContextService(String name, Instance<Object> instance,
       ContextInfo... infos) {
     if (tryAsClass("javax.transaction.TransactionManager") != null) {
+      // FIXME check transaction manager CDI scope, now we assume it's application scope
       return new DefaultContextService(name, new ContextSetupProviderImpl(infos),
           new TransactionSetupProviderImpl(instance));
     }

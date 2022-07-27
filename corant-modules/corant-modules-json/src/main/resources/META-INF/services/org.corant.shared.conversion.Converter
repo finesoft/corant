@@ -1,0 +1,11 @@
+org.corant.modules.bson.converter.LongBsonDateTimeConverter
+org.corant.modules.bson.converter.LongBsonTimeStampConverter
+org.corant.modules.bson.converter.MapBsonRegexConverter
+org.corant.modules.bson.converter.StringBsonObjectIdConverter
+org.corant.modules.bson.converter.StringBsonRegexConverter
+org.corant.modules.bson.converter.TemporalBsonDateTimeConverter
+org.corant.modules.bson.converter.StringBsonDbPointerConverter
+org.corant.modules.bson.converter.StringBsonSymbolConverter
+org.corant.modules.bson.converter.BsonDatetimeZonedDateTimeConverter
+org.corant.modules.bson.converter.BsonDatetimeSqlDateConverter
+org.corant.modules.bson.converter.BsonTimestampTimestampConverter

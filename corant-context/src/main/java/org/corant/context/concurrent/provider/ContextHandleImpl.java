@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.provider;
 
+import javax.transaction.Transaction;
 import org.corant.context.Contexts.ContextInstaller;
 import org.corant.context.Contexts.ContextRestorer;
 import org.corant.context.security.SecurityContext;
@@ -31,11 +32,11 @@ public class ContextHandleImpl implements ContextHandle {
   private transient ContextInstaller CDIContextInstaller;
   private transient ContextRestorer CDIContextRestorer;
   private transient ClassLoader contextClassLoader;
+  private transient Transaction transaction;
   private SecurityContext securityContext;
   private boolean useTransactionOfExecutionThread;
 
   /**
-   *
    * @return the cDIContextInstaller
    */
   public ContextInstaller getCDIContextInstaller() {
@@ -43,7 +44,6 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @return the cDIContextRestorer
    */
   public ContextRestorer getCDIContextRestorer() {
@@ -51,7 +51,6 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @return the contextClassLoader
    */
   public ClassLoader getContextClassLoader() {
@@ -59,15 +58,17 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @return the securityContext
    */
   public SecurityContext getSecurityContext() {
     return securityContext;
   }
 
+  public Transaction getTransaction() {
+    return transaction;
+  }
+
   /**
-   *
    * @return the useTransactionOfExecutionThread
    */
   public boolean isUseTransactionOfExecutionThread() {
@@ -75,7 +76,6 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @param cDIContextInstaller the cDIContextInstaller to set
    */
   protected void setCDIContextInstaller(ContextInstaller cDIContextInstaller) {
@@ -83,7 +83,6 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @param cDIContextRestorer the cDIContextRestorer to set
    */
   protected void setCDIContextRestorer(ContextRestorer cDIContextRestorer) {
@@ -99,15 +98,17 @@ public class ContextHandleImpl implements ContextHandle {
   }
 
   /**
-   *
    * @param securityContext the securityContext to set
    */
   protected void setSecurityContext(SecurityContext securityContext) {
     this.securityContext = securityContext;
   }
 
+  protected void setTransaction(Transaction transaction) {
+    this.transaction = transaction;
+  }
+
   /**
-   *
    * @param useTransactionOfExecutionThread the useTransactionOfExecutionThread to set
    */
   protected void setUseTransactionOfExecutionThread(boolean useTransactionOfExecutionThread) {

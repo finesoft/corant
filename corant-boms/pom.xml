@@ -29,6 +29,7 @@
     <version.assertj>3.10.0</version.assertj>
     <version.atomikos>5.0.8</version.atomikos>
     <version.bouncycastle>1.70</version.bouncycastle>
+    <version.bson.mongodb>3.12.0</version.bson.mongodb>
     <version.cache-annotations-ri-cdi>1.1.1</version.cache-annotations-ri-cdi>
     <version.caffeine>3.0.5</version.caffeine>
     <version.calcite>1.27.0</version.calcite>
@@ -131,7 +132,7 @@
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
-    <version.narayana>5.12.7.Final</version.narayana>
+    <version.narayana>5.13.0.Final</version.narayana>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
@@ -149,7 +150,7 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.13.4</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.7.6.Final</version.resteasy>
+    <version.resteasy>4.7.7.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.slf4j>1.7.32</version.slf4j>
@@ -822,6 +823,25 @@
         <scope>provided</scope>
       </dependency>
 
+      <!-- Json/bson -->
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>${version.bson.mongodb}</version>
+      </dependency>      
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${version.jackson}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>      
+      <dependency>
+        <groupId>org.eclipse</groupId>
+        <artifactId>yasson</artifactId>
+        <version>${version.eclipse.yasson}</version>
+      </dependency>
+
       <!-- Jaxrs -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -871,13 +891,6 @@
         <version>${version.netty}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>${version.jackson}</version>
-        <scope>import</scope>
-        <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
@@ -1242,13 +1255,6 @@
         <groupId>org.webjars</groupId>
         <artifactId>swagger-ui</artifactId>
         <version>${version.swagger-ui-webjars}</version>
-      </dependency>
-
-      <!-- Json -->
-      <dependency>
-        <groupId>org.eclipse</groupId>
-        <artifactId>yasson</artifactId>
-        <version>${version.eclipse.yasson}</version>
       </dependency>
 
       <!-- DataSource -->

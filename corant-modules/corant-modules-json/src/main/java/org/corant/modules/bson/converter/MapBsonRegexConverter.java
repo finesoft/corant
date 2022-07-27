@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.mongodb.converter;
+package org.corant.modules.bson.converter;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.asDefaultString;
@@ -22,7 +22,7 @@ import org.bson.BsonRegularExpression;
 import org.corant.shared.conversion.converter.AbstractConverter;
 
 /**
- * corant-modules-query-mongodb
+ * corant-modules-json
  *
  * @author bingo 上午10:04:31
  *
@@ -30,29 +30,16 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 @SuppressWarnings("rawtypes")
 public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExpression> {
 
-  /**
-   *
-   */
   public MapBsonRegexConverter() {}
 
-  /**
-   * @param throwException
-   */
   public MapBsonRegexConverter(boolean throwException) {
     super(throwException);
   }
 
-  /**
-   * @param defaultValue
-   */
   public MapBsonRegexConverter(BsonRegularExpression defaultValue) {
     super(defaultValue);
   }
 
-  /**
-   * @param defaultValue
-   * @param throwException
-   */
   public MapBsonRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
     super(defaultValue, throwException);
   }

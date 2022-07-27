@@ -23,9 +23,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.concurrent.ContextService;
+import javax.enterprise.concurrent.ManagedTask;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import org.corant.context.Contexts.ContextInstaller;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
 import org.corant.context.security.SecurityContexts;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.glassfish.enterprise.concurrent.spi.ContextHandle;
 import org.glassfish.enterprise.concurrent.spi.ContextSetupProvider;
 import org.jboss.weld.manager.api.WeldManager;
@@ -55,6 +60,8 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     resetCDIContext(resetContextHandle);
     resetSecurityContext(resetContextHandle);
     resetApplicationContext(resetContextHandle);
+    // FIXME the concurrency-ri doesn't handle additional information when executing task.
+    // resetTranction(resetContextHandle);
   }
 
   @Override
@@ -69,6 +76,8 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     saveApplicationContext(contextHandle, contextService, contextObjectProperties);
     saveSecurityContext(contextHandle, contextService, contextObjectProperties);
     saveCDIContext(contextHandle, contextService, contextObjectProperties);
+    contextHandle.setUseTransactionOfExecutionThread(
+        isUseTransactionOfExecutionThread(contextObjectProperties));
     return contextHandle;
   }
 
@@ -80,7 +89,21 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     setupApplication(preContextHandle, resetContextHandle);
     setupSecurityContext(preContextHandle, resetContextHandle);
     setupCDIContext(preContextHandle, resetContextHandle);
+    // FIXME the concurrency-ri doesn't handle additional information when executing task.
+    // setupTransaction(preContextHandle, resetContextHandle);
     return resetContextHandle;
+  }
+
+  protected String getTransactionExecutionProperty(Map<String, String> executionProperties) {
+    if (executionProperties != null && executionProperties.get(ManagedTask.TRANSACTION) != null) {
+      return executionProperties.get(ManagedTask.TRANSACTION);
+    }
+    return ManagedTask.SUSPEND;
+  }
+
+  protected boolean isUseTransactionOfExecutionThread(Map<String, String> executionProperties) {
+    return ManagedTask.USE_TRANSACTION_OF_EXECUTION_THREAD
+        .equals(getTransactionExecutionProperty(executionProperties));
   }
 
   protected void resetApplicationContext(ContextHandleImpl contextHandle) {
@@ -121,6 +144,21 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     logger.fine(() -> "Reset Security context if necessary.");
     if (contextInfos.contains(ContextInfo.SECURITY)) {
       SecurityContexts.setCurrent(contextHandle.getSecurityContext());
+    }
+  }
+
+  protected void resetTranction(ContextHandleImpl contextHandle) {
+    logger.fine(() -> "Reset transaction if necessary.");
+    if (!contextHandle.isUseTransactionOfExecutionThread()) {
+      TransactionManager tm = tryResolve(TransactionManager.class);
+      try {
+        if (tm != null) {
+          tm.resume(contextHandle.getTransaction());
+          logger.fine(() -> "Resume current transaction.");
+        }
+      } catch (SystemException | InvalidTransactionException | IllegalStateException e) {
+        throw new CorantRuntimeException(e);
+      }
     }
   }
 
@@ -194,6 +232,23 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     if (contextInfos.contains(ContextInfo.SECURITY)) {
       resetContextHandle.setSecurityContext(SecurityContexts.getCurrent());
       SecurityContexts.setCurrent(preContextHandle.getSecurityContext());
+    }
+  }
+
+  protected void setupTransaction(ContextHandleImpl preContextHandle,
+      ContextHandleImpl resetContextHandle) {
+    logger.fine(() -> "Setup transaction context if necessary.");
+    if (!preContextHandle.isUseTransactionOfExecutionThread()) {
+      TransactionManager tm = tryResolve(TransactionManager.class);
+      try {
+        if (tm != null) {
+          resetContextHandle.setUseTransactionOfExecutionThread(false);
+          resetContextHandle.setTransaction(tm.suspend());
+          logger.fine(() -> "Suspend current transaction.");
+        }
+      } catch (SystemException e) {
+        throw new CorantRuntimeException(e);
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 org.corant.shared.conversion.converter.BlobByteArrayConverter
 org.corant.shared.conversion.converter.ClobStringConverter
-org.corant.shared.conversion.converter.DateInstantConverter
+org.corant.shared.conversion.converter.DateSqlDateConverter
 org.corant.shared.conversion.converter.InstantTimestampConverter
 org.corant.shared.conversion.converter.LocalDateSqlDateConverter
 org.corant.shared.conversion.converter.LocalDateTimeTimestampConverter

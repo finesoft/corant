@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
@@ -134,8 +135,8 @@ public class FileSystemResource extends URLResource implements WritableResource 
   }
 
   @Override
-  public FileChannel openWritableChannel() throws IOException {
-    return FileChannel.open(file.toPath(), StandardOpenOption.WRITE);
+  public FileChannel openWritableChannel(OpenOption... openOptions) throws IOException {
+    return FileChannel.open(file.toPath(), openOptions);
   }
 
   @Override

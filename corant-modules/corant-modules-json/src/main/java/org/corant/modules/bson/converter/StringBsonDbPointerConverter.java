@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.mongodb.converter;
+package org.corant.modules.bson.converter;
 
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
@@ -24,7 +24,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 import org.corant.shared.normal.Names;
 
 /**
- * corant-modules-query-mongodb
+ * corant-modules-json
  *
  * @author bingo 下午3:47:12
  *

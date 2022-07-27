@@ -845,11 +845,11 @@ public interface Mutable<T> extends Supplier<T> {
    */
   class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
+    public MutableString() {}
+
     public MutableString(final String value) {
       super(value);
     }
-
-    protected MutableString() {}
 
     public static MutableString of(final String value) {
       return new MutableString(value);

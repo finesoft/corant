@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.OpenOption;
 import java.util.logging.Level;
 import org.corant.shared.util.Resources;
 
@@ -30,7 +31,7 @@ public interface WritableResource extends Resource {
 
   OutputStream openOutputStream() throws IOException;
 
-  default WritableByteChannel openWritableChannel() throws IOException {
+  default WritableByteChannel openWritableChannel(OpenOption... openOptions) throws IOException {
     return Channels.newChannel(openOutputStream());
   }
 

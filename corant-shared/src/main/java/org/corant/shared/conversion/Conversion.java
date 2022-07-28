@@ -13,7 +13,6 @@
  */
 package org.corant.shared.conversion;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.forceCast;
@@ -95,6 +94,7 @@ public class Conversion {
       Class<T> targetClass, Map<String, ?> hints) {
     Converter converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
+      LOGGER.finer(() -> String.format("Resolve converter %", converter));
       return converter.iterable(value, hints);
     } else {
       Converter stringConverter = resolveConverter(String.class, targetClass);
@@ -141,18 +141,24 @@ public class Conversion {
           return null;
         }
         final Class<?> nextClass = next.getClass();
-        if (!nextClass.equals(sourceClass) || converter == null || sourceClass == null) {
+        if (converter == null || sourceClass == null
+            || nextClass != sourceClass && !nextClass.isAssignableFrom(sourceClass)) {
+          // if (!nextClass.equals(sourceClass) || converter == null || sourceClass == null) {
           sourceClass = nextClass;
           converter = resolveConverter(sourceClass, targetClass);
           if (converter == null) {
-            tryStringConverter = true;
             converter = resolveConverter(String.class, targetClass);
+            tryStringConverter = converter != null;
           } else {
             tryStringConverter = false;
           }
+          if (converter == null) {
+            throw new ConversionException("Can not find converter for type pair s% -> %s.",
+                sourceClass, targetClass);
+          }
+          LOGGER.finer(() -> String.format("Resolve converter %", converter));
         }
-        return (T) shouldNotNull(converter, "Can not find converter for type pair s% -> %s.",
-            sourceClass, targetClass).apply(tryStringConverter ? next.toString() : next, hints);
+        return (T) converter.apply(tryStringConverter ? next.toString() : next, hints);
       }
 
       @Override
@@ -269,6 +275,7 @@ public class Conversion {
     }
     Converter<S, T> converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
+      LOGGER.finer(() -> String.format("Resolve converter %", converter));
       return converter.apply((S) value, hints);
     } else {
       Converter<String, T> stringConverter = resolveConverter(String.class, targetClass);

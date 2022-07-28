@@ -147,7 +147,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     }
   }
 
-  protected void resetTranction(ContextHandleImpl contextHandle) {
+  protected void resetTransaction(ContextHandleImpl contextHandle) {
     logger.fine(() -> "Reset transaction if necessary.");
     if (!contextHandle.isUseTransactionOfExecutionThread()) {
       TransactionManager tm = tryResolve(TransactionManager.class);

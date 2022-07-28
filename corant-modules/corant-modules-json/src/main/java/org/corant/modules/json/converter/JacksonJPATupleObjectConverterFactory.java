@@ -22,7 +22,6 @@ import org.corant.modules.json.Jsons;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.service.RequiredClassPresent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * corant-modules-json
@@ -32,8 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RequiredClassPresent("javax.persistence.Tuple")
 public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
-
-  static final ObjectMapper mapper = Jsons.copyMapper();
 
   @Override
   public Converter<Tuple, Object> create(Class<Object> targetClass, Object defaultValue,
@@ -47,7 +44,7 @@ public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<T
       if (Map.class.isAssignableFrom(targetClass)) {
         return tupleMap;
       }
-      return mapper.convertValue(tupleMap, targetClass);
+      return Jsons.convert(tupleMap, targetClass);
     };
   }
 

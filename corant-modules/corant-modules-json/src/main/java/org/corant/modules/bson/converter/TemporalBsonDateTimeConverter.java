@@ -22,8 +22,8 @@ import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.Map;
 import org.bson.BsonDateTime;
-import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractConverter;
+import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 
 /**
  * corant-modules-json
@@ -60,27 +60,18 @@ public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, B
   @Override
   protected BsonDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
     // violate JSR-310
+    ZoneId zoneId =
+        AbstractTemporalConverter.resolveHintZoneId(hints).orElseGet(ZoneId::systemDefault);
     if (value instanceof LocalDateTime) {
-      return new BsonDateTime(
-          ((LocalDateTime) value).atZone(resolveHintZoneId(hints)).toInstant().toEpochMilli());
+      return new BsonDateTime(((LocalDateTime) value).atZone(zoneId).toInstant().toEpochMilli());
     } else if (value instanceof LocalDate) {
-      return new BsonDateTime(((LocalDate) value).atTime(LocalTime.ofNanoOfDay(0L))
-          .atZone(resolveHintZoneId(hints)).toInstant().toEpochMilli());
-    } else if (value instanceof OffsetDateTime) {
-      return new BsonDateTime(((OffsetDateTime) value).atZoneSameInstant(resolveHintZoneId(hints))
+      return new BsonDateTime(((LocalDate) value).atTime(LocalTime.ofNanoOfDay(0L)).atZone(zoneId)
           .toInstant().toEpochMilli());
+    } else if (value instanceof OffsetDateTime) {
+      return new BsonDateTime(
+          ((OffsetDateTime) value).atZoneSameInstant(zoneId).toInstant().toEpochMilli());
     }
     return new BsonDateTime(Instant.from(value).toEpochMilli());
   }
 
-  ZoneId resolveHintZoneId(Map<String, ?> hints) {
-    ZoneId zoneId = ZoneId.systemDefault();
-    Object hintZoneId = ConverterHints.getHint(hints, ConverterHints.CVT_ZONE_ID_KEY);
-    if (hintZoneId instanceof ZoneId) {
-      zoneId = (ZoneId) hintZoneId;
-    } else if (hintZoneId instanceof String) {
-      zoneId = ZoneId.of(hintZoneId.toString());
-    }
-    return zoneId;
-  }
 }

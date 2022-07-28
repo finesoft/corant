@@ -322,6 +322,24 @@ public class Maps {
     }
   }
 
+  /**
+   *
+   * Return and convert the collection value mapped to the given key in the given Map or
+   * {@code null} if the given map is {@code null} or the map contains no mapping for the key or the
+   * mapped value is {@code null}.
+   *
+   * <p>
+   * Note: The returned collection is reconstructed, and the result of modifying the collection may
+   * not be reflected in the given map.
+   *
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param collectionFactory the constructor of collection
+   * @param converter the single element converter
+   * @return the mapped expected collection value
+   */
   public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
       final Object key, final IntFunction<C> collectionFactory,
       final Function<Object, T> converter) {

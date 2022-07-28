@@ -36,30 +36,18 @@ public class ContextHandleImpl implements ContextHandle {
   private SecurityContext securityContext;
   private boolean useTransactionOfExecutionThread;
 
-  /**
-   * @return the cDIContextInstaller
-   */
   public ContextInstaller getCDIContextInstaller() {
     return CDIContextInstaller;
   }
 
-  /**
-   * @return the cDIContextRestorer
-   */
   public ContextRestorer getCDIContextRestorer() {
     return CDIContextRestorer;
   }
 
-  /**
-   * @return the contextClassLoader
-   */
   public ClassLoader getContextClassLoader() {
     return contextClassLoader;
   }
 
-  /**
-   * @return the securityContext
-   */
   public SecurityContext getSecurityContext() {
     return securityContext;
   }
@@ -68,38 +56,22 @@ public class ContextHandleImpl implements ContextHandle {
     return transaction;
   }
 
-  /**
-   * @return the useTransactionOfExecutionThread
-   */
   public boolean isUseTransactionOfExecutionThread() {
     return useTransactionOfExecutionThread;
   }
 
-  /**
-   * @param cDIContextInstaller the cDIContextInstaller to set
-   */
   protected void setCDIContextInstaller(ContextInstaller cDIContextInstaller) {
     CDIContextInstaller = cDIContextInstaller;
   }
 
-  /**
-   * @param cDIContextRestorer the cDIContextRestorer to set
-   */
   protected void setCDIContextRestorer(ContextRestorer cDIContextRestorer) {
     CDIContextRestorer = cDIContextRestorer;
   }
 
-  /**
-   *
-   * @param contextClassLoader the contextClassLoader to set
-   */
   protected void setContextClassLoader(ClassLoader contextClassLoader) {
     this.contextClassLoader = contextClassLoader;
   }
 
-  /**
-   * @param securityContext the securityContext to set
-   */
   protected void setSecurityContext(SecurityContext securityContext) {
     this.securityContext = securityContext;
   }
@@ -108,9 +80,6 @@ public class ContextHandleImpl implements ContextHandle {
     this.transaction = transaction;
   }
 
-  /**
-   * @param useTransactionOfExecutionThread the useTransactionOfExecutionThread to set
-   */
   protected void setUseTransactionOfExecutionThread(boolean useTransactionOfExecutionThread) {
     this.useTransactionOfExecutionThread = useTransactionOfExecutionThread;
   }

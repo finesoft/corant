@@ -62,7 +62,7 @@ public class CorantConfigResolver {
     StringBuilder concats = new StringBuilder();
     for (String key : keys) {
       String useKey = defaultString(key);
-      if (isNotBlank(useKey)) {
+      if (!useKey.isBlank()) {
         concats.append(removeSplitor(key)).append(KEY_DELIMITER);
       }
     }

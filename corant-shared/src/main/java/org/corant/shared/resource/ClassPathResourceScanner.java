@@ -16,6 +16,7 @@ package org.corant.shared.resource;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Functions.emptyPredicate;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Sets.immutableSetOf;
 import static org.corant.shared.util.Strings.isBlank;
@@ -86,7 +87,7 @@ public class ClassPathResourceScanner {
   protected final Set<URI> scannedUris = new HashSet<>();
   protected final String root;
 
-  protected Predicate<String> filter = s -> true;
+  protected Predicate<String> filter = emptyPredicate(true);
 
   public ClassPathResourceScanner(PathMatcher matcher) {
     this(matcher.getPlainParent(PATH_SEPARATOR_STRING), matcher);
@@ -113,18 +114,17 @@ public class ClassPathResourceScanner {
   public static URLResource relative(Class<?> relative, String path) {
     URL url = null;
     if (path != null) {
+      String uPath = path.replace('\\', PATH_SEPARATOR);
       if (relative != null) {
-        url =
-            relative.getResource(
-                path.contains(TOP_PATH)
-                    ? PATH_SEPARATOR_STRING.concat(Path
-                        .of(relative.getCanonicalName().replace(CLASS_PATH_SEPARATOR,
-                            PATH_SEPARATOR))
-                        .getParent().resolve(path).normalize().toString()
-                        .replace(File.separatorChar, PATH_SEPARATOR))
-                    : path);
+        if (uPath.contains(TOP_PATH)) {
+          String rePath = relative.getCanonicalName().replace(CLASS_PATH_SEPARATOR, PATH_SEPARATOR);
+          uPath = Path.of(rePath, uPath).normalize().toString().replace('\\', PATH_SEPARATOR);
+          url = relative.getClassLoader().getResource(uPath);
+        } else {
+          url = relative.getResource(uPath);
+        }
       } else {
-        url = defaultClassLoader().getResource(path);
+        url = defaultClassLoader().getResource(uPath);
       }
     }
     return url != null ? new URLResource(url) : null;

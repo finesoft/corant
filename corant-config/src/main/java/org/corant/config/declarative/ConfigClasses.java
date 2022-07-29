@@ -50,19 +50,6 @@ public class ConfigClasses {
   public static final String SPEC_KEY_ITEM_DV_FMT = SPEC_KEY_ITEM_FMT + ".default-value";
   public static final String SPEC_KEY_ITEM_PTN_FMT = SPEC_KEY_ITEM_FMT + ".pattern";
 
-  public static Class<?> resolveClass(Class<?> clazz) {
-    Class<?> klass = getUserClass(clazz);
-    String classNameKey = String.format(SPEC_REAL, klass.getCanonicalName());
-    String className = Configs.getValue(classNameKey, String.class);
-    if (isNotBlank(className)) {
-      Class<?> realClass = asClass(className);
-      shouldBeTrue(klass.isAssignableFrom(realClass), "The config class %s must be derived from %s",
-          className, klass.getCanonicalName());
-      return realClass;
-    }
-    return klass;
-  }
-
   public static ConfigKeyItem resolveItem(Field field) {
     String className = getUserClass(field.getDeclaringClass()).getCanonicalName();
     String fieldName = field.getName();
@@ -103,7 +90,7 @@ public class ConfigClasses {
       if (keyRoot == null) {
         keyRoot = ann.value();
       }
-      if (keyIndex != null) {
+      if (keyIndex == null) {
         keyIndex = ann.keyIndex();
       }
       if (ignore == null) {
@@ -115,5 +102,18 @@ public class ConfigClasses {
           keyIndex == null || keyIndex < 0 ? splitKey(keyRoot).length : keyIndex, keyRoot));
     }
     return Pair.empty();
+  }
+
+  static Class<?> resolveClass(Class<?> clazz) {
+    Class<?> klass = getUserClass(clazz);
+    String classNameKey = String.format(SPEC_REAL, klass.getCanonicalName());
+    String className = Configs.getValue(classNameKey, String.class);
+    if (isNotBlank(className)) {
+      Class<?> realClass = asClass(className);
+      shouldBeTrue(klass.isAssignableFrom(realClass), "The config class %s must be derived from %s",
+          className, klass.getCanonicalName());
+      return realClass;
+    }
+    return klass;
   }
 }

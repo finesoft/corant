@@ -77,7 +77,7 @@ public class CorantConfigExpander {
   static String resolve(String template, CorantConfigRawValueProvider provider,
       Collection<String> stacks) {
     int[] position = resolvePosition(template);
-    if (position[1] >= 0) {
+    if (position != null) {
       boolean eval = position[0] == 1;
       String extracted = template.substring(position[1] + MACRO_PREFIX_LENGTH, position[2]);
       final String logExtracted = extracted;
@@ -129,7 +129,7 @@ public class CorantConfigExpander {
         return resolvePosition(value.substring(0, start));
       }
     }
-    return new int[] {-1, -1, -1};
+    return null;
   }
 
   static String resolveValue(boolean eval, String key, CorantConfigRawValueProvider provider,
@@ -152,5 +152,6 @@ public class CorantConfigExpander {
   public interface CorantConfigRawValueProvider {
 
     String get(boolean eval, String key);
+
   }
 }

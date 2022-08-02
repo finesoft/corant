@@ -66,10 +66,10 @@ import net.sf.jsqlparser.util.deparser.SelectDeParser;
 public class SqlStatements {
 
   /**
-   * Converts the given SQL statement containing named query parameters and the given named
-   * parameter maps to a normalized SQL prepare statement and its query parameters and return them,
-   * the returned query parameters correspond to the placeholders ({@code ?}) in the returned SQL
-   * statement one-to-one. Throws exception if the name of query parameter not find in the given
+   * Converts the given named parameters(:name) prepared SQL statement and the given query
+   * parameters maps to a normalized SQL prepared statement and its query parameters and return
+   * them, the returned query parameters array correspond to the placeholders (?) in the returned
+   * SQL statement one to one. Throws exception if the name of query parameter not find in the given
    * named parameter maps.
    *
    * <p>
@@ -110,10 +110,10 @@ public class SqlStatements {
   }
 
   /**
-   * Converts the given SQL statement containing parameters placeholders ({@code ?}) and the given
-   * query parameters array to a normalized SQL prepare statement and its query parameters and
-   * return them, the returned query parameters correspond to the placeholders ({@code ?}) in the
-   * returned SQL statement one-to-one. Throws exception if the number of parameters placeholders
+   * Converts the given containing parameters placeholders (?) prepared SQL statement and the given
+   * query parameters array to a normalized SQL prepared statement and its query parameters and
+   * return them, the returned query parameters array correspond to the placeholders (?) in the
+   * returned SQL statement one to one. Throws exception if the number of parameters placeholders
    * less then the length of the given query parameters array.
    *
    * <p>

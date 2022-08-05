@@ -123,13 +123,13 @@ public class JDBCTemplate {
   }
 
   public static int execute(Connection conn, String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return SIMPLE_RUNNER.execute(conn, processeds.getKey(), processeds.getValue());
   }
 
   public static <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh,
       Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return SIMPLE_RUNNER.execute(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -150,7 +150,7 @@ public class JDBCTemplate {
 
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return SIMPLE_RUNNER.insert(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -178,7 +178,7 @@ public class JDBCTemplate {
 
   public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return SIMPLE_RUNNER.query(conn, processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -362,10 +362,11 @@ public class JDBCTemplate {
   }
 
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
   }
 
+  @Deprecated
   static Pair<String, Object[]> processSqlAndParams(String sql, Object... params) {
     if (isEmpty(params) || isBlank(sql)
         || streamOf(params).noneMatch(p -> p instanceof Collection || p.getClass().isArray())) {
@@ -424,13 +425,13 @@ public class JDBCTemplate {
   }
 
   public int execute(String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return runner.execute(processeds.getKey(), processeds.getValue());
   }
 
   public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return runner.execute(processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -439,7 +440,7 @@ public class JDBCTemplate {
   }
 
   public Map<String, Object> get(String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return runner.query(processeds.getKey(), MAP_HANDLER, processeds.getValue());
   }
 
@@ -460,7 +461,7 @@ public class JDBCTemplate {
   }
 
   public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return runner.insert(processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -484,7 +485,7 @@ public class JDBCTemplate {
   }
 
   public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
     return runner.query(processeds.getKey(), rsh, processeds.getValue());
   }
 
@@ -665,7 +666,7 @@ public class JDBCTemplate {
   }
 
   public int update(String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processed = processSqlAndParams(sql, params);
+    Pair<String, Object[]> processed = SqlStatements.normalize(sql, params);
     return runner.update(processed.getKey(), processed.getValue());
   }
 

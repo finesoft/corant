@@ -18,8 +18,8 @@ import static org.corant.shared.util.Maps.getMapBoolean;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.corant.modules.datasource.shared.SqlStatements;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
-import org.corant.modules.query.sql.SqlStatements;
 
 /**
  * corant-modules-query-sql

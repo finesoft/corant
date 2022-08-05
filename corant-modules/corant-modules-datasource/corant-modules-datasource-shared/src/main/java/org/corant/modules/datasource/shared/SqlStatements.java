@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.sql;
+package org.corant.modules.datasource.shared;
 
 import static java.util.Collections.singletonList;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -27,9 +27,11 @@ import static org.corant.shared.util.Strings.substring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.corant.modules.query.QueryRuntimeException;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import net.sf.jsqlparser.JSQLParserException;
@@ -41,6 +43,10 @@ import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.replace.Replace;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
@@ -54,8 +60,13 @@ import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.util.deparser.DeleteDeParser;
 import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
+import net.sf.jsqlparser.util.deparser.InsertDeParser;
+import net.sf.jsqlparser.util.deparser.ReplaceDeParser;
 import net.sf.jsqlparser.util.deparser.SelectDeParser;
+import net.sf.jsqlparser.util.deparser.UpdateDeParser;
 
 /**
  * corant-modules-query-sql
@@ -75,7 +86,8 @@ public class SqlStatements {
    * <p>
    * Note: If the given parameter type is an array or a collection, the number of placeholders
    * ({@code ?}) in the returned SQL corresponding to the parameter will automatically change to the
-   * number of elements of the array or collection.
+   * number of elements of the array or collection. <br>
+   * The name of the parameter can't be a number
    * </p>
    *
    * <pre>
@@ -98,14 +110,10 @@ public class SqlStatements {
       List<Object> useParams = new ArrayList<>();
       ExpressionDeParser expressionDeParser =
           new JdbcParameterExpressionDeParser(namedParameters, useParams);
-      Select select = (Select) CCJSqlParserUtil.parse(sql);
-      SelectDeParser deparser = new SelectDeParser(expressionDeParser, statement);
-      expressionDeParser.setSelectVisitor(deparser);
-      expressionDeParser.setBuffer(statement);
-      select.getSelectBody().accept(deparser);
+      normalize(CCJSqlParserUtil.parse(sql), statement, expressionDeParser);
       return Pair.of(statement.toString(), useParams.toArray());
     } catch (JSQLParserException ex) {
-      throw new QueryRuntimeException(ex);
+      throw new CorantRuntimeException(ex);
     }
   }
 
@@ -146,14 +154,10 @@ public class SqlStatements {
       List<Object> useParams = new ArrayList<>();
       ExpressionDeParser expressionDeParser =
           new JdbcParameterExpressionDeParser(ordinaryParameters, useParams);
-      Select select = (Select) CCJSqlParserUtil.parse(sql);
-      SelectDeParser deparser = new SelectDeParser(expressionDeParser, statement);
-      expressionDeParser.setSelectVisitor(deparser);
-      expressionDeParser.setBuffer(statement);
-      select.getSelectBody().accept(deparser);
+      normalize(CCJSqlParserUtil.parse(sql), statement, expressionDeParser);
       return Pair.of(statement.toString(), useParams.toArray());
     } catch (JSQLParserException ex) {
-      throw new QueryRuntimeException(ex);
+      throw new CorantRuntimeException(ex);
     }
   }
 
@@ -238,6 +242,60 @@ public class SqlStatements {
   static boolean containsParameterizedOrderbyElement(List<OrderByElement> orderbyElements) {
     return orderbyElements != null
         && orderbyElements.stream().anyMatch(e -> e.toString().indexOf('?') != -1);
+  }
+
+  static void normalize(Statement statement, StringBuilder buffer,
+      ExpressionDeParser expressionDeParser) {
+    if (statement instanceof Select) {
+      Select select = (Select) statement;
+      SelectDeParser deparser = new SelectDeParser(expressionDeParser, buffer);
+      expressionDeParser.setSelectVisitor(deparser);
+      expressionDeParser.setBuffer(buffer);
+      if (isNotEmpty(select.getWithItemsList())) {
+        buffer.append("WITH ");
+        for (Iterator<WithItem> iter = select.getWithItemsList().iterator(); iter.hasNext();) {
+          WithItem withItem = iter.next();
+          buffer.append(withItem);
+          if (iter.hasNext()) {
+            buffer.append(",");
+          }
+          buffer.append(" ");
+        }
+      }
+      select.getSelectBody().accept(deparser);
+    } else if (statement instanceof Delete) {
+      Delete delete = (Delete) statement;
+      SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
+      expressionDeParser.setSelectVisitor(selectDeParser);
+      expressionDeParser.setBuffer(buffer);
+      DeleteDeParser deleteDeParser = new DeleteDeParser(expressionDeParser, buffer);
+      deleteDeParser.deParse(delete);
+    } else if (statement instanceof Insert) {
+      Insert insert = (Insert) statement;
+      SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
+      expressionDeParser.setSelectVisitor(selectDeParser);
+      expressionDeParser.setBuffer(buffer);
+      InsertDeParser insertDeParser =
+          new InsertDeParser(expressionDeParser, selectDeParser, buffer);
+      insertDeParser.deParse(insert);
+    } else if (statement instanceof Update) {
+      Update update = (Update) statement;
+      SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
+      expressionDeParser.setSelectVisitor(selectDeParser);
+      expressionDeParser.setBuffer(buffer);
+      UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser, buffer);
+      updateDeParser.deParse(update);
+    } else if (statement instanceof Replace) {
+      Replace replace = (Replace) statement;
+      SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
+      expressionDeParser.setSelectVisitor(selectDeParser);
+      expressionDeParser.setBuffer(buffer);
+      ReplaceDeParser replaceDeParser =
+          new ReplaceDeParser(expressionDeParser, selectDeParser, buffer);
+      replaceDeParser.deParse(replace);
+    } else {
+      throw new NotSupportedException("Only supports SELECT/UPDATE/INSERT/DELETE statemens!");
+    }
   }
 
   static void reviseCountSqlFromItem(FromItem fromItem) {
@@ -356,7 +414,7 @@ public class SqlStatements {
         return;
       }
       if (jdbcParameter.getIndex() > ordinaryParameters.length) {
-        throw new QueryRuntimeException("SQL placeholder does not match the given parameter!");
+        throw new CorantRuntimeException("SQL placeholder does not match the given parameter!");
       }
       Object parameter = ordinaryParameters[jdbcParameter.getIndex() - 1];
       List<Object> tempParams = resolveParameter(parameter);

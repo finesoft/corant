@@ -69,7 +69,7 @@ import net.sf.jsqlparser.util.deparser.SelectDeParser;
 import net.sf.jsqlparser.util.deparser.UpdateDeParser;
 
 /**
- * corant-modules-query-sql
+ * corant-modules-datasource-shared
  *
  * @author bingo 下午4:06:43
  *

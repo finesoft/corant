@@ -18,12 +18,12 @@ import static org.corant.shared.util.Maps.toMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-config
@@ -37,12 +37,8 @@ public class PropertiesConfigSource extends AbstractCorantConfigSource {
 
   final Map<String, String> properties;
 
-  public PropertiesConfigSource(URL resourceUrl, int ordinal) {
-    this(shouldNotNull(resourceUrl).toExternalForm(), ordinal, toMap(getProperties(resourceUrl)));
-  }
-
-  PropertiesConfigSource(String name, int ordinal, InputStream is) throws IOException {
-    this(name, ordinal, toMap(load(is)));
+  public PropertiesConfigSource(Resource resource, int ordinal) {
+    this(shouldNotNull(resource).getLocation(), ordinal, toMap(getProperties(resource)));
   }
 
   PropertiesConfigSource(String name, int ordinal, Map<String, String> properties) {
@@ -55,12 +51,12 @@ public class PropertiesConfigSource extends AbstractCorantConfigSource {
     }
   }
 
-  protected static Properties getProperties(URL url) {
-    try (InputStream is = url.openStream()) {
+  protected static Properties getProperties(Resource resource) {
+    try (InputStream is = resource.openInputStream()) {
       return load(is);
     } catch (IOException e) {
       throw new CorantRuntimeException(e,
-          "Load properties config source from '%s' occurred an error!", url);
+          "Load properties config source from '%s' occurred an error!", resource.getLocation());
     }
   }
 

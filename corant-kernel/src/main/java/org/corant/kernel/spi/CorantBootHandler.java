@@ -13,12 +13,12 @@
  */
 package org.corant.kernel.spi;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 import org.corant.Corant;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Iterables;
 import org.corant.shared.util.Services;
 
 /**
@@ -50,7 +50,7 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
       return Services.selectRequired(CorantBootHandler.class, classLoader);
     } else {
       return Services.selectRequired(CorantBootHandler.class, classLoader)
-          .filter(h -> Arrays.binarySearch(excludeClassNames, h.getClass().getName()) == -1);
+          .filter(h -> Iterables.search(excludeClassNames, h.getClass().getName()) == -1);
     }
   }
 

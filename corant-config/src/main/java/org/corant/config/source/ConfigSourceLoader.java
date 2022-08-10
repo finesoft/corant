@@ -13,10 +13,10 @@
  */
 package org.corant.config.source;
 
+import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,11 +28,14 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.URLResource;
+import org.corant.shared.util.Functions;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Services;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
@@ -42,6 +45,8 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  *
  */
 public class ConfigSourceLoader {
+
+  static final Logger logger = Logger.getLogger(ConfigSourceLoader.class.getName());
 
   public static List<ConfigSource> load(ClassLoader classLoader, int ordinal, Predicate<URL> filter,
       String... classPaths) throws IOException {
@@ -71,36 +76,34 @@ public class ConfigSourceLoader {
   static Optional<AbstractCorantConfigSource> load(Predicate<URL> filter, URLResource resource,
       int ordinal) {
     if (resource != null && filter.test(resource.getURL())) {
-      String location = resource.getURL().getPath();
-      try (InputStream is = resource.openInputStream()) {
-        if (location.endsWith(".properties")) {
-          return Optional.of(new PropertiesConfigSource(location, ordinal, is));
-        } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
-          return Optional.of(new YamlConfigSource(is, ordinal));
-        } else if (location.endsWith(".json")) {
-          return Optional.of(new JsonConfigSource(null, ordinal));
-        } else if (location.endsWith(".xml")) {
-          return Optional.of(new XmlConfigSource(location, ordinal, is));
+      String location = resource.getURL().getPath().toLowerCase(Locale.ROOT);
+      if (location.endsWith(".properties")) {
+        return Optional.of(new PropertiesConfigSource(resource, ordinal));
+      } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
+        if (tryAsClass("org.yaml.snakeyaml.Yaml") == null) {
+          logger.warning(() -> String.format(
+              "Can't not load config source [%s], the [class org.yaml.snakeyaml.Yaml] not not exists!",
+              location));
+        } else {
+          return Optional.of(new YamlConfigSource(resource, ordinal));
         }
-      } catch (IOException e) {
-        throw new CorantRuntimeException(e);
+      } else if (location.endsWith(".json")) {
+        if (Services.findRequired(JsonConfigSourceResolver.class).isEmpty()) {
+          logger.warning(() -> String.format(
+              "Can't not load config source [%s], the [JsonConfigSourceResolver] not not exists!",
+              location));
+        } else {
+          return Optional.of(new JsonConfigSource(resource, ordinal));
+        }
+      } else if (location.endsWith(".xml")) {
+        return Optional.of(new XmlConfigSource(resource, ordinal));
       }
     }
     return Optional.empty();
   }
 
   static AbstractCorantConfigSource load(URL resourceUrl, int ordinal) {
-    String urlstr = resourceUrl.getPath().toLowerCase(Locale.ROOT);
-    if (urlstr.endsWith(".properties")) {
-      return new PropertiesConfigSource(resourceUrl, ordinal);
-    } else if (urlstr.endsWith(".yml") || urlstr.endsWith(".yaml")) {
-      return new YamlConfigSource(resourceUrl, ordinal);
-    } else if (urlstr.endsWith(".json")) {
-      return new JsonConfigSource(resourceUrl, ordinal);
-    } else if (urlstr.endsWith(".xml")) {
-      return new XmlConfigSource(resourceUrl, ordinal);
-    }
-    return null;
+    return load(Functions.emptyPredicate(true), new URLResource(resourceUrl), ordinal).orElse(null);
   }
 
   static URI toURI(URL url) {

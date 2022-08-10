@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
@@ -391,6 +392,28 @@ public class Iterables {
       array[x] = i;
     }
     return array;
+  }
+
+  /**
+   * Searches the specified array for the specified value, returns index of the search key, if it is
+   * contained in the array; otherwise, <code>(-(<i>insertion point</i>) - 1)</code>.
+   *
+   * @param <T> the array component type
+   * @param a the array to be searched
+   * @param key the value to be searched for
+   * @return index of the search key, if it is contained in the array; otherwise,
+   *         <code>(-(<i>insertion point</i>) - 1)</code>.
+   */
+  public static <T> int search(T[] a, T key) {
+    if (a != null) {
+      int len = a.length;
+      for (int i = 0; i < len; i++) {
+        if (areEqual(a[i], key)) {
+          return i;
+        }
+      }
+    }
+    return -1;
   }
 
   /**

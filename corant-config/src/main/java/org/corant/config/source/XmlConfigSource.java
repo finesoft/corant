@@ -17,11 +17,11 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.toMap;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 
 /**
  * corant-config
@@ -37,22 +37,10 @@ public class XmlConfigSource extends AbstractCorantConfigSource {
 
   final Map<String, String> properties;
 
-  XmlConfigSource(String name, int ordinal, InputStream is) {
-    this.name = name;
-    this.ordinal = ordinal;
+  XmlConfigSource(Resource resource, int ordinal) {
+    super(shouldNotNull(resource).getLocation(), ordinal);
     Properties props = new Properties();
-    try {
-      props.loadFromXML(is);
-      properties = Collections.unmodifiableMap(toMap(props));
-    } catch (IOException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
-  XmlConfigSource(URL resourceUrl, int ordinal) {
-    super(shouldNotNull(resourceUrl).toExternalForm(), ordinal);
-    Properties props = new Properties();
-    try (InputStream is = resourceUrl.openStream()) {
+    try (InputStream is = resource.openInputStream()) {
       props.loadFromXML(is);
       properties = Collections.unmodifiableMap(toMap(props));
     } catch (IOException e) {

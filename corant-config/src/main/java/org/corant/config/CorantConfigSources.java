@@ -37,6 +37,7 @@ import org.corant.shared.ubiquity.Mutable.MutableBoolean;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.FileUtils;
+import org.corant.shared.util.Iterables;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.Config;
@@ -58,7 +59,7 @@ public class CorantConfigSources {
 
   public static final Comparator<ConfigSource> CONFIG_SOURCE_COMPARATOR = (o1, o2) -> {
     int res = Long.signum((long) o2.getOrdinal() - (long) o1.getOrdinal());
-    return res != 0 ? res : o2.getName().compareTo(o1.getName());
+    return res != 0 ? res : Objects.compare(o2.getName(), o1.getName());
   };
 
   protected final List<CorantConfigSource> sources;
@@ -120,7 +121,7 @@ public class CorantConfigSources {
     final ConfigAdjuster configAdjuster = ConfigAdjuster.resolve(classLoader);
     List<CorantConfigSource> sources = new ArrayList<>(originalSources.size());
     profileSources.forEach(ps -> {
-      if (ps.getLeft() == null || Arrays.binarySearch(profiles.get(), ps.getLeft()) != -1) {
+      if (ps.getLeft() == null || Iterables.search(profiles.get(), ps.getLeft()) != -1) {
         ConfigSource adjustedSource = configAdjuster.apply(ps.getRight());
         if (adjustedSource != null) {
           sources.add(new CorantConfigSource(adjustedSource, ps.getLeft()));
@@ -230,16 +231,16 @@ public class CorantConfigSources {
         if (areEqual(cs.getSourceProfile(), profiles[i])) {
           value = cs.getValue(propertyName);
         } else {
-          value = defaultString(cs.getValue(key), cs.getValue(propertyName));
+          value = cs.getValue(key);// defaultString(cs.getValue(key), cs.getValue(propertyName));
         }
-        if (value != null) {
+        if (value != null && !value.isEmpty()) {
           return Pair.of(cs, value);
         }
       }
     }
     for (CorantConfigSource cs : sources) {
       String value = cs.getValue(propertyName);
-      if (value != null) {
+      if (value != null && !value.isEmpty()) {
         return Pair.of(cs, value);
       }
     }

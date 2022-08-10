@@ -13,18 +13,16 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Maps.flatStringMap;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.Resource;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -39,23 +37,17 @@ public class YamlConfigSource extends AbstractCorantConfigSource {
 
   final Map<String, String> properties;
 
-  YamlConfigSource(InputStream in, int ordinal) {
+  YamlConfigSource(Resource resource, int ordinal) {
     Class<?> yamlCls = tryAsClass("org.yaml.snakeyaml.Yaml");
-    if (yamlCls != null) {
-      this.ordinal = ordinal;
-      try {
-        // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
-        Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
-        properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
-        name = null;
-      } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-          | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-        throw new CorantRuntimeException(e);
-      }
-    } else {
-      name = null;
-      this.ordinal = Integer.MIN_VALUE;
-      properties = new HashMap<>();
+    this.ordinal = ordinal;
+    try (InputStream in = resource.openInputStream()) {
+      // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
+      Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
+      properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
+      name = resource.getLocation();
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException | NoSuchMethodException | SecurityException | IOException e) {
+      throw new CorantRuntimeException(e);
     }
   }
 
@@ -63,27 +55,6 @@ public class YamlConfigSource extends AbstractCorantConfigSource {
     this.name = name;
     this.ordinal = ordinal;
     this.properties = Collections.unmodifiableMap(flatStringMap(properties, ".", 16));
-  }
-
-  YamlConfigSource(URL resourceUrl, int ordinal) {
-    Class<?> yamlCls = tryAsClass("org.yaml.snakeyaml.Yaml");
-    if (yamlCls != null) {
-      this.ordinal = ordinal;
-      try (InputStream in = resourceUrl.openStream()) {
-        // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
-        Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
-        properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
-        name = shouldNotNull(resourceUrl).toExternalForm();
-      } catch (IOException | InstantiationException | IllegalAccessException
-          | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-          | SecurityException e) {
-        throw new CorantRuntimeException(e);
-      }
-    } else {
-      name = null;
-      this.ordinal = Integer.MIN_VALUE;
-      properties = new HashMap<>();
-    }
   }
 
   @Override

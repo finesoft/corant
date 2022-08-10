@@ -35,7 +35,6 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -138,7 +137,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       // setEnvironmentVariables(e, ow); deprecated since 1.6.2
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
-    } catch (IOException | TemplateException e) {
+    } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "Freemarker dynamic querier builder [%s] execute occurred error!", getQuery().getName());
     }

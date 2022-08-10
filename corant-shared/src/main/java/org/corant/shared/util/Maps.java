@@ -148,6 +148,13 @@ public class Maps {
     return toList(extractMapKeyPathValues(object, keyPath), t -> toObject(t, expectedElementType));
   }
 
+  /**
+   * @see #flatMap(Map, String, int)
+   *
+   * @param map
+   * @param maxDepth
+   * @return flatMap
+   */
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
     Map<FlatMapKey, Object> flatMap = new HashMap<>();
     if (map != null) {
@@ -158,6 +165,56 @@ public class Maps {
     return flatMap;
   }
 
+  /**
+   * Flatten a map, where the key consists of the key of the given original map and the given
+   * splitor, and the flattening is performed in a depth-first manner.
+   *
+   * <p>
+   * Note that: The flattening process only applies to values of type Collection or Map or Array, so
+   * if the value is a POJO or primitive type, it will not be flatted in depth, and if the value is
+   * a Collection or Array, the corresponding key is the index of element.
+   *
+   * <p>
+   *
+   * <pre>
+   * <b>Examples:</b>
+   * {@code
+   * Map<String, Object> original = new HashMap<>();
+   * original.put("str", "str");
+   * original.put("int", 0);
+   * original.put("map", new HashMap<Object, Object>() {
+   *   {
+   *     put("sub-str", "sub-str");
+   *     put("sub-int", 100);
+   *   }
+   * });
+   * original.put("str-array", new String[] {"e0", "e1"});
+   * original.put("int-list", new ArrayList<Integer>() {
+   *   {
+   *     add(0);
+   *     add(1);
+   *   }
+   * });
+   * original.put("map-list", new ArrayList<Map<Object, Object>>() {
+   *   {
+   *     add(Collections.singletonMap("map-list-key0", "map-list-value0"));
+   *     add(Collections.singletonMap("map-list-key1", "map-list-value1"));
+   *   }
+   * });
+   * Map flatted = flatMap(original, ".", 32);
+   * }
+   * <b> flatted results:</b>
+   * { "int" : 0, "str" : "str", "int-list.0" : 0, "int-list.1" : 1, "map.sub-int" : 100,
+   * "map.sub-str" : "sub-str", "str-array.0" : "e0", "str-array.1" : "e1",
+   * "map-list.0.map-list-key0" : "map-list-value0", "map-list.1.map-list-key1" : "map-list-value1"
+   * }
+   *</pre>
+   *
+   * @param map the map to be flatten
+   * @param splitor the string key splitor, use to splite key levels.
+   * @param maxDepth Maximum leveling depth
+   * @return a map, where the key consists of the key of the given map and the given delimiter
+   */
   public static Map<String, Object> flatMap(Map<String, ?> map, String splitor, int maxDepth) {
     Map<FlatMapKey, Object> flatMap = new HashMap<>();
     Map<String, Object> stringKeyMap = new TreeMap<>((k1, k2) -> {
@@ -176,6 +233,14 @@ public class Maps {
     return stringKeyMap;
   }
 
+  /**
+   * @see #flatMap(Map, String, int)
+   *
+   * @param map the map to be flatten
+   * @param splitor the string key splitor, use to splite key levels.
+   * @param maxDepth Maximum leveling depth
+   * @return a map, where the key consists of the key of the original map and the given delimiter
+   */
   public static Map<String, String> flatStringMap(Map<String, ?> map, String splitor,
       int maxDepth) {
     Map<String, Object> stringKeyMap = flatMap(map, splitor, maxDepth);

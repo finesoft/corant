@@ -52,10 +52,10 @@ public class MicroprofileConfigSources {
     try {
       new ClassPathResourceLoader(classLoader, false)
           .load(META_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream().parallel()
-          .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+          .map(r -> new PropertiesConfigSource(r, ordinal)).forEach(sources::add);
       new ClassPathResourceLoader(classLoader, false)
           .load(WEB_INF_MICROPROFILE_CONFIG_PROPERTIES_BASE + suffix).stream().parallel()
-          .map(r -> new PropertiesConfigSource(r.getURL(), ordinal)).forEach(sources::add);
+          .map(r -> new PropertiesConfigSource(r, ordinal)).forEach(sources::add);
     } catch (IOException e) {
       // Noop
     }

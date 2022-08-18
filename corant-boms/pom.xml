@@ -13,6 +13,7 @@
     <version.agroal>1.16</version.agroal>
     <version.aliyun-java-sdk-core>4.5.13</version.aliyun-java-sdk-core>
     <version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
+    <version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
     <version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
     <version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
     <version.ansj_seg>5.1.6</version.ansj_seg>
@@ -1879,6 +1880,11 @@
         <groupId>com.aliyun</groupId>
         <artifactId>aliyun-java-sdk-afs</artifactId>
         <version>${version.aliyun-java-sdk-afs}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.aliyun</groupId>
+        <artifactId>aliyun-java-sdk-green</artifactId>
+        <version>${version.aliyun-java-sdk-green}</version>
       </dependency>
       <dependency>
         <groupId>com.alipay.sdk</groupId>

@@ -272,7 +272,6 @@ public class Iterables {
    * @param iterable the iterable that contain the index-th value
    * @param index the index
    */
-  @Deprecated
   public static <E> E get(final Iterable<? extends E> iterable, final int index) {
     if (index < 0) {
       throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
@@ -292,7 +291,6 @@ public class Iterables {
    * @param iterator the iterator that used to retrieve the index-th value
    * @param index the index
    */
-  @Deprecated
   public static <E> E get(final Iterator<? extends E> iterator, final int index) {
     int i = index;
     if (i < 0) {

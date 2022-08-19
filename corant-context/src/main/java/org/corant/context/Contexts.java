@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.util.TypeLiteral;
 import org.corant.config.Configs;
 import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.WeldAlterableContext;
@@ -37,6 +39,7 @@ import org.jboss.weld.context.bound.BoundLiteral;
 import org.jboss.weld.context.bound.BoundRequestContext;
 import org.jboss.weld.context.bound.BoundSessionContext;
 import org.jboss.weld.context.bound.MutableBoundRequest;
+import org.jboss.weld.inject.WeldInstance;
 import org.jboss.weld.manager.api.WeldManager;
 
 /**
@@ -51,6 +54,15 @@ public class Contexts {
 
   static final boolean propagateStrictly =
       Configs.getValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
+
+  /**
+   * Returns an enhanced version of of {@link Instance} provide by Weld.
+   */
+  public static WeldInstance<Object> getWeldInstance() {
+    return Beans.resolve(new TypeLiteral<WeldInstance<Object>>() {
+      private static final long serialVersionUID = 1235213990342343584L;
+    });
+  }
 
   /**
    * Returns whether there is an active context for all given scope types.

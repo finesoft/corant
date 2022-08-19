@@ -14,7 +14,9 @@
 package org.corant.modules.ddd.shared.repository;
 
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +27,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
+import org.corant.context.Contexts;
+import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 
 /**
  * corant-modules-ddd-shared
@@ -37,6 +42,28 @@ import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
  *
  */
 public interface TypedJPARepository<T extends Entity> extends TypedRepository<T, Query> {
+
+  /**
+   * Returns a typed JPA repository, the underling processing depend on CDI & Weld. If qualifiers
+   * are not assigned, return a auto created instance.
+   *
+   * @param <T> the entity type to be used in the repository
+   * @param entityClass the entity type to be used in the repository
+   * @return an auto created Typed JPA repository
+   */
+  public static <T extends Entity> TypedJPARepository<T> instance(Class<T> entityClass,
+      Annotation... qualifiers) {
+    if (qualifiers.length == 0) {
+      return forceCast(Contexts.getWeldInstance()
+          .select(new ParameterizedTypeImpl(TypedJPARepository.class, entityClass),
+              AutoCreated.INST)
+          .get());
+    } else {
+      return forceCast(Contexts.getWeldInstance()
+          .select(new ParameterizedTypeImpl(TypedJPARepository.class, entityClass), qualifiers)
+          .get());
+    }
+  }
 
   /**
    * {@link EntityManager#clear()}

@@ -63,6 +63,13 @@ public interface TransactionService {
   }
 
   /**
+   * @see #actuator()
+   */
+  static TransactionalActuator withTransaction() {
+    return new TransactionalActuator();
+  }
+
+  /**
    * Get current transaction or null if current has not transaction.
    *
    * @return currentTransaction

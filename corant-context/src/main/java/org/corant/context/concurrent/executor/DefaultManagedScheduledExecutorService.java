@@ -17,6 +17,8 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.corant.context.concurrent.ConcurrentExtension;
+import org.corant.shared.ubiquity.Throwing;
 import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedScheduledExecutorServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
@@ -47,6 +49,22 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
     } else {
       threadPoolExecutor.setRejectedExecutionHandler(new AbortHandler(name));
     }
+  }
+
+  @Override
+  public void execute(Runnable command) {
+    if (command == null) {
+      throw new NullPointerException("The runnable can't null!");
+    }
+    final Runnable useCommand = ConcurrentExtension.ENABLE_EXE_RUNNABLE_LOGGER ? () -> {
+      try {
+        command.run();
+      } catch (Throwable t) {
+        logger.log(Level.SEVERE, "Execute runnable occurred error!", t);
+        Throwing.rethrow(t);
+      }
+    } : command;
+    super.execute(useCommand);
   }
 
   void stop() {

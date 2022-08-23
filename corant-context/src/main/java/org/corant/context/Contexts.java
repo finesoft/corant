@@ -56,15 +56,6 @@ public class Contexts {
       Configs.getValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
 
   /**
-   * Returns an enhanced version of of {@link Instance} provide by Weld.
-   */
-  public static WeldInstance<Object> getWeldInstance() {
-    return Beans.resolve(new TypeLiteral<WeldInstance<Object>>() {
-      private static final long serialVersionUID = 1235213990342343584L;
-    });
-  }
-
-  /**
    * Returns whether there is an active context for all given scope types.
    *
    * @param scopeTypes
@@ -104,6 +95,15 @@ public class Contexts {
 
   public static ContextInstaller createInstaller(boolean propagate, WeldManager manager) {
     return new ContextInstaller(propagate, manager);
+  }
+
+  /**
+   * Returns an enhanced version of {@link Instance} provide by Weld.
+   */
+  public static WeldInstance<Object> getWeldInstance() {
+    return Beans.resolve(new TypeLiteral<WeldInstance<Object>>() {
+      private static final long serialVersionUID = 1235213990342343584L;
+    });
   }
 
   /**

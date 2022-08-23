@@ -13,6 +13,7 @@
  */
 package org.corant.context.proxy;
 
+import static java.util.Collections.emptyList;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -116,6 +117,50 @@ public class ProxyUtils {
       }
     }
     return chains;
+  }
+
+  /**
+   * Resolve bean method and it's interceptor invocations from the given bean method with the given
+   * bean manager and the given creational context.
+   * <p>
+   * Note: Currently we do not support resolving static methods.
+   * <p>
+   * FIXME for now I am not sure yet, the default method interceptor?
+   *
+   * @param beanManager bean manager to handle interceptors
+   * @param creationalContext the creational context use for interceptor instantiation
+   * @param method the target bean method type with some interceptors
+   * @return a list contains the interceptor invocations of the method， the interceptor invocation
+   *         contains interceptor instance and the meta object of the interceptor.
+   *
+   * @see BeanManager#resolveInterceptors(InterceptionType, Annotation...)
+   * @see InterceptorInvocation
+   */
+  public static List<InterceptorInvocation> getInterceptorChains(BeanManager beanManager,
+      CreationalContext<?> creationalContext, Method method) {
+    if (!Modifier.isStatic(method.getModifiers())) {
+      Map<Interceptor<?>, Object> interceptorInstances = new HashMap<>();
+      List<Annotation> classLevelBindings =
+          getInterceptorBindings(method.getDeclaringClass().getAnnotations(), beanManager);
+      List<Annotation> methodLevelBindings =
+          getInterceptorBindings(method.getAnnotations(), beanManager);
+      if (!classLevelBindings.isEmpty() || !methodLevelBindings.isEmpty()) {
+        List<Annotation> interceptorBindings = merge(methodLevelBindings, classLevelBindings);
+        List<Interceptor<?>> interceptors =
+            beanManager.resolveInterceptors(InterceptionType.AROUND_INVOKE,
+                interceptorBindings.toArray(new Annotation[interceptorBindings.size()]));
+        if (!interceptors.isEmpty()) {
+          List<InterceptorInvocation> chain = new ArrayList<>();
+          for (Interceptor<?> interceptor : interceptors) {
+            chain.add(new InterceptorInvocation(interceptor,
+                interceptorInstances.computeIfAbsent(interceptor,
+                    i -> beanManager.getReference(i, i.getBeanClass(), creationalContext))));
+          }
+          return chain;
+        }
+      }
+    }
+    return emptyList();
   }
 
   /**

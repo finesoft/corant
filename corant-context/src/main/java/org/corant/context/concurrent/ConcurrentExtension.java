@@ -84,6 +84,8 @@ public class ConcurrentExtension implements Extension {
       "corant.concurrent.enable-default-context-service";
   public static final String ENABLE_HUNG_TASK_LOGGER_CFG =
       "corant.concurrent.enable-hung-task-logger";
+  public static final String ENABLE_EXE_RUNNABLE_LOGGER_CFG =
+      "corant.concurrent.enable-execute-runnable-logger";
   public static final String ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG =
       "corant.concurrent.enable-concurrent-throttle-interceptor";
   public static final String ENABLE_ASYNC_INTERCEPTOR_CFG =
@@ -98,6 +100,8 @@ public class ConcurrentExtension implements Extension {
       Configs.<Boolean>getValue(ENABLE_DFLT_CS_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_HUNG_TASK_LOGGER =
       Configs.<Boolean>getValue(ENABLE_HUNG_TASK_LOGGER_CFG, Boolean.class, Boolean.FALSE);
+  public static final boolean ENABLE_EXE_RUNNABLE_LOGGER =
+      Configs.<Boolean>getValue(ENABLE_EXE_RUNNABLE_LOGGER_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR = Configs
       .<Boolean>getValue(ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG, Boolean.class, Boolean.FALSE);
   public static final boolean ENABLE_ASYNC_INTERCEPTOR =

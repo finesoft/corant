@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -27,6 +28,16 @@ import java.util.function.Function;
 public class Throwing {
 
   private Throwing() {}
+
+  public static void rethrow(Throwable t) {
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException) t;
+    }
+    if (t instanceof Error) {
+      throw (Error) t;
+    }
+    throw new CorantRuntimeException(t);
+  }
 
   @FunctionalInterface
   public interface ThrowingBiConsumer<K, V, E extends Throwable> {

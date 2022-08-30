@@ -322,7 +322,7 @@ public class Texts {
         try {
           if (offset > 0) {
             for (int i = 0; i < offset; i++) {
-              if (reader.readLine() == null) {
+              if ((nextLine = reader.readLine()) == null) {
                 valid = false;
                 break;
               }
@@ -338,15 +338,11 @@ public class Texts {
         if (!valid) {
           return false;
         }
-        if (nextLine != null) {
-          return true;
-        } else {
-          try {
-            nextLine = reader.readLine();
-            return nextLine != null && !useTerminator.test(++readLines, nextLine);
-          } catch (IOException e) {
-            throw new UncheckedIOException(e);
-          }
+        try {
+          nextLine = reader.readLine();
+          return nextLine != null && !useTerminator.test(++readLines, nextLine);
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
         }
       }
 

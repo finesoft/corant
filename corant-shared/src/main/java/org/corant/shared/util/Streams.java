@@ -162,6 +162,56 @@ public class Streams {
   }
 
   /**
+   * {@link #concat(List)}
+   *
+   * @param inputStreams the input streams.
+   * @return {@link SequenceInputStream}
+   */
+  public static InputStream concat(InputStream... inputStreams) {
+    return concat(listOf(inputStreams));
+  }
+
+  /**
+   * Initializes a newly created <code>SequenceInputStream</code> by remembering the argument, which
+   * must be an <code>List</code> that produces objects whose run-time type is
+   * <code>InputStream</code>. The input streams that are produced by the iterator of given
+   * inputStreams will be read, in order, to provide the bytes to be read from this
+   * <code>SequenceInputStream</code>. After each input stream from the the iterator of given
+   * inputStreams is exhausted, it is closed by calling its <code>close</code> method.
+   * <p>
+   * In some scenarios, such as wanting to know the number of bytes of each input stream, the user
+   * can wrap each input stream into <code>CountingStream.CountingInputStream</code> and after the
+   * returns <code>InputStream</code> is read, the length of each specific input stream can be
+   * obtained.
+   *
+   * @param inputStreams a list of input streams.
+   * @return {@link SequenceInputStream}
+   */
+  public static InputStream concat(List<InputStream> inputStreams) {
+    int size = sizeOf(inputStreams);
+    if (size == 0) {
+      return InputStream.nullInputStream();
+    } else if (size == 1) {
+      return inputStreams.get(0);
+    } else {
+      return new SequenceInputStream(new Enumeration<InputStream>() {
+        final Iterator<InputStream> iterator = inputStreams.iterator();
+
+        @Override
+        public boolean hasMoreElements() {
+          return iterator.hasNext();
+        }
+
+        @Override
+        public InputStream nextElement() {
+          return iterator.next();
+        }
+
+      });
+    }
+  }
+
+  /**
    * Copy the given input stream to the given output stream without closing the streams, the buffer
    * size is 4kbs.
    *
@@ -278,56 +328,6 @@ public class Streams {
       count += n;
     }
     return count;
-  }
-
-  /**
-   * {@link #concat(List)}
-   *
-   * @param inputStreams the input streams.
-   * @return {@link SequenceInputStream}
-   */
-  public static InputStream concat(InputStream... inputStreams) {
-    return concat(listOf(inputStreams));
-  }
-
-  /**
-   * Initializes a newly created <code>SequenceInputStream</code> by remembering the argument, which
-   * must be an <code>List</code> that produces objects whose run-time type is
-   * <code>InputStream</code>. The input streams that are produced by the iterator of given
-   * inputStreams will be read, in order, to provide the bytes to be read from this
-   * <code>SequenceInputStream</code>. After each input stream from the the iterator of given
-   * inputStreams is exhausted, it is closed by calling its <code>close</code> method.
-   * <p>
-   * In some scenarios, such as wanting to know the number of bytes of each input stream, the user
-   * can wrap each input stream into <code>CountingStream.CountingInputStream</code> and after the
-   * returns <code>InputStream</code> is read, the length of each specific input stream can be
-   * obtained.
-   *
-   * @param inputStreams a list of input streams.
-   * @return {@link SequenceInputStream}
-   */
-  public static InputStream concat(List<InputStream> inputStreams) {
-    int size = sizeOf(inputStreams);
-    if (size == 0) {
-      return InputStream.nullInputStream();
-    } else if (size == 1) {
-      return inputStreams.get(0);
-    } else {
-      return new SequenceInputStream(new Enumeration<InputStream>() {
-        final Iterator<InputStream> iterator = inputStreams.iterator();
-
-        @Override
-        public boolean hasMoreElements() {
-          return iterator.hasNext();
-        }
-
-        @Override
-        public InputStream nextElement() {
-          return iterator.next();
-        }
-
-      });
-    }
   }
 
   /**

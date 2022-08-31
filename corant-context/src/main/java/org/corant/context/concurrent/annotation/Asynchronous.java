@@ -27,9 +27,9 @@ import org.corant.context.qualifier.Qualifiers;
 /**
  * corant-context
  * <p>
- * NOTE: According the java interceptor specification: Around-invoke and around-timeout
- * interceptormethods run in the same Java thread as the associated target method, so the
- * Asynchronous methodcan't handle contextual parameters such as CDI event .etc.
+ * NOTE: According the java interceptor specification: Around-invoke and around-timeout interceptor
+ * methods run in the same Java thread as the associated target method, so the Asynchronous method
+ * can't handle contextual parameters such as CDI event .etc.
  *
  * @author bingo 上午9:49:43
  *

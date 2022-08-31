@@ -34,6 +34,7 @@ import javax.annotation.Priority;
 import javax.enterprise.concurrent.ContextService;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
@@ -65,6 +66,7 @@ import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 import org.corant.shared.normal.Priorities;
+import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedExecutorServiceAdapter;
 import org.glassfish.enterprise.concurrent.ManagedScheduledExecutorServiceAdapter;
 
@@ -82,6 +84,8 @@ public class ConcurrentExtension implements Extension {
       "corant.concurrent.enable-default-managed-scheduled-executor";
   public static final String ENABLE_DFLT_CS_CFG =
       "corant.concurrent.enable-default-context-service";
+  public static final String ENABLE_DFLT_MTF_CFG =
+      "corant.concurrent.enable-default-managed-thread-factory";
   public static final String ENABLE_HUNG_TASK_LOGGER_CFG =
       "corant.concurrent.enable-hung-task-logger";
   public static final String ENABLE_EXE_RUNNABLE_LOGGER_CFG =
@@ -98,6 +102,8 @@ public class ConcurrentExtension implements Extension {
       Configs.<Boolean>getValue(ENABLE_DFLT_MSES_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_DFLT_CS =
       Configs.<Boolean>getValue(ENABLE_DFLT_CS_CFG, Boolean.class, Boolean.TRUE);
+  public static final boolean ENABLE_DFLT_MTF =
+      Configs.<Boolean>getValue(ENABLE_DFLT_MTF_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_HUNG_TASK_LOGGER =
       Configs.<Boolean>getValue(ENABLE_HUNG_TASK_LOGGER_CFG, Boolean.class, Boolean.FALSE);
   public static final boolean ENABLE_EXE_RUNNABLE_LOGGER =
@@ -114,6 +120,8 @@ public class ConcurrentExtension implements Extension {
   protected volatile NamedQualifierObjectManager<ManagedScheduledExecutorConfig> scheduledExecutorConfigs =
       NamedQualifierObjectManager.empty();
   protected volatile NamedQualifierObjectManager<ContextServiceConfig> contextServiceConfigs =
+      NamedQualifierObjectManager.empty();
+  protected volatile NamedQualifierObjectManager<ManagedThreadFactoryConfig> threadFactoryConfigs =
       NamedQualifierObjectManager.empty();
   protected volatile InitialContext jndi;
 
@@ -154,7 +162,7 @@ public class ConcurrentExtension implements Extension {
       });
 
       contextServiceConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
-        event.<ContextService>addBean().addTransitiveTypeClosure(ContextService.class)
+        event.<ContextService>addBean().addTransitiveTypeClosure(DefaultContextService.class)
             .addQualifiers(esn).beanClass(DefaultContextService.class)
             .scope(ApplicationScoped.class).produceWith(beans -> {
               try {
@@ -187,6 +195,24 @@ public class ConcurrentExtension implements Extension {
           registerJndi(cfg.getName(), ManagedScheduledExecutorService.class, esn);
         }
       });
+
+      threadFactoryConfigs.getAllWithQualifiers().forEach((cfg, esn) -> {
+        event.<ManagedThreadFactory>addBean().addQualifiers(esn)
+            .addTransitiveTypeClosure(DefaultManagedThreadFactory.class)
+            .beanClass(DefaultManagedThreadFactory.class).scope(ApplicationScoped.class)
+            .produceWith(beans -> {
+              try {
+                return produce(beans, cfg);
+              } catch (NamingException e) {
+                throw new CorantRuntimeException(e);
+              }
+            });
+        logger
+            .info(() -> String.format("Resolved managed thread factory %s %s", cfg.getName(), cfg));
+        if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
+          registerJndi(cfg.getName(), ManagedThreadFactory.class, esn);
+        }
+      });
     }
   }
 
@@ -215,9 +241,18 @@ public class ConcurrentExtension implements Extension {
       cscs.add(ContextServiceConfig.DFLT_INST);
     }
 
+    Collection<ManagedThreadFactoryConfig> mtfcs =
+        newArrayList(Configs.resolveMulti(ManagedThreadFactoryConfig.class).values());
+    if (mtfcs.isEmpty() && ENABLE_DFLT_MTF) {
+      logger.info(() -> String.format("Use default managed thread factory configuration %s",
+          ManagedThreadFactoryConfig.DFLT_INST));
+      mtfcs.add(ManagedThreadFactoryConfig.DFLT_INST);
+    }
+
     executorConfigs = new DefaultNamedQualifierObjectManager<>(mecs);
     scheduledExecutorConfigs = new DefaultNamedQualifierObjectManager<>(msecs);
     contextServiceConfigs = new DefaultNamedQualifierObjectManager<>(cscs);
+    threadFactoryConfigs = new DefaultNamedQualifierObjectManager<>(mtfcs);
   }
 
   protected void onProcessAsynchronousAnnotatedType(
@@ -277,6 +312,18 @@ public class ConcurrentExtension implements Extension {
         cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getKeepAliveTime().toMillis(),
         TimeUnit.MILLISECONDS, cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(),
         contextService, cfg.getRejectPolicy(), cfg.getRetryDelay());
+  }
+
+  protected DefaultManagedThreadFactory produce(Instance<Object> instance,
+      ManagedThreadFactoryConfig cfg) throws NamingException {
+    ContextServiceImpl contextService = null;// FIXME use context service interface
+    if (cfg.getContext() != null) {
+      Annotation[] qualifiers = contextServiceConfigs.getQualifiers(cfg.getContext());
+      contextService = instance.select(ContextServiceImpl.class, qualifiers).get();
+    }
+    logger
+        .fine(() -> String.format("Create managed thread factory %s with %s.", cfg.getName(), cfg));
+    return new DefaultManagedThreadFactory(cfg.getName(), contextService, cfg.getPriority());
   }
 
   protected ManagedExecutorServiceAdapter register(Instance<Object> instance,

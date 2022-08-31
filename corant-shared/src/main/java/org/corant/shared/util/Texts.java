@@ -348,7 +348,7 @@ public class Texts {
 
       @Override
       public T next() {
-        if (nextLine != null || hasNext()) {
+        if (valid && (nextLine != null || hasNext())) {
           String line = nextLine;
           nextLine = null;
           return converter.apply(line);

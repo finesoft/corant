@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.executor;
 
+import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
 
 /**
@@ -28,6 +29,14 @@ public class DefaultManagedThreadFactory extends ManagedThreadFactoryImpl {
    */
   public DefaultManagedThreadFactory(String name) {
     super(name);
+  }
+
+  public DefaultManagedThreadFactory(String name, ContextServiceImpl contextService) {
+    super(name, contextService);
+  }
+
+  public DefaultManagedThreadFactory(String name, ContextServiceImpl contextService, int priority) {
+    super(name, contextService, priority);
   }
 
 }

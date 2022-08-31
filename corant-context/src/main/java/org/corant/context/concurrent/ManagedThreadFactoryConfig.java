@@ -31,23 +31,28 @@ public class ManagedThreadFactoryConfig extends AbstractNamedObject implements D
 
   private static final long serialVersionUID = -293822931326474344L;
 
-  protected String context;
-  protected int priority = Thread.NORM_PRIORITY;
+  public static final ManagedThreadFactoryConfig DFLT_INST = new ManagedThreadFactoryConfig(null);
 
-  /**
-   *
-   * @return the context
-   */
+  protected String context;// the context service named qualifier
+  protected int priority = Thread.NORM_PRIORITY;
+  protected boolean enableJndi = false;
+
+  public ManagedThreadFactoryConfig() {}
+
+  private ManagedThreadFactoryConfig(String name) {
+    setName(name);
+  }
+
   public String getContext() {
     return context;
   }
 
-  /**
-   *
-   * @return the priority
-   */
   public int getPriority() {
     return priority;
+  }
+
+  public boolean isEnableJndi() {
+    return enableJndi;
   }
 
   @Override
@@ -60,18 +65,20 @@ public class ManagedThreadFactoryConfig extends AbstractNamedObject implements D
     setName(key);
   }
 
-  /**
-   *
-   * @param context the context to set
-   */
+  @Override
+  public String toString() {
+    return "[context=" + context + ", priority=" + priority + ", enableJndi=" + enableJndi
+        + ", name=" + getName() + "]";
+  }
+
   protected void setContext(String context) {
     this.context = context;
   }
 
-  /**
-   *
-   * @param priority the priority to set
-   */
+  protected void setEnableJndi(boolean enableJndi) {
+    this.enableJndi = enableJndi;
+  }
+
   protected void setPriority(int priority) {
     this.priority = priority;
   }

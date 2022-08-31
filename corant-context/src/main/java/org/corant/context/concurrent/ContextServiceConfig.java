@@ -14,7 +14,7 @@
 package org.corant.context.concurrent;
 
 import static org.corant.shared.util.Sets.immutableSetOf;
-import static org.corant.shared.util.Strings.isNoneBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Set;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -55,7 +55,7 @@ public class ContextServiceConfig extends AbstractNamedObject implements Declara
 
   @Override
   public boolean isValid() {
-    return isNoneBlank(getName());
+    return isNotBlank(getName()); // Be Used in managed thread factory, so must have a name.
   }
 
   @Override

@@ -96,7 +96,7 @@
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
     <version.jose4j>0.7.9</version.jose4j>
     <version.jsqlparser>4.3</version.jsqlparser>
-    <version.jsoup>1.14.2</version.jsoup>
+    <version.jsoup>1.15.3</version.jsoup>
     <version.junit>4.13.2</version.junit>
     <version.jython>2.7.2</version.jython>
     <version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>

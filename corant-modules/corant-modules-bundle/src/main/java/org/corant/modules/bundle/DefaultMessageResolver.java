@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -40,6 +41,9 @@ import org.corant.shared.util.Strings;
  */
 @ApplicationScoped
 public class DefaultMessageResolver implements MessageResolver {
+
+  @Inject
+  Logger logger;
 
   @Inject
   @Any
@@ -82,6 +86,7 @@ public class DefaultMessageResolver implements MessageResolver {
           .filter(Strings::isNotBlank).findFirst().orElse(null);
     }
     if (msg == null) {
+      logger.warning(() -> String.format("Can't find any message for %s", codes));
       if (dfltMsgResolver != null) {
         msg = dfltMsgResolver.apply(locale);
       } else {

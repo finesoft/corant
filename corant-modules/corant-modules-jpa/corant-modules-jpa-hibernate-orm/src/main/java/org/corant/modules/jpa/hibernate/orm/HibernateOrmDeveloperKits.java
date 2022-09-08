@@ -188,8 +188,8 @@ public class HibernateOrmDeveloperKits {
       System.out.println("\n/**-->>>>>>>> Schema output start**/");
     } else {
       String version =
-          "V" + DateTimeFormatter.ofPattern("yyMMddHHmmss").format(LocalDateTime.now());
-      System.out.println("\n/**--Version: " + version + "__todo.sql");
+          "V" + DateTimeFormatter.ofPattern("yyMMddHHmm").format(LocalDateTime.now());
+      System.out.println("\n/**--Version: " + version + "__rename.sql");
       System.out.println("\n--<<<<<<<< Schema output end. **/\n");
     }
   }

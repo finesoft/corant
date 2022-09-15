@@ -166,7 +166,7 @@
     <version.smallrye-jwt-cdi-extension>3.3.1</version.smallrye-jwt-cdi-extension>
     <version.smallrye-metrics>3.0.4</version.smallrye-metrics>
     <version.smallrye-opentracing>2.0.1</version.smallrye-opentracing>
-    <version.snakeyaml>1.27</version.snakeyaml>
+    <version.snakeyaml>1.31</version.snakeyaml>
     <version.swagger>2.1.12</version.swagger>
     <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>

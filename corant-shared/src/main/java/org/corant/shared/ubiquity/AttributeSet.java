@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.security.shared;
+package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Maps.getMapCollection;
@@ -23,10 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
- * corant-modules-security-shared
+ * corant-shared
  *
  * @author bingo 下午11:16:12
  *

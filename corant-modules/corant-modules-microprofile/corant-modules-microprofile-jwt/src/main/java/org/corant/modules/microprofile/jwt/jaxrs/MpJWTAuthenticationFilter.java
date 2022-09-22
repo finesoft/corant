@@ -29,9 +29,10 @@ import javax.ws.rs.core.SecurityContext;
 import org.corant.config.Configs;
 import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
 import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
-import org.corant.modules.microprofile.jwt.MpJWTSecurityContextManager;
+import org.corant.modules.microprofile.jwt.MpJWTPrincipal;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.Authenticator;
+import org.corant.modules.security.SecurityContextManager;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
@@ -65,7 +66,8 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   protected PrincipalProducer producer;
 
   @Inject
-  protected MpJWTSecurityContextManager securityManager;
+  @Any
+  protected Instance<SecurityContextManager<ContainerRequestContext>> securityManagers;
 
   @Inject
   @Any
@@ -85,13 +87,14 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
         try {
           AuthenticationData authcData =
               authenticator.authenticate(new MpJWTJsonWebToken(bearerToken, requestContext));
-          JsonWebToken jwtPrincipal =
-              authcData.getPrincipals().iterator().next().unwrap(JsonWebToken.class);
+          JsonWebToken jwtPrincipal = authcData.getPrincipal(MpJWTPrincipal.class);
           producer.setJsonWebToken(jwtPrincipal);
           // Install the JWT principal as the caller
           JWTSecurityContext jwtSctx = new JWTSecurityContext(securityContext, jwtPrincipal);
-          securityManager.bind(jwtSctx);
           requestContext.setSecurityContext(jwtSctx);
+          if (securityManagers.isResolvable()) {
+            securityManagers.get().bind(requestContext);
+          }
           logger.debugf("JWT authentication filter handle successfully");
         } catch (Exception e) {
           if (SUPPRESS_UNAUTHENTICATED) {

@@ -50,7 +50,8 @@ public interface Authenticator extends Sortable {
    * @return true if it has been authenticated otherwise false
    */
   default boolean authenticated(Object context) {
-    return context instanceof SecurityContext && ((SecurityContext) context).getPrincipal() != null;
+    return context instanceof SecurityContext
+        && ((SecurityContext) context).getCallerPrincipal() != null;
   }
 
   /**

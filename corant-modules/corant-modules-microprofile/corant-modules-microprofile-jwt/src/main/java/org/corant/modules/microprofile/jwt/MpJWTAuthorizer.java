@@ -63,7 +63,7 @@ public class MpJWTAuthorizer extends AbstractAuthorizer {
 
   protected boolean testPermAccess(SecurityContext sctx, SimplePermissions perms) {
     if (perms.isEmpty()) {
-      return sctx.getPrincipal() != null;
+      return sctx.getCallerPrincipal() != null;
     }
     Collection<SimplePermission> sctxPerms = sctx.getPrincipal(SimplePrincipal.class)
         .getAttribute("permits", ArrayList::new, p -> new SimplePermission(p.toString()));
@@ -79,7 +79,7 @@ public class MpJWTAuthorizer extends AbstractAuthorizer {
 
   protected boolean testRoleAccess(SecurityContext sctx, SimpleRoles roles) {
     if (roles.isEmpty()) {
-      return sctx.getPrincipal() != null;
+      return sctx.getCallerPrincipal() != null;
     }
     Collection<SimpleRole> sctxRoles = sctx.getPrincipal(SimplePrincipal.class)
         .getAttribute("groups", ArrayList::new, r -> new SimpleRole(r.toString()));

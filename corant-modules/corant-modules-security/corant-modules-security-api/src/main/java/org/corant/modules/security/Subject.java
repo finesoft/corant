@@ -13,6 +13,9 @@
  */
 package org.corant.modules.security;
 
+import static java.util.Collections.emptySet;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Sets.newHashSet;
 import java.io.Serializable;
 import java.util.Collection;
@@ -38,7 +41,7 @@ public interface Subject extends Serializable {
 
     @Override
     public Collection<? extends Principal> getPrincipals() {
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
   };
 
@@ -46,17 +49,26 @@ public interface Subject extends Serializable {
     return new javax.security.auth.Subject(true, newHashSet(getPrincipals()), null, null);
   }
 
-  Principal getPrincipal(String name);
-
-  default <T> T getPrincipal(String name, Class<T> c) {
-    Principal p = getPrincipal(name);
-    return p != null ? p.unwrap(c) : null;
+  default <T> T getPrincipal(Class<T> clazz) {
+    Collection<? extends Principal> principals;
+    if (clazz == null || isEmpty(principals = getPrincipals())) {
+      return null;
+    }
+    return principals.stream().filter(p -> clazz.isAssignableFrom(getUserClass(p)))
+        .map(p -> p.unwrap(clazz)).findFirst().orElse(null);
   }
+
+  Principal getPrincipal(String name);
 
   Collection<? extends Principal> getPrincipals();
 
-  default <T> Collection<T> getPrincipals(Class<T> c) {
-    return getPrincipals().stream().map(p -> p.unwrap(c)).collect(Collectors.toList());
+  default <T> Collection<T> getPrincipals(Class<T> clazz) {
+    Collection<? extends Principal> principals;
+    if (clazz == null || isEmpty(principals = getPrincipals())) {
+      return emptySet();
+    }
+    return principals.stream().filter(p -> clazz.isAssignableFrom(getUserClass(p)))
+        .map(p -> p.unwrap(clazz)).collect(Collectors.toUnmodifiableSet());
   }
 
   default <T> T unwrap(Class<T> cls) {

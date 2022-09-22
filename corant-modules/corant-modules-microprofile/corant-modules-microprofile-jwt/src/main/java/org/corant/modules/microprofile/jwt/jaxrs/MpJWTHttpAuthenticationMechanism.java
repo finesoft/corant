@@ -28,8 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
 import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
+import org.corant.modules.microprofile.jwt.MpJWTPrincipal;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.Authenticator;
+import org.corant.modules.security.SecurityContextManager;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
@@ -66,6 +68,10 @@ public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMecha
   @Any
   protected Instance<Authenticator> authenticatorInstance;
 
+  @Inject
+  @Any
+  protected Instance<SecurityContextManager<HttpServletRequest>> securityManagers;
+
   protected Authenticator authenticator = MpJWTAuthenticator.DFLT_INST;
 
   @Override
@@ -77,11 +83,14 @@ public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMecha
     if (bearerToken != null) {
       try {
         AuthenticationData authcData =
-            authenticator.authenticate(new MpJWTJsonWebToken(bearerToken));
-        JsonWebToken jwtPrincipal =
-            authcData.getPrincipals().iterator().next().unwrap(JsonWebToken.class);
+            authenticator.authenticate(new MpJWTJsonWebToken(bearerToken, request));
+        JsonWebToken jwtPrincipal = authcData.getPrincipal(MpJWTPrincipal.class);
         producer.setJsonWebToken(jwtPrincipal);
         Set<String> groups = jwtPrincipal.getGroups();
+        request.setAttribute(JsonWebToken.class.getCanonicalName(), jwtPrincipal);
+        if (securityManagers.isResolvable()) {
+          securityManagers.get().bind(request);
+        }
         return httpMessageContext.notifyContainerAboutLogin(jwtPrincipal, groups);
       } catch (org.corant.modules.security.AuthenticationException e) {
         if (debugLogging) {

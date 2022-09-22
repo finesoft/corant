@@ -35,27 +35,27 @@ public class UserAuthzData extends SimpleAuthzData {
   protected Serializable userId;
 
   public UserAuthzData(Serializable userId) {
-    this(userId, (Collection<String>) null, (Collection<String>) null, null);
+    this(userId, (List<String>) null, (List<String>) null, null);
   }
 
-  public UserAuthzData(Serializable userId, Collection<String> roles,
-      Collection<String> permissions) {
+  public UserAuthzData(Serializable userId, Collection<? extends Role> roles,
+      Collection<? extends Permission> permissions) {
     this(userId, roles, permissions, null);
   }
 
-  public UserAuthzData(Serializable userId, Collection<String> roles,
-      Collection<String> permissions, Map<String, ? extends Serializable> attributes) {
+  public UserAuthzData(Serializable userId, Collection<? extends Role> roles,
+      Collection<? extends Permission> permissions,
+      Map<String, ? extends Serializable> attributes) {
     super(roles, permissions, attributes);
     this.userId = userId;
   }
 
-  public UserAuthzData(Serializable userId, List<? extends Role> roles,
-      List<? extends Permission> permissions) {
+  public UserAuthzData(Serializable userId, List<String> roles, List<String> permissions) {
     this(userId, roles, permissions, null);
   }
 
-  public UserAuthzData(Serializable userId, List<? extends Role> roles,
-      List<? extends Permission> permissions, Map<String, ? extends Serializable> attributes) {
+  public UserAuthzData(Serializable userId, List<String> roles, List<String> permissions,
+      Map<String, ? extends Serializable> attributes) {
     super(roles, permissions, attributes);
     this.userId = userId;
   }
@@ -63,19 +63,20 @@ public class UserAuthzData extends SimpleAuthzData {
   protected UserAuthzData() {}
 
   public static UserAuthzData ofPermissions(Serializable userId,
-      List<? extends Permission> permissions) {
+      Collection<? extends Permission> permissions) {
     return ofPermissions(userId, permissions, null);
   }
 
   public static UserAuthzData ofPermissions(Serializable userId,
-      List<? extends Permission> permissions, Map<String, ? extends Serializable> attributes) {
+      Collection<? extends Permission> permissions,
+      Map<String, ? extends Serializable> attributes) {
     return new UserAuthzData(userId, null, permissions, attributes);
   }
 
   public static UserAuthzData ofPermissions(Serializable userId,
       Map<String, ? extends Serializable> attributes, String... permissions) {
     return ofPermissions(userId,
-        Arrays.stream(permissions).map(SimplePermission::of).collect(Collectors.toList()),
+        Arrays.stream(permissions).map(SimplePermission::of).collect(Collectors.toSet()),
         attributes);
   }
 
@@ -83,18 +84,18 @@ public class UserAuthzData extends SimpleAuthzData {
     return ofPermissions(userId, null, permissions);
   }
 
-  public static UserAuthzData ofRoles(Serializable userId, List<? extends Role> roles) {
+  public static UserAuthzData ofRoles(Serializable userId, Collection<? extends Role> roles) {
     return ofRoles(userId, roles, null);
   }
 
-  public static UserAuthzData ofRoles(Serializable userId, List<? extends Role> roles,
+  public static UserAuthzData ofRoles(Serializable userId, Collection<? extends Role> roles,
       Map<String, ? extends Serializable> attributes) {
     return new UserAuthzData(userId, roles, null, attributes);
   }
 
   public static UserAuthzData ofRoles(Serializable userId,
       Map<String, ? extends Serializable> attributes, String... roles) {
-    return ofRoles(userId, Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toList()),
+    return ofRoles(userId, Arrays.stream(roles).map(SimpleRole::of).collect(Collectors.toSet()),
         attributes);
   }
 

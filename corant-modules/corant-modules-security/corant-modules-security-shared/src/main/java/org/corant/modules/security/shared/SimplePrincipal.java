@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import org.corant.modules.security.Principal;
+import org.corant.shared.ubiquity.AttributeSet;
 
 /**
  * corant-modules-security-shared

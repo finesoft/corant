@@ -13,11 +13,9 @@
  */
 package org.corant.modules.microprofile.jwt;
 
-import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.SecurityContext;
+import javax.servlet.http.HttpServletRequest;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**
@@ -27,19 +25,14 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  *
  */
 @RequestScoped
-public class MpJWTSecurityContextManager
-    extends AbstractJWTSecurityContextManager<ContainerRequestContext> {
+public class MpJWTHAMSecurityContextManager
+    extends AbstractJWTSecurityContextManager<HttpServletRequest> {
 
   @Override
-  public void bind(ContainerRequestContext requestContext) {
-    JsonWebToken userPrincipal = null;
-    String authSchema = null;
-    SecurityContext securityContext = requestContext.getSecurityContext();
-    if (securityContext != null && securityContext.getUserPrincipal() != null) {
-      userPrincipal = shouldInstanceOf(securityContext.getUserPrincipal(), JsonWebToken.class);
-      authSchema = securityContext.getAuthenticationScheme();
-    }
-    bindJsonWebToken(userPrincipal, authSchema);
+  public void bind(HttpServletRequest request) {
+    JsonWebToken userPrincipal =
+        (JsonWebToken) request.getAttribute(JsonWebToken.class.getCanonicalName());
+    super.bindJsonWebToken(userPrincipal, null);
   }
 
   @PreDestroy

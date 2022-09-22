@@ -22,7 +22,7 @@ import org.corant.context.security.SecurityContext;
 import org.corant.context.security.SecurityContexts;
 import org.corant.modules.security.annotation.SecuredMetadata;
 import org.corant.modules.security.annotation.SecuredType;
-import org.corant.modules.security.shared.AttributeSet;
+import org.corant.shared.ubiquity.AttributeSet;
 
 /**
  * corant-modules-security-shared

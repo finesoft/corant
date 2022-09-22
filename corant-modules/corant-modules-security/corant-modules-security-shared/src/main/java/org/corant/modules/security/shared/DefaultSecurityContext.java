@@ -13,6 +13,15 @@
  */
 package org.corant.modules.security.shared;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Sets.immutableSet;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Subject;
@@ -29,16 +38,16 @@ public class DefaultSecurityContext implements SecurityContext {
 
   protected final String authenticationScheme;
 
-  protected final Principal principal;
+  protected final Collection<? extends Principal> principals;
 
   public DefaultSecurityContext(String authenticationScheme, Principal principal) {
     this.authenticationScheme = authenticationScheme;
-    this.principal = principal;
+    principals = principal == null ? emptySet() : singleton(principal);
   }
 
   public DefaultSecurityContext(String authenticationScheme, Subject subject) {
     this.authenticationScheme = authenticationScheme;
-    principal = subject.getPrincipals().iterator().next();
+    principals = subject == null ? emptySet() : immutableSet(subject.getPrincipals());
   }
 
   @Override
@@ -47,19 +56,28 @@ public class DefaultSecurityContext implements SecurityContext {
   }
 
   @Override
-  public Principal getPrincipal() {
-    return principal;
+  public Principal getCallerPrincipal() {
+    return isEmpty(principals) ? null : principals.iterator().next();
   }
 
   @Override
-  public <T> T getPrincipal(Class<T> cls) {
-    return principal == null ? null : principal.unwrap(cls);
+  public <T extends Serializable> T getPrincipal(Class<T> cls) {
+    return cls == null || isEmpty(principals) ? null
+        : principals.stream().filter(p -> cls.isAssignableFrom(getUserClass(p)))
+            .map(p -> p.unwrap(cls)).findFirst().orElse(null);
+  }
+
+  @Override
+  public <T extends Serializable> Set<T> getPrincipals(Class<T> cls) {
+    return cls == null ? emptySet()
+        : principals.stream().filter(p -> cls.isAssignableFrom(getUserClass(p)))
+            .map(p -> p.unwrap(cls)).collect(Collectors.toUnmodifiableSet());
   }
 
   @Override
   public String toString() {
-    return "DefaultSecurityContext [authenticationScheme=" + authenticationScheme + ", principal="
-        + principal + "]";
+    return "DefaultSecurityContext [authenticationScheme=" + authenticationScheme + ", principals="
+        + principals + "]";
   }
 
   @Override

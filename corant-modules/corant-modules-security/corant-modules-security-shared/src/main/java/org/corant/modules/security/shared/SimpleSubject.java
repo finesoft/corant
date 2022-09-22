@@ -23,6 +23,7 @@ import org.corant.modules.security.Permission;
 import org.corant.modules.security.Principal;
 import org.corant.modules.security.Role;
 import org.corant.modules.security.Subject;
+import org.corant.shared.ubiquity.AttributeSet;
 
 /**
  * corant-modules-security-shared

@@ -13,13 +13,15 @@
  */
 package org.corant.modules.security.shared;
 
-import static org.corant.shared.util.Lists.newArrayList;
+import static java.util.Collections.emptySet;
+import static org.corant.shared.util.Sets.immutableSet;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.Principal;
+import org.corant.shared.ubiquity.AttributeSet;
 
 /**
  * corant-modules-security-shared
@@ -33,7 +35,7 @@ public class SimpleAuthcData implements AuthenticationData, AttributeSet {
 
   protected Object credentials;
 
-  protected Collection<Principal> principals;
+  protected Collection<Principal> principals = emptySet();
 
   protected Map<String, ? extends Serializable> attributes = Collections.emptyMap();
 
@@ -44,7 +46,7 @@ public class SimpleAuthcData implements AuthenticationData, AttributeSet {
   public SimpleAuthcData(Object credentials, Collection<? extends Principal> principals,
       Map<String, ? extends Serializable> attributes) {
     this.credentials = credentials;
-    this.principals = Collections.unmodifiableCollection(newArrayList(principals));
+    this.principals = immutableSet(principals);
     if (attributes != null) {
       this.attributes = Collections.unmodifiableMap(attributes);
     }

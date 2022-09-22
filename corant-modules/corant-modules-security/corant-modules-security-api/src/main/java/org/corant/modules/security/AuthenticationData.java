@@ -13,8 +13,12 @@
  */
 package org.corant.modules.security;
 
+import static java.util.Collections.emptySet;
+import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isEmpty;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * corant-modules-security-api
@@ -26,6 +30,24 @@ public interface AuthenticationData extends Serializable {
 
   Object getCredentials();
 
+  default <T> T getPrincipal(Class<T> clazz) {
+    Collection<? extends Principal> principals;
+    if (clazz == null || isEmpty(principals = getPrincipals())) {
+      return null;
+    }
+    return principals.stream().filter(p -> clazz.isAssignableFrom(getUserClass(p)))
+        .map(p -> p.unwrap(clazz)).findFirst().orElse(null);
+  }
+
   Collection<? extends Principal> getPrincipals();
+
+  default <T> Collection<T> getPrincipals(Class<T> clazz) {
+    Collection<? extends Principal> principals;
+    if (clazz == null || isEmpty(principals = getPrincipals())) {
+      return emptySet();
+    }
+    return principals.stream().filter(p -> clazz.isAssignableFrom(getUserClass(p)))
+        .map(p -> p.unwrap(clazz)).collect(Collectors.toUnmodifiableSet());
+  }
 
 }

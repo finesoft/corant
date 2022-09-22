@@ -29,10 +29,10 @@ public class SecurityContexts {
   }
 
   public static Serializable getCurrentPrincipal() {
-    return getCurrent().getPrincipal();
+    return getCurrent().getCallerPrincipal();
   }
 
-  public static <T> T getCurrentPrincipal(Class<T> cls) {
+  public static <T extends Serializable> T getCurrentPrincipal(Class<T> cls) {
     return getCurrent().getPrincipal(cls);
   }
 

@@ -17,9 +17,16 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import org.corant.modules.bundle.GlobalMessageCodes;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;
@@ -349,6 +356,41 @@ public class Jsons {
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
+    }
+  }
+
+  /**
+   * Returns java object from the given jakarta json value object.
+   *
+   * @param jsonValue jakarta json value object
+   * @return java object
+   */
+  public static Object fromJsonValue(JsonValue jsonValue) {
+    if (jsonValue instanceof JsonNumber) {
+      JsonNumber jcv = (JsonNumber) jsonValue;
+      if (jcv.isIntegral()) {
+        return Long.valueOf(jcv.longValue());
+      } else {
+        return Double.valueOf(jcv.doubleValue());
+      }
+    } else if (jsonValue instanceof JsonArray) {
+      JsonArray ja = (JsonArray) jsonValue;
+      ArrayList<Object> list = new ArrayList<>(ja.size());
+      for (JsonValue jv : ja) {
+        list.add(fromJsonValue(jv));
+      }
+      return list;
+    } else if (jsonValue instanceof JsonObject) {
+      JsonObject jo = (JsonObject) jsonValue;
+      Map<String, Object> map = new LinkedHashMap<>(jo.size());
+      jo.forEach((k, v) -> {
+        map.put(k, fromJsonValue(v));
+      });
+      return map;
+    } else if (jsonValue != null) {
+      return ((JsonString) jsonValue).getString();
+    } else {
+      return null;
     }
   }
 

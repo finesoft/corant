@@ -38,7 +38,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  */
 public abstract class AbstractJWTSecurityContextManager<C> implements SecurityContextManager<C> {
 
-  static final Logger logger = Logger.getLogger(AbstractJWTSecurityContextManager.class.getName());
+  protected static final Logger logger =
+      Logger.getLogger(AbstractJWTSecurityContextManager.class.getName());
 
   @Override
   public void unbind() {

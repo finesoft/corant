@@ -55,6 +55,7 @@
     <module>corant-modules-websocket</module>
     <module>corant-modules-aicv</module>
     <module>corant-modules-jnosql</module>
+    <module>corant-modules-javafx</module>
   </modules>
   <description>The Corant integration modules, which contains various components involved in enterprise development.</description>
 </project>

@@ -13,9 +13,7 @@
  */
 package org.corant.modules.jms.receive;
 
-import javax.jms.Connection;
 import javax.jms.ExceptionListener;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -26,13 +24,4 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface ManagedMessageReceivingExceptionListener extends ExceptionListener, Sortable {
 
-  boolean canHandle(Object ob);
-
-  default void tryConfig(Connection conn) {
-    try {
-      conn.setExceptionListener(this);
-    } catch (Exception e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
 }

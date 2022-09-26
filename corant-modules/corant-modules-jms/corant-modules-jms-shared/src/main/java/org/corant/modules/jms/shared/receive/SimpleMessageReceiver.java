@@ -106,7 +106,13 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
       select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::reverseCompare)
           .forEach(c -> c.configConnection(connection, meta));
       select(ManagedMessageReceivingExceptionListener.class).stream().min(Sortable::compare)
-          .ifPresent(listener -> listener.tryConfig(connection));
+          .ifPresent(t -> {
+            try {
+              connection.setExceptionListener(t);
+            } catch (JMSException e) {
+              throw new CorantRuntimeException(e);
+            }
+          });
     }
     // initialize session
     if (session == null) {

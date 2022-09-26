@@ -22,7 +22,7 @@ import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
 /**
- * corant-modules-bundle
+ * corant-context
  *
  * @author bingo 下午8:44:38
  *

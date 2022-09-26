@@ -61,14 +61,15 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected static final Logger logger = Logger.getLogger(DefaultMessageReceiver.class.getName());
 
-  // config
+  // configuration
   protected final MessageReceivingMetaData meta;
   protected final int receiveThreshold;
   protected final long receiveTimeout;
 
-  // worker workhorse
+  // workhorse
   protected final ManagedMessageReceivingHandler messageHandler;
   protected final MessageReceivingMediator mediator;
+  protected volatile Connection connection;
   protected volatile Session session;
   protected volatile MessageConsumer messageConsumer;
 
@@ -94,13 +95,20 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
     // initialize connection
     Connection connection = resolve(MessageReceivingConnections.class).startConnection(meta);
+    if (connection != this.connection) {
+      // connection was changed, we must release current session & consumer
+      if (session != null) {
+        release(true);
+      }
+      this.connection = connection;
+    }
 
     // initialize session
     if (session == null) {
       if (meta.isXa()) {
-        session = ((XAConnection) connection).createXASession();
+        session = ((XAConnection) this.connection).createXASession();
       } else {
-        session = connection.createSession(meta.getAcknowledge());
+        session = this.connection.createSession(meta.getAcknowledge());
       }
       select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
           .forEach(c -> c.configSession(session, meta));
@@ -172,6 +180,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected void closeMessageConsumerIfNecessary(boolean forceClose) {
     if (messageConsumer != null && (forceClose || meta.getCacheLevel() <= 2)) {
+      logger.log(Level.INFO, () -> String.format("Close current consumer [%s].", meta));
       try {
         messageConsumer.close();
       } catch (JMSException e) {
@@ -185,6 +194,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected void closeSessionIfNecessary(boolean forceClose) {
     if (session != null && (forceClose || meta.getCacheLevel() <= 1)) {
+      logger.log(Level.INFO, () -> String.format("Close current session of [%s].", meta));
       try {
         session.close();
       } catch (JMSException e) {

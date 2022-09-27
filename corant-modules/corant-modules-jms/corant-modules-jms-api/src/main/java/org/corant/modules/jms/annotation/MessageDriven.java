@@ -238,7 +238,7 @@ public @interface MessageDriven {
    *
    * @return txTimeout
    */
-  String txTimeout() default "0";
+  String txTimeout() default "300";
 
   /**
    * Whether to enable XA to receive messages, if true the Connection factory must support

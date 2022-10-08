@@ -168,7 +168,7 @@ public class NarayanaExtension implements TransactionExtension {
           "JTA recovery settings: init-offset: %ss, period: %ss, back-off: %ss, expiry-scan-interval: %sh.",
           recoveryBean.getPeriodicRecoveryInitilizationOffset(),
           recoveryBean.getPeriodicRecoveryPeriod(), recoveryBean.getRecoveryBackoffPeriod(),
-          recoveryBean.getExpiryScanInterval(), recoveryBean.getExpiryScanInterval()));
+          recoveryBean.getExpiryScanInterval()));
     }
   }
 

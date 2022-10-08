@@ -150,10 +150,6 @@ public class Maps {
 
   /**
    * @see #flatMap(Map, String, int)
-   *
-   * @param map
-   * @param maxDepth
-   * @return flatMap
    */
   public static Map<FlatMapKey, Object> flatMap(Map<?, ?> map, int maxDepth) {
     Map<FlatMapKey, Object> flatMap = new HashMap<>();
@@ -210,7 +206,7 @@ public class Maps {
    * }
    *</pre>
    *
-   * @param map the map to be flatten
+   * @param map the map to be flattened
    * @param splitor the string key splitor, use to splite key levels.
    * @param maxDepth Maximum leveling depth
    * @return a map, where the key consists of the key of the given map and the given delimiter
@@ -236,8 +232,8 @@ public class Maps {
   /**
    * @see #flatMap(Map, String, int)
    *
-   * @param map the map to be flatten
-   * @param splitor the string key splitor, use to splite key levels.
+   * @param map the map to be flattened
+   * @param splitor the string key splitor, use to split key levels.
    * @param maxDepth Maximum leveling depth
    * @return a map, where the key consists of the key of the original map and the given delimiter
    */
@@ -368,22 +364,16 @@ public class Maps {
    * @param hints the lastConverter hints use for intervening converters
    * @return the mapped expected collection value
    *
-   * @see Conversion#convert(Object, Class, IntFunction, Map)
-   * @see Conversion#convert(Collection, IntFunction, Class, Map)
-   * @see Conversion#convert(Object[], IntFunction, Class, Map)
+   * @see Conversion#convert(Object, Class, IntFunction, Map, boolean)
    */
   public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
       final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz,
       final Map<String, ?> hints) {
     Object obj = map == null ? null : map.get(key);
-    if (obj instanceof Collection) {
-      return Conversion.convert((Collection<?>) obj, collectionFactory, elementClazz, hints);
-    } else if (obj instanceof Object[] || obj != null && obj.getClass().isArray()) {
-      return Conversion.convert(wrapArray(obj), collectionFactory, elementClazz, hints);
-    } else if (obj != null) {
-      return Conversion.convert(obj, elementClazz, collectionFactory, hints);
-    } else {
+    if (obj == null) {
       return null;
+    } else {
+      return Conversion.convert(obj, elementClazz, collectionFactory, hints, false);
     }
   }
 
@@ -408,47 +398,7 @@ public class Maps {
   public static <T, C extends Collection<T>> C getMapCollection(final Map<?, ?> map,
       final Object key, final IntFunction<C> collectionFactory,
       final Function<Object, T> converter) {
-    Object obj = map == null ? null : map.get(key);
-    if (obj instanceof Collection) {
-      Collection<?> vals = (Collection<?>) obj;
-      C results = collectionFactory.apply(vals.size());
-      for (Object val : vals) {
-        results.add(converter.apply(val));
-      }
-      return results;
-    } else if (obj instanceof Object[] || obj != null && obj.getClass().isArray()) {
-      Object[] vals = wrapArray(obj);
-      C results = collectionFactory.apply(vals.length);
-      for (Object val : vals) {
-        results.add(converter.apply(val));
-      }
-      return results;
-    } else if (obj instanceof Iterable) {
-      Iterable<?> vals = (Iterable<?>) obj;
-      C results = collectionFactory.apply(10);
-      for (Object val : vals) {
-        results.add(converter.apply(val));
-      }
-      return results;
-    } else if (obj instanceof Iterator) {
-      Iterator<?> vals = (Iterator<?>) obj;
-      C results = collectionFactory.apply(10);
-      while (vals.hasNext()) {
-        results.add(converter.apply(vals.next()));
-      }
-      return results;
-    } else if (obj instanceof Enumeration) {
-      Enumeration<?> vals = (Enumeration<?>) obj;
-      C results = collectionFactory.apply(10);
-      while (vals.hasMoreElements()) {
-        results.add(converter.apply(vals.nextElement()));
-      }
-      return results;
-    } else if (obj == null) {
-      return null;
-    } else {
-      throw new NotSupportedException();
-    }
+    return convertCollection(map == null ? null : map.get(key), collectionFactory, converter);
   }
 
   /**
@@ -759,13 +709,13 @@ public class Maps {
    * @param <T> the expected returned element type
    * @param map the map to use
    * @param key the key to lookup
-   * @param singleElementconverter the converter function that extract value to expected list
+   * @param singleElementConverter the converter function that extract value to expected list
    *        element.
    * @return the expected list
    */
   public static <T> List<T> getMapList(final Map<?, ?> map, final Object key,
-      final Function<Object, T> singleElementconverter) {
-    return getMapObjectList(map, key, v -> toList(v, singleElementconverter));
+      final Function<Object, T> singleElementConverter) {
+    return getMapObjectList(map, key, v -> toList(v, singleElementConverter));
   }
 
   /**
@@ -1162,6 +1112,86 @@ public class Maps {
     return map != null ? new LinkedHashMap<>(map) : new LinkedHashMap<>();
   }
 
+  /**
+   *
+   * Remove and return converted the collection value mapped to the given key in the given Map or
+   * {@code null} if the given map is {@code null} or the map contains no mapping for the key or the
+   * mapped value is {@code null}.
+   *
+   * <p>
+   * Note: The returned collection is reconstructed
+   *
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param collectionFactory the constructor of collection
+   * @param elementClazz the element class
+   * @return the mapped expected collection value
+   */
+  public static <T, C extends Collection<T>> C popMapCollection(final Map<?, ?> map,
+      final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz) {
+    Object obj = map == null ? null : map.remove(key);
+    if (obj == null) {
+      return null;
+    } else {
+      return Conversion.convert(obj, elementClazz, collectionFactory, null, false);
+    }
+  }
+
+  /**
+   *
+   * Remove and return converted the collection value mapped to the given key in the given Map or
+   * {@code null} if the given map is {@code null} or the map contains no mapping for the key or the
+   * mapped value is {@code null}.
+   *
+   * <p>
+   * Note: The returned collection is reconstructed
+   *
+   * @param <T> the target class of item of the collection
+   * @param <C> the target collection class
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param collectionFactory the constructor of collection
+   * @param converter the single element converter
+   * @return the mapped expected collection value
+   */
+  public static <T, C extends Collection<T>> C popMapCollection(final Map<?, ?> map,
+      final Object key, final IntFunction<C> collectionFactory,
+      final Function<Object, T> converter) {
+    return convertCollection(map == null ? null : map.remove(key), collectionFactory, converter);
+  }
+
+  /**
+   * Remove and return converted the value corresponding to the given key in the given map, and the
+   * intermediate process may involve type conversion.
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param clazz the expected value class
+   * @return the mapped object
+   */
+  public static <T> T popMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
+    return popMapObject(map, key, clazz, null);
+  }
+
+  /**
+   * Remove and return converted the value corresponding to the given key in the given map, and the
+   * intermediate process may involve type conversion.
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param clazz the expected value class
+   * @param hints the conversion hints
+   * @return the mapped object
+   */
+  public static <T> T popMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz,
+      final Map<String, ?> hints) {
+    return toObject(map == null ? null : map.remove(key), shouldNotNull(clazz), hints);
+  }
+
   public static Properties propertiesOf(String... strings) {
     Properties result = new Properties();
     result.putAll(mapOf((Object[]) strings));
@@ -1229,6 +1259,50 @@ public class Maps {
       }
     }
     return union;
+  }
+
+  static <T, C extends Collection<T>> C convertCollection(Object obj,
+      final IntFunction<C> collectionFactory, final Function<Object, T> converter) {
+    if (obj == null) {
+      return null;
+    } else if (obj instanceof Collection) {
+      Collection<?> vals = (Collection<?>) obj;
+      C results = collectionFactory.apply(vals.size());
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj instanceof Object[] || obj.getClass().isArray()) {
+      Object[] vals = wrapArray(obj);
+      C results = collectionFactory.apply(vals.length);
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj instanceof Iterable) {
+      Iterable<?> vals = (Iterable<?>) obj;
+      C results = collectionFactory.apply(10);
+      for (Object val : vals) {
+        results.add(converter.apply(val));
+      }
+      return results;
+    } else if (obj instanceof Iterator) {
+      Iterator<?> vals = (Iterator<?>) obj;
+      C results = collectionFactory.apply(10);
+      while (vals.hasNext()) {
+        results.add(converter.apply(vals.next()));
+      }
+      return results;
+    } else if (obj instanceof Enumeration) {
+      Enumeration<?> vals = (Enumeration<?>) obj;
+      C results = collectionFactory.apply(10);
+      while (vals.hasMoreElements()) {
+        results.add(converter.apply(vals.nextElement()));
+      }
+      return results;
+    } else {
+      throw new NotSupportedException();
+    }
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})

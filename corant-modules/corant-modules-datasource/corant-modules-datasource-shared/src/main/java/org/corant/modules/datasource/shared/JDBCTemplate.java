@@ -122,15 +122,32 @@ public class JDBCTemplate {
     return new JDBCTemplate(ds);
   }
 
+  public static int execute(Connection conn, String sql, Map<String, Object> namedParams)
+      throws SQLException {
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, namedParams);
+    return SIMPLE_RUNNER.execute(conn, sqlAndParams.getKey(), sqlAndParams.getValue());
+  }
+
   public static int execute(Connection conn, String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return SIMPLE_RUNNER.execute(conn, sqlAndParams.getKey(), sqlAndParams.getValue());
+  }
+
+  public static <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Map<String, Object> namedParams) throws SQLException {
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, namedParams);
+    return SIMPLE_RUNNER.execute(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   public static <T> List<T> execute(Connection conn, String sql, ResultSetHandler<T> rsh,
       Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return SIMPLE_RUNNER.execute(conn, processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return SIMPLE_RUNNER.execute(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
+  }
+
+  public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
+      Map<String, Object> namedParams) throws SQLException {
+    return execute(conn, sql, MAP_LIST_HANDLER, namedParams);
   }
 
   public static List<List<Map<String, Object>>> executes(Connection conn, String sql,
@@ -138,9 +155,19 @@ public class JDBCTemplate {
     return execute(conn, sql, MAP_LIST_HANDLER, params);
   }
 
+  public static Map<String, Object> get(Connection conn, String sql,
+      Map<String, Object> namedParams) throws SQLException {
+    return query(conn, sql, MAP_HANDLER, namedParams);
+  }
+
   public static Map<String, Object> get(Connection conn, String sql, Object... params)
       throws SQLException {
     return query(conn, sql, MAP_HANDLER, params);
+  }
+
+  public static Map<String, Object> insert(Connection conn, String sql,
+      Map<String, Object> namedParams) throws SQLException {
+    return insert(conn, sql, MAP_HANDLER, namedParams);
   }
 
   public static Map<String, Object> insert(Connection conn, String sql, Object... params)
@@ -148,10 +175,16 @@ public class JDBCTemplate {
     return insert(conn, sql, MAP_HANDLER, params);
   }
 
+  public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Map<String, Object> namedParams) throws SQLException {
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, namedParams);
+    return SIMPLE_RUNNER.insert(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
+  }
+
   public static <T> T insert(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return SIMPLE_RUNNER.insert(conn, processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return SIMPLE_RUNNER.insert(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   public static void insertBatch(Connection conn, String sql, int batchSubmitSize,
@@ -171,15 +204,26 @@ public class JDBCTemplate {
     return SIMPLE_RUNNER.insertBatch(conn, sql, rsh, params);
   }
 
+  public static List<Map<String, Object>> query(Connection conn, String sql,
+      Map<String, Object> namedParams) throws SQLException {
+    return query(conn, sql, MAP_LIST_HANDLER, namedParams);
+  }
+
   public static List<Map<String, Object>> query(Connection conn, String sql, Object... params)
       throws SQLException {
     return query(conn, sql, MAP_LIST_HANDLER, params);
   }
 
+  public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh,
+      Map<String, Object> namedParams) throws SQLException {
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, namedParams);
+    return SIMPLE_RUNNER.query(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
+  }
+
   public static <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return SIMPLE_RUNNER.query(conn, processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return SIMPLE_RUNNER.query(conn, sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   public static void release(ResultSet rs, PreparedStatement stmt, Connection conn,
@@ -361,9 +405,15 @@ public class JDBCTemplate {
     }
   }
 
+  public static int update(Connection conn, String sql, Map<String, Object> namedParams)
+      throws SQLException {
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, namedParams);
+    return SIMPLE_RUNNER.update(conn, sqlAndParams.getKey(), sqlAndParams.getValue());
+  }
+
   public static int update(Connection conn, String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return SIMPLE_RUNNER.update(conn, processeds.getKey(), processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return SIMPLE_RUNNER.update(conn, sqlAndParams.getKey(), sqlAndParams.getValue());
   }
 
   @Deprecated
@@ -425,14 +475,14 @@ public class JDBCTemplate {
   }
 
   public int execute(String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return runner.execute(processeds.getKey(), processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return runner.execute(sqlAndParams.getKey(), sqlAndParams.getValue());
   }
 
   public <T> List<T> execute(String sql, ResultSetHandler<T> rsh, Object... params)
       throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return runner.execute(processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return runner.execute(sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   public List<Map<String, Object>> executes(String sql, Object... params) throws SQLException {
@@ -440,8 +490,8 @@ public class JDBCTemplate {
   }
 
   public Map<String, Object> get(String sql, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return runner.query(processeds.getKey(), MAP_HANDLER, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return runner.query(sqlAndParams.getKey(), MAP_HANDLER, sqlAndParams.getValue());
   }
 
   public DataSource getDataSource() {
@@ -461,8 +511,8 @@ public class JDBCTemplate {
   }
 
   public <T> T insert(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return runner.insert(processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return runner.insert(sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   public void insertBatch(String sql, int batchSubmitSize, Stream<Iterable<?>> params,
@@ -485,8 +535,8 @@ public class JDBCTemplate {
   }
 
   public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    Pair<String, Object[]> processeds = SqlStatements.normalize(sql, params);
-    return runner.query(processeds.getKey(), rsh, processeds.getValue());
+    Pair<String, Object[]> sqlAndParams = SqlStatements.normalize(sql, params);
+    return runner.query(sqlAndParams.getKey(), rsh, sqlAndParams.getValue());
   }
 
   /**
@@ -498,7 +548,7 @@ public class JDBCTemplate {
    * <pre>
    * Example: try(Stream stream = stream(s,f,p)){
    *    stream.forEach(row->{
-   *        //do somthing
+   *        //do something
    *    })
    * }
    * </pre>
@@ -523,7 +573,7 @@ public class JDBCTemplate {
    * <pre>
    * Example: try(Stream stream = stream(s,f,r,p)){
    *    stream.forEach(row->{
-   *        //do somthing
+   *        //do something
    *    })
    * }
    * </pre>

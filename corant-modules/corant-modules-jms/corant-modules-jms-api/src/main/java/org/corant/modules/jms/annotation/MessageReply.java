@@ -20,6 +20,7 @@ import java.lang.annotation.Target;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import org.corant.modules.jms.JMSNames;
+import org.corant.modules.jms.marshaller.MessageMarshaller;
 
 /**
  * corant-modules-jms-shared
@@ -62,6 +63,7 @@ public @interface MessageReply {
    * be obtained from the system property or configuration.
    *
    * @return the marshaler name
+   * @see MessageMarshaller
    */
   String marshaller() default JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
 

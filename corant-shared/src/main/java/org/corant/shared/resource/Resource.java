@@ -22,7 +22,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
 import java.util.logging.Level;
-import org.corant.shared.util.Resources;
+import java.util.logging.Logger;
 import org.corant.shared.util.Streams;
 
 /**
@@ -37,6 +37,8 @@ import org.corant.shared.util.Streams;
  *
  */
 public interface Resource {
+
+  Logger logger = Logger.getLogger(Resource.class.getName());
 
   String META_CONTENT_TYPE = "Content-Type";
   String META_CONTENT_LENGTH = "Content-Length";
@@ -54,7 +56,7 @@ public interface Resource {
   /**
    * Return a byte array for the content of this resource, please evaluate the size of the resource
    * when using it to avoid OOM.
-   *
+   * <p>
    * NOTE: the stream will be closed after reading.
    *
    * @throws IOException If I/O errors occur
@@ -92,7 +94,7 @@ public interface Resource {
    * Returns metadata information for this resource's corresponding name with the given name and
    * type.
    *
-   * @param <T>
+   * @param <T> the metadata value type class
    * @param name the metadata key
    * @param type the metadata value type, may involve type conversion
    */
@@ -142,7 +144,7 @@ public interface Resource {
     try {
       return openInputStream();
     } catch (IOException e) {
-      Resources.logger.log(Level.WARNING, e,
+      logger.log(Level.WARNING, e,
           () -> String.format("Can't not open stream from %s.", getLocation()));
     }
     return null;

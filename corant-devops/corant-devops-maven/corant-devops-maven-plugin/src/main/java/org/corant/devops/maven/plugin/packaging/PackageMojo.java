@@ -61,6 +61,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-dist")
   protected boolean withDist;
 
+  @Parameter(defaultValue = "false", property = "corant.maven-mojo.use-javaw")
+  protected boolean useJavaw;
+
   @Parameter(defaultValue = "zip", property = "corant.maven-mojo.dist-format")
   protected String distFormat;
 
@@ -69,6 +72,9 @@ public class PackageMojo extends AbstractMojo {
 
   @Parameter(property = "corant.maven-mojo.main-class")
   protected String mainClass;
+
+  @Parameter
+  protected String miArgs;
 
   @Parameter
   protected String vmArgs;
@@ -149,6 +155,13 @@ public class PackageMojo extends AbstractMojo {
         : mainClass;
   }
 
+  /**
+   * Returns the module info arguments
+   */
+  public String getMiArgs() {
+    return miArgs != null && !miArgs.isEmpty() ? miArgs.trim().replace('\n', ' ') : "";
+  }
+
   public MavenProject getProject() {
     return project;
   }
@@ -171,6 +184,10 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isUseDirectRunner() {
     return useDirectRunner;
+  }
+
+  public boolean isUseJavaw() {
+    return useJavaw;
   }
 
   public boolean isWar() {

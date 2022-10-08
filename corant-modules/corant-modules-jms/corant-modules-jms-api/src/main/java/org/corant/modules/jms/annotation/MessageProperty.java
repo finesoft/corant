@@ -34,6 +34,7 @@ public @interface MessageProperty {
   /** The name of the property */
   String name();
 
+  /** The type of the property */
   Class<?> type() default String.class;
 
   /**

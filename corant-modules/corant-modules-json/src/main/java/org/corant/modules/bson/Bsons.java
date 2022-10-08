@@ -238,8 +238,8 @@ public class Bsons {
         throw new CorantRuntimeException(e);
       }
     }
-    throw new IllegalArgumentException(
-        String.format("Unable to convert %s (%s) to BsonValue.", source.getClass().getName()));
+    throw new IllegalArgumentException(String.format("Unable to convert %s (%s) to BsonValue.",
+        source, source.getClass().getName()));
   }
 
   static Object decodeTransformer(Object objectToTransform) {

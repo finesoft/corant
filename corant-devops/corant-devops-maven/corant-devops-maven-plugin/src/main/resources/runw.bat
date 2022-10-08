@@ -33,12 +33,12 @@ set CLASS_PATH=%CFG_DIR%\*;%APP_DIR%\*;%LIB_DIR%\*
 set _JAVACMD=%JAVACMD%
 
 if "%JAVA_HOME%" == "" goto NO_JAVA_HOME
-if not exist "%JAVA_HOME%\bin\java.exe" goto NO_JAVA_HOME
-if "%_JAVACMD%" == "" set _JAVACMD=%JAVA_HOME%\bin\java.exe
+if not exist "%JAVA_HOME%\bin\javaw.exe" goto NO_JAVA_HOME
+if "%_JAVACMD%" == "" set _JAVACMD=start "%JAVA_HOME%\bin\" javaw
 goto RUN_JAVA
 
 :NO_JAVA_HOME
-if "%_JAVACMD%" == "" set _JAVACMD=java.exe
+if "%_JAVACMD%" == "" set _JAVACMD=start javaw
 echo.
 echo Warning: JAVA_HOME environment variable is not set.
 echo.
@@ -69,7 +69,7 @@ set CORANT_JVM_OPTS=%CORANT_JVM_OPTS% -Dcorant.application.root-dir=filesystem:"
 
 if NOT "%DEBUG_ARGS%"=="" set CORANT_JVM_OPTS=%CORANT_JVM_OPTS% %DEBUG_ARGS%
 
-"%_JAVACMD%" %CORANT_JVM_OPTS% %MODULE_ARGUMENTS% %MAIN_CLASS% %APPLICATION_ARGUMENTS%
+%_JAVACMD% %CORANT_JVM_OPTS% %MODULE_ARGUMENTS% %MAIN_CLASS% %APPLICATION_ARGUMENTS%
 
 endlocal
 GOTO :EOF

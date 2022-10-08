@@ -40,7 +40,7 @@ public @interface MessageSend {
    * For transacted sends, this time starts when the client sends the message, not when the
    * transaction is committed.
    *
-   * deliveryDelay is set to -1 by default, means not setting
+   * DeliveryDelay is set to -1 by default, means not setting
    *
    * @return deliveryDelay
    * @see JMSProducer#setDeliveryDelay(long)
@@ -75,7 +75,8 @@ public @interface MessageSend {
    * JMSContext.DUPS_OK_ACKNOWLEDGE. The session will be non-transacted and messages received by
    * this session will be acknowledged automatically according to the value of acknowledgeMode. For
    * a definition of the meaning of these acknowledgement modes see the links below. The values
-   * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
+   * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used. Default is
+   * false.
    *
    * <p>
    * Note: The final value type is <b>boolean</b> type; in order to support configurability, the

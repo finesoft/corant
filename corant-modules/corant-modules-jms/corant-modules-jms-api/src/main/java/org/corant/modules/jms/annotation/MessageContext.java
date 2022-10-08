@@ -34,10 +34,13 @@ import javax.jms.JMSContext;
 public @interface MessageContext {
   /**
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
-   * configuration file.
+   * configuration file. Default is empty that means unspecified. At the same time the connection
+   * factory id is used for CDI qualifier.
    * <p>
    * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
    * be obtained from the system property or configuration.
+   *
+   * @see org.corant.context.qualifier.Qualifiers
    */
   String connectionFactoryId() default EMPTY;
 
@@ -48,7 +51,8 @@ public @interface MessageContext {
    * JMSContext.DUPS_OK_ACKNOWLEDGE. The session will be non-transacted and messages received by
    * this session will be acknowledged automatically according to the value of acknowledgeMode. For
    * a definition of the meaning of these acknowledgement modes see the links below. The values
-   * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used.
+   * JMSContext.SESSION_TRANSACTED and JMSContext.CLIENT_ACKNOWLEDGE may not be used. Default is
+   * false
    * <p>
    * Note: The final value type is <b>boolean</b> type; in order to support configurability, the
    * string is used as the value type of annotation property, and the value will eventually be

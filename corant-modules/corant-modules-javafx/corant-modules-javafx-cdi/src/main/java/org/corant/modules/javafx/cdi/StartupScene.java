@@ -13,26 +13,29 @@
  */
 package org.corant.modules.javafx.cdi;
 
-import static org.corant.shared.util.Strings.EMPTY;
-import javax.enterprise.util.Nonbinding;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
 
 /**
  * corant-modules-javafx-cdi
  *
- * @author bingo 下午11:26:29
+ * @author bingo 上午12:41:32
  *
  */
-public @interface FXML {
+@Qualifier
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface StartupScene {
 
-  /**
-   * The name of the resources used to resolve resource key attribute values.
-   */
-  @Nonbinding
-  String bundle();
+  StartupSceneLiteral INSTANCE = new StartupSceneLiteral();
 
-  /**
-   * The URL used to resolve relative path attribute values.
-   */
-  @Nonbinding
-  String url() default EMPTY;
+  class StartupSceneLiteral extends AnnotationLiteral<StartupScene> implements StartupScene {
+
+    private static final long serialVersionUID = -5372955628801737362L;
+
+  }
 }

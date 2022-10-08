@@ -52,9 +52,11 @@ public class DistPackager implements Packager {
 
   public static final String JVM_OPT = "jvm.options";
   public static final String RUN_BAT = "run.bat";
+  public static final String RUNW_BAT = "runw.bat";
   public static final String LAUNCH_BATS =
       "startup.bat,start.bat,stop.bat,restart.bat,shutdown.bat";
   public static final String RUN_SH = "run.sh";
+  public static final String RUNW_SH = "runw.sh";
   public static final String LAUNCH_SHS = "startup.sh,start.sh,stop.sh,restart.sh,shutdown.sh";
   public static final String RUN_APP_NAME_PH = "#APPLICATION_NAME#";
   public static final String RUN_APP_ARGS = "#APPLICATION_ARGUMENTS#";
@@ -62,6 +64,7 @@ public class DistPackager implements Packager {
   public static final String RUN_USED_CONFIG_LOCATION = "#USED_CONFIG_LOCATION#";
   public static final String RUN_USED_CONFIG_PROFILE = "#USED_CONFIG_PROFILE#";
   public static final String RUN_ADD_VM_ARGS = "#ADDITIONAL_VM_ARGUMENTS#";
+  public static final String RUN_MODULE_ARGS = "#MODULE_ARGUMENTS#";
 
   public static final String DIST_NAME_SUF = "-dist";
 
@@ -150,8 +153,13 @@ public class DistPackager implements Packager {
 
   List<Entry> resolveBinFiles() throws IOException {
     List<Entry> entries = new ArrayList<>();
-    entries.add(resolveRunbat());
-    entries.add(resolveRunsh());
+    if (getMojo().isUseJavaw()) {
+      entries.add(resolveRunbat(RUNW_BAT));
+      entries.add(resolveRunsh(RUNW_SH));
+    } else {
+      entries.add(resolveRunbat(RUN_BAT));
+      entries.add(resolveRunsh(RUN_SH));
+    }
     entries.addAll(resolveLaunchs());
     return entries;
   }
@@ -176,12 +184,12 @@ public class DistPackager implements Packager {
 
   List<Entry> resolveLaunchs() throws IOException {
     List<Entry> entries = new ArrayList<>();
-    if (getMojo().isUseDirectRunner()) {
+    if (getMojo().isUseDirectRunner() && !getMojo().isUseJavaw()) {
       String[] bats = LAUNCH_BATS.split(",");
       String applicationName = resolveApplicationName();
       for (String bat : bats) {
         String runbat = IOUtils.toString(ClassPathEntry.of(bat, bat).getInputStream(), CHARSET);
-        final String usebat = runbat.replaceAll(RUN_APP_NAME_PH, applicationName);
+        final String usebat = runbat.replace(RUN_APP_NAME_PH, applicationName);
         log.debug(String.format("(corant) resolve launch file %s.", bat));
         entries.add(new ScriptEntry(bat, usebat));
       }
@@ -212,34 +220,36 @@ public class DistPackager implements Packager {
     return entries;
   }
 
-  Entry resolveRunbat() throws IOException {
-    String runbat = IOUtils.toString(ClassPathEntry.of(RUN_BAT, RUN_BAT).getInputStream(), CHARSET);
+  Entry resolveRunbat(String run_bat) throws IOException {
+    String runbat = IOUtils.toString(ClassPathEntry.of(run_bat, run_bat).getInputStream(), CHARSET);
     String applicationName = resolveApplicationName();
-    final String usebat = runbat.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, applicationName)
-        .replaceAll(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
-        .replaceAll(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
-        .replaceAll(RUN_APP_ARGS,
+    final String usebat = runbat.replace(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
+        .replace(RUN_APP_NAME_PH, applicationName)
+        .replace(RUN_USED_CONFIG_LOCATION, getMojo().getUsedConfigLocation())
+        .replace(RUN_USED_CONFIG_PROFILE, getMojo().getUsedConfigProfile())
+        .replace(RUN_APP_ARGS,
             getMojo().isUseDirectRunner()
                 ? getMojo().getAppArgs().isEmpty() ? getMojo().getAppArgs().concat("%1")
                     : getMojo().getAppArgs().concat(" %1")
                 : getMojo().getAppArgs())
-        .replaceAll(RUN_ADD_VM_ARGS, getMojo().getVmArgs());
-    log.debug(String.format("(corant) resolve run command file %s.", RUN_BAT));
-    return new ScriptEntry(RUN_BAT, usebat);
+        .replace(RUN_ADD_VM_ARGS, getMojo().getVmArgs())
+        .replace(RUN_MODULE_ARGS, getMojo().getMiArgs());
+    log.debug(String.format("(corant) resolve run command file %s.", run_bat));
+    return new ScriptEntry(run_bat, usebat);
   }
 
-  Entry resolveRunsh() throws IOException {
-    String runsh = IOUtils.toString(ClassPathEntry.of(RUN_SH, RUN_SH).getInputStream(), CHARSET);
+  Entry resolveRunsh(String run_sh) throws IOException {
+    String runsh = IOUtils.toString(ClassPathEntry.of(run_sh, run_sh).getInputStream(), CHARSET);
     String applicationName = resolveApplicationName();
-    final String usesh = runsh.replaceAll(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
-        .replaceAll(RUN_APP_NAME_PH, resolveRunshVar(applicationName))
-        .replaceAll(RUN_USED_CONFIG_LOCATION, resolveRunshVar(getMojo().getUsedConfigLocation()))
-        .replaceAll(RUN_USED_CONFIG_PROFILE, resolveRunshVar(getMojo().getUsedConfigProfile()))
-        .replaceAll(RUN_APP_ARGS, resolveRunshVar(getMojo().getAppArgs()))
-        .replaceAll(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()));
-    log.debug(String.format("(corant) resolve run command file %s.", RUN_SH));
-    return new ScriptEntry(RUN_SH, usesh);
+    final String usesh = runsh.replace(RUN_MAIN_CLASS_PH, getMojo().getMainClass())
+        .replace(RUN_APP_NAME_PH, resolveRunshVar(applicationName))
+        .replace(RUN_USED_CONFIG_LOCATION, resolveRunshVar(getMojo().getUsedConfigLocation()))
+        .replace(RUN_USED_CONFIG_PROFILE, resolveRunshVar(getMojo().getUsedConfigProfile()))
+        .replace(RUN_APP_ARGS, resolveRunshVar(getMojo().getAppArgs()))
+        .replace(RUN_ADD_VM_ARGS, resolveRunshVar(getMojo().getVmArgs()))
+        .replace(RUN_MODULE_ARGS, getMojo().getMiArgs());
+    log.debug(String.format("(corant) resolve run command file %s.", run_sh));
+    return new ScriptEntry(run_sh, usesh);
   }
 
   private void packArchiveEntry(ArchiveOutputStream aos, Archive archive, Entry entry)

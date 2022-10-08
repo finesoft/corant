@@ -11,10 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.corant.modules.javafx.cdi;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
+import javafx.application.Application.Parameters;
+
 /**
  * corant-modules-javafx-cdi
  *
- * @author bingo 下午11:06:37
+ * @author bingo 上午12:21:56
  *
  */
-package org.corant.modules.javafx.cdi;
+@Singleton
+public class CorantApplicationParametersFactory {
+
+  protected volatile Parameters parameters;
+
+  public @Produces Parameters getParameters() {
+    return parameters;
+  }
+
+  protected void setParameters(Parameters p) {
+    this.parameters = p;
+  }
+}

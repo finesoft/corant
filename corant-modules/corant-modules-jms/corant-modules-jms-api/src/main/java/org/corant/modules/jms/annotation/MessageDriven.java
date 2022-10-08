@@ -227,7 +227,7 @@ public @interface MessageDriven {
   /**
    * The value of the timeout in seconds. If the value is zero, the transaction service restores the
    * default value. If the value is negative a SystemException is thrown. Only works if
-   * {@link #xa()} = true, default is 0.
+   * {@link #xa()} = true, default is 300.
    *
    * <p>
    * <b>Note:</b> The final value type is <b>integer</b> type; in order to support configurability,

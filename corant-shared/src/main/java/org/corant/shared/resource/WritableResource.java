@@ -19,7 +19,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.OpenOption;
 import java.util.logging.Level;
-import org.corant.shared.util.Resources;
 
 /**
  * corant-shared
@@ -39,7 +38,7 @@ public interface WritableResource extends Resource {
     try {
       return openOutputStream();
     } catch (IOException e) {
-      Resources.logger.log(Level.WARNING, e,
+      logger.log(Level.WARNING, e,
           () -> String.format("Can't not open stream from %s.", getLocation()));
     }
     return null;

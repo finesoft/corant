@@ -25,5 +25,9 @@
       <groupId>org.corant</groupId>
       <artifactId>corant-shared</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+    </dependency>
   </dependencies>
 </project>

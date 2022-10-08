@@ -34,7 +34,11 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
   @Override
   public Iterable<ConfigSource> getConfigSources(ClassLoader forClassLoader) {
-    return Collections.singleton(TEST_WSPORT_CFGSRC);
+    if (CorantJunit4Runner.ENA_RDM_WEB_PORTS.get()) {
+      return Collections.singleton(TEST_WSPORT_CFGSRC);
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   public static class RandomWebServerPortConfigSource implements ConfigSource {
@@ -55,11 +59,7 @@ public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 
     @Override
     public int getOrdinal() {
-      if (CorantJunit4Runner.ENA_RDM_WEB_PORTS.get()) {
-        return Integer.MAX_VALUE;
-      } else {
-        return Integer.MIN_VALUE;
-      }
+      return Integer.MAX_VALUE;
     }
 
     @Override

@@ -13,6 +13,8 @@
  */
 package org.corant.shared.conversion;
 
+import static org.corant.shared.util.Assertions.shouldNoneNull;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
 import static org.corant.shared.util.Iterables.transform;
 import static org.corant.shared.util.Objects.forceCast;
@@ -73,6 +75,7 @@ public class Conversion {
     if (value == null) {
       return null;
     }
+    shouldNotNull(targetItemClass, "The target class of the conversion can't be null");
     C collection = collectionFactory.apply(value.size());
     for (T t : convert(value, targetItemClass, hints)) {
       collection.add(t);
@@ -92,9 +95,10 @@ public class Conversion {
    */
   public static <T> Iterable<T> convert(Iterable<?> value, Class<?> sourceClass,
       Class<T> targetClass, Map<String, ?> hints) {
+    shouldNoneNull(sourceClass, targetClass);
     Converter converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
-      LOGGER.finer(() -> String.format("Resolve converter %", converter));
+      LOGGER.finer(() -> String.format("Resolve converter %s", converter));
       return converter.iterable(value, hints);
     } else {
       Converter stringConverter = resolveConverter(String.class, targetClass);
@@ -123,6 +127,7 @@ public class Conversion {
     if (value == null) {
       return null;
     }
+    shouldNotNull(targetClass, "The target class of the conversion can't be null");
     return () -> new Iterator<>() {
       final Iterator<?> it = value.iterator();
       Converter converter = null;
@@ -156,7 +161,7 @@ public class Conversion {
             throw new ConversionException("Can not find converter for type pair s% -> %s.",
                 sourceClass, targetClass);
           }
-          LOGGER.finer(() -> String.format("Resolve converter %", converter));
+          LOGGER.finer(() -> String.format("Resolve converter %s", converter));
         }
         return (T) converter.apply(tryStringConverter ? next.toString() : next, hints);
       }
@@ -189,7 +194,7 @@ public class Conversion {
           | InvocationTargetException | NoSuchMethodException | SecurityException e) {
         throw new NotSupportedException();
       }
-    }, hints);
+    }, hints, false);
   }
 
   /**
@@ -208,8 +213,8 @@ public class Conversion {
   /**
    * Convert a value object to a collection objects, use for converting the
    * iterable/array/iterator/enumeration objects to collection objects.
-   *
-   * if the value object not belong to above then regard the value object as the first item of
+   * <p>
+   * If the value object not belong to above then regard the value object as the first item of
    * collection and convert it.
    *
    * @param <T> the target class of item of the collection
@@ -218,10 +223,13 @@ public class Conversion {
    * @param targetItemClass the target class of item of the collection
    * @param collectionFactory the constructor of collection
    * @param hints the converter hints use for intervening converters
+   * @param supportsSingleton whether to be converted as single element collection if the given
+   *        value is not iterable/array/iterator/enumeration.
    * @return A collection of items converted according to the target type
    */
   public static <T, C extends Collection<T>> C convert(Object value, Class<T> targetItemClass,
-      IntFunction<C> collectionFactory, Map<String, ?> hints) {
+      IntFunction<C> collectionFactory, Map<String, ?> hints, boolean supportsSingleton) {
+    shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     Iterable<T> it = null;
     int size = 10;
     if (value instanceof Iterable) {
@@ -242,8 +250,11 @@ public class Conversion {
         Object[] array = wrapArray(value);
         size = array.length;
         it = convert(iterableOf(wrapArray(array)), targetItemClass, hints);
-      } else {
+      } else if (supportsSingleton) {
         it = convert(iterableOf(value), targetItemClass, hints);
+      } else {
+        throw new ConversionException(
+            "The given value can't be converted, the target item class of the conversion must be iterable/array/iterator/enumeration");
       }
     }
     final C collection = collectionFactory.apply(size);
@@ -269,13 +280,14 @@ public class Conversion {
     if (value == null) {
       return null;
     }
+    shouldNotNull(targetClass, "The target class of the conversion can't be null");
     Class<?> sourceClass = value.getClass();
     if (targetClass.isAssignableFrom(sourceClass)) {
       return (T) value;
     }
     Converter<S, T> converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
-      LOGGER.finer(() -> String.format("Resolve converter %", converter));
+      LOGGER.finer(() -> String.format("Resolve converter %s", converter));
       return converter.apply((S) value, hints);
     } else {
       Converter<String, T> stringConverter = resolveConverter(String.class, targetClass);
@@ -331,6 +343,7 @@ public class Conversion {
    */
   public static <T> T[] convert(Object[] value, Class<T> targetItemClass,
       IntFunction<T[]> arrayFactory, Map<String, ?> hints) {
+    shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     if (value == null) {
       return arrayFactory.apply(0);
     }
@@ -359,6 +372,7 @@ public class Conversion {
     if (value == null) {
       return null;
     }
+    shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     C collection = collectionFactory.apply(value.length);
     for (T t : convert(iterableOf(value), targetItemClass, hints)) {
       collection.add(t);
@@ -376,6 +390,7 @@ public class Conversion {
    * @return the converted object
    */
   public static <T> T[] convertArray(Object value, Class<T> targetClass, Map<String, ?> hints) {
+    shouldNotNull(targetClass, "The target class can't null");
     if (value == null) {
       return (T[]) Array.newInstance(targetClass, 0);
     } else if (value.getClass().isArray()) {
@@ -412,6 +427,7 @@ public class Conversion {
    */
   public static <K, V> Map<K, V> convertMap(Object value, Class<K> keyClass, Class<V> valueClass,
       Map<String, ?> hints) {
+    shouldNoneNull(keyClass, valueClass);
     if (value == null) {
       return null;
     } else if (value instanceof Map) {
@@ -552,9 +568,9 @@ public class Conversion {
                 "Cannot convert for type " + typeClass + "<" + Arrays.toString(argClasses) + "[]>");
           }
         } else if (List.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-          result = convert(value, argClasses[0], ArrayList::new, hints);
+          result = convert(value, argClasses[0], ArrayList::new, hints, false);
         } else if (Set.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
-          result = convert(value, argClasses[0], HashSet::new, hints);
+          result = convert(value, argClasses[0], HashSet::new, hints, false);
         } else if (Optional.class.isAssignableFrom(typeClass) && argClasses.length == 1) {
           result = Optional.ofNullable(convert(value, argClasses[0], hints));
         } else if (Supplier.class.isAssignableFrom(typeClass) && argClasses.length == 1) {

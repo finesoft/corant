@@ -61,7 +61,7 @@ public interface ConversionService {
     @Override
     public <C extends Collection<T>, T> C convert(Object value, Class<T> clazz,
         IntFunction<C> collectionFactory, Object... hints) {
-      return Conversion.convert(value, clazz, collectionFactory, mapOf(hints));
+      return Conversion.convert(value, clazz, collectionFactory, mapOf(hints), false);
     }
 
     @Override

@@ -42,7 +42,7 @@ import org.corant.shared.resource.URLResource;
  */
 public class Resources {
 
-  public static final Logger logger = Logger.getLogger(Resources.class.getName());
+  static final Logger logger = Logger.getLogger(Resources.class.getName());
 
   /**
    * Get URL resources from specified URL path, support Glob / Regex Pattern.
@@ -60,7 +60,7 @@ public class Resources {
    *
    * @param <T> the resource type
    * @param path the resource path
-   * @throws IOException
+   * @throws IOException if an I/O error occurs
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    */
   public static <T extends URLResource> Stream<T> from(String path) throws IOException {
@@ -80,9 +80,9 @@ public class Resources {
   /**
    * Use specified class loader to scan all class path resources.
    *
-   * @param classLoader
-   * @return
-   * @throws IOException fromClassPath
+   * @param classLoader class loader for loading resources
+   * @return A class path resource stream
+   * @throws IOException if an I/O error occurs
    */
   public static Stream<ClassPathResource> fromClassPath(ClassLoader classLoader)
       throws IOException {
@@ -100,15 +100,17 @@ public class Resources {
    * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
-   * 4.if path is blank ({@code Strings.isBlank}) then will scan all class path in the system.
+   * 4.if path is blank ({@code
+   * Strings.isBlank
+   * }) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
    *
-   * @param classLoader
-   * @param classPath
-   * @return
-   * @throws IOException fromClassPath
+   * @param classLoader class loader for loading resources
+   * @param classPath the resource class path or expression, supports glob-pattern/regex
+   * @return A class path resource stream
+   * @throws IOException if an I/O error occurs
    */
   public static Stream<ClassPathResource> fromClassPath(ClassLoader classLoader, String classPath)
       throws IOException {
@@ -118,9 +120,9 @@ public class Resources {
   /**
    * Use default class loader to scan the specified path resources.
    *
-   * @param classPath
-   * @return
-   * @throws IOException fromClassPath
+   * @param classPath the resource class path or expression, supports glob-pattern/regex
+   * @return A class path resource stream
+   * @throws IOException if an I/O error occurs
    */
   public static Stream<ClassPathResource> fromClassPath(String classPath) throws IOException {
     return ClassPathResourceLoader.DFLT_INST.load(classPath).stream();
@@ -129,9 +131,8 @@ public class Resources {
   /**
    * Use file create file system resource.
    *
-   * @param file
-   * @return
-   * @throws IOException fromFileSystem
+   * @param file used to build FileSystemResource
+   * @return A file system resource
    */
   public static FileSystemResource fromFileSystem(File file) {
     return new FileSystemResource(shouldNotNull(file));
@@ -140,9 +141,9 @@ public class Resources {
   /**
    * Use Path to find file system resource.
    *
-   * @param path
-   * @return
-   * @throws IOException fromFileSystem
+   * @param path used to build FileSystemResource
+   * @return A file system resource
+   * @throws IOException if an I/O error occurs
    */
   public static FileSystemResource fromFileSystem(Path path) throws IOException {
     return new FileSystemResource(path);
@@ -151,10 +152,11 @@ public class Resources {
   /**
    * Use path string to find file system resource. Support glob/regex expression
    *
+   * @param path the resource path or expression, supports glob-pattern/regex
+   * @return A file system resource stream
+   * @throws IOException if an I/O error occurs
+   *
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
-   * @param path
-   * @return
-   * @throws IOException fromFileSystem
    */
   public static Stream<FileSystemResource> fromFileSystem(String path) throws IOException {
     return FileSystemResourceLoader.DFLT_INST.load(path).stream();
@@ -163,10 +165,10 @@ public class Resources {
   /**
    * Use input stream to build input stream resource.
    *
-   * @param inputStream
-   * @param location
-   * @return
-   * @throws IOException fromInputStream
+   * @param inputStream used to build InputStreamResource
+   * @param location used to denote the origin of a given input stream
+   * @return an input stream resource
+   * @throws IOException if an I/O error occurs
    */
   public static InputStreamResource fromInputStream(InputStream inputStream, String location)
       throws IOException {
@@ -176,9 +178,9 @@ public class Resources {
   /**
    * Get the resources of a relative path through a class and path
    *
-   * @param relative
-   * @param path
-   * @return fromRelativeClass
+   * @param relative the relative class use to search the resource
+   * @param path resource class path
+   * @return a URLResource
    */
   public static URLResource fromRelativeClass(Class<?> relative, String path) {
     return ClassPathResourceLoader.relative(relative, path);
@@ -187,9 +189,9 @@ public class Resources {
   /**
    * Use specified URL string to find resource.
    *
-   * @param url
-   * @return
-   * @throws IOException fromUrl
+   * @param url used to build URLResource
+   * @return a URLResource
+   * @throws IOException if an I/O error occurs
    */
   public static URLResource fromUrl(String url) throws IOException {
     return new URLResource(SourceType.URL.resolve(url));
@@ -198,9 +200,9 @@ public class Resources {
   /**
    * Use specified URL to find resource.
    *
-   * @param url
-   * @return
-   * @throws IOException fromUrl
+   * @param url used to build URLResource
+   * @return a URLResource
+   * @throws IOException if an I/O error occurs
    */
   public static URLResource fromUrl(URL url) throws IOException {
     return new URLResource(url);
@@ -209,10 +211,10 @@ public class Resources {
   /**
    * Use specified http URL and proxy to find resource.
    *
-   * @param url
-   * @param proxy
-   * @return
-   * @throws IOException fromUrl
+   * @param url used to build URLResource
+   * @param proxy the Proxy through which this connection will be made
+   * @return an input stream resource
+   * @throws IOException if an I/O error occurs
    */
   public static InputStreamResource fromUrl(URL url, Proxy proxy) throws IOException {
     return fromInputStream(url.openConnection(proxy).getInputStream(), url.toExternalForm());
@@ -222,9 +224,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #from
-   *
-   * @param path
-   * @return tryFrom
    */
   public static <T extends URLResource> Stream<T> tryFrom(final String path) {
     try {
@@ -240,8 +239,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromClassPath(ClassLoader)
-   * @param classLoader
-   * @return tryFromClassPath
    */
   public static Stream<ClassPathResource> tryFromClassPath(ClassLoader classLoader) {
     try {
@@ -257,9 +254,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromClassPath(ClassLoader, String)
-   * @param classLoader
-   * @param classPath
-   * @return tryFromClassPath
    */
   public static Stream<ClassPathResource> tryFromClassPath(ClassLoader classLoader,
       String classPath) {
@@ -276,8 +270,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromClassPath(String)
-   * @param classPath
-   * @return tryFromClassPath
    */
   public static Stream<ClassPathResource> tryFromClassPath(String classPath) {
     try {
@@ -293,8 +285,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromFileSystem(Path)
-   * @param path
-   * @return tryFromFileSystem
    */
   public static FileSystemResource tryFromFileSystem(Path path) {
     try {
@@ -310,8 +300,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromFileSystem(String)
-   * @param path
-   * @return tryFromFileSystem
    */
   public static Stream<FileSystemResource> tryFromFileSystem(String path) {
     try {
@@ -327,9 +315,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromInputStream(InputStream, String)
-   * @param inputStream
-   * @param location
-   * @return tryFromInputStream
    */
   public static InputStreamResource tryFromInputStream(InputStream inputStream, String location) {
     try {
@@ -344,8 +329,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromUrl(String)
-   * @param url
-   * @return tryFromUrl
    */
   public static URLResource tryFromUrl(String url) {
     try {
@@ -360,8 +343,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromUrl(URL)
-   * @param url
-   * @return tryFromUrl
    */
   public static URLResource tryFromUrl(URL url) {
     try {
@@ -376,9 +357,6 @@ public class Resources {
    * Not throw IO exception, just warning
    *
    * @see #fromUrl(URL, Proxy)
-   * @param url
-   * @param proxy
-   * @return tryFromUrl
    */
   public static InputStreamResource tryFromUrl(URL url, Proxy proxy) {
     try {

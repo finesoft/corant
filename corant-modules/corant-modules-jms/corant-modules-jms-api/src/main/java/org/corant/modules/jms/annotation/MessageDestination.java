@@ -37,7 +37,10 @@ public @interface MessageDestination {
   /**
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
    * configuration file, if the value uses the <b>"${...}"</b> expression, the specific value can be
-   * obtained from the system property or configuration..
+   * obtained from the system property or configuration.
+   *
+   * Default is empty that means unspecified. At the same time the connection factory id is used for
+   * CDI qualifier.
    */
   String connectionFactoryId() default EMPTY;
 
@@ -52,7 +55,7 @@ public @interface MessageDestination {
    * the specific value can be obtained from the system property or configuration, and then convert
    * it to boolean value.
    *
-   * @return multicast
+   * @return whether is Topic
    */
   String multicast() default "false";
 

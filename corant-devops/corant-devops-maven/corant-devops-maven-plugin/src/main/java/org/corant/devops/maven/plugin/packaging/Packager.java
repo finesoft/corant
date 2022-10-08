@@ -38,6 +38,7 @@ public interface Packager {
   String CFG_DIR = "cfg";
   String BIN_DIR = "bin";
   String LOG_DIR = "log";
+  String JFX_DIR = "jfx";
 
   Attributes.Name FW_VER_KEY = new Attributes.Name("Corant-Kernel-Version");
 

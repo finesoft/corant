@@ -101,7 +101,7 @@ public class Conversions {
   /**
    * Convert an object to BigDecimal object, supports String to BigDecimal Number to BigDecimal,
    * return the given alternative object if the converted object is null else return the converted
-   * obejct. Support converting String or Numeric type to BigDecimal type.
+   * object. Support converting String or Numeric type to BigDecimal type.
    *
    * @param obj the object that to be converted
    * @param altVal the alternative object if converted object is null
@@ -116,7 +116,7 @@ public class Conversions {
   /**
    * Convert an object to rounding BigDecimal object with scale, support converting String or
    * Numeric type to BigDecimal type. Return the given alternative object if the converted object is
-   * null else return the converted obejct.
+   * null else return the converted object.
    *
    * @param obj the object that to be converted
    * @param altVal the alternative object if converted object is null
@@ -225,7 +225,7 @@ public class Conversions {
   /**
    * Convert an object to Byte object, support converting String (normal or Hex) or Numeric type to
    * Byte type, Float or Double type object may involve rounding or truncation. Return the given
-   * alternative object if the converted object is null else return the converted obejct.
+   * alternative object if the converted object is null else return the converted object.
    *
    * @param obj the object that to be converted
    * @param altVal the alternative object if converted object is null
@@ -269,7 +269,7 @@ public class Conversions {
    */
   public static <T, C extends Collection<T>> C toCollection(Object obj, Class<T> itemClass,
       IntFunction<C> collectionFactory) {
-    return Conversion.convert(obj, itemClass, collectionFactory, null);
+    return Conversion.convert(obj, itemClass, collectionFactory, null, true);
   }
 
   /**
@@ -377,12 +377,9 @@ public class Conversions {
   public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
     if (obj == null) {
       return null;
-    } else if (obj instanceof Collection) {
-      return Conversion.convert((Collection<?>) obj, ArrayList::new, clazz, hints);
-    } else if (obj.getClass().isArray()) {
-      return Conversion.convert(wrapArray(obj), ArrayList::new, clazz, hints);
+    } else {
+      return Conversion.convert(obj, clazz, ArrayList::new, hints, false);
     }
-    return Conversion.convert(obj, clazz, ArrayList::new, hints);// FIXME weird
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -592,12 +589,9 @@ public class Conversions {
   public static <T> Set<T> toSet(Object obj, Class<T> clazz, Map<String, ?> hints) {
     if (obj == null) {
       return null;
-    } else if (obj instanceof Collection) {
-      return Conversion.convert((Collection<?>) obj, HashSet::new, clazz, hints);
-    } else if (obj.getClass().isArray()) {
-      return Conversion.convert(wrapArray(obj), HashSet::new, clazz, hints);
+    } else {
+      return Conversion.convert(obj, clazz, HashSet::new, hints, false);
     }
-    return Conversion.convert(obj, clazz, HashSet::new, hints);// FIXME weird
   }
 
   public static <T> Set<T> toSet(Object obj, Function<Object, T> convert) {

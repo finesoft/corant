@@ -254,7 +254,7 @@ public class Conversion {
         it = convert(iterableOf(value), targetItemClass, hints);
       } else {
         throw new ConversionException(
-            "The given value can't be converted, the target item class of the conversion must be iterable/array/iterator/enumeration");
+            "The given value can't be converted, the value class of the conversion must be iterable/array/iterator/enumeration");
       }
     }
     final C collection = collectionFactory.apply(size);

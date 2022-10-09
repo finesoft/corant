@@ -12,8 +12,8 @@
  * the License.
  */
 /**
- * corant-devops-maven
- * 
+ * corant-devops-maven-plugin
+ *
  * @author bingo 下午2:50:15
  *
  */

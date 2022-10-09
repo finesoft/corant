@@ -14,7 +14,7 @@
 package bin;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 上午11:41:28
  *

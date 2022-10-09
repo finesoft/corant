@@ -24,7 +24,7 @@ import java.util.Objects;
 import org.corant.devops.maven.plugin.archive.Archive.Entry;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午3:43:43
  *

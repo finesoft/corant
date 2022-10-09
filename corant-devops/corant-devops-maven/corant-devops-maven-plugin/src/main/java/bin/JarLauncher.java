@@ -43,7 +43,7 @@ import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 上午11:33:04
  *
@@ -56,6 +56,9 @@ public class JarLauncher {
   public static final String MANIFEST = "META-INF/MANIFEST.MF";
   public static final String MAIN = "main";
   public static final String JAREXT = ".jar";
+  public static final String CMD_CLEAN_WORK_DIR = "-clean_work_dir";
+  public static final String CMD_SET_THREAD_CLASSLOADER = "-set_thread_context_class_loader";
+  public static final String CMD_LOG_CLASS_PATHS = "-log_class_paths";
   public static final int JAREXT_LEN = JAREXT.length();
   private final List<Path> classpaths = new ArrayList<>();
   private String appName;
@@ -81,7 +84,11 @@ public class JarLauncher {
       Files.createDirectories(workPath);
       cleanWorkDir();
       extract();
-      Class<?> mainClass = buildClassLoader().loadClass(mainClsName);
+      ClassLoader classLoader = buildClassLoader();
+      if (hasCommand(CMD_SET_THREAD_CLASSLOADER)) {
+        Thread.currentThread().setContextClassLoader(classLoader);
+      }
+      Class<?> mainClass = classLoader.loadClass(mainClsName);
       System.setProperty(APP_NME_KEY, appName);
       log(true, "Found main class %s by corant class loader, the %s is starting...", mainClass,
           appName);
@@ -93,10 +100,14 @@ public class JarLauncher {
   }
 
   ClassLoader buildClassLoader() {
+    final boolean logClassPaths = hasCommand(CMD_SET_THREAD_CLASSLOADER);
     return AccessController
         .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(DFLT_APP_NAME,
             classpaths.stream().map(path -> {
               try {
+                if (logClassPaths) {
+                  log(true, "Add class path: %s", path.toString());
+                }
                 return path.toUri().toURL();
               } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
@@ -105,7 +116,7 @@ public class JarLauncher {
   }
 
   void cleanWorkDir() {
-    if (Arrays.stream(args).anyMatch("-cwd"::equalsIgnoreCase)) {
+    if (hasCommand(CMD_CLEAN_WORK_DIR)) {
       log(true, "Clearing archives from workspace %s ...", workPath);
       File file = workPath.toFile();
       if (file != null && file.exists()) {
@@ -183,7 +194,7 @@ public class JarLauncher {
   Method getMainMethod(Class<?> cls) throws NoSuchMethodException {
     Method[] methods = cls.getMethods();
     for (Method method : methods) {
-      if (method.getName().equals(MAIN) && Modifier.isPublic(method.getModifiers())
+      if (MAIN.equals(method.getName()) && Modifier.isPublic(method.getModifiers())
           && Modifier.isStatic(method.getModifiers())) {
         Class<?>[] params = method.getParameterTypes();
         if (params.length == 1 && params[0] == String[].class) {
@@ -192,6 +203,10 @@ public class JarLauncher {
       }
     }
     throw new NoSuchMethodException("public static void main(String...args)");
+  }
+
+  boolean hasCommand(String cmd) {
+    return Arrays.stream(args).anyMatch(c -> c.equalsIgnoreCase(cmd));
   }
 
   void initialize() throws IOException {
@@ -227,12 +242,10 @@ public class JarLauncher {
       } else {
         System.out.print(msgOrFmt);
       }
+    } else if (newLine) {
+      System.out.printf(msgOrFmt + "%n", args);
     } else {
-      if (newLine) {
-        System.out.printf(msgOrFmt + "%n", args);
-      } else {
-        System.out.printf(msgOrFmt, args);
-      }
+      System.out.printf(msgOrFmt, args);
     }
   }
 

@@ -14,15 +14,15 @@
 package org.corant.modules.aicv.yolo;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
-import java.io.ByteArrayInputStream;
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import org.corant.kernel.logging.LoggerFactory;
-import org.corant.shared.util.Threads;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfRect;
@@ -32,92 +32,42 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import com.carrotsearch.hppc.FloatArrayList;
 import com.carrotsearch.hppc.IntArrayList;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 import nu.pattern.OpenCV;
 
 /**
  * corant-modules-aicv-yolo
  *
- * @author bingo 下午4:28:09
+ * @author bingo 下午12:04:28
  *
  */
-public class TestJfx extends Application {
-
+public class TestSwing {
   static {
     LoggerFactory.disableAccessWarnings();
   }
 
-  GraphicsContext gc;
-
-  public static void main(String... args) {
-    launch(args);
-  }
-
-  @Override
-  public void start(Stage stage) throws Exception {
-    // Create the Canvas
-    Canvas canvas = new Canvas(1024, 768);
-    // Set the width of the Canvas
-    // canvas.setWidth(640);
-    // Set the height of the Canvas
-    // canvas.setHeight(480);
-
-    // Get the graphics context of the canvas
-    gc = canvas.getGraphicsContext2D();
-
-    // Draw a Text
-    // gc.strokeText("Hello Canvas", 150, 100);
-
-    // Create the Pane
-    Pane root = new Pane();
-    // Set the Style-properties of the Pane
-    // root.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;" + "-fx-border-width: 2;"
-    // + "-fx-border-insets: 5;" + "-fx-border-radius: 5;" + "-fx-border-color: blue;");
-
-    // Add the Canvas to the Pane
-    root.getChildren().add(canvas);
-    // Create the Scene
-    Scene scene = new Scene(root);
-    // Add the Scene to the Stage
-    stage.setScene(scene);
-    // Set the Title of the Stage
-    stage.setTitle("Creation of a Canvas");
-    // Display the Stage
-    stage.show();
-    Threads.runInDaemon(this::doStart);
-  }
-
-  protected void doStart() {
+  public static void main(String[] args) throws InterruptedException {
     OpenCV.loadShared();
-    String modelWeights = "E:/IDE/ai-model-repo/vehicles/yolov3.weights";
-    String modelConfiguration = "E:/IDE/ai-model-repo/vehicles/yolov3.cfg";
-    String filePath = "D:/shared/VID_20211217_210759.mp4";
+    String modelWeights = "E:/AiModelRepo/yolov3.weights";
+    String modelConfiguration = "E:/AiModelRepo/yolov3.cfg";
+    String filePath = "D:\\VID_20211217_210759.mp4";
 
     AtomicBoolean running = new AtomicBoolean(true);
-    // JFrame jframe = new JFrame("Video");
-    // JLabel vidpanel = new JLabel();
-    // jframe.setContentPane(vidpanel);
-    // jframe.setVisible(true);
-    // jframe.setExtendedState(Frame.MAXIMIZED_BOTH);
-    // jframe.addWindowListener(new java.awt.event.WindowAdapter() {
-    // @Override
-    // public void windowClosing(java.awt.event.WindowEvent e) {
-    // e.getWindow().dispose();
-    // running.set(false);
-    // }
-    // });
+    JFrame jframe = new JFrame("Video");
+    JLabel vidpanel = new JLabel();
+    jframe.setContentPane(vidpanel);
+    jframe.setVisible(true);
+    jframe.setExtendedState(Frame.MAXIMIZED_BOTH);
+    jframe.addWindowListener(new java.awt.event.WindowAdapter() {
+      @Override
+      public void windowClosing(java.awt.event.WindowEvent e) {
+        e.getWindow().dispose();
+        running.set(false);
+      }
+    });
     Net net = Dnn.readNetFromDarknet(modelConfiguration, modelWeights);
     net.setPreferableBackend(3);
     net.setPreferableTarget(0);
@@ -178,18 +128,12 @@ public class TestJfx extends Application {
             }
           }
         }
-        if (gc != null && running.get()) {
+        if (vidpanel != null && running.get()) {
           try {
-            Platform.runLater(() -> {
-              MatOfByte bytemat = new MatOfByte();
-              Imgcodecs.imencode(".bmp", frame, bytemat);
-              // byte[] bytes = bytemat.toArray();
-              Image image = new Image(new ByteArrayInputStream(bytemat.toArray()));
-              gc.drawImage(image, 0, 0);
-            });
-            // vidpanel.setGraphic(new ImageView(image));
+            vidpanel.getGraphics().drawImage(Mats.toBufferedImage(frame, null), 0, 0,
+                vidpanel.getWidth(), vidpanel.getHeight(), null);
           } catch (Exception e) {
-            e.printStackTrace();
+
           }
         }
       }

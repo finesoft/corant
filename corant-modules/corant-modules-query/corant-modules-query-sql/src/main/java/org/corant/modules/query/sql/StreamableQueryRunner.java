@@ -68,7 +68,7 @@ public class StreamableQueryRunner extends QueryRunner {
           .stream(new ResultSetSpliterator<>(releaser, resultSetHandler, terminater), false)
           .onClose(releaser);
       if (autoClose) {
-        Cleaner.create().register(resultSet, releaser::run);// JDK9+
+        Cleaner.create().register(resultSet, releaser);// JDK9+
       }
       return stream;
     } catch (Exception e) {

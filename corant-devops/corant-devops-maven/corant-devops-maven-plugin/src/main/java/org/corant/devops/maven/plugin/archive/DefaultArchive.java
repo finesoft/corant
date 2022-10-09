@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午3:10:46
  *

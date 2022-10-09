@@ -24,7 +24,7 @@ import java.util.jar.Manifest;
 import org.corant.devops.maven.plugin.archive.Archive.Entry;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 上午10:03:17
  *

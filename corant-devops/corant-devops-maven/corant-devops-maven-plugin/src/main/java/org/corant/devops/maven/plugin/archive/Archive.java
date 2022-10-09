@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 下午2:48:41
  *

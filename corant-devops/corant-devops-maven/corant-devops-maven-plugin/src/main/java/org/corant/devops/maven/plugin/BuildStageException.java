@@ -14,7 +14,7 @@
 package org.corant.devops.maven.plugin;
 
 /**
- * corant-devops-maven
+ * corant-devops-maven-plugin
  *
  * @author bingo 上午11:23:48
  *
@@ -23,45 +23,23 @@ public class BuildStageException extends RuntimeException {
 
   private static final long serialVersionUID = -1147901031577231763L;
 
-  /**
-   *
-   */
-  public BuildStageException() {
-    super();
-  }
+  public BuildStageException() {}
 
-  /**
-   * @param message
-   */
   public BuildStageException(String message) {
     super(message);
   }
 
-  /**
-   * @param message
-   * @param cause
-   */
   public BuildStageException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  /**
-   * @param message
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   */
   public BuildStageException(String message, Throwable cause, boolean enableSuppression,
       boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
 
-  /**
-   * @param cause
-   */
   public BuildStageException(Throwable cause) {
     super(cause);
   }
-
 
 }

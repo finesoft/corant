@@ -93,7 +93,7 @@ public class TestJfx extends Application {
     // Add the Scene to the Stage
     stage.setScene(scene);
     // Set the Title of the Stage
-    stage.setTitle("Creation of a Canvas");
+    stage.setTitle("Vehicles Recognition");
     // Display the Stage
     stage.show();
     Threads.runInDaemon(this::doStart);
@@ -101,9 +101,9 @@ public class TestJfx extends Application {
 
   protected void doStart() {
     OpenCV.loadShared();
-    String modelWeights = "E:\\AiModelRepo/yolov3.weights";
-    String modelConfiguration = "E:\\AiModelRepo/yolov3.cfg";
-    String filePath = "D:/VID_20211217_210759.mp4";
+    String modelWeights = getParameters().getNamed().get("mw");
+    String modelConfiguration = getParameters().getNamed().get("mc");
+    String filePath = getParameters().getNamed().get("file");
 
     AtomicBoolean running = new AtomicBoolean(true);
     Net net = Dnn.readNetFromDarknet(modelConfiguration, modelWeights);

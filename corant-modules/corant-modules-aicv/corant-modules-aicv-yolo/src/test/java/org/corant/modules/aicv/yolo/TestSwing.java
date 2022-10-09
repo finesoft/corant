@@ -51,12 +51,12 @@ public class TestSwing {
 
   public static void main(String[] args) throws InterruptedException {
     OpenCV.loadShared();
-    String modelWeights = "E:/AiModelRepo/yolov3.weights";
-    String modelConfiguration = "E:/AiModelRepo/yolov3.cfg";
-    String filePath = "D:\\VID_20211217_210759.mp4";
+    String modelWeights = args[0];
+    String modelConfiguration = args[1];
+    String filePath = args[2];
 
     AtomicBoolean running = new AtomicBoolean(true);
-    JFrame jframe = new JFrame("Video");
+    JFrame jframe = new JFrame("Vehicles Recognition");
     JLabel vidpanel = new JLabel();
     jframe.setContentPane(vidpanel);
     jframe.setVisible(true);

@@ -36,6 +36,8 @@ import org.corant.devops.maven.plugin.archive.DefaultArchive;
 import org.corant.devops.maven.plugin.archive.FileEntry;
 import org.corant.devops.maven.plugin.archive.ManifestEntry;
 import bin.JarLauncher;
+import bin.JarLauncherForkJoinWorkerThread;
+import bin.JarLauncherForkJoinWorkerThreadFactory;
 
 /**
  * corant-devops-maven-plugin
@@ -45,9 +47,8 @@ import bin.JarLauncher;
  */
 public class JarPackager implements Packager {
 
-  public static final String JAR_LAU_PATH =
-      JarLauncher.class.getName().replaceAll("\\.", "/") + ".class";
-  public static final String JAR_LAU_NME = JarLauncher.class.getSimpleName() + ".class";
+  public static final List<Class<?>> JAR_LAU_CLASSES = List.of(JarLauncher.class,
+      JarLauncherForkJoinWorkerThreadFactory.class, JarLauncherForkJoinWorkerThread.class);
 
   private final PackageMojo mojo;
   private final Log log;
@@ -118,7 +119,10 @@ public class JarPackager implements Packager {
         .map(Artifact::getFile).map(FileEntry::of).collect(Collectors.toList()));
     DefaultArchive.of(APP_DIR, root)
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-    DefaultArchive.of(BIN_DIR, root).addEntry(ClassPathEntry.of(JAR_LAU_PATH, JAR_LAU_NME));
+    for (Class<?> klass : JAR_LAU_CLASSES) {
+      DefaultArchive.of(BIN_DIR, root).addEntry(ClassPathEntry
+          .of(klass.getName().replaceAll("\\.", "/") + ".class", klass.getSimpleName() + ".class"));
+    }
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of(attr -> {
       // The application main class and runner class
       attr.put(Attributes.Name.MAIN_CLASS, JarLauncher.class.getName());

@@ -56,10 +56,14 @@ public class JarLauncher {
   public static final String MANIFEST = "META-INF/MANIFEST.MF";
   public static final String MAIN = "main";
   public static final String JAREXT = ".jar";
-  public static final String CMD_CLEAN_WORK_DIR = "-clean_work_dir";
-  public static final String CMD_SET_THREAD_CLASSLOADER = "-set_thread_context_class_loader";
-  public static final String CMD_LOG_CLASS_PATHS = "-log_class_paths";
   public static final int JAREXT_LEN = JAREXT.length();
+
+  // commands
+  public static final String CMD_CLEAN_WORK_DIR = "-clean_work_dir";
+  public static final String CMD_NOT_SET_THREAD_CONTEXT_CLASSL_OADER =
+      "-not_set_thread_context_class_loader";
+  public static final String CMD_LOG_CLASS_PATHS = "-log_class_paths";
+
   private final List<Path> classpaths = new ArrayList<>();
   private String appName;
   private String mainClsName;
@@ -85,8 +89,11 @@ public class JarLauncher {
       cleanWorkDir();
       extract();
       ClassLoader classLoader = buildClassLoader();
-      if (hasCommand(CMD_SET_THREAD_CLASSLOADER)) {
+      if (!hasCommand(CMD_NOT_SET_THREAD_CONTEXT_CLASSL_OADER)) {
         Thread.currentThread().setContextClassLoader(classLoader);
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.threadFactory",
+            JarLauncherForkJoinWorkerThreadFactory.class.getName());
+        log(true, "Set thread context class loader and fork join pool worker thread factory");
       }
       Class<?> mainClass = classLoader.loadClass(mainClsName);
       System.setProperty(APP_NME_KEY, appName);
@@ -100,7 +107,7 @@ public class JarLauncher {
   }
 
   ClassLoader buildClassLoader() {
-    final boolean logClassPaths = hasCommand(CMD_SET_THREAD_CLASSLOADER);
+    final boolean logClassPaths = hasCommand(CMD_LOG_CLASS_PATHS);
     return AccessController
         .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(DFLT_APP_NAME,
             classpaths.stream().map(path -> {
@@ -248,5 +255,4 @@ public class JarLauncher {
       System.out.printf(msgOrFmt, args);
     }
   }
-
 }

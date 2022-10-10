@@ -13,6 +13,14 @@
  */
 package org.corant.modules.logging;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.corant.Corant;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.shared.util.Systems;
@@ -28,6 +36,37 @@ public class Log4jProvider implements CorantBootHandler {
   public static final String LOGMANAER_KEY = "java.util.logging.manager";
   public static final String JBOSS_LOGGER_KEY = "org.jboss.logging.provider";
   public static final String JUL_LOGMANAGER = "org.apache.logging.log4j.jul.LogManager";
+
+  public static void addAppender(Appender appender, Level level, Filter filter) {
+    shouldNotNull(appender);
+    final LoggerContext ctx =
+        (LoggerContext) LogManager.getContext(Log4jProvider.class.getClassLoader(), false);
+    final Configuration config = ctx.getConfiguration();
+    if (!appender.isStarted()) {
+      appender.start();
+    }
+    config.addAppender(appender);
+    for (final LoggerConfig loggerConfig : config.getLoggers().values()) {
+      loggerConfig.addAppender(appender, level, filter);
+    }
+    config.getRootLogger().addAppender(appender, level, filter);
+    ctx.updateLoggers();
+  }
+
+  public static void removeAppender(Appender appender) {
+    shouldNotNull(appender);
+    if (!appender.isStopped()) {
+      appender.stop();
+    }
+    final LoggerContext ctx =
+        (LoggerContext) LogManager.getContext(Log4jProvider.class.getClassLoader(), false);
+    final Configuration config = ctx.getConfiguration();
+    for (final LoggerConfig loggerConfig : config.getLoggers().values()) {
+      loggerConfig.removeAppender(appender.getName());
+    }
+    config.getRootLogger().removeAppender(appender.getName());
+    ctx.updateLoggers();
+  }
 
   @Override
   public int getPriority() {

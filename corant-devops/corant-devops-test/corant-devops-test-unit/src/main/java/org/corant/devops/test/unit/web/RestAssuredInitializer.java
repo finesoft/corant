@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import org.corant.devops.test.unit.web.RandomWebServerPortSourceProvider.RandomWebServerPortConfigSource;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
+import org.corant.modules.webserver.shared.WebServerConfig;
 import org.corant.shared.normal.Defaults;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.restassured.RestAssured;
@@ -47,7 +48,8 @@ public class RestAssuredInitializer {
   public static final String TEST_JWT = "corant.test.jwt";
 
   @Inject
-  @ConfigProperty(name = RandomWebServerPortConfigSource.WEB_SERVER_PORT_PN, defaultValue = "0")
+  @ConfigProperty(name = RandomWebServerPortConfigSource.WEB_SERVER_PORT_PN,
+      defaultValue = WebServerConfig.DEFAULT_PORT)
   private int port;
 
   @Inject

@@ -14,11 +14,10 @@
 package org.corant.modules.javafx.cdi;
 
 import static org.corant.context.Beans.resolve;
-import static org.corant.context.Beans.resolveAccept;
-import org.corant.Corant;
 import org.corant.context.CDIs;
 import org.corant.modules.javafx.cdi.CorantFXML.CorantFXMLLiteral;
 import javafx.application.Application;
+import javafx.application.Preloader.ErrorNotification;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 
@@ -32,8 +31,7 @@ public class CorantJavaFXApplication extends Application {
 
   @Override
   public final void init() throws Exception {
-    startCorant();
-    resolveAccept(CorantApplicationParametersFactory.class, p -> p.setParameters(getParameters()));
+    initCorant();
     super.init();
     doInit();
   }
@@ -60,6 +58,16 @@ public class CorantJavaFXApplication extends Application {
 
   protected void doStop() throws Exception {}
 
+  protected void initCorant() {
+    try {
+      notifyPreloader(new CorantInitializationNotification("Initialize Corant...", this));
+      CorantJavaFX.startCorant(getParameters());
+      notifyPreloader(new CorantInitializationNotification("Corant initialized", this));
+    } catch (Exception ex) {
+      notifyPreloader(new ErrorNotification(null, "Initialize Corant occurred error!", ex));
+    }
+  }
+
   protected FXMLLoader resolveFXMLLoader() {
     return resolveFXMLLoader(null, null, null);
   }
@@ -76,27 +84,8 @@ public class CorantJavaFXApplication extends Application {
     return resolve(FXMLLoader.class, CorantFXMLLiteral.of(bundle, url, charset));
   }
 
-  protected void startCorant() {
-    if (Corant.current() == null) {
-      synchronized (Corant.class) {
-        if (Corant.current() == null) {
-          Corant.startup(getParameters().getRaw().toArray(String[]::new));
-        }
-      }
-    }
-    if (!Corant.current().isRunning()) {
-      Corant.current().start(null);
-    }
-  }
-
   protected void stopCorant() {
-    if (Corant.current() != null) {
-      synchronized (Corant.class) {
-        if (Corant.current() != null) {
-          Corant.shutdown();
-        }
-      }
-    }
+    CorantJavaFX.stopCorant();
   }
 
 }

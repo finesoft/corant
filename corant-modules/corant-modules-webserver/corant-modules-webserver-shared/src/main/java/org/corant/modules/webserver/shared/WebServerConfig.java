@@ -33,6 +33,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Singleton
 public class WebServerConfig {
 
+  public static final String DEFAULT_HOST = "0.0.0.0";
+  public static final String DEFAULT_PORT = "8080";
+
   @Inject
   @ConfigProperty(name = "corant.webserver.default-charset")
   protected Optional<String> defaultCharset;
@@ -42,11 +45,11 @@ public class WebServerConfig {
   protected Optional<String> displayName;
 
   @Inject
-  @ConfigProperty(name = "corant.webserver.host", defaultValue = "0.0.0.0")
+  @ConfigProperty(name = "corant.webserver.host", defaultValue = DEFAULT_HOST)
   protected String host;
 
   @Inject
-  @ConfigProperty(name = "corant.webserver.port", defaultValue = "8080")
+  @ConfigProperty(name = "corant.webserver.port", defaultValue = DEFAULT_PORT)
   protected Integer port;
 
   @Inject

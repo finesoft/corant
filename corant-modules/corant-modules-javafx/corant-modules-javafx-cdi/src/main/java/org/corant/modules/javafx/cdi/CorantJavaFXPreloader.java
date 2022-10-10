@@ -13,59 +13,51 @@
  */
 package org.corant.modules.javafx.cdi;
 
-import org.corant.Corant;
 import javafx.application.Preloader;
 import javafx.stage.Stage;
 
 /**
  * corant-modules-javafx-cdi
  *
+ * <p>
+ * Preloader flow:
+ *
+ * <pre>
+ * 1. Preloader constructor called, thread: JavaFX Application Thread
+ * 2. Preloader#init (could be used to initialize preloader view), thread: JavaFX-Launcher
+ * 3. Preloader#start (showing preloader stage), thread: JavaFX Application Thread
+ * 4. BEFORE_LOAD
+ * 5. Application constructor called, thread: JavaFX Application Thread
+ * 6. BEFORE_INIT
+ * 7. Application#init (doing some heavy lifting), thread: JavaFX-Launcher
+ * 8. BEFORE_START
+ * 9. Application#start (initialize and show primary application stage), thread: JavaFX Application Thread
+ * </pre>
+ *
  * @author bingo 下午11:51:55
  *
  */
 public class CorantJavaFXPreloader extends Preloader {
 
+  protected volatile Stage preloaderStage;
+
   @Override
   public boolean handleErrorNotification(ErrorNotification info) {
-    stopCorant();
     return super.handleErrorNotification(info);
   }
 
   @Override
-  public void init() throws Exception {
-    startCorant();
-    super.init();
+  public void handleStateChangeNotification(StateChangeNotification info) {
+    if (info.getType() == StateChangeNotification.Type.BEFORE_START) {
+      preloaderStage.hide();
+    }
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {}
-
-  @Override
-  public void stop() throws Exception {
-    super.stop();
-    stopCorant();
+  public final void start(Stage preloaderStage) throws Exception {
+    this.preloaderStage = preloaderStage;
+    doStart(this.preloaderStage);
   }
 
-  protected void startCorant() {
-    if (Corant.current() == null) {
-      synchronized (Corant.class) {
-        if (Corant.current() == null) {
-          Corant.startup(getParameters().getRaw().toArray(String[]::new));
-        }
-      }
-    }
-    if (!Corant.current().isRunning()) {
-      Corant.current().start(null);
-    }
-  }
-
-  protected void stopCorant() {
-    if (Corant.current() != null) {
-      synchronized (Corant.class) {
-        if (Corant.current() != null) {
-          Corant.shutdown();
-        }
-      }
-    }
-  }
+  protected void doStart(Stage preloaderStage) {}
 }

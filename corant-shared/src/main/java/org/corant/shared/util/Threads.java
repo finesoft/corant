@@ -13,11 +13,16 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Functions.uncheckedRunner;
 import java.time.Duration;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
 
@@ -31,6 +36,26 @@ public class Threads {
 
   public static final String DAEMON_THREAD_NAME_PREFIX = Names.CORANT.concat("-daemon");
   static final AtomicLong DAEMON_THREAD_ID = new AtomicLong(0);
+
+  public static <V> V callInDaemon(Callable<V> callable) {
+    final FutureTask<V> future = new FutureTask<>(shouldNotNull(callable));
+    runInDaemon(future);
+    try {
+      return future.get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static <V> V callInDaemon(String threadName, Callable<V> callable) {
+    final FutureTask<V> future = new FutureTask<>(shouldNotNull(callable));
+    runInDaemon(threadName, future);
+    try {
+      return future.get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
 
   public static ThreadFactory daemonThreadFactory(final String threadName) {
     return daemonThreadFactory(threadName, Thread.NORM_PRIORITY);

@@ -14,6 +14,8 @@
 package org.corant.modules.javafx.cdi;
 
 import static org.corant.context.Beans.resolve;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.corant.context.CDIs;
 import org.corant.modules.javafx.cdi.CorantFXML.CorantFXMLLiteral;
 import javafx.application.Application;
@@ -28,6 +30,8 @@ import javafx.stage.Stage;
  *
  */
 public class CorantJavaFXApplication extends Application {
+
+  protected Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
 
   @Override
   public final void init() throws Exception {
@@ -54,17 +58,23 @@ public class CorantJavaFXApplication extends Application {
 
   protected void doInit() throws Exception {}
 
+  protected void doInitCorant() throws Exception {
+    notifyPreloader(new CorantInitializationNotification("Initialize Corant...", this));
+    CorantJavaFX.startCorant(getParameters());
+    notifyPreloader(new CorantInitializationNotification("Corant initialized", this));
+  }
+
   protected void doStart(Stage primaryStage) throws Exception {}
 
   protected void doStop() throws Exception {}
 
-  protected void initCorant() {
+  protected void initCorant() throws Exception {
     try {
-      notifyPreloader(new CorantInitializationNotification("Initialize Corant...", this));
-      CorantJavaFX.startCorant(getParameters());
-      notifyPreloader(new CorantInitializationNotification("Corant initialized", this));
+      doInitCorant();
     } catch (Exception ex) {
+      logger.log(Level.SEVERE, "Initialize Corant occurred error!", ex);
       notifyPreloader(new ErrorNotification(null, "Initialize Corant occurred error!", ex));
+      throw ex;
     }
   }
 

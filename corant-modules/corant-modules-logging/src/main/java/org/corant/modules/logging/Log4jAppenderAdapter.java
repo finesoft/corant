@@ -13,11 +13,15 @@
  */
 package org.corant.modules.logging;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.Serializable;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.ErrorHandler;
+import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.apache.logging.log4j.core.layout.SyslogLayout;
 
 /**
  * corant-modules-logging
@@ -25,61 +29,24 @@ import org.apache.logging.log4j.core.LogEvent;
  * @author bingo 下午8:12:28
  *
  */
-public class Log4jAppenderAdapter implements Appender {
+public class Log4jAppenderAdapter extends AbstractAppender {
+
+  public Log4jAppenderAdapter(String name) {
+    this(name, new NoOpFilter(), SyslogLayout.newBuilder().build(), true, new Property[0]);
+  }
+
+  public Log4jAppenderAdapter(String name, Filter filter, Layout<? extends Serializable> layout,
+      boolean ignoreExceptions, Property[] properties) {
+    super(shouldNotNull(name), filter, layout, ignoreExceptions, properties);
+  }
 
   @Override
   public void append(LogEvent event) {}
 
-  @Override
-  public ErrorHandler getHandler() {
-    return null;
+  static class NoOpFilter extends AbstractFilter {
+
+    public NoOpFilter() {
+      super(Result.NEUTRAL, Result.NEUTRAL);
+    }
   }
-
-  @Override
-  public Layout<? extends Serializable> getLayout() {
-    return null;
-  }
-
-  @Override
-  public String getName() {
-    return null;
-  }
-
-  @Override
-  public State getState() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean ignoreExceptions() {
-    return false;
-  }
-
-  @Override
-  public void initialize() {}
-
-  @Override
-  public boolean isStarted() {
-    return false;
-  }
-
-  @Override
-  public boolean isStopped() {
-    return false;
-  }
-
-  @Override
-  public void setHandler(ErrorHandler handler) {
-
-  }
-
-  @Override
-  public void start() {
-
-  }
-
-  @Override
-  public void stop() {}
-
 }

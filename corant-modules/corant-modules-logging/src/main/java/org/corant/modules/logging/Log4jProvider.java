@@ -49,7 +49,7 @@ public class Log4jProvider implements CorantBootHandler {
     for (final LoggerConfig loggerConfig : config.getLoggers().values()) {
       loggerConfig.addAppender(appender, level, filter);
     }
-    config.getRootLogger().addAppender(appender, level, filter);
+    ctx.getRootLogger().addAppender(ctx.getConfiguration().getAppender(appender.getName()));
     ctx.updateLoggers();
   }
 

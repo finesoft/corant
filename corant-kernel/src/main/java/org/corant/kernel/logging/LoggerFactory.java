@@ -13,12 +13,18 @@
  */
 package org.corant.kernel.logging;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Functions.emptyPredicate;
+import static org.corant.shared.util.Iterables.search;
 import static org.corant.shared.util.Methods.getMatchingMethod;
 import static org.corant.shared.util.Objects.tryNewInstance;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.function.Predicate;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -32,6 +38,10 @@ import org.corant.shared.util.UnsafeAccessors;
  *
  */
 public class LoggerFactory {
+
+  public static void addHandler(Handler handler, String... loggerNames) {
+    maintainHandler(false, handler, loggerNames);
+  }
 
   public static void disableAccessWarnings() {
     try {
@@ -77,6 +87,29 @@ public class LoggerFactory {
       }
     } catch (Exception ignore) {
       // NOOP
+    }
+  }
+
+  public static void removeHandler(Handler handler, String... loggerNames) {
+    maintainHandler(true, handler, loggerNames);
+  }
+
+  static void maintainHandler(boolean remove, Handler handler, String... loggerNames) {
+    shouldNotNull(handler);
+    Enumeration<String> names = LogManager.getLogManager().getLoggerNames();
+    Predicate<String> filter =
+        isEmpty(loggerNames) ? emptyPredicate(true) : s -> search(loggerNames, s) != -1;
+    if (names != null) {
+      while (names.hasMoreElements()) {
+        String name = names.nextElement();
+        if (filter.test(name)) {
+          if (remove) {
+            Logger.getLogger(name).removeHandler(handler);
+          } else {
+            Logger.getLogger(name).addHandler(handler);
+          }
+        }
+      }
     }
   }
 

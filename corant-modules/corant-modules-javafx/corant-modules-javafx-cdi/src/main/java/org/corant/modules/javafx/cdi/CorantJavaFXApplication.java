@@ -13,14 +13,11 @@
  */
 package org.corant.modules.javafx.cdi;
 
-import static org.corant.context.Beans.resolve;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.context.CDIs;
-import org.corant.modules.javafx.cdi.CorantFXML.CorantFXMLLiteral;
 import javafx.application.Application;
 import javafx.application.Preloader.ErrorNotification;
-import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 
 /**
@@ -60,7 +57,7 @@ public class CorantJavaFXApplication extends Application {
 
   protected void doInitCorant() throws Exception {
     notifyPreloader(new CorantInitializationNotification("Initialize Corant...", this));
-    CorantJavaFX.startCorant(getParameters());
+    CorantJavaFX.startCorant(this);
     notifyPreloader(new CorantInitializationNotification("Corant initialized", this));
   }
 
@@ -76,22 +73,6 @@ public class CorantJavaFXApplication extends Application {
       notifyPreloader(new ErrorNotification(null, "Initialize Corant occurred error!", ex));
       throw ex;
     }
-  }
-
-  protected FXMLLoader resolveFXMLLoader() {
-    return resolveFXMLLoader(null, null, null);
-  }
-
-  protected FXMLLoader resolveFXMLLoader(String bundle) {
-    return resolveFXMLLoader(bundle, null, null);
-  }
-
-  protected FXMLLoader resolveFXMLLoader(String bundle, String url) {
-    return resolveFXMLLoader(bundle, url, null);
-  }
-
-  protected FXMLLoader resolveFXMLLoader(String bundle, String url, String charset) {
-    return resolve(FXMLLoader.class, CorantFXMLLiteral.of(bundle, url, charset));
   }
 
   protected void stopCorant() {

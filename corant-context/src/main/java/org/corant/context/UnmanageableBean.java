@@ -50,6 +50,7 @@ public class UnmanageableBean<T> implements AutoCloseable {
     originalInstance = null;
   }
 
+  @SuppressWarnings("deprecation")
   public UnmanageableBean(T object) {
     shouldBeFalse(Beans.isManagedBean(shouldNotNull(object)));
     bm = (WeldManager) CDI.current().getBeanManager();
@@ -179,9 +180,8 @@ public class UnmanageableBean<T> implements AutoCloseable {
     }
     instance =
         // originalInstance == null ? injectionTarget.produce(creationalContext) : originalInstance;
-
         InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
-            .createInterceptedInstance(
+            .ignoreFinalMethods().createInterceptedInstance(
                 originalInstance == null ? injectionTarget.produce(creationalContext)
                     : originalInstance);
     return this;

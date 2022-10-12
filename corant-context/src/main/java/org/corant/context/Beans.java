@@ -14,7 +14,6 @@
 package org.corant.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
@@ -32,11 +31,13 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
+import javax.inject.Singleton;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Services;
+import org.jboss.weld.bean.proxy.ProxyObject;
 
 /**
  * corant-context
@@ -197,8 +198,16 @@ public class Beans {
     return Services.findRequired(instanceClass);
   }
 
+  @Deprecated
   public static boolean isManagedBean(Object object, Annotation... qualifiers) {
-    return object != null && !select(getUserClass(object), qualifiers).isUnsatisfied();
+    if (object instanceof ProxyObject) {
+      return true;
+    } else if (object != null) {
+      if (object.getClass().getAnnotation(Singleton.class) != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

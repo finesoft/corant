@@ -13,8 +13,15 @@
  */
 package org.corant.modules.javafx.cdi;
 
+import static org.corant.context.Beans.resolve;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.inject.Singleton;
 import org.corant.Corant;
-import org.corant.shared.util.Annotations;
+import javafx.application.Application;
 import javafx.application.Application.Parameters;
 
 /**
@@ -25,17 +32,19 @@ import javafx.application.Application.Parameters;
  */
 public class CorantJavaFX {
 
-  public static void startCorant(Parameters parameters) {
+  public static void startCorant(Application application) {
     if (Corant.current() == null) {
       synchronized (Corant.class) {
         if (Corant.current() == null) {
-          Corant.call(false, CorantApplicationParametersFactory.class, Annotations.EMPTY_ARRAY,
-              parameters.getRaw().toArray(String[]::new)).setParameters(parameters);
+          final Parameters parameters = application.getParameters();
+          Corant.startup(sc -> sc.addExtensions(new ApplicationExtension(application)),
+              parameters.getRaw().toArray(String[]::new));
+          resolve(CorantApplicationParametersFactory.class).setParameters(parameters);
         }
       }
     }
     if (!Corant.current().isRunning()) {
-      Corant.current().start(null);
+      Corant.current().start(sc -> sc.addExtensions(new ApplicationExtension(application)));
     }
   }
 
@@ -47,5 +56,21 @@ public class CorantJavaFX {
         }
       }
     }
+  }
+
+  static class ApplicationExtension implements Extension {
+
+    final Application application;
+
+    ApplicationExtension(Application application) {
+      this.application = application;
+    }
+
+    void onAfterBeanDiscovery(@Observes AfterBeanDiscovery event) {
+      event.addBean().addType(application.getClass()).scope(Singleton.class)
+          .addQualifier(Default.Literal.INSTANCE).addQualifier(Any.Literal.INSTANCE)
+          .produceWith(obj -> application);
+    }
+
   }
 }

@@ -23,25 +23,75 @@ import javafx.util.BuilderFactory;
 
 /**
  * corant-modules-javafx-cdi
+ * <p>
+ * A CDI related FXMLLoader utility class.
  *
  * @author bingo 下午4:30:32
  *
  */
 public class FXMLLoaders {
 
+  /**
+   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
+   * over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param location the location used to resolve relative path attribute values
+   *
+   * @throws IOException if an error occurs during loading
+   * @return the loaded object hierarchy
+   */
   public static <T> T load(URL location) throws IOException {
     return FXMLLoader.load(location, null, null, Beans::resolve);
   }
 
+  /**
+   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
+   * over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param location the location used to resolve relative path attribute values
+   * @param resources the resources used to resolve resource key attribute values
+   *
+   * @throws IOException if an error occurs during loading
+   * @return the loaded object hierarchy
+   */
   public static <T> T load(URL location, ResourceBundle resources) throws IOException {
     return FXMLLoader.load(location, resources, null, Beans::resolve);
   }
 
+  /**
+   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
+   * over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param location the location used to resolve relative path attribute values
+   * @param resources the resources used to resolve resource key attribute values
+   * @param builderFactory the builder factory used to load the document
+   *
+   * @throws IOException if an error occurs during loading
+   * @return the loaded object hierarchy
+   */
   public static <T> T load(URL location, ResourceBundle resources, BuilderFactory builderFactory)
       throws IOException {
     return FXMLLoader.load(location, resources, builderFactory, Beans::resolve);
   }
 
+  /**
+   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
+   * over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param location the location used to resolve relative path attribute values
+   * @param resources the resources used to resolve resource key attribute values
+   * @param builderFactory the builder factory used when loading the document
+   * @param charset the character set used when loading the document
+   *
+   * @throws IOException if an error occurs during loading
+   * @return the loaded object hierarchy
+   *
+   * @since JavaFX 2.1
+   */
   public static <T> T load(URL location, ResourceBundle resources, BuilderFactory builderFactory,
       Charset charset) throws IOException {
     return FXMLLoader.load(location, resources, builderFactory, Beans::resolve, charset);

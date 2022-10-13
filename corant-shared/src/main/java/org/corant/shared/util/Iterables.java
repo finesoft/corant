@@ -394,13 +394,12 @@ public class Iterables {
 
   /**
    * Searches the specified array for the specified value, returns index of the search key, if it is
-   * contained in the array; otherwise, <code>(-(<i>insertion point</i>) - 1)</code>.
+   * contained in the array; otherwise, return -1.
    *
    * @param <T> the array component type
    * @param a the array to be searched
    * @param key the value to be searched for
-   * @return index of the search key, if it is contained in the array; otherwise,
-   *         <code>(-(<i>insertion point</i>) - 1)</code>.
+   * @return index of the search key, if it is contained in the array; otherwise, return -1.
    */
   public static <T> int search(T[] a, T key) {
     if (a != null) {

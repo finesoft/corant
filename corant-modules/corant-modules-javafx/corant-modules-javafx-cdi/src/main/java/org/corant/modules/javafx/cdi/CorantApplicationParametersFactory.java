@@ -20,6 +20,9 @@ import javafx.application.Application.Parameters;
 /**
  * corant-modules-javafx-cdi
  *
+ * <p>
+ * A application parameters producer, use to make application parameters injectable.
+ *
  * @author bingo 上午12:21:56
  *
  */
@@ -33,6 +36,6 @@ public class CorantApplicationParametersFactory {
   }
 
   protected void setParameters(Parameters p) {
-    this.parameters = p;
+    parameters = p;
   }
 }

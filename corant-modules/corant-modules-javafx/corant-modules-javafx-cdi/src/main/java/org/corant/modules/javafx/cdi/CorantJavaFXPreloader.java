@@ -48,8 +48,9 @@ public class CorantJavaFXPreloader extends Preloader {
 
   @Override
   public void handleStateChangeNotification(StateChangeNotification info) {
-    if (info.getType() == StateChangeNotification.Type.BEFORE_START) {
-      preloaderStage.hide();
+    final Stage usedStage = preloaderStage;
+    if (info.getType() == StateChangeNotification.Type.BEFORE_START && usedStage != null) {
+      usedStage.hide();
     }
   }
 

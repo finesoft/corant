@@ -321,7 +321,7 @@ public class Systems {
   }
 
   public static String getUserCountry() {
-    return defaultObject(getProperty("user.country"), () -> getProperty("user.country"));
+    return defaultObject(getProperty("user.country"), () -> getProperty("user.region"));
   }
 
   public static String getUserHome() {

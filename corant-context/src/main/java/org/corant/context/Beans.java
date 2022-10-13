@@ -14,6 +14,7 @@
 package org.corant.context;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
@@ -199,12 +200,13 @@ public class Beans {
   }
 
   @Deprecated
-  public static boolean isManagedBean(Object object, Annotation... qualifiers) {
+  public static boolean isManagedBean(Object object) {
     if (object instanceof ProxyObject) {
-      return true;
-    } else if (object != null) {
-      if (object.getClass().getAnnotation(Singleton.class) != null) {
-        return true;
+      return true; // for WELD only
+    } else if (object != null && object.getClass().getAnnotation(Singleton.class) != null) {
+      Instance<?> inst = select(getUserClass(object));
+      if (inst.isResolvable()) {
+        return inst.get().equals(object);
       }
     }
     return false;

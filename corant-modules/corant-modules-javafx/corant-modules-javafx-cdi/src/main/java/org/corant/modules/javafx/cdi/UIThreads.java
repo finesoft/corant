@@ -84,13 +84,13 @@ public class UIThreads {
     if (!isUIThread()) {
       runnable.run();
     } else {
-      shouldNotNull(executorService).submit(uncheckedRunner(runnable::run));
+      shouldNotNull(executorService).execute(uncheckedRunner(runnable::run));
     }
   }
 
   public static void runOutsideUIAsync(final ExecutorService executorService,
       final Runnable runnable) {
     shouldNoneNull(runnable, executorService);
-    executorService.submit(uncheckedRunner(runnable::run));
+    executorService.execute(uncheckedRunner(runnable::run));
   }
 }

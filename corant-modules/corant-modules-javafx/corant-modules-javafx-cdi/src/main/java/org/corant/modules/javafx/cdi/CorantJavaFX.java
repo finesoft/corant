@@ -27,11 +27,26 @@ import javafx.application.Application.Parameters;
 /**
  * corant-modules-javafx-cdi
  *
+ * <p>
+ * Corant JavaFX bootstrap for JavaFX applications integrated with CDI. Generally, when
+ * {@link Application#init()} and {@link Application#stop()} the CDI container is started and closed
+ * accordingly. The command line arguments passed to the application can be passed to Corant
+ * correspondingly, and make the application instance injectable.
+ * <p>
+ * NOTE: Each process has one and only one corant instance, it can be startup and shotdown mulity
+ * times, the command line arguments only passed to it only first startup.
+ *
  * @author bingo 下午5:40:17
  *
  */
 public class CorantJavaFX {
 
+  /**
+   * Start corant with given application, if corant has already been started, this method does
+   * nothing.
+   *
+   * @param application the JavaFX application
+   */
   public static void startCorant(Application application) {
     if (Corant.current() == null) {
       synchronized (Corant.class) {
@@ -42,12 +57,19 @@ public class CorantJavaFX {
           resolve(CorantApplicationParametersFactory.class).setParameters(parameters);
         }
       }
-    }
-    if (!Corant.current().isRunning()) {
-      Corant.current().start(sc -> sc.addExtensions(new ApplicationExtension(application)));
+    } else {
+      synchronized (Corant.class) {
+        if (!Corant.current().isRunning()) {
+          Corant.current().start(sc -> sc.addExtensions(new ApplicationExtension(application)));
+        }
+      }
     }
   }
 
+  /**
+   * Stop corant, if corant has already been stopped or corant instance doesn't exist, this
+   * methoddoes nothing.
+   */
   public static void stopCorant() {
     if (Corant.current() != null) {
       synchronized (Corant.class) {
@@ -58,6 +80,15 @@ public class CorantJavaFX {
     }
   }
 
+  /**
+   * corant-modules-javafx-cdi
+   *
+   * <p>
+   * An application instance for injection.
+   *
+   * @author bingo 下午5:50:34
+   *
+   */
   static class ApplicationExtension implements Extension {
 
     final Application application;

@@ -66,7 +66,7 @@
     <version.hibernate-validator-cdi>6.0.16.Final</version.hibernate-validator-cdi>
     <version.hikariCP>3.4.5</version.hikariCP>
     <version.hppc>0.9.1</version.hppc>
-    <version.hsqldb>2.6.1</version.hsqldb>
+    <version.hsqldb>2.7.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
     <version.jackson>2.13.4</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
@@ -135,6 +135,7 @@
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
     <version.narayana>5.13.0.Final</version.narayana>
+    <version.ndarray>0.3.3</version.ndarray>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
@@ -1377,6 +1378,11 @@
         <version>${version.hsqldb}</version>
       </dependency>
       <dependency>
+          <groupId>org.hsqldb</groupId>
+          <artifactId>sqltool</artifactId>
+          <version>${version.hsqldb}</version>
+      </dependency>
+      <dependency>
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
         <version>${version.mysql}</version>
@@ -1961,6 +1967,13 @@
         <artifactId>opencv</artifactId>
         <version>${version.opencv}</version>
       </dependency>
+      
+      <!-- AI-DSA -->
+     <dependency>
+         <groupId>org.tensorflow</groupId>
+         <artifactId>ndarray</artifactId>
+         <version>${version.ndarray}</version>
+     </dependency>      
 
       <!-- apm -->
       <dependency>

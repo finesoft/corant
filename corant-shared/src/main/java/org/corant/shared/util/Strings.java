@@ -450,38 +450,6 @@ public class Strings {
   }
 
   /**
-   * <p>Checks if any of the CharSequences are empty ("") or null or whitespace only.</p>
-   *
-   * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-   *
-   * <pre>
-   * Strings.isAnyBlank((String) null)    = true
-   * Strings.isAnyBlank((String[]) null)  = false
-   * Strings.isAnyBlank(null, "foo")      = true
-   * Strings.isAnyBlank(null, null)       = true
-   * Strings.isAnyBlank("", "bar")        = true
-   * Strings.isAnyBlank("bob", "")        = true
-   * Strings.isAnyBlank("  bob  ", null)  = true
-   * Strings.isAnyBlank(" ", "bar")       = true
-   * Strings.isAnyBlank(new String[] {})  = false
-   * Strings.isAnyBlank(new String[]{""}) = true
-   * Strings.isAnyBlank("foo", "bar")     = false
-   * </pre>
-   */
-  public static boolean isAnyBlank(final String... css) {
-    if (css == null || css.length == 0) {
-      return false;
-    }
-    for (final String cs : css) {
-      if (isBlank(cs)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-  /**
    * <pre>
    * Strings.isNoneBlank((String) null)    = false
    * Strings.isNoneBlank((String[]) null)  = true

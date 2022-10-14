@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared.util;
 
+import static org.corant.shared.util.Empties.isEmpty;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -51,8 +52,8 @@ public class DbUtilBasicRowProcessor extends BasicRowProcessor {
 
     for (int i = 1; i <= cols; i++) {
       String columnName = rsmd.getColumnLabel(i);
-      int type = rsmd.getColumnType(cols);
-      if (null == columnName || 0 == columnName.length()) {
+      int type = rsmd.getColumnType(i);
+      if (isEmpty(columnName)) {
         columnName = rsmd.getColumnName(i);
       }
       boolean converted = false;

@@ -52,7 +52,8 @@ import org.corant.shared.ubiquity.Sortable;
 /**
  * corant-modules-jpa-shared
  *
- * TODO FIXME Need to readjust how em and emf lookup
+ * TODO FIXME Need to readjust how em and emf lookup, resolve all emfs in boost stage for warm-up
+ * the application.
  *
  * @author bingo 下午2:10:42
  *

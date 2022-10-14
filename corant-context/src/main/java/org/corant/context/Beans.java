@@ -37,6 +37,7 @@ import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Services;
 import org.jboss.weld.bean.proxy.ProxyObject;
 
@@ -335,6 +336,29 @@ public class Beans {
       throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
     }
     return CDI.current().select(shouldNotNull(subtype), qualifiers);
+  }
+
+  public static void touch(Class<?>... cas) {
+    if (cas.length > 0 && CDIs.isEnabled()) {
+      for (Class<?> ca : cas) {
+        Instance<?> inst = CDI.current().select(ca);
+        if (!inst.isUnsatisfied()) {
+          inst.stream().forEach(Object::toString);
+        }
+      }
+    }
+  }
+
+  @SafeVarargs
+  public static void touch(Pair<Class<?>, Annotation[]>... cas) {
+    if (cas.length > 0 && CDIs.isEnabled()) {
+      for (Pair<Class<?>, Annotation[]> ca : cas) {
+        Instance<?> inst = CDI.current().select(ca.first(), ca.second());
+        if (!inst.isUnsatisfied()) {
+          inst.stream().forEach(Object::toString);
+        }
+      }
+    }
   }
 
   /**

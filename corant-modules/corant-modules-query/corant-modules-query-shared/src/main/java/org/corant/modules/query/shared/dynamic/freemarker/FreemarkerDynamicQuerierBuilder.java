@@ -67,7 +67,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
     try {
-      String scriptSource = scriptResolver.resolve(query);// FIXME
+      // FIXME should we need to compile all executions in boost stage for warm-up the application?
+      String scriptSource = scriptResolver.resolve(query);
       execution = new Template(query.getName(), scriptSource, FreemarkerConfigurations.FM_CFG);
     } catch (IOException e) {
       throw new QueryRuntimeException(e,

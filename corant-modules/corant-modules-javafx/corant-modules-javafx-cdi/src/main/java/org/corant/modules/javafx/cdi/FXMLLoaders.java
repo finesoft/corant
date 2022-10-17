@@ -14,11 +14,17 @@
 package org.corant.modules.javafx.cdi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import org.corant.context.Beans;
+import org.corant.shared.resource.URLResource;
+import org.corant.shared.util.Resources;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
 
 /**
@@ -30,6 +36,30 @@ import javafx.util.BuilderFactory;
  *
  */
 public class FXMLLoaders {
+
+  private FXMLLoaders() {}
+
+  /**
+   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
+   * over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param pathOrExpression the resource path or path expression
+   * @return the loaded object hierarchy
+   * @throws IOException if an error occurs during loading
+   *
+   * @see Resources#from(String)
+   */
+  public static <T> T load(String pathOrExp) throws IOException {
+    Optional<URLResource> resource = Resources.from(pathOrExp).findAny();
+    if (resource.isPresent()) {
+      try (InputStream is = resource.get().openInputStream()) {
+        return new FXMLLoader(null, null, new JavaFXBuilderFactory(), Beans::resolve,
+            StandardCharsets.UTF_8).load(is);
+      }
+    }
+    return null;
+  }
 
   /**
    * Loads an object hierarchy from a FXML document. The controller factory in the document is taken

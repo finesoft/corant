@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Fields;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
@@ -35,16 +36,29 @@ import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
 @ApplicationScoped
 public class SnowflakeIdentifierGenerator {
 
+  public static final String IG_SF_RESI =
+      "corant.identifier.generator.snowflake.retain-entity-self-id";
+  public static final String IG_SF_EIPN =
+      "corant.identifier.generator.snowflake.entity-id-property-name";
   public static final String IG_SF_WK_IP = "corant.identifier.generator.snowflake.worker-ip";
   public static final String IG_SF_WK_ID = "corant.identifier.generator.snowflake.worker-id";
   public static final String IG_SF_DC_ID = "corant.identifier.generator.snowflake.datacenter-id";
   public static final String IG_SF_DL_TM = "corant.identifier.generator.snowflake.delayed-timing";
   static Logger logger = Logger.getLogger(SnowflakeIdentifierGenerator.class.getName());
 
+  final boolean retainEntitySelfId = Configs.getValue(IG_SF_RESI, Boolean.TYPE, false);
+  final String entityIdPropertyName = Configs.getValue(IG_SF_EIPN, String.class, "id");
+
   TimeService specTimeGenerator;
   GeneralSnowflakeUUIDGenerator generator;
 
   public long generate(Object object) {
+    if (retainEntitySelfId) {
+      Object id;
+      if (object != null && (id = Fields.getFieldValue(entityIdPropertyName, object)) != null) {
+        return (Long) id;
+      }
+    }
     return generator
         .generate(() -> specTimeGenerator.get(object, generator.getUnit() == ChronoUnit.SECONDS));
   }

@@ -40,6 +40,7 @@ import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
+import org.corant.shared.util.Fields;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeD5W5S12UUIDGenerator;
 import org.corant.shared.util.Identifiers.SnowflakeIpv4HostUUIDGenerator;
@@ -58,6 +59,8 @@ import org.hibernate.id.IdentifierGenerator;
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
+  public static final String IG_SF_RESI = "identifier.generator.snowflake.retain-entity-self-id";
+  public static final String IG_SF_EIPN = "identifier.generator.snowflake.entity-id-property-name";
   public static final String IG_SF_WK_IP = "identifier.generator.snowflake.worker-ip";
   public static final String IG_SF_WK_ID = "identifier.generator.snowflake.worker-id";
   public static final String IG_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
@@ -199,6 +202,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     final boolean useSecond;
     final HibernateSessionTimeService timeService;
     final boolean usePersistenceTimer;
+    final boolean retainEntitySelfId = Configs.getValue(IG_SF_RESI, Boolean.TYPE, false);
+    final String entityIdPropertyName = Configs.getValue(IG_SF_EIPN, String.class, "id");
 
     public Generator(final Class<?> providerClass, GeneralSnowflakeUUIDGenerator snowflakeGenerator,
         boolean usePst) {
@@ -214,6 +219,12 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     }
 
     public long generate(SessionFactoryImplementor sessionFactory, Object object) {
+      if (retainEntitySelfId) {
+        Object id;
+        if (object != null && (id = Fields.getFieldValue(entityIdPropertyName, object)) != null) {
+          return (Long) id;
+        }
+      }
       return snowflakeGenerator.generate(() -> timeService.get(useSecond, sessionFactory, object));
     }
 

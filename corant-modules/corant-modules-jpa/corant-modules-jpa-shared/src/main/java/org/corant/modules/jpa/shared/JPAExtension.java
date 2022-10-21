@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static org.corant.context.Beans.resolve;
 import static org.corant.context.qualifier.Qualifiers.resolveNameds;
 import static org.corant.shared.normal.Priorities.MODULES_LOWER;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
@@ -40,6 +41,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.SynchronizationType;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import org.corant.context.Beans;
@@ -144,5 +146,14 @@ public class JPAExtension implements Extension {
         }
       });
     }
+    Map<String, Annotation[]> qualifiers = resolveNameds(persistenceUnitInfoMetaDatas.keySet()
+        .stream().map(PersistenceUnit::unitName).collect(Collectors.toSet()));
+    persistenceUnitInfoMetaDatas.values().forEach(pu -> {
+      if (pu.isVerifyDeployment()) {
+        // FIXME use provider validation
+        resolve(EntityManagerFactory.class, qualifiers.get(pu.getName()))
+            .createEntityManager(SynchronizationType.UNSYNCHRONIZED).close();
+      }
+    });
   }
 }

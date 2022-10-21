@@ -8,4 +8,22 @@
     <version>${revision}</version>
   </parent>
   <artifactId>corant-modules-validation</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-shared</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-modules-bundle</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator-cdi</artifactId>
+    </dependency>
+  </dependencies>
 </project>

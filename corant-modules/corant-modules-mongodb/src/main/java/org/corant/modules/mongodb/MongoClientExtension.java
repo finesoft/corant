@@ -15,6 +15,7 @@ package org.corant.modules.mongodb;
 
 import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.findNamed;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -225,7 +226,7 @@ public class MongoClientExtension implements Extension {
   protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     clientConfigManager.getAllWithQualifiers().forEach((cfg, quas) -> {
       if (cfg.isVerifyDeployment()) {
-        resolve(MongoClient.class).startSession().close();// FIXME use another ways.
+        resolve(MongoClient.class, quas).startSession().close();// FIXME use another ways.
       }
     });
   }

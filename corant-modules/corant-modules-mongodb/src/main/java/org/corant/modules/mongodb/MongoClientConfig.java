@@ -219,7 +219,6 @@ public class MongoClientConfig implements NamedObject {
     if (isNotEmpty(mc.hostAndPorts) || isNotNull(mc.uri)) {
       return mc;
     } else {
-      logger.warning("Can't not find any hosts or uris in mongodb configurations");
       return null;
     }
   }

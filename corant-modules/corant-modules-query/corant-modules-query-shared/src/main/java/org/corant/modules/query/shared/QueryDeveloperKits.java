@@ -32,7 +32,7 @@ import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResult;
 import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
-import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerConfigurations;
+import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerExecutions;
 import org.corant.shared.exception.CorantRuntimeException;
 import freemarker.core.Environment;
 import freemarker.template.Template;
@@ -132,8 +132,8 @@ public class QueryDeveloperKits {
     System.out.println("[".concat(query.getName()).concat("]:\n"));
     if (query.getScript().getType() == ScriptType.FM) {
       try (StringWriter sw = new StringWriter()) {
-        Template tpl = new Template(query.getName(), query.getScript().getCode(),
-            FreemarkerConfigurations.FM_CFG);
+        Template tpl =
+            new Template(query.getName(), query.getScript().getCode(), FreemarkerExecutions.FM_CFG);
         tpl.dump(System.out);
         if (isNotEmpty(parameter)) {
           // DynamicTemplateMethodModelExSql sqlTmm = new DynamicTemplateMethodModelExSql(); FIXME

@@ -82,7 +82,7 @@ public class NarayanaExtension implements TransactionExtension {
     if (getConfig().isBindToJndi()) {
       try {
         JNDIManager.bindJTAImplementation();
-        logger.fine(() -> "Bind JTA implementations to Jndi.");
+        logger.info(() -> "Bind JTA implementations to Jndi.");
       } catch (NamingException e) {
         throw new CorantRuntimeException(e,
             "An error occurred while registering Transaction Manager to JNDI");

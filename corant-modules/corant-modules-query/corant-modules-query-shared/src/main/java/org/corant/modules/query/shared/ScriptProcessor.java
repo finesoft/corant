@@ -13,26 +13,15 @@
  */
 package org.corant.modules.query.shared;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Assertions.shouldNotBlank;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
-import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.Script;
-import org.corant.modules.query.mapping.Script.ScriptType;
+import org.corant.modules.query.shared.QueryMappingService.AfterQueryMappingInitializedHandler;
 import org.corant.modules.query.shared.spi.ResultScriptMapperHintHandler;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -42,7 +31,7 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 下午2:13:08
  *
  */
-public interface ScriptProcessor extends Sortable {
+public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedHandler {
 
   String RESULT_FUNC_PARAMETER_NAME = "r";
   String RESULTS_FUNC_PARAMETER_NAME = "rs";
@@ -99,127 +88,6 @@ public interface ScriptProcessor extends Sortable {
    * @param script the script used to test whether this processor can process
    */
   boolean supports(Script script);
-
-  /**
-   *
-   * corant-modules-query-shared
-   *
-   * @author bingo 下午2:34:03
-   *
-   */
-  abstract class CompilableScriptProcessor implements ScriptProcessor {
-
-    static final Logger logger = Logger.getLogger(CompilableScriptProcessor.class.getName());
-
-    protected static final ThreadLocal<Map<Object, Function<ParameterAndResult, Object>>> PARAM_RESULT_FUNCTIONS =
-        ThreadLocal.withInitial(HashMap::new);
-
-    protected static final ThreadLocal<Map<Object, Function<ParameterAndResultPair, Object>>> PARAM_RESULT_PAIR_FUNCTIONS =
-        ThreadLocal.withInitial(HashMap::new);
-
-    @Override
-    public Function<ParameterAndResultPair, Object> resolveFetchInjections(FetchQuery fetchQuery) {
-      final Script script = fetchQuery.getInjectionScript();
-      if (script.isValid()) {
-        shouldBeTrue(supports(script));
-        return compileFunction(script, null, RESULTS_FUNC_PARAMETER_NAME,
-            FETCHED_RESULTS_FUNC_PARAMETER_NAME);
-      }
-      return null;
-    }
-
-    @Override
-    public Function<ParameterAndResult, Object> resolveFetchParameter(
-        FetchQueryParameter parameter) {
-      final Script script = parameter.getScript();
-      if (script.isValid()) {
-        shouldBeTrue(supports(script));
-        return compileFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULTS_FUNC_PARAMETER_NAME);
-      }
-      return null;
-    }
-
-    @Override
-    public Function<ParameterAndResult, Object> resolveFetchPredicates(FetchQuery fetchQuery) {
-      final Script script = fetchQuery.getPredicateScript();
-      if (script.isValid()) {
-        shouldBeTrue(supports(script));
-        return compileFunction(fetchQuery.getPredicateScript(), PARAMETER_FUNC_PARAMETER_NAME,
-            RESULT_FUNC_PARAMETER_NAME);
-      }
-      return null;
-    }
-
-    @Override
-    public Function<ParameterAndResult, Object> resolveQueryHintResultScriptMappers(
-        QueryHint queryHint) {
-      final Script script = queryHint.getScript();
-      if (script.isValid()) {
-        shouldBeTrue(supports(script));
-        return compileFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULT_FUNC_PARAMETER_NAME);
-      }
-      return null;
-    }
-
-    protected Function<ParameterAndResult, Object> compileFunction(Script script,
-        String parameterPName, String resultPName) {
-      return PARAM_RESULT_FUNCTIONS.get().computeIfAbsent(script.getId(), k -> {
-        try {
-          logger.fine(() -> String.format(
-              "Compile the query consumer script, id is %s, the thread name is %s id is %s",
-              script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
-          final Compilable se = getCompilable(script.getType());
-          final CompiledScript cs = se.compile(shouldNotBlank(script.getCode()));
-          return pns -> {
-            Bindings bindings = new SimpleBindings();
-            try {
-              bindings.put(parameterPName, pns.parameter);
-              bindings.put(resultPName, pns.result);
-              return cs.eval(bindings);
-            } catch (ScriptException e) {
-              throw new CorantRuntimeException(e);
-            } finally {
-              bindings.clear();
-            }
-          };
-        } catch (ScriptException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-    }
-
-    protected Function<ParameterAndResultPair, Object> compileFunction(Script script,
-        String parameterPName, String parentResultPName, String fetchResultPName) {
-      return PARAM_RESULT_PAIR_FUNCTIONS.get().computeIfAbsent(script.getId(), k -> {
-        try {
-          logger.fine(() -> String.format(
-              "Compile the query consumer script, id is %s, the thread name is %s id is %s",
-              script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
-          final Compilable se = getCompilable(script.getType());
-          final CompiledScript cs = se.compile(shouldNotBlank(script.getCode()));
-          return pns -> {
-            Bindings bindings = new SimpleBindings();
-            try {
-              if (parameterPName != null) {
-                bindings.put(parameterPName, pns.parameter);
-              }
-              bindings.put(parentResultPName, pns.parentResult);
-              bindings.put(fetchResultPName, pns.fetchedResult);
-              return cs.eval(bindings);
-            } catch (ScriptException e) {
-              throw new CorantRuntimeException(e);
-            } finally {
-              bindings.clear();
-            }
-          };
-        } catch (ScriptException e) {
-          throw new CorantRuntimeException(e);
-        }
-      });
-    }
-
-    protected abstract Compilable getCompilable(ScriptType type);
-  }
 
   /**
    * corant-modules-query-shared

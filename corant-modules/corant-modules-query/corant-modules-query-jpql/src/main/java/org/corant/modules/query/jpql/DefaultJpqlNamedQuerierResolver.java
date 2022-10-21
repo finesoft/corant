@@ -15,17 +15,18 @@ package org.corant.modules.query.jpql;
 
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.shared.exception.NotSupportedException;
+import net.jcip.annotations.GuardedBy;
 
 /**
  * corant-modules-query-jpql
@@ -43,22 +44,24 @@ public class DefaultJpqlNamedQuerierResolver
   @Inject
   protected Logger logger;
 
+  @GuardedBy("QueryMappingService.rwl.writeLock")
   @Override
-  public void onServiceInitialize() {
-    onPreDestroy();
+  public void beforeQueryMappingInitialize(Collection<Query> queries, long initializedVersion) {
+    clearBuilders();
   }
 
   @Override
-  public DefaultJpqlNamedQuerier resolve(String key, Object param) {
-    DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+  public DefaultJpqlNamedQuerier resolve(String name, Object param) {
+    DynamicQuerierBuilder builder = builders.get(name);
+    if (builder == null) {
+      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      Query query = resolveQuery(name);
+      builder = builders.computeIfAbsent(name, k -> createBuilder(query));
+    }
     return forceCast(builder.build(param));
   }
 
-  protected DynamicQuerierBuilder createBuilder(String key) {
-    Query query = getMappingService().getQuery(key);
-    if (query == null) {
-      throw new QueryRuntimeException("Can not find name query for name [%s]", key);
-    }
+  protected DynamicQuerierBuilder createBuilder(Query query) {
     if (isNotEmpty(query.getFetchQueries()) || isNotEmpty(query.getHints())) {
       throw new NotSupportedException();
     }
@@ -85,9 +88,15 @@ public class DefaultJpqlNamedQuerierResolver
   }
 
   @PreDestroy
-  protected synchronized void onPreDestroy() {
-    builders.clear();
-    logger.fine(() -> "Clear default jpql named querier resolver builders");
+  protected void onPreDestroy() {
+    clearBuilders();
+  }
+
+  void clearBuilders() {
+    if (!builders.isEmpty()) {
+      builders.clear();
+      logger.fine(() -> "Clear default jpql named querier resolver builders");
+    }
   }
 
 }

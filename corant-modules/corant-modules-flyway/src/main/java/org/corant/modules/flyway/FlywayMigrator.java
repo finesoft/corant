@@ -91,7 +91,7 @@ public class FlywayMigrator {
       StopWatch sw = StopWatch.press("Flyway migration");
       logger.info(() -> "Perform migration process if necessary...");
       getConfigProviders().map(this::build).filter(Objects::isNotNull).forEach(this::doMigrate);
-      logger.info(() -> "Finished migration process.");
+      logger.info(() -> "Complete migration process.");
       sw.destroy(logger);
     } else {
       logger.fine(() -> String.format(

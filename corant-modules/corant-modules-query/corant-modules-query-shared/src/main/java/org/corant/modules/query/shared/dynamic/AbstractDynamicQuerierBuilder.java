@@ -52,6 +52,11 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   }
 
   @Override
+  public FetchQueryHandler getFetchQueryHandler() {
+    return fetchQueryHandler;
+  }
+
+  @Override
   public Query getQuery() {
     return query;
   }
@@ -59,10 +64,6 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   @Override
   public QueryHandler getQueryHandler() {
     return queryHandler;
-  }
-
-  protected FetchQueryHandler getFetchQueryHandler() {
-    return fetchQueryHandler;
   }
 
   protected QueryParameter resolveParameter(Object param) {

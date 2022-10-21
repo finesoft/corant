@@ -15,7 +15,6 @@ package org.corant.modules.query.shared.dynamic.freemarker;
 
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,14 +65,14 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected FreemarkerDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
-    try {
-      // FIXME should we need to compile all executions in boost stage for warm-up the application?
-      String scriptSource = scriptResolver.resolve(query);
-      execution = new Template(query.getName(), scriptSource, FreemarkerConfigurations.FM_CFG);
-    } catch (IOException e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the query template [%s].", query.getName());
-    }
+    execution = FreemarkerExecutions.resolveExecution(query);
+    // try {
+    // String scriptSource = scriptResolver.resolve(query);
+    // execution = new Template(query.getName(), scriptSource, FreemarkerExecutions.FM_CFG);
+    // } catch (IOException e) {
+    // throw new QueryRuntimeException(e,
+    // "An error occurred while executing the query template [%s].", query.getName());
+    // }
   }
 
   @Override

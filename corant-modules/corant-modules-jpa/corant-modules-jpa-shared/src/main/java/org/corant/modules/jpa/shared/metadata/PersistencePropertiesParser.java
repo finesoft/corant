@@ -102,6 +102,8 @@ public class PersistencePropertiesParser {
             .ifPresent(s -> puimd.setValidationMode(ValidationMode.valueOf(s)));
       } else if (pn.endsWith(JPAConfig.JC_ENABLE)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setEnable);
+      } else if (pn.endsWith(JPAConfig.JC_NVOW)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(puimd::setVerifyDeployment);
       } else if (pn.endsWith(JPAConfig.JC_SHARE_CACHE_MOD)) {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
@@ -134,6 +136,12 @@ public class PersistencePropertiesParser {
             puimd.getPersistenceUnitName(), puimd.getPersistenceProviderClassName()));
       }
       doParseProperties(config, proPrefix, proCfgNmes, puimd);
+
+      // FIXME hibernate only
+      if (puimd.getProperties().get("javax.persistence.schema-generation.database.action") == null
+          && puimd.isVerifyDeployment()) {
+        puimd.putPropertity("javax.persistence.schema-generation.database.action", "validate");
+      }
       shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
           puimd.getPersistenceUnitName());
     }

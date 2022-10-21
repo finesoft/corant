@@ -218,7 +218,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
       logger.log(Level.FINE, () -> String.format("Received message start handling, [%s]", meta));
       Object result = messageHandler.onMessage(message, session);
       mediator.onPostMessageHandled(message, session, result);
-      logger.log(Level.FINE, () -> String.format("Finished message handling, [%s]", meta));
+      logger.log(Level.FINE, () -> String.format("Complete message handling, [%s]", meta));
     }
     return message;
   }

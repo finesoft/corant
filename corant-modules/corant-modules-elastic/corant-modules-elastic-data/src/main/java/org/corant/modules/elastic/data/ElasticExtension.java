@@ -21,15 +21,19 @@ import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
@@ -47,8 +51,10 @@ import org.corant.modules.elastic.data.service.ElasticDocumentService;
 import org.corant.modules.elastic.data.service.ElasticIndicesService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -112,7 +118,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {
-      logger.fine(() -> String.format("Found %s elastic clusters named [%s]", configManager.size(),
+      logger.info(() -> String.format("Found %s elastic clusters named [%s]", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }
@@ -125,6 +131,19 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
 
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent e) {
     clients.values().forEach(TransportClient::close);
+  }
+
+  protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    getConfigManager().getAllWithQualifiers().forEach((cfg, quas) -> {
+      if (cfg.isVerifyDeployment()) {
+        List<DiscoveryNode> nodes = getTransportClient(cfg.getName()).connectedNodes();
+        if (nodes != null) {
+          logger.fine(() -> String.format("Tranport client %s connected nodes: %s",
+              cfg.getClusterName(), Strings.join(", ",
+                  nodes.stream().map(DiscoveryNode::getName).collect(Collectors.toList()))));
+        }
+      }
+    });
   }
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
@@ -169,7 +188,6 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
       try {
         tc.addTransportAddress(new TransportAddress(InetAddress.getByName(hostPort[0]),
             Integer.parseInt(hostPort[1])));
-        tc.connectedNodes();
       } catch (NumberFormatException | UnknownHostException e) {
         throw new CorantRuntimeException(e, "Can not build transport client from %s:%s.",
             (Object[]) hostPort);

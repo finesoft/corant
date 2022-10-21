@@ -30,11 +30,12 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 public abstract class JavaScriptDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
-  protected final Function<Object[], Object> execution;
-
   protected JavaScriptDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
-    execution = NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
+  }
+
+  protected Function<Object[], Object> getExecution() {
+    return NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
   }
 }

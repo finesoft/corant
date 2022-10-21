@@ -64,6 +64,7 @@ public class JPAConfig {
   public static final String JCX_VAL_MOD = "validation-mode";
   public static final String JCX_SHARE_CACHE_MOD = "shared-cache-mode";
   public static final String JCX_ENABLE = "enable";
+  public static final String JCX_NVOW = "verify-deployment";
   public static final String JCX_PROS = "properties";
   public static final String JCX_PRO = "property";
   public static final String JCX_PRO_NME = "name";
@@ -84,6 +85,7 @@ public class JPAConfig {
   public static final String JC_SHARE_CACHE_MOD = "." + JCX_SHARE_CACHE_MOD;
   public static final String JC_PRO = "." + "property";
   public static final String JC_ENABLE = "." + JCX_ENABLE;
+  public static final String JC_NVOW = "." + JCX_NVOW;
 
   protected static final Logger logger = Logger.getLogger(JPAConfig.class.getName());
 
@@ -111,6 +113,7 @@ public class JPAConfig {
     names.add(dfltPrefix + JC_VAL_MOD);
     names.add(dfltPrefix + JC_PU_NME);
     names.add(dfltPrefix + JC_ENABLE);
+    names.add(dfltPrefix + JC_NVOW);
     return names;
   }
 

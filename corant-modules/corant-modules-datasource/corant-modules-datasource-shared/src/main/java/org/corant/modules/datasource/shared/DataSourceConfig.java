@@ -69,8 +69,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "0")
   protected int initialSize = 0;
 
-  @ConfigKeyItem(defaultValue = "8")
-  protected int minSize = 8;
+  @ConfigKeyItem(defaultValue = "2")
+  protected int minSize = 2;
 
   @ConfigKeyItem(defaultValue = "64")
   protected int maxSize = 64;
@@ -113,6 +113,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   @ConfigKeyItem(defaultValue = "true")
   protected boolean enableCustomTransactionIntegration;
+
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean verifyDeployment;
 
   /**
    * The maximum amount of time a thread may be blocked waiting for a connection. If this time
@@ -218,7 +221,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * The minimum number of connections on the pool. If the pool has to flush connections it may
-   * create connections to keep this amount, default is 8.
+   * create connections to keep this amount, default is 2.
    */
   public int getMinSize() {
     return minSize;
@@ -320,6 +323,14 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @Override
   public boolean isValid() {
     return driver != null && enable;
+  }
+
+  /**
+   * Whether to verify the data source instance after deployment, this may try to build
+   * {@link #getMinSize()} connections.
+   */
+  public boolean isVerifyDeployment() {
+    return verifyDeployment;
   }
 
   /**

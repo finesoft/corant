@@ -13,16 +13,18 @@ package org.corant.modules.query.mongodb;
  * the License.
  */
 
+import static org.corant.shared.util.Objects.forceCast;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.shared.exception.NotSupportedException;
+import net.jcip.annotations.GuardedBy;
 
 /**
  * corant-modules-query-mongodb
@@ -38,22 +40,24 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   @Inject
   protected Logger logger;
 
+  @GuardedBy("QueryMappingService.rwl.writeLock")
   @Override
-  public void onServiceInitialize() {
-    onPreDestroy();
+  public void beforeQueryMappingInitialize(Collection<Query> queries, long initializedVersion) {
+    clearBuilders();
   }
 
   @Override
-  public MgNamedQuerier resolve(String key, Object param) {
-    FreemarkerMgQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
-    return builder.build(param);
-  }
-
-  protected FreemarkerMgQuerierBuilder createBuilder(String key) {
-    Query query = getMappingService().getQuery(key);
-    if (query == null) {
-      throw new QueryRuntimeException("Can not find name query for name [%s]", key);
+  public MgNamedQuerier resolve(String name, Object param) {
+    FreemarkerMgQuerierBuilder builder = builders.get(name);
+    if (builder == null) {
+      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      Query query = resolveQuery(name);
+      builder = builders.computeIfAbsent(name, k -> createBuilder(query));
     }
+    return forceCast(builder.build(param));
+  }
+
+  protected FreemarkerMgQuerierBuilder createBuilder(Query query) {
     switch (query.getScript().getType()) {
       case CDI:
       case JSE:
@@ -67,8 +71,14 @@ public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   @PreDestroy
-  protected synchronized void onPreDestroy() {
-    builders.clear();
-    logger.fine(() -> "Clear default mongodb named querier resolver builders");
+  protected void onPreDestroy() {
+    clearBuilders();
+  }
+
+  void clearBuilders() {
+    if (!builders.isEmpty()) {
+      builders.clear();
+      logger.fine(() -> "Clear default mongodb named querier resolver builders");
+    }
   }
 }

@@ -13,12 +13,16 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
@@ -68,7 +72,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.fine(() -> String.format("Found %s data sources named [%s].", configManager.size(),
+      logger.info(() -> String.format("Found %s data sources named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }
@@ -87,11 +91,25 @@ public abstract class AbstractDataSourceExtension implements Extension {
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
         jndi.bind(jndiName, new NamingReference(DataSource.class, qualifiers));
-        logger.fine(() -> String.format("Bind data source %s to jndi.", jndiName));
+        logger.info(() -> String.format("Bind data source %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     }
+  }
+
+  protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    getConfigManager().getAllWithQualifiers().forEach((cfg, quas) -> {
+      if (cfg.isVerifyDeployment()) {
+        try {
+          for (int i = 0; i < cfg.getMinSize(); i++) {
+            resolve(DataSource.class, quas).getConnection().close();// FIXME use another ways.
+          }
+        } catch (SQLException e) {
+          adv.addDeploymentProblem(e);
+        }
+      }
+    });
   }
 
 }

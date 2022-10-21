@@ -93,7 +93,7 @@ public class IdentifiersTest extends TestCase {
     timestamps.forEach(t -> System.out.println(String.format("TIMESTAMP:%s.", t)));
     es.shutdown();
     assertEquals(set.size(), size);
-    System.out.println("FINISHED: " + set.size());
+    System.out.println("Completed: " + set.size());
 
   }
 }

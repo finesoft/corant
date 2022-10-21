@@ -15,11 +15,13 @@ package org.corant.modules.query.shared.dynamic.javabean;
 
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import java.util.Collection;
 import java.util.function.Function;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Singleton;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -37,6 +39,11 @@ import org.corant.modules.query.spi.ResultHintResolver;
  */
 @Singleton
 public class JavaBeanScriptProcessor implements ScriptProcessor {
+
+  @Override
+  public void afterQueryMappingInitialized(Collection<Query> queries, long initializedVersion) {
+    // No op~
+  }
 
   @Override
   public Function<ParameterAndResultPair, Object> resolveFetchInjections(FetchQuery fetchQuery) {

@@ -74,6 +74,32 @@ public class Beans {
   }
 
   /**
+   * <p>
+   * When called, the container destroys the instance if the active context object for the scope
+   * type of the bean supports destroying bean instances. All normal scoped built-in contexts
+   * support destroying bean instances.
+   * </p>
+   *
+   * <p>
+   * The instance passed should either be a dependent scoped bean instance obtained from the same
+   * {@link Instance} object, or the client proxy for a normal scoped bean instance.
+   * </p>
+   *
+   *
+   * @param instance the instance to destroy
+   * @throws UnsupportedOperationException if the active context object for the scope type of the
+   *         bean does not support destroying bean instances
+   */
+  public static void destory(Object instance) {
+    if (instance != null) {
+      if (!CDIs.isEnabled()) {
+        throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
+      }
+      CDI.current().destroy(instance);
+    }
+  }
+
+  /**
    * Returns an {@link Optional} CDI bean instance that matches the given instance class and
    * qualifiers, ambiguous and unsatisfied return an empty {@link Optional}.
    *

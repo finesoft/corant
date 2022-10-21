@@ -82,6 +82,7 @@ public class MongoClientConfig implements NamedObject {
   public static final String MC_PASSWORD = ".password";
   public static final String MC_DATABASES = ".databases";
   public static final String MC_BIND_TO_JNDI = ".bind-to-jndi";
+  public static final String MC_NVOW = ".verify-deployment";
 
   private List<Pair<String, Integer>> hostAndPorts = new ArrayList<>();
 
@@ -104,6 +105,8 @@ public class MongoClientConfig implements NamedObject {
   private char[] password = Chars.EMPTY_ARRAY;
 
   private boolean bindToJndi = false;
+
+  private boolean verifyDeployment = false;
 
   public static NamedQualifierObjectManager<MongoClientConfig> from(Config config) {
     Set<MongoClientConfig> cfgs = new HashSet<>();
@@ -140,6 +143,7 @@ public class MongoClientConfig implements NamedObject {
     names.add(dfltPrefix + MC_URI);
     names.add(dfltPrefix + MC_USER_NAME);
     names.add(dfltPrefix + MC_BIND_TO_JNDI);
+    names.add(dfltPrefix + MC_NVOW);
     // opt property
     for (String proNme : config.getPropertyNames()) {
       if (proNme.startsWith(dfltOptPrefix)) {
@@ -191,6 +195,8 @@ public class MongoClientConfig implements NamedObject {
         config.getOptionalValue(pn, String.class).ifPresent(mc::setUsername);
       } else if (pn.endsWith(MC_BIND_TO_JNDI)) {
         config.getOptionalValue(pn, Boolean.class).ifPresent(mc::setBindToJndi);
+      } else if (pn.endsWith(MC_NVOW)) {
+        config.getOptionalValue(pn, Boolean.class).ifPresent(mc::setVerifyDeployment);
       } else if (pn.endsWith(MC_DATABASES)) {
         config.getOptionalValue(pn, String.class).ifPresent(dbns -> {
           for (String dn : split(dbns, ",", true, true)) {
@@ -356,6 +362,10 @@ public class MongoClientConfig implements NamedObject {
     }
   }
 
+  protected boolean isVerifyDeployment() {
+    return verifyDeployment;
+  }
+
   protected void setApplicationName(String applicationName) {
     this.applicationName = applicationName;
   }
@@ -395,6 +405,10 @@ public class MongoClientConfig implements NamedObject {
 
   protected void setUsername(String username) {
     this.username = username;
+  }
+
+  protected void setVerifyDeployment(boolean verifyDeployment) {
+    this.verifyDeployment = verifyDeployment;
   }
 
   /**

@@ -125,7 +125,7 @@ public class DefaultMessageReceivingTask
         return cancellation.compareAndSet(false, true);
       } else {
         logger.log(Level.INFO,
-            () -> String.format("Waiting for message receiving task finished, %s.", meta));
+            () -> String.format("Waiting for message receiving task completed, %s.", meta));
         tryThreadSleep(waitMs);
       }
     }

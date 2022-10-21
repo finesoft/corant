@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.cdi;
 
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,6 +27,9 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.WithAnnotations;
+import org.corant.config.Configs;
+import org.corant.context.qualifier.AutoCreated;
+import org.corant.modules.query.shared.QueryMappingService;
 import org.corant.modules.query.shared.declarative.DeclarativeQueryService;
 import org.corant.modules.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
 import org.corant.shared.normal.Priorities;
@@ -40,6 +44,9 @@ import org.corant.shared.util.Services;
  *
  */
 public class QueryExtension implements Extension {
+
+  public static boolean verifyDeployment =
+      Configs.getValue("corant.query.verify-deployment", Boolean.TYPE, false);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -80,5 +87,11 @@ public class QueryExtension implements Extension {
 
   void onAfterDeploymentValidation(@Observes final AfterDeploymentValidation event) {
     // TODO check whether the declarative query service fit the query define
+    if (verifyDeployment) {
+      resolve(QueryMappingService.class).getQueries();
+      for (Class<?> cls : declarativeQueryServiceClasses) {
+        resolve(cls, AutoCreated.INST).toString();
+      }
+    }
   }
 }

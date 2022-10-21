@@ -15,7 +15,6 @@ package org.corant.modules.mongodb;
 
 import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.findNamed;
-import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -23,6 +22,7 @@ import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Services.resolve;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.io.Serializable;
@@ -41,6 +41,8 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
@@ -169,7 +171,7 @@ public class MongoClientExtension implements Extension {
     if (databaseConfigManager.isEmpty()) {
       logger.info(() -> "Can not find any mongodb databases!");
     } else {
-      logger.fine(() -> String.format("Found %s mongodb databases named [%s].",
+      logger.info(() -> String.format("Found %s mongodb databases named [%s].",
           databaseConfigManager.size(),
           String.join(",", databaseConfigManager.getAllDisplayNames())));
     }
@@ -220,6 +222,14 @@ public class MongoClientExtension implements Extension {
     }
   }
 
+  protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+    clientConfigManager.getAllWithQualifiers().forEach((cfg, quas) -> {
+      if (cfg.isVerifyDeployment()) {
+        resolve(MongoClient.class).startSession().close();// FIXME use another ways.
+      }
+    });
+  }
+
   void resolveJndi(String name, Annotation[] qualifiers) {
     if (isNotBlank(name)) {
       synchronized (this) {
@@ -230,7 +240,7 @@ public class MongoClientExtension implements Extension {
           }
           String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + name;
           jndi.bind(jndiName, new NamingReference(MongoClient.class, qualifiers));
-          logger.fine(() -> String.format("Bind mongo client %s to jndi.", jndiName));
+          logger.info(() -> String.format("Bind mongo client %s to jndi.", jndiName));
         } catch (NamingException e) {
           throw new CorantRuntimeException(e);
         }

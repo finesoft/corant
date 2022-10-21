@@ -14,6 +14,7 @@
 package org.corant.modules.query.cassandra;
 
 import static org.corant.shared.util.Objects.forceCast;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +23,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
@@ -31,6 +31,7 @@ import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQueri
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import net.jcip.annotations.GuardedBy;
 
 /**
  * corant-modules-query-cassandra
@@ -51,22 +52,24 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   @ConfigProperty(name = "corant.query.cassandra.mapping-file.paths")
   protected Optional<String> mappingFilePaths;
 
+  @GuardedBy("QueryMappingService.rwl.writeLock")
   @Override
-  public void onServiceInitialize() {
-    onPreDestroy();
+  public void beforeQueryMappingInitialize(Collection<Query> queries, long initializedVersion) {
+    clearBuilders();
   }
 
   @Override
-  public DefaultCasNamedQuerier resolve(String key, Object param) {
-    DynamicQuerierBuilder builder = builders.computeIfAbsent(key, this::createBuilder);
+  public DefaultCasNamedQuerier resolve(String name, Object param) {
+    DynamicQuerierBuilder builder = builders.get(name);
+    if (builder == null) {
+      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      Query query = resolveQuery(name);
+      builder = builders.computeIfAbsent(name, k -> createBuilder(query));
+    }
     return forceCast(builder.build(param));
   }
 
-  protected DynamicQuerierBuilder createBuilder(String key) {
-    Query query = getMappingService().getQuery(key);
-    if (query == null) {
-      throw new QueryRuntimeException("Can not find name query for name [%s]", key);
-    }
+  protected DynamicQuerierBuilder createBuilder(Query query) {
     switch (query.getScript().getType()) {
       case CDI:
       case JSE:
@@ -99,9 +102,14 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   @PreDestroy
-  protected synchronized void onPreDestroy() {
-    builders.clear();
-    logger.fine(() -> "Clear default cassandra named querier resolver builders");
+  protected void onPreDestroy() {
+    clearBuilders();
   }
 
+  void clearBuilders() {
+    if (!builders.isEmpty()) {
+      builders.clear();
+      logger.fine(() -> "Clear default cassandra named querier resolver builders");
+    }
+  }
 }

@@ -16,12 +16,25 @@ package org.corant.modules.query.spi;
 /**
  * corant-modules-query-api
  *
+ * <p>
+ * A query script resolver which use to generate the query script and query parameters.
+ * <p>
+ * In general the query script resolver is a CDI bean with named qualifiers and its bean scope is
+ * ApplicationScope, the name of qualifier is generally the name of a particular query.
+ *
+ *
  * @author bingo 上午10:12:25
  *
  */
 @FunctionalInterface
 public interface QueryScriptResolver {
 
+  /**
+   * Returns a query script and query parameters object
+   *
+   * @param parameter the query parameter
+   * @return a query script
+   */
   Object resolve(Object parameter);
 
 }

@@ -14,7 +14,9 @@
 package org.corant.modules.flyway;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.normal.Priorities.MODULES_HIGHER;
 import java.util.logging.Logger;
+import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Extension;
@@ -30,7 +32,7 @@ public class FlywayExtension implements Extension {
 
   Logger logger = Logger.getLogger(FlywayExtension.class.getName());
 
-  void after(@Observes AfterDeploymentValidation adv) {
+  void after(@Observes @Priority(MODULES_HIGHER) AfterDeploymentValidation adv) {
     try {
       resolve(FlywayMigrator.class).migrate();
     } catch (Exception e) {

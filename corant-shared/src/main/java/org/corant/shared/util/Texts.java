@@ -335,7 +335,7 @@ public class Texts {
 
       @Override
       public boolean hasNext() {
-        if (!valid) {
+        if (!valid || Thread.currentThread().isInterrupted()) {
           return false;
         }
         try {
@@ -640,7 +640,7 @@ public class Texts {
 
   public static void tryWriteToFile(File file, Iterable<?> data) {
     try {
-      writeToFile(file, false, streamOf(data));
+      writeToFile(file, data);
     } catch (IOException e) {
       // Noop!
     }
@@ -655,15 +655,22 @@ public class Texts {
   }
 
   public static void writeCSVFile(File file, boolean append, Charset charset,
+      List<List<String>> list) throws IOException {
+    writeToFile(file, append, charset,
+        Iterables.transform(shouldNotNull(list).iterator(), e -> toCSVLine((Iterable<?>) e)));
+  }
+
+  public static void writeCSVFile(File file, boolean append, Charset charset,
       Stream<List<String>> stream) throws IOException {
-    writeToFile(file, append, charset, shouldNotNull(stream).map(Texts::toCSVLine));
+    writeToFile(file, append, charset, shouldNotNull(stream).map(Texts::toCSVLine).iterator());
   }
 
   public static void writeCSVFile(File file, List<List<String>> data) throws IOException {
-    writeToFile(file, false, shouldNotNull(streamOf(data)).map(Texts::toCSVLine));
+    writeToFile(file, false, null,
+        Iterables.transform(shouldNotNull(data).iterator(), e -> toCSVLine((Iterable<?>) e)));
   }
 
-  public static void writeToFile(File file, boolean append, Charset charset, Stream<?> lines)
+  public static void writeToFile(File file, boolean append, Charset charset, Iterator<?> lines)
       throws IOException {
     shouldNotNull(lines);
     if (!file.exists()) {
@@ -672,24 +679,21 @@ public class Texts {
     try (OutputStream os = new FileOutputStream(file, append);
         BufferedWriter fileWriter = new BufferedWriter(
             new OutputStreamWriter(os, defaultObject(charset, StandardCharsets.UTF_8)))) {
-      lines.forEach(line -> {
-        try {
-          if (line == null) {
-            fileWriter.append(EMPTY);
-          } else {
-            fileWriter.append(line.toString());
-          }
-          fileWriter.newLine();
-          fileWriter.flush();
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
+      while (lines.hasNext() && !Thread.currentThread().isInterrupted()) {
+        Object line = lines.next();
+        if (line == null) {
+          fileWriter.append(EMPTY);
+        } else {
+          fileWriter.append(line.toString());
         }
-      });
+        fileWriter.newLine();
+        fileWriter.flush();
+      }
     }
   }
 
   public static void writeToFile(File file, boolean append, Stream<?> lines) throws IOException {
-    writeToFile(file, append, StandardCharsets.UTF_8, lines);
+    writeToFile(file, append, StandardCharsets.UTF_8, shouldNotNull(lines).iterator());
   }
 
   /**
@@ -700,12 +704,19 @@ public class Texts {
    * @throws IOException writeToFile
    */
   public static void writeToFile(File file, Iterable<?> data) throws IOException {
-    writeToFile(file, false, streamOf(data));
+    writeToFile(file, false, null, shouldNotNull(data).iterator());
+  }
+
+  public static void writeXSVFile(File file, boolean append, Charset charset, String delimiter,
+      List<List<String>> list) throws IOException {
+    writeToFile(file, append, charset, Iterables.transform(shouldNotNull(list).iterator(),
+        s -> toXSVLine((Iterable<?>) s, delimiter)));
   }
 
   public static void writeXSVFile(File file, boolean append, Charset charset, String delimiter,
       Stream<List<String>> stream) throws IOException {
-    writeToFile(file, append, charset, shouldNotNull(stream).map(s -> toXSVLine(s, delimiter)));
+    writeToFile(file, append, charset,
+        shouldNotNull(stream).map(s -> toXSVLine(s, delimiter)).iterator());
   }
 
   /**

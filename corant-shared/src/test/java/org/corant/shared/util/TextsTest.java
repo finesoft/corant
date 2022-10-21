@@ -32,26 +32,8 @@ import junit.framework.TestCase;
 public class TextsTest extends TestCase {
 
   @Test
-  public void testAsCSVLines() {
-    Texts.asCSVLines(new File("d:/test.csv"), null, 0, 0).map(s -> String.join("\t", s))
-        .forEach(System.out::println);
-  }
-
-  @Test
-  public void testAsXSVLines() {
-    Texts.asXSVLines(new File("d:/test.txt"), "oooo").map(s -> String.join("\t", s))
-        .forEach(System.out::println);
-  }
-
-  @Test
-  public void testCSVLine() {
-    List<String> datLine = listOf("1", "", "2", "3", "\"", "4", "\r", "\n", "5");
-    String csvLine = Texts.toCSVLine(datLine);
-    assertEquals(datLine, Texts.readCSVFields(csvLine));
-  }
-
-  @Test
   public void testStreamCSVRows() throws IOException {
+    File testFile = FileUtils.createTempFile("corant-testing-csv-rows", ".csv");
     List<String> datLine = listOf("1", "", "2", "3", "\"", ",", "厦门China", "\r\n", "\r\r\r\r",
         "\n\n\r", "4", "\r", "\n", "5");
     String csvLine = Texts.toCSVLine(datLine);
@@ -65,14 +47,19 @@ public class TextsTest extends TestCase {
     List<List<String>> results =
         Texts.asCSVLines(Texts.asInputStream(context.toString())).collect(Collectors.toList());
     assertEquals(results, datLines);
-    Texts.writeCSVFile(new File("d:/yyy.csv"), false, Charset.forName("GB2312"), results.stream());
+    Texts.writeCSVFile(testFile, false, Charset.forName("GB2312"), results.stream());
     List<List<String>> reads = new ArrayList<>();
-    Texts.asCSVLines(new File("d:/yyy.csv"), Charset.forName("GB2312")).forEach(reads::add);
+    Texts.asCSVLines(testFile, Charset.forName("GB2312")).forEach(reads::add);
+    assertEquals(results, reads);
+    reads.clear();
+    Texts.writeCSVFile(testFile, false, Charset.forName("GB2312"), results);
+    Texts.asCSVLines(testFile, Charset.forName("GB2312")).forEach(reads::add);
     assertEquals(results, reads);
   }
 
   @Test
   public void testStreamXSVRows() throws IOException {
+    File testFile = FileUtils.createTempFile("corant-testing-xsv-rows", ".xsv");
     List<String> datLine = listOf("1", "", "\\t2", "3", "\"", ",", "厦门\tChina", "\r\n", "\r\r\r\r",
         "\n\n\r", "4", "\r", "\n", "5");
     String delimiter = "\t";
@@ -88,9 +75,14 @@ public class TextsTest extends TestCase {
         Texts.asXSVLines(Texts.asInputStream(context.toString()), delimiter)
             .collect(Collectors.toList());
     assertEquals(results, datLines);
-    Texts.writeXSVFile(new File("d:/yyyx.csv"), false, null, delimiter, results.stream());
+    Texts.writeXSVFile(testFile, false, null, delimiter, results.stream());
     List<List<String>> reads = new ArrayList<>();
-    Texts.asXSVLines(new File("d:/yyyx.csv"), delimiter).forEach(reads::add);
+    Texts.asXSVLines(testFile, delimiter).forEach(reads::add);
     assertEquals(results, reads);
+    reads.clear();
+    Texts.writeXSVFile(testFile, false, null, delimiter, results);
+    Texts.asXSVLines(testFile, delimiter).forEach(reads::add);
+    assertEquals(results, reads);
+
   }
 }

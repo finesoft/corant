@@ -25,6 +25,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -37,9 +38,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -153,26 +157,54 @@ public class FileUtils {
     }
   }
 
-  public static File createTempDir(String prefix, String suffix) {
+  public static File createTempDir(String prefix) {
     try {
-      File tempDir = File.createTempFile(prefix, suffix);
-      boolean notExist = true;
-      if (tempDir.exists()) {
-        notExist = tempDir.delete();
-      }
-      if (notExist) {
-        if (tempDir.mkdir()) {
-          logger.fine(() -> String.format("Created temp dir %s!", tempDir.getAbsolutePath()));
-        } else {
-          throw new CorantRuntimeException("Unable to create tempDir. java.io.tmpdir is set to %s."
-              + Systems.getProperty("java.io.tmpdir"));
-        }
-      }
+      File tempDir = Files
+          .createDirectory(Path.of(Systems.getTempDir(),
+              defaultString(prefix) + Long.toUnsignedString(Randoms.SECURITY_RANDOM.nextLong())))
+          .toFile();
       tempDir.deleteOnExit();
       return tempDir;
     } catch (IOException ex) {
       throw new CorantRuntimeException(ex);
     }
+  }
+
+  public static File createTempFile(String prefix, String suffix) {
+    try {
+      File file = File.createTempFile(prefix, suffix);
+      file.deleteOnExit();
+      return file;
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void deleteRecursive(final Path directory) throws IOException {
+    if (!Files.isDirectory(directory)) {
+      return;
+    }
+    Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        try {
+          Files.delete(dir);
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        try {
+          Files.delete(file);
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    });
   }
 
   public static void extractJarFile(Path src, Path dest, Predicate<JarEntry> filter)

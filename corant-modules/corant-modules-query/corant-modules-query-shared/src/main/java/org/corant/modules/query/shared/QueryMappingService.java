@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.util.Collections.unmodifiableCollection;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -20,7 +21,7 @@ import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -28,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -51,6 +53,8 @@ import org.corant.modules.query.spi.FetchQueryResultInjector;
 import org.corant.modules.query.spi.QueryProvider;
 import org.corant.modules.query.spi.QueryScriptResolver;
 import org.corant.modules.query.spi.ResultHintResolver;
+import org.corant.shared.ubiquity.Experimental;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -62,8 +66,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class QueryMappingService {
 
+  protected final static ReadWriteLock rwl = new ReentrantReadWriteLock();
+  protected final static AtomicLong initializedVersion = new AtomicLong(0);
+
   protected final Map<String, Query> queries = new HashMap<>();
-  protected final ReadWriteLock rwl = new ReentrantReadWriteLock();
   protected volatile boolean initialized = false;
 
   @Inject
@@ -75,21 +81,33 @@ public class QueryMappingService {
 
   @Inject
   @Any
-  protected Instance<QueryProvider> queryProvider;
+  protected Instance<QueryProvider> queryProviders;
 
   @Inject
   @Any
-  protected Instance<QueryMappingClient> resolver;
+  protected Instance<QueryMappingClient> resolvers;
+
+  @Inject
+  @Any
+  protected Instance<BeforeQueryMappingInitializeHandler> preInitializeHandlers;
+
+  @Inject
+  @Any
+  protected Instance<AfterQueryMappingInitializedHandler> postInitializedHandlers;
+
+  public static long getInitializedVersion() {
+    return initializedVersion.get();
+  }
 
   public String getMappingFilePaths() {
     return mappingFilePaths;
   }
 
-  public List<Query> getQueries() {
+  public Collection<Query> getQueries() {
     Lock l = rwl.readLock();
     try {
       l.lock();
-      return new ArrayList<>(queries.values());
+      return unmodifiableCollection(queries.values());
     } finally {
       l.unlock();
     }
@@ -105,29 +123,38 @@ public class QueryMappingService {
     }
   }
 
+  public boolean isInitialized() {
+    return initialized;
+  }
+
+  @Experimental // NOTE since the query scripts may be cached in thread local
   public void reinitialize() {
     Lock l = rwl.writeLock();
     try {
       l.lock();
+      logger.info("Start query mapping re-initialization.");
+      doInitialize();
+      logger.info("Completed query mapping re-initialization.");
+    } catch (Exception ex) {
       initialized = false;
       queries.clear();
-      if (!resolver.isUnsatisfied()) {
-        resolver.forEach(QueryMappingClient::onServiceInitialize);
-      }
-      initialize();
     } finally {
       l.unlock();
     }
   }
 
   protected void doInitialize() {
-    if (initialized) {
-      return;
+    initialized = false;
+    if (!preInitializeHandlers.isUnsatisfied()) {
+      final Collection<Query> oldQueries = getQueries();
+      final long civn = getInitializedVersion();
+      preInitializeHandlers.forEach(l -> l.beforeQueryMappingInitialize(oldQueries, civn));
     }
+    queries.clear();
     new QueryParser().parse(resolveMappingFilePaths()).forEach(m -> {
-      List<String> brokens = m.selfValidate();
-      if (!brokens.isEmpty()) {
-        throw new QueryRuntimeException(String.join(NEWLINE, brokens));
+      List<String> broken = m.selfValidate();
+      if (!broken.isEmpty()) {
+        throw new QueryRuntimeException(String.join(NEWLINE, broken));
       }
       m.getQueries().forEach(q -> {
         // q.setParamMappings(m.getParaMapping());// copy
@@ -203,18 +230,24 @@ public class QueryMappingService {
         Query fq = queries.get(tq);
         if (fq == null) {
           throw new QueryRuntimeException(
-              "The 'name' [%s] of 'fetch-query' in query [%s] in system can not found the refered query!",
+              "The 'name' [%s] of 'fetch-query' in query [%s] in system can not found the referred query!",
               tq, q);
         }
         tmp.addAll(queries.get(tq).getVersionedFetchQueryNames());
       }
       refs.clear();
     });
-    if (!queryProvider.isUnsatisfied()) {
+    if (!queryProviders.isUnsatisfied()) {
       // FIXME CIRCULAR NO CHECK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! bingo
-      queryProvider.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
+      queryProviders.forEach(qp -> qp.provide().forEach(q -> queries.put(q.getVersionedName(), q)));
     }
     initialized = true;
+    initializedVersion.incrementAndGet();
+    if (!postInitializedHandlers.isUnsatisfied()) {
+      final Collection<Query> newQueries = getQueries();
+      final long civn = getInitializedVersion();
+      postInitializedHandlers.forEach(l -> l.afterQueryMappingInitialized(newQueries, civn));
+    }
     logger.info(() -> String.format("Found %s queries from mapping file path %s.", queries.size(),
         mappingFilePaths));
   }
@@ -223,7 +256,12 @@ public class QueryMappingService {
     Lock l = rwl.writeLock();
     try {
       l.lock();
+      logger.info("Start query mapping initialization.");
       doInitialize();
+      logger.info("Complete query mapping initialization.");
+    } catch (Exception ex) {
+      initialized = false;
+      queries.clear();
     } finally {
       l.unlock();
     }
@@ -231,32 +269,18 @@ public class QueryMappingService {
 
   @PostConstruct
   protected void onPostConstruct() {
-    Lock l = rwl.writeLock();
-    try {
-      l.lock();
-      initialize();
-    } finally {
-      l.unlock();
-    }
+    initialize();
   }
 
   @PreDestroy
   protected void onPreDestroy() {
-    Lock l = rwl.writeLock();
-    try {
-      l.lock();
-      queries.clear();
-      initialized = false;
-      logger.fine(() -> "Clear all query mappings.");
-    } finally {
-      l.unlock();
-    }
+    uninitialize();
   }
 
   protected String[] resolveMappingFilePaths() {
     Set<String> paths = new LinkedHashSet<>();
-    if (!resolver.isUnsatisfied()) {
-      resolver.forEach(s -> {
+    if (!resolvers.isUnsatisfied()) {
+      resolvers.forEach(s -> {
         Set<String> ps = s.getMappingFilePaths();
         if (isNotEmpty(ps)) {
           for (String p : ps) {
@@ -281,10 +305,31 @@ public class QueryMappingService {
     return resolved;
   }
 
+  protected void uninitialize() {
+    Lock l = rwl.writeLock();
+    try {
+      l.lock();
+      logger.info("Start query mapping un-initialization.");
+      queries.clear();
+      initialized = false;
+      logger.info("Completed query mapping un-initialization.");
+    } finally {
+      l.unlock();
+    }
+  }
+
+  @FunctionalInterface
+  public interface AfterQueryMappingInitializedHandler extends Sortable {
+    void afterQueryMappingInitialized(Collection<Query> queries, long initializedVersion);
+  }
+
+  @FunctionalInterface
+  public interface BeforeQueryMappingInitializeHandler extends Sortable {
+    void beforeQueryMappingInitialize(Collection<Query> queries, long initializedVersion);
+  }
+
+  @FunctionalInterface
   public interface QueryMappingClient {
-
     Set<String> getMappingFilePaths();
-
-    void onServiceInitialize();
   }
 }

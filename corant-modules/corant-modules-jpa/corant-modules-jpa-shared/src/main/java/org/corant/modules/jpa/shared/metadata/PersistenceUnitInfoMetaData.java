@@ -72,6 +72,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   private ValidationMode validationMode = ValidationMode.NONE;
   private boolean bindToJndi = false;
   private boolean enable = true;
+  private boolean verifyDeployment = false;
 
   /**
    * @param persistenceUnitName
@@ -140,10 +141,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
+    if ((obj == null) || (getClass() != obj.getClass())) {
       return false;
     }
     PersistenceUnitInfoMetaData other = (PersistenceUnitInfoMetaData) obj;
@@ -287,6 +285,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return excludeUnlistedClasses;
   }
 
+  public boolean isVerifyDeployment() {
+    return verifyDeployment;
+  }
+
   public void putPropertity(String name, String value) {
     properties.put(name, value);
   }
@@ -320,6 +322,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     newObj.setValidationMode(getValidationMode());
     newObj.setVersion(getVersion());
     newObj.setPersistenceUnitTransactionType(putt);
+    newObj.setVerifyDeployment(isVerifyDeployment());
     return newObj;
   }
 
@@ -445,6 +448,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   protected void setValidationMode(ValidationMode validationMode) {
     this.validationMode = validationMode;
+  }
+
+  protected void setVerifyDeployment(boolean verifyDeployment) {
+    this.verifyDeployment = verifyDeployment;
   }
 
   protected void setVersion(String version) {

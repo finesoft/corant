@@ -17,7 +17,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.shared.QueryMappingService.BeforeQueryMappingInitializeHandler;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
+import net.jcip.annotations.GuardedBy;
 
 /**
  * corant-modules-query-shared
@@ -27,7 +31,7 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  */
 @ApplicationScoped
 public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?>>
-    implements NamedQuerierResolver<String, Object, Q> {
+    implements NamedQuerierResolver<String, Object, Q>, BeforeQueryMappingInitializeHandler {
 
   @Inject
   protected QueryMappingService mappingService;
@@ -51,6 +55,15 @@ public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?
   @Override
   public QueryHandler getQueryHandler() {
     return queryHandler;
+  }
+
+  @GuardedBy("QueryMappingService.rwl.readLock")
+  protected Query resolveQuery(String name) {
+    Query query = getMappingService().getQuery(name);
+    if (query == null) {
+      throw new QueryRuntimeException("Can not find name query for name [%s]", name);
+    }
+    return query;
   }
 
 }

@@ -62,10 +62,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   protected Set<String> mbeanNames = new CopyOnWriteArraySet<>();
 
-  /**
-   *
-   * @param event onAfterBeanDiscovery
-   */
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
@@ -185,7 +181,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   protected void registerMetricsMBean(String name) {
     final String useName = defaultString(name, "unnamed");
-    logger.fine(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
+    logger.info(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
     final String mbeanName = applicationName().concat(":type=agroal,name=").concat(useName);
     registerToMBean(mbeanName, new AgroalCPDataSourceMetrics(name));
     mbeanNames.add(mbeanName);
@@ -203,7 +199,6 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         cfgs.connectionPoolConfiguration()
             .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, null, false, null));
       }
-
     }
   }
 

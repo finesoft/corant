@@ -14,6 +14,7 @@
 package org.corant.modules.jpa.shared;
 
 import static org.corant.context.qualifier.Qualifiers.resolveNameds;
+import static org.corant.shared.normal.Priorities.MODULES_LOWER;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -116,14 +117,14 @@ public class JPAExtension implements Extension {
         }
         String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName, new NamingReference(EntityManagerFactory.class, quas));
-        logger.fine(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
+        logger.info(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
     }
   }
 
-  void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
+  void validate(@Observes @Priority(MODULES_LOWER) AfterDeploymentValidation adv, BeanManager bm) {
     // TODO FIXME validate config check data source etc
     final String jndiPrefix = JndiNames.JNDI_COMP_NME + "/Datasources";
     Set<String> dataSourceNames = new HashSet<>();

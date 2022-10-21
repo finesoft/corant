@@ -69,6 +69,9 @@ public class ElasticConfig extends AbstractNamedObject implements DeclarativeCon
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> properties = new HashMap<>();
 
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean verifyDeployment;
+
   protected final Map<String, Object> setting = new LinkedHashMap<>();
 
   /**
@@ -138,6 +141,13 @@ public class ElasticConfig extends AbstractNamedObject implements DeclarativeCon
   @Override
   public boolean isValid() {
     return isNoneBlank(getClusterName(), getClusterNodes());
+  }
+
+  /**
+   * Whether to verify TransportClient instance.
+   */
+  public boolean isVerifyDeployment() {
+    return verifyDeployment;
   }
 
   @Override

@@ -13,10 +13,13 @@
  */
 package org.corant.modules.bundle;
 
+import static java.util.Collections.unmodifiableList;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +48,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class PropertyMessageSource implements MessageSource {
 
   protected final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
+  protected final List<PropertyResourceBundle> bundles = new ArrayList<>();
 
   protected volatile boolean initialized = false;
 
@@ -59,6 +63,10 @@ public class PropertyMessageSource implements MessageSource {
   @Inject
   @Any
   protected Instance<MessageSourceAdjuster> adjusters;
+
+  public List<PropertyResourceBundle> getBundles() {
+    return unmodifiableList(this.bundles);
+  }
 
   @Override
   public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchMessageException {
@@ -134,6 +142,7 @@ public class PropertyMessageSource implements MessageSource {
             paths.stream().filter(Strings::isNotBlank)
                 .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, this::accept).stream())
                 .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
+                  bundles.add(res);
                   logger.fine(() -> String.format("Found message resource from %s.", res.getUri()));
                   Map<String, MessageFormat> localeMap =
                       res.dump().entrySet().stream().collect(Collectors.toMap(Entry::getKey,

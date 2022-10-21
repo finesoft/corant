@@ -29,7 +29,6 @@ import org.corant.modules.jpa.shared.JPAProvider;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hibernate.tool.schema.Action;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -50,7 +49,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     tmp.put("hibernate.connection.autocommit", false);
     tmp.put("hibernate.archive.autodetection", "class, hbm");
     tmp.put("javax.persistence.query.timeout", 100000);
-    tmp.put("javax.persistence.schema-generation.database.action", Action.NONE);
+    // tmp.put("javax.persistence.schema-generation.database.action", Action.NONE);
     DEFAULT_PROPERTIES = Collections.unmodifiableMap(tmp);
   }
 

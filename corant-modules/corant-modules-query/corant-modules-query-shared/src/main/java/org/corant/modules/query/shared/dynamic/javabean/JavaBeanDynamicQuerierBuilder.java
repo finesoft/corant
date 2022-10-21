@@ -36,7 +36,7 @@ public abstract class JavaBeanDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   protected JavaBeanDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
-    scriptResolver =
-        resolve(QueryScriptResolver.class, NamedLiteral.of(query.getScript().getCode()));
+    // Note: take care of bean scope
+    scriptResolver = resolve(QueryScriptResolver.class, NamedLiteral.of(query.getVersionedName()));
   }
 }

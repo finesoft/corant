@@ -158,7 +158,7 @@ public class JarLauncher {
     }
     double takeSecs = (System.currentTimeMillis() - ts) / 1000.00;
     log(true,
-        "Finished extraction, %d archives were extracted, including %d new ones and %d existing ones,"
+        "Complete extraction, %d archives were extracted, including %d new ones and %d existing ones,"
             + " take %.2f seconds.",
         newJarPaths.size() + existedJarPaths.size(), newJarPaths.size(), existedJarPaths.size(),
         takeSecs);

@@ -31,6 +31,7 @@ import org.corant.modules.security.shared.crypto.cipher.SymmetricCipherProviderF
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Randoms;
+import org.corant.shared.util.Texts;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -73,23 +74,28 @@ public class JCACipherProviderTest extends TestCase {
 
   @Test
   public void testSymmetricStream() throws IOException {
+    String streamContent = content.repeat(100);
+    File fileSrc = FileUtils.createTempFile("corant-test-symmetric-stream_src", ".txt");
+    File fileEnc = FileUtils.createTempFile("corant-test-symmetric-stream_src_enc", ".txt");
+    File fileDec = FileUtils.createTempFile("corant-test-symmetric-stream_src_dec", ".txt");
+    Texts.tryWriteToFile(fileSrc, false, streamContent);
+
     SymmetricCipherProvider provider;
     for (SymmetricCipherProviderFactory fac : SymmetricCipherProviderFactory.values()) {
       provider = (SymmetricCipherProvider) fac.createProvider(fac.createKey());
-      try (InputStream fis = new FileInputStream("d:/corant-1.9.0_20220505.txt");
-          OutputStream fos = new FileOutputStream("d:/" + fac.name() + "_en.txt")) {
+      try (InputStream fis = new FileInputStream(fileSrc);
+          OutputStream fos = new FileOutputStream(fileEnc)) {
         provider.encrypt(fis, fos);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
-      try (InputStream fis = new FileInputStream("d:/" + fac.name() + "_en.txt");
-          OutputStream fos = new FileOutputStream("d:/" + fac.name() + "_de.txt")) {
+      try (InputStream fis = new FileInputStream(fileEnc);
+          OutputStream fos = new FileOutputStream(fileDec)) {
         provider.decrypt(fis, fos);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
-      assertTrue(FileUtils.isSameContent(new File("d:/corant-1.9.0_20220505.txt"),
-          new File("d:/" + fac.name() + "_de.txt")));
+      assertTrue(FileUtils.isSameContent(fileSrc, fileDec));
     }
   }
 

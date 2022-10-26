@@ -9,7 +9,7 @@ pipeline {
       agent {
         docker {
           image 'maven:3.8.6-openjdk-11'
-          args '-u root -v /root/devops/dev/ci-settings.xml:/usr/share/maven/ref/settings.xml -v maven-data:/root/.m2/repository'
+          args '-u root -v /root/devops/dev/ci-settings.xml:/usr/share/maven/conf/settings.xml -v maven-data:/root/.m2/repository'
         }
       }
       steps {

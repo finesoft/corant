@@ -34,7 +34,7 @@ public class StringBsonDbPointerConverter extends AbstractConverter<String, Bson
   public static final String SEPARATOR_KEY = "namespace.separator";
 
   @Override
-  protected BsonDbPointer convert(String value, Map<String, ?> hints) throws Exception {
+  protected BsonDbPointer doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isBlank(value)) {
       return null;
     }

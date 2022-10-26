@@ -88,7 +88,7 @@ public class JPAQueries {
     if (sizeOf(eles) == 1 && isSimpleClass(type)) {
       return toObject(tuple.get(0), type);
     }
-    return converter.apply(tuple, null);
+    return converter.convert(tuple, null);
   }
 
   /**
@@ -118,7 +118,7 @@ public class JPAQueries {
         }
       } else {
         for (Tuple tuple : tuples) {
-          results.add(converter.apply(tuple, null));
+          results.add(converter.convert(tuple, null));
         }
       }
     }

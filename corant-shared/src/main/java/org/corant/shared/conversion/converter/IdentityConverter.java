@@ -25,11 +25,10 @@ public final class IdentityConverter<T> extends AbstractConverter<T, T> {
 
   public static final IdentityConverter<?> INSTANCE = new IdentityConverter<>();
 
-  private IdentityConverter() {
-  }
+  private IdentityConverter() {}
 
   @Override
-  protected T convert(T value, Map<String, ?> hints) throws Exception {
+  protected T doConvert(T value, Map<String, ?> hints) throws Exception {
     return value;
   }
 

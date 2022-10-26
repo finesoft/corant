@@ -54,7 +54,7 @@ public class ObjectClassConverter extends AbstractConverter<Object, Class> {
   }
 
   @Override
-  protected Class convert(Object value, Map<String, ?> hints) throws Exception {
+  protected Class doConvert(Object value, Map<String, ?> hints) throws Exception {
     if (value instanceof Class) {
       return (Class) value;
     } else {

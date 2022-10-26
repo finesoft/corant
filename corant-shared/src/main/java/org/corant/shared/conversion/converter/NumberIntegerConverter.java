@@ -51,7 +51,7 @@ public class NumberIntegerConverter extends AbstractConverter<Number, Integer> {
   }
 
   @Override
-  protected Integer convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Integer doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Integer) {
       return (Integer) value;
     }

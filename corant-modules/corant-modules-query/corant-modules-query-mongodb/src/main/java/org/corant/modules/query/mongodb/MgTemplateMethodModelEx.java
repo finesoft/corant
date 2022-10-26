@@ -13,28 +13,16 @@
  */
 package org.corant.modules.query.mongodb;
 
+import static org.corant.modules.query.mongodb.converter.Bsons.EXTJSON_CONVERTERS;
 import static org.corant.shared.util.Classes.getComponentClass;
 import static org.corant.shared.util.Conversions.toList;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Primitives.wrap;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import org.bson.BsonDateTime;
 import org.bson.BsonDbPointer;
 import org.bson.BsonMaxKey;
@@ -44,7 +32,6 @@ import org.bson.BsonRegularExpression;
 import org.bson.BsonSymbol;
 import org.bson.BsonTimestamp;
 import org.bson.types.Decimal128;
-import org.bson.types.ObjectId;
 import org.corant.modules.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -59,75 +46,6 @@ import freemarker.template.TemplateModelException;
  *
  */
 public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
-
-  static final Map<Class<?>, Function<Object, Object>> converters = new HashMap<>();
-
-  static {
-
-    converters.put(BsonDateTime.class,
-        o -> mapOf("$date", mapOf("$numberLong", asString(((BsonDateTime) o).getValue()))));
-    converters.put(ZonedDateTime.class, o -> mapOf("$date",
-        mapOf("$numberLong", asString(((ZonedDateTime) o).toInstant().toEpochMilli()))));
-    converters.put(Instant.class,
-        o -> mapOf("$date", mapOf("$numberLong", asString(((Instant) o).toEpochMilli()))));
-    converters.put(LocalDate.class, o -> mapOf("$date",
-        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
-    converters.put(Date.class,
-        o -> mapOf("$date", mapOf("$numberLong", asString(((Date) o).toInstant().toEpochMilli()))));
-    converters.put(LocalDateTime.class, o -> mapOf("$date",
-        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
-    converters.put(OffsetDateTime.class, o -> mapOf("$date",
-        mapOf("$numberLong", asString(toObject(o, BsonDateTime.class).getValue()))));
-
-    converters.put(BsonTimestamp.class, o -> {
-      BsonTimestamp bto = (BsonTimestamp) o;
-      return mapOf("$timestamp", mapOf("t", bto.getTime(), "i", bto.getInc()));
-    });
-
-    converters.put(BigDecimal.class, o -> mapOf("$numberDecimal", o.toString()));
-    converters.put(Decimal128.class, o -> mapOf("$numberDecimal", o.toString()));
-    converters.put(BigInteger.class, o -> mapOf("$numberDecimal", o.toString()));
-    converters.put(Double.class, o -> {
-      Double d = (Double) o;
-      if (d.isNaN()) {
-        return mapOf("$numberDouble", "NaN");
-      } else if (d.doubleValue() == Double.POSITIVE_INFINITY) {
-        return mapOf("$numberDouble", "Infinity");
-      } else if (d.doubleValue() == Double.NEGATIVE_INFINITY) {
-        return mapOf("$numberDouble", "-Infinity");
-      } else {
-        return mapOf("$numberDouble", d.toString());
-      }
-    });
-    converters.put(Long.class, o -> mapOf("$numberLong", o.toString()));
-    converters.put(Integer.class, o -> mapOf("$numberInt", o.toString()));
-
-    converters.put(BsonMaxKey.class, o -> mapOf("$maxKey", 1));
-    converters.put(BsonMinKey.class, o -> mapOf("$minKey", 1));
-
-    converters.put(BsonObjectId.class,
-        o -> mapOf("$oid", ((BsonObjectId) o).getValue().toHexString()));
-    converters.put(BsonRegularExpression.class, o -> {
-      BsonRegularExpression breo = (BsonRegularExpression) o;
-      return mapOf("$regularExpression",
-          mapOf("pattern", breo.getPattern(), "options", breo.getOptions()));
-    });
-    converters.put(BsonDbPointer.class, o -> {
-      BsonDbPointer dp = (BsonDbPointer) o;
-      return mapOf("$dbPointer",
-          mapOf("$ref", dp.getNamespace(), "$id", mapOf("$oid", dp.getId().toHexString())));
-    });
-    converters.put(BsonSymbol.class, o -> mapOf("$symbol", ((BsonSymbol) o).getSymbol()));
-    converters.put(DBRef.class, o -> {
-      DBRef r = (DBRef) o;
-      Map<Object, Object> map = mapOf("$ref", r.getCollectionName(), "$id",
-          mapOf("$oid", ((ObjectId) r.getId()).toHexString()));
-      if (r.getDatabaseName() != null) {
-        map.put("$db", r.getDatabaseName());
-      }
-      return map;
-    });
-  }
 
   public static final ObjectMapper OM = new ObjectMapper();
 
@@ -153,13 +71,14 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       try {
         if (arg != null) {
           Class<?> argCls = wrap(arg.getClass());
-          if (converters.containsKey(argCls)) {
+          if (EXTJSON_CONVERTERS.containsKey(argCls)) {
             return OM.writeValueAsString(toBsonValue(arg));
           } else if (isPrimitiveOrWrapper(argCls)) {
             return arg;
           } else if (isSimpleType(getComponentClass(arg))) {
             return OM.writeValueAsString(toBsonValue(arg));
           } else {
+            // Simple injection prevention
             return OM.writer(JsonpCharacterEscapes.instance())
                 .writeValueAsString(OM.writer().writeValueAsString(arg));
           }
@@ -192,12 +111,12 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       return null;
     }
     Class<?> cls = wrap(getComponentClass(args));
-    if (!converters.containsKey(cls)) {
+    if (!EXTJSON_CONVERTERS.containsKey(cls)) {
       return args;
     } else if (args.getClass().isArray() || args instanceof Iterable) {
-      return toList(args, converters.get(cls));
+      return toList(args, EXTJSON_CONVERTERS.get(cls));
     } else {
-      return converters.get(cls).apply(args);
+      return EXTJSON_CONVERTERS.get(cls).apply(args);
     }
   }
 

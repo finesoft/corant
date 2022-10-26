@@ -53,7 +53,7 @@ public class ClobStringConverter extends AbstractConverter<Clob, String> {
   }
 
   @Override
-  protected String convert(Clob value, Map<String, ?> hints) throws Exception {
+  protected String doConvert(Clob value, Map<String, ?> hints) throws Exception {
     StringBuilder sb = new StringBuilder();
     try (Reader reader = value.getCharacterStream()) {
       int c;

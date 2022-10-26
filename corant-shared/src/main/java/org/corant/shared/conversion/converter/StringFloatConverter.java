@@ -50,7 +50,7 @@ public class StringFloatConverter extends AbstractNumberConverter<String, Float>
   }
 
   @Override
-  protected Float convert(String value, Map<String, ?> hints) throws Exception {
+  protected Float doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

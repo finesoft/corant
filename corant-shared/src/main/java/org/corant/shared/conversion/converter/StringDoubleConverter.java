@@ -50,7 +50,7 @@ public class StringDoubleConverter extends AbstractNumberConverter<String, Doubl
   }
 
   @Override
-  protected Double convert(String value, Map<String, ?> hints) throws Exception {
+  protected Double doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

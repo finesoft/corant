@@ -62,7 +62,7 @@ public class NumberLocalDateTimeConverter extends AbstractTemporalConverter<Numb
   }
 
   @Override
-  protected LocalDateTime convert(Number value, Map<String, ?> hints) throws Exception {
+  protected LocalDateTime doConvert(Number value, Map<String, ?> hints) throws Exception {
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (ozoneId.isEmpty()) {
       if (!isStrict(hints)) {

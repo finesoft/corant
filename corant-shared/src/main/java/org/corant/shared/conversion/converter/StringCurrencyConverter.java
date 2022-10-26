@@ -51,7 +51,7 @@ public class StringCurrencyConverter extends AbstractConverter<String, Currency>
   }
 
   @Override
-  protected Currency convert(String value, Map<String, ?> hints) throws Exception {
+  protected Currency doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

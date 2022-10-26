@@ -34,7 +34,7 @@ public class BsonDatetimeZonedDateTimeConverter
     extends AbstractConverter<BsonDateTime, ZonedDateTime> {
 
   @Override
-  protected ZonedDateTime convert(BsonDateTime value, Map<String, ?> hints) throws Exception {
+  protected ZonedDateTime doConvert(BsonDateTime value, Map<String, ?> hints) throws Exception {
     if (value == null) {
       return null;
     }

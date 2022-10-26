@@ -52,7 +52,7 @@ public class StringBigDecimalConverter extends AbstractNumberConverter<String, B
   }
 
   @Override
-  protected BigDecimal convert(String value, Map<String, ?> hints) throws Exception {
+  protected BigDecimal doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }

@@ -26,7 +26,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 public class LongBsonTimeStampConverter extends AbstractConverter<Long, BsonTimestamp> {
 
   @Override
-  protected BsonTimestamp convert(Long value, Map<String, ?> hints) throws Exception {
+  protected BsonTimestamp doConvert(Long value, Map<String, ?> hints) throws Exception {
     if (value == null) {
       return getDefaultValue();
     }

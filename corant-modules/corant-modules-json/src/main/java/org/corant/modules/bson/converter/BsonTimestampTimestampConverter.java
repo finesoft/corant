@@ -48,7 +48,7 @@ public class BsonTimestampTimestampConverter extends AbstractConverter<BsonTimes
   }
 
   @Override
-  protected Timestamp convert(BsonTimestamp value, Map<String, ?> hints) throws Exception {
+  protected Timestamp doConvert(BsonTimestamp value, Map<String, ?> hints) throws Exception {
     return value == null ? null : new Timestamp(value.getValue());
   }
 

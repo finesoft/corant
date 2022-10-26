@@ -51,7 +51,7 @@ public class NumberByteConverter extends AbstractConverter<Number, Byte> {
   }
 
   @Override
-  protected Byte convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Byte doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Byte) {
       return (Byte) value;
     }

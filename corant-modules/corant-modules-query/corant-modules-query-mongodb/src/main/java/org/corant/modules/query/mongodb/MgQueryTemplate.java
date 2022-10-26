@@ -44,6 +44,7 @@ import org.corant.modules.query.mongodb.converter.Bsons;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
@@ -139,6 +140,11 @@ public class MgQueryTemplate {
 
   public MgQueryTemplate filter(Map<?, ?> filter) {
     return filter(parse(defaultObject(filter, HashMap::new)));
+  }
+
+  public MgQueryTemplate filterx(Map<?, ?> filter) {
+    this.filter = BasicDBObject.parse(Bsons.toExtendedJson(defaultObject(filter, HashMap::new)));
+    return this;
   }
 
   public Forwarding<Map<?, ?>> forward() {

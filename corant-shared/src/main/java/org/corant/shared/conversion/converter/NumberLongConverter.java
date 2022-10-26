@@ -50,7 +50,7 @@ public class NumberLongConverter extends AbstractConverter<Number, Long> {
   }
 
   @Override
-  protected Long convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Long doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Long) {
       return (Long) value;
     }

@@ -50,7 +50,7 @@ public class StringShortConverter extends AbstractNumberConverter<String, Short>
   }
 
   @Override
-  protected Short convert(String value, Map<String, ?> hints) throws Exception {
+  protected Short doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {

@@ -45,7 +45,7 @@ public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExp
   }
 
   @Override
-  protected BsonRegularExpression convert(Map value, Map<String, ?> hints) throws Exception {
+  protected BsonRegularExpression doConvert(Map value, Map<String, ?> hints) throws Exception {
     String pattern;
     String option;
     if (isEmpty(value) || isBlank(pattern = asDefaultString(value.get("pattern")))) {

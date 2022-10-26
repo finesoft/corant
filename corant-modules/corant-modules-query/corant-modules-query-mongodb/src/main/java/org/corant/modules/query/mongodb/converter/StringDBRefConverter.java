@@ -33,7 +33,7 @@ import com.mongodb.DBRef;
 public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
 
   @Override
-  protected DBRef convert(String value, Map<String, ?> hints) throws Exception {
+  protected DBRef doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isBlank(value)) {
       return null;
     }

@@ -58,7 +58,7 @@ public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, B
   }
 
   @Override
-  protected BsonDateTime convert(Temporal value, Map<String, ?> hints) throws Exception {
+  protected BsonDateTime doConvert(Temporal value, Map<String, ?> hints) throws Exception {
     // violate JSR-310
     ZoneId zoneId =
         AbstractTemporalConverter.resolveHintZoneId(hints).orElseGet(ZoneId::systemDefault);

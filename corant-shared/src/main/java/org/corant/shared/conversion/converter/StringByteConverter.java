@@ -50,7 +50,7 @@ public class StringByteConverter extends AbstractNumberConverter<String, Byte> {
   }
 
   @Override
-  protected Byte convert(String value, Map<String, ?> hints) throws Exception {
+  protected Byte doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {

@@ -25,7 +25,7 @@ import org.corant.shared.conversion.ConversionException;
 public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
 
   @Override
-  protected Boolean convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Boolean doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value == null) {
       return Boolean.FALSE;
     }

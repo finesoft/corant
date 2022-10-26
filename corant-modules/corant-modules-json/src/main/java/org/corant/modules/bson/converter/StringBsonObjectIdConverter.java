@@ -55,7 +55,7 @@ public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonO
   }
 
   @Override
-  protected BsonObjectId convert(String value, Map<String, ?> hints) throws Exception {
+  protected BsonObjectId doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }

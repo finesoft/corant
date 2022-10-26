@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import org.corant.context.Beans;
+import org.corant.shared.resource.ClassPathResourceLoader;
 import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Resources;
 import javafx.fxml.FXMLLoader;
@@ -125,6 +126,30 @@ public class FXMLLoaders {
   public static <T> T load(URL location, ResourceBundle resources, BuilderFactory builderFactory,
       Charset charset) throws IOException {
     return FXMLLoader.load(location, resources, builderFactory, Beans::resolve, charset);
+  }
+
+  /**
+   * Loads an object hierarchy from a FXML document with a relative path through a class and path.
+   * The controller factory in the document is taken over by CDI.
+   *
+   * @param <T> the type of the root object
+   * @param relative the relative class use to search the resource
+   * @param path the resource path
+   * @return the loaded object hierarchy
+   * @throws IOException if an error occurs during loading
+   *
+   * @see Resources#fromRelativeClass(Class, String)
+   * @see ClassPathResourceLoader#relative(Class, String)
+   */
+  public static <T> T loadRelative(Class<?> relative, String path) throws IOException {
+    URLResource resource = Resources.fromRelativeClass(relative, path);
+    if (resource != null) {
+      try (InputStream is = resource.openInputStream()) {
+        return new FXMLLoader(null, null, new JavaFXBuilderFactory(), Beans::resolve,
+            StandardCharsets.UTF_8).load(is);
+      }
+    }
+    return null;
   }
 
 }

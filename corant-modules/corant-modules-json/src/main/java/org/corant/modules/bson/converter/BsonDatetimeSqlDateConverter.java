@@ -48,7 +48,7 @@ public class BsonDatetimeSqlDateConverter extends AbstractConverter<BsonDateTime
   }
 
   @Override
-  protected Date convert(BsonDateTime value, Map<String, ?> hints) throws Exception {
+  protected Date doConvert(BsonDateTime value, Map<String, ?> hints) throws Exception {
     return value == null ? null : new Date(value.getValue());
   }
 

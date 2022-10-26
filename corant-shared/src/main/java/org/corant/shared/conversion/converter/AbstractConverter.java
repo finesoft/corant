@@ -80,10 +80,10 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
   }
 
   @Override
-  public T apply(S value, Map<String, ?> hints) {
+  public T convert(S value, Map<String, ?> hints) {
     T result = null;
     try {
-      result = value == null ? null : convert(value, hints);
+      result = value == null ? null : doConvert(value, hints);
     } catch (Exception e) {
       if (isThrowException()) {
         throw new ConversionException(e, "Can not convert %s.", asString(value));
@@ -120,7 +120,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    * @return the converted value
    * @throws Exception occurred during the conversion process
    */
-  protected abstract T convert(S value, Map<String, ?> hints) throws Exception;
+  protected abstract T doConvert(S value, Map<String, ?> hints) throws Exception;
 
   protected void warn(Class<?> target, Object object) {
     if (object == null) {

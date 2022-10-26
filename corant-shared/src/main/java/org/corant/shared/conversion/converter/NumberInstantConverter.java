@@ -58,7 +58,7 @@ public class NumberInstantConverter extends AbstractTemporalConverter<Number, In
   }
 
   @Override
-  protected Instant convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Instant doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (ChronoUnit.SECONDS
         .equals(ConverterHints.getHint(hints, ConverterHints.CVT_TEMPORAL_EPOCH_KEY))) {
       return Instant.ofEpochSecond(value.longValue());

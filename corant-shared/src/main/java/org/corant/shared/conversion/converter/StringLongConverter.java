@@ -50,7 +50,7 @@ public class StringLongConverter extends AbstractNumberConverter<String, Long> {
   }
 
   @Override
-  protected Long convert(String value, Map<String, ?> hints) throws Exception {
+  protected Long doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {

@@ -50,7 +50,7 @@ public class StringIntegerConverter extends AbstractNumberConverter<String, Inte
   }
 
   @Override
-  protected Integer convert(String value, Map<String, ?> hints) throws Exception {
+  protected Integer doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     } else {

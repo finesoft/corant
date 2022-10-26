@@ -60,7 +60,7 @@ public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Ins
   }
 
   @Override
-  protected Instant convert(Date value, Map<String, ?> hints) throws Exception {
+  protected Instant doConvert(Date value, Map<String, ?> hints) throws Exception {
     Optional<ZoneId> zoneId = resolveHintZoneId(hints);
     if (zoneId.isPresent()) {
       return value.toLocalDate().atStartOfDay(zoneId.get()).toInstant();

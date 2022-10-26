@@ -51,7 +51,7 @@ public class StringTimeZoneConverter extends AbstractConverter<String, TimeZone>
   }
 
   @Override
-  protected TimeZone convert(String value, Map<String, ?> hints) throws Exception {
+  protected TimeZone doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

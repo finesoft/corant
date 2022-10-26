@@ -51,7 +51,7 @@ public class StringCharacterConverter extends AbstractConverter<String, Characte
   }
 
   @Override
-  protected Character convert(String value, Map<String, ?> hints) throws Exception {
+  protected Character doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

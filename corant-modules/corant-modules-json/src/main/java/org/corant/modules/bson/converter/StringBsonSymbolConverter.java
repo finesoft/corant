@@ -27,7 +27,7 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 public class StringBsonSymbolConverter extends AbstractConverter<String, BsonSymbol> {
 
   @Override
-  protected BsonSymbol convert(String value, Map<String, ?> hints) throws Exception {
+  protected BsonSymbol doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isBlank(value)) {
       return null;
     }

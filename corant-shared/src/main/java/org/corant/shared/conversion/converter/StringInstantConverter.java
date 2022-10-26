@@ -66,7 +66,7 @@ public class StringInstantConverter extends AbstractTemporalConverter<String, In
   }
 
   @Override
-  protected Instant convert(String value, Map<String, ?> hints) throws Exception {
+  protected Instant doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

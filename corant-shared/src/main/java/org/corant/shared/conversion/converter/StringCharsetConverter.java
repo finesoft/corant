@@ -51,7 +51,7 @@ public class StringCharsetConverter extends AbstractConverter<String, Charset> {
   }
 
   @Override
-  protected Charset convert(String value, Map<String, ?> hints) throws Exception {
+  protected Charset doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

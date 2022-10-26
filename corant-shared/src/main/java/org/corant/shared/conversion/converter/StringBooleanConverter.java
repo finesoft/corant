@@ -29,8 +29,7 @@ public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
   private String[] trues = {"true", "yes", "y", "on", "1", "是"};
   // private String[] falses = {"false", "no", "n", "off", "0", "否"};
 
-  public StringBooleanConverter() {
-  }
+  public StringBooleanConverter() {}
 
   public StringBooleanConverter(Boolean defaultValue, String[] trues/* , String[] falses */) {
     super(defaultValue);
@@ -43,7 +42,7 @@ public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
   }
 
   @Override
-  protected Boolean convert(String value, Map<String, ?> hints) throws Exception {
+  protected Boolean doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }

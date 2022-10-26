@@ -52,7 +52,7 @@ public class StringBigIntegerConverter extends AbstractNumberConverter<String, B
   }
 
   @Override
-  protected BigInteger convert(String value, Map<String, ?> hints) throws Exception {
+  protected BigInteger doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     } else {

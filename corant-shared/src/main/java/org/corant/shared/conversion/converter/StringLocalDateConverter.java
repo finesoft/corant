@@ -59,7 +59,7 @@ public class StringLocalDateConverter extends AbstractTemporalConverter<String, 
   }
 
   @Override
-  protected LocalDate convert(String value, Map<String, ?> hints) throws Exception {
+  protected LocalDate doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

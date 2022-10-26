@@ -51,7 +51,7 @@ public class NumberShortConverter extends AbstractConverter<Number, Short> {
   }
 
   @Override
-  protected Short convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Short doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Short) {
       return (Short) value;
     }

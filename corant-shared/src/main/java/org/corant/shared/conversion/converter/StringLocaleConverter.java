@@ -55,7 +55,7 @@ public class StringLocaleConverter extends AbstractConverter<String, Locale> {
   }
 
   @Override
-  protected Locale convert(String value, Map<String, ?> hints) throws Exception {
+  protected Locale doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

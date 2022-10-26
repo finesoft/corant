@@ -51,7 +51,7 @@ public class StringURLConverter extends AbstractConverter<String, URL> {
   }
 
   @Override
-  protected URL convert(String value, Map<String, ?> hints) throws Exception {
+  protected URL doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

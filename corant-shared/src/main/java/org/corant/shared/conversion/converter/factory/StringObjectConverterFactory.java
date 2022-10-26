@@ -55,7 +55,7 @@ public class StringObjectConverterFactory implements ConverterFactory<String, Ob
     if (source == null || String.class.equals(generalType)) {
       return (T) source;
     }
-    return (T) forType(generalType).orElseThrow(NotSupportedException::new).apply(source, null);
+    return (T) forType(generalType).orElseThrow(NotSupportedException::new).convert(source, null);
   }
 
   @SuppressWarnings("unchecked")

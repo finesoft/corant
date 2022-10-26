@@ -163,7 +163,7 @@ public class Conversion {
           }
           LOGGER.finer(() -> String.format("Resolve converter %s", converter));
         }
-        return (T) converter.apply(tryStringConverter ? next.toString() : next, hints);
+        return (T) converter.convert(tryStringConverter ? next.toString() : next, hints);
       }
 
       @Override
@@ -288,14 +288,14 @@ public class Conversion {
     Converter<S, T> converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
       LOGGER.finer(() -> String.format("Resolve converter %s", converter));
-      return converter.apply((S) value, hints);
+      return converter.convert((S) value, hints);
     } else {
       Converter<String, T> stringConverter = resolveConverter(String.class, targetClass);
       if (stringConverter != null) {
         LOGGER.fine(() -> String.format(
             "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
             targetClass, targetClass));
-        return stringConverter.apply(value.toString(), hints);
+        return stringConverter.convert(value.toString(), hints);
       }
     }
     throw new ConversionException("Can not find converter for type pair s% -> %s.", sourceClass,

@@ -50,7 +50,7 @@ public interface Converter<S, T> extends Sortable {
    * @see #compose(Converter)
    */
   default <V> Converter<S, V> andThen(Converter<? super T, ? extends V> after) {
-    return (t, hints) -> shouldNotNull(after).apply(apply(t, hints), hints);
+    return (t, hints) -> shouldNotNull(after).convert(convert(t, hints), hints);
   }
 
   /**
@@ -61,7 +61,7 @@ public interface Converter<S, T> extends Sortable {
    * @param hints the conversion hints use to intervene in the conversion process
    * @return the converted target object
    */
-  T apply(S t, Map<String, ?> hints);
+  T convert(S t, Map<String, ?> hints);
 
   /**
    * Returns a composed converter that first applies the {@code before} converter to its input, and
@@ -75,7 +75,7 @@ public interface Converter<S, T> extends Sortable {
    * @throws NullPointerException if before is null
    */
   default <V> Converter<V, T> compose(Converter<? super V, ? extends S> before) {
-    return (v, hints) -> apply(shouldNotNull(before).apply(v, hints), hints);
+    return (v, hints) -> convert(shouldNotNull(before).convert(v, hints), hints);
   }
 
   /**
@@ -141,7 +141,7 @@ public interface Converter<S, T> extends Sortable {
 
       @Override
       public T next() {
-        return apply(fromIterator.next(), hints);
+        return convert(fromIterator.next(), hints);
       }
 
       @Override

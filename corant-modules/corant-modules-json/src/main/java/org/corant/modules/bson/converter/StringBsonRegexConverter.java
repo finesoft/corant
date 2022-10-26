@@ -58,7 +58,7 @@ public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegu
   }
 
   @Override
-  protected BsonRegularExpression convert(String value, Map<String, ?> hints) throws Exception {
+  protected BsonRegularExpression doConvert(String value, Map<String, ?> hints) throws Exception {
     if (isEmpty(value)) {
       return getDefaultValue();
     }

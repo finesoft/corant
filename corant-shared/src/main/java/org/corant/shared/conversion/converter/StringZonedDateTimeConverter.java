@@ -66,7 +66,7 @@ public class StringZonedDateTimeConverter extends AbstractTemporalConverter<Stri
   }
 
   @Override
-  protected ZonedDateTime convert(String value, Map<String, ?> hints) throws Exception {
+  protected ZonedDateTime doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

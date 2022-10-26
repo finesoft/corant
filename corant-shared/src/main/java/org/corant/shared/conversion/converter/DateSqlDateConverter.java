@@ -59,7 +59,7 @@ public class DateSqlDateConverter extends AbstractConverter<Date, java.sql.Date>
   }
 
   @Override
-  protected java.sql.Date convert(Date value, Map<String, ?> hints) throws Exception {
+  protected java.sql.Date doConvert(Date value, Map<String, ?> hints) throws Exception {
     return value == null ? null : new java.sql.Date(value.getTime());
   }
 

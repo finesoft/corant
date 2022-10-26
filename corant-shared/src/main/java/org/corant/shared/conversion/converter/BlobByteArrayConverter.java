@@ -52,7 +52,7 @@ public class BlobByteArrayConverter extends AbstractConverter<Blob, byte[]> {
   }
 
   @Override
-  protected byte[] convert(Blob value, Map<String, ?> hints) throws Exception {
+  protected byte[] doConvert(Blob value, Map<String, ?> hints) throws Exception {
     byte[] bytes = value.getBytes(1L, (int) value.length());
     if (ConverterHints.getHint(hints, ConverterHints.CVT_FREE_AFTER_CONVERTED, Boolean.TRUE)) {
       value.free();

@@ -63,7 +63,7 @@ public class NumberZonedDateTimeConverter extends AbstractTemporalConverter<Numb
   }
 
   @Override
-  protected ZonedDateTime convert(Number value, Map<String, ?> hints) throws Exception {
+  protected ZonedDateTime doConvert(Number value, Map<String, ?> hints) throws Exception {
     Optional<ZoneId> ozoneId = resolveHintZoneId(hints);
     if (ozoneId.isEmpty()) {
       if (!isStrict(hints)) {

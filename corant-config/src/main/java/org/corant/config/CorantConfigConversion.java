@@ -364,7 +364,7 @@ public class CorantConfigConversion implements Serializable {
     Optional<org.corant.shared.conversion.Converter<String, T>> corantConverter =
         Converters.lookup(String.class, forType);
     if (corantConverter.isPresent()) {
-      converter = s -> corantConverter.get().apply(s, null);
+      converter = s -> corantConverter.get().convert(s, null);
       return Optional.of(forceCast(converter));
     }
     return Optional.empty();

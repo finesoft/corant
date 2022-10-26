@@ -51,7 +51,7 @@ public class NumberFloatConverter extends AbstractConverter<Number, Float> {
   }
 
   @Override
-  protected Float convert(Number value, Map<String, ?> hints) throws Exception {
+  protected Float doConvert(Number value, Map<String, ?> hints) throws Exception {
     if (value instanceof Float) {
       return (Float) value;
     }

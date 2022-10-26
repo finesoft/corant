@@ -51,7 +51,7 @@ public class StringDurationConverter extends AbstractConverter<String, Duration>
   }
 
   @Override
-  protected Duration convert(String value, Map<String, ?> hints) throws Exception {
+  protected Duration doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

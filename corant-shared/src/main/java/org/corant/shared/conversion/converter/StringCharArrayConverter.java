@@ -50,7 +50,7 @@ public class StringCharArrayConverter extends AbstractConverter<String, char[]> 
   }
 
   @Override
-  protected char[] convert(String value, Map<String, ?> hints) throws Exception {
+  protected char[] doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

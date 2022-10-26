@@ -116,7 +116,7 @@ public class StringDateConverter extends AbstractConverter<String, Date> {
   }
 
   @Override
-  protected Date convert(String value, Map<String, ?> hints) throws Exception {
+  protected Date doConvert(String value, Map<String, ?> hints) throws Exception {
     if (value.isEmpty()) {
       return getDefaultValue();
     }

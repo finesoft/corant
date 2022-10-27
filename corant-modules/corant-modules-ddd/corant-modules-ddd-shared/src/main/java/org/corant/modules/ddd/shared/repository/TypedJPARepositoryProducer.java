@@ -13,8 +13,11 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
+import static org.corant.context.Beans.findAnyway;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Optional;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
@@ -22,9 +25,20 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.shared.repository.AbstractTypedJPARepository.TypedJPARepositoryTemplate;
+import org.corant.shared.ubiquity.Sortable;
 
 @ApplicationScoped
 public class TypedJPARepositoryProducer {
+
+  protected TypedJPARepositoryFactory factory = TypedJPARepositoryFactory.DEFAULT;
+
+  @PostConstruct
+  protected void onPostConstruct() {
+    Optional<TypedJPARepositoryFactory> custom = findAnyway(TypedJPARepositoryFactory.class);
+    if (custom.isPresent()) {
+      factory = custom.get();
+    }
+  }
 
   @SuppressWarnings("unchecked")
   @Produces
@@ -35,6 +49,23 @@ public class TypedJPARepositoryProducer {
     final ParameterizedType parameterizedType = (ParameterizedType) type;
     final Type argType = parameterizedType.getActualTypeArguments()[0];
     final Class<T> entityClass = (Class<T>) argType;
-    return new TypedJPARepositoryTemplate<>(entityClass);
+    return factory.create(entityClass);
+  }
+
+  /**
+   * corant-modules-ddd-shared
+   * <p>
+   * A CDI bean used to produce custom repository instance. The bean scope of implementation must be
+   * ApplicationScope or Singleton.
+   *
+   * @author bingo 下午4:18:07
+   *
+   */
+  @FunctionalInterface
+  public interface TypedJPARepositoryFactory extends Sortable {
+
+    TypedJPARepositoryFactory DEFAULT = TypedJPARepositoryTemplate::new;
+
+    <T extends Entity> TypedJPARepository<T> create(Class<T> entityClass);
   }
 }

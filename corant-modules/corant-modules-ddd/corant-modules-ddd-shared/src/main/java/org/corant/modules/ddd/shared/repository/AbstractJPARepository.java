@@ -42,7 +42,7 @@ public abstract class AbstractJPARepository implements JPARepository {
   }
 
   @PostConstruct
-  void onPostConstruct() {
+  protected void onPostConstruct() {
     if (persistenceContext == null) {
       synchronized (this) {
         if (persistenceContext == null) {

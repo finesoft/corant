@@ -41,6 +41,7 @@ import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.mongodb.converter.Bsons;
+import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,6 +143,7 @@ public class MgQueryTemplate {
     return filter(parse(defaultObject(filter, HashMap::new)));
   }
 
+  @Experimental
   public MgQueryTemplate filterx(Map<?, ?> filter) {
     this.filter = BasicDBObject.parse(Bsons.toExtendedJson(defaultObject(filter, HashMap::new)));
     return this;

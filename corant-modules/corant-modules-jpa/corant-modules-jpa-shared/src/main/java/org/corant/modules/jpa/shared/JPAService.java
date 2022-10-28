@@ -47,6 +47,7 @@ import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names.PersistenceNames;
+import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -147,13 +148,13 @@ public class JPAService implements PersistenceService {
   }
 
   protected ExtendedEntityManager newEntityManager(PersistenceContext p, boolean transaction) {
-    final EntityManager delegate =
+    final MutableObject<EntityManager> delegate = new MutableObject<>(
         getEntityManagerFactory(PersistenceUnitLiteral.of(p)).createEntityManager(
-            p.synchronization(), PersistenceContextLiteral.extractProperties(p.properties()));
+            p.synchronization(), PersistenceContextLiteral.extractProperties(p.properties())));
     if (!emConfigurator.isUnsatisfied()) {
-      emConfigurator.stream().sorted(Sortable::compare).forEachOrdered(c -> c.accept(delegate));
+      emConfigurator.stream().sorted(Sortable::compare).forEachOrdered(delegate::apply);
     }
-    return new ExtendedEntityManager(delegate, transaction);
+    return new ExtendedEntityManager(delegate.get(), transaction);
   }
 
   @PreDestroy

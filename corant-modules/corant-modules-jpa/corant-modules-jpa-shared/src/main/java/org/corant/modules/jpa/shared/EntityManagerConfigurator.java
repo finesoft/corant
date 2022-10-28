@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jpa.shared;
 
-import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import javax.persistence.EntityManager;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -24,6 +24,6 @@ import org.corant.shared.ubiquity.Sortable;
  *
  */
 @FunctionalInterface
-public interface EntityManagerConfigurator extends Sortable, Consumer<EntityManager> {
+public interface EntityManagerConfigurator extends Sortable, UnaryOperator<EntityManager> {
 
 }

@@ -52,11 +52,10 @@ import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariable
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
-import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
-import org.corant.modules.query.shared.ScriptProcessor;
+import org.corant.modules.query.shared.ScriptProcessor.AbstractScriptProcessor;
 import org.corant.modules.query.shared.cdi.QueryExtension;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names;
@@ -71,7 +70,7 @@ import net.jcip.annotations.GuardedBy;
  *
  */
 @Singleton
-public class JsonExpressionScriptProcessor implements ScriptProcessor {
+public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
 
   public static final String FILTER_KEY = "filter";
   public static final String PROJECTION_KEY = "projection";
@@ -109,30 +108,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
     preFuns.clear();
     if (QueryExtension.verifyDeployment) {
       logger.info("Start json expression query scripts precompiling.");
-      int cs = 0;
-      for (Query query : queries) {
-        List<FetchQuery> fqs = query.getFetchQueries();
-        if (isNotEmpty(fqs)) {
-          for (FetchQuery fq : fqs) {
-            if (fq.getInjectionScript() != null && supports(fq.getInjectionScript())) {
-              resolveFetchInjections(fq);
-              cs++;
-            }
-            if (fq.getParameters() != null) {
-              for (FetchQueryParameter fqp : fq.getParameters()) {
-                if (fqp.getScript() != null && supports(fqp.getScript())) {
-                  resolveFetchParameter(fqp);
-                  cs++;
-                }
-              }
-            }
-            if (fq.getPredicateScript() != null && supports(fq.getPredicateScript())) {
-              resolveFetchPredicates(fq);
-              cs++;
-            }
-          }
-        }
-      }
+      int cs = resolveAll(queries, initializedVersion);
       logger.info("Complete " + cs + " json expression query scripts precompiling.");
     }
   }
@@ -297,10 +273,7 @@ public class JsonExpressionScriptProcessor implements ScriptProcessor {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
+      if ((obj == null) || (getClass() != obj.getClass())) {
         return false;
       }
       Mapping other = (Mapping) obj;

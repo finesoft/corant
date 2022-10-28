@@ -13,11 +13,17 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.shared.QueryMappingService.AfterQueryMappingInitializedHandler;
@@ -88,6 +94,69 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
    * @param script the script used to test whether this processor can process
    */
   boolean supports(Script script);
+
+  /**
+   * corant-modules-query-shared
+   *
+   * @author bingo 下午2:42:21
+   *
+   */
+  abstract class AbstractScriptProcessor implements ScriptProcessor {
+
+    protected final static Logger logger = Logger.getLogger(ScriptProcessor.class.getName());
+
+    @Override
+    public void afterQueryMappingInitialized(Collection<Query> queries, long initializedVersion) {
+      resolveAll(queries, initializedVersion);
+    }
+
+    protected int resolveAll(Collection<Query> queries, long initializedVersion) {
+      int cs = 0;
+      for (Query query : queries) {
+        List<FetchQuery> fqs = query.getFetchQueries();
+        if (isNotEmpty(fqs)) {
+          for (FetchQuery fq : fqs) {
+            if (fq.getInjectionScript() != null && supports(fq.getInjectionScript())) {
+              try {
+                resolveFetchInjections(fq);
+                cs++;
+              } catch (Exception ex) {
+                throw new QueryRuntimeException(ex,
+                    "Resolve fetch query [%s -> %s] injection script occurred error!",
+                    query.getVersionedName(), fq.getReferenceQuery().getVersionedName());
+              }
+            }
+            if (fq.getParameters() != null) {
+              for (FetchQueryParameter fqp : fq.getParameters()) {
+                if (fqp.getScript() != null && supports(fqp.getScript())) {
+                  try {
+                    resolveFetchParameter(fqp);
+                    cs++;
+                  } catch (Exception ex) {
+                    throw new QueryRuntimeException(ex,
+                        "Resolve fetch query [%s -> %s] parameter script [%s] occurred error!",
+                        query.getVersionedName(), fq.getReferenceQuery().getVersionedName(),
+                        fqp.getName());
+                  }
+                }
+              }
+            }
+            if (fq.getPredicateScript() != null && supports(fq.getPredicateScript())) {
+              try {
+                resolveFetchPredicates(fq);
+                cs++;
+              } catch (Exception ex) {
+                throw new QueryRuntimeException(ex,
+                    "Resolve fetch query [%s -> %s] predication occurred error!",
+                    query.getVersionedName(), fq.getReferenceQuery().getVersionedName());
+              }
+            }
+          }
+        }
+      }
+      return cs;
+    }
+  }
 
   /**
    * corant-modules-query-shared

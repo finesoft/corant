@@ -13,16 +13,12 @@
  */
 package org.corant.modules.query.shared.dynamic.kotlin;
 
-import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.inject.Singleton;
 import javax.script.Compilable;
 import org.corant.modules.lang.kotlin.KotlinScriptEngines;
-import org.corant.modules.query.mapping.FetchQuery;
-import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -55,30 +51,7 @@ public class KotlinScriptProcessor extends AbstractCompilableScriptProcessor {
     PARAM_RESULT_PAIR_FUNCTIONS.get().clear();
     if (QueryExtension.verifyDeployment) {
       logger.info("Start kotlin query scripts precompiling.");
-      int cs = 0;
-      for (Query query : queries) {
-        List<FetchQuery> fqs = query.getFetchQueries();
-        if (isNotEmpty(fqs)) {
-          for (FetchQuery fq : fqs) {
-            if (fq.getInjectionScript() != null && supports(fq.getInjectionScript())) {
-              resolveFetchInjections(fq);
-              cs++;
-            }
-            if (fq.getParameters() != null) {
-              for (FetchQueryParameter fqp : fq.getParameters()) {
-                if (fqp.getScript() != null && supports(fqp.getScript())) {
-                  resolveFetchParameter(fqp);
-                  cs++;
-                }
-              }
-            }
-            if (fq.getPredicateScript() != null && supports(fq.getPredicateScript())) {
-              resolveFetchPredicates(fq);
-              cs++;
-            }
-          }
-        }
-      }
+      int cs = resolveAll(queries, initializedVersion);
       logger.info("Complete " + cs + " kotlin query scripts precompiling.");
     }
   }

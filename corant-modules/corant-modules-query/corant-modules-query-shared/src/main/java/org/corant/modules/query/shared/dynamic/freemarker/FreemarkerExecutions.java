@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.shared.dynamic.freemarker;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,7 +88,7 @@ public class FreemarkerExecutions
     return executions.computeIfAbsent(query.getScript().getId(), k -> {
       try {
         return new Template(query.getScript().getId(), scriptResolver.resolve(query), FM_CFG);
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new QueryRuntimeException(e,
             "An error occurred while executing the query template [%s].", query.getName());
       }

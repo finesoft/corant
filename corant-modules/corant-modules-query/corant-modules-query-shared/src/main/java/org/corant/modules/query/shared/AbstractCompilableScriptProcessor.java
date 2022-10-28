@@ -18,18 +18,18 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
+import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.modules.query.shared.ScriptProcessor.AbstractScriptProcessor;
 
 /**
  *
@@ -38,9 +38,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * @author bingo 下午2:34:03
  *
  */
-public abstract class AbstractCompilableScriptProcessor implements ScriptProcessor {
-
-  static final Logger logger = Logger.getLogger(AbstractCompilableScriptProcessor.class.getName());
+public abstract class AbstractCompilableScriptProcessor extends AbstractScriptProcessor {
 
   @Override
   public Function<ParameterAndResultPair, Object> resolveFetchInjections(FetchQuery fetchQuery) {
@@ -101,13 +99,13 @@ public abstract class AbstractCompilableScriptProcessor implements ScriptProcess
             bindings.put(resultPName, pns.result);
             return cs.eval(bindings);
           } catch (ScriptException e) {
-            throw new CorantRuntimeException(e);
+            throw new QueryRuntimeException(e);
           } finally {
             bindings.clear();
           }
         };
       } catch (ScriptException e) {
-        throw new CorantRuntimeException(e);
+        throw new QueryRuntimeException(e);
       }
     });
   }
@@ -131,13 +129,13 @@ public abstract class AbstractCompilableScriptProcessor implements ScriptProcess
             bindings.put(fetchResultPName, pns.fetchedResult);
             return cs.eval(bindings);
           } catch (ScriptException e) {
-            throw new CorantRuntimeException(e);
+            throw new QueryRuntimeException(e);
           } finally {
             bindings.clear();
           }
         };
       } catch (ScriptException e) {
-        throw new CorantRuntimeException(e);
+        throw new QueryRuntimeException(e);
       }
     });
   }

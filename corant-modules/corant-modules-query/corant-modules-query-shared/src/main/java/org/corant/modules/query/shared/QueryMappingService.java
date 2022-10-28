@@ -55,6 +55,7 @@ import org.corant.modules.query.spi.QueryScriptResolver;
 import org.corant.modules.query.spi.ResultHintResolver;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.Throwing;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -130,16 +131,21 @@ public class QueryMappingService {
   @Experimental // NOTE since the query scripts may be cached in thread local
   public void reinitialize() {
     Lock l = rwl.writeLock();
+    Throwable throwable = null;
     try {
       l.lock();
       logger.info("Start query mapping re-initialization.");
       doInitialize();
       logger.info("Completed query mapping re-initialization.");
     } catch (Exception ex) {
+      throwable = ex;
       initialized = false;
       queries.clear();
     } finally {
       l.unlock();
+      if (throwable != null) {
+        Throwing.rethrow(throwable);
+      }
     }
   }
 
@@ -254,16 +260,21 @@ public class QueryMappingService {
 
   protected void initialize() {
     Lock l = rwl.writeLock();
+    Throwable throwable = null;
     try {
       l.lock();
       logger.info("Start query mapping initialization.");
       doInitialize();
       logger.info("Complete query mapping initialization.");
     } catch (Exception ex) {
+      throwable = ex;
       initialized = false;
       queries.clear();
     } finally {
       l.unlock();
+      if (throwable != null) {
+        Throwing.rethrow(throwable);
+      }
     }
   }
 

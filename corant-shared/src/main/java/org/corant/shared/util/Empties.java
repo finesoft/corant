@@ -159,6 +159,19 @@ public class Empties {
   }
 
   /**
+   * <pre>
+   * Empties.isEmpty(null)      = true
+   * Empties.isEmpty("")        = true
+   * Empties.isEmpty(" ")       = false
+   * Empties.isEmpty("abc")     = false
+   * Empties.isEmpty("  abc  ") = false
+   * </pre>
+   */
+  public static boolean isEmpty(final String object) {
+    return object == null || object.isEmpty();
+  }
+
+  /**
    * Return true if object is null and object.isEmpty() == true
    *
    * @param object the tuple triple object to check

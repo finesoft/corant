@@ -14,6 +14,7 @@
 package org.corant.modules.json.expression.predicate;
 
 import static org.corant.shared.util.Maps.mapOf;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -23,6 +24,7 @@ import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.SimpleParser;
 import org.corant.modules.json.expression.ast.ASTFunctionNode;
 import org.corant.modules.json.expression.ast.ASTVariableNode;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -32,7 +34,42 @@ import junit.framework.TestCase;
  * @author bingo 下午4:24:48
  *
  */
-public class PredicateTest extends TestCase {
+public class JsonExpressionTest extends TestCase {
+
+  @Test
+  public void testFunc() {
+    final Map<String, Object> r = mapOf("r.id", 123, "r.name", "bingo.chen", "r.a", 100, "r.b",
+        "10  ", "r.s", 0, "r.e", 7, "r.indexof", "c", "r.size");
+    final EvaluationContext ec = new EvaluationContext() {
+      @Override
+      public Function<Object[], Object> resolveFunction(Node<?> node) {
+        ASTFunctionNode fn = (ASTFunctionNode) node;
+        Optional<FunctionResolver> fr =
+            SimpleParser.resolveFunction().filter(p -> p.supports(fn.getName())).findFirst();
+        if (fr.isPresent()) {
+          return fr.get().resolve(fn.getName());
+        }
+        throw new CorantRuntimeException("xxx");
+      }
+
+      @Override
+      public Object resolveVariableValue(Node<?> node) {
+        return r.get(((ASTVariableNode) node).getName());
+      }
+    };
+    String[] exps =
+        new String[] {"{\"#java.lang.String::substring\":[\"@r.name\",\"@r.s\",\"@r.e\"]}",
+            "{\"#java.lang.String::indexOf\":[\"@r.name\",\"@r.indexof\"]}",
+            "{\"#java.lang.System::currentTimeMillis\":[]}", "{\"#java.util.Date::new\":[]}",
+            "{\"#java.util.UUID::toString\":[{\"#java.util.UUID::randomUUID\":[]}]}",
+            "{\"#sizeOf\":\"@r.name\"}", "{\"#sizeOf\":\"@r.size\"}"};
+    Node<?>[] nodes = Arrays.stream(exps).map(SimpleParser::parse).toArray(Node[]::new);
+    for (Node<?> node : nodes) {
+      Object val = node.getValue(ec);
+      val.toString();
+      System.out.println("[" + val + "]");
+    }
+  }
 
   @Test
   public void testMixed() {

@@ -50,7 +50,7 @@ public class DefaultDateFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return SIGN.equalsIgnoreCase(name);
+    return SIGN.equals(name);
   }
 
 }

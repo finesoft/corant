@@ -1,3 +1,5 @@
 org.corant.modules.json.expression.function.DefaultConvertFunctionResolver
 org.corant.modules.json.expression.function.DefaultDateFunctionResolver
 org.corant.modules.json.expression.function.DefaultMathFunctionResolver
+org.corant.modules.json.expression.function.DefaultSizeOfFunctionResolver
+org.corant.modules.json.expression.function.DefaultObjectFunctionResolver

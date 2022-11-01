@@ -15,10 +15,18 @@ package org.corant.modules.json.expression;
 
 import java.util.function.Function;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-json
  *
+ * <p>
+ * A function resolver, used to create functions, the function name must start with {@code #}. This
+ * interface is an SPI, which is generally used to expand custom functions, the framework uses
+ * service loader to load.
+ *
+ * @see Services#selectRequired(Class)
+ * @see Sortable
  * @author bingo 下午3:29:32
  *
  */

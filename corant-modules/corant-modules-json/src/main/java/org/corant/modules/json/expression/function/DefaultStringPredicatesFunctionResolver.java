@@ -14,13 +14,11 @@
 package org.corant.modules.json.expression.function;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Classes.asClass;
-import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Maps.mapOf;
-import java.util.Arrays;
-import java.util.Map;
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Set;
 import java.util.function.Function;
 import org.corant.modules.json.expression.FunctionResolver;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-json
@@ -28,27 +26,35 @@ import org.corant.modules.json.expression.FunctionResolver;
  * @author bingo 下午3:29:41
  *
  */
-public class DefaultConvertFunctionResolver implements FunctionResolver {
+public class DefaultStringPredicatesFunctionResolver implements FunctionResolver {
 
-  public static final String SIGN = "convert";
+  public static final Set<String> SIGNS = immutableSetOf("isBlank,isEmpty,contains,matchWildcard");
 
   @Override
   public Function<Object[], Object> resolve(String name) {
     return fs -> {
-      shouldBeTrue(fs.length > 1);
-      Object object = fs[0];
-      Class<?> targetClass = asClass(fs[1].toString());
-      Map<String, ?> hints = null;
-      if (fs.length > 2) {
-        hints = mapOf(Arrays.copyOfRange(fs, 2, fs.length));
+      shouldBeTrue(fs.length >= 1);
+      String object = fs[0] == null ? null : fs[0].toString();
+      if ("isBlank".equals(name)) {
+        return Strings.isBlank(object);
+      } else if ("isEmpty".equals(name)) {
+        return object == null || object.isEmpty();
+      } else if ("contains".equals(name)) {
+        shouldBeTrue(fs.length >= 2 && fs[1] != null);
+        return Strings.contains(object, fs[1].toString());
+      } else if ("matchWildcard".equals(name)) {
+        shouldBeTrue(fs.length >= 2 && fs[1] != null);
+        return Strings.matchWildcard(object, true, fs[1].toString());
+      } else {
+        throw new IllegalArgumentException("Unsupported string predicates function: " + name);
       }
-      return toObject(object, targetClass, hints);
     };
+
   }
 
   @Override
   public boolean supports(String name) {
-    return SIGN.equals(name);
+    return SIGNS.contains(name);
   }
 
 }

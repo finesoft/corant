@@ -52,7 +52,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
 
   @Override
   public Function<Object[], Object> resolve(String name) {
-    final String operator = name.toLowerCase();
+    final String operator = name;
     return fs -> {
       shouldBeTrue(fs.length > 1 && Arrays.stream(fs).allMatch(f -> f instanceof Number));
       if (Arrays.stream(fs).anyMatch(p -> p instanceof Float || p instanceof Double)) {
@@ -123,8 +123,7 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
 
   @Override
   public boolean supports(String name) {
-    return SIGN_ADD.equalsIgnoreCase(name) || SIGN_SUB.equalsIgnoreCase(name)
-        || SIGN_MUL.equalsIgnoreCase(name) || SIGN_DIV.equalsIgnoreCase(name)
-        || SIGN_MOD.equalsIgnoreCase(name);
+    return SIGN_ADD.equals(name) || SIGN_SUB.equals(name) || SIGN_MUL.equals(name)
+        || SIGN_DIV.equals(name) || SIGN_MOD.equals(name);
   }
 }

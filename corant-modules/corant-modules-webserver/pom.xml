@@ -12,5 +12,6 @@
   <modules>
     <module>corant-modules-webserver-shared</module>
     <module>corant-modules-webserver-undertow</module>
+    <module>corant-modules-webserver-jetty</module>
   </modules>
 </project>

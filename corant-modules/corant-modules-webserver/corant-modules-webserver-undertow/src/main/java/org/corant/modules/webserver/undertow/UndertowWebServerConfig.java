@@ -16,8 +16,8 @@ package org.corant.modules.webserver.undertow;
 import static org.corant.shared.util.Objects.max;
 import java.util.Optional;
 import java.util.Set;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午3:08:00
  *
  */
-@Singleton
+@ApplicationScoped
 public class UndertowWebServerConfig {
 
   @Inject
@@ -70,7 +70,7 @@ public class UndertowWebServerConfig {
   protected boolean eagerFilterInit;
 
   @Inject
-  @ConfigProperty(name = "corant.webserver.undertow.enable-http2", defaultValue = "false")
+  @ConfigProperty(name = "corant.webserver.undertow.enable-http2", defaultValue = "true")
   protected boolean enableHttp2;
 
   @Inject

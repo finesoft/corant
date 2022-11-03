@@ -34,7 +34,7 @@ import org.corant.shared.util.Strings;
  * corant-modules-json
  *
  * <p>
- * A experimental simple object method or constructor invoke function resolver, generally used to
+ * An experimental simple object method or constructor invoke function resolver, generally used to
  * perform method invoke on objects or static method invokes of object types or invoke object
  * constructor.
  *

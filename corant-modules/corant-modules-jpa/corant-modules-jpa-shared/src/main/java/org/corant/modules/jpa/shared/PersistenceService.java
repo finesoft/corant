@@ -88,7 +88,7 @@ public interface PersistenceService {
   }
 
   /**
-   * corant-kernel
+   * corant-modules-jpa-shared
    *
    * @author bingo 下午12:01:07
    *
@@ -196,6 +196,12 @@ public interface PersistenceService {
     }
   }
 
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 上午11:50:24
+   *
+   */
   class PersistencePropertyLiteral extends AnnotationLiteral<PersistenceProperty>
       implements PersistenceProperty {
     private static final long serialVersionUID = -5166046527595649735L;
@@ -221,7 +227,7 @@ public interface PersistenceService {
   }
 
   /**
-   * corant-kernel
+   * corant-modules-jpa-shared
    *
    * @author bingo 下午12:04:52
    *

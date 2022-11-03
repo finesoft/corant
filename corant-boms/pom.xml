@@ -95,6 +95,7 @@
     <version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
     <version.jakarta.jnosql>1.0.0-b3</version.jakarta.jnosql>
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
+    <version.jetty>10.0.12</version.jetty>
     <version.jose4j>0.7.9</version.jose4j>
     <version.jsqlparser>4.3</version.jsqlparser>
     <version.jsoup>1.14.2</version.jsoup>
@@ -531,6 +532,11 @@
       </dependency>
       <dependency>
         <groupId>org.corant</groupId>
+        <artifactId>corant-modules-webserver-jetty</artifactId>
+        <version>${revision}</version>
+      </dependency>      
+      <dependency>
+        <groupId>org.corant</groupId>
         <artifactId>corant-modules-websocket</artifactId>
         <version>${revision}</version>
       </dependency>
@@ -538,7 +544,7 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-javafx-cdi</artifactId>
         <version>${revision}</version>
-      </dependency>      
+      </dependency>
 
       <!-- Java & Javax & Jakarta & Javafx -->
       <dependency>
@@ -689,13 +695,13 @@
         <artifactId>javafx-base</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-controls</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>       
+      </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-graphics</artifactId>
@@ -707,27 +713,27 @@
         <artifactId>javafx-fxml</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>   
+      </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-swing</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>  
+      </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-web</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>  
+      </dependency>
       <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-media</artifactId>
         <version>${version.javafx}</version>
         <scope>provided</scope>
-      </dependency>  
-      
-                                        
+      </dependency>
+
+
       <dependency>
         <groupId>com.sun.activation</groupId>
         <artifactId>jakarta.activation</artifactId>
@@ -875,14 +881,14 @@
         <groupId>org.mongodb</groupId>
         <artifactId>bson</artifactId>
         <version>${version.bson.mongodb}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${version.jackson}</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.eclipse</groupId>
         <artifactId>yasson</artifactId>
@@ -1200,6 +1206,76 @@
         <artifactId>undertow-websockets-jsr</artifactId>
         <version>${version.undertow}</version>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-annotations</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-security</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-client</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-io</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-util</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-jndi</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-plus</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-webapp</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-xml</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlet</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-javax-server</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-cdi</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
 
       <!-- Transaction -->
       <dependency>
@@ -1378,9 +1454,9 @@
         <version>${version.hsqldb}</version>
       </dependency>
       <dependency>
-          <groupId>org.hsqldb</groupId>
-          <artifactId>sqltool</artifactId>
-          <version>${version.hsqldb}</version>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>sqltool</artifactId>
+        <version>${version.hsqldb}</version>
       </dependency>
       <dependency>
         <groupId>mysql</groupId>
@@ -1417,7 +1493,7 @@
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver</artifactId>
         <version>${version.mongodb}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
@@ -1427,12 +1503,12 @@
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-async</artifactId>
         <version>${version.mongodb}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-reactivestreams</artifactId>
         <version>${revision}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>redis.clients</groupId>
         <artifactId>jedis</artifactId>
@@ -1469,7 +1545,7 @@
         <artifactId>jsqlparser</artifactId>
         <version>${version.jsqlparser}</version>
       </dependency>
-   
+
       <!-- ORM -->
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -1533,17 +1609,17 @@
         <groupId>org.eclipse.jnosql.mapping</groupId>
         <artifactId>mapping-key-value</artifactId>
         <version>${version.jakarta.jnosql}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jnosql.mapping</groupId>
         <artifactId>mapping-column</artifactId>
         <version>${version.jakarta.jnosql}</version>
-      </dependency>   
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jnosql.mapping</groupId>
         <artifactId>mapping-graph</artifactId>
         <version>${version.jakarta.jnosql}</version>
-      </dependency>               
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jnosql.communication</groupId>
         <artifactId>mongodb-driver</artifactId>
@@ -1554,17 +1630,17 @@
             <artifactId>mongodb-driver-sync</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jnosql.communication</groupId>
         <artifactId>redis-driver</artifactId>
         <version>${version.jakarta.jnosql}</version>
-      </dependency> 
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jnosql.communication</groupId>
         <artifactId>hbase-driver</artifactId>
         <version>${version.jakarta.jnosql}</version>
-      </dependency>    
+      </dependency>
       <!-- Cache -->
       <dependency>
         <groupId>org.jsr107.ri</groupId>
@@ -1967,13 +2043,13 @@
         <artifactId>opencv</artifactId>
         <version>${version.opencv}</version>
       </dependency>
-      
+
       <!-- AI-DSA -->
-     <dependency>
-         <groupId>org.tensorflow</groupId>
-         <artifactId>ndarray</artifactId>
-         <version>${version.ndarray}</version>
-     </dependency>      
+      <dependency>
+        <groupId>org.tensorflow</groupId>
+        <artifactId>ndarray</artifactId>
+        <version>${version.ndarray}</version>
+      </dependency>
 
       <!-- apm -->
       <dependency>
@@ -2018,7 +2094,7 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-devops-docs-swagger</artifactId>
         <version>${revision}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>io.rest-assured</groupId>
         <artifactId>rest-assured</artifactId>

@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.modules.servlet.metadata.HttpConstraintMetaData;
@@ -82,7 +82,7 @@ import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
  * @author bingo 下午3:00:15
  *
  */
-@Singleton
+@ApplicationScoped
 public class UndertowWebServer extends AbstractWebServer {
 
   public static final String HANDLERS_CONF = "META-INF/undertow-handlers.conf";
@@ -152,7 +152,7 @@ public class UndertowWebServer extends AbstractWebServer {
     if (Undertow.class.isAssignableFrom(cls)) {
       return cls.cast(server);
     } else {
-      throw new CorantRuntimeException("Undertow can not unwrap %s ", cls);
+      throw new CorantRuntimeException("Undertow server can not unwrap %s ", cls);
     }
   }
 
@@ -165,7 +165,7 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected void resolveFilterInfo(DeploymentInfo di) {
+  protected void resolveFilter(DeploymentInfo di) {
     getFilterMetaDatas().forEach(wfm -> {
       if (wfm != null) {
         FilterInfo fi = new FilterInfo(wfm.getFilterName(), wfm.getClazz());
@@ -276,9 +276,9 @@ public class UndertowWebServer extends AbstractWebServer {
     // web socket endpoint
     resolveWebSocket(di);
     // servlet
-    resolveServletInfo(di);
+    resolveServlet(di);
     // filter
-    resolveFilterInfo(di);
+    resolveFilter(di);
     return Servlets.defaultContainer().addDeployment(di);
   }
 
@@ -293,7 +293,7 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
-  protected void resolveServletInfo(DeploymentInfo di) {
+  protected void resolveServlet(DeploymentInfo di) {
 
     if (specConfig.isEnableDefaultServlet()) {
       di.addServlet(Servlets.servlet("default", DefaultServlet.class));

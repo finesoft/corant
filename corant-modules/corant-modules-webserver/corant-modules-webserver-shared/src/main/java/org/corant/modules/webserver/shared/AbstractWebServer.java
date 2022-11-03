@@ -127,6 +127,10 @@ public abstract class AbstractWebServer implements WebServer {
     return Stream.empty();
   }
 
+  protected WebServerConfig getConfig() {
+    return this.config;
+  }
+
   protected Stream<WebFilterMetaData> getFilterMetaDatas() {
     if (!metaDataProviders.isUnsatisfied()) {
       return metaDataProviders.stream().flatMap(WebMetaDataProvider::filterMetaDataStream);

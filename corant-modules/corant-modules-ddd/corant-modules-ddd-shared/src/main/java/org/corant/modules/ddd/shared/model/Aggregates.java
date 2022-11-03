@@ -180,7 +180,6 @@ public class Aggregates {
   }
 
   static JPARepository resolveRepository(Class<?> cls) {
-    return Beans.resolve(JPARepository.class,
-        Beans.resolve(JPARepositoryExtension.class).resolveQualifiers(cls));
+    return Beans.resolve(JPARepositoryExtension.class).resolveRepository(cls);
   }
 }

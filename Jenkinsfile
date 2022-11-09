@@ -2,7 +2,7 @@ def VERSION = 'none'
 pipeline {
   agent any
   parameters {
-    choice(name: 'changelist', choices: ['-SNAPSHOT', '.RELEASE'])
+    booleanParam(name: 'releasable', defaultValue: false, description: 'deploy release version')
   }
   stages {
     stage('Build') {
@@ -14,7 +14,10 @@ pipeline {
       }
       steps {
         script {
-          sh "mvn clean deploy -Dmaven.test.skip=true -Dchangelist=${params.changelist}"
+          sh "mvn clean deploy -Dmaven.test.skip=true -Dchangelist=-SNAPSHOT"
+          if(params.releasable){
+            sh "mvn clean deploy -U -Dmaven.test.skip=true -Dchangelist=.RELEASE"
+          }
           def flattened = readMavenPom file: 'corant-boms/.flattened-pom.xml'
           VERSION = flattened.version
         }
@@ -26,10 +29,8 @@ pipeline {
       script {
         wrap([$class: 'BuildUser']) {
           slackSend channel: '#jenkins',color: 'good',
-            message:
-            """successfully @${env.BUILD_USER}
-            ${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}
-            version: ${VERSION}
+            message: """successfully @${env.BUILD_USER}
+            ${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} ; version: ${VERSION}
             ${env.BUILD_URL}"""
         }
       }
@@ -40,8 +41,7 @@ pipeline {
           slackSend channel: '#jenkins',color: '#EA4335',
         	message:
         	"""failed!!! @${env.BUILD_USER} @here
-        	${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME}
-        	version: ${revision}
+        	${currentBuild.fullDisplayName} ; branch:${env.BRANCH_NAME} ; version: ${VERSION}
         	${env.BUILD_URL}"""
         }
       }

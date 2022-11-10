@@ -85,6 +85,10 @@ public class Bsons {
   public static final CodecRegistry BSON_DOCUMENT_REGISTRY =
       fromProviders(new BsonValueCodecProvider(), new ExtendedCodecProvider());
 
+  public static final DecoderContext DEFAULT_DECODER_CONTEXT = DecoderContext.builder().build();
+  public static final EncoderContext DEFAULT_ENCODER_CONTEXT =
+      EncoderContext.builder().isEncodingCollectibleDocument(true).build();
+
   /**
    * Returns a map for the given bson bytes array, the mapped value type is BsonType.
    *
@@ -92,11 +96,24 @@ public class Bsons {
    * @return a map for the given bson bytes array, the mapped value type is BsonType.
    */
   public static Map<String, Object> fromBytes(byte[] bsonBytes) {
+    return fromBytes(bsonBytes, DEFAULT_DOCUMENT_CODEC, DEFAULT_DECODER_CONTEXT);
+  }
+
+  /**
+   * Returns a map for the given bson bytes array, the mapped value type is BsonType.
+   *
+   * @param bsonBytes the given bson types array
+   * @param codec the Codec for decoding
+   * @param decodeContext the context for decoding
+   * @return a map for the given bson bytes array, the mapped value type is BsonType.
+   */
+  public static Map<String, Object> fromBytes(byte[] bsonBytes, Codec<Document> codec,
+      DecoderContext decodeContext) {
     if (bsonBytes == null || bsonBytes.length == 0) {
       return emptyMap();
     }
     try (BsonBinaryReader reader = new BsonBinaryReader(ByteBuffer.wrap(bsonBytes))) {
-      return DEFAULT_DOCUMENT_CODEC.decode(reader, DecoderContext.builder().build());
+      return codec.decode(reader, decodeContext);
     }
   }
 
@@ -174,6 +191,19 @@ public class Bsons {
    * @return a bson bytes array
    */
   public static byte[] toBytes(Map<String, Object> bsonObject) {
+    return toBytes(bsonObject, DEFAULT_DOCUMENT_CODEC, DEFAULT_ENCODER_CONTEXT);
+  }
+
+  /**
+   * Convert given maps object to bson bytes array
+   *
+   * @param bsonObject the maps object
+   * @param codec the Codec for encoding
+   * @param encoderContext the context for encoding
+   * @return a bson bytes array
+   */
+  public static byte[] toBytes(Map<String, Object> bsonObject, Codec<Document> codec,
+      EncoderContext encoderContext) {
     if (bsonObject == null) {
       return Bytes.EMPTY_ARRAY;
     }
@@ -181,8 +211,7 @@ public class Bsons {
         BsonBinaryWriter writer = new BsonBinaryWriter(buffer);) {
       Document doc =
           bsonObject instanceof Document ? (Document) bsonObject : new Document(bsonObject);
-      DEFAULT_DOCUMENT_CODEC.encode(writer, doc,
-          EncoderContext.builder().isEncodingCollectibleDocument(true).build());
+      codec.encode(writer, doc, encoderContext);
       return buffer.toByteArray();
     }
   }

@@ -85,7 +85,7 @@ public interface Futures {
   class NoncancelabilityFuture<V> extends SimpleFuture<V> {
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public synchronized boolean cancel(boolean mayInterruptIfRunning) {
       throw new NotSupportedException("Can't support cancel");
     }
 

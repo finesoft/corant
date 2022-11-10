@@ -22,7 +22,7 @@ import java.time.Instant;
  *
  * @author bingo 上午12:27:12
  */
-public interface Event extends Serializable, Cloneable {
+public interface Event extends Serializable {
 
   Instant getOccurredTime();
 

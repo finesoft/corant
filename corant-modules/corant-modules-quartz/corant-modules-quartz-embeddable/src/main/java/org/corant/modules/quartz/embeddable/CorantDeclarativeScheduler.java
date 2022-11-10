@@ -93,7 +93,7 @@ public class CorantDeclarativeScheduler {
         logger.info(() -> "Start the bulit-in declarative job scheduler!");
       }
     } catch (SchedulerException ex) {
-      throw new CorantRuntimeException("Could not start Quartz Scheduler", ex);
+      throw new CorantRuntimeException(ex, "Could not start Quartz Scheduler");
     }
   }
 

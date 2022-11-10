@@ -30,35 +30,12 @@ public class ClientConfig extends AbstractNamedObject implements DeclarativeConf
 
   private static final long serialVersionUID = 6342527084682440153L;
 
-  protected String name;
   protected String host;
   @ConfigKeyItem(defaultValue = "9000")
   protected int port;
   protected String certFile;
   protected String keyFile;
   protected String trustManager;
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ClientConfig other = (ClientConfig) obj;
-    if (name == null) {
-      if (other.name != null) {
-        return false;
-      }
-    } else if (!name.equals(other.name)) {
-      return false;
-    }
-    return true;
-  }
 
   /**
    *
@@ -86,15 +63,6 @@ public class ClientConfig extends AbstractNamedObject implements DeclarativeConf
 
   /**
    *
-   * @return the name
-   */
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  /**
-   *
    * @return the port
    */
   public int getPort() {
@@ -107,13 +75,6 @@ public class ClientConfig extends AbstractNamedObject implements DeclarativeConf
    */
   public String getTrustManager() {
     return trustManager;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    return prime * result + (name == null ? 0 : name.hashCode());
   }
 
   @Override

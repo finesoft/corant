@@ -16,7 +16,7 @@ package org.corant.devops.test.unit.web;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Random;
+import org.corant.shared.util.Randoms;
 
 /**
  * corant-devops-test-unit
@@ -34,7 +34,7 @@ public class RandomWebServerPortProducer {
     int tryTimes = 0;
     ServerSocket serverPort = null;
     while (serverPort == null && tryTimes < MAX_FAIL) {
-      serverPort = openServerSocket(new Random().nextInt(RANGE) + START);
+      serverPort = openServerSocket(Randoms.randomInt(0, RANGE) + START);
       tryTimes++;
     }
     try {

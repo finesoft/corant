@@ -56,7 +56,9 @@ public class Lists {
    */
   @SuppressWarnings("unchecked")
   public static <E> E[] append(E[] src, E... ts) {
-    if (src == null || src.length == 0) {
+    if (src == null && ts == null) {
+      return null;
+    } else if (src == null || src.length == 0) {
       return ts.clone();
     } else if (ts == null || ts.length == 0) {
       return src.clone();
@@ -93,7 +95,9 @@ public class Lists {
    */
   @SuppressWarnings("unchecked")
   public static <E> E[] appendIfAbsent(E[] src, E... ts) {
-    if (src == null || src.length == 0) {
+    if (src == null && ts == null) {
+      return null;
+    } else if (src == null || src.length == 0) {
       return ts.clone();
     } else if (ts == null || ts.length == 0) {
       return src.clone();

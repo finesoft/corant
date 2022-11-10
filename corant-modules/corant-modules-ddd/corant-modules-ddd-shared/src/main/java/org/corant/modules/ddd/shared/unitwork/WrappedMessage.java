@@ -27,7 +27,7 @@ import org.corant.modules.ddd.Message;
  * @author bingo 下午5:00:15
  *
  */
-final class WrappedMessage implements Comparable<WrappedMessage> {
+final class WrappedMessage {
 
   static final Logger logger = Logger.getLogger(WrappedMessage.class.getName());
 
@@ -81,11 +81,6 @@ final class WrappedMessage implements Comparable<WrappedMessage> {
       logger.fine(() -> String.format("Enqueue message %s.", newMsg.delegate));
       queue.add(newMsg);
     }
-  }
-
-  @Override
-  public int compareTo(WrappedMessage o) {
-    return wrappedTime.compareTo(o.wrappedTime);
   }
 
   public Message getDelegate() {

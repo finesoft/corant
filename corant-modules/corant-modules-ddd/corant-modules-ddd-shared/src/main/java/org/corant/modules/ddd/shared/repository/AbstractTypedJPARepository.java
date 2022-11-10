@@ -127,10 +127,11 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
     if (this.entityClass == null) {
       synchronized (this) {
         if (this.entityClass == null) {
+          Class<T> resolvedClass = null;
           Class<?> repoClass = this.getClass();
           do {
             if (repoClass.getGenericSuperclass() instanceof ParameterizedType) {
-              entityClass = (Class<T>) ((ParameterizedType) repoClass.getGenericSuperclass())
+              resolvedClass = (Class<T>) ((ParameterizedType) repoClass.getGenericSuperclass())
                   .getActualTypeArguments()[0];
               break;
             } else {
@@ -140,14 +141,14 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
                   ParameterizedType parameterizedType = (ParameterizedType) type;
                   if (AbstractTypedJPARepository.class
                       .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                    entityClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                    resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
                     break;
                   }
                 }
               }
             }
-          } while (entityClass == null && (repoClass = repoClass.getSuperclass()) != null);
-          requireNotNull(this.entityClass, ERR_OBJ_CONSTRUCT);
+          } while (resolvedClass == null && (repoClass = repoClass.getSuperclass()) != null);
+          this.entityClass = requireNotNull(resolvedClass, ERR_OBJ_CONSTRUCT);
         }
       }
     }

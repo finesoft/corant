@@ -150,17 +150,19 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (limit == null) {
       synchronized (this) {
         if (limit == null) {
-          if ((limit = defaultObject(getQueryParameter().getLimit(),
+          Integer useLimit;
+          if ((useLimit = defaultObject(getQueryParameter().getLimit(),
               () -> resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
                   config.getDefaultLimit()))) <= 0) {
-            limit = config.getMaxLimit();
+            useLimit = config.getMaxLimit();
           }
           int max = resolveMaxSelectSize();
-          if (limit > max) {
+          if (useLimit > max) {
             throw new QueryRuntimeException(
                 "Exceeded the maximum number of query [%s] results, limit is [%s].", getName(),
                 max);
           }
+          limit = useLimit;
         }
       }
     }
@@ -180,10 +182,13 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   public int resolveMaxSelectSize() {
     if (maxSelectSize == null) {
       synchronized (this) {
-        if (maxSelectSize == null
-            && (maxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
-                Integer.class, config.getDefaultSelectSize())) <= 0) {
-          maxSelectSize = max(config.getMaxSelectSize(), 0);
+        if (maxSelectSize == null) {
+          Integer useMaxSelectSize;
+          if ((useMaxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_MAX_SELECT_SIZE,
+              Integer.class, config.getDefaultSelectSize())) <= 0) {
+            useMaxSelectSize = max(config.getMaxSelectSize(), 0);
+          }
+          maxSelectSize = useMaxSelectSize;
         }
       }
     }
@@ -237,17 +242,19 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     if (streamLimit == null) {
       synchronized (this) {
         if (streamLimit == null) {
-          if ((streamLimit = defaultObject(getQueryParameter().getLimit(),
+          Integer useStreamLimit;
+          if ((useStreamLimit = defaultObject(getQueryParameter().getLimit(),
               () -> resolveProperty(QuerierConfig.PRO_KEY_STREAM_LIMIT, Integer.class,
                   config.getDefaultStreamLimit()))) <= 0) {
-            streamLimit = config.getMaxLimit();
+            useStreamLimit = config.getMaxLimit();
           }
           int max = resolveMaxSelectSize();
-          if (streamLimit > max) {
+          if (useStreamLimit > max) {
             throw new QueryRuntimeException(
                 "Exceeded the maximum number of query [%s] results, limit is [%s].", getName(),
                 max);
           }
+          streamLimit = useStreamLimit;
         }
       }
     }

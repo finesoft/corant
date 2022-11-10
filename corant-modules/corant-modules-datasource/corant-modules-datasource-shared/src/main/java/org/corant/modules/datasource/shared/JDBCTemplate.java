@@ -733,7 +733,7 @@ public class JDBCTemplate {
       this.rsh = rsh;
     }
 
-    ResultSetSpliterator(Gadget obj, ResultSetHandler<T> rsh) {
+    ResultSetSpliterator(Liberator obj, ResultSetHandler<T> rsh) {
       this(obj.rs, rsh, obj);
     }
 
@@ -755,13 +755,13 @@ public class JDBCTemplate {
     }
   }
 
-  static class Gadget implements Runnable {
+  static class Liberator implements Runnable {
     final Connection conn;
     final PreparedStatement stmt;
     final ResultSet rs;
     final boolean closeConn;
 
-    Gadget(Connection conn, PreparedStatement stmt, ResultSet rs, boolean closeConn) {
+    Liberator(Connection conn, PreparedStatement stmt, ResultSet rs, boolean closeConn) {
       this.conn = conn;
       this.stmt = stmt;
       this.rs = rs;
@@ -902,11 +902,11 @@ public class JDBCTemplate {
         }
         throw new SQLException("Null ResultSetHandler");
       }
-      Gadget g = null;
+      Liberator g = null;
       try {
         PreparedStatement stmt = completeStatement(prepareStatement(conn, sql), params);
         ResultSet rs = wrap(stmt.executeQuery());
-        g = new Gadget(conn, stmt, rs, closeConn);
+        g = new Liberator(conn, stmt, rs, closeConn);
         final ResultSetSpliterator<T> spliterator = new ResultSetSpliterator<>(g, rsh);
         return StreamSupport.stream(spliterator, false).onClose(g);
       } catch (Exception e) {

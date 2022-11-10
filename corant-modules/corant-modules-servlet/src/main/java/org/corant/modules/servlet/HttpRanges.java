@@ -150,6 +150,40 @@ public class HttpRanges {
       return max;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      HttpRange other = (HttpRange) obj;
+      if (max == null) {
+        if (other.max != null) {
+          return false;
+        }
+      } else if (!max.equals(other.max)) {
+        return false;
+      }
+      if (min == null) {
+        return other.min == null;
+      } else {
+        return min.equals(other.min);
+      }
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (max == null ? 0 : max.hashCode());
+      return prime * result + (min == null ? 0 : min.hashCode());
+    }
+
     public long size() {
       return max - min + 1;
     }

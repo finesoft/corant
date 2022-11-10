@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
@@ -167,14 +168,13 @@ public class SqlStatements {
    * fields, etc.
    *
    * @param sql the original select statement
-   * @param countColumn the count field name
-   * @param countColumnAlias the count field alias
-   * @param aggregateFunctions the aggregation functions that can't be optimized.
+   * @param countColumnExpression the count column expression
    * @param wrappedTableAlias the wrapped select statement table alias
+   * @param aggregateFunctions the aggregation functions that can't be optimized.
    * @return an optimized count query statement
    * @throws JSQLParserException if CCJSqlParserUtil occurred error
    */
-  public static String resolveCountSql(String sql, String countColumn, String countColumnAlias,
+  public static String resolveCountSql(String sql, String countColumnExpression,
       String wrappedTableAlias, Collection<String> aggregateFunctions) throws JSQLParserException {
     Select select = (Select) CCJSqlParserUtil.parse(sql);
     SelectBody selectBody = select.getSelectBody();
@@ -186,9 +186,8 @@ public class SqlStatements {
         }
       }
     }
-    final Column useCountColumn = new Column(
-        "COUNT(" + defaultBlank(countColumn, "1") + ") " + defaultString(countColumnAlias));
-    final SelectExpressionItem countItem = new SelectExpressionItem(useCountColumn);
+    final SelectExpressionItem countItem =
+        new SelectExpressionItem(new Column(countColumnExpression));
     final List<SelectItem> countItems = singletonList(countItem);
     if (canBeOptimized(selectBody, aggregateFunctions)) {
       ((PlainSelect) selectBody).setSelectItems(countItems);
@@ -206,6 +205,26 @@ public class SqlStatements {
     return select.toString();
   }
 
+  /**
+   * Returns a new reorganization a count statement based on the given select statement, the given
+   * select statement may be optimized, such as removing order by clauses, removing the select
+   * fields, etc.
+   *
+   * @param sql the original select statement
+   * @param countColumn the count field name
+   * @param countColumnAlias the count field alias
+   * @param aggregateFunctions the aggregation functions that can't be optimized.
+   * @param wrappedTableAlias the wrapped select statement table alias
+   * @return an optimized count query statement
+   * @throws JSQLParserException if CCJSqlParserUtil occurred error
+   */
+  public static String resolveCountSql(String sql, String countColumn, String countColumnAlias,
+      String wrappedTableAlias, Collection<String> aggregateFunctions) throws JSQLParserException {
+    return resolveCountSql(sql,
+        "COUNT(" + defaultBlank(countColumn, "1") + ") " + defaultString(countColumnAlias),
+        wrappedTableAlias, aggregateFunctions);
+  }
+
   static boolean canBeOptimized(SelectBody selectBody, Collection<String> aggregationFunctions) {
     if (selectBody instanceof PlainSelect) {
       PlainSelect plainSelect = (PlainSelect) selectBody;
@@ -214,25 +233,28 @@ public class SqlStatements {
         return false;
       }
       for (SelectItem it : plainSelect.getSelectItems()) {
+        // check whether select item contains variable place holder
         if (it.toString().indexOf('?') != -1) {
           return false;
         }
-        Expression itEx = ((SelectExpressionItem) it).getExpression();
+        // check whether select item is expression (sub-query / function)
         if (it instanceof SelectExpressionItem) {
+          Expression itEx = ((SelectExpressionItem) it).getExpression();
           if (itEx instanceof Function) {
             if (isEmpty(aggregationFunctions)) {
               return false;
             } else {
-              String funcName = ((Function) itEx).getName().toUpperCase();
+              String funcName = ((Function) itEx).getName().toUpperCase(Locale.ROOT);
               for (String af : aggregationFunctions) {
                 if (funcName.startsWith(af)) {
                   return false;
                 }
               }
             }
+          } else if (itEx instanceof Parenthesis
+              && ((SelectExpressionItem) it).getAlias() != null) {
+            return false;
           }
-        } else if (itEx instanceof Parenthesis && ((SelectExpressionItem) it).getAlias() != null) {
-          return false;
         }
       }
     }

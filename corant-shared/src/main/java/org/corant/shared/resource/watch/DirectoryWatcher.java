@@ -64,7 +64,7 @@ public class DirectoryWatcher extends AbstractWatcher {
   public DirectoryWatcher(Path dir, boolean recursive, Predicate<Path> pathFilter,
       FileChangeListener... listeners) {
     try {
-      path = shouldNotNull(dir, "The path to be watched can't null!", dir).normalize();
+      path = shouldNotNull(dir, "The path to be watched can't null!").normalize();
       filter = defaultObject(pathFilter, p -> true);
       service = FileSystems.getDefault().newWatchService();
       keys = new HashMap<>();

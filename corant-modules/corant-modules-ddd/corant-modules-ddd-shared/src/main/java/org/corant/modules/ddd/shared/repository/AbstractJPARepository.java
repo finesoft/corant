@@ -46,11 +46,13 @@ public abstract class AbstractJPARepository implements JPARepository {
     if (persistenceContext == null) {
       synchronized (this) {
         if (persistenceContext == null) {
+          PersistenceContext usePersistenceContext;
           Class<?> thisClass = getUserClass(this.getClass());
-          if ((persistenceContext = thisClass.getAnnotation(PersistenceContext.class)) == null) {
+          if ((usePersistenceContext = thisClass.getAnnotation(PersistenceContext.class)) == null) {
             Named name = defaultObject(thisClass.getAnnotation(Named.class), NamedLiteral.INSTANCE);
-            persistenceContext = PersistenceContextLiteral.of(name.value());
+            usePersistenceContext = PersistenceContextLiteral.of(name.value());
           }
+          persistenceContext = usePersistenceContext;
         }
       }
     }

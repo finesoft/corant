@@ -77,10 +77,30 @@ public interface Mutable<T> extends Supplier<T> {
       return areEqual(value, o.value) ? 0 : value ? 1 : -1;
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (this == obj) {
+        return true;
+      }
+      if (this.getClass() == obj.getClass()) {
+        final MutableBoolean that = (MutableBoolean) obj;
+        return this.value.equals(that.value);
+      }
+      return false;
+    }
+
     public Boolean getAndSet(boolean other) {
       final Boolean pre = get();
       set(other);
       return pre;
+    }
+
+    @Override
+    public int hashCode() {
+      return value == null ? 0 : value.hashCode();
     }
 
     public Boolean setAndGet(boolean other) {
@@ -528,7 +548,7 @@ public interface Mutable<T> extends Supplier<T> {
       } else if (current instanceof Double) {
         return current.doubleValue() + operand.doubleValue();
       } else if (current instanceof Float) {
-        return current.floatValue() + operand.floatValue();
+        return (float) (current.doubleValue() + operand.doubleValue());
       } else if (current instanceof BigInteger) {
         return ((BigInteger) current).add(BigInteger.valueOf(operand.longValue()));
       } else if (current instanceof BigDecimal) {
@@ -551,7 +571,7 @@ public interface Mutable<T> extends Supplier<T> {
       } else if (current instanceof Double) {
         return current.doubleValue() - operand.doubleValue();
       } else if (current instanceof Float) {
-        return current.floatValue() - operand.floatValue();
+        return (float) (current.doubleValue() - operand.doubleValue());
       } else if (current instanceof BigInteger) {
         return ((BigInteger) current).subtract(BigInteger.valueOf(operand.longValue()));
       } else if (current instanceof BigDecimal) {
@@ -860,15 +880,36 @@ public interface Mutable<T> extends Supplier<T> {
       return value.compareTo(o.value);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (this == obj) {
+        return true;
+      }
+      if (this.getClass() == obj.getClass()) {
+        final MutableString that = (MutableString) obj;
+        return this.value.equals(that.value);
+      }
+      return false;
+    }
+
     public String getAndSet(String other) {
       final String pre = get();
       set(other);
       return pre;
     }
 
+    @Override
+    public int hashCode() {
+      return value == null ? 0 : value.hashCode();
+    }
+
     public String setAndGet(String other) {
       return set(other).get();
     }
+
   }
 
   /**

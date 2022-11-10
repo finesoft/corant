@@ -222,7 +222,9 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
 
   protected boolean extractMessages(LinkedList<WrappedMessage> messages) {
     if (!registeredMessages.isEmpty()) {
-      registeredMessages.stream().sorted().forEach(messages::offer);
+      registeredMessages.stream()
+          .sorted((wm1, wm2) -> wm1.getRaisedTime().compareTo(wm2.getRaisedTime()))
+          .forEach(messages::offer);
       registeredMessages.clear();
       return true;
     }

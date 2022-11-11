@@ -75,7 +75,7 @@ public class StreamableQueryRunner extends QueryRunner {
       if (releaser != null) {
         releaser.run();
       }
-      rethrow(e, sql, params);
+      rethrowAny(e, sql, params);
     }
     return Stream.empty();
   }
@@ -105,11 +105,11 @@ public class StreamableQueryRunner extends QueryRunner {
     }
   }
 
-  private void rethrow(Exception e, String sql, Object... params) throws SQLException {
+  private void rethrowAny(Exception e, String sql, Object... params) throws SQLException {
     if (e instanceof SQLException) {
-      super.rethrow((SQLException) e, sql, params);
+      rethrow((SQLException) e, sql, params);
     } else {
-      super.rethrow(new SQLException(e), sql, params);
+      rethrow(new SQLException(e), sql, params);
     }
   }
 

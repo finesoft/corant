@@ -45,7 +45,7 @@ public class Backoffs {
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
    */
-  public static long computeExpoBackoffDecorr(long cap, long base, int attempts, long sleep) {
+  public static long computeExpoBackoffDecorr(long cap, long base, long sleep) {
     long result = min(cap, Randoms.randomLong(base, (sleep <= 0 ? base : sleep) * 3));
     return result > 0 ? result : cap;
   }

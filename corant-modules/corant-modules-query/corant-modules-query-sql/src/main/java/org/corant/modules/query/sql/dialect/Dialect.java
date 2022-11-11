@@ -15,11 +15,15 @@ package org.corant.modules.query.sql.dialect;
 
 import static org.corant.shared.util.Lists.immutableListOf;
 import static org.corant.shared.util.Maps.getMapBoolean;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.corant.config.Configs;
 import org.corant.modules.datasource.shared.SqlStatements;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-query-sql
@@ -30,6 +34,8 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
 public interface Dialect {
 
   List<String> AGGREGATE_FUNCTIONS = immutableListOf("AVG", "COUNT", "MAX", "MIN", "SUM");
+  boolean USE_CUSTOM_DIALECT =
+      Configs.getValue("corant.query.sql.use-custom-dialect", Boolean.TYPE, false);
 
   String COUNT_FIELD_NAME = "total_";
   String COUNT_TEMP_TABLE_NAME = "tmp_count_";
@@ -131,7 +137,7 @@ public interface Dialect {
 
     MYSQL() {
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return MySQLDialect.INSTANCE;
       }
 
@@ -144,7 +150,7 @@ public interface Dialect {
     },
     ORACLE() {
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return OracleDialect.INSTANCE;
       }
 
@@ -156,7 +162,7 @@ public interface Dialect {
     DB2() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return DB2Dialect.INSTANCE;
       }
 
@@ -168,7 +174,7 @@ public interface Dialect {
     H2() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return H2Dialect.INSTANCE;
       }
 
@@ -180,7 +186,7 @@ public interface Dialect {
     HSQL() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return HSQLDialect.INSTANCE;
       }
 
@@ -192,7 +198,7 @@ public interface Dialect {
     POSTGRE() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return PostgreSQLDialect.INSTANCE;
       }
 
@@ -204,7 +210,7 @@ public interface Dialect {
     SQLSERVER2005() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return SQLServer2005Dialect.INSTANCE;
       }
 
@@ -216,7 +222,7 @@ public interface Dialect {
     SQLSERVER2008() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return SQLServer2008Dialect.INSTANCE;
       }
 
@@ -228,7 +234,7 @@ public interface Dialect {
     SQLSERVER2012() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return SQLServer2012Dialect.INSTANCE;
       }
 
@@ -240,7 +246,7 @@ public interface Dialect {
     SYBASE() {
 
       @Override
-      public Dialect instance() {
+      public Dialect defaultInstance() {
         return SybaseDialect.INSTANCE;
       }
 
@@ -259,7 +265,17 @@ public interface Dialect {
       return null;
     }
 
-    public abstract Dialect instance();
+    public abstract Dialect defaultInstance();
+
+    public Dialect instance() {
+      if (USE_CUSTOM_DIALECT) {
+        Optional<DialectResolver> resolver = Services.findPreferentially(DialectResolver.class);
+        if (resolver.isPresent()) {
+          return defaultObject(resolver.get().resolve(this), this::defaultInstance);
+        }
+      }
+      return defaultInstance();
+    }
 
     abstract boolean matchURL(String URL);
   }

@@ -1327,7 +1327,7 @@ public class Maps {
       ((Map) val).forEach(
           (k, nextVal) -> doFlatMap(resultMap, FlatMapKey.of(key).append(k), nextVal, maxDepth));
     } else if (resultMap.put(key, val) != null) {
-      throw new CorantRuntimeException("FlatMap with key %s dup!", key);
+      throw new CorantRuntimeException("FlatMap with key %s dup!", key.asStringKeys("."));
     }
   }
 

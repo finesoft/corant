@@ -141,7 +141,7 @@ public abstract class AbstractHashProvider implements DigestProvider {
    * @param algorithm the hash algorithm name, can't empty
    * @param iterations the iterations times
    * @param salt the salt bytes
-   * @param the instance of {@link java.security.Provider} or the name of
+   * @param provider the instance of {@link java.security.Provider} or the name of
    *        {@link java.security.Provider} or use system default provider if null.
    * @return encode
    */

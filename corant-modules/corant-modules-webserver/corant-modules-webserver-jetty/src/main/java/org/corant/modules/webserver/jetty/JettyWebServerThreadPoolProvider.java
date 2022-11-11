@@ -31,8 +31,16 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 @FunctionalInterface
 public interface JettyWebServerThreadPoolProvider extends Function<WebServerConfig, ThreadPool> {
 
-  JettyWebServerThreadPoolProvider DEFAULT = new JettyWebServerThreadPoolProvider() {
+  JettyWebServerThreadPoolProvider DEFAULT = new DefaultJettyWebServerThreadPoolProvider();
 
+  /**
+   * corant-modules-webserver-jetty
+   *
+   * @author bingo 上午11:42:56
+   *
+   */
+  public final class DefaultJettyWebServerThreadPoolProvider
+      implements JettyWebServerThreadPoolProvider {
     @Override
     public ThreadPool apply(WebServerConfig config) {
       final int maxThreads = config.getWorkThreads();
@@ -41,7 +49,6 @@ public interface JettyWebServerThreadPoolProvider extends Function<WebServerConf
       return new QueuedThreadPool(maxThreads, minThreads, 60000,
           new BlockingArrayQueue<>(queueCapacity, queueCapacity));
     }
-
-  };
+  }
 
 }

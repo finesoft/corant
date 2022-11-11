@@ -85,8 +85,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Remove the data for entities of the specified class (and its subclasses) from the cache.
    * {@link Cache#evict(Class)}
-   *
-   * @param entityClass evictCache
    */
   void evictCache();
 

@@ -112,7 +112,7 @@ public abstract class AbstractRetryer<R extends AbstractRetryer<R>> implements R
     // if (context.getAttempts() > 0) {
     getRetryListeners().forEach(listener -> {
       try {
-        listener.onRetry(getContext());
+        listener.onRetry(context);
       } catch (Throwable ex) {
         logger.log(Level.SEVERE, ex, () -> String.format(
             "Retry listener %s handling occurred error, but the retry process continued to execute!",

@@ -332,6 +332,11 @@ public class ExtendedEntityManager implements EntityManager {
   }
 
   @Override
+  public String toString() {
+    return "ExtendedEntityManager [delegate=" + delegate + ", transaction=" + transaction + "]";
+  }
+ 
+  @Override
   public <T> T unwrap(Class<T> cls) {
     return delegate.unwrap(cls);
   }

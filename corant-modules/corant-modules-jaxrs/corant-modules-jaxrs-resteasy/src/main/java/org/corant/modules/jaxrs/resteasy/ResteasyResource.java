@@ -121,7 +121,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
     protected InputPartResource(InputPart inputPart, ContentDisposition disposition) {
       this.inputPart = inputPart;
       fieldName = disposition.getName();
-      String filename = disposition.getFilename();
+      filename = disposition.getFilename();
       if (filename != null) {
         if (filename.startsWith("=?") && filename.endsWith("?=")) {
           // For RFC 2047 bingo 2021-04-06

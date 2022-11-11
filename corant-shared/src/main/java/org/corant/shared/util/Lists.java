@@ -58,9 +58,9 @@ public class Lists {
   public static <E> E[] append(E[] src, E... ts) {
     if (src == null && ts == null) {
       return null;
-    } else if (src == null || src.length == 0) {
+    } else if (ts != null && (src == null || src.length == 0)) {
       return ts.clone();
-    } else if (ts == null || ts.length == 0) {
+    } else if (src != null && (ts == null || ts.length == 0)) {
       return src.clone();
     }
     final Class<?> st = src.getClass().getComponentType();
@@ -97,9 +97,9 @@ public class Lists {
   public static <E> E[] appendIfAbsent(E[] src, E... ts) {
     if (src == null && ts == null) {
       return null;
-    } else if (src == null || src.length == 0) {
+    } else if (ts != null && (src == null || src.length == 0)) {
       return ts.clone();
-    } else if (ts == null || ts.length == 0) {
+    } else if (src != null && (ts == null || ts.length == 0)) {
       return src.clone();
     }
     final Class<?> st = src.getClass().getComponentType();

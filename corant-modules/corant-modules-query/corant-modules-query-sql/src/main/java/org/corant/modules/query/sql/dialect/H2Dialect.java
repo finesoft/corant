@@ -55,7 +55,7 @@ public class H2Dialect implements Dialect {
    * select * from user limit :offset,:limit
    * </pre>
    */
-  private String getLimitString(String sql, int offset, String offsetPlaceholder,
+  protected String getLimitString(String sql, int offset, String offsetPlaceholder,
       String limitPlaceholder, Map<String, ?> hints) {
     if (offset > 0) {
       return new StringBuilder(sql.length() + 32).append(sql).append(" LIMIT ")

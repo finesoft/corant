@@ -63,7 +63,7 @@ public class EventSelector implements Predicate<Event> {
 
   @Override
   public boolean test(Event t) {
-    boolean forward = t != null;
+    boolean forward = (t != null);
     if (!types.isEmpty()) {
       forward &= types.contains(t.getType());
     }

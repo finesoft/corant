@@ -195,7 +195,7 @@ public interface LimitedStream {
     public RangedInputStream(InputStream delegate, long offset, long limit) {
       super(delegate, limit);
       try {
-        delegate.skip(Math.max(0L, offset));
+        delegate.skip(Math.max(0L, offset));// FIXME Ignored error status of call
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }

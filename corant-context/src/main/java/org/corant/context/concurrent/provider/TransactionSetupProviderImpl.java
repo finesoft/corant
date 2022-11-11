@@ -39,14 +39,14 @@ public class TransactionSetupProviderImpl implements TransactionSetupProvider {
   private transient TransactionManager transactionManager;
 
   /**
-   * @param transactionManager
+   * @param instance CDI instance use to retrieve transaction manager
    */
   public TransactionSetupProviderImpl(Instance<Object> instance) {
-    transactionManager = instance.select(TransactionManager.class).get();
+    this(instance.select(TransactionManager.class).get());
   }
 
   /**
-   * @param transactionManager
+   * @param transactionManager the transaction manager use to suspend or resume transaction
    */
   public TransactionSetupProviderImpl(TransactionManager transactionManager) {
     this.transactionManager = transactionManager;

@@ -45,7 +45,7 @@ public class FXMLLoaders {
    * over by CDI.
    *
    * @param <T> the type of the root object
-   * @param pathOrExpression the resource path or path expression
+   * @param pathOrExp the resource path or path expression
    * @return the loaded object hierarchy
    * @throws IOException if an error occurs during loading
    *

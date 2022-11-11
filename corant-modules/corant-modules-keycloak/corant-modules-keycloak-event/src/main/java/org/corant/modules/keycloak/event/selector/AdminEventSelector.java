@@ -63,7 +63,7 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
   @Override
   public boolean test(AdminEvent t) {
     boolean forward = (t != null);
-    if (!types.isEmpty()) {
+    if (forward && !types.isEmpty()) {
       forward &= types.contains(t.getResourceType().name() + ":" + t.getOperationType().name());
     }
     if (forward && realmId != null) {

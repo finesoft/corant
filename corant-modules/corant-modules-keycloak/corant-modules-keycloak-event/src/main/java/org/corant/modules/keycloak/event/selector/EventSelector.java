@@ -64,7 +64,7 @@ public class EventSelector implements Predicate<Event> {
   @Override
   public boolean test(Event t) {
     boolean forward = (t != null);
-    if (!types.isEmpty()) {
+    if (forward && !types.isEmpty()) {
       forward &= types.contains(t.getType());
     }
     if (forward && realmId != null) {

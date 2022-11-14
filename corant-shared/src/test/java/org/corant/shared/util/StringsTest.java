@@ -35,6 +35,7 @@ import static org.corant.shared.util.Strings.remove;
 import static org.corant.shared.util.Strings.split;
 import static org.junit.Assert.assertArrayEquals;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -103,8 +104,8 @@ public class StringsTest extends TestCase {
   public void testDefaultBlank() {
     assertTrue(defaultBlank("x", () -> "x").equals("x"));
     assertTrue(defaultBlank(null, () -> "x").equals("x"));
-    assertTrue(defaultBlank(null, () -> null) == null);
-    assertTrue(defaultBlank("   ", () -> null) == null);
+    assertTrue(defaultBlank(null, (Supplier<String>) () -> null) == null);
+    assertTrue(defaultBlank("   ", (Supplier<String>) () -> null) == null);
     assertTrue(defaultBlank("", () -> "bingo").equals("bingo"));
     assertTrue(defaultBlank("x", "x").equals("x"));
     assertTrue(defaultBlank(null, "x").equals("x"));

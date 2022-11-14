@@ -102,11 +102,11 @@ public class StringsTest extends TestCase {
 
   @Test
   public void testDefaultBlank() {
-    assertTrue(defaultBlank("x", () -> "x").equals("x"));
-    assertTrue(defaultBlank(null, () -> "x").equals("x"));
+    assertTrue(defaultBlank("x", (Supplier<String>) () -> "x").equals("x"));
+    assertTrue(defaultBlank(null, (Supplier<String>) () -> "x").equals("x"));
     assertTrue(defaultBlank(null, (Supplier<String>) () -> null) == null);
     assertTrue(defaultBlank("   ", (Supplier<String>) () -> null) == null);
-    assertTrue(defaultBlank("", () -> "bingo").equals("bingo"));
+    assertTrue(defaultBlank("", (Supplier<String>) () -> "bingo").equals("bingo"));
     assertTrue(defaultBlank("x", "x").equals("x"));
     assertTrue(defaultBlank(null, "x").equals("x"));
     assertTrue(defaultBlank(null, (String) null) == null);

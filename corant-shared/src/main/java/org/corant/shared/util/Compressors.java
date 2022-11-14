@@ -16,6 +16,7 @@ package org.corant.shared.util;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.linkedListOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
 import static org.corant.shared.util.Streams.copy;
 import static org.corant.shared.util.Streams.streamOf;
@@ -153,8 +154,9 @@ public class Compressors {
   }
 
   public static void unzip(File zipFile, Charset charset, File destFile) throws IOException {
-    shouldBeTrue(isNoneNull(zipFile, charset, destFile) && zipFile.exists());
-    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile), charset)) {
+    shouldBeTrue(isNoneNull(zipFile, destFile) && zipFile.exists());
+    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile),
+        defaultObject(charset, StandardCharsets.UTF_8))) {
       ZipEntry zipEntry = zis.getNextEntry();
       final String destDir = destFile.getCanonicalPath() + File.separator;
       while (zipEntry != null) {

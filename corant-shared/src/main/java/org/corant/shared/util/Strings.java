@@ -1151,7 +1151,8 @@ public class Strings {
    * @param limit a non-negative integer specifying a limit on the number of substrings to be
    *        included in the array. If provided, splits the string at each occurrence of the
    *        specified separator, but stops when limit entries have been placed in the array. Any
-   *        leftover text is not included in the array at all.
+   *        leftover text is not included in the array at all, this is different from the handling
+   *        mechanism of {@code String.split(String, int)}.
    * @return string array
    */
   public static String[] split(final String str, final String wholeSeparator, int limit) {

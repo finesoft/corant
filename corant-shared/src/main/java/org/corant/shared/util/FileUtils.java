@@ -19,11 +19,13 @@ import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Functions.emptyPredicate;
 import static org.corant.shared.util.Functions.uncheckedConsumer;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
 import static org.corant.shared.util.Objects.max;
+import static org.corant.shared.util.Streams.copy;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
@@ -58,6 +60,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.Checksum;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.resource.Resource;
 
@@ -172,7 +175,7 @@ public class FileUtils {
 
   public static File createTempFile(String prefix, String suffix) {
     try {
-      File file = File.createTempFile(prefix, suffix);
+      File file = Files.createTempFile(prefix, suffix).toFile();
       file.deleteOnExit();
       return file;
     } catch (IOException e) {
@@ -211,18 +214,32 @@ public class FileUtils {
       throws IOException {
     shouldBeTrue(src != null && dest != null, "Extract jar file the src and dest can not null");
     try (JarFile jar = new JarFile(shouldNotNull(src.toFile()))) {
-      Predicate<JarEntry> useFilter = defaultObject(filter, e -> true);
+      final Path destPath = dest.normalize();
+      Predicate<JarEntry> entyFilter = defaultObject(filter, emptyPredicate(true));
       Enumeration<JarEntry> entries = jar.entries();
       while (entries.hasMoreElements()) {
-        JarEntry each = entries.nextElement();
-        if (useFilter.test(each)) {
-          Path eachPath = dest.resolve(each.getName().replace('/', File.separatorChar));
-          if (each.isDirectory()) {
-            if (!java.nio.file.Files.exists(eachPath)) {
-              java.nio.file.Files.createDirectories(eachPath);
+        final JarEntry entry = entries.nextElement();
+        final String entryName = entry.getName();
+        if (entyFilter.test(entry)) {
+          Path entryPath = destPath.resolve(entryName).normalize();
+          if (!entryPath.startsWith(destPath)) {
+            throw new NotSupportedException("Can't extract entry %s that outside the given path %s",
+                entryName, destPath.toString());
+          }
+          File entryFile = entryPath.toFile();
+          if (entry.isDirectory()) {
+            if (!entryFile.isDirectory() && !entryFile.mkdirs()) {
+              throw new IOException("Extract error, failed to create directory " + entryFile);
             }
           } else {
-            java.nio.file.Files.copy(jar.getInputStream(each), eachPath);
+            File parent = entryFile.getParentFile();
+            if (!parent.isDirectory() && !parent.mkdirs()) {
+              throw new IOException("Extract error, failed to create directory " + parent);
+            }
+            try (InputStream jis = jar.getInputStream(entry);
+                FileOutputStream fos = new FileOutputStream(entryFile)) {
+              copy(jis, fos);
+            }
           }
         }
       }

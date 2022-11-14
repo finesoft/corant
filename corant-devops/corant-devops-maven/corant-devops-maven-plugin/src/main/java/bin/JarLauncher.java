@@ -97,8 +97,7 @@ public class JarLauncher {
       }
       Class<?> mainClass = classLoader.loadClass(mainClsName);
       System.setProperty(APP_NME_KEY, appName);
-      log(true, "Found main class %s by corant class loader, the %s is starting...", mainClass,
-          appName);
+      log(true, "Found main class %s by corant class loader, startup %s", mainClass, appName);
       getMainMethod(mainClass).invoke(null, new Object[] {args});
     } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchMethodException
         | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -174,6 +173,10 @@ public class JarLauncher {
     String checksum = getChecksum(jar, entry);
     Path dest = workPath
         .resolve(entryName.substring(0, entryName.length() - JAREXT_LEN) + "-" + checksum + JAREXT);
+    if (!dest.normalize().startsWith(workPath)) {
+      throw new IOException(String.format("Can't extract entry %s that outside the work path %s",
+          entryName, workPath.toString()));
+    }
     if (Files.exists(dest)) {
       classpaths.add(dest);
       existedJarPaths.add(dest);
@@ -223,7 +226,8 @@ public class JarLauncher {
     } else {
       appName = manifest.getMainAttributes().getValue(Attributes.Name.EXTENSION_NAME);
     }
-    workPath = Paths.get(System.getProperty("user.home")).resolve("." + appName + "-works");
+    workPath =
+        Paths.get(System.getProperty("user.home")).resolve("." + appName + "-works").normalize();
     mainClsName = manifest.getMainAttributes().getValue(RUNNER_CLS_ATTR_NME);
   }
 

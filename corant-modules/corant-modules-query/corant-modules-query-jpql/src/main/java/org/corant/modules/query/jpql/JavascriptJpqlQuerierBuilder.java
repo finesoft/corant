@@ -15,13 +15,11 @@ package org.corant.modules.query.jpql;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import org.corant.modules.lang.javascript.NashornScriptEngines;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerierBuilder;
+import org.corant.modules.query.shared.dynamic.javascript.JavaScriptDynamicQuerierBuilder;
 
 /**
  * corant-modules-query-jpql
@@ -30,23 +28,20 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerierBuilder;
  *
  */
 public class JavascriptJpqlQuerierBuilder
-    extends AbstractDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
-
-  final Function<Object[], Object> execution;
+    extends JavaScriptDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   /**
    * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param queryHandler
+   * @param fetchQueryHandler
    */
-  protected JavascriptJpqlQuerierBuilder(Query query, QueryHandler queryResolver,
-      FetchQueryHandler fetchQueryResolver) {
-    super(query, queryResolver, fetchQueryResolver);
-    execution = NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
+  protected JavascriptJpqlQuerierBuilder(Query query, QueryHandler queryHandler,
+      FetchQueryHandler fetchQueryHandler) {
+    super(query, queryHandler, fetchQueryHandler);
   }
 
   /**
-   * Generate SQL script with placeholder, and converted the parameter to appropriate type.
+   * Generate JPQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
   public DefaultJpqlNamedQuerier build(Object param) {
@@ -55,10 +50,6 @@ public class JavascriptJpqlQuerierBuilder
     Object script = getExecution().apply(new Object[] {queryParam, useParam});
     return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getQueryHandler(),
         getFetchQueryHandler(), useParam.toArray(new Object[useParam.size()]), script.toString());
-  }
-
-  public Function<Object[], Object> getExecution() {
-    return execution;
   }
 
 }

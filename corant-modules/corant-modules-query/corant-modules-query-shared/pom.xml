@@ -33,10 +33,12 @@
     <dependency>
       <groupId>org.corant</groupId>
       <artifactId>corant-modules-lang-javascript</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.corant</groupId>
       <artifactId>corant-modules-lang-groovy</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.corant</groupId>

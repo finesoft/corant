@@ -14,10 +14,7 @@ pipeline {
       }
       steps {
         script {
-          sh "mvn clean deploy -Dmaven.test.skip=true -Dchangelist=-SNAPSHOT"
-          if(params.releasable){
-            sh "mvn clean deploy -U -Dmaven.test.skip=true -Dchangelist=.RELEASE"
-          }
+          sh "mvn clean deploy -Dmaven.test.skip=true"
           def flattened = readMavenPom file: 'corant-boms/.flattened-pom.xml'
           VERSION = flattened.version
         }

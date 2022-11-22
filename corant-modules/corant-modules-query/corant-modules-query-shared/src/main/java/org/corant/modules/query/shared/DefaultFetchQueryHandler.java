@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.shared;
 
-import static org.corant.context.Beans.select;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_FETCH_QUERY;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -40,6 +39,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import org.corant.context.service.ConversionService;
 import org.corant.modules.query.FetchQueryHandler;
@@ -75,6 +76,10 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
   @Inject
   protected QueryScriptEngines scriptEngines;
+
+  @Inject
+  @Any
+  protected Instance<QueryParameterReviser> parameterRevisers;
 
   @Inject
   protected Logger logger;
@@ -155,8 +160,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     MutableObject<QueryParameter> resolved =
         new MutableObject<>(new DefaultQueryParameter().context(parentQueryParameter.getContext())
             .criteria(resolveFetchQueryCriteria(result, query, parentQueryParameter)));
-    select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
-        .sorted(Sortable::compare).forEach(resolved::apply);
+    parameterRevisers.stream().filter(r -> r.supports(query)).sorted(Sortable::compare)
+        .forEach(resolved::apply);
     return resolved.get();
   }
 

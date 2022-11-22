@@ -26,7 +26,7 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.query.sql.dialect.Dialect.DBMS;
+import org.corant.modules.datasource.shared.DBMS;
 
 /**
  * corant-modules-query-sql

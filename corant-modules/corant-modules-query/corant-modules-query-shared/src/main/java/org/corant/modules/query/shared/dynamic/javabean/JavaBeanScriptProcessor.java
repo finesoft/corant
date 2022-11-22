@@ -13,11 +13,13 @@
  */
 package org.corant.modules.query.shared.dynamic.javabean;
 
-import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.util.Collection;
 import java.util.function.Function;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
@@ -40,6 +42,22 @@ import org.corant.modules.query.spi.ResultHintResolver;
 @Singleton
 public class JavaBeanScriptProcessor implements ScriptProcessor {
 
+  @Inject
+  @Any
+  protected Instance<FetchQueryParameterResolver> fetchQueryParameterResolvers;
+
+  @Inject
+  @Any
+  protected Instance<FetchQueryPredicate> fetchQueryPredicates;
+
+  @Inject
+  @Any
+  protected Instance<FetchQueryResultInjector> fetchQueryResultInjectors;
+
+  @Inject
+  @Any
+  protected Instance<ResultHintResolver> resultHintResolvers;
+
   @Override
   public void afterQueryMappingInitialized(Collection<Query> queries, long initializedVersion) {
     // No op~
@@ -51,7 +69,7 @@ public class JavaBeanScriptProcessor implements ScriptProcessor {
     if (script.isValid()) {
       shouldBeTrue(supports(script));
       return p -> {
-        resolve(FetchQueryResultInjector.class, NamedLiteral.of(script.getCode()))
+        fetchQueryResultInjectors.select(NamedLiteral.of(script.getCode())).get()
             .inject(p.parameter, p.parentResult, p.fetchedResult);
         return null;
       };
@@ -64,7 +82,7 @@ public class JavaBeanScriptProcessor implements ScriptProcessor {
     final Script script = parameter.getScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return p -> resolve(FetchQueryParameterResolver.class, NamedLiteral.of(script.getCode()))
+      return p -> fetchQueryParameterResolvers.select(NamedLiteral.of(script.getCode())).get()
           .resolve(p.parameter, p.result);
     }
     return null;
@@ -75,7 +93,7 @@ public class JavaBeanScriptProcessor implements ScriptProcessor {
     final Script script = fetchQuery.getPredicateScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return p -> resolve(FetchQueryPredicate.class, NamedLiteral.of(script.getCode()))
+      return p -> fetchQueryPredicates.select(NamedLiteral.of(script.getCode())).get()
           .test(p.parameter, p.result);
     }
     return null;
@@ -87,7 +105,7 @@ public class JavaBeanScriptProcessor implements ScriptProcessor {
     final Script script = queryHint.getScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return p -> resolve(ResultHintResolver.class, NamedLiteral.of(script.getCode()))
+      return p -> resultHintResolvers.select(NamedLiteral.of(script.getCode())).get()
           .resolve(p.parameter, p.result);
     }
     return null;

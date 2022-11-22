@@ -13,7 +13,6 @@
  */
 package org.corant.shared.exception;
 
-import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.SPACE;
@@ -26,9 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import org.corant.shared.exception.ExceptionMessageResolver.SimpleExceptionMessageResolver;
 import org.corant.shared.util.Objects;
-import org.corant.shared.util.Services;
 
 /**
  * corant-shared
@@ -51,10 +48,6 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   protected static final String UN_KNOW_EXMSG = "An unknown exception has occurred!";
 
-  protected static final ExceptionMessageResolver messageResolver =
-      Services.findRequired(ExceptionMessageResolver.class, defaultClassLoader())
-          .orElseGet(SimpleExceptionMessageResolver::new);
-
   private static final long serialVersionUID = -3720369148530068164L;
 
   private Object code;
@@ -73,17 +66,17 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    * @param code the exception code use for message resolving or checking
    */
   public GeneralRuntimeException(Object code) {
-    this(code, null, new HashMap<>(), Objects.EMPTY_ARRAY);
+    this(code, null, null, Objects.EMPTY_ARRAY);
   }
 
   /**
    * Constructs a general runtime exception with the given code and message parameters
    *
    * @param code the exception code use for message resolving or checking
-   * @param variants the message parameters
+   * @param parameters the message parameters
    */
-  public GeneralRuntimeException(Object code, Object... variants) {
-    this(code, null, new HashMap<>(), variants);
+  public GeneralRuntimeException(Object code, Object... parameters) {
+    this(code, null, new HashMap<>(), parameters);
   }
 
   /**
@@ -199,12 +192,11 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   }
 
   public String getLocalizedMessage(Locale locale) {
-    if (messageResolver != null) {
-      try {
-        return messageResolver.getMessage(this, defaultObject(locale, Locale::getDefault));
-      } catch (Exception e) {
-        addSuppressed(e);
-      }
+    try {
+      return ExceptionMessageResolver.INSTANCE.getMessage(this,
+          defaultObject(locale, Locale::getDefault));
+    } catch (Exception e) {
+      addSuppressed(e);
     }
     return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
   }

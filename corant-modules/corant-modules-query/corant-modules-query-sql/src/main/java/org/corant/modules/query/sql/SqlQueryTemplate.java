@@ -47,6 +47,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.datasource.shared.DriverManagerDataSource;
 import org.corant.modules.datasource.shared.SqlStatements;
@@ -57,7 +58,7 @@ import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.sql.dialect.Dialect;
-import org.corant.modules.query.sql.dialect.Dialect.DBMS;
+import org.corant.modules.query.sql.dialect.Dialects;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
@@ -97,13 +98,13 @@ public class SqlQueryTemplate {
 
   public SqlQueryTemplate(DataSource dataSource, DBMS dbms) {
     this.dataSource = dataSource;
-    dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
+    dialect = Dialects.resolve(defaultObject(dbms, () -> DBMS.MYSQL));
     runner = new QueryRunner(dataSource);
   }
 
   public SqlQueryTemplate(DBMS dbms, String dataSourceName) {
     dataSource = resolve(DataSourceService.class).resolve(dataSourceName);
-    dialect = defaultObject(dbms, () -> DBMS.MYSQL).instance();
+    dialect = Dialects.resolve(defaultObject(dbms, () -> DBMS.MYSQL));
     runner = new QueryRunner(dataSource);
   }
 
@@ -121,13 +122,13 @@ public class SqlQueryTemplate {
 
   public static SqlQueryTemplate of(String jdbcUrl) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl);
-    final DBMS dbms = DBMS.url(jdbcUrl);
+    final DBMS dbms = DBMS.fromUrl(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
   public static SqlQueryTemplate of(String jdbcUrl, Properties properties) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, properties);
-    final DBMS dbms = DBMS.url(jdbcUrl);
+    final DBMS dbms = DBMS.fromUrl(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
@@ -135,13 +136,13 @@ public class SqlQueryTemplate {
       String username, String password) {
     final DriverManagerDataSource ds =
         new DriverManagerDataSource(jdbcUrl, driverClassName, properties, username, password);
-    final DBMS dbms = DBMS.url(jdbcUrl);
+    final DBMS dbms = DBMS.fromUrl(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
   public static SqlQueryTemplate of(String jdbcUrl, String username, String password) {
     final DriverManagerDataSource ds = new DriverManagerDataSource(jdbcUrl, username, password);
-    final DBMS dbms = DBMS.url(jdbcUrl);
+    final DBMS dbms = DBMS.fromUrl(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 
@@ -149,7 +150,7 @@ public class SqlQueryTemplate {
       String password) {
     final DriverManagerDataSource ds =
         new DriverManagerDataSource(jdbcUrl, driverClassName, username, password);
-    final DBMS dbms = DBMS.url(jdbcUrl);
+    final DBMS dbms = DBMS.fromUrl(jdbcUrl);
     return new SqlQueryTemplate(ds, dbms);
   }
 

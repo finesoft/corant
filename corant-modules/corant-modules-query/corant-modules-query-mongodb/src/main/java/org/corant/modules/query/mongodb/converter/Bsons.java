@@ -48,6 +48,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.Decimal128;
 import org.bson.types.ObjectId;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Experimental;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -163,6 +164,39 @@ public class Bsons {
     EXTJSON_CONVERTERS = unmodifiableMap(extJsonConverters);
   }
 
+  @Experimental
+  public static Object extended(Object value) {
+    if (value != null) {
+      final Class<?> valueClass = wrap(value.getClass());
+      if (EXTJSON_CONVERTERS.containsKey(valueClass)) {
+        return EXTJSON_CONVERTERS.get(valueClass).apply(value);
+      } else if (value instanceof Map) {
+        Map<Object, Object> valMap = new HashMap<>(((Map<?, ?>) value).size());
+        for (Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+          valMap.put(entry.getKey(), extended(entry.getValue()));
+        }
+        return valMap;
+      } else if (value instanceof Collection) {
+        List<Object> list = new ArrayList<>(((Collection<?>) value).size());
+        for (Object item : (Collection<?>) value) {
+          list.add(extended(item));
+        }
+        return list;
+      } else if (valueClass.isArray()) {
+        Object[] valueArray = wrapArray(value);
+        int length = valueArray.length;
+        Object[] array = new Object[length];
+        for (int i = 0; i < length; i++) {
+          array[i] = extended(valueArray[i]);
+        }
+        return array;
+      } else {
+        return value;
+      }
+    }
+    return null;
+  }
+
   /**
    * Convert the given object directly to a BSON type object, assuming that the given Java type
    * object has been converted according to "Extended JSON" before conversion.
@@ -237,37 +271,5 @@ public class Bsons {
     } catch (JsonProcessingException e) {
       throw new CorantRuntimeException(e);
     }
-  }
-
-  protected static Object doExtended(Object value) {
-    if (value != null) {
-      final Class<?> valueClass = wrap(value.getClass());
-      if (EXTJSON_CONVERTERS.containsKey(valueClass)) {
-        return EXTJSON_CONVERTERS.get(valueClass).apply(value);
-      } else if (value instanceof Map) {
-        Map<Object, Object> valMap = new HashMap<>(((Map<?, ?>) value).size());
-        for (Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
-          valMap.put(entry.getKey(), doExtended(entry.getValue()));
-        }
-        return valMap;
-      } else if (value instanceof Collection) {
-        List<Object> list = new ArrayList<>(((Collection<?>) value).size());
-        for (Object item : (Collection<?>) value) {
-          list.add(doExtended(item));
-        }
-        return list;
-      } else if (valueClass.isArray()) {
-        Object[] valueArray = wrapArray(value);
-        int length = valueArray.length;
-        Object[] array = new Object[length];
-        for (int i = 0; i < length; i++) {
-          array[i] = doExtended(valueArray[i]);
-        }
-        return array;
-      } else {
-        return value;
-      }
-    }
-    return null;
   }
 }

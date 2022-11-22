@@ -78,22 +78,23 @@ public class Aggregates {
     return resolveRepository(cls).namedQuery(namedQuery).parameters(params).get();
   }
 
-  public static <X extends Aggregate> void lock(Aggregate obj, LockModeType lockModeType,
-      Object... properties) {
-    if (obj != null) {
-      if (properties.length > 0) {
-        resolveRepository(getUserClass(obj)).lock(obj, lockModeType, mapOf(properties));
-      } else {
-        resolveRepository(getUserClass(obj)).lock(obj, lockModeType);
-      }
-    } else {
-      throw new GeneralRuntimeException(ERR_PARAM);
-    }
-  }
-
   public static <X extends Aggregate> void lock(Class<X> cls, Serializable id,
       LockModeType lockModeType, Object... properties) {
     resolve(cls, id, lockModeType, properties);
+  }
+
+  public static <X extends Aggregate> X lock(X aggregate, LockModeType lockModeType,
+      Object... properties) {
+    if (aggregate != null) {
+      if (properties.length > 0) {
+        resolveRepository(getUserClass(aggregate)).lock(aggregate, lockModeType, mapOf(properties));
+      } else {
+        resolveRepository(getUserClass(aggregate)).lock(aggregate, lockModeType);
+      }
+      return aggregate;
+    } else {
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
   }
 
   public static <X extends Aggregate> X reference(Class<X> cls, Serializable id) {

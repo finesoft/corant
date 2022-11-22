@@ -20,8 +20,8 @@ import static org.corant.shared.util.Strings.defaultString;
 import java.util.Locale;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
-import org.corant.modules.bundle.MessageResolver.MessageParameter;
 import org.corant.modules.bundle.MessageResolver.MessageCategory;
+import org.corant.modules.bundle.MessageResolver.MessageParameter;
 import org.corant.shared.exception.ExceptionMessageResolver;
 import org.corant.shared.exception.GeneralRuntimeException;
 
@@ -34,15 +34,18 @@ import org.corant.shared.exception.GeneralRuntimeException;
 public class DefaultExceptionMessageResolver implements ExceptionMessageResolver {
 
   @Override
-  public String getMessage(GeneralRuntimeException exception, Locale locale) {
-    Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
-    if (inst.isResolvable()) {
-      return inst.get().getMessage(defaultObject(locale, Locale::getDefault),
-          new ExceptionMessageParameter(exception));
-    } else {
-      return defaultString(exception.getOriginalMessage()) + SPACE
-          + asDefaultString(exception.getCode());
+  public String getMessage(Exception exception, Locale locale) {
+    if (exception instanceof GeneralRuntimeException) {
+      GeneralRuntimeException gre = (GeneralRuntimeException) exception;
+      Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
+      if (inst.isResolvable()) {
+        return inst.get().getMessage(defaultObject(locale, Locale::getDefault),
+            new ExceptionMessageParameter(gre));
+      } else {
+        return defaultString(gre.getOriginalMessage()) + SPACE + asDefaultString(gre.getCode());
+      }
     }
+    return defaultObject(exception.getLocalizedMessage(), () -> exception.getMessage());
   }
 
   /**

@@ -14,12 +14,12 @@
 package org.corant.shared.exception;
 
 import static org.corant.shared.ubiquity.Atomics.strictAtomicInitializer;
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Conversions.tryConvert;
 import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
 import static org.corant.shared.util.Sets.setOf;
-import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
@@ -61,21 +61,22 @@ import org.corant.shared.util.Systems;
  */
 public interface ExceptionMessageResolver extends Sortable {
 
+  ExceptionMessageResolver INSTANCE =
+      Services.findRequired(ExceptionMessageResolver.class, defaultClassLoader())
+          .orElseGet(SimpleExceptionMessageResolver::new);
+
   /**
    * Use the given exception object and locale to construct and return the message corresponding to
-   * the exception. The implementation may use {@link GeneralRuntimeException#getCode()},
-   * {@link GeneralRuntimeException#getSubCode()}, and
-   * {@link GeneralRuntimeException#getParameters()} to construct a localized message.
+   * the exception.
+   * <p>
+   * For example: If the given exception is {@link GeneralRuntimeException}, the implementation may
+   * use {@link GeneralRuntimeException#getCode()}, {@link GeneralRuntimeException#getSubCode()},
+   * and {@link GeneralRuntimeException#getParameters()} to construct a localized message.
    *
    * @param exception the exception to extract message
    * @param locale the message locale
-   *
-   * @see GeneralRuntimeException#getCode()
-   * @see GeneralRuntimeException#getSubCode()
-   * @see GeneralRuntimeException#getLocalizedMessage(Locale)
-   * @see GeneralRuntimeException#getParameters()
    */
-  String getMessage(GeneralRuntimeException exception, Locale locale);
+  String getMessage(Exception exception, Locale locale);
 
   /**
    * corant-shared
@@ -150,23 +151,39 @@ public interface ExceptionMessageResolver extends Sortable {
       return Pair.of(locale, source);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If the given exception is {@link GeneralRuntimeException} the default implementation use
+     * {@link GeneralRuntimeException#getCode()}, {@link GeneralRuntimeException#getSubCode()}, and
+     * {@link GeneralRuntimeException#getParameters()} to construct a localized message; otherwise
+     * returns {@link Exception#getLocalizedMessage()} directly.
+     *
+     * @see GeneralRuntimeException#getCode()
+     * @see GeneralRuntimeException#getSubCode()
+     * @see GeneralRuntimeException#getLocalizedMessage(Locale)
+     * @see GeneralRuntimeException#getParameters()
+     */
     @Override
-    public String getMessage(GeneralRuntimeException exception, Locale locale) {
-      String message = null;
-      if (exception.getCode() != null) {
-        String key = exception.getCode().toString();
-        if (exception.getSubCode() != null) {
-          key = key.concat(Names.NAME_SPACE_SEPARATORS).concat(exception.getSubCode().toString());
+    public String getMessage(Exception exception, Locale locale) {
+      if (exception instanceof GeneralRuntimeException) {
+        GeneralRuntimeException gre = (GeneralRuntimeException) exception;
+        String message = null;
+        if (gre.getCode() != null) {
+          String key = gre.getCode().toString();
+          if (gre.getSubCode() != null) {
+            key = key.concat(Names.NAME_SPACE_SEPARATORS).concat(gre.getSubCode().toString());
+          }
+          message = getMessage(locale, key, gre.getParameters());
         }
-        message = getMessage(locale, key, exception.getParameters());
+        return defaultObject(message, gre::getOriginalMessage);
       }
-      return defaultString(message, exception.getOriginalMessage());
+      return defaultObject(exception.getLocalizedMessage(), exception::getMessage);
     }
 
     public String getMessage(Locale locale, String key, Object... parameters) {
-      MessageFormat mf =
-          (MessageFormat) getMapObject(source.get().get(defaultObject(locale, Locale::getDefault)),
-              key);
+      final Locale loc = defaultObject(locale, Locale::getDefault);
+      final MessageFormat mf = (MessageFormat) getMapObject(source.get().get(loc), key);
       if (mf != null) {
         return mf.format(parameters);
       }

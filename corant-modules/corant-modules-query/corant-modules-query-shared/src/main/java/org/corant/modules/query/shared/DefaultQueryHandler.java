@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.shared;
 
-import static org.corant.context.Beans.select;
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESULT;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULTHINT;
@@ -83,6 +82,10 @@ public class DefaultQueryHandler implements QueryHandler {
 
   @Inject
   protected QueryObjectMapper objectMapper;
+
+  @Inject
+  @Any
+  protected Instance<QueryParameterReviser> parameterRevisers;
 
   protected DefaultQuerierConfig querierConfig = DefaultQuerierConfig.DFLT_INST;
 
@@ -174,8 +177,8 @@ public class DefaultQueryHandler implements QueryHandler {
     } else {
       resolved.set(new DefaultQueryParameter());
     }
-    select(QueryParameterReviser.class).stream().filter(r -> r.supports(query))
-        .sorted(Sortable::compare).forEach(resolved::apply);
+    parameterRevisers.stream().filter(r -> r.supports(query)).sorted(Sortable::compare)
+        .forEach(resolved::apply);
     return resolved.get();
   }
 

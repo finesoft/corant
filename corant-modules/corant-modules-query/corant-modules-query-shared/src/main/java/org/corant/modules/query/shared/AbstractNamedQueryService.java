@@ -191,8 +191,7 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
       private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
           return Retry.synchronousRetryer()
-              .retryStrategy(
-                  new MaxAttemptsRetryStrategy(parameter.getRetryTimes() + 1))
+              .retryStrategy(new MaxAttemptsRetryStrategy(parameter.getRetryTimes() + 1))
               .backoffStrategy(parameter.getRetryBackoffStrategy())
               .retryPrecondition(c -> Corant.current() != null && Corant.current().isRunning())
               .execute(() -> forward(queryName, parameter));
@@ -240,13 +239,13 @@ public abstract class AbstractNamedQueryService implements NamedQueryService {
         "%n[QueryService name]: %s; %n[QueryService parameters]: %s; %n[QueryService script]: %s.",
         name,
         getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(param, false, true),
-        String.join(";\n", script)));
+        String.join("\n", script)));
   }
 
   protected void log(String name, Object[] param, String... script) {
     logger.fine(() -> String.format(
         "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s.",
-        name, String.join(",", asStrings(param)), String.join(";\n", script)));
+        name, String.join(",", asStrings(param)), String.join("\n", script)));
   }
 
   protected <T> void parallelFetch(List<T> results, Querier parentQuerier) {

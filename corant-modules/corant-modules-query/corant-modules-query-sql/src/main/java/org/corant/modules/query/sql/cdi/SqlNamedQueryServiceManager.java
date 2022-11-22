@@ -35,6 +35,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -45,7 +46,7 @@ import org.corant.modules.query.sql.SqlNamedQuerier;
 import org.corant.modules.query.sql.SqlQueryConfiguration;
 import org.corant.modules.query.sql.SqlQueryConfiguration.Builder;
 import org.corant.modules.query.sql.SqlQueryExecutor;
-import org.corant.modules.query.sql.dialect.Dialect.DBMS;
+import org.corant.modules.query.sql.dialect.Dialects;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
@@ -187,7 +188,8 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           .dataSource(shouldNotNull(resolveDataSource(dataSourceName),
               "Can't build default sql named query, the data source named %s not found.",
               dataSourceName))
-          .dialect(dbms.instance()).fetchSize(manager.fetchSize).maxFieldSize(manager.maxFieldSize);
+          .dialect(Dialects.resolve(dbms)).fetchSize(manager.fetchSize)
+          .maxFieldSize(manager.maxFieldSize);
       // DON'T CONFIGURE MAX ROWS AND TIME OUT, USE QUERIER since 1.6.2
       /*
        * .maxRows(manager.maxRows).queryTimeout(manager.timeout.orElseGet(() -> { Duration d =

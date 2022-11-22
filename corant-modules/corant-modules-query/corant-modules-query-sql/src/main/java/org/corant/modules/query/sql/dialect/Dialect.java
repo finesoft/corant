@@ -15,15 +15,11 @@ package org.corant.modules.query.sql.dialect;
 
 import static org.corant.shared.util.Lists.immutableListOf;
 import static org.corant.shared.util.Maps.getMapBoolean;
-import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.corant.config.Configs;
 import org.corant.modules.datasource.shared.SqlStatements;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
-import org.corant.shared.util.Services;
 
 /**
  * corant-modules-query-sql
@@ -34,26 +30,10 @@ import org.corant.shared.util.Services;
 public interface Dialect {
 
   List<String> AGGREGATE_FUNCTIONS = immutableListOf("AVG", "COUNT", "MAX", "MIN", "SUM");
-  boolean USE_CUSTOM_DIALECT =
-      Configs.getValue("corant.query.sql.use-custom-dialect", Boolean.TYPE, false);
 
   String COUNT_FIELD_NAME = "total_";
   String COUNT_TEMP_TABLE_NAME = "tmp_count_";
   String USE_DEFAULT_COUNT_SQL_HINT_KEY = "_use_default_count_sql";
-
-  String H2_JDBC_URL_PREFIX = "jdbc:h2";
-  String HSQL_JDBC_URL_PREFIX = "jdbc:hsqldb";
-  String DB2_JDBC_URL_PREFIX = "jdbc:db2:";
-  String MARIADB_JDBC_DRIVER = "org.mariadb.jdbc.Driver";
-  String MARIADB_JDBC_URL_PREFIX = "jdbc:mariadb:";
-  String MYSQL_JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-  String MYSQL_GOOGLE_JDBC_DRIVER = "com.mysql.jdbc.GoogleDriver";
-  String MYSQL_LEGACY_JDBC_DRIVER = "com.mysql.jdbc.Driver";
-  String MYSQL_JDBC_URL_PREFIX = "jdbc:mysql:";
-  String ORACLE_JDBC_URL_PREFIX = "jdbc:oracle:";
-  String POSTGRESQL_JDBC_URL_PREFIX = "jdbc:postgresql:";
-  String SQLSERVER_JDBC_URL_PREFIX = "jdbc:sqlserver:";
-  String SYBASE_JDBC_URL_PREFIX = "jdbc:sybase:";
 
   default Collection<String> getAggregationFunctionNames() {
     return AGGREGATE_FUNCTIONS;
@@ -127,156 +107,4 @@ public interface Dialect {
    */
   boolean supportsLimit();
 
-  /**
-   * corant-modules-query-sql
-   *
-   * @author bingo 上午11:25:32
-   *
-   */
-  enum DBMS {
-
-    MYSQL() {
-      @Override
-      public Dialect defaultInstance() {
-        return MySQLDialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(MYSQL_JDBC_URL_PREFIX) || URL.startsWith(MYSQL_GOOGLE_JDBC_DRIVER)
-            || URL.startsWith(MYSQL_JDBC_DRIVER) || URL.startsWith(MYSQL_LEGACY_JDBC_DRIVER)
-            || URL.startsWith(MARIADB_JDBC_DRIVER) || URL.startsWith(MARIADB_JDBC_URL_PREFIX);
-      }
-    },
-    ORACLE() {
-      @Override
-      public Dialect defaultInstance() {
-        return OracleDialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(ORACLE_JDBC_URL_PREFIX);
-      }
-    },
-    DB2() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return DB2Dialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(DB2_JDBC_URL_PREFIX);
-      }
-    },
-    H2() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return H2Dialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(H2_JDBC_URL_PREFIX);
-      }
-    },
-    HSQL() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return HSQLDialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(HSQL_JDBC_URL_PREFIX);
-      }
-    },
-    POSTGRE() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return PostgreSQLDialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(POSTGRESQL_JDBC_URL_PREFIX);
-      }
-    },
-    SQLSERVER2005() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return SQLServer2005Dialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
-      }
-    },
-    SQLSERVER2008() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return SQLServer2008Dialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
-      }
-    },
-    SQLSERVER2012() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return SQLServer2012Dialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(SQLSERVER_JDBC_URL_PREFIX);
-      }
-    },
-    SYBASE() {
-
-      @Override
-      public Dialect defaultInstance() {
-        return SybaseDialect.INSTANCE;
-      }
-
-      @Override
-      boolean matchURL(String URL) {
-        return URL.startsWith(SYBASE_JDBC_URL_PREFIX);
-      }
-    };
-
-    public static DBMS url(String url) {
-      for (DBMS d : DBMS.values()) {
-        if (d.matchURL(url)) {
-          return d;
-        }
-      }
-      return null;
-    }
-
-    public abstract Dialect defaultInstance();
-
-    public Dialect instance() {
-      if (USE_CUSTOM_DIALECT) {
-        Optional<DialectResolver> resolver = Services.findPreferentially(DialectResolver.class);
-        if (resolver.isPresent()) {
-          return defaultObject(resolver.get().resolve(this), this::defaultInstance);
-        }
-      }
-      return defaultInstance();
-    }
-
-    abstract boolean matchURL(String URL);
-  }
 }

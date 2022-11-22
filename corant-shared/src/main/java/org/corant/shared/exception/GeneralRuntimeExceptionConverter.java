@@ -11,19 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.sql.dialect;
+package org.corant.shared.exception;
 
-import org.corant.modules.datasource.shared.DBMS;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
- * corant-modules-query-sql
+ * corant-shared
  *
- * @author bingo 上午11:51:33
+ * @author bingo 下午10:57:09
  *
  */
-public interface DialectResolver extends Sortable {
+public interface GeneralRuntimeExceptionConverter extends Sortable {
 
-  Dialect resolve(DBMS dbms);
+  GeneralRuntimeException convert(Throwable exception, Object... parameters);
+
+  boolean supports(Throwable exception);
 
 }

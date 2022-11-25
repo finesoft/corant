@@ -69,7 +69,7 @@ public @interface EsRange {
   boolean store() default false;
 
   /**
-   * Range type,if type is date range then can assign {@link #dateFormat()}
+   * Range type
    *
    * @return
    */

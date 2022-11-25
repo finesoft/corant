@@ -39,8 +39,6 @@ public @interface MessageContext {
    * <p>
    * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
    * be obtained from the system property or configuration.
-   *
-   * @see org.corant.context.qualifier.Qualifiers
    */
   String connectionFactoryId() default EMPTY;
 

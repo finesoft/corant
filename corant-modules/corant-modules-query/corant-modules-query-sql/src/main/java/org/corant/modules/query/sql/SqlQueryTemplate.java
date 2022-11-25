@@ -564,7 +564,7 @@ public class SqlQueryTemplate {
      *
      * @param throwables the exception types
      * @see Retry
-     * @see Retryer#thrower(BiConsumer)
+     * @see ThrowableClassifierRetryStrategy
      */
     @SuppressWarnings("unchecked")
     public StreamConfig stopOn(Class<? extends Throwable>... throwables) {

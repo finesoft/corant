@@ -101,7 +101,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
    * FIXME: Make XAResource {@link Serializable}, may use jms config ({@link #config}) to rebuild
    * the {@link #factory}, and the {@link #connection} and the {@link #session}}.
    *
-   * @see ARJUNA016037
+   * @see <a href="https://developer.jboss.org/thread/221033">ARJUNA016037</a>
    *
    * @author bingo 下午5:09:39
    *

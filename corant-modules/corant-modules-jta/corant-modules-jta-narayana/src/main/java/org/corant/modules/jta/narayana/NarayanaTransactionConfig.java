@@ -44,6 +44,9 @@ public class NarayanaTransactionConfig extends TransactionConfig {
   static final String DFLT_OBJECT_STORE_TYPE = ShadowNoFileLockStore.class.getName();
 
   @ConfigKeyItem
+  protected Optional<String> nodeIdentifier;
+
+  @ConfigKeyItem
   protected Optional<Duration> autoRecoveryBackoffPeriod;
 
   @ConfigKeyItem
@@ -80,6 +83,10 @@ public class NarayanaTransactionConfig extends TransactionConfig {
 
   public Map<String, String> getCoordinatorEnvironment() {
     return coordinatorEnvironment;
+  }
+
+  public Optional<String> getNodeIdentifier() {
+    return nodeIdentifier;
   }
 
   public boolean getObeCommunicationStoreDropTable() {

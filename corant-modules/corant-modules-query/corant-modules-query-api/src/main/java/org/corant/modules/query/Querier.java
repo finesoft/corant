@@ -52,7 +52,7 @@ public interface Querier {
    * @param result the single parent query result
    * @param fetchedResult the fetched result use to inject
    * @param fetchQuery the fetch query
-   * @see FetchQueryHandler#handleFetchedResult(Object, List, FetchQuery)
+   * @see FetchQueryHandler#handleFetchedResult(QueryParameter, Object, List, FetchQuery)
    */
   void handleFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
 
@@ -62,7 +62,7 @@ public interface Querier {
    * @param results the parent query results
    * @param fetchedResult the fetched result use to inject
    * @param fetchQuery the fetch query
-   * @see FetchQueryHandler#handleFetchedResults(List, List, FetchQuery)
+   * @see FetchQueryHandler#handleFetchedResults(QueryParameter, List, List, FetchQuery)
    */
   void handleFetchedResults(List<?> results, List<?> fetchedResult, FetchQuery fetchQuery);
 
@@ -71,7 +71,7 @@ public interface Querier {
    *
    * @param <T> the finally query result object type
    * @param result the result to be handled
-   * @see QueryHandler#handleResult(Object, Class, List, QueryParameter)
+   * @see QueryHandler#handleResult(Object, Query, QueryParameter)
    */
   <T> T handleResult(Object result);
 
@@ -79,16 +79,16 @@ public interface Querier {
    * Handle the result hints
    *
    * @param result the result to handle
-   * @see QueryHandler#handleResultHints(Object, Class, List, QueryParameter)
+   * @see QueryHandler#handleResultHints(Object, Class, Query, QueryParameter)
    */
   void handleResultHints(Object result);
 
   /**
    * Handle result list, handle hints and conversions.
    *
-   * @param <T> the finally query result object type
+   * @param <T> the final query result object type
    * @param results the results to be handled
-   * @see QueryHandler#handleResults(List, Class, List, QueryParameter)
+   * @see QueryHandler#handleResults(List, Query, QueryParameter)
    */
   <T> List<T> handleResults(List<?> results);
 

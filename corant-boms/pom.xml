@@ -68,7 +68,7 @@
     <version.hppc>0.9.1</version.hppc>
     <version.hsqldb>2.7.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
-    <version.jackson>2.14.0</version.jackson>
+    <version.jackson>2.14.1</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javafx>11.0.2</version.javafx>
@@ -105,8 +105,10 @@
     <version.keycloak>6.0.1</version.keycloak>
     <version.kotlin>1.3.72</version.kotlin>
     <version.kryo>5.1.1</version.kryo>
+    <version.liquibase-core>4.17.2</version.liquibase-core>
     <version.log4j2>2.19.0</version.log4j2>
     <version.lombok>1.18.16</version.lombok>
+    <version.metadata-extractor>2.18.0</version.metadata-extractor>
     <version.maven-bundle-plugin>5.1.2</version.maven-bundle-plugin>
     <version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
     <version.maven-deploy-plugin>2.8.2</version.maven-deploy-plugin>
@@ -135,7 +137,7 @@
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
-    <version.narayana>5.13.0.Final</version.narayana>
+    <version.narayana>5.13.1.Final</version.narayana>
     <version.ndarray>0.3.3</version.ndarray>
     <version.netty>4.1.52.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
@@ -169,7 +171,7 @@
     <version.smallrye-jwt-cdi-extension>3.3.1</version.smallrye-jwt-cdi-extension>
     <version.smallrye-metrics>3.0.4</version.smallrye-metrics>
     <version.smallrye-opentracing>2.0.1</version.smallrye-opentracing>
-    <version.snakeyaml>1.32</version.snakeyaml>
+    <version.snakeyaml>1.33</version.snakeyaml>
     <version.swagger>2.1.12</version.swagger>
     <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>
@@ -534,7 +536,7 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-webserver-jetty</artifactId>
         <version>${revision}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-websocket</artifactId>
@@ -971,6 +973,11 @@
         <groupId>com.esotericsoftware</groupId>
         <artifactId>kryo</artifactId>
         <version>${version.kryo}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.drewnoakes</groupId>
+        <artifactId>metadata-extractor</artifactId>
+        <version>${version.metadata-extractor}</version>
       </dependency>
 
       <!-- Apache integration -->
@@ -1477,6 +1484,11 @@
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-core</artifactId>
         <version>${version.flyway}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+        <version>${version.liquibase-core}</version>
       </dependency>
       <dependency>
         <groupId>org.elasticsearch.client</groupId>

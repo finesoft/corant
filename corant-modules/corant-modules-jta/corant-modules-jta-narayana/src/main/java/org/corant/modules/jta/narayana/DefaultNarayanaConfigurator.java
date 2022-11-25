@@ -17,8 +17,10 @@ import static org.corant.shared.util.Conversions.toInteger;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.corant.shared.exception.CorantRuntimeException;
 import com.arjuna.ats.arjuna.common.CoordinatorEnvironmentBean;
 import com.arjuna.ats.arjuna.common.CoreEnvironmentBean;
+import com.arjuna.ats.arjuna.common.CoreEnvironmentBeanException;
 import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.arjuna.common.RecoveryEnvironmentBean;
 import com.arjuna.ats.arjuna.common.Uid;
@@ -51,8 +53,13 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
 
   @Override
   public void configCoreEnvironment(CoreEnvironmentBean bean, NarayanaTransactionConfig config) {
-    // TODO Auto-generated method stub
-
+    if (config.getNodeIdentifier().isPresent()) {
+      try {
+        bean.setNodeIdentifier(config.getNodeIdentifier().get());
+      } catch (CoreEnvironmentBeanException e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
   }
 
   @Override

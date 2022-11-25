@@ -45,7 +45,7 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
         return defaultString(gre.getOriginalMessage()) + SPACE + asDefaultString(gre.getCode());
       }
     }
-    return defaultObject(exception.getLocalizedMessage(), () -> exception.getMessage());
+    return defaultObject(exception.getLocalizedMessage(), exception::getMessage);
   }
 
   /**

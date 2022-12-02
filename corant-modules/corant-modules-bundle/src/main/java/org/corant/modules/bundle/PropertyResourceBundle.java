@@ -13,6 +13,8 @@
  */
 package org.corant.modules.bundle;
 
+import static org.corant.shared.util.Functions.defaultBiPredicate;
+import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -31,7 +33,8 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.corant.shared.normal.Defaults;
@@ -67,12 +70,16 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
 
   private final String uri;
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public PropertyResourceBundle(Resource fo) {
+    this(fo, emptyBiPredicate(true));
+  }
+
+  public PropertyResourceBundle(Resource fo, BiPredicate<String, String> fs) {
     uri = fo instanceof URLResource ? ((URLResource) fo).getURI().toString() : fo.getName();
     baseBundleName = fo.getName();
     locale = PropertyResourceBundle.detectLocaleByName(baseBundleName);
     lastModifiedTime = Instant.now().toEpochMilli();
+    lookup = new ConcurrentHashMap<>();
     Properties properties = new Properties();
     try (InputStream is = fo.openInputStream();
         InputStreamReader isr = new InputStreamReader(is, Defaults.DFLT_CHARSET)) {
@@ -81,13 +88,27 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
       throw new NoSuchBundleException(e, "Can not load property resource bundle %s.", uri);
     }
     logger.fine(() -> String.format("Load property resource from %s.", fo.getLocation()));
-    lookup = new HashMap(properties);
+    final BiPredicate<String, String> ufs = defaultBiPredicate(fs, true);
+    properties.forEach((k, v) -> {
+      if (k != null) {
+        String key = k.toString();
+        String val = v == null ? null : v.toString();
+        if (ufs.test(key, val)) {
+          lookup.put(k.toString(), v.toString());
+        }
+      }
+    });
   }
 
-  public static List<PropertyResourceBundle> getBundles(String path, Predicate<Resource> fs) {
+  public static List<PropertyResourceBundle> getBundles(String path) {
+    return getBundles(path, emptyBiPredicate(true));
+  }
+
+  public static List<PropertyResourceBundle> getBundles(String path,
+      BiPredicate<String, String> fs) {
     try {
-      List<PropertyResourceBundle> list = Resources.from(path).filter(fs).parallel()
-          .map(PropertyResourceBundle::new).collect(Collectors.toList());
+      List<PropertyResourceBundle> list = Resources.from(path).parallel()
+          .map(r -> new PropertyResourceBundle(r, fs)).collect(Collectors.toList());
       list.sort(Sortable::compare);
       return list;
     } catch (IOException e) {
@@ -151,6 +172,11 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
       throw new NullPointerException();
     }
     return lookup.get(key);
+  }
+
+  @Override
+  protected void setParent(ResourceBundle parent) {
+    super.setParent(parent);
   }
 
   public static class ResourceBundleEnumeration implements Enumeration<String> {

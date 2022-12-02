@@ -14,6 +14,7 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Functions.emptyPredicate;
 import static org.corant.shared.util.Lists.linkedListOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -27,7 +28,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
-import org.corant.shared.util.Functions;
 import org.corant.shared.util.PathMatcher;
 import org.corant.shared.util.PathMatcher.GlobMatcher;
 import org.corant.shared.util.PathMatcher.RegexMatcher;
@@ -96,7 +96,7 @@ public class FileSystemResourceLoader implements ResourceLoader {
    */
   protected List<File> selectFiles(String path, Predicate<File> filter) {
     final File root = new File(path);
-    final Predicate<File> predicate = defaultObject(filter, Functions.emptyPredicate(true));
+    final Predicate<File> predicate = defaultObject(filter, emptyPredicate(true));
     List<File> files = new ArrayList<>();
     if (root.exists()) {
       LinkedList<File> candidates = linkedListOf(root);

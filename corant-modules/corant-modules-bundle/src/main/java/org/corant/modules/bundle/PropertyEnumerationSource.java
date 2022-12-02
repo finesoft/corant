@@ -14,6 +14,7 @@
 package org.corant.modules.bundle;
 
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
+ * corant-modules-bundle
+ *
  * @author bingo 上午10:30:07
  *
  */
@@ -121,7 +124,8 @@ public class PropertyEnumerationSource implements EnumerationSource {
             logger.fine(() -> "Clear property enumerations bundle holder for initializing.");
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(Strings::isNotBlank)
-                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, this::accept).stream())
+                .flatMap(
+                    pkg -> PropertyResourceBundle.getBundles(pkg, emptyBiPredicate(true)).stream())
                 .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
                   logger.fine(
                       () -> String.format("Found enumeration resource from %s.", res.getUri()));

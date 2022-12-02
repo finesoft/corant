@@ -20,13 +20,41 @@ import org.corant.shared.ubiquity.Sortable;
 /**
  * corant-modules-bundle
  *
+ * <p>
+ * Interface used to retrieve messages, support for the internationalization of such messages.
+ *
  * @author bingo 下午3:45:34
  *
  */
-public interface MessageSource extends Sortable {
+public interface MessageSource extends Sortable, AutoCloseable {
 
-  String getMessage(Locale locale, Object key, Object[] args) throws NoSuchBundleException;
+  @Override
+  default void close() throws Exception {}
 
-  String getMessage(Locale locale, Object key, Object[] args,
-      Function<Locale, String> defaultMessage);
+  String getMessage(Locale locale, Object key) throws NoSuchBundleException;
+
+  String getMessage(Locale locale, Object key, Function<Locale, String> defaultMessage);
+
+  default void refresh() {}
+
+  /**
+   * corant-modules-bundle
+   *
+   * @author bingo 下午7:46:22
+   *
+   */
+  class MessageSourceRefreshedEvent {
+
+    final MessageSource source;
+
+    public MessageSourceRefreshedEvent(MessageSource source) {
+      super();
+      this.source = source;
+    }
+
+    protected MessageSource getSource() {
+      return source;
+    }
+
+  }
 }

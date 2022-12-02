@@ -13,19 +13,18 @@
  */
 package org.corant.modules.bundle;
 
-import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.Map;
+import java.util.function.BiPredicate;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-bundle
+ * <p>
+ * Interface for the raw message sources filtering. Filtered messages will no longer be added to the
+ * {@link MessageSource}
  *
- * @author bingo 下午8:06:14
+ * @author bingo 上午11:39:28
  *
  */
-public interface MessageSourceAdjuster extends Sortable {
-
-  void adjust(Map<Locale, Map<String, MessageFormat>> sources);
-
+@FunctionalInterface
+public interface MessageSourceFilter extends BiPredicate<String, String>, Sortable {
 }

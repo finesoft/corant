@@ -13,33 +13,32 @@
  */
 package org.corant.modules.bundle;
 
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
+ * corant-modules-bundle
  *
  * @author bingo 上午12:26:12
  *
@@ -47,8 +46,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class PropertyMessageSource implements MessageSource {
 
-  protected final Map<Locale, Map<String, MessageFormat>> holder = new ConcurrentHashMap<>(128);
-  protected final List<PropertyResourceBundle> bundles = new ArrayList<>();
+  protected final Map<Locale, PropertyResourceBundle> bundles = new ConcurrentHashMap<>();
 
   protected volatile boolean initialized = false;
 
@@ -62,69 +60,71 @@ public class PropertyMessageSource implements MessageSource {
 
   @Inject
   @Any
-  protected Instance<MessageSourceAdjuster> adjusters;
+  protected Instance<MessageSourceFilter> filters;
 
-  public List<PropertyResourceBundle> getBundles() {
-    return unmodifiableList(this.bundles);
+  protected BiPredicate<String, String> filter = (o1, o2) -> true;
+
+  @Override
+  public synchronized void close() throws Exception {
+    initialized = false;
+    this.bundles.clear();
+    logger.fine(() -> "Close property message source, all bundles are cleared.");
+  }
+
+  public Map<Locale, PropertyResourceBundle> getBundles() {
+    return unmodifiableMap(this.bundles);
   }
 
   @Override
-  public String getMessage(Locale locale, Object key, Object[] args) throws NoSuchMessageException {
-    load();
+  public String getMessage(Locale locale, Object key) throws NoSuchMessageException {
     if (key == null) {
       throw new NoSuchMessageException("The message property key can't null");
     } else {
+      load();
       Locale useLocale = defaultObject(locale, Locale::getDefault);
-      Map<String, MessageFormat> mfMap = holder.get(useLocale);
-      if (mfMap == null) {
+      PropertyResourceBundle bundle = bundles.get(useLocale);
+      if (bundle == null || !bundle.containsKey(key.toString())) {
         throw new NoSuchMessageException("Can't find message for %s with locale %s.",
             key.toString(), useLocale.toString());
+      }
+      String message = bundle.getString(key.toString());
+      if (!filter.test(key.toString(), message)) {
+        throw new NoSuchMessageException("Can't find message for %s with locale %s.",
+            key.toString(), useLocale.toString());
+      }
+      return message;
+    }
+  }
+
+  @Override
+  public String getMessage(Locale locale, Object key, Function<Locale, String> dfltMsg) {
+    if (key == null) {
+      return dfltMsg.apply(locale);
+    } else {
+      load();
+      Locale useLocale = defaultObject(locale, Locale::getDefault);
+      PropertyResourceBundle bundle = bundles.get(useLocale);
+      if (bundle == null || !bundle.containsKey(key.toString())) {
+        return dfltMsg.apply(useLocale);
       } else {
-        MessageFormat mf = mfMap.get(key);
-        if (mf == null) {
-          throw new NoSuchMessageException("Can't find message for %s with locale %s.",
-              key.toString(), useLocale.toString());
-        } else {
-          return mf.format(args);
+        String message = bundle.getString(key.toString());
+        if (!filter.test(key.toString(), message)) {
+          message = null;
         }
+        return defaultObject(message, () -> dfltMsg.apply(useLocale));
       }
     }
   }
 
   @Override
-  public String getMessage(Locale locale, Object key, Object[] args,
-      Function<Locale, String> dfltMsg) {
-    load();
-    if (key == null) {
-      return dfltMsg.apply(locale);
-    } else {
-      Map<String, MessageFormat> mfMap = holder.get(locale);
-      if (mfMap == null) {
-        return dfltMsg.apply(locale);
-      } else {
-        MessageFormat mf = mfMap.get(key);
-        if (mf == null) {
-          return dfltMsg.apply(locale);
-        } else {
-          return mf.format(args);
-        }
-      }
-    }
-  }
-
-  public synchronized void reload() {
+  public synchronized void refresh() {
+    logger.info(() -> "Refresh property message bundles.");
     initialized = false;
     load();
   }
 
   protected boolean accept(Resource resource) {
     return true;
-  }
-
-  protected synchronized void clear() {
-    holder.forEach((k, v) -> v.clear());
-    holder.clear();
-    initialized = false;
   }
 
   protected boolean isInitialized() {
@@ -136,30 +136,26 @@ public class PropertyMessageSource implements MessageSource {
       synchronized (this) {
         if (!isInitialized()) {
           try {
-            clear();
-            logger.fine(() -> "Clear property message bundle holder for initializing.");
+            bundles.clear();
             Set<String> paths = setOf(split(bundleFilePaths, ","));
             paths.stream().filter(Strings::isNotBlank)
-                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, this::accept).stream())
+                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, filter).stream())
                 .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
-                  bundles.add(res);
+                  Locale locale = res.getLocale();
+                  PropertyResourceBundle bundle = bundles.get(locale);
+                  if (bundle == null) {
+                    bundles.put(locale, res);
+                  } else {
+                    res.setParent(bundle);
+                    bundle = res;
+                    bundles.put(locale, bundle);
+                  }
                   logger.fine(() -> String.format("Found message resource from %s.", res.getUri()));
-                  Map<String, MessageFormat> localeMap =
-                      res.dump().entrySet().stream().collect(Collectors.toMap(Entry::getKey,
-                          v -> new MessageFormat(v.getValue(), res.getLocale())));
-                  holder.computeIfAbsent(res.getLocale(), k -> new ConcurrentHashMap<>())
-                      .putAll(localeMap);
-                  logger.fine(() -> String.format("Found %s %s message keys from %s.",
-                      localeMap.size(), res.getLocale(), res.getUri()));
                 });
-            if (!adjusters.isUnsatisfied()) {
-              adjusters.stream().sorted(Sortable::compare).forEach(sa -> sa.adjust(holder));
-            }
+            logger.info(() -> "All property message bundles are loaded.");
           } finally {
             initialized = true;
-            logger.fine(() -> String.format("Found %s message keys from %s.",
-                holder.values().stream().flatMap(e -> e.values().stream()).count(),
-                bundleFilePaths));
+            CDI.current().getBeanManager().getEvent().fire(new MessageSourceRefreshedEvent(this));
           }
         }
       }
@@ -167,13 +163,19 @@ public class PropertyMessageSource implements MessageSource {
   }
 
   @PostConstruct
-  protected synchronized void onPostConstruct() {
-    load();
+  protected void onPostConstruct() {
+    if (!filters.isUnsatisfied()) {
+      filter = filters.stream().max(Sortable::compare).get();
+    }
   }
 
   @PreDestroy
-  protected synchronized void onPreDestroy() {
-    clear();
-    logger.fine(() -> "Clear property message bundle holder.");
+  protected void onPreDestroy() {
+    try {
+      close();
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
   }
+
 }

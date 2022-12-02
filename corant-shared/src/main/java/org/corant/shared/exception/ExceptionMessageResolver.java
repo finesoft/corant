@@ -185,7 +185,9 @@ public interface ExceptionMessageResolver extends Sortable {
       final Locale loc = defaultObject(locale, Locale::getDefault);
       final MessageFormat mf = (MessageFormat) getMapObject(source.get().get(loc), key);
       if (mf != null) {
-        return mf.format(parameters);
+        synchronized (mf) {
+          return mf.format(parameters);
+        }
       }
       return null;
     }

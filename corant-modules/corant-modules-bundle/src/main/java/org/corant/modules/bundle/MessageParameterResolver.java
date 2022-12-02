@@ -29,6 +29,10 @@ import org.corant.shared.util.Strings;
 /**
  * corant-modules-bundle
  *
+ * <p>
+ * Interface for resolving message parameters, mainly used to increase its readability and
+ * internationalization for some message parameters.
+ *
  * @author bingo 下午1:14:50
  *
  */
@@ -83,7 +87,7 @@ public interface MessageParameterResolver extends Sortable {
   }
 
   @ApplicationScoped
-  public static class ReadableTimeMessageParameterResolver implements MessageParameterResolver {
+  public static class ReadableMessageParameterResolver implements MessageParameterResolver {
 
     @Override
     public Object handle(Locale locale, Object obj) {

@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -58,6 +59,12 @@ public class Functions {
   @SuppressWarnings("rawtypes")
   public static final Predicate EMPTY_PREDICATE_FALSE = p -> false;
 
+  @SuppressWarnings("rawtypes")
+  public static final BiPredicate EMPTY_BIPREDICATE_TRUE = (a, b) -> true;
+
+  @SuppressWarnings("rawtypes")
+  public static final BiPredicate EMPTY_BIPREDICATE_FALSE = (a, b) -> false;
+
   public static <T> Callable<T> asCallable(Runnable runnable) {
     return () -> {
       shouldNotNull(runnable).run();
@@ -86,9 +93,23 @@ public class Functions {
     };
   }
 
+  public static <T, U> BiPredicate<T, U> defaultBiPredicate(BiPredicate<T, U> predicate,
+      boolean always) {
+    return predicate != null ? predicate : emptyBiPredicate(always);
+  }
+
+  public static <T> Predicate<T> defaultPredicate(Predicate<T> predicate, boolean always) {
+    return predicate != null ? predicate : emptyPredicate(always);
+  }
+
   @SuppressWarnings("unchecked")
   public static <A, B> BiConsumer<A, B> emptyBiConsumer() {
     return EMPTY_BICONSUMER;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T, U> BiPredicate<T, U> emptyBiPredicate(boolean bool) {
+    return bool ? EMPTY_BIPREDICATE_TRUE : EMPTY_BIPREDICATE_FALSE;
   }
 
   @SuppressWarnings("unchecked")

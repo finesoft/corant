@@ -21,12 +21,15 @@ import java.util.Locale;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import org.corant.modules.bundle.MessageResolver.MessageCategory;
-import org.corant.modules.bundle.MessageResolver.MessageParameter;
 import org.corant.shared.exception.ExceptionMessageResolver;
 import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
  * corant-modules-bundle
+ *
+ * <p>
+ * Default exception message resolver, use {@link MessageResolver} CDI bean to resolve the exception
+ * message.
  *
  * @author bingo 下午12:07:35
  *
@@ -39,54 +42,18 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
       GeneralRuntimeException gre = (GeneralRuntimeException) exception;
       Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
       if (inst.isResolvable()) {
-        return inst.get().getMessage(defaultObject(locale, Locale::getDefault),
-            new ExceptionMessageParameter(gre));
+        final MessageResolver resolver = inst.get();
+        // FIXME Do we need to append category prefix to message code keys?
+        final Object code = MessageCategory.ERR.genMessageCode(gre.getCode(), gre.getSubCode());
+        final Object[] parameters = gre.getParameters();
+        return resolver.getMessage(locale, code, parameters,
+            l1 -> resolver.getMessage(l1, MessageResolver.UNKNOW_ERR_CODE, parameters,
+                l2 -> MessageResolver.getNoFoundMessage(l2, code)));
       } else {
         return defaultString(gre.getOriginalMessage()) + SPACE + asDefaultString(gre.getCode());
       }
     }
     return defaultObject(exception.getLocalizedMessage(), exception::getMessage);
-  }
-
-  /**
-   * corant-modules-bundle
-   *
-   * @author bingo 下午2:35:56
-   *
-   */
-  static class ExceptionMessageParameter implements MessageParameter {
-
-    final GeneralRuntimeException ex;
-
-    protected ExceptionMessageParameter(GeneralRuntimeException ex) {
-      this.ex = ex;
-    }
-
-    @Override
-    public Object getCodes() {
-      return MessageCategory.ERR.genMessageCode(ex.getCode(), ex.getSubCode());
-    }
-
-    @Override
-    public String getDefaultMessage(Locale locale) {
-      Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
-      if (inst.isResolvable()) {
-        return inst.get().getMessage(locale, UNKNOW_ERR_CODE, new Object[] {getCodes()},
-            MessageParameter.super::getDefaultMessage);
-      }
-      return MessageParameter.super.getDefaultMessage(locale);
-    }
-
-    @Override
-    public MessageCategory getMessageCategory() {
-      return MessageCategory.ERR;
-    }
-
-    @Override
-    public Object[] getParameters() {
-      return ex.getParameters();
-    }
-
   }
 
 }

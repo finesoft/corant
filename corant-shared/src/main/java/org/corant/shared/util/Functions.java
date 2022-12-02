@@ -73,7 +73,7 @@ public class Functions {
   }
 
   public static <T> Callable<T> asCallable(Supplier<T> supplier) {
-    return () -> supplier.get();
+    return supplier::get;
   }
 
   public static <T> Supplier<T> asSupplier(Callable<T> callable) {

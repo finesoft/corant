@@ -14,6 +14,7 @@
 package org.corant.modules.bundle;
 
 import static java.util.Collections.unmodifiableMap;
+import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
@@ -62,7 +63,7 @@ public class PropertyMessageSource implements MessageSource {
   @Any
   protected Instance<MessageSourceFilter> filters;
 
-  protected BiPredicate<String, String> filter = (o1, o2) -> true;
+  protected BiPredicate<String, String> filter = emptyBiPredicate(true);
 
   @Override
   public synchronized void close() throws Exception {

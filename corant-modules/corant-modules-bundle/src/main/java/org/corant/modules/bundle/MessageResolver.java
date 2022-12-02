@@ -30,9 +30,9 @@ import org.corant.shared.normal.Names;
  */
 public interface MessageResolver extends AutoCloseable {
 
-  String UNKNOW_INF_CODE = "INF.message.unknow";
-  String UNKNOW_ERR_CODE = "ERR.message.unknow";
-  String UNKNOW_DES_CODE = "DES.message.unknow";
+  String UNKNOWN_INF_CODE = "INF.message.unknown";
+  String UNKNOWN_ERR_CODE = "ERR.message.unknown";
+  String UNKNOWN_DES_CODE = "DES.message.unknown";
 
   static String getNoFoundMessage(Locale locale, Object codes) {
     return String.format("Can't find any message for %s.", codes);
@@ -44,7 +44,7 @@ public interface MessageResolver extends AutoCloseable {
    * @param locale the locale in which to do the lookup
    * @param code code the message code to lookup
    * @param params an array of context arguments that will be used to generate a message.
-   * @return the resolved message if the lookup was successful otherwise retrun null
+   * @return the resolved message if the lookup was successful otherwise return null
    */
   default String getMessage(Locale locale, Object code, Object... params) {
     if (code == null) {

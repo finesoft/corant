@@ -40,10 +40,10 @@ public interface MessageParameterResolver extends Sortable {
 
   Object handle(Locale locale, Object obj);
 
-  boolean supprots(Object obj);
+  boolean supports(Object obj);
 
   @ApplicationScoped
-  public static class EnumMessageParameterResolver implements MessageParameterResolver {
+  class EnumMessageParameterResolver implements MessageParameterResolver {
 
     @Inject
     @Any
@@ -62,14 +62,14 @@ public interface MessageParameterResolver extends Sortable {
     }
 
     @Override
-    public boolean supprots(Object obj) {
+    public boolean supports(Object obj) {
       return obj instanceof Enum;
     }
 
   }
 
   @ApplicationScoped
-  public static class InstantMessageParameterResolver implements MessageParameterResolver {
+  class InstantMessageParameterResolver implements MessageParameterResolver {
 
     static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
@@ -80,14 +80,14 @@ public interface MessageParameterResolver extends Sortable {
     }
 
     @Override
-    public boolean supprots(Object obj) {
+    public boolean supports(Object obj) {
       return obj instanceof Instant;
     }
 
   }
 
   @ApplicationScoped
-  public static class ReadableMessageParameterResolver implements MessageParameterResolver {
+  class ReadableMessageParameterResolver implements MessageParameterResolver {
 
     @Override
     public Object handle(Locale locale, Object obj) {
@@ -95,14 +95,14 @@ public interface MessageParameterResolver extends Sortable {
     }
 
     @Override
-    public boolean supprots(Object obj) {
+    public boolean supports(Object obj) {
       return obj instanceof Readable;
     }
 
   }
 
   @ApplicationScoped
-  public static class ZonedDateTimeMessageParameterResolver implements MessageParameterResolver {
+  class ZonedDateTimeMessageParameterResolver implements MessageParameterResolver {
 
     static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withLocale(Locale.getDefault()).withZone(ZoneId.systemDefault());
@@ -113,7 +113,7 @@ public interface MessageParameterResolver extends Sortable {
     }
 
     @Override
-    public boolean supprots(Object obj) {
+    public boolean supports(Object obj) {
       return obj instanceof ZonedDateTime;
     }
 

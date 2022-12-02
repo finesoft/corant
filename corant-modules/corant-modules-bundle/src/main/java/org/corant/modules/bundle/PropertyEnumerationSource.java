@@ -17,7 +17,7 @@ import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -59,11 +59,10 @@ public class PropertyEnumerationSource implements EnumerationSource {
       defaultValue = "META-INF/**Enums_*.properties")
   protected String bundleFilePaths;
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<Class<Enum>> getAllEnumClass() {
-    return new ArrayList(holder.values().stream().flatMap(e -> e.classLiteral.keySet().stream())
-        .collect(Collectors.toSet()));
+    return holder.values().stream().flatMap(e -> e.classLiteral.keySet().stream())
+        .collect(Collectors.toUnmodifiableList());
   }
 
   @Override
@@ -136,7 +135,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
                     int i = k.lastIndexOf('.');
                     String enumClsName = k.substring(0, i);
                     String enumItemKey = null;
-                    Class enumCls = null;
+                    Class enumCls;
                     try {
                       enumCls = Class.forName(enumClsName);
                       enumItemKey = k.substring(i + 1);
@@ -157,7 +156,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
           } finally {
             initialized = true;
             logger.fine(() -> String.format("Found %s enumeration class literals from %s.",
-                holder.values().stream().flatMap(e -> e.classLiteral.keySet().stream()).count(),
+                holder.values().stream().mapToLong(e -> e.classLiteral.keySet().size()).sum(),
                 bundleFilePaths));
           }
         }
@@ -194,8 +193,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
     public void putEnum(Enum e, String literal) {
       Class declaringClass = e.getDeclaringClass();
       if (!enumLiterals.containsKey(declaringClass)) {
-        enumLiterals.put(declaringClass,
-            new TreeMap<Enum, String>((Enum o1, Enum o2) -> o1.ordinal() - o2.ordinal()));
+        enumLiterals.put(declaringClass, new TreeMap<>(Comparator.comparingInt(Enum::ordinal)));
       }
       Map<Enum, String> map = enumLiterals.get(declaringClass);
       if (map.put(e, literal) != null) {

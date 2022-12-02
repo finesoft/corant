@@ -60,7 +60,7 @@ public class FileSystemResourceLoader implements ResourceLoader {
    * case-insensitive, support Glob and Regex file name expression search, if it is not a path
    * expression, return all files under the specified file or directory.
    *
-   * @param location
+   * @param location the file path or path expression
    *
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    * @see GlobMatcher

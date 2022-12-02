@@ -47,7 +47,7 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
         final Object code = MessageCategory.ERR.genMessageCode(gre.getCode(), gre.getSubCode());
         final Object[] parameters = gre.getParameters();
         return resolver.getMessage(locale, code, parameters,
-            l1 -> resolver.getMessage(l1, MessageResolver.UNKNOW_ERR_CODE, parameters,
+            l1 -> resolver.getMessage(l1, MessageResolver.UNKNOWN_ERR_CODE, parameters,
                 l2 -> MessageResolver.getNoFoundMessage(l2, code)));
       } else {
         return defaultString(gre.getOriginalMessage()) + SPACE + asDefaultString(gre.getCode());

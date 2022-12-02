@@ -28,9 +28,9 @@ import java.util.Locale;
  */
 public class DefaultMessageInterpreter implements MessageInterpreter {
 
-  protected MessageFormat fmt;
-  protected String pattern;
-  protected boolean noFmt;
+  protected final MessageFormat fmt;
+  protected final String pattern;
+  protected final boolean noFmt;
 
   public DefaultMessageInterpreter(String pattern, Locale locale) {
     this.fmt = new MessageFormat(pattern, locale);

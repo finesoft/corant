@@ -94,7 +94,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
         String key = k.toString();
         String val = v == null ? null : v.toString();
         if (ufs.test(key, val)) {
-          lookup.put(k.toString(), v.toString());
+          lookup.put(key, val);
         }
       }
     });

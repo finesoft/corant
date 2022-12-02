@@ -187,7 +187,7 @@ public class DefaultMessageResolver implements MessageResolver {
   protected Object resolveParameter(Locale locale, Object obj) {
     MutableObject<Object> mo = new MutableObject<>(obj);
     if (!parameterResolver.isUnsatisfied()) {
-      parameterResolver.stream().filter(h -> h.supprots(obj)).sorted(Sortable::compare)
+      parameterResolver.stream().filter(h -> h.supports(obj)).sorted(Sortable::compare)
           .forEach(h -> mo.apply(o -> h.handle(locale, o)));
     }
     return mo.get();

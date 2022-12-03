@@ -36,22 +36,21 @@ public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, B
   public TemporalBsonDateTimeConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public TemporalBsonDateTimeConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public TemporalBsonDateTimeConverter(BsonDateTime defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public TemporalBsonDateTimeConverter(BsonDateTime defaultValue, boolean throwException) {
     super(defaultValue, throwException);

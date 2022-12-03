@@ -44,7 +44,7 @@ public class Throwables {
 
   public static Stream<Throwable> causes(final Throwable throwable) {
     return streamOf(() -> new Iterator<Throwable>() {
-      volatile Throwable cause = throwable;
+      Throwable cause = throwable;
 
       @Override
       public boolean hasNext() {

@@ -400,7 +400,7 @@ public class CorantConfigConversion implements Serializable {
     boolean useKvs = true;
     for (String val : values) {
       int s = val.indexOf('=');
-      if (s > 0 && s < val.length()) {
+      if (s > 0 && s < (val.length() - 1)) {
         String kvKey = strip(val.substring(0, s));
         String kvVal = strip(val.substring(s + 1));
         if (isNotBlank(kvKey)) {

@@ -110,7 +110,7 @@ public class Compressors {
   }
 
   public static void gzip(InputStream is, OutputStream os) throws IOException {
-    try (GZIPOutputStream gos = new GZIPOutputStream(os);) {
+    try (GZIPOutputStream gos = new GZIPOutputStream(os)) {
       copy(is, gos);
     }
   }

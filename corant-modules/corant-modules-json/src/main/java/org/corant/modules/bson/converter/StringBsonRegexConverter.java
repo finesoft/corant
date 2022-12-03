@@ -31,27 +31,26 @@ public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegu
   public static final String REGEX_KEY = "regex.option";
 
   /**
-   *
+   * @see AbstractConverter#AbstractConverter()
    */
   public StringBsonRegexConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringBsonRegexConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringBsonRegexConverter(BsonRegularExpression defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringBsonRegexConverter(BsonRegularExpression defaultValue, boolean throwException) {
     super(defaultValue, throwException);

@@ -121,7 +121,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
                 .map(Class::getName).collect(Collectors.toList()));
           }));
     } else {
-      logger.info(() -> String.format("The jaxrs application not found!"));
+      logger.info(() -> "The jaxrs application not found!");
     }
   }
 

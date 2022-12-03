@@ -279,7 +279,7 @@ public interface QueryParameter extends Serializable {
     public StreamQueryParameter(StreamQueryParameter other) {
       super(other);
       enhancer(other.enhancer).retryBackoffStrategy(other.retryBackoffStrategy)
-          .retryTimes(other.retryTimes).terminater(other.terminater);
+          .retryTimes(other.retryTimes).terminater(other.terminater).autoClose(other.autoClose);
     }
 
     public StreamQueryParameter autoClose(boolean autoClose) {

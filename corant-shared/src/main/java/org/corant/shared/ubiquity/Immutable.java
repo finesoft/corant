@@ -286,7 +286,7 @@ public interface Immutable {
 
     public ImmutableSetBuilder<E> removeAll(final ImmutableListBuilder<? extends E> other) {
       if (other != null) {
-        set.removeAll(other.list);
+        other.list.forEach(set::remove);
       }
       return this;
     }

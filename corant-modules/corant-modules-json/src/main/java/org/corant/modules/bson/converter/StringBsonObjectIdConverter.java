@@ -28,27 +28,26 @@ import org.corant.shared.conversion.converter.AbstractConverter;
 public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonObjectId> {
 
   /**
-   *
+   * @see AbstractConverter#AbstractConverter()
    */
   public StringBsonObjectIdConverter() {}
 
   /**
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(boolean)
    */
   public StringBsonObjectIdConverter(boolean throwException) {
     super(throwException);
   }
 
   /**
-   * @param defaultValue
+   * @see AbstractConverter#AbstractConverter(Object)
    */
   public StringBsonObjectIdConverter(BsonObjectId defaultValue) {
     super(defaultValue);
   }
 
   /**
-   * @param defaultValue
-   * @param throwException
+   * @see AbstractConverter#AbstractConverter(Object,boolean)
    */
   public StringBsonObjectIdConverter(BsonObjectId defaultValue, boolean throwException) {
     super(defaultValue, throwException);

@@ -14,7 +14,6 @@
 package bin;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -189,7 +188,7 @@ public class JarLauncher {
     }
   }
 
-  String getChecksum(JarFile jar, JarEntry each) throws FileNotFoundException, IOException {
+  String getChecksum(JarFile jar, JarEntry each) throws IOException {
     CRC32 crc32 = new CRC32();
     try (InputStream is = jar.getInputStream(each)) {
       byte[] buffer = new byte[8192];

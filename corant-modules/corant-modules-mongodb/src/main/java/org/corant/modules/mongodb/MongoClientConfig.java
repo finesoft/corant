@@ -313,9 +313,6 @@ public class MongoClientConfig implements NamedObject {
       if (boolean.class.equals(type)) {
         type = Boolean.class;
       }
-      if (String.class.equals(type)) {
-        type = String.class;
-      }
       Object value = toObject(options.get(entry.getKey()), type);
       if (value == null) {
         continue;

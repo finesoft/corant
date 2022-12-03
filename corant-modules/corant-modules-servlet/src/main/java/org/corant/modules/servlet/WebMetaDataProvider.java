@@ -30,7 +30,7 @@ public interface WebMetaDataProvider {
 
   static boolean isNeedDfltServlet(Stream<WebFilterMetaData> filters,
       Stream<WebServletMetaData> servlets) {
-    return filters.count() > 0 && servlets.count() == 0;
+    return filters.findAny().isPresent() && servlets.findAny().isEmpty();
   }
 
   default Stream<WebFilterMetaData> filterMetaDataStream() {

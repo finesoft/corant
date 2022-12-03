@@ -27,9 +27,8 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-import org.corant.modules.bundle.GlobalMessageCodes;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
@@ -97,7 +96,7 @@ public class Jsons {
    * Convert an object to given target class object.
    *
    * @param <T> the target type
-   * @param object the object to be convert
+   * @param object the object to be converted
    * @param clazz the target class
    * @return the converted object
    *
@@ -118,7 +117,7 @@ public class Jsons {
    * </pre>
    *
    * @param <T> the target type
-   * @param object the object to be convert
+   * @param object the object to be converted
    * @param typeLiteral the target type literal
    * @return the converted object
    *
@@ -140,7 +139,7 @@ public class Jsons {
    * </pre>
    *
    * @param <T> the target type
-   * @param object the object to be convert
+   * @param object the object to be converted
    * @param targetTypeRef the target type reference
    * @return the converted object
    *
@@ -164,6 +163,7 @@ public class Jsons {
    *
    * @see TokenBuffer
    */
+  @Experimental
   @SuppressWarnings("unchecked")
   public static <T> T copy(Object pojo, ObjectMapper objectMapper, TypeLiteral<T> type) {
     if (pojo == null) {
@@ -197,6 +197,7 @@ public class Jsons {
    *
    * @see TokenBuffer
    */
+  @Experimental
   @SuppressWarnings("unchecked")
   public static <T> T copy(Object pojo, ObjectMapper objectMapper, TypeReference<T> type) {
     if (pojo == null) {
@@ -229,6 +230,7 @@ public class Jsons {
    *
    * @see TokenBuffer
    */
+  @Experimental
   public static <T> T copy(Object pojo, TypeLiteral<T> type) {
     return copy(pojo, objectMapper, type);
   }
@@ -262,6 +264,7 @@ public class Jsons {
    *
    * @see TokenBuffer
    */
+  @Experimental
   @SuppressWarnings("unchecked")
   public static <T> T copy(T pojo) {
     if (pojo == null) {
@@ -302,9 +305,9 @@ public class Jsons {
   }
 
   /**
-   * Returns an typed object from given JSON bytes and class
+   * Returns a typed object from given JSON bytes and class
    *
-   * @param <T> the the expected object type
+   * @param <T> the expected object type
    * @param jsonBytes the JSON serialized bytes of the object
    * @param cls the expected object class
    */
@@ -321,9 +324,9 @@ public class Jsons {
   }
 
   /**
-   * Returns an typed object from given JSON bytes and type literal
+   * Returns a typed object from given JSON bytes and type literal
    *
-   * @param <T> the the expected object type
+   * @param <T> the expected object type
    * @param jsonBytes the JSON serialized bytes of the object
    * @param type the expected object type
    */
@@ -341,9 +344,9 @@ public class Jsons {
   }
 
   /**
-   * Returns an typed object from given JSON bytes and type reference
+   * Returns a typed object from given JSON bytes and type reference
    *
-   * @param <T> the the expected object type
+   * @param <T> the expected object type
    * @param jsonBytes the JSON serialized bytes of the object
    * @param type the expected object type
    */
@@ -369,9 +372,9 @@ public class Jsons {
     if (jsonValue instanceof JsonNumber) {
       JsonNumber jcv = (JsonNumber) jsonValue;
       if (jcv.isIntegral()) {
-        return Long.valueOf(jcv.longValue());
+        return jcv.longValue();
       } else {
-        return Double.valueOf(jcv.doubleValue());
+        return jcv.doubleValue();
       }
     } else if (jsonValue instanceof JsonArray) {
       JsonArray ja = (JsonArray) jsonValue;
@@ -383,9 +386,7 @@ public class Jsons {
     } else if (jsonValue instanceof JsonObject) {
       JsonObject jo = (JsonObject) jsonValue;
       Map<String, Object> map = new LinkedHashMap<>(jo.size());
-      jo.forEach((k, v) -> {
-        map.put(k, fromJsonValue(v));
-      });
+      jo.forEach((k, v) -> map.put(k, fromJsonValue(v)));
       return map;
     } else if (jsonValue != null) {
       return ((JsonString) jsonValue).getString();
@@ -411,14 +412,14 @@ public class Jsons {
       return objectMapper.readValue(jsonString,
           objectMapper.getTypeFactory().constructParametricType(Map.class, keyCls, valueCls));
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
+      throw new CorantRuntimeException(e, "Can't parse json string");
     }
   }
 
   /**
    * Returns a Map object from given JSON string
    *
-   * @param jsonString the JSON string to be convert
+   * @param jsonString the JSON string to be converted
    */
   public static <K, V> Map<K, V> fromString(String jsonString) {
     try {
@@ -429,7 +430,7 @@ public class Jsons {
   }
 
   /**
-   * Returns an typed object from given JSON string and class
+   * Returns a typed object from given JSON string and class
    *
    * @param jsonString the JSON serialized string of the object
    * @param clazz the expected object class
@@ -439,7 +440,7 @@ public class Jsons {
       try {
         return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {
-        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString,
+        throw new CorantRuntimeException(e, "Unable to parse JSON string as object of type %s",
             clazz.getName());
       }
     }
@@ -449,7 +450,7 @@ public class Jsons {
   /**
    * Returns an typed object from given JSON string and type literal.
    *
-   * @param jsonString the JSON string to be deserialize
+   * @param jsonString the JSON string to be deserialized
    * @param targetTypeLiteral the target type literal
    */
   public static <T> T fromString(String jsonString, TypeLiteral<T> targetTypeLiteral) {
@@ -460,14 +461,15 @@ public class Jsons {
       return objectMapper.readValue(jsonString,
           objectMapper.constructType(targetTypeLiteral.getType()));
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
+      throw new CorantRuntimeException(e, "Unable to parse JSON string as object of type %s",
+          targetTypeLiteral);
     }
   }
 
   /**
-   * Returns an typed object from given JSON string and type reference.
+   * Returns a typed object from given JSON string and type reference.
    *
-   * @param jsonString the JSON string to be deserialize
+   * @param jsonString the JSON string to be deserialized
    * @param targetTypeRef the target type reference
    */
   public static <T> T fromString(String jsonString, TypeReference<T> targetTypeRef) {
@@ -477,7 +479,8 @@ public class Jsons {
     try {
       return objectMapper.readValue(jsonString, targetTypeRef);
     } catch (IOException e) {
-      throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, jsonString);
+      throw new CorantRuntimeException(e, "Unable to parse JSON string as object of type %s",
+          targetTypeRef.getType());
     }
   }
 
@@ -485,7 +488,7 @@ public class Jsons {
    * Returns serialized JSON byte array from given object or empty byte array if the given object is
    * null.
    *
-   * @param obj
+   * @param obj the object to be serialized
    */
   public static byte[] toBytes(Object obj) {
     if (obj == null) {
@@ -523,17 +526,17 @@ public class Jsons {
           return objectMapper.writeValueAsString(obj);
         }
       } catch (JsonProcessingException e) {
-        throw new GeneralRuntimeException(e, GlobalMessageCodes.ERR_OBJ_SEL, obj);
+        throw new CorantRuntimeException(e, "Unable to parse object into json string.");
       }
     }
     return null;
   }
 
   /**
-   * Returns an typed object from given JSON bytes and class, when a exception occurs, it returns
+   * Returns a typed object from given JSON bytes and class, when an exception occurs, it returns
    * null.
    *
-   * @param <T> the the expected object type
+   * @param <T> the expected object type
    * @param jsonBytes the JSON serialized bytes of the object
    * @param cls the expected object class
    */
@@ -550,7 +553,7 @@ public class Jsons {
   }
 
   /**
-   * Returns an typed object from given JSON string and class, when a exception occurs, it returns
+   * Returns a typed object from given JSON string and class, when an exception occurs, it returns
    * null.
    *
    * @param jsonString the JSON serialized string of the object

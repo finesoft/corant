@@ -168,7 +168,7 @@ public interface BackoffStrategy {
     }
 
     @Override
-    public long computeBackoffMillis(int attempts) {
+    public synchronized long computeBackoffMillis(int attempts) {
       sleep = min(maxDuration, Randoms.randomLong(baseDuration, sleep * 3));
       return sleep;
     }

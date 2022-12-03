@@ -58,7 +58,7 @@ public interface Value extends Serializable {
 
     private final int hash;
 
-    protected SimpleValueMap(Map<String, Object> contents) {
+    private SimpleValueMap(Map<String, Object> contents) {
       this.contents = Collections.unmodifiableMap(newHashMap(contents));
       hash = 31 + (contents == null ? 0 : contents.hashCode());
     }
@@ -120,7 +120,7 @@ public interface Value extends Serializable {
 
     final Map<String, Object> contents = new HashMap<>();
 
-    protected SimpleValueMapBuilder() {}
+    public SimpleValueMapBuilder() {}
 
     public SimpleValueMapBuilder bool(String key, Boolean value) {
       return with(key, value);

@@ -165,7 +165,7 @@ public class Bsons {
     try (
         ByteBufferBsonInput input = new ByteBufferBsonInput(new ByteBufNIO(
             ByteBuffer.wrap(bsonBytes, 0, bsonBytes.length).order(ByteOrder.LITTLE_ENDIAN)));
-        BsonBinaryReader bsonReader = new BsonBinaryReader(input);) {
+        BsonBinaryReader bsonReader = new BsonBinaryReader(input)) {
       return new BsonDocumentCodec(BSON_DOCUMENT_REGISTRY).decode(bsonReader,
           DecoderContext.builder().build());
     }
@@ -208,7 +208,7 @@ public class Bsons {
       return Bytes.EMPTY_ARRAY;
     }
     try (BasicOutputBuffer buffer = new BasicOutputBuffer();
-        BsonBinaryWriter writer = new BsonBinaryWriter(buffer);) {
+        BsonBinaryWriter writer = new BsonBinaryWriter(buffer)) {
       Document doc =
           bsonObject instanceof Document ? (Document) bsonObject : new Document(bsonObject);
       codec.encode(writer, doc, encoderContext);

@@ -246,7 +246,7 @@ public class HttpStreamOutput {
     final String boundary = Randoms.randomNumbersAndUcLetters(32) + Defaults.CORANT_SIGN;
     headers.put(HEADER_NAME_CONTENT_TYPE, format(MULTIPART_BYTE_RANGES_FMT, boundary));
     if (additionalHeaders != null) {
-      headers.putAll(headers);
+      headers.putAll(additionalHeaders);
     }
     return new HttpStreamOutputResult(STATUS_OF_PARTIAL_CONTENT, headers,
         uncheckedBiConsumer((is, os) -> {
@@ -271,7 +271,7 @@ public class HttpStreamOutput {
     headers.put(HEADER_NAME_ACCEPT_RANGES, HEADER_VALUE_ACCEPT_RANGES);
     headers.put(HEADER_NAME_CONTENT_RANGE, format(NOT_SATISFIABLE_FMT, size));
     if (additionalHeaders != null) {
-      headers.putAll(headers);
+      headers.putAll(additionalHeaders);
     }
     return new HttpStreamOutputResult(headers, STATUS_OF_REQUESTED_RANGE_NOT_SATISFIABLE);
   }
@@ -285,7 +285,7 @@ public class HttpStreamOutput {
     logger.fine(() -> format("Handle range %s output result; stream offset:%s limit: %s, total: %s",
         range, range.start(), range.size(), size));
     if (additionalHeaders != null) {
-      headers.putAll(headers);
+      headers.putAll(additionalHeaders);
     }
     return new HttpStreamOutputResult(STATUS_OF_PARTIAL_CONTENT, headers, uncheckedBiConsumer(
         (is, os) -> copy(new RangedInputStream(is, range.start(), range.size()), os)));

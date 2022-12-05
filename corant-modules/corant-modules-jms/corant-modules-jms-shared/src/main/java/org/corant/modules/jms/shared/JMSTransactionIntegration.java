@@ -68,7 +68,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
     List<XAResource> resources = new ArrayList<>();
     Instance<AbstractJMSExtension> extensions = CDI.current().select(AbstractJMSExtension.class);
     if (!extensions.isUnsatisfied()) {
-      extensions.forEach(et -> et.getConfigManager().getAllWithNames().forEach((k, v) -> {
+      extensions.forEach(et -> et.getConfigManager().getAllWithNames().values().forEach(v -> {
         if (v.isXa() && v.isEnable()) {
           resolveRecoveryXAResource(v).ifPresent(resources::add);
         }

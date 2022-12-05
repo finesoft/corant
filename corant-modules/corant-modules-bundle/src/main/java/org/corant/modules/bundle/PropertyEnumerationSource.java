@@ -32,7 +32,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.resource.Resource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -94,10 +93,6 @@ public class PropertyEnumerationSource implements EnumerationSource {
   public synchronized void reload() {
     initialized = false;
     load();
-  }
-
-  protected boolean accept(Resource resource) {
-    return true;
   }
 
   protected synchronized void clear() {

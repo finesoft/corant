@@ -249,7 +249,7 @@ public class Conversion {
       if (value.getClass().isArray()) {
         Object[] array = wrapArray(value);
         size = array.length;
-        it = convert(iterableOf(wrapArray(array)), targetItemClass, hints);
+        it = convert(iterableOf(array), targetItemClass, hints);
       } else if (supportsSingleton) {
         it = convert(iterableOf(value), targetItemClass, hints);
       } else {

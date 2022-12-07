@@ -139,10 +139,7 @@ public interface Tuple {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
+      if ((obj == null) || (getClass() != obj.getClass())) {
         return false;
       }
       AbstractSeries other = (AbstractSeries) obj;
@@ -455,7 +452,7 @@ public interface Tuple {
   class Quartet<A, B, C, D> extends Triplet<A, B, C> {
 
     public Quartet(A a, B b, C c, D d) {
-      super(new Object[] {a, b, c, d});
+      this(new Object[] {a, b, c, d});
     }
 
     protected Quartet(Object... objects) {
@@ -479,7 +476,7 @@ public interface Tuple {
   class Quintet<A, B, C, D, E> extends Quartet<A, B, C, D> {
 
     public Quintet(A a, B b, C c, D d, E e) {
-      super(new Object[] {a, b, c, d, e});
+      this(new Object[] {a, b, c, d, e});
     }
 
     protected Quintet(Object... objects) {
@@ -557,10 +554,7 @@ public interface Tuple {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
+      if ((obj == null) || (getClass() != obj.getClass())) {
         return false;
       }
       Range other = (Range) obj;
@@ -657,7 +651,7 @@ public interface Tuple {
   class Septet<A, B, C, D, E, F, G> extends Sextet<A, B, C, D, E, F> {
 
     public Septet(A a, B b, C c, D d, E e, F f, G g) {
-      super(new Object[] {a, b, c, d, e, f, g});
+      this(new Object[] {a, b, c, d, e, f, g});
     }
 
     protected Septet(Object... objects) {
@@ -681,7 +675,7 @@ public interface Tuple {
   class Sextet<A, B, C, D, E, F> extends Quintet<A, B, C, D, E> {
 
     public Sextet(A a, B b, C c, D d, E e, F f) {
-      super(new Object[] {a, b, c, d, e, f});
+      this(new Object[] {a, b, c, d, e, f});
     }
 
     protected Sextet(Object... objects) {

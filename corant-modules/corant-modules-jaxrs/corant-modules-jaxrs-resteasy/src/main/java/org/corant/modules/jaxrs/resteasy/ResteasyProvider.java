@@ -219,7 +219,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
       String pattern = applicationPath.endsWith("/") ? applicationPath.concat("*")
           : applicationPath.concat("/*");
       String diapatchName = dispatcherClass.getSimpleName();
-      String appName = getUserClass(applicationClass.getClass()).getSimpleName();
+      String appName = applicationClass.getSimpleName();
       WebInitParamMetaData[] ipmds =
           {new WebInitParamMetaData(ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX,
               applicationPath, null)};

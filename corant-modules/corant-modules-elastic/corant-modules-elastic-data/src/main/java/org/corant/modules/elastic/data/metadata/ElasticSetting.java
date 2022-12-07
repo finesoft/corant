@@ -14,7 +14,7 @@
 package org.corant.modules.elastic.data.metadata;
 
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,8 +45,8 @@ public class ElasticSetting {
     if (golbalSetting != null) {
       map.putAll(golbalSetting);
     }
-    int numberOfShards = defaultObject(docAnn.number_of_shards(), DFLT_NUM_OF_SHARDS);
-    int numberOfReplicas = defaultObject(docAnn.number_of_replicas(), DFLT_NUM_OF_REPS);
+    int numberOfShards = max(docAnn.number_of_shards(), DFLT_NUM_OF_SHARDS);
+    int numberOfReplicas = max(docAnn.number_of_replicas(), DFLT_NUM_OF_REPS);
     XContentHelper.update(map,
         mapOf("index",
             mapOf("number_of_shards", numberOfShards <= 0 ? DFLT_NUM_OF_SHARDS : numberOfShards,

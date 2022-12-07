@@ -42,7 +42,7 @@ public interface MetaDataPropertyResolver extends Sortable {
         resolver = inst.stream().sorted(Sortable::compare).findFirst().get();
       }
     } catch (Exception ex) {
-      resolver = null;
+      // ignore
     }
     if (resolver != null) {
       return resolver.resolve(property, clazz);

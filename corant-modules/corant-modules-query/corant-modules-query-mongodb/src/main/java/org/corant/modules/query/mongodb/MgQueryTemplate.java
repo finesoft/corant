@@ -145,7 +145,9 @@ public class MgQueryTemplate {
 
   @Experimental
   public MgQueryTemplate filterx(Map<?, ?> filter) {
-    this.filter = BasicDBObject.parse(Bsons.toExtendedJson(defaultObject(filter, HashMap::new)));
+    if (filter != null) {
+      this.filter = BasicDBObject.parse(Bsons.toExtendedJson(defaultObject(filter, HashMap::new)));
+    }
     return this;
   }
 

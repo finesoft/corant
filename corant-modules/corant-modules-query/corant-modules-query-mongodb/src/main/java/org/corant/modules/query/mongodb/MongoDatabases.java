@@ -35,11 +35,13 @@ public class MongoDatabases {
       ConnectionString cs = new ConnectionString(database);
       MongoClient client = MongoClients.create(cs);
       MongoDatabase mongoDatabase = client.getDatabase(cs.getDatabase());
-      Cleaner.create().register(mongoDatabase, () -> {
-        if (client != null) {
-          client.close(); // FIXME Do we need to automatically close the mongodb client here
-        }
-      });
+      if (mongoDatabase != null) {
+        Cleaner.create().register(mongoDatabase, () -> {
+          if (client != null) {
+            client.close(); // FIXME Do we need to automatically close the mongodb client here
+          }
+        });
+      }
       return mongoDatabase;
     } else {
       return findNamed(MongoDatabase.class, database).orElse(null);

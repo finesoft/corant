@@ -86,7 +86,7 @@ public class DefaultMessageResolver implements MessageResolver {
     Lock writeLock = rwl.writeLock();
     try {
       writeLock.lock();
-      this.holder.clear();
+      holder.clear();
       if (!messageSources.isUnsatisfied()) {
         messageSources.stream().sorted(Sortable::compare).forEach(t -> {
           try {
@@ -103,22 +103,22 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   @Override
-  public String getMessage(Locale locale, Object code, Object[] params,
-      Function<Locale, String> dfltMsgResolver) {
+  public String getMessage(Locale locale, Object key, Object[] params,
+      Function<Locale, String> failLookupHandler) {
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = resolveParameters(useLocale, params);
     Lock readLock = rwl.readLock();
     try {
       readLock.lock();
-      String rawMessage = resolveRawMessage(useLocale, code);
+      String rawMessage = resolveRawMessage(useLocale, key);
       String message = rawMessage == null ? null
-          : resolveMessage(useLocale, code.toString(), rawMessage, parameters);
+          : resolveMessage(useLocale, key.toString(), rawMessage, parameters);
       if (message == null) {
-        logger.warning(() -> String.format("Can't find any message for %s", code));
-        if (dfltMsgResolver != null) {
-          message = dfltMsgResolver.apply(locale);
+        logger.warning(() -> String.format("Can't find any message for %s", key));
+        if (failLookupHandler != null) {
+          message = failLookupHandler.apply(locale);
         } else {
-          throw new NoSuchMessageException("Can't find any message for %s.", code);
+          throw new NoSuchMessageException("Can't find any message for %s.", key);
         }
       }
       return message;
@@ -152,16 +152,16 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   @Produces
-  @MessageCodes
+  @MessageKey
   @Dependent
   protected String produce(InjectionPoint ip) {
-    String codes = null;
+    String key = null;
     Locale locale = Locale.getDefault();
     Object[] parameters = Objects.EMPTY_ARRAY;
     for (Annotation ann : ip.getQualifiers()) {
-      if (ann instanceof MessageCodes) {
-        MessageCodes mc = (MessageCodes) ann;
-        codes = mc.value();
+      if (ann instanceof MessageKey) {
+        MessageKey mc = (MessageKey) ann;
+        key = mc.value();
         if (isNotBlank(mc.locale())) {
           locale = LocaleUtils.langToLocale(mc.locale(), PropertyResourceBundle.LOCALE_SPT_CHAR);
         }
@@ -169,8 +169,8 @@ public class DefaultMessageResolver implements MessageResolver {
         break;
       }
     }
-    if (isNotBlank(codes)) {
-      return getMessage(locale, codes, parameters);
+    if (isNotBlank(key)) {
+      return getMessage(locale, key, parameters);
     }
     throw new NoSuchMessageException("Can't find any message");
   }
@@ -179,9 +179,9 @@ public class DefaultMessageResolver implements MessageResolver {
     return new DefaultMessageInterpreter(pattern, locale);
   }
 
-  protected String resolveMessage(Locale locale, String codes, String rawMessage, Object[] params) {
+  protected String resolveMessage(Locale locale, String key, String rawMessage, Object[] params) {
     return holder.computeIfAbsent(locale, l -> new ConcurrentHashMap<>(256))
-        .computeIfAbsent(codes, c -> resolveInterpreter(rawMessage, locale)).apply(params, locale);
+        .computeIfAbsent(key, c -> resolveInterpreter(rawMessage, locale)).apply(params, locale);
   }
 
   protected Object resolveParameter(Locale locale, Object obj) {
@@ -200,10 +200,10 @@ public class DefaultMessageResolver implements MessageResolver {
     return Objects.EMPTY_ARRAY;
   }
 
-  protected String resolveRawMessage(Locale locale, Object code) {
+  protected String resolveRawMessage(Locale locale, Object key) {
     if (!messageSources.isUnsatisfied()) {
       return messageSources.stream().sorted(Sortable::compare)
-          .map(b -> b.getMessage(locale, code, s -> null)).filter(Strings::isNotBlank).findFirst()
+          .map(b -> b.getMessage(locale, key, s -> null)).filter(Strings::isNotBlank).findFirst()
           .orElse(null);
     }
     return null;

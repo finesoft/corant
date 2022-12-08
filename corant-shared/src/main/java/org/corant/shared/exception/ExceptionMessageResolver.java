@@ -70,8 +70,8 @@ public interface ExceptionMessageResolver extends Sortable {
    * the exception.
    * <p>
    * For example: If the given exception is {@link GeneralRuntimeException}, the implementation may
-   * use {@link GeneralRuntimeException#getCode()}, {@link GeneralRuntimeException#getSubCode()},
-   * and {@link GeneralRuntimeException#getParameters()} to construct a localized message.
+   * use {@link GeneralRuntimeException#getMessageKey()} and
+   * {@link GeneralRuntimeException#getMessageParameters()} to construct a localized message.
    *
    * @param exception the exception to extract message
    * @param locale the message locale
@@ -155,26 +155,21 @@ public interface ExceptionMessageResolver extends Sortable {
      * {@inheritDoc}
      * <p>
      * If the given exception is {@link GeneralRuntimeException} the default implementation use
-     * {@link GeneralRuntimeException#getCode()}, {@link GeneralRuntimeException#getSubCode()}, and
-     * {@link GeneralRuntimeException#getParameters()} to construct a localized message; otherwise
-     * returns {@link Exception#getLocalizedMessage()} directly.
+     * {@link GeneralRuntimeException#getMessageKey()}, and
+     * {@link GeneralRuntimeException#getMessageParameters()} to construct a localized message;
+     * otherwise returns {@link Exception#getLocalizedMessage()} directly.
      *
-     * @see GeneralRuntimeException#getCode()
-     * @see GeneralRuntimeException#getSubCode()
+     * @see GeneralRuntimeException#getMessageKey()
      * @see GeneralRuntimeException#getLocalizedMessage(Locale)
-     * @see GeneralRuntimeException#getParameters()
+     * @see GeneralRuntimeException#getMessageParameters()
      */
     @Override
     public String getMessage(Exception exception, Locale locale) {
       if (exception instanceof GeneralRuntimeException) {
         GeneralRuntimeException gre = (GeneralRuntimeException) exception;
         String message = null;
-        if (gre.getCode() != null) {
-          String key = gre.getCode().toString();
-          if (gre.getSubCode() != null) {
-            key = key.concat(Names.NAME_SPACE_SEPARATORS).concat(gre.getSubCode().toString());
-          }
-          message = getMessage(locale, key, gre.getParameters());
+        if (gre.getMessageKey() != null) {
+          message = getMessage(locale, gre.getMessageKey().toString(), gre.getMessageParameters());
         }
         return defaultObject(message, gre::getOriginalMessage);
       }

@@ -21,7 +21,7 @@ public interface GlobalMessageCodes {
 
   String ERR_SYS = "global.system_error";
   String ERR_PARAM = "global.parameter_error";
-  String ERR_UNKNOW = "global.unknown_error";
+  String ERR_UNKNOWN = "global.unknown_error";
   String ERR_OP_NON_SUP = "global.operation_not_support_error";
   String ERR_OBJ_SEL = "global.object.serialize_error";
   String ERR_OBJ_NON_FUD = "global.object_not_found_error";

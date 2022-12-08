@@ -67,12 +67,12 @@ public class PropertyMessageSource implements MessageSource {
   @Override
   public synchronized void close() throws Exception {
     initialized = false;
-    this.bundles.clear();
+    bundles.clear();
     logger.fine(() -> "Close property message source, all bundles are cleared.");
   }
 
   public Map<Locale, PropertyResourceBundle> getBundles() {
-    return unmodifiableMap(this.bundles);
+    return unmodifiableMap(bundles);
   }
 
   @Override
@@ -97,21 +97,21 @@ public class PropertyMessageSource implements MessageSource {
   }
 
   @Override
-  public String getMessage(Locale locale, Object key, Function<Locale, String> dfltMsg) {
+  public String getMessage(Locale locale, Object key, Function<Locale, String> defaultMessage) {
     if (key == null) {
-      return dfltMsg.apply(locale);
+      return defaultMessage.apply(locale);
     } else {
       load();
       Locale useLocale = defaultObject(locale, Locale::getDefault);
       PropertyResourceBundle bundle = bundles.get(useLocale);
       if (bundle == null || !bundle.containsKey(key.toString())) {
-        return dfltMsg.apply(useLocale);
+        return defaultMessage.apply(useLocale);
       } else {
         String message = bundle.getString(key.toString());
         if (!filter.test(key.toString(), message)) {
           message = null;
         }
-        return defaultObject(message, () -> dfltMsg.apply(useLocale));
+        return defaultObject(message, () -> defaultMessage.apply(useLocale));
       }
     }
   }

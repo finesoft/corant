@@ -34,9 +34,9 @@ import org.corant.shared.util.Objects;
  * Exception class that can carry more business-significant information. In general, this class
  * doesn't specify the concrete detailed message, it is used with the
  * {@link ExceptionMessageResolver} to resolve the exception message. The
- * {@link ExceptionMessageResolver} may use {@link #getCode()}, {@link #getSubCode()},
- * {@link #getParameters()} to resolve the message and may specify some attributes
- * {@link #getAttributes()} to the catcher to do some action.
+ * {@link ExceptionMessageResolver} may use {@link #getMessageKey()},
+ * {@link #getMessageParameters()} to resolve the message and may specify code {@link #getCode()}
+ * and some attributes {@link #getAttributes()} to the catcher to do some action.
  *
  * @see ExceptionMessageResolver
  * @see GeneralRuntimeExceptionWrapper
@@ -46,55 +46,71 @@ import org.corant.shared.util.Objects;
  */
 public class GeneralRuntimeException extends CorantRuntimeException {
 
-  protected static final String UN_KNOW_EXMSG = "An unknown exception has occurred!";
+  protected static final String UNKNOWN_EX_MSG = "An unknown exception has occurred!";
 
   private static final long serialVersionUID = -3720369148530068164L;
 
-  private Object code;
-
-  private Object subCode;
-
   private GeneralExceptionSeverity severity = GeneralExceptionSeverity.ERROR;
 
-  private Object[] parameters = Objects.EMPTY_ARRAY;
+  private Object messageKey;
+
+  private Object[] messageParameters = Objects.EMPTY_ARRAY;
+
+  private Object code;
 
   private Map<Object, Object> attributes = new HashMap<>();
 
   /**
-   * Constructs a general runtime exception with the given code
+   * Constructs a general runtime exception with the given message key
    *
-   * @param code the exception code use for message resolving or checking
+   * @param messageKey the exception message key use for message resolving or checking
    */
-  public GeneralRuntimeException(Object code) {
-    this(code, null, null, Objects.EMPTY_ARRAY);
+  public GeneralRuntimeException(Object messageKey) {
+    this(messageKey, null, null, Objects.EMPTY_ARRAY);
   }
 
   /**
-   * Constructs a general runtime exception with the given code and message parameters
+   * Constructs a general runtime exception with the given message key and message parameters
    *
-   * @param code the exception code use for message resolving or checking
-   * @param parameters the message parameters
+   * @param messageKey the exception message key use for message resolving or checking
+   * @param messageParameters the message parameters
    */
-  public GeneralRuntimeException(Object code, Object... parameters) {
-    this(code, null, new HashMap<>(), parameters);
+  public GeneralRuntimeException(Object messageKey, Object... messageParameters) {
+    this(messageKey, null, null, messageParameters);
   }
 
   /**
-   * Constructs a general runtime exception with the given codes and message parameters and
+   * Constructs a general runtime exception with the given message key and message parameters and
    * additional attributes.
    *
-   * @param code the exception code use for message resolving or checking
-   * @param subCode the exception sub-code use for message resolving or checking
+   * @param messageKey the exception message key use for message resolving or checking
+   * @param code the exception sub-code use for message resolving or checking
    * @param attributes the additional business-significant attributes for the catcher to do more
    *        action
-   * @param parameters the message parameters
+   * @param messageParameters the message parameters
    */
-  public GeneralRuntimeException(Object code, Object subCode, Map<Object, Object> attributes,
-      Object... parameters) {
-    setCode(code);
-    setSubCode(subCode);
-    setParameters(parameters);
-    setAttributes(attributes);
+  public GeneralRuntimeException(Object messageKey, Object code, Map<Object, Object> attributes,
+      Object... messageParameters) {
+    this.messageKey = messageKey;
+    this.code = code;
+    if (messageParameters != null) {
+      this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
+    }
+    if (attributes != null) {
+      this.attributes.putAll(attributes);
+    }
+  }
+
+  /**
+   * Constructs a general runtime exception with the given code and message key and message
+   * parameters
+   *
+   * @param code the exception code
+   * @param messageKey the exception message key use for message resolving or checking
+   * @param messageParameters the message parameters
+   */
+  public GeneralRuntimeException(Object code, Object messageKey, Object[] messageParameters) {
+    this(messageKey, code, new HashMap<>(), messageParameters);
   }
 
   /**
@@ -107,55 +123,93 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     super(cause);
     if (cause instanceof GeneralRuntimeException) {
       GeneralRuntimeException causeToUse = (GeneralRuntimeException) cause;
-      setCode(causeToUse.getCode());
-      setSubCode(causeToUse.getSubCode());
-      setParameters(causeToUse.getParameters());
-      setAttributes(causeToUse.getAttributes());
+      messageKey = causeToUse.getMessageKey();
+      code = causeToUse.getCode();
+      if (causeToUse.getMessageParameters() != null) {
+        messageParameters = Arrays.copyOf(causeToUse.getMessageParameters(),
+            causeToUse.getMessageParameters().length);
+      }
+      attributes.putAll(causeToUse.getAttributes());
     }
   }
 
   /**
-   * Use cause and code to construct a new runtime exception.
+   * Use cause and message key to construct a new runtime exception.
    *
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
-   * @param code the exception code use for message resolving or checking
+   * @param messageKey the exception message key use for message resolving or checking
    */
-  public GeneralRuntimeException(Throwable cause, Object code) {
+  public GeneralRuntimeException(Throwable cause, Object messageKey) {
     super(cause);
-    setCode(code);
+    this.messageKey = messageKey;
   }
 
   /**
-   * Use cause and code and message parameters to construct a new runtime exception.
+   * Use cause and message key and message parameters to construct a new runtime exception.
    *
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
-   * @param code the exception code use for message resolving or checking
-   * @param parameters the message parameters
+   * @param messageKey the exception message key use for message resolving or checking
+   * @param messageParameters the message parameters
    */
-  public GeneralRuntimeException(Throwable cause, Object code, Object... parameters) {
+  public GeneralRuntimeException(Throwable cause, Object messageKey, Object... messageParameters) {
     super(cause);
-    setCode(code);
-    setParameters(parameters);
+    this.messageKey = messageKey;
+    if (messageParameters != null) {
+      this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
+    }
   }
 
   protected GeneralRuntimeException() {
-    this(UN_KNOW_EXMSG);
+    this(UNKNOWN_EX_MSG);
   }
 
+  /**
+   * Use the specific message to construct the instance.
+   *
+   * @param message the specific original message.
+   *
+   * @see #getOriginalMessage()
+   */
   protected GeneralRuntimeException(String message) {
     super(message);
   }
 
+  /**
+   * Use the specific message and cause to construct the instance.
+   *
+   * @param message the specific original message.
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A {@code null} value is permitted, and indicates that the cause is nonexistent or
+   *        unknown.)
+   *
+   * @see #getOriginalMessage()
+   */
   protected GeneralRuntimeException(String message, Throwable cause) {
     super(cause, message);
   }
 
+  /**
+   * Returns an instance construct with a specific message.
+   *
+   * @param message the specific original message.
+   *
+   * @see #getOriginalMessage()
+   */
   public static GeneralRuntimeException of(String message) {
     return new GeneralRuntimeException(message);
   }
 
+  /**
+   * Returns an instance construct with A specific message and a cause.
+   *
+   * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   *        (A {@code null} value is permitted, and indicates that the cause is nonexistent or
+   *        unknown.)
+   * @param message the specific original message.
+   * @see #getOriginalMessage()
+   */
   public static GeneralRuntimeException of(Throwable cause, String message) {
     return new GeneralRuntimeException(message, cause);
   }
@@ -167,8 +221,17 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   public GeneralRuntimeException attributes(UnaryOperator<Map<Object, Object>> func) {
     if (func != null) {
-      setAttributes(func.apply(new HashMap<>(attributes)));
+      Map<Object, Object> newAttr = func.apply(new HashMap<>(attributes));
+      attributes.clear();
+      attributes.putAll(newAttr);
+    } else {
+      attributes.clear();
     }
+    return this;
+  }
+
+  public GeneralRuntimeException code(Object code) {
+    this.code = code;
     return this;
   }
 
@@ -198,31 +261,57 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     } catch (Exception e) {
       addSuppressed(e);
     }
-    return defaultString(super.getMessage()) + SPACE + asDefaultString(getCode());
+    return defaultString(super.getMessage()) + SPACE + asDefaultString(getMessageKey());
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * Note: The message returned here has generally been processed by the
+   * {@link ExceptionMessageResolver#getMessage(Exception, Locale)}.
+   *
+   * @see ExceptionMessageResolver#getMessage(Exception, Locale)
+   */
   @Override
   public String getMessage() {
     return getLocalizedMessage(Locale.getDefault());
   }
 
-  public String getOriginalMessage() {
-    return super.getMessage();
+  /**
+   * Returns the exception message key, which can be used with the specified Locale for i18 message
+   * retrieval.
+   */
+  public Object getMessageKey() {
+    return messageKey;
   }
 
-  public Object[] getParameters() {
-    return Arrays.copyOf(parameters, parameters.length);
+  /**
+   * Returns the parameter of the exception message, which can be used together with the
+   * {@link #getMessageKey()} to construct the message.
+   */
+  public Object[] getMessageParameters() {
+    return Arrays.copyOf(messageParameters, messageParameters.length);
+  }
+
+  /**
+   * Returns the original message. The original message refers to the message that is not
+   * constructed using {@link #getMessageKey()} and {@link #getMessageParameters()} and is generally
+   * directly constructed by the constructor.
+   *
+   * @see #of(Throwable, String)
+   * @see #GeneralRuntimeException(String)
+   */
+  public String getOriginalMessage() {
+    return super.getMessage();
   }
 
   public GeneralExceptionSeverity getSeverity() {
     return severity;
   }
 
-  /**
-   * Imply the exception type polymorph, for exception type polymorph
-   */
-  public Object getSubCode() {
-    return subCode;
+  public GeneralRuntimeException messageKey(Object messageKey) {
+    this.messageKey = messageKey;
+    return this;
   }
 
   /**
@@ -230,19 +319,16 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    */
   public GeneralRuntimeException parameters(UnaryOperator<List<Object>> func) {
     if (func != null) {
-      List<Object> updated = func.apply(listOf(parameters));
-      setParameters(updated == null ? Objects.EMPTY_ARRAY : updated.toArray());
+      List<Object> updated = func.apply(listOf(messageParameters));
+      messageParameters = updated == null ? Objects.EMPTY_ARRAY : updated.toArray();
+    } else {
+      messageParameters = Objects.EMPTY_ARRAY;
     }
     return this;
   }
 
   public GeneralRuntimeException severity(GeneralExceptionSeverity severity) {
-    setSeverity(severity);
-    return this;
-  }
-
-  public GeneralRuntimeException subCode(Object subCode) {
-    setSubCode(subCode);
+    this.severity = defaultObject(severity, GeneralExceptionSeverity.ERROR);
     return this;
   }
 
@@ -252,10 +338,17 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    *
    * <pre>
    * try {
-   *    //...domain logic break by new GeneralRuntimeException("original code","original var")
+   *    //...domain logic break by new GeneralRuntimeException("original message key","original var")
    * } catch (GeneralRuntimeException ex) {
-   *   throw ex.wrapper().ifCodeIs("original code").thenSubcode("new sub
+   *   throw ex.wrapper().ifMessageKeyIs("original message key").thenCode("new sub
    *   code").thenVariants((o)->Arrays.asList("new var")).wrap();
+   * }
+   *
+   * try {
+   *    //...domain logic break by new GeneralRuntimeException("original code","original message key","original var")
+   * } catch (GeneralRuntimeException ex) {
+   *   throw ex.wrapper().ifCodeIs("original code").thenMessageKey("new message
+   *   key").thenVariants((o)->Arrays.asList("new var")).wrap();
    * }
    * </pre>
    *
@@ -263,30 +356,6 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    */
   public GeneralRuntimeExceptionWrapper wrapper() {
     return new GeneralRuntimeExceptionWrapper(this);
-  }
-
-  protected void setAttributes(Map<Object, Object> attributes) {
-    this.attributes.clear();
-    if (attributes != null) {
-      this.attributes.putAll(attributes);
-    }
-  }
-
-  protected void setCode(Object code) {
-    this.code = code;
-  }
-
-  protected void setParameters(Object[] parameters) {
-    this.parameters =
-        parameters == null ? Objects.EMPTY_ARRAY : Arrays.copyOf(parameters, parameters.length);
-  }
-
-  protected void setSeverity(GeneralExceptionSeverity severity) {
-    this.severity = severity == null ? GeneralExceptionSeverity.ERROR : severity;
-  }
-
-  protected void setSubCode(Object subCode) {
-    this.subCode = subCode;
   }
 
 }

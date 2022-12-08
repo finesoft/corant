@@ -30,27 +30,27 @@ import org.corant.shared.normal.Names;
  */
 public interface MessageResolver extends AutoCloseable {
 
-  String UNKNOWN_INF_CODE = "INF.message.unknown";
-  String UNKNOWN_ERR_CODE = "ERR.message.unknown";
-  String UNKNOWN_DES_CODE = "DES.message.unknown";
+  String UNKNOWN_INF_KEY = "INF.message.unknown";
+  String UNKNOWN_ERR_KEY = "ERR.message.unknown";
+  String UNKNOWN_DES_KEY = "DES.message.unknown";
 
-  static String getNoFoundMessage(Locale locale, Object codes) {
-    return String.format("Can't find any message for %s.", codes);
+  static String getNoFoundMessage(Locale locale, Object key) {
+    return String.format("Can't find any message for %s.", key);
   }
 
   /**
    * Try to resolve the message with given parameters.
    *
    * @param locale the locale in which to do the lookup
-   * @param code code the message code to lookup
+   * @param key key the message key to lookup
    * @param params an array of context arguments that will be used to generate a message.
    * @return the resolved message if the lookup was successful otherwise return null
    */
-  default String getMessage(Locale locale, Object code, Object... params) {
-    if (code == null) {
+  default String getMessage(Locale locale, Object key, Object... params) {
+    if (key == null) {
       return null;
     }
-    return getMessage(locale, code, params, l -> null);
+    return getMessage(locale, key, params, l -> null);
   }
 
   /**
@@ -58,13 +58,15 @@ public interface MessageResolver extends AutoCloseable {
    * found.
    *
    * @param locale the locale in which to do the lookup
-   * @param code code the message code to lookup
+   * @param key key the message key to lookup
    * @param params an array of context arguments that will be used to generate a message.
-   * @param dfltMsg a default message callback is used to return default message if the lookup fails
+   * @param failLookupHandler a default message callback is used to return default message if the
+   *        lookup fails
    * @return the resolved message if the lookup was successful, otherwise return the default
    *         message.
    */
-  String getMessage(Locale locale, Object code, Object[] params, Function<Locale, String> dfltMsg);
+  String getMessage(Locale locale, Object key, Object[] params,
+      Function<Locale, String> failLookupHandler);
 
   /**
    * Used to refresh the cache, if the implementation uses a caching mechanism.
@@ -75,7 +77,7 @@ public interface MessageResolver extends AutoCloseable {
    * corant-modules-bundle
    *
    * <p>
-   * Message category, mainly used to distinguish message codes, etc.
+   * Message category, mainly used to distinguish message keys, etc.
    *
    * @author bingo 下午2:54:09
    *
@@ -83,11 +85,11 @@ public interface MessageResolver extends AutoCloseable {
   enum MessageCategory {
     INF, ERR, DES;
 
-    public String genMessageCode(Object... codes) {
+    public String genMessageKey(Object... keys) {
       StringBuilder sb = new StringBuilder(name());
-      for (Object code : codes) {
+      for (Object key : keys) {
         String cs;
-        if (code != null && isNotBlank(cs = code.toString())) {
+        if (key != null && isNotBlank(cs = key.toString())) {
           sb.append(Names.NAME_SPACE_SEPARATORS).append(cs);
         }
       }

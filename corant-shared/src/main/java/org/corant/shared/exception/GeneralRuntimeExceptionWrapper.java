@@ -31,37 +31,74 @@ import org.corant.shared.util.Objects;
 public class GeneralRuntimeExceptionWrapper {
 
   protected final GeneralRuntimeException exception;
-  protected final List<ConjoinedBuilder> builders = new LinkedList<>();
+  protected final List<ConjoinedMessageKeyBuilder> keyBuilders = new LinkedList<>();
+  protected final List<ConjoinedCodeBuilder> codeBuilders = new LinkedList<>();
 
   GeneralRuntimeExceptionWrapper(GeneralRuntimeException exception) {
     this.exception = exception;
   }
 
-  public ConjoinedBuilder ifCodeIs(Object code) {
-    return new ConjoinedBuilder(this, code);
+  public ConjoinedCodeBuilder ifCodeIs(Object code) {
+    return new ConjoinedCodeBuilder(this, code);
+  }
+
+  public ConjoinedMessageKeyBuilder ifMessageKeyIs(Object messageKey) {
+    return new ConjoinedMessageKeyBuilder(this, messageKey);
   }
 
   public Builder whatever() {
-    return new Builder(this, null);
+    return new Builder(this) {
+      @Override
+      public Builder thenCode(Object code) {
+        return super.thenCode(code);
+      }
+
+      @Override
+      public Builder thenMessageKey(Object messageKey) {
+        return super.thenMessageKey(messageKey);
+      }
+    };
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:58:13
+   *
+   */
   public static class Builder {
-    protected Object[] parameters = Objects.EMPTY_ARRAY;
-    protected Object subCode;
-    protected final Object code;
     protected final GeneralRuntimeExceptionWrapper wrapper;
+    protected Object messageKey;
+    protected Object[] messageParameters = Objects.EMPTY_ARRAY;
+    protected Object code;
     protected Map<Object, Object> attributes = new HashMap<>();
 
-    Builder(GeneralRuntimeExceptionWrapper wrapper, Object code) {
-      this.code = code;
+    Builder(GeneralRuntimeExceptionWrapper wrapper) {
       this.wrapper = wrapper;
-      int varLen = wrapper.exception.getParameters().length;
+    }
+
+    Builder(GeneralRuntimeExceptionWrapper wrapper, Object messageKey) {
+      this.messageKey = messageKey;
+      this.wrapper = wrapper;
+      int varLen = wrapper.exception.getMessageParameters().length;
       if (varLen > 0) {
-        parameters = new Object[varLen];
-        System.arraycopy(wrapper.exception.getParameters(), 0, parameters, 0, varLen);
+        messageParameters = new Object[varLen];
+        System.arraycopy(wrapper.exception.getMessageParameters(), 0, messageParameters, 0, varLen);
       }
       attributes.putAll(wrapper.exception.getAttributes());
-      subCode = wrapper.exception.getSubCode();
+      code = wrapper.exception.getCode();
+    }
+
+    Builder(Object code, GeneralRuntimeExceptionWrapper wrapper) {
+      this.code = code;
+      this.wrapper = wrapper;
+      int varLen = wrapper.exception.getMessageParameters().length;
+      if (varLen > 0) {
+        messageParameters = new Object[varLen];
+        System.arraycopy(wrapper.exception.getMessageParameters(), 0, messageParameters, 0, varLen);
+      }
+      attributes.putAll(wrapper.exception.getAttributes());
+      messageKey = wrapper.exception.getMessageKey();
     }
 
     public Builder thenAttributes(Map<Object, Object> attributes) {
@@ -75,26 +112,21 @@ public class GeneralRuntimeExceptionWrapper {
       return this;
     }
 
-    public Builder thenParameters(List<Object> parameters) {
-      return this.thenParameters(t -> parameters);
+    public Builder thenMessageParameters(List<Object> parameters) {
+      return this.thenMessageParameters(t -> parameters);
     }
 
-    public Builder thenParameters(UnaryOperator<List<Object>> func) {
+    public Builder thenMessageParameters(UnaryOperator<List<Object>> func) {
       if (func != null) {
-        List<Object> updated = func.apply(listOf(parameters));
-        setParameters(updated == null ? null : updated.toArray());
+        List<Object> updated = func.apply(listOf(messageParameters));
+        setMessageParameters(updated == null ? null : updated.toArray());
       }
-      return this;
-    }
-
-    public Builder thenSubCode(Object subCode) {
-      this.subCode = subCode;
       return this;
     }
 
     public GeneralRuntimeException wrap() {
       GeneralRuntimeException ex = wrapper.exception.attributes(t -> getAttributes())
-          .parameters(t -> listOf(getParameters())).subCode(getSubCode());
+          .parameters(t -> listOf(getMessageParameters())).code(getCode());
       attributes.clear();
       return ex;
     }
@@ -107,12 +139,12 @@ public class GeneralRuntimeExceptionWrapper {
       return code;
     }
 
-    Object[] getParameters() {
-      return parameters;
+    Object getMessageKey() {
+      return messageKey;
     }
 
-    Object getSubCode() {
-      return subCode;
+    Object[] getMessageParameters() {
+      return messageParameters;
     }
 
     GeneralRuntimeExceptionWrapper getWrapper() {
@@ -126,65 +158,145 @@ public class GeneralRuntimeExceptionWrapper {
       }
     }
 
-    void setParameters(Object[] parameters) {
-      this.parameters = parameters == null ? Objects.EMPTY_ARRAY : parameters;
+    void setMessageParameters(Object[] messageParameters) {
+      this.messageParameters = messageParameters == null ? Objects.EMPTY_ARRAY : messageParameters;
+    }
+
+    Builder thenCode(Object code) {
+      this.code = code;
+      return this;
+    }
+
+    Builder thenMessageKey(Object messageKey) {
+      this.messageKey = messageKey;
+      return this;
     }
 
   }
 
-  public static class ConjoinedBuilder extends Builder {
-    ConjoinedBuilder(GeneralRuntimeExceptionWrapper wrapper, Object code) {
-      super(wrapper, code);
-      wrapper.builders.removeIf(p -> areEqual(p.getCode(), code));
-      wrapper.builders.add(this);
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:58:09
+   */
+  public static class ConjoinedCodeBuilder extends Builder {
+
+    ConjoinedCodeBuilder(GeneralRuntimeExceptionWrapper wrapper, Object code) {
+      super(code, wrapper);
+      wrapper.codeBuilders.removeIf(p -> areEqual(p.getCode(), code));
+      wrapper.codeBuilders.add(this);
     }
 
-    public ConjoinedBuilder elseIfCodeIs(Object code) {
-      return new ConjoinedBuilder(getWrapper(), code);
+    public ConjoinedCodeBuilder elseIfCodeIs(Object code) {
+      return new ConjoinedCodeBuilder(getWrapper(), code);
     }
 
     @Override
-    public ConjoinedBuilder thenAttributes(Map<Object, Object> attributes) {
+    public ConjoinedCodeBuilder thenAttributes(Map<Object, Object> attributes) {
       super.thenAttributes(attributes);
       return this;
     }
 
     @Override
-    public ConjoinedBuilder thenAttributes(UnaryOperator<Map<Object, Object>> func) {
+    public ConjoinedCodeBuilder thenAttributes(UnaryOperator<Map<Object, Object>> func) {
       super.thenAttributes(func);
       return this;
     }
 
     @Override
-    public ConjoinedBuilder thenParameters(List<Object> parameters) {
-      super.thenParameters(parameters);
+    public ConjoinedCodeBuilder thenMessageKey(Object messageKey) {
+      super.thenMessageKey(messageKey);
       return this;
     }
 
     @Override
-    public ConjoinedBuilder thenParameters(UnaryOperator<List<Object>> func) {
-      super.thenParameters(func);
+    public ConjoinedCodeBuilder thenMessageParameters(List<Object> parameters) {
+      super.thenMessageParameters(parameters);
       return this;
     }
 
     @Override
-    public ConjoinedBuilder thenSubCode(Object subCode) {
-      super.thenSubCode(subCode);
+    public ConjoinedCodeBuilder thenMessageParameters(UnaryOperator<List<Object>> func) {
+      super.thenMessageParameters(func);
       return this;
     }
 
     @Override
     public GeneralRuntimeException wrap() {
-      for (Builder builder : getWrapper().builders) {
+      for (Builder builder : getWrapper().codeBuilders) {
         if (areEqual(builder.code, getWrapper().exception.getCode())) {
           getWrapper().exception.attributes(t -> builder.attributes)
-              .parameters(t -> listOf(builder.parameters)).subCode(builder.subCode);
+              .parameters(t -> listOf(builder.messageParameters)).messageKey(builder.messageKey);
           break;
         } else {
           builder.attributes.clear();
         }
       }
-      getWrapper().builders.clear();
+      getWrapper().codeBuilders.clear();
+      return getWrapper().exception;
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:58:09
+   */
+  public static class ConjoinedMessageKeyBuilder extends Builder {
+
+    ConjoinedMessageKeyBuilder(GeneralRuntimeExceptionWrapper wrapper, Object messageKey) {
+      super(wrapper, messageKey);
+      wrapper.keyBuilders.removeIf(p -> areEqual(p.getMessageKey(), messageKey));
+      wrapper.keyBuilders.add(this);
+    }
+
+    public ConjoinedMessageKeyBuilder elseIfMessageKeyIs(Object messageKey) {
+      return new ConjoinedMessageKeyBuilder(getWrapper(), messageKey);
+    }
+
+    @Override
+    public ConjoinedMessageKeyBuilder thenAttributes(Map<Object, Object> attributes) {
+      super.thenAttributes(attributes);
+      return this;
+    }
+
+    @Override
+    public ConjoinedMessageKeyBuilder thenAttributes(UnaryOperator<Map<Object, Object>> func) {
+      super.thenAttributes(func);
+      return this;
+    }
+
+    @Override
+    public ConjoinedMessageKeyBuilder thenCode(Object code) {
+      super.thenCode(code);
+      return this;
+    }
+
+    @Override
+    public ConjoinedMessageKeyBuilder thenMessageParameters(List<Object> parameters) {
+      super.thenMessageParameters(parameters);
+      return this;
+    }
+
+    @Override
+    public ConjoinedMessageKeyBuilder thenMessageParameters(UnaryOperator<List<Object>> func) {
+      super.thenMessageParameters(func);
+      return this;
+    }
+
+    @Override
+    public GeneralRuntimeException wrap() {
+      for (Builder builder : getWrapper().keyBuilders) {
+        if (areEqual(builder.messageKey, getWrapper().exception.getMessageKey())) {
+          getWrapper().exception.attributes(t -> builder.attributes)
+              .parameters(t -> listOf(builder.messageParameters)).code(builder.code);
+          break;
+        } else {
+          builder.attributes.clear();
+        }
+      }
+      getWrapper().keyBuilders.clear();
       return getWrapper().exception;
     }
 

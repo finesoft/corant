@@ -33,7 +33,7 @@ import javax.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
-public @interface MessageCodes {
+public @interface MessageKey {
 
   @Nonbinding
   String locale() default "zh_CN";
@@ -44,17 +44,17 @@ public @interface MessageCodes {
   @Nonbinding
   String value() default EMPTY;
 
-  class MessageCodesLiteral extends AnnotationLiteral<MessageCodes> implements MessageCodes {
+  class MessageCodesLiteral extends AnnotationLiteral<MessageKey> implements MessageKey {
 
     private static final long serialVersionUID = -5766940942537035511L;
 
     final Locale locale;
-    final String code;
+    final String key;
     final String[] parameters;
 
-    public MessageCodesLiteral(Locale locale, String code, String... parameters) {
+    public MessageCodesLiteral(Locale locale, String key, String... parameters) {
       this.locale = locale;
-      this.code = code;
+      this.key = key;
       this.parameters = parameters;
     }
 
@@ -70,7 +70,7 @@ public @interface MessageCodes {
 
     @Override
     public String value() {
-      return defaultString(code, EMPTY);
+      return defaultString(key, EMPTY);
     }
 
   }

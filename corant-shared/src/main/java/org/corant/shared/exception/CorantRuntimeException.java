@@ -52,7 +52,6 @@ public class CorantRuntimeException extends RuntimeException {
    * stack trace enabled or disabled and the specified detail message or message format and
    * parameters.
    *
-   *
    * @param cause the cause. (A {@code null} value is permitted, and indicates that the cause is
    *        nonexistent or unknown.)
    * @param enableSuppression whether suppression is enabled or disabled
@@ -68,10 +67,10 @@ public class CorantRuntimeException extends RuntimeException {
 
   /**
    * Constructs a new runtime exception with the specified detail message and cause.
-   *
+   * <p>
    * Note: the detail message associated with cause is not automatically incorporated in this
    * runtime exception's detail message.
-   *
+   * </p>
    *
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *        (A null value is permitted, and indicates that the cause is nonexistent or unknown.)

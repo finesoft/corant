@@ -43,14 +43,15 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
       Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
       if (inst.isResolvable()) {
         final MessageResolver resolver = inst.get();
-        // FIXME Do we need to append category prefix to message code keys?
-        final Object code = MessageCategory.ERR.genMessageCode(gre.getCode(), gre.getSubCode());
-        final Object[] parameters = gre.getParameters();
-        return resolver.getMessage(locale, code, parameters,
-            l1 -> resolver.getMessage(l1, MessageResolver.UNKNOWN_ERR_CODE, parameters,
-                l2 -> MessageResolver.getNoFoundMessage(l2, code)));
+        // FIXME Do we need to append category prefix to message keys?
+        final Object key = MessageCategory.ERR.genMessageKey(gre.getMessageKey());
+        final Object[] parameters = gre.getMessageParameters();
+        return resolver.getMessage(locale, key, parameters,
+            l1 -> resolver.getMessage(l1, MessageResolver.UNKNOWN_ERR_KEY, parameters,
+                l2 -> MessageResolver.getNoFoundMessage(l2, key)));
       } else {
-        return defaultString(gre.getOriginalMessage()) + SPACE + asDefaultString(gre.getCode());
+        return defaultString(gre.getOriginalMessage()) + SPACE
+            + asDefaultString(gre.getMessageKey());
       }
     }
     return defaultObject(exception.getLocalizedMessage(), exception::getMessage);

@@ -37,7 +37,7 @@ public class LocaleUtils {
     if (lang == null || EMPTY.equals(lang)) { // not specified => getDefault
       return Locale.getDefault();
     }
-    String language = EMPTY;
+    String language;
     String country = EMPTY;
     String variant = EMPTY;
 

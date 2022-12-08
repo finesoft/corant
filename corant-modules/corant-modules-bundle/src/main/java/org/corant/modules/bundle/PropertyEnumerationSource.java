@@ -151,7 +151,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
           } finally {
             initialized = true;
             logger.fine(() -> String.format("Found %s enumeration class literals from %s.",
-                holder.values().stream().mapToLong(e -> e.classLiteral.keySet().size()).sum(),
+                holder.values().stream().mapToLong(e -> e.classLiteral.size()).sum(),
                 bundleFilePaths));
           }
         }

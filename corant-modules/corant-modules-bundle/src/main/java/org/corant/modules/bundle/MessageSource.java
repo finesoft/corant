@@ -48,7 +48,6 @@ public interface MessageSource extends Sortable, AutoCloseable {
     final MessageSource source;
 
     public MessageSourceRefreshedEvent(MessageSource source) {
-      super();
       this.source = source;
     }
 

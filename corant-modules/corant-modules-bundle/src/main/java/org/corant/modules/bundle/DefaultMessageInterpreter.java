@@ -33,9 +33,9 @@ public class DefaultMessageInterpreter implements MessageInterpreter {
   protected final boolean noFmt;
 
   public DefaultMessageInterpreter(String pattern, Locale locale) {
-    this.fmt = new MessageFormat(pattern, locale);
+    fmt = new MessageFormat(pattern, locale);
     this.pattern = pattern;
-    this.noFmt = this.fmt.getFormats().length == 0;
+    noFmt = fmt.getFormats().length == 0;
   }
 
   @Override

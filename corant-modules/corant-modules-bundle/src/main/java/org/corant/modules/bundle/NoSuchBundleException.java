@@ -25,43 +25,21 @@ public class NoSuchBundleException extends CorantRuntimeException {
 
   private static final long serialVersionUID = -3100048835965108713L;
 
-  /**
-   *
-   */
   public NoSuchBundleException() {}
 
-  /**
-   * @param msgOrFormat
-   * @param args
-   */
   public NoSuchBundleException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);
   }
 
-  /**
-   * @param cause
-   */
   public NoSuchBundleException(Throwable cause) {
     super(cause);
   }
 
-  /**
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   * @param msgOrFormat
-   * @param args
-   */
   public NoSuchBundleException(Throwable cause, boolean enableSuppression,
       boolean writableStackTrace, String msgOrFormat, Object... args) {
     super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
   }
 
-  /**
-   * @param cause
-   * @param msgOrFormat
-   * @param args
-   */
   public NoSuchBundleException(Throwable cause, String msgOrFormat, Object... args) {
     super(cause, msgOrFormat, args);
   }

@@ -28,29 +28,29 @@ public class AuthorizationException extends GeneralRuntimeException {
 
   public AuthorizationException() {}
 
-  public AuthorizationException(Object code) {
-    super(code);
+  public AuthorizationException(Object messageKey) {
+    super(messageKey);
   }
 
-  public AuthorizationException(Object code, Object... variants) {
-    super(code, variants);
+  public AuthorizationException(Object messageKey, Object... messageParameters) {
+    super(messageKey, messageParameters);
   }
 
-  public AuthorizationException(Object code, Object subCode, Map<Object, Object> attributes,
-      Object... parameters) {
-    super(code, subCode, attributes, parameters);
+  public AuthorizationException(Object messageKey, Object[] messageParameters, Object code,
+      Map<Object, Object> attributes) {
+    super(messageKey, messageParameters, code, attributes);
   }
 
   public AuthorizationException(Throwable cause) {
     super(cause);
   }
 
-  public AuthorizationException(Throwable cause, Object code) {
-    super(cause, code);
+  public AuthorizationException(Throwable cause, Object messageKey) {
+    super(cause, messageKey);
   }
 
-  public AuthorizationException(Throwable cause, Object code, Object... parameters) {
-    super(cause, code, parameters);
+  public AuthorizationException(Throwable cause, Object messageKey, Object... messageParameters) {
+    super(cause, messageKey, messageParameters);
   }
 
   protected AuthorizationException(String message) {

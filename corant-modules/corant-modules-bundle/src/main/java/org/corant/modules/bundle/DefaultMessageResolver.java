@@ -111,8 +111,8 @@ public class DefaultMessageResolver implements MessageResolver {
     try {
       readLock.lock();
       String rawMessage = resolveRawMessage(useLocale, key);
-      String message = rawMessage == null ? null
-          : resolveMessage(useLocale, key.toString(), rawMessage, parameters);
+      String message =
+          rawMessage == null ? null : resolveMessage(useLocale, key, rawMessage, parameters);
       if (message == null) {
         logger.warning(() -> String.format("Can't find any message for %s", key));
         if (failLookupHandler != null) {
@@ -179,9 +179,13 @@ public class DefaultMessageResolver implements MessageResolver {
     return new DefaultMessageInterpreter(pattern, locale);
   }
 
-  protected String resolveMessage(Locale locale, String key, String rawMessage, Object[] params) {
+  protected String resolveMessage(Locale locale, Object key, String rawMessage, Object[] params) {
+    if (key == null) {
+      return null;
+    }
     return holder.computeIfAbsent(locale, l -> new ConcurrentHashMap<>(256))
-        .computeIfAbsent(key, c -> resolveInterpreter(rawMessage, locale)).apply(params, locale);
+        .computeIfAbsent(key.toString(), c -> resolveInterpreter(rawMessage, locale))
+        .apply(params, locale);
   }
 
   protected Object resolveParameter(Locale locale, Object obj) {

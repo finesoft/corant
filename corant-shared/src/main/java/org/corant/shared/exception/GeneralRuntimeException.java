@@ -66,7 +66,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    * @param messageKey the exception message key use for message resolving or checking
    */
   public GeneralRuntimeException(Object messageKey) {
-    this(messageKey, null, null, Objects.EMPTY_ARRAY);
+    this(messageKey, null, null, null);
   }
 
   /**
@@ -76,41 +76,29 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    * @param messageParameters the message parameters
    */
   public GeneralRuntimeException(Object messageKey, Object... messageParameters) {
-    this(messageKey, null, null, messageParameters);
+    this(messageKey, messageParameters, null, null);
   }
 
   /**
    * Constructs a general runtime exception with the given message key and message parameters and
-   * additional attributes.
+   * code and additional attributes.
    *
    * @param messageKey the exception message key use for message resolving or checking
-   * @param code the exception sub-code use for message resolving or checking
+   * @param messageParameters the message parameters
+   * @param code the exception code for the catcher to do more action
    * @param attributes the additional business-significant attributes for the catcher to do more
    *        action
-   * @param messageParameters the message parameters
    */
-  public GeneralRuntimeException(Object messageKey, Object code, Map<Object, Object> attributes,
-      Object... messageParameters) {
+  public GeneralRuntimeException(Object messageKey, Object[] messageParameters, Object code,
+      Map<Object, Object> attributes) {
     this.messageKey = messageKey;
-    this.code = code;
     if (messageParameters != null) {
       this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
     }
+    this.code = code;
     if (attributes != null) {
       this.attributes.putAll(attributes);
     }
-  }
-
-  /**
-   * Constructs a general runtime exception with the given code and message key and message
-   * parameters
-   *
-   * @param code the exception code
-   * @param messageKey the exception message key use for message resolving or checking
-   * @param messageParameters the message parameters
-   */
-  public GeneralRuntimeException(Object code, Object messageKey, Object[] messageParameters) {
-    this(messageKey, code, new HashMap<>(), messageParameters);
   }
 
   /**
@@ -124,11 +112,11 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     if (cause instanceof GeneralRuntimeException) {
       GeneralRuntimeException causeToUse = (GeneralRuntimeException) cause;
       messageKey = causeToUse.getMessageKey();
-      code = causeToUse.getCode();
       if (causeToUse.getMessageParameters() != null) {
         messageParameters = Arrays.copyOf(causeToUse.getMessageParameters(),
             causeToUse.getMessageParameters().length);
       }
+      code = causeToUse.getCode();
       attributes.putAll(causeToUse.getAttributes());
     }
   }
@@ -219,6 +207,14 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     return this;
   }
 
+  public GeneralRuntimeException attributes(Map<Object, Object> attributes) {
+    this.attributes.clear();
+    if (attributes != null) {
+      this.attributes.putAll(attributes);
+    }
+    return this;
+  }
+
   public GeneralRuntimeException attributes(UnaryOperator<Map<Object, Object>> func) {
     if (func != null) {
       Map<Object, Object> newAttr = func.apply(new HashMap<>(attributes));
@@ -236,14 +232,16 @@ public class GeneralRuntimeException extends CorantRuntimeException {
   }
 
   /**
-   * For handle intention
+   * Context data for exceptions, it is usually handled by subsequent business logic that catches
+   * the exception.
    */
   public Map<Object, Object> getAttributes() {
     return Collections.unmodifiableMap(attributes);
   }
 
   /**
-   * Imply the exception type, for exception type intention
+   * Implied exception type, for the intent of the exception type, it is usually handled by
+   * subsequent business logic that catches the exception.
    */
   public Object getCode() {
     return code;
@@ -314,10 +312,19 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     return this;
   }
 
+  public GeneralRuntimeException messageParameters(Object[] messageParameters) {
+    if (messageParameters != null) {
+      this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
+    } else {
+      this.messageParameters = Objects.EMPTY_ARRAY;
+    }
+    return this;
+  }
+
   /**
    * Supply the original parameters list for handler and then return the new variants
    */
-  public GeneralRuntimeException parameters(UnaryOperator<List<Object>> func) {
+  public GeneralRuntimeException messageParameters(UnaryOperator<List<Object>> func) {
     if (func != null) {
       List<Object> updated = func.apply(listOf(messageParameters));
       messageParameters = updated == null ? Objects.EMPTY_ARRAY : updated.toArray();

@@ -126,7 +126,7 @@ public class GeneralRuntimeExceptionWrapper {
 
     public GeneralRuntimeException wrap() {
       GeneralRuntimeException ex = wrapper.exception.attributes(t -> getAttributes())
-          .parameters(t -> listOf(getMessageParameters())).code(getCode());
+          .messageParameters(t -> listOf(getMessageParameters())).code(getCode());
       attributes.clear();
       return ex;
     }
@@ -226,7 +226,8 @@ public class GeneralRuntimeExceptionWrapper {
       for (Builder builder : getWrapper().codeBuilders) {
         if (areEqual(builder.code, getWrapper().exception.getCode())) {
           getWrapper().exception.attributes(t -> builder.attributes)
-              .parameters(t -> listOf(builder.messageParameters)).messageKey(builder.messageKey);
+              .messageParameters(t -> listOf(builder.messageParameters))
+              .messageKey(builder.messageKey);
           break;
         } else {
           builder.attributes.clear();
@@ -290,7 +291,7 @@ public class GeneralRuntimeExceptionWrapper {
       for (Builder builder : getWrapper().keyBuilders) {
         if (areEqual(builder.messageKey, getWrapper().exception.getMessageKey())) {
           getWrapper().exception.attributes(t -> builder.attributes)
-              .parameters(t -> listOf(builder.messageParameters)).code(builder.code);
+              .messageParameters(t -> listOf(builder.messageParameters)).code(builder.code);
           break;
         } else {
           builder.attributes.clear();

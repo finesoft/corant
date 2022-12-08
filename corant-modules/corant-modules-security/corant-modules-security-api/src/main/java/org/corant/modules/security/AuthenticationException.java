@@ -28,29 +28,29 @@ public class AuthenticationException extends GeneralRuntimeException {
 
   public AuthenticationException() {}
 
-  public AuthenticationException(Object code) {
-    super(code);
+  public AuthenticationException(Object messageKey) {
+    super(messageKey);
   }
 
-  public AuthenticationException(Object code, Object... variants) {
-    super(code, variants);
+  public AuthenticationException(Object messageKey, Object... messageParameters) {
+    super(messageKey, messageParameters);
   }
 
-  public AuthenticationException(Object code, Object subCode, Map<Object, Object> attributes,
-      Object... parameters) {
-    super(code, subCode, attributes, parameters);
+  public AuthenticationException(Object messageKey, Object[] messageParameters, Object code,
+      Map<Object, Object> attributes) {
+    super(messageKey, messageParameters, code, attributes);
   }
 
   public AuthenticationException(Throwable cause) {
     super(cause);
   }
 
-  public AuthenticationException(Throwable cause, Object code) {
-    super(cause, code);
+  public AuthenticationException(Throwable cause, Object messageKey) {
+    super(cause, messageKey);
   }
 
-  public AuthenticationException(Throwable cause, Object code, Object... parameters) {
-    super(cause, code, parameters);
+  public AuthenticationException(Throwable cause, Object messageKey, Object... messageParameters) {
+    super(cause, messageKey, messageParameters);
   }
 
   protected AuthenticationException(String message) {

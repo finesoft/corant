@@ -13,7 +13,6 @@
  */
 package org.corant.modules.bundle;
 
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Locale;
 import java.util.function.Function;
 import org.corant.shared.normal.Names;
@@ -85,15 +84,13 @@ public interface MessageResolver extends AutoCloseable {
   enum MessageCategory {
     INF, ERR, DES;
 
-    public String genMessageKey(Object... keys) {
-      StringBuilder sb = new StringBuilder(name());
-      for (Object key : keys) {
-        String cs;
-        if (key != null && isNotBlank(cs = key.toString())) {
-          sb.append(Names.NAME_SPACE_SEPARATORS).append(cs);
-        }
+    public String genMessageKey(Object key) {
+      if (key == null) {
+        return null;
+      } else {
+        return new StringBuilder(name()).append(Names.NAME_SPACE_SEPARATORS).append(key.toString())
+            .toString();
       }
-      return sb.toString();
     }
   }
 

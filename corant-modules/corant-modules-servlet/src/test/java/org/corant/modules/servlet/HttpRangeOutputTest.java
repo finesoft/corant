@@ -13,7 +13,7 @@ package org.corant.modules.servlet;
  * the License.
  */
 
-import static org.corant.shared.util.Functions.uncheckedFunction;
+import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,9 +55,8 @@ public class HttpRangeOutputTest extends TestCase {
       paths.add(path);
     }
     final String md = "D:\\bingo_new___merged";
-    try (
-        InputStream isx = Streams.concat(paths.stream()
-            .map(uncheckedFunction(FileInputStream::new)).collect(Collectors.toList()));
+    try (InputStream isx = Streams.concat(
+        paths.stream().map(uncheckedFunction(FileInputStream::new)).collect(Collectors.toList()));
         FileOutputStream fos = new FileOutputStream(md)) {
       Streams.copy(isx, fos);
     }

@@ -61,6 +61,20 @@ public class Throwables {
     });
   }
 
+  public static void rethrow(Throwable t) {
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException) t;
+    }
+    if (t instanceof Error) {
+      throw (Error) t;
+    }
+    throw new CorantRuntimeException(t);
+  }
+
+  public static RuntimeException asUncheckedException(Exception e) {
+    return e instanceof RuntimeException ? (RuntimeException) e : new CorantRuntimeException(e);
+  }
+
   public static Throwable rootCause(final Throwable throwable) {
     return throwable != null && throwable.getCause() != null && throwable != throwable.getCause()
         ? rootCause(throwable.getCause())
@@ -98,7 +112,7 @@ public class Throwables {
             }
           }
         });
-        throw new CorantRuntimeException(e);
+        throw asUncheckedException(e);
       } finally {
         cases.clear();
       }

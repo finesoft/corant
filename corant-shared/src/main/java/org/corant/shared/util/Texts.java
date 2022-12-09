@@ -328,8 +328,8 @@ public class Texts {
               }
             }
           }
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e, "Skip lines error!");
         }
       }
 

@@ -19,6 +19,7 @@ import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.SPACE;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Throwables.rethrow;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +33,6 @@ import org.corant.config.source.MicroprofileConfigSources;
 import org.corant.config.source.SystemEnvironmentConfigSource;
 import org.corant.config.source.SystemPropertiesConfigSource;
 import org.corant.shared.normal.Names;
-import org.corant.shared.ubiquity.Throwing;
 import org.corant.shared.util.StopWatch;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
@@ -183,7 +183,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
         && !Systems.getProperty(Names.CORANT_PREFIX + "config.builder.suppress-exception",
             Boolean.class, false)) {
       // logger.log(Level.SEVERE, thrown, () -> "Process configurations occurred error");
-      Throwing.rethrow(thrown);
+      rethrow(thrown);
     }
   }
 

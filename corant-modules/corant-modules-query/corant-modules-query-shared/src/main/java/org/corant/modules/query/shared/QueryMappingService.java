@@ -21,6 +21,7 @@ import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Strings.NEWLINE;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
+import static org.corant.shared.util.Throwables.rethrow;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +56,6 @@ import org.corant.modules.query.spi.QueryScriptResolver;
 import org.corant.modules.query.spi.ResultHintResolver;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.ubiquity.Throwing;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -144,7 +144,7 @@ public class QueryMappingService {
     } finally {
       l.unlock();
       if (throwable != null) {
-        Throwing.rethrow(throwable);
+        rethrow(throwable);
       }
     }
   }
@@ -273,7 +273,7 @@ public class QueryMappingService {
     } finally {
       l.unlock();
       if (throwable != null) {
-        Throwing.rethrow(throwable);
+        rethrow(throwable);
       }
     }
   }

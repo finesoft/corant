@@ -15,11 +15,12 @@ package org.corant.shared.retry;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Throwables.asUncheckedException;
+import static org.corant.shared.util.Throwables.rethrow;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.retry.RetryContext.DefaultRetryContext;
 
 public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
@@ -33,7 +34,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
       try {
         return callable.call();
       } catch (Exception e) {
-        throw new CorantRuntimeException(e);
+        throw asUncheckedException(e);
       }
     });
   }
@@ -120,7 +121,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
             logger.log(Level.WARNING, currThrowable, () -> String.format(
                 "An error occurred in the execution, it has been tried %s times, and the retrying execution was interrupted.",
                 context.getAttempts()));
-            throw new CorantRuntimeException(currThrowable);
+            rethrow(currThrowable);
           }
         }
       }

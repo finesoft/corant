@@ -14,10 +14,13 @@
 package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Throwables.asUncheckedException;
+import static org.corant.shared.util.Throwables.rethrow;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.corant.shared.exception.CorantRuntimeException;
+import java.util.function.Supplier;
 
 /**
  * corant-shared
@@ -29,14 +32,76 @@ public class Throwing {
 
   private Throwing() {}
 
-  public static void rethrow(Throwable t) {
-    if (t instanceof RuntimeException) {
-      throw (RuntimeException) t;
+  public static <K, V> BiConsumer<K, V> uncheckedBiConsumer(
+      ThrowingBiConsumer<K, V, Exception> consumer) {
+    return (k, v) -> {
+      try {
+        consumer.accept(k, v);
+      } catch (Exception ex) {
+        throw asUncheckedException(ex);
+      }
+    };
+  }
+
+  public static <T, U, R> BiFunction<T, U, R> uncheckedBiFunction(
+      ThrowingBiFunction<T, U, R, Exception> biFunction) {
+    return (t, u) -> {
+      try {
+        return biFunction.apply(t, u);
+      } catch (Exception ex) {
+        throw asUncheckedException(ex);
+      }
+    };
+  }
+
+  public static <T> Consumer<T> uncheckedConsumer(ThrowingConsumer<T, Exception> consumer) {
+    return i -> {
+      try {
+        consumer.accept(i);
+      } catch (Exception ex) {
+        throw asUncheckedException(ex);
+      }
+    };
+  }
+
+  public static <T, R, E extends Exception> Function<T, R> uncheckedFunction(
+      ThrowingFunction<T, R, E> computer) {
+    return t -> {
+      try {
+        return shouldNotNull(computer).apply(t);
+      } catch (Exception e) {
+        throw asUncheckedException(e);
+      }
+    };
+  }
+
+  public static <E extends Exception> Runnable uncheckedRunner(ThrowingRunnable<E> runner) {
+    return () -> {
+      try {
+        shouldNotNull(runner).run();
+      } catch (Exception e) {
+        rethrow(e);
+      }
+    };
+  }
+
+  public static <T, E extends Exception> T uncheckedSupplied(ThrowingSupplier<T, E> supplier) {
+    try {
+      return shouldNotNull(supplier).get();
+    } catch (Exception e) {
+      throw asUncheckedException(e);
     }
-    if (t instanceof Error) {
-      throw (Error) t;
-    }
-    throw new CorantRuntimeException(t);
+  }
+
+  public static <T, E extends Exception> Supplier<T> uncheckedSupplier(
+      final ThrowingSupplier<T, E> supplier) {
+    return () -> {
+      try {
+        return shouldNotNull(supplier).get();
+      } catch (Exception e) {
+        throw asUncheckedException(e);
+      }
+    };
   }
 
   @FunctionalInterface

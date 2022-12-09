@@ -60,6 +60,10 @@ public class GeneralRuntimeException extends CorantRuntimeException {
 
   private Map<Object, Object> attributes = new HashMap<>();
 
+  public GeneralRuntimeException() {
+    this(UNKNOWN_EX_MSG);
+  }
+
   /**
    * Constructs a general runtime exception with the given message key
    *
@@ -77,28 +81,6 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    */
   public GeneralRuntimeException(Object messageKey, Object... messageParameters) {
     this(messageKey, messageParameters, null, null);
-  }
-
-  /**
-   * Constructs a general runtime exception with the given message key and message parameters and
-   * code and additional attributes.
-   *
-   * @param messageKey the exception message key use for message resolving or checking
-   * @param messageParameters the message parameters
-   * @param code the exception code for the catcher to do more action
-   * @param attributes the additional business-significant attributes for the catcher to do more
-   *        action
-   */
-  public GeneralRuntimeException(Object messageKey, Object[] messageParameters, Object code,
-      Map<Object, Object> attributes) {
-    this.messageKey = messageKey;
-    if (messageParameters != null) {
-      this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
-    }
-    this.code = code;
-    if (attributes != null) {
-      this.attributes.putAll(attributes);
-    }
   }
 
   /**
@@ -149,8 +131,26 @@ public class GeneralRuntimeException extends CorantRuntimeException {
     }
   }
 
-  protected GeneralRuntimeException() {
-    this(UNKNOWN_EX_MSG);
+  /**
+   * Constructs a general runtime exception with the given message key and message parameters and
+   * code and additional attributes.
+   *
+   * @param messageKey the exception message key use for message resolving or checking
+   * @param messageParameters the message parameters
+   * @param code the exception code for the catcher to do more action
+   * @param attributes the additional business-significant attributes for the catcher to do more
+   *        action
+   */
+  protected GeneralRuntimeException(Object messageKey, Object[] messageParameters, Object code,
+      Map<Object, Object> attributes) {
+    this.messageKey = messageKey;
+    if (messageParameters != null) {
+      this.messageParameters = Arrays.copyOf(messageParameters, messageParameters.length);
+    }
+    this.code = code;
+    if (attributes != null) {
+      this.attributes.putAll(attributes);
+    }
   }
 
   /**

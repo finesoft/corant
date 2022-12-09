@@ -14,9 +14,9 @@
 package org.corant.modules.ddd.shared.message;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.ubiquity.Throwing.uncheckedBiConsumer;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Functions.uncheckedBiConsumer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;

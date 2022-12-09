@@ -13,7 +13,10 @@
  */
 package org.corant.modules.security;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
+import org.corant.shared.exception.GeneralExceptionSeverity;
 import org.corant.shared.exception.GeneralRuntimeException;
 
 /**
@@ -34,11 +37,6 @@ public class AuthorizationException extends GeneralRuntimeException {
 
   public AuthorizationException(Object messageKey, Object... messageParameters) {
     super(messageKey, messageParameters);
-  }
-
-  public AuthorizationException(Object messageKey, Object[] messageParameters, Object code,
-      Map<Object, Object> attributes) {
-    super(messageKey, messageParameters, code, attributes);
   }
 
   public AuthorizationException(Throwable cause) {
@@ -67,5 +65,53 @@ public class AuthorizationException extends GeneralRuntimeException {
 
   public static AuthorizationException of(Throwable cause, String message) {
     return new AuthorizationException(message, cause);
+  }
+
+  @Override
+  public AuthorizationException attribute(Object name, Object value) {
+    super.attribute(name, value);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException attributes(Map<Object, Object> attributes) {
+    super.attributes(attributes);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException attributes(UnaryOperator<Map<Object, Object>> func) {
+    super.attributes(func);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException code(Object code) {
+    super.code(code);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException messageKey(Object messageKey) {
+    super.messageKey(messageKey);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException messageParameters(Object[] messageParameters) {
+    super.messageParameters(messageParameters);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException messageParameters(UnaryOperator<List<Object>> func) {
+    super.messageParameters(func);
+    return this;
+  }
+
+  @Override
+  public AuthorizationException severity(GeneralExceptionSeverity severity) {
+    super.severity(severity);
+    return this;
   }
 }

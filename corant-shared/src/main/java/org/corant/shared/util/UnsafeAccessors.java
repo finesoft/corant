@@ -14,13 +14,13 @@
 package org.corant.shared.util;
 
 import static java.lang.invoke.MethodType.methodType;
+import static org.corant.shared.util.Throwables.rethrow;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import org.corant.shared.exception.CorantRuntimeException;
 import sun.misc.Unsafe;
 
 /**
@@ -84,7 +84,7 @@ public class UnsafeAccessors {
           }
         }
       } catch (Throwable throwable) {
-        throw new CorantRuntimeException(throwable);
+        rethrow(throwable);
       }
     }
   }

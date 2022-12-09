@@ -21,6 +21,7 @@ import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Throwables.asUncheckedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
@@ -38,7 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -82,7 +82,7 @@ public class DirectoryWatcher extends AbstractWatcher {
       }
       trace = true;
     } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      throw asUncheckedException(e);
     }
   }
 

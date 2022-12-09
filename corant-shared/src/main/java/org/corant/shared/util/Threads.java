@@ -13,8 +13,8 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.ubiquity.Throwing.uncheckedRunner;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Functions.uncheckedRunner;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -85,12 +85,12 @@ public class Threads {
     }).start();
   }
 
-  public static <E extends Throwable> void delayRunInDaemonx(Duration delay,
+  public static <E extends Exception> void delayRunInDaemonx(Duration delay,
       ThrowingRunnable<E> runner) {
     delayRunInDaemonx(DAEMON_THREAD_NAME_PREFIX, delay, runner);
   }
 
-  public static <E extends Throwable> void delayRunInDaemonx(String threadName, Duration delay,
+  public static <E extends Exception> void delayRunInDaemonx(String threadName, Duration delay,
       ThrowingRunnable<E> runner) {
     delayRunInDaemon(threadName, delay, uncheckedRunner(runner));
   }
@@ -103,12 +103,12 @@ public class Threads {
     delayRunInDaemon(threadName, null, runner);
   }
 
-  public static <E extends Throwable> void runInDaemonx(String threadName,
+  public static <E extends Exception> void runInDaemonx(String threadName,
       ThrowingRunnable<E> runner) {
     delayRunInDaemonx(threadName, null, runner);
   }
 
-  public static <E extends Throwable> void runInDaemonx(ThrowingRunnable<E> runner) {
+  public static <E extends Exception> void runInDaemonx(ThrowingRunnable<E> runner) {
     delayRunInDaemonx(null, runner);
   }
 

@@ -1,6 +1,6 @@
 package org.corant.modules.mail;
 
-import static org.corant.shared.util.Functions.uncheckedFunction;
+import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;

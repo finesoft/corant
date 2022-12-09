@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Throwables.asUncheckedException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
@@ -319,7 +320,7 @@ public class Classes {
         if (ex instanceof NoSuchMethodException) {
           throw (NoSuchMethodException) ex;
         } else {
-          throw new CorantRuntimeException(ex);
+          throw asUncheckedException(ex);
         }
       }
     }

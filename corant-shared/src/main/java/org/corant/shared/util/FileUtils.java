@@ -15,12 +15,12 @@ package org.corant.shared.util;
 
 import static org.corant.shared.normal.Defaults.FOUR_KB;
 import static org.corant.shared.normal.Defaults.SIXTEEN_KBS;
+import static org.corant.shared.ubiquity.Throwing.uncheckedConsumer;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.emptyPredicate;
-import static org.corant.shared.util.Functions.uncheckedConsumer;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNoneNull;
@@ -160,6 +160,14 @@ public class FileUtils {
     }
   }
 
+  /**
+   * Returns a temporary file directory with given prefix, the directory will be deleted when the
+   * virtual machine terminates.
+   *
+   * @param prefix temporary file directory prefix string
+   *
+   * @see File#deleteOnExit()
+   */
   public static File createTempDir(String prefix) {
     try {
       File tempDir = Files
@@ -173,6 +181,16 @@ public class FileUtils {
     }
   }
 
+  /**
+   * Returns a temporary file with given prefix and suffix, the file will be deleted when the
+   * virtual machine terminates.
+   *
+   * @param prefix the prefix string to be used in generating the file's name;may be null suffix
+   * @param suffix the suffix string to be used in generating the file's name;may be null, in which
+   *        case ".tmp" is used
+   *
+   * @see File#deleteOnExit()
+   */
   public static File createTempFile(String prefix, String suffix) {
     try {
       File file = Files.createTempFile(prefix, suffix).toFile();

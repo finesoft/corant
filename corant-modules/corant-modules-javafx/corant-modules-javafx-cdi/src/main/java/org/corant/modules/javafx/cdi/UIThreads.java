@@ -13,9 +13,9 @@
  */
 package org.corant.modules.javafx.cdi;
 
+import static org.corant.shared.ubiquity.Throwing.uncheckedRunner;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Functions.uncheckedRunner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;

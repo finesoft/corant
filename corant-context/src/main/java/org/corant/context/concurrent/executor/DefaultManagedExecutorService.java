@@ -13,13 +13,13 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static org.corant.shared.util.Throwables.rethrow;
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.corant.context.concurrent.ConcurrentExtension;
-import org.corant.shared.ubiquity.Throwing;
 import org.glassfish.enterprise.concurrent.ContextServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedExecutorServiceImpl;
 import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
@@ -79,7 +79,7 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         command.run();
       } catch (Throwable t) {
         logger.log(Level.SEVERE, "Execute runnable occurred error!", t);
-        Throwing.rethrow(t);
+        rethrow(t);
       }
     } : command;
     super.execute(useCommand);

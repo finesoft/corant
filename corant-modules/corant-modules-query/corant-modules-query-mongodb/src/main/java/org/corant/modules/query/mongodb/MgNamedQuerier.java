@@ -35,7 +35,7 @@ public interface MgNamedQuerier
     AGGREGATE("aggregate"), FILTER("filter"), PROJECTION("projection"), MIN("min"), MAX(
         "max"), HINT("hint"), SORT("sort");
 
-    private String ops;
+    private final String ops;
 
     MgOperator(String ops) {
       this.ops = ops;

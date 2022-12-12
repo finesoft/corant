@@ -226,6 +226,7 @@ public class MongoClientExtension implements Extension {
   protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     clientConfigManager.getAllWithQualifiers().forEach((cfg, quas) -> {
       if (cfg.isVerifyDeployment()) {
+        logger.fine(() -> String.format("Check mongo client %s", cfg.getName()));
         resolve(MongoClient.class, quas).startSession().close();// FIXME use another ways.
       }
     });

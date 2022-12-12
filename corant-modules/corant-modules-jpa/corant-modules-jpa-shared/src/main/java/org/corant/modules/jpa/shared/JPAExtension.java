@@ -151,6 +151,8 @@ public class JPAExtension implements Extension {
     persistenceUnitInfoMetaDatas.values().forEach(pu -> {
       if (pu.isVerifyDeployment()) {
         // FIXME use provider validation
+        logger.fine(() -> String.format("Check entity manager, psersistence unit %s",
+            pu.getPersistenceUnitName()));
         resolve(EntityManagerFactory.class, qualifiers.get(pu.getName()))
             .createEntityManager(SynchronizationType.UNSYNCHRONIZED).close();
       }

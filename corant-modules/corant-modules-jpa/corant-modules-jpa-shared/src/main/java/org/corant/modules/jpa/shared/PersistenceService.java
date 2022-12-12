@@ -41,10 +41,19 @@ public interface PersistenceService {
   String EMPTY_PERSISTENCE_UNIT_NAME = Qualifiers.EMPTY_NAME;
 
   /**
+   * Returns a not managed entity manager for given persistence context
+   *
+   * @param pc persistence context use to retrieve the entity manager from the managed entity
+   *        manager factory
+   * @return a not managed entity manager
+   */
+  EntityManager createStandAloneEntityManager(PersistenceContext pc);
+
+  /**
    * Returns the managed entity manager for given persistence context
    *
-   * @param pc
-   * @return getEntityManager
+   * @param pc persistence context use to retrieve the entity manager from entity manager factory
+   * @return managed entity manager
    */
   EntityManager getEntityManager(PersistenceContext pc);
 
@@ -62,8 +71,9 @@ public interface PersistenceService {
   /**
    * Returns the managed entity manager factory for given persistence context
    *
-   * @param pc
-   * @return getEntityManagerFactory
+   * @param pc persistence context use to retrieve the entity manager factory by
+   *        {@link PersistenceContext#unitName()}
+   * @return managed entity manager factory
    */
   default EntityManagerFactory getEntityManagerFactory(PersistenceContext pc) {
     return getEntityManagerFactory(PersistenceUnitLiteral.of(pc));
@@ -72,16 +82,16 @@ public interface PersistenceService {
   /**
    * Returns the managed entity manager factory for given persistence unit
    *
-   * @param pu
-   * @return getEntityManagerFactory
+   * @param pu persistence unit use to retrieve the entity manager factory
+   * @return managed entity manager factory
    */
   EntityManagerFactory getEntityManagerFactory(PersistenceUnit pu);
 
   /**
    * Returns the managed entity manager factory for given persistence unit name
    *
-   * @param persistenceUnitName
-   * @return getEntityManagerFactory
+   * @param persistenceUnitName persistence unit name use to retrieve the entity manager factory
+   * @return managed entity manager factory
    */
   default EntityManagerFactory getEntityManagerFactory(String persistenceUnitName) {
     return getEntityManagerFactory(PersistenceUnitLiteral.of(persistenceUnitName));
@@ -104,13 +114,6 @@ public interface PersistenceService {
     private final SynchronizationType synchronization;
     private final Map<String, String> properties;
 
-    /**
-     * @param name
-     * @param unitName
-     * @param type
-     * @param synchronization
-     * @param properties
-     */
     protected PersistenceContextLiteral(String name, String unitName, PersistenceContextType type,
         SynchronizationType synchronization, Map<String, String> properties) {
       this.name = Qualifiers.resolveName(name);
@@ -238,10 +241,6 @@ public interface PersistenceService {
     private final String name;
     private final String unitName;
 
-    /**
-     * @param name
-     * @param unitName
-     */
     protected PersistenceUnitLiteral(String name, String unitName) {
       this.name = Qualifiers.resolveName(name);
       this.unitName = Qualifiers.resolveName(unitName);

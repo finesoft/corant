@@ -52,7 +52,7 @@ import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-jpa-shared
- *
+ * <p>
  * TODO FIXME Need to readjust how em and emf lookup, resolve all emfs in boost stage for warm-up
  * the application.
  *
@@ -88,6 +88,17 @@ public class JPAService implements PersistenceService {
   @Inject
   @Any
   protected Instance<EntityManagerFactoryConfigurator> emfConfigurator;
+
+  @Override
+  public EntityManager createStandAloneEntityManager(PersistenceContext pc) {
+    final MutableObject<EntityManager> entityManager = new MutableObject<>(
+        getEntityManagerFactory(PersistenceUnitLiteral.of(pc)).createEntityManager(
+            pc.synchronization(), PersistenceContextLiteral.extractProperties(pc.properties())));
+    if (!emConfigurator.isUnsatisfied()) {
+      emConfigurator.stream().sorted(Sortable::compare).forEachOrdered(entityManager::apply);
+    }
+    return entityManager.get();
+  }
 
   @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
@@ -176,7 +187,7 @@ public class JPAService implements PersistenceService {
 
   /**
    * corant-modules-jpa-shared
-   *
+   * <p>
    * TODO use entity manager factory as components key
    *
    * @author bingo 下午4:09:51

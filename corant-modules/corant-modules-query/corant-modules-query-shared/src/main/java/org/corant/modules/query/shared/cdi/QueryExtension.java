@@ -90,7 +90,8 @@ public class QueryExtension implements Extension {
     if (verifyDeployment) {
       resolve(QueryMappingService.class).getQueries();
       for (Class<?> cls : declarativeQueryServiceClasses) {
-        resolve(cls, AutoCreated.INST).toString();
+        String inst = resolve(cls, AutoCreated.INST).toString();
+        logger.fine(() -> String.format("Resolve declarative query service %s, %s", cls, inst));
       }
     }
   }

@@ -211,7 +211,7 @@ public interface Aggregate extends Entity {
      */
     DESTROYED(512);
 
-    int sign;
+    final int sign;
 
     Lifecycle(int sign) {
       this.sign = sign;

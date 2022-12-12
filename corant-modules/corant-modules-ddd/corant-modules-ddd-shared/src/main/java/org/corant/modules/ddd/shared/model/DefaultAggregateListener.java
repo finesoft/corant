@@ -24,9 +24,11 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
+import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.shared.unitwork.UnitOfWorks;
+import org.corant.modules.jta.shared.TransactionService;
 
 /**
  * corant-modules-ddd-shared
@@ -41,9 +43,17 @@ import org.corant.modules.ddd.shared.unitwork.UnitOfWorks;
  */
 public class DefaultAggregateListener {
 
+  protected static final boolean supportsNotTransactionLoad =
+      Configs.getValue("corant.ddd.unitofwork.support-no-transaction-load", Boolean.TYPE, true);
+
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected void handlePostLoad(AbstractAggregate o) {
+    if (supportsNotTransactionLoad && (TransactionService.currentTransaction() == null)) {
+      // Supports PersistenceContextType.EXTENDED
+      o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
+      return;
+    }
     if (o.callAssistant().dequeueMessages(false).size() > 0) {
       logger.warning(() -> String.format("The message held by aggregate %s will be clear.", o));
     }

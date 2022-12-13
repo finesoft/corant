@@ -36,8 +36,11 @@ import org.corant.context.required.RequiredExtension;
 import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
+import org.corant.shared.ubiquity.Configurator;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Services;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
@@ -212,6 +215,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
       if (handler != null) {
         handler.accept(deploy);
       }
+      Services.selectRequired(Configurator.class, this.getClass().getClassLoader())
+          .sorted(Sortable::compare).filter(c -> c.supports(deploy)).forEach(c -> c.accept(deploy));
       return deploy;
     }
 

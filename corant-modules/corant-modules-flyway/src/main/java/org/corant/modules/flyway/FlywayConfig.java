@@ -27,14 +27,16 @@ import org.flywaydb.core.api.configuration.ClassicConfiguration;
 @ConfigKeyRoot(value = "corant.flyway.migrate", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class FlywayConfig extends ClassicConfiguration implements DeclarativeConfig {
 
+  public static final String DEFAULT_LOCATION = "META-INF/dbmigration";
+
   private static final long serialVersionUID = 3571486311594362397L;
 
-  public static final FlywayConfig EMPTY = new FlywayConfig(false, "META-INF/dbmigration");
+  public static final FlywayConfig EMPTY = new FlywayConfig(false, DEFAULT_LOCATION);
 
   @ConfigKeyItem(defaultValue = "false")
   protected boolean enable;
 
-  @ConfigKeyItem(defaultValue = "META-INF/dbmigration")
+  @ConfigKeyItem(defaultValue = DEFAULT_LOCATION)
   protected String locationPrefix;
 
   @ConfigKeyItem(defaultValue = "true")

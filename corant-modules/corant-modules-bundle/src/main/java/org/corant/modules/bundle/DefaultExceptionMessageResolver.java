@@ -40,6 +40,9 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
   public String getMessage(Exception exception, Locale locale) {
     if (exception instanceof GeneralRuntimeException) {
       GeneralRuntimeException gre = (GeneralRuntimeException) exception;
+      if (gre.getMessageKey() == null && gre.getOriginalMessage() != null) {
+        return gre.getOriginalMessage();
+      }
       Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
       if (inst.isResolvable()) {
         final MessageResolver resolver = inst.get();

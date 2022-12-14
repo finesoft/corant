@@ -14,15 +14,12 @@
 package org.corant.modules.bundle;
 
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Functions.emptyBiPredicate;
-import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -32,8 +29,6 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -46,6 +41,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @SuppressWarnings("rawtypes")
 public class PropertyEnumerationSource implements EnumerationSource {
 
+  public static final String BUNDLE_PATHS_CFG_KEY = "corant.bundle.enum-file.paths";
+  public static final String DEFAULT_BUNDLE_PATHS = "META-INF/**Enums_*.properties";
+
   @Inject
   protected Logger logger;
 
@@ -54,8 +52,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
   protected volatile boolean initialized = false;
 
   @Inject
-  @ConfigProperty(name = "corant.bundle.enum-file.paths",
-      defaultValue = "META-INF/**Enums_*.properties")
+  @ConfigProperty(name = BUNDLE_PATHS_CFG_KEY, defaultValue = DEFAULT_BUNDLE_PATHS)
   protected String bundleFilePaths;
 
   @Override
@@ -116,34 +113,30 @@ public class PropertyEnumerationSource implements EnumerationSource {
           try {
             clear();
             logger.fine(() -> "Clear property enumerations bundle holder for initializing.");
-            Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(Strings::isNotBlank)
-                .flatMap(
-                    pkg -> PropertyResourceBundle.getBundles(pkg, emptyBiPredicate(true)).stream())
-                .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
-                  logger.fine(
-                      () -> String.format("Found enumeration resource from %s.", res.getUri()));
-                  Locale locale = res.getLocale();
-                  EnumLiteralsObject obj =
-                      holder.computeIfAbsent(locale, k -> new EnumLiteralsObject());
+            PropertyResourceBundle.getFoldedLocaleBundles(null, split(bundleFilePaths, ","))
+                .forEach((lc, res) -> {
+                  EnumLiteralsObject el = holder.computeIfAbsent(lc, k -> new EnumLiteralsObject());
                   res.dump().forEach((k, v) -> {
-                    int i = k.lastIndexOf('.');
-                    String enumClsName = k.substring(0, i);
-                    String enumItemKey = null;
-                    Class enumCls;
-                    try {
-                      enumCls = Class.forName(enumClsName);
-                      enumItemKey = k.substring(i + 1);
-                    } catch (ClassNotFoundException e) {
-                      enumCls = tryAsClass(k);
-                      if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
-                        obj.putEnumClass(enumCls, v);
-                      } else {
-                        throw new CorantRuntimeException("enum class %s error", res.getUri());
+                    if (!PropertyResourceBundle.PRIORITY_KEY.equals(k)) {
+                      int i = k.lastIndexOf('.');
+                      String enumClsName = k.substring(0, i);
+                      String enumItemKey = null;
+                      Class enumCls;
+                      try {
+                        enumCls = Class.forName(enumClsName);
+                        enumItemKey = k.substring(i + 1);
+                      } catch (ClassNotFoundException e) {
+                        enumCls = tryAsClass(k);
+                        if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
+                          el.putEnumClass(enumCls, v);
+                        } else {
+                          throw new CorantRuntimeException("Enum class %s on %s error", enumClsName,
+                              res.getUri());
+                        }
                       }
-                    }
-                    if (enumItemKey != null) {
-                      obj.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
+                      if (enumItemKey != null) {
+                        el.putEnum(Enum.valueOf(enumCls, enumItemKey), v);
+                      }
                     }
                   });
                 });

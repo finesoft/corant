@@ -25,6 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import org.corant.shared.ubiquity.Experimental;
 import org.jboss.resteasy.spi.AsyncMessageBodyWriter;
 import org.jboss.resteasy.spi.AsyncOutputStream;
 
@@ -40,6 +41,7 @@ import org.jboss.resteasy.spi.AsyncOutputStream;
  * @author bingo 上午11:07:19
  *
  */
+@Experimental
 @Provider
 @Priority(3000)
 @Consumes({"application/json", "application/*+json", "text/json"})
@@ -51,8 +53,8 @@ public class ImprovedJsonWebNumberWriter extends AbstractImprovedJsonWriter<Numb
   public CompletionStage<Void> asyncWriteTo(Number t, Class<?> type, Type genericType,
       Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
       AsyncOutputStream entityStream) {
-    return internalWriter().asyncWriteTo(t, type, genericType, annotations, mediaType,
-        httpHeaders, entityStream);
+    return internalWriter().asyncWriteTo(t, type, genericType, annotations, mediaType, httpHeaders,
+        entityStream);
   }
 
   @Override

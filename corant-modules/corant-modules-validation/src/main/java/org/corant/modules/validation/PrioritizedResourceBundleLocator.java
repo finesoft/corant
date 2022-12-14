@@ -16,29 +16,31 @@ package org.corant.modules.validation;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.spi.ResourceBundleProvider;
+import org.corant.config.Configs;
+import org.corant.modules.bundle.PropertyMessageSource;
+import org.corant.modules.bundle.PropertyResourceBundle;
+import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 
 /**
  * corant-modules-validation
  *
  * <p>
- * To be continue!
+ * Prioritized resource bundle locator.
+ *
+ * @see PropertyResourceBundle
  *
  * @author bingo 上午11:23:30
  *
  */
-public class AggregateResourceBundleProvider implements ResourceBundleProvider {
+public class PrioritizedResourceBundleLocator implements ResourceBundleLocator {
 
-  final Map<Locale, ResourceBundle> bundles = new ConcurrentHashMap<>();
-
-  protected AggregateResourceBundleProvider() {
-
-  }
+  protected static final Map<Locale, PropertyResourceBundle> bundles = PropertyResourceBundle
+      .getFoldedLocaleBundles(null, Configs.getValue(PropertyMessageSource.BUNDLE_PATHS_CFG_KEY,
+          String.class, PropertyMessageSource.DEFAULT_BUNDLE_PATHS));
 
   @Override
-  public ResourceBundle getBundle(String baseName, Locale locale) {
-    return null;// TODO FIXME
+  public ResourceBundle getResourceBundle(Locale locale) {
+    return bundles.get(locale);
   }
 
 }

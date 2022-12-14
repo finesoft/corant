@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,6 +44,7 @@ import org.corant.shared.resource.URLResource;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-bundle
@@ -115,6 +117,24 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
       throw new NoSuchBundleException(e, "Can not load property resource bundles from paths %s.",
           path);
     }
+  }
+
+  public static Map<Locale, PropertyResourceBundle> getFoldedLocaleBundles(
+      BiPredicate<String, String> fs, String... paths) {
+    Map<Locale, PropertyResourceBundle> bundles = new HashMap<>();
+    Arrays.stream(paths).filter(Strings::isNotBlank).flatMap(pkg -> getBundles(pkg, fs).stream())
+        .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
+          Locale locale = res.getLocale();
+          PropertyResourceBundle bundle = bundles.get(locale);
+          if (bundle == null) {
+            bundles.put(locale, res);
+          } else {
+            res.setParent(bundle);
+            bundle = res;
+            bundles.put(locale, bundle);
+          }
+        });
+    return bundles;
   }
 
   protected static Locale detectLocaleByName(String name) {

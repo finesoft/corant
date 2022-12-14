@@ -16,11 +16,9 @@ package org.corant.modules.bundle;
 import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -34,7 +32,6 @@ import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.util.Strings;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -46,6 +43,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class PropertyMessageSource implements MessageSource {
 
+  public static final String BUNDLE_PATHS_CFG_KEY = "corant.bundle.message-file.paths";
+  public static final String DEFAULT_BUNDLE_PATHS = "META-INF/**Messages_*.properties";
   protected final Map<Locale, PropertyResourceBundle> bundles = new ConcurrentHashMap<>();
 
   protected volatile boolean initialized = false;
@@ -54,8 +53,7 @@ public class PropertyMessageSource implements MessageSource {
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "corant.bundle.message-file.paths",
-      defaultValue = "META-INF/**Messages_*.properties")
+  @ConfigProperty(name = BUNDLE_PATHS_CFG_KEY, defaultValue = DEFAULT_BUNDLE_PATHS)
   protected String bundleFilePaths;
 
   @Inject
@@ -133,21 +131,8 @@ public class PropertyMessageSource implements MessageSource {
         if (!isInitialized()) {
           try {
             bundles.clear();
-            Set<String> paths = setOf(split(bundleFilePaths, ","));
-            paths.stream().filter(Strings::isNotBlank)
-                .flatMap(pkg -> PropertyResourceBundle.getBundles(pkg, filter).stream())
-                .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
-                  Locale locale = res.getLocale();
-                  PropertyResourceBundle bundle = bundles.get(locale);
-                  if (bundle == null) {
-                    bundles.put(locale, res);
-                  } else {
-                    res.setParent(bundle);
-                    bundle = res;
-                    bundles.put(locale, bundle);
-                  }
-                  logger.fine(() -> String.format("Found message resource from %s.", res.getUri()));
-                });
+            bundles.putAll(
+                PropertyResourceBundle.getFoldedLocaleBundles(filter, split(bundleFilePaths, ",")));
             logger.info(() -> "All property message bundles are loaded.");
           } finally {
             initialized = true;

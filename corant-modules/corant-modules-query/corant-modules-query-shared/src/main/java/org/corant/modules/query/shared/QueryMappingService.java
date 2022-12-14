@@ -67,6 +67,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class QueryMappingService {
 
+  public static final String MAPPING_FILE_PATH_CFG_KEY = "corant.query.mapping-file.paths";
+  public static final String DEFAULT_MAPPING_FILE_PATH = "META-INF/**Query.xml";
+
   protected final static ReadWriteLock rwl = new ReentrantReadWriteLock();
   protected final static AtomicLong initializedVersion = new AtomicLong(0);
 
@@ -77,7 +80,7 @@ public class QueryMappingService {
   protected Logger logger;
 
   @Inject
-  @ConfigProperty(name = "corant.query.mapping-file.paths", defaultValue = "META-INF/**Query.xml")
+  @ConfigProperty(name = MAPPING_FILE_PATH_CFG_KEY, defaultValue = DEFAULT_MAPPING_FILE_PATH)
   protected String mappingFilePaths;
 
   @Inject

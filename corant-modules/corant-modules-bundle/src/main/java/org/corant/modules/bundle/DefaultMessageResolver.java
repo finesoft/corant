@@ -47,8 +47,8 @@ import org.corant.shared.util.Strings;
  * <p>
  * Default message resolver implementation, it is used to resolve messages, support for the
  * parameterization and internationalization of such messages. All message sources come from
- * {@link MessageSource}, and the resolving process will process message sources and message
- * parameters according to the respective priorities of {@link MessageSource} and
+ * {@link MessageSourceManager#stream()}, and the resolving process will process message sources and
+ * message parameters according to the respective priorities of {@link MessageSource} and
  * {@link MessageParameterResolver}.
  *
  * <p>
@@ -56,10 +56,7 @@ import org.corant.shared.util.Strings;
  * return the final message. In message parameter resolving, a {@link MessageParameterResolver}
  * chain is used to process the message parameter before it pass to the {@link MessageInterpreter}.
  *
- * <p>
- * Note: The default implementation uses a caching mechanism, some message sources may be updated in
- * real time, so caller can call {@link #refresh()} to refresh the entire cache.
- *
+ * @see MessageSourceManager#stream()
  * @see MessageSource#getMessage(Locale, Object, Function)
  * @see MessageInterpreter#apply(Object[], Locale)
  * @see MessageParameterResolver#handle(Locale, Object)

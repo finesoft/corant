@@ -83,7 +83,7 @@ public interface MessageResolver extends AutoCloseable {
       if (key == null) {
         return null;
       } else {
-        return new StringBuilder(name()).append(Names.NAME_SPACE_SEPARATORS).append(key).toString();
+        return name() + Names.NAME_SPACE_SEPARATORS + key;
       }
     }
   }

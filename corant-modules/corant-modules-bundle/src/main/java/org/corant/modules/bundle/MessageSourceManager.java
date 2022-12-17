@@ -34,9 +34,9 @@ public interface MessageSourceManager {
   default void refresh() {}
 
   /**
-   * Used to release all message sources, generally called when the application is about to
-   * shutdown. Release can be implemented in many ways. For example, some the message sources may
-   * hold an underlying resource, and calling this method can release related resources.
+   * Used to release all message sources, generally called when the application is about to shut
+   * down. Release can be implemented in many ways. For example, some the message sources may hold
+   * an underlying resource, and calling this method can release related resources.
    */
   default void release() {}
 

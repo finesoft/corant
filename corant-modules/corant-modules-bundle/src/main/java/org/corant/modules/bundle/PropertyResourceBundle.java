@@ -182,7 +182,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
   }
 
   /**
-   * Returns a locale resource bundle maps combining all property resource bundles scanned ccording
+   * Returns a locale resource bundle maps combining all property resource bundles scanned according
    * to the given path expression.
    *
    * @param paths path expression supports class path and file system path with wildcard etc

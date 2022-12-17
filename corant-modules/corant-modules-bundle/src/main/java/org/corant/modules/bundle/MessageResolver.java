@@ -68,11 +68,6 @@ public interface MessageResolver extends AutoCloseable {
       Function<Locale, String> failLookupHandler);
 
   /**
-   * Used to refresh the cache, if the implementation uses a caching mechanism.
-   */
-  default void refresh() {}
-
-  /**
    * corant-modules-bundle
    *
    * <p>
@@ -88,8 +83,7 @@ public interface MessageResolver extends AutoCloseable {
       if (key == null) {
         return null;
       } else {
-        return new StringBuilder(name()).append(Names.NAME_SPACE_SEPARATORS).append(key.toString())
-            .toString();
+        return new StringBuilder(name()).append(Names.NAME_SPACE_SEPARATORS).append(key).toString();
       }
     }
   }

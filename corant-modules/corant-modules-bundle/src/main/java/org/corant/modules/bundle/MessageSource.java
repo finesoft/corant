@@ -13,7 +13,9 @@
  */
 package org.corant.modules.bundle;
 
+import static java.util.Collections.emptySet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Function;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -31,10 +33,49 @@ public interface MessageSource extends Sortable, AutoCloseable {
   @Override
   default void close() throws Exception {}
 
+  /**
+   * Returns all message keys related to the given locale for this resource.
+   *
+   * @param locale the locale to retrieve, can't null
+   * @return all the message keys related to the given locale
+   */
+  default Set<String> getKeys(Locale locale) {
+    return emptySet();
+  }
+
+  /**
+   * Returns the locales supported by this resource.
+   */
+  default Set<Locale> getLocales() {
+    return emptySet();
+  }
+
+  /**
+   * Try to resolve the message.
+   *
+   * @param locale the locale in which to do the lookup
+   * @param key key the message key to lookup
+   * @return the resolved message if the lookup was successful otherwise throws
+   *         NoSuchBundleException
+   */
   String getMessage(Locale locale, Object key) throws NoSuchBundleException;
 
+  /**
+   * Try to resolve the message. Return default message if no message was found.
+   *
+   * @param locale the locale in which to do the lookup
+   * @param key key the message key to lookup
+   * @param defaultMessage a default message callback is used to return default message if the
+   *        lookup fails
+   * @return the resolved message if the lookup was successful, otherwise return the default
+   *         message.
+   */
   String getMessage(Locale locale, Object key, Function<Locale, String> defaultMessage);
 
+  /**
+   * Refresh underling caching if necessary, usually all callers that use message source may perform
+   * a refresh before starting to use.
+   */
   default void refresh() {}
 
   /**

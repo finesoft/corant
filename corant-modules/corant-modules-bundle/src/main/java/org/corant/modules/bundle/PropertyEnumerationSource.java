@@ -113,7 +113,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
           try {
             clear();
             logger.fine(() -> "Clear property enumerations bundle holder for initializing.");
-            PropertyResourceBundle.getFoldedLocaleBundles(null, split(bundleFilePaths, ","))
+            PropertyResourceBundle.getFoldedLocaleBundles(split(bundleFilePaths, ","))
                 .forEach((lc, res) -> {
                   EnumLiteralsObject el = holder.computeIfAbsent(lc, k -> new EnumLiteralsObject());
                   res.dump().forEach((k, v) -> {

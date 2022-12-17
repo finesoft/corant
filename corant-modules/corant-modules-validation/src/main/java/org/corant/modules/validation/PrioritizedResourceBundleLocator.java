@@ -25,7 +25,8 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
  * corant-modules-validation
  *
  * <p>
- * Prioritized resource bundle locator.
+ * A simple class that scans all message resources according to URL expressions, and uses these
+ * resources and their priorities to construct {@link ResourceBundle}.
  *
  * @see PropertyResourceBundle
  *
@@ -35,7 +36,7 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 public class PrioritizedResourceBundleLocator implements ResourceBundleLocator {
 
   protected static final Map<Locale, PropertyResourceBundle> bundles = PropertyResourceBundle
-      .getFoldedLocaleBundles(null, Configs.getValue(PropertyMessageSource.BUNDLE_PATHS_CFG_KEY,
+      .getFoldedLocaleBundles(Configs.getValue(PropertyMessageSource.BUNDLE_PATHS_CFG_KEY,
           String.class, PropertyMessageSource.DEFAULT_BUNDLE_PATHS));
 
   @Override

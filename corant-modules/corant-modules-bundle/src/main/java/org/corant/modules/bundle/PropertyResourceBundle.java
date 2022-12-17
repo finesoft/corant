@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.defaultBiPredicate;
 import static org.corant.shared.util.Functions.emptyBiPredicate;
 import static org.corant.shared.util.Maps.getMapInteger;
@@ -48,6 +49,12 @@ import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-bundle
+ *
+ * <p>
+ * A simple class can build a {@link ResourceBundle} with priority according to the specified
+ * properties {@link Resource}.
+ *
+ * @see Sortable
  *
  * @author bingo 下午3:47:37
  *
@@ -102,39 +109,88 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
     });
   }
 
+  /**
+   * Combine the given property resource bundle list into a locale maps according to the priority
+   * order, where the higher priority is the parent.
+   *
+   * @param list property bundle to be combined
+   * @return a combined locale bundle maps
+   */
+  public static Map<Locale, PropertyResourceBundle> foldedLocaleBundles(
+      List<PropertyResourceBundle> list) {
+    Map<Locale, PropertyResourceBundle> bundles = new HashMap<>();
+    if (isNotEmpty(list)) {
+      list.stream().sorted(Sortable::reverseCompare).forEachOrdered(res -> {
+        Locale locale = res.getLocale();
+        PropertyResourceBundle bundle = bundles.get(locale);
+        if (bundle == null) {
+          bundles.put(locale, res);
+        } else {
+          res.setParent(bundle);
+          bundle = res;
+          bundles.put(locale, bundle);
+        }
+      });
+    }
+    return bundles;
+  }
+
+  /**
+   * Return all property resource bundles scanned according to the given path expression, the given
+   * path expression supports class path and file system path with wildcard etc.
+   *
+   * @param path path expression supports class path and file system path with wildcard etc
+   * @see #getBundles(String, BiPredicate)
+   */
   public static List<PropertyResourceBundle> getBundles(String path) {
     return getBundles(path, emptyBiPredicate(true));
   }
 
+  /**
+   * Return all property resource bundles scanned according to the given path expression, the given
+   * path expression supports class path and file system path with wildcard etc.
+   *
+   * @param path path expression supports class path and file system path with wildcard etc
+   * @param fs filter use to filter the properties key and value
+   * @return a property resource bundle list
+   */
   public static List<PropertyResourceBundle> getBundles(String path,
       BiPredicate<String, String> fs) {
     try {
-      List<PropertyResourceBundle> list = Resources.from(path).parallel()
-          .map(r -> new PropertyResourceBundle(r, fs)).collect(Collectors.toList());
-      list.sort(Sortable::compare);
-      return list;
+      return Resources.from(path).parallel().map(r -> new PropertyResourceBundle(r, fs))
+          .sorted(Sortable::compare).collect(Collectors.toList());
     } catch (IOException e) {
       throw new NoSuchBundleException(e, "Can not load property resource bundles from paths %s.",
           path);
     }
   }
 
+  /**
+   * Returns a locale resource bundle maps combining all property resource bundles scanned according
+   * to the given path expression and filtered according to the given property key value filter.
+   *
+   * @param fs filter use to filter the properties key and value
+   * @param paths path expression supports class path and file system path with wildcard etc
+   *
+   * @see #getBundles(String, BiPredicate)
+   * @see #foldedLocaleBundles(List)
+   */
   public static Map<Locale, PropertyResourceBundle> getFoldedLocaleBundles(
       BiPredicate<String, String> fs, String... paths) {
-    Map<Locale, PropertyResourceBundle> bundles = new HashMap<>();
-    Arrays.stream(paths).filter(Strings::isNotBlank).flatMap(pkg -> getBundles(pkg, fs).stream())
-        .sorted(Sortable::reverseCompare).forEachOrdered(res -> {
-          Locale locale = res.getLocale();
-          PropertyResourceBundle bundle = bundles.get(locale);
-          if (bundle == null) {
-            bundles.put(locale, res);
-          } else {
-            res.setParent(bundle);
-            bundle = res;
-            bundles.put(locale, bundle);
-          }
-        });
-    return bundles;
+    return foldedLocaleBundles(Arrays.stream(paths).filter(Strings::isNotBlank)
+        .flatMap(pkg -> getBundles(pkg, fs).stream()).collect(Collectors.toList()));
+  }
+
+  /**
+   * Returns a locale resource bundle maps combining all property resource bundles scanned ccording
+   * to the given path expression.
+   *
+   * @param paths path expression supports class path and file system path with wildcard etc
+   *
+   * @see #getFoldedLocaleBundles(BiPredicate, String...)
+   */
+  public static Map<Locale, PropertyResourceBundle> getFoldedLocaleBundles(String... paths) {
+    return getFoldedLocaleBundles(null, paths);
   }
 
   protected static Locale detectLocaleByName(String name) {

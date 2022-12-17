@@ -14,25 +14,27 @@
 package org.corant.modules.bundle;
 
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.newConcurrentHashSet;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import org.corant.modules.bundle.MessageSource.MessageSourceRefreshedEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
@@ -68,14 +70,19 @@ import org.corant.shared.util.Strings;
 public class DefaultMessageResolver implements MessageResolver {
 
   protected final Map<Locale, Map<String, MessageInterpreter>> holder = new ConcurrentHashMap<>();
-  protected final ReadWriteLock rwl = new ReentrantReadWriteLock();
+  protected final Set<String> validKeys = newConcurrentHashSet();
+  protected final AtomicLong lastSourceVersion = new AtomicLong(0);
+  protected volatile long cachedSourceVersion = 0;
 
   @Inject
   protected Logger logger;
 
   @Inject
+  protected MessageSourceManager sourceManager;
+
+  @Inject
   @Any
-  protected Instance<MessageSource> messageSources;
+  protected Instance<MessageSourceFilter> sourceFilters;
 
   @Inject
   @Any
@@ -83,23 +90,10 @@ public class DefaultMessageResolver implements MessageResolver {
 
   @Override
   public void close() throws Exception {
-    Lock writeLock = rwl.writeLock();
-    try {
-      writeLock.lock();
-      holder.clear();
-      if (!messageSources.isUnsatisfied()) {
-        messageSources.stream().sorted(Sortable::compare).forEach(t -> {
-          try {
-            t.close();
-          } catch (Exception e) {
-            throw new CorantRuntimeException(e);
-          }
-        });
-      }
-      logger.info(() -> "Close message resolver, all caches are cleared.");
-    } finally {
-      writeLock.unlock();
-    }
+    holder.clear();
+    validKeys.clear();
+    sourceManager.release();
+    logger.info(() -> "Close message resolver, all caches are cleared.");
   }
 
   @Override
@@ -107,39 +101,21 @@ public class DefaultMessageResolver implements MessageResolver {
       Function<Locale, String> failLookupHandler) {
     Locale useLocale = defaultObject(locale, Locale::getDefault);
     Object[] parameters = resolveParameters(useLocale, params);
-    Lock readLock = rwl.readLock();
-    try {
-      readLock.lock();
-      String rawMessage = resolveRawMessage(useLocale, key);
-      String message =
-          rawMessage == null ? null : resolveMessage(useLocale, key, rawMessage, parameters);
-      if (message == null) {
-        logger.warning(() -> String.format("Can't find any message for %s", key));
-        if (failLookupHandler != null) {
-          message = failLookupHandler.apply(locale);
-        } else {
-          throw new NoSuchMessageException("Can't find any message for %s.", key);
-        }
+    String rawMsg = resolveRawMessage(useLocale, key);
+    String msg = rawMsg == null ? null : resolveMessage(useLocale, key, rawMsg, parameters);
+    if (msg == null) {
+      logger.warning(() -> String.format("Can't find any message for %s", key));
+      if (failLookupHandler != null) {
+        msg = failLookupHandler.apply(locale);
+      } else {
+        throw new NoSuchMessageException("Can't find any message for %s.", key);
       }
-      return message;
-    } finally {
-      readLock.unlock();
     }
+    return msg;
   }
 
-  @Override
-  public void refresh() {
-    logger.info(() -> "Refresh message resolver, all caches will be refreshed.");
-    Lock writeLock = rwl.writeLock();
-    try {
-      writeLock.lock();
-      holder.clear();
-      if (!messageSources.isUnsatisfied()) {
-        messageSources.stream().sorted(Sortable::compare).forEach(MessageSource::refresh);
-      }
-    } finally {
-      writeLock.unlock();
-    }
+  protected void onMessageSourceRefreshed(@Observes MessageSourceRefreshedEvent e) {
+    lastSourceVersion.incrementAndGet();
   }
 
   @PreDestroy
@@ -180,12 +156,24 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   protected String resolveMessage(Locale locale, Object key, String rawMessage, Object[] params) {
-    if (key == null) {
+    if (key == null || !verifyKeyAndMessage(key.toString(), rawMessage)) {
       return null;
     }
-    return holder.computeIfAbsent(locale, l -> new ConcurrentHashMap<>(256))
+    String msg = holder.computeIfAbsent(locale, l -> new ConcurrentHashMap<>(256))
         .computeIfAbsent(key.toString(), c -> resolveInterpreter(rawMessage, locale))
         .apply(params, locale);
+    // FIXME Use another ways to avoid the holder invalid or dirty
+    final long lsv = lastSourceVersion.get();
+    if (cachedSourceVersion != lsv) {
+      holder.clear();
+      validKeys.clear();
+      synchronized (this) {
+        if (cachedSourceVersion != lsv) {
+          cachedSourceVersion = lsv;
+        }
+      }
+    }
+    return msg;
   }
 
   protected Object resolveParameter(Locale locale, Object obj) {
@@ -205,11 +193,21 @@ public class DefaultMessageResolver implements MessageResolver {
   }
 
   protected String resolveRawMessage(Locale locale, Object key) {
-    if (!messageSources.isUnsatisfied()) {
-      return messageSources.stream().sorted(Sortable::compare)
-          .map(b -> b.getMessage(locale, key, s -> null)).filter(Strings::isNotBlank).findFirst()
-          .orElse(null);
+    return sourceManager.stream().sorted(Sortable::compare)
+        .map(b -> b.getMessage(locale, key, s -> null)).filter(Strings::isNotBlank).findFirst()
+        .orElse(null);
+  }
+
+  protected boolean verifyKeyAndMessage(String key, String rawMessage) {
+    if (!validKeys.contains(key)) {
+      if (!sourceFilters.isUnsatisfied()) {
+        MessageSourceFilter filter = sourceFilters.stream().max(Sortable::compare).orElse(null);
+        if (filter != null && !filter.test(key, rawMessage)) {
+          return false;
+        }
+      }
+      validKeys.add(key);
     }
-    return null;
+    return true;
   }
 }

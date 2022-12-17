@@ -13,25 +13,21 @@
  */
 package org.corant.modules.bundle;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableMap;
-import static org.corant.shared.util.Functions.emptyBiPredicate;
+import static java.util.Collections.unmodifiableSet;
+import static org.corant.modules.bundle.PropertyResourceBundle.getFoldedLocaleBundles;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.split;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -56,12 +52,6 @@ public class PropertyMessageSource implements MessageSource {
   @ConfigProperty(name = BUNDLE_PATHS_CFG_KEY, defaultValue = DEFAULT_BUNDLE_PATHS)
   protected String bundleFilePaths;
 
-  @Inject
-  @Any
-  protected Instance<MessageSourceFilter> filters;
-
-  protected BiPredicate<String, String> filter = emptyBiPredicate(true);
-
   @Override
   public synchronized void close() throws Exception {
     initialized = false;
@@ -71,6 +61,20 @@ public class PropertyMessageSource implements MessageSource {
 
   public Map<Locale, PropertyResourceBundle> getBundles() {
     return unmodifiableMap(bundles);
+  }
+
+  @Override
+  public Set<String> getKeys(Locale locale) {
+    PropertyResourceBundle bundle = bundles.get(locale);
+    if (bundle != null) {
+      return unmodifiableSet(bundle.keySet());
+    }
+    return emptySet();
+  }
+
+  @Override
+  public Set<Locale> getLocales() {
+    return unmodifiableSet(bundles.keySet());
   }
 
   @Override
@@ -85,12 +89,7 @@ public class PropertyMessageSource implements MessageSource {
         throw new NoSuchMessageException("Can't find message for %s with locale %s.",
             key.toString(), useLocale.toString());
       }
-      String message = bundle.getString(key.toString());
-      if (!filter.test(key.toString(), message)) {
-        throw new NoSuchMessageException("Can't find message for %s with locale %s.",
-            key.toString(), useLocale.toString());
-      }
-      return message;
+      return bundle.getString(key.toString());
     }
   }
 
@@ -106,9 +105,6 @@ public class PropertyMessageSource implements MessageSource {
         return defaultMessage.apply(useLocale);
       } else {
         String message = bundle.getString(key.toString());
-        if (!filter.test(key.toString(), message)) {
-          message = null;
-        }
         return defaultObject(message, () -> defaultMessage.apply(useLocale));
       }
     }
@@ -131,8 +127,7 @@ public class PropertyMessageSource implements MessageSource {
         if (!isInitialized()) {
           try {
             bundles.clear();
-            bundles.putAll(
-                PropertyResourceBundle.getFoldedLocaleBundles(filter, split(bundleFilePaths, ",")));
+            bundles.putAll(getFoldedLocaleBundles(split(bundleFilePaths, ",")));
             logger.info(() -> "All property message bundles are loaded.");
           } finally {
             initialized = true;
@@ -140,22 +135,6 @@ public class PropertyMessageSource implements MessageSource {
           }
         }
       }
-    }
-  }
-
-  @PostConstruct
-  protected void onPostConstruct() {
-    if (!filters.isUnsatisfied()) {
-      filter = filters.stream().max(Sortable::compare).get();
-    }
-  }
-
-  @PreDestroy
-  protected void onPreDestroy() {
-    try {
-      close();
-    } catch (Exception e) {
-      throw new CorantRuntimeException(e);
     }
   }
 

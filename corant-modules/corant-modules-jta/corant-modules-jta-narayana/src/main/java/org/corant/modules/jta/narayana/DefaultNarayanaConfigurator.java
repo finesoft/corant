@@ -123,23 +123,22 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
                 Throwable t =
                     new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");
                 t.setStackTrace(thread.getStackTrace());
-                logger.log(Level.INFO, t,
-                    () -> String.format("Transaction %s is %s with active thread %s.",
-                        actUid.toString(), isCommit ? "committing" : "aborting", thread.getName()));
+                logger.log(Level.INFO, t, () -> String.format(
+                    "Transaction %s is %s with active thread %s-%s, this may be caused by a timeout.",
+                    actUid.toString(), isCommit ? "committing" : "aborting", thread.getName(),
+                    thread.getId()));
               } catch (Exception e) {
-                logger.log(Level.WARNING, e,
-                    () -> String.format(
-                        "Narayana extension checked action execute failed on %s , isCommit %s .",
-                        actUid, isCommit));
+                logger.log(Level.WARNING, e, () -> String.format(
+                    "Narayana extension checked action execute failed on %s , isCommit %s. This may be caused by a timeout.",
+                    actUid, isCommit));
               }
               thread.interrupt();
             }
           }
         } catch (Exception e) {
-          logger.log(Level.WARNING, e,
-              () -> String.format(
-                  "Narayana extension checked action execute failed on %s , isCommit %s .", actUid,
-                  isCommit));
+          logger.log(Level.WARNING, e, () -> String.format(
+              "Narayana extension checked action execute failed on %s , isCommit %s. This may be caused by a timeout.",
+              actUid, isCommit));
         }
         tsLogger.i18NLogger.warn_coordinator_CheckedAction_2(actUid, Integer.toString(list.size()));
       }

@@ -31,8 +31,8 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-ddd-shared
  *
  * <p>
- * The JTA JPA unit of works manager, use for create and destroy the unit of works, provide
- * thenecessary transaction manager and message dispatch service for the unit of work.
+ * The JTA JPA unit of works manager, use for create and destroy the unit of works, provide the
+ * necessary transaction manager and message dispatch service for the unit of work.
  * </p>
  *
  * @author bingo 下午2:14:21
@@ -54,10 +54,10 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     try {
       final Transaction curTx = shouldNotNull(transactionManager.getTransaction(),
           "For now we only support transactional unit of work.");
-      return uows.computeIfAbsent(wrapUintOfWorksKey(curTx), key -> {
+      return uows.computeIfAbsent(wrapUnitOfWorksKey(curTx), key -> {
         try {
-          logger.fine(() -> "Register an new unit of work with the current transacion context.");
-          AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnifOfWorksKey(key));
+          logger.fine(() -> "Register an new unit of work with the current transaction context.");
+          AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnitOfWorksKey(key));
           curTx.registerSynchronization(uow);
           return uow;
         } catch (IllegalStateException | RollbackException | SystemException e) {
@@ -80,7 +80,7 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   protected abstract AbstractJTAJPAUnitOfWork buildUnitOfWork(Transaction transaction);
 
   protected void clearCurrentUnitOfWorks(Object key) {
-    logger.fine(() -> "Deregister the unit of work with the current transacion context.");
+    logger.fine(() -> "Deregister the unit of work with the current transaction context.");
     uows.remove(key);
   }
 
@@ -90,11 +90,11 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     logger.fine(() -> "Clear unit of works.");
   }
 
-  protected Transaction unwrapUnifOfWorksKey(Object object) {
+  protected Transaction unwrapUnitOfWorksKey(Object object) {
     return object == null ? null : (Transaction) object;
   }
 
-  protected Object wrapUintOfWorksKey(Transaction transaction) {
+  protected Object wrapUnitOfWorksKey(Transaction transaction) {
     return transaction;// JTA1.3 Spec-> 3.3.4 Transaction Equality and Hash Code
   }
 

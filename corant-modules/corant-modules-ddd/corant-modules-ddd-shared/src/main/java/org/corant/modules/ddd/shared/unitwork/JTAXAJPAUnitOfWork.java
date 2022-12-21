@@ -23,9 +23,9 @@ import org.corant.shared.exception.CorantRuntimeException;
  *
  * <p>
  * The JPA unit of work based on JTA XA resource transaction boundaries, generally used for
- * single/multi database and/or use XA message queue scenarios. Through JTA's transaction
- * management, the state of the business entity are persisted and the messages are sent before the
- * transaction is committed.<br>
+ * single/multi database and/or use XA message queue scenarios. Through JTA transaction management,
+ * the state of the business entity are persisted and the messages are sent before the transaction
+ * is committed.<br>
  * This solution can theoretically guarantee full consistency.
  * </p>
  *
@@ -47,7 +47,7 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   @Override
   protected void handleMessage() {
     logger.fine(() -> String.format(
-        "Sorted the flushed messages and store them if nessuary, dispatch them to the message dispatcher, before %s completion.",
+        "Sorted the flushed messages and store them if necessary, dispatch them to the message dispatcher, before %s completion.",
         transaction.toString()));
     LinkedList<WrappedMessage> messages = new LinkedList<>();
     extractMessages(messages);

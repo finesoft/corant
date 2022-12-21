@@ -13,9 +13,13 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Objects.areEqual;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -73,7 +77,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   protected final UnitOfWorksManager manager;
   protected final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   protected final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
-  protected final Map<AggregateIdentifier, Lifecycle> evolutiveAggregates = new LinkedHashMap<>();
+  protected final Map<AggregateIdentifier, Lifecycle> evolutionaryAggregates =
+      new LinkedHashMap<>();
   protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
   protected final LinkedList<WrappedMessage> registeredMessages = new LinkedList<>();
 
@@ -100,7 +105,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.remove(ai);
-          evolutiveAggregates.remove(ai);
+          evolutionaryAggregates.remove(ai);
           registeredMessages.removeIf(e -> areEqual(e.getSource(), ai));
         }
       } else if (obj instanceof Message) {
@@ -120,7 +125,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    * @return the registered aggregates
    */
   public Map<AggregateIdentifier, Lifecycle> getAggregates() {
-    return Collections.unmodifiableMap(registeredAggregates);
+    return unmodifiableMap(registeredAggregates);
   }
 
   /**
@@ -141,12 +146,21 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   }
 
   /**
+   * Returns all the entity managers held by this unit of work currently. This can be used to flush
+   * all entity managers in some scenarios, for example, when large-scale data is persisted in a
+   * single transaction, memory performance may be affected if not properly flushed.
+   */
+  public Collection<EntityManager> getEntityManagers() {
+    return unmodifiableCollection(entityManagers.values());
+  }
+
+  /**
    * Message queue collected by the current unit of work.
    *
-   * @return the registered messsages
+   * @return the registered messages
    */
   public List<WrappedMessage> getMessages() {
-    return Collections.unmodifiableList(registeredMessages);
+    return unmodifiableList(registeredMessages);
   }
 
   @Override
@@ -191,7 +205,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
           Lifecycle al = aggregate.getLifecycle();
           registeredAggregates.put(ai, al);
           if (al.signFlushed()) {
-            evolutiveAggregates.put(ai, al);
+            evolutionaryAggregates.put(ai, al);
           }
           for (Message message : aggregate.extractMessages(true)) {
             WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage(message, ai));
@@ -214,7 +228,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
         em.close();
       }
     });
-    evolutiveAggregates.clear();
+    evolutionaryAggregates.clear();
     registeredAggregates.clear();
     registeredMessages.clear();
     registeredVariables.clear();
@@ -222,8 +236,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
 
   protected boolean extractMessages(LinkedList<WrappedMessage> messages) {
     if (!registeredMessages.isEmpty()) {
-      registeredMessages.stream()
-          .sorted((wm1, wm2) -> wm1.getRaisedTime().compareTo(wm2.getRaisedTime()))
+      registeredMessages.stream().sorted(Comparator.comparing(WrappedMessage::getRaisedTime))
           .forEach(messages::offer);
       registeredMessages.clear();
       return true;
@@ -245,7 +258,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
       }
     });
     if (success) {
-      evolutiveAggregates.forEach((k, v) -> {
+      evolutionaryAggregates.forEach((k, v) -> {
         if (v.signFlushed()) {
           try {
             CDIs.fireAsyncEvent(new AggregatePersistEvent(k, v),
@@ -284,8 +297,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     final Map<Object, Object> variables;
 
     Registration(AbstractJPAUnitOfWork uow) {
-      aggregates = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredAggregates));
-      variables = Collections.unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
+      aggregates = unmodifiableMap(new LinkedHashMap<>(uow.registeredAggregates));
+      variables = unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
     }
 
     public Map<AggregateIdentifier, Lifecycle> getAggregates() {

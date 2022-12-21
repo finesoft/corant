@@ -43,7 +43,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *
  * <p>
  * The JTA JPA unit of works manager, use for create and destroy the {@link JTARLJPAUnitOfWork}
- * provide the necessary message stroage service and message dispatch service for the unit of work.
+ * provide the necessary message storage service and message dispatch service for the unit of work.
  * </p>
  *
  * @author bingo 下午2:14:21

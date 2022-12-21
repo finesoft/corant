@@ -17,6 +17,8 @@ import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.resolveApply;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.util.ArrayList;
+import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.transaction.RollbackException;
@@ -28,6 +30,10 @@ import javax.transaction.UserTransaction;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jboss.weld.transaction.spi.TransactionServices;
+import com.arjuna.ats.arjuna.common.Uid;
+import com.arjuna.ats.arjuna.objectstore.StoreManager;
+import com.arjuna.ats.arjuna.state.InputObjectState;
+import com.arjuna.ats.internal.arjuna.common.UidHelper;
 import com.arjuna.ats.jta.common.JTAEnvironmentBean;
 
 /**
@@ -37,6 +43,35 @@ import com.arjuna.ats.jta.common.JTAEnvironmentBean;
  *
  */
 public class NarayanaTransactionServices implements TransactionServices {
+
+  public static List<Uid> getPendingUids() throws Exception {
+    InputObjectState types = new InputObjectState();
+    StoreManager.getRecoveryStore().allTypes(types);
+    List<Uid> allUIDs = new ArrayList<>();
+    for (String typeName = types.unpackString(); typeName != null
+        && typeName.compareTo("") != 0; typeName = types.unpackString()) {
+      allUIDs.addAll(getPendingUids(typeName));
+    }
+    return allUIDs;
+  }
+
+  public static List<Uid> getPendingUids(String type) throws Exception {
+    List<Uid> uidList = new ArrayList<>();
+    InputObjectState uids = new InputObjectState();
+    if (!StoreManager.getRecoveryStore().allObjUids(type, uids)) {
+      throw new CorantRuntimeException("Cannot obtain pending Uids");
+    }
+    if (uids.notempty()) {
+      Uid u;
+      do {
+        u = UidHelper.unpackFrom(uids);
+        if (Uid.nullUid().notEquals(u)) {
+          uidList.add(u);
+        }
+      } while (Uid.nullUid().notEquals(u));
+    }
+    return uidList;
+  }
 
   @Override
   public void cleanup() {

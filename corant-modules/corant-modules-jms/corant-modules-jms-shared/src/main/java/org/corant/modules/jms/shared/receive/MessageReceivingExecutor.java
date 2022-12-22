@@ -120,7 +120,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
         entry.getValue().shutdown();
         entry.getValue().awaitTermination(MessageReceivingExecutorConfig
             .getExecutorConfig(entry.getKey()).getAwaitTermination().toMillis(),
-            TimeUnit.MICROSECONDS);
+            TimeUnit.MILLISECONDS);
         logger.info(() -> String.format("The message receiving executor service %s was stopped.",
             entry.getKey().getConnectionFactoryId()));
       } catch (InterruptedException e) {
@@ -162,7 +162,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
     final ManagedMessageReceivingTask task = taskFactory.create(meta);
     final ScheduledFuture<?> future =
         service.scheduleWithFixedDelay(task, executorConfig.getInitialDelay().toMillis(),
-            executorConfig.getDelay().toMillis(), TimeUnit.MICROSECONDS);
+            executorConfig.getDelay().toMillis(), TimeUnit.MILLISECONDS);
     return new MessageReceivingTaskExecution(future, task);
   }
 

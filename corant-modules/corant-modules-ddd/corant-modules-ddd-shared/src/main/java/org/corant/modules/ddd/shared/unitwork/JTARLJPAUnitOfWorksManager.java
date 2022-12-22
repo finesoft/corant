@@ -109,7 +109,7 @@ public class JTARLJPAUnitOfWorksManager extends AbstractJTAJPAUnitOfWorksManager
     final long ms = terminationTimeout.toMillis();
     try {
       dispatcher.shutdown();
-      if (!dispatcher.awaitTermination(ms, TimeUnit.MICROSECONDS)) {
+      if (!dispatcher.awaitTermination(ms, TimeUnit.MILLISECONDS)) {
         logger.log(Level.WARNING,
             () -> "Terminate JTA RL JPA unit of work manager dispatcher timeout!");
       }

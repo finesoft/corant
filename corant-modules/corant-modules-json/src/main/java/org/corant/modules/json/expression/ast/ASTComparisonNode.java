@@ -238,10 +238,12 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (!(right instanceof Collection)) {
-        return false;
+      if (right instanceof Collection) {
+        return ((Collection) right).contains(left);
+      } else if (right instanceof String && (left instanceof String)) {
+        return ((String) right).contains((String) left);
       }
-      return ((Collection) right).contains(left);
+      return false;
     }
   }
 
@@ -297,10 +299,12 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (!(right instanceof Collection)) {
-        return true;
+      if (right instanceof Collection) {
+        return !((Collection) right).contains(left);
+      } else if (right instanceof String && (left instanceof String)) {
+        return !((String) right).contains((String) left);
       }
-      return !((Collection) right).contains(left);
+      return true;
     }
   }
 

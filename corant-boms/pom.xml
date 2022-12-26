@@ -107,7 +107,7 @@
     <version.kryo>5.1.1</version.kryo>
     <version.liquibase-core>4.17.2</version.liquibase-core>
     <version.log4j2>2.19.0</version.log4j2>
-    <version.lombok>1.18.16</version.lombok>
+    <version.lombok>1.18.24</version.lombok>
     <version.metadata-extractor>2.18.0</version.metadata-extractor>
     <version.maven-bundle-plugin>5.1.2</version.maven-bundle-plugin>
     <version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>

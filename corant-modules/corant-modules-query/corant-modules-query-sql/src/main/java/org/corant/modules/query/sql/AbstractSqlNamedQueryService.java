@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.corant.modules.query.Querier;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.QueryParameter.StreamQueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.StreamQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
@@ -90,7 +90,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       Duration timeout = querier.resolveTimeout();
       log(queryName, scriptParameter, sql);
       return batchStream(querier.getQueryParameter().getLimit(), getExecutor().stream(sql,
-          useQueryParam.getTerminater(), timeout, useQueryParam.isAutoClose(), scriptParameter))
+          useQueryParam.getTerminator(), timeout, useQueryParam.isAutoClose(), scriptParameter))
               .flatMap(list -> {
                 this.fetch(list, querier);
                 List<T> results = querier.handleResults(list);

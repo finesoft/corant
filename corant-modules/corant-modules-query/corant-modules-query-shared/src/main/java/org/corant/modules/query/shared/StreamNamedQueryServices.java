@@ -28,8 +28,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.QueryObjectMapper;
-import org.corant.modules.query.QueryParameter.StreamQueryParameter;
 import org.corant.modules.query.QueryService;
+import org.corant.modules.query.StreamQueryParameter;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
@@ -248,7 +248,7 @@ public class StreamNamedQueryServices {
    * @return terminater
    */
   public StreamNamedQueryServices terminater(BiPredicate<Integer, Object> terminater) {
-    parameter.terminater(terminater);
+    parameter.terminator(terminater);
     return this;
   }
 

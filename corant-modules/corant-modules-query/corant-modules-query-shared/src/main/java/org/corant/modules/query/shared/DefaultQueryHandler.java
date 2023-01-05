@@ -15,7 +15,7 @@ package org.corant.modules.query.shared;
 
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESULT;
-import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULTHINT;
+import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULT_HINT;
 import static org.corant.modules.query.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.modules.query.QueryParameter.OFFSET_PARAM_NME;
 import static org.corant.shared.util.Conversions.toInteger;
@@ -116,7 +116,7 @@ public class DefaultQueryHandler implements QueryHandler {
   public void handleResultHints(Object result, Class<?> originalResultClass, Query query,
       QueryParameter parameter) {
     if (result != null && !resultHintHandlers.isUnsatisfied()) {
-      final String exs = getMapString(parameter.getContext(), CTX_QHH_EXCLUDE_RESULTHINT);
+      final String exs = getMapString(parameter.getContext(), CTX_QHH_EXCLUDE_RESULT_HINT);
       final Predicate<QueryHint> predicate;
       if (isBlank(exs)) {
         predicate = Functions.emptyPredicate(true);

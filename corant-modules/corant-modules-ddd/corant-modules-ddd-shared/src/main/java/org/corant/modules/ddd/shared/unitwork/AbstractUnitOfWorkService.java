@@ -33,6 +33,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  * Examples:
  *
  * <pre>
+ * {@literal @}TransactionScoped
  * public class StateTracer extends AbstractUnitOfWorkService {
  *
  *   final Set<Serializable> states = new LinkedHashSet<>();
@@ -46,7 +47,18 @@ import org.corant.shared.exception.CorantRuntimeException;
  *       CDIs.fireEvent(new StateEvent(states));
  *     }
  *   }
+ * }
  *
+ * {@literal @}ApplicationScoped
+ * {@literal @}Transactional
+ * public class StateService {
+ *   {@literal @}Inject
+ *   StateTracer stateTracer;
+ *
+ *   public void update(){
+ *     //...do update
+ *     stateTracer.registerState(state);
+ *   }
  * }
  * </pre>
  *

@@ -43,3 +43,10 @@ jobs:
           git commit -a -m "ci release ${{ inputs.CI_COMMIT_TAG }} "
           git tag ${{ inputs.CI_COMMIT_TAG }} 
           git push origin ${{ inputs.CI_COMMIT_TAG }} 
+      - name: notification
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: 'cicd'
+          slack-message: "github build result: ${{ job.status }} @here"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}

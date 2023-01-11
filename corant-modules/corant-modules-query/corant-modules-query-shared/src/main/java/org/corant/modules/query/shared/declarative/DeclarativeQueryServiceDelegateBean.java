@@ -53,9 +53,6 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   final String queryQualifier;
   final QueryType queryType;
 
-  /**
-   * @param beanManager
-   */
   public DeclarativeQueryServiceDelegateBean(BeanManager beanManager, Class<?> proxyType) {
     super(beanManager);
     this.proxyType = shouldNotNull(getUserClass(proxyType));

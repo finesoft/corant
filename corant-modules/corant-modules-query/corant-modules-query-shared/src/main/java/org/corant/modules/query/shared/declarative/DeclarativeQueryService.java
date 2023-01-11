@@ -41,7 +41,7 @@ import org.corant.modules.query.mapping.Query.QueryType;
  *
  * 2. If use Java8 then default method will available, this may be changed in the future.
  *
- * 3. For now If the method without default and static modifier and has more than one parameter,
+ * 3. For now if the method without default and static modifier and has more than one parameter,
  * the second parameter will not be use, we only use first parameter as query parameter,
  * this may be changed in the future.
  *
@@ -75,18 +75,26 @@ public @interface DeclarativeQueryService {
    *
    * <pre>
    *
-   *  1. In SQL query <i>({@code type()} is QueryType.SQL)</i>, the qualifier represents the
+   *  1. In SQL query <i>({@code
+   * type()
+   * } is QueryType.SQL)</i>, the qualifier represents the
    *  data source name and the database dialect and use ':' to concat.
    *  example: blog:MYSQL, blog is the data source name, MYSQL is the dialect.
    *
-   *  2. In Mongodb <i>(query {@code type()})</i> is QueryType.MG, the qualifier represents the
+   *  2. In Mongodb <i>(query {@code
+   * type()
+   * })</i> is QueryType.MG, the qualifier represents the
    *  mongodb data base name.
    *
-   *  3. In elastic and cassandra query <i>({@code type()} is QueryType.ES or QueryType.CAS) </i>,
+   *  3. In elastic and cassandra query <i>({@code
+   * type()
+   * } is QueryType.ES or QueryType.CAS) </i>,
    *  the qualifier represents the cluster name.
    *
    *  Default is empty string, meaning that if there is only one data source for the particular
-   *  query type ({@code type()}) in the application, then the qualifier represents that data source.
+   *  query type ({@code
+   * type()
+   * }) in the application, then the qualifier represents that data source.
    *
    * </pre>
    *

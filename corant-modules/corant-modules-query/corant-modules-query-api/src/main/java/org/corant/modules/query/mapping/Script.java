@@ -39,32 +39,33 @@ public class Script implements Serializable {
   private ScriptType type;
 
   /**
-   *
-   * @return the code
+   * Returns script source code
    */
   public String getCode() {
     return code;
   }
 
   /**
-   *
-   * @return the id
+   * Returns this script id
    */
   public String getId() {
     return id;
   }
 
   /**
-   *
-   * @return the src
+   * Returns the source code URL. For example: classpath:org/corant/BingoQuery.py, for more URL
+   * schema, please see {@code org.corant.shared.resource.SourceType}.
+   * <p>
+   * Note: If both {@link #getCode()} and {@link #getSrc()} are valid, the {@link #getSrc()} takes
+   * precedence. When the script object is constructed, the script of {@link #getSrc()} must be
+   * assigned to {@link #code}.
    */
   public String getSrc() {
     return src;
   }
 
   /**
-   *
-   * @return the type
+   * Returns the script type.
    */
   public ScriptType getType() {
     return type;
@@ -74,33 +75,47 @@ public class Script implements Serializable {
     return isNotBlank(code);
   }
 
-  /**
-   *
-   * @param code the code to set
-   */
   protected void setCode(String code) {
     this.code = strip(code);
   }
 
-  /**
-   *
-   * @param src the src to set
-   */
   protected void setSrc(String src) {
     this.src = src;
   }
 
-  /**
-   *
-   * @param type the type to set
-   */
   protected void setType(ScriptType type) {
     this.type = type;
   }
 
+  /**
+   * corant-modules-query-api
+   *
+   * @author bingo 下午1:11:27
+   *
+   */
   public enum ScriptType {
 
-    JS, FM, KT, CDI, JSE;
+    /**
+     * Indicates that the script or expression language is Javascript.
+     */
+    JS,
+    /**
+     * Indicates that the script or expression language is Freemarker.
+     */
+    FM,
+    /**
+     * Indicates that the script or expression language is Kotlin(JSR223).
+     */
+    KT,
+    /**
+     * Indicates that the script or expression is a CDI Bean, where the script is the named
+     * qualifier of the CDI Bean.
+     */
+    CDI,
+    /**
+     * Indicates that the script or expression language is Json expression.
+     */
+    JSE;
 
   }
 }

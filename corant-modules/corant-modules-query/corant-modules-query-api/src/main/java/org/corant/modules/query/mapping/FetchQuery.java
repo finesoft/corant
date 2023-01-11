@@ -49,15 +49,19 @@ public class FetchQuery implements Serializable {
   public FetchQuery() {}
 
   /**
-   * @param referenceQuery
-   * @param injectPropertyName
-   * @param resultClass
-   * @param maxSize
-   * @param parameters
-   * @param multiRecords
-   * @param predicate
-   * @param injection
-   * @param eagerInject
+   * Construct a fetch query
+   *
+   * @param referenceQuery the real query corresponding to this fetch query
+   * @param injectPropertyName the name of the parent query result property which use to hold the
+   *        fetch query results
+   * @param resultClass the fetch query result record class
+   * @param maxSize the max fetch query result size, -1 means unlimited
+   * @param parameters the fetch query parameters
+   * @param multiRecords indicates that the fetch query result set is multiple records
+   * @param predicate the script use to detect whether performance the fetch query
+   * @param injection the script use to performance inject the fetch query result to parent query
+   *        results.
+   * @param eagerInject indicates whether to performance the fetch query eager.
    */
   public FetchQuery(QueryReference referenceQuery, String injectPropertyName, Class<?> resultClass,
       int maxSize, List<FetchQueryParameter> parameters, boolean multiRecords, Script predicate,

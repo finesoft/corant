@@ -51,10 +51,10 @@ public class CaffeineJCacheExtension implements Extension {
    * URI is specified in the cornat configuration properties named
    * '<b>corant.jcache.caffeine.config.resource</b>'.
    * <p>
-   * 2. Use the configuration name prefixed with '<b>caffeine.jcache.</b>' in the coarnt
+   * 2. Use the configuration name prefixed with '<b>caffeine.jcache.</b>' in the corant
    * configuration properties to configure the Caffeine configuration option information.
    * <p>
-   * 3. Use the configuration name prefixed with '<b>corant.jcache.caffeine.</b>' in the coarnt
+   * 3. Use the configuration name prefixed with '<b>corant.jcache.caffeine.</b>' in the corant
    * configuration properties to configure the Caffeine configuration option information.
    *
    * <p>

@@ -138,7 +138,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
       if (cfg.isVerifyDeployment()) {
         List<DiscoveryNode> nodes = getTransportClient(cfg.getName()).connectedNodes();
         if (nodes != null) {
-          logger.fine(() -> String.format("Tranport client %s connected nodes: %s",
+          logger.info(() -> String.format("Tranport client %s connected nodes: %s",
               cfg.getClusterName(), Strings.join(", ",
                   nodes.stream().map(DiscoveryNode::getName).collect(Collectors.toList()))));
         }

@@ -103,7 +103,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
       if (cfg.isVerifyDeployment()) {
         try {
           for (int i = 0; i < cfg.getMinSize(); i++) {
-            logger.fine(() -> String.format("Check data source %s connection", cfg.connectionUrl));
+            logger.info(() -> String.format("Check data source %s connection", cfg.connectionUrl));
             resolve(DataSource.class, quas).getConnection().close();// FIXME use another ways.
           }
         } catch (SQLException e) {

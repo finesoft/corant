@@ -13,11 +13,13 @@
  */
 package org.corant.modules.query.mapping;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Lists.immutableList;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,16 @@ import java.util.UUID;
 
 /**
  * corant-modules-query-api
+ * <p>
+ * The class defines query hints, which are used to provide additional programmable query
+ * processing, such as query result processing, etc.
+ * <p>
+ * Generally it used with SPI interfaces. The query hints object may contain several parameters, a
+ * script or expression. Each query hint must have a unique key which used to locate an
+ * implementation of the SPI interface, Usually, the implementation of the SPI interface has a
+ * method to detect whether a certain query hint is supported, and the key judgment is through the
+ * {@link #key} of the query hint. Through this mechanism one can customize a query hint and an
+ * implementation, the implementation will be invoked in query execution.
  *
  * @author bingo 下午7:35:54
  *
@@ -41,9 +53,10 @@ public class QueryHint implements Serializable {
   public QueryHint() {}
 
   /**
-   * @param key
-   * @param parameters
-   * @param script
+   * @param key unique key, used in conjunction with SPI-related interfaces to locate an
+   *        implementation of the SPI interface
+   * @param parameters the parameters used in the implementation of the SPI interface
+   * @param script additional script or expression
    */
   public QueryHint(String key, Map<String, List<QueryHintParameter>> parameters, Script script) {
     this.key = key;
@@ -72,26 +85,39 @@ public class QueryHint implements Serializable {
     }
   }
 
+  /**
+   * Returns the identifier of this query hint.
+   */
   public String getId() {
     return id;
   }
 
+  /**
+   * A unique key, used in conjunction with SPI-related interfaces to locate an implementation of
+   * the SPI interface.
+   */
   public String getKey() {
     return key;
   }
 
+  /**
+   * Returns all pre-defined parameters used in the implementation of the SPI interface.
+   */
   public Map<String, List<QueryHintParameter>> getParameters() {
     return parameters;
   }
 
+  /**
+   * Returns a pre-defined parameters list used in the implementation of the SPI interface by the
+   * given name.
+   */
   public List<QueryHintParameter> getParameters(String name) {
-    if (parameters.containsKey(name)) {
-      return parameters.get(name);
-    } else {
-      return new ArrayList<>();
-    }
+    return parameters.getOrDefault(name, emptyList());
   }
 
+  /**
+   * Returns an additional script used in the implementation of the SPI interface.
+   */
   public Script getScript() {
     return script;
   }
@@ -111,8 +137,11 @@ public class QueryHint implements Serializable {
    * Make query immutable
    */
   protected void postConstruct() {
-    parameters =
-        parameters == null ? Collections.emptyMap() : Collections.unmodifiableMap(parameters);
+    Map<String, List<QueryHintParameter>> temp = new LinkedHashMap<>();
+    if (parameters != null) {
+      parameters.forEach((k, v) -> temp.put(k, immutableList(v)));
+    }
+    parameters = unmodifiableMap(temp);
   }
 
   protected void setKey(String key) {
@@ -123,6 +152,15 @@ public class QueryHint implements Serializable {
     this.script = defaultObject(script, Script.EMPTY);
   }
 
+  /**
+   * corant-modules-query-api
+   * <p>
+   * Class define a pre-define query hint parameter, include parameter name, parameter value and
+   * parameter type.
+   *
+   * @author bingo 上午11:44:54
+   *
+   */
   public static class QueryHintParameter implements Serializable {
 
     private static final long serialVersionUID = -875004740413444084L;
@@ -140,49 +178,34 @@ public class QueryHint implements Serializable {
     }
 
     /**
-     *
-     * @return the name
+     * Returns the name of this parameter
      */
     public String getName() {
       return name;
     }
 
     /**
-     *
-     * @return the type
+     * Returns the type of this parameter
      */
     public Class<?> getType() {
       return type;
     }
 
     /**
-     *
-     * @return the value
+     * Returns the value of this parameter
      */
     public String getValue() {
       return value;
     }
 
-    /**
-     *
-     * @param name the name to set
-     */
     protected void setName(String name) {
       this.name = shouldNotNull(name);
     }
 
-    /**
-     *
-     * @param type the type to set
-     */
     protected void setType(Class<?> type) {
       this.type = defaultObject(type, Object.class);
     }
 
-    /**
-     *
-     * @param value the value to set
-     */
     protected void setValue(String value) {
       this.value = value;
     }

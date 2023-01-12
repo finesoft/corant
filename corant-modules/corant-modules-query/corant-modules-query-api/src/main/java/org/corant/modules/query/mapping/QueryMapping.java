@@ -13,6 +13,8 @@
  */
 package org.corant.modules.query.mapping;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
@@ -30,6 +32,9 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 
 /**
  * corant-modules-query-api
+ * <p>
+ * In general, each query mapping corresponds to a query program resource, and each program resource
+ * contains some queries.
  *
  * @author bingo 下午3:41:30
  *
@@ -37,45 +42,29 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 public class QueryMapping {
 
   String url;
-  final List<Query> queries = new ArrayList<>();
-  final Map<String, ParameterMapping> paraMapping = new HashMap<>();
+  List<Query> queries = new ArrayList<>();
+  Map<String, ParameterMapping> paraMapping = new HashMap<>();
   String commonSegment;
 
   public QueryMapping() {}
 
-  /**
-   * @param url
-   * @param commonSegment
-   */
   public QueryMapping(String url, String commonSegment) {
     this.url = url;
     this.commonSegment = commonSegment;
   }
 
-  /**
-   * @return the commonSegment
-   */
   public String getCommonSegment() {
     return commonSegment;
   }
 
-  /**
-   * @return the paraMapping
-   */
   public Map<String, ParameterMapping> getParaMapping() {
     return paraMapping;
   }
 
-  /**
-   * @return the queries
-   */
   public List<Query> getQueries() {
     return queries;
   }
 
-  /**
-   * @return the uri
-   */
   public String getUrl() {
     return url;
   }
@@ -188,19 +177,23 @@ public class QueryMapping {
     return brokens;
   }
 
-  /**
-   *
-   * @param commonSegment the commonSegment to set
-   */
   protected void setCommonSegment(String commonSegment) {
     this.commonSegment = commonSegment;
   }
 
   void assembly() { // FIXME
+    List<Query> tempQueries = new ArrayList<>();
+    Map<String, ParameterMapping> tempParaMapping = new HashMap<>();
     if (isNotBlank(commonSegment) && isNotEmpty(queries)) {
       for (Query q : queries) {
         q.setMacroScript(commonSegment);
+        tempQueries.add(q);
       }
     }
+    if (isNotEmpty(paraMapping)) {
+      tempParaMapping.putAll(paraMapping);
+    }
+    queries = unmodifiableList(tempQueries);
+    paraMapping = unmodifiableMap(tempParaMapping);
   }
 }

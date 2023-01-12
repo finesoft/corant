@@ -17,6 +17,8 @@ import java.io.Serializable;
 
 /**
  * corant-modules-query-api
+ * <p>
+ * Class use to define the type of a query parameter.
  *
  * @author bingo 上午10:36:16
  *
@@ -31,8 +33,8 @@ public class ParameterMapping implements Serializable {
   public ParameterMapping() {}
 
   /**
-   * @param name
-   * @param type
+   * @param name the name of the query parameter
+   * @param type the expected query parameter type
    */
   public ParameterMapping(String name, Class<?> type) {
     this.name = name;
@@ -40,14 +42,14 @@ public class ParameterMapping implements Serializable {
   }
 
   /**
-   * @return the name
+   * Returns the query of the query parameter
    */
   public String getName() {
     return name;
   }
 
   /**
-   * @return the type
+   * Returns the expected query parameter type
    */
   public Class<?> getType() {
     return type;

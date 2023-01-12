@@ -31,6 +31,13 @@ import java.util.stream.Collectors;
 
 /**
  * corant-modules-query-api
+ * <p>
+ * Query class, used to define a query. It contains the definition of query name version, query
+ * script, sub-fetch query, query result set and parameters processing, etc.
+ * <p>
+ * Each query has a name and version, the name and version of the query form the identifier of the
+ * query. The query script may be a SQL query script or NoSQL query script or a mixed script and
+ * expression.
  *
  * @author bingo 上午10:22:33
  *
@@ -63,20 +70,21 @@ public class Query implements Serializable {
   }
 
   /**
-   * @param name
-   * @param resultClass
-   * @param resultSetMapping
-   * @param cache
-   * @param cacheResultSetMetadata
-   * @param description
-   * @param script
-   * @param fetchQueries
-   * @param hints
-   * @param version
-   * @param paramMappings
-   * @param properties
-   * @param mappingFilePath
-   * @param macroScript
+   * @param name the query name
+   * @param resultClass the class of the query result records
+   * @param resultSetMapping reserved field, may be used in the future
+   * @param cache reserved field, may be used in the future
+   * @param cacheResultSetMetadata reserved field, may be used in the future
+   * @param description the query description
+   * @param script the query script
+   * @param fetchQueries the sub fetch query
+   * @param hints the query hints use to adjust the query results
+   * @param version the query version, The name and version of the query form the identifier of the
+   *        query
+   * @param paramMappings the query parameter mappings use for query parameter type conversion
+   * @param properties the query execution properties, used to tune the execution of the query
+   * @param mappingFilePath the file containing this query
+   * @param macroScript the macro script use in this query
    */
   public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
       boolean cacheResultSetMetadata, String description, Script script,
@@ -132,69 +140,77 @@ public class Query implements Serializable {
   }
 
   /**
-   * @return the description
+   * Returns the query description
+   *
    */
   public String getDescription() {
     return description;
   }
 
   /**
-   * @return the fetchQueries
+   * Returns all sub-fetch queries of this query
    */
   public List<FetchQuery> getFetchQueries() {
     return fetchQueries;
   }
 
   /**
-   * @return the hints
+   * Returns all the query hints for this query.
+   *
+   * @see QueryHint
+   *
    */
   public List<QueryHint> getHints() {
     return hints;
   }
 
   /**
-   *
-   * @return the macroScript
+   * Returns the macro for this query, for query scripts or expressions that support macros
    */
   public String getMacroScript() {
     return macroScript;
   }
 
   /**
-   * The mapping file path where this query come from
-   *
-   * @return getMappingFilePath
+   * Returns the mapping file path where this query come from
    */
   public String getMappingFilePath() {
     return mappingFilePath;
   }
 
   /**
-   * @return the name
+   * Returns the query name
    */
   public String getName() {
     return name;
   }
 
+  /**
+   * Returns the query parameter conversion schema mapping, the key of the map is the name of the
+   * query parameter and the value of the map is the type of the query parameter.
+   */
   public Map<String, Class<?>> getParamConvertSchema() {
     return paramConvertSchema;
   }
 
   /**
-   * @return the paramMappings
+   * Returns the source of the conversion schema
    */
   public Map<String, ParameterMapping> getParamMappings() {
     return paramMappings;
   }
 
   /**
-   *
-   * @return the properties
+   * Returns all query properties of this query. The properties can be used for some query process
+   * control, such as timeout or maximum number of result sets, etc.
    */
   public Map<String, String> getProperties() {
     return properties;
   }
 
+  /**
+   * Returns the value of query property by given name.
+   */
   public Object getProperty(String name) {
     return getProperties() == null ? null : getProperties().get(name);
   }
@@ -205,7 +221,7 @@ public class Query implements Serializable {
    * @param <T> property type
    * @param name property name
    * @param cls property type class
-   * @return getProperty
+   * @return the property value
    */
   public <T> T getProperty(String name, Class<T> cls) {
     return toObject(getProperty(name), cls);
@@ -215,11 +231,11 @@ public class Query implements Serializable {
    * Returns the property value of the specified type, if not found or be found is null return
    * alternative value.
    *
-   * @param <T>
-   * @param name
-   * @param cls
+   * @param <T> property type
+   * @param name property name
+   * @param cls property type class
    * @param altVal if not found or be found is null return this value
-   * @return getProperty
+   * @return the property value
    */
   public <T> T getProperty(String name, Class<T> cls, T altVal) {
     return defaultObject(getProperty(name, cls), altVal);
@@ -227,39 +243,45 @@ public class Query implements Serializable {
 
   /**
    * Return the result class, if not setting return java.util.Map.class
-   *
-   * @return the resultClass
    */
   public Class<?> getResultClass() {
     return resultClass;
   }
 
   /**
-   * @return the resultSetMapping
+   * reserved field
    */
   public Class<?> getResultSetMapping() {
     return resultSetMapping;
   }
 
   /**
-   * @return the script
+   * Returns the query script, the query script may be a SQL query script or NoSQL query script or a
+   * mixed script and expression.
    */
   public Script getScript() {
     return script;
   }
 
   /**
-   * @return the version
+   * Returns the query version.
    */
   public String getVersion() {
     return version;
   }
 
+  /**
+   * Returns the all sub-fetch query identifiers
+   */
   public List<String> getVersionedFetchQueryNames() {
     return fetchQueries.stream().map(f -> f.getReferenceQuery().getVersionedName())
         .collect(Collectors.toList());
   }
 
+  /**
+   * Returns the query name and version, the name and version of the query form the identifier of
+   * the query.
+   */
   public String getVersionedName() {
     return defaultString(getName())
         + (isNotBlank(getVersion()) ? UNDERSCORE + getVersion() : EMPTY);
@@ -274,14 +296,14 @@ public class Query implements Serializable {
   }
 
   /**
-   * @return the cache
+   * reserved field
    */
   public boolean isCache() {
     return cache;
   }
 
   /**
-   * @return the cacheResultSetMetadata
+   * reserved field
    */
   public boolean isCacheResultSetMetadata() {
     return cacheResultSetMetadata;
@@ -304,7 +326,7 @@ public class Query implements Serializable {
    */
   protected void postConstruct() {
     if (fetchQueries != null) {
-      fetchQueries.forEach(FetchQuery::postConstuct);
+      fetchQueries.forEach(FetchQuery::postConstruct);
       fetchQueries = Collections.unmodifiableList(fetchQueries);
     } else {
       fetchQueries = Collections.emptyList();
@@ -334,10 +356,6 @@ public class Query implements Serializable {
     this.description = description;
   }
 
-  /**
-   *
-   * @param macroScript the macroScript to set
-   */
   protected void setMacroScript(String macroScript) {
     this.macroScript = macroScript;
   }
@@ -376,7 +394,35 @@ public class Query implements Serializable {
     this.version = version;
   }
 
+  /**
+   * corant-modules-query-api
+   * <p>
+   * Query type, used to indicate the type of query script supported by the query, and also implies
+   * the type of data system.
+   *
+   * @author bingo 上午11:23:59
+   *
+   */
   public enum QueryType {
-    SQL, MG, JPQL, ES, CAS
+    /**
+     * Indicates that the query is a relational database query, such as MYSQL/MSSQL/ORACLE
+     */
+    SQL,
+    /**
+     * Indicates that the query is a Mongodb query.
+     */
+    MG,
+    /**
+     * Indicates that the query is a JPA query.
+     */
+    JPQL,
+    /**
+     * Indicates that the query is an elastic search query.
+     */
+    ES,
+    /**
+     * Indicates that the query is a cassandra query.
+     */
+    CAS
   }
 }

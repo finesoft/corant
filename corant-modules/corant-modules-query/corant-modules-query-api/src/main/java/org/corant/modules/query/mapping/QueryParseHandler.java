@@ -207,7 +207,7 @@ public class QueryParseHandler extends DefaultHandler {
           } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
             fq.setEagerInject(isBlank(atv) ? true : toBoolean(atv));
           } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
-            fq.setReferenceQueryversion(defaultString(atv));
+            fq.setReferenceQueryVersion(defaultString(atv));
           } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
             fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
           } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {

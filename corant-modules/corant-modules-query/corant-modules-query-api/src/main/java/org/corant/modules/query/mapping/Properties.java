@@ -21,6 +21,8 @@ import java.util.function.Predicate;
 
 /**
  * corant-modules-query-api
+ * <p>
+ * A query properties set
  *
  * @author bingo 上午11:28:57
  *
@@ -43,14 +45,22 @@ public class Properties {
     entries.removeIf(p);
   }
 
+  /**
+   * corant-modules-query-api
+   * <p>
+   * A name and value pair.
+   *
+   * @author bingo 上午11:22:32
+   *
+   */
   public static class Property {
 
     private String name;
     private String value;
 
     /**
-     * @param name
-     * @param value
+     * @param name the property name
+     * @param value the property raw value
      */
     public Property(String name, String value) {
       this.name = name;
@@ -86,16 +96,14 @@ public class Properties {
     }
 
     /**
-     *
-     * @return the name
+     * Returns the name of this property
      */
     public String getName() {
       return name;
     }
 
     /**
-     *
-     * @return the value
+     * Returns the raw value of this property
      */
     public String getValue() {
       return value;
@@ -109,18 +117,10 @@ public class Properties {
       return prime * result + (value == null ? 0 : value.hashCode());
     }
 
-    /**
-     *
-     * @param name the name to set
-     */
     protected void setName(String name) {
       this.name = name;
     }
 
-    /**
-     *
-     * @param value the value to set
-     */
     protected void setValue(String value) {
       this.value = value;
     }

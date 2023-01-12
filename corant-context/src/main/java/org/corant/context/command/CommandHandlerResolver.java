@@ -35,7 +35,7 @@ import javax.inject.Singleton;
  *
  * <p>
  * The command handler resolver is used to resolve the appropriate command handler with the given
- * command and handler qualifiers
+ * command and handler qualifiers.
  * <p>
  * Note: Users can use CDI {@link Specializes} to replace and inherit this class by themselves, and
  * re-implement the {@link #resolve(Object, Annotation...)} method to enable it to face more complex
@@ -68,35 +68,36 @@ public class CommandHandlerResolver {
    * @param qualifiers the command handler bean additional qualifiers
    */
   public <C> CommandHandler<C> resolve(C cmd, Annotation... qualifiers) {
-    if (cmd != null) {
-      if (validators.isResolvable()) {
-        validators.get().validate(cmd);
-      }
-      Set<Class<? extends CommandHandler<?>>> handlerClasses =
-          extension.getCommandHandlerTypes(cmd.getClass());
-      CommandHandler<C> handler = null;
-      int size = sizeOf(handlerClasses);
-      if (size == 1) {
-        handler = resolve(handlerClasses.iterator().next(), qualifiers);
-      } else if (size > 1) {
-        for (Class<? extends CommandHandler<?>> handlerClass : handlerClasses) {
-          CommandHandler<C> resolvedHandler = resolve(handlerClass, qualifiers);
-          if (resolvedHandler != null) {
-            if (handler == null) {
-              handler = resolvedHandler;
-            } else if (!getUserClass(resolvedHandler.getClass())
-                .equals(getUserClass(handler.getClass()))) {
-              // Filter @Specializes
-              throw new AmbiguousResolutionException("Can't resolve command handler for "
-                  + cmd.getClass() + " and ambiguous handlers " + String.join(",",
-                      handlerClasses.stream().map(Class::getName).toArray(String[]::new)));
-            }
+    if (cmd == null) {
+      throw new UnsatisfiedResolutionException("Can't resolve command handler for null command!");
+    }
+    if (validators.isResolvable()) {
+      validators.get().validate(cmd);
+    }
+    Set<Class<? extends CommandHandler<?>>> handlerClasses =
+        extension.getCommandHandlerTypes(cmd.getClass());
+    CommandHandler<C> handler = null;
+    int size = sizeOf(handlerClasses);
+    if (size == 1) {
+      handler = resolve(handlerClasses.iterator().next(), qualifiers);
+    } else if (size > 1) {
+      for (Class<? extends CommandHandler<?>> handlerClass : handlerClasses) {
+        CommandHandler<C> resolvedHandler = resolve(handlerClass, qualifiers);
+        if (resolvedHandler != null) {
+          if (handler == null) {
+            handler = resolvedHandler;
+          } else if (!getUserClass(resolvedHandler.getClass())
+              .equals(getUserClass(handler.getClass()))) {
+            // Filter @Specializes
+            throw new AmbiguousResolutionException("Can't resolve command handler for "
+                + cmd.getClass() + " and ambiguous handlers " + String.join(",",
+                    handlerClasses.stream().map(Class::getName).toArray(String[]::new)));
           }
         }
       }
-      if (handler != null) {
-        return handler;
-      }
+    }
+    if (handler != null) {
+      return handler;
     }
     throw new UnsatisfiedResolutionException("Can't resolve command handler for " + cmd.getClass());
   }

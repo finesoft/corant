@@ -29,8 +29,8 @@ import javafx.application.Application.Parameters;
  *
  * <p>
  * Corant JavaFX bootstrap for JavaFX applications integrated with CDI. Generally, when
- * {@link Application#init()} and {@link Application#stop()} the CDI container is started and closed
- * accordingly. The command line arguments passed to the application can be passed to Corant
+ * {@link Application#init()} and {@link Application#stop()}, the CDI container is started and
+ * closed accordingly. The command line arguments passed to the application can be passed to Corant
  * correspondingly, and make the application instance injectable.
  * <p>
  * NOTE: Each process has one and only one corant instance, it can be startup and shotdown mulity

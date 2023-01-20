@@ -21,8 +21,6 @@ import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.strip;
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -427,8 +425,8 @@ public class CorantConfigConversion implements Serializable {
               && c instanceof AutoCloseable)
           .forEach(c -> {
             try {
-              ((Closeable) c).close();
-            } catch (IOException e) {
+              ((AutoCloseable) c).close();
+            } catch (Exception e) {
               // Noop!
             }
           });

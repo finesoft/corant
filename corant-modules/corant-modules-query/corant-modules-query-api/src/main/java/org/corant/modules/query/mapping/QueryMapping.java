@@ -184,9 +184,11 @@ public class QueryMapping {
   void assembly() { // FIXME
     List<Query> tempQueries = new ArrayList<>();
     Map<String, ParameterMapping> tempParaMapping = new HashMap<>();
-    if (isNotBlank(commonSegment) && isNotEmpty(queries)) {
+    if (isNotEmpty(queries)) {
       for (Query q : queries) {
-        q.setMacroScript(commonSegment);
+        if (isNotBlank(commonSegment)) {
+          q.setMacroScript(commonSegment);
+        }
         tempQueries.add(q);
       }
     }

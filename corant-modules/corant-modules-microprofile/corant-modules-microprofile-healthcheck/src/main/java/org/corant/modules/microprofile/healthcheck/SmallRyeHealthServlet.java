@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.modules.microprofile.healthcheck;
+package org.corant.modules.microprofile.healthcheck;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.annotation.WebServlet;
@@ -24,22 +24,20 @@ import io.smallrye.health.SmallRyeHealth;
 /**
  * corant-modules-microprofile-healthcheck
  *
- * @author bingo 下午7:08:54
+ * @author bingo 下午6:39:12
  *
  */
 @ApplicationScoped
-@WebServlet(name = "SmallRyeHealthGroupServlet",
-    urlPatterns = "${corant.microprofile.health-check.health-group.endpoint.url:/health/group/*}")
-@RequiredConfiguration(key = "corant.microprofile.health-check.health-group.endpoint.enable",
+@WebServlet(name = "SmallRyeHealthServlet",
+    urlPatterns = "${corant.microprofile.health-check.health.endpoint.url:/health}")
+@RequiredConfiguration(key = "corant.microprofile.health-check.health.endpoint.enable",
     predicate = ValuePredicate.EQ, value = "true", type = Boolean.class)
-public class SmallRyeHealthGroupServlet extends AbstractSmallRyeHealthServlet {
+public class SmallRyeHealthServlet extends AbstractSmallRyeHealthServlet {
 
-  private static final long serialVersionUID = -4212256133641830391L;
+  private static final long serialVersionUID = 5810626055768809257L;
 
   @Override
   protected SmallRyeHealth getHealth(HttpServletRequest req, HttpServletResponse resp) {
-    String pathInfo = req.getPathInfo();
-    return pathInfo != null ? reporter.getHealthGroup(pathInfo.substring(1))
-        : reporter.getHealthGroups();
+    return reporter.getHealth();
   }
 }

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.modules.microprofile.healthcheck;
+package org.corant.modules.microprofile.healthcheck;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.annotation.WebServlet;

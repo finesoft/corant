@@ -17,4 +17,4 @@
  * @author bingo 下午5:37:35
  *
  */
-package corant.modules.microprofile.healthcheck;
+package org.corant.modules.microprofile.healthcheck;

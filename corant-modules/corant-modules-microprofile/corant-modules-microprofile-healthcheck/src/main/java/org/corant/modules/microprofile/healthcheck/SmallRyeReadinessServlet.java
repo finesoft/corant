@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package corant.modules.microprofile.healthcheck;
+package org.corant.modules.microprofile.healthcheck;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.annotation.WebServlet;
@@ -24,20 +24,20 @@ import io.smallrye.health.SmallRyeHealth;
 /**
  * corant-modules-microprofile-healthcheck
  *
- * @author bingo 下午6:39:12
+ * @author bingo 下午6:47:21
  *
  */
 @ApplicationScoped
-@WebServlet(name = "SmallRyeHealthServlet",
-    urlPatterns = "${corant.microprofile.health-check.health.endpoint.url:/health}")
-@RequiredConfiguration(key = "corant.microprofile.health-check.health.endpoint.enable",
+@WebServlet(name = "SmallRyeReadinessServlet",
+    urlPatterns = "${corant.microprofile.health-check.readiness.endpoint.url:/health/ready}")
+@RequiredConfiguration(key = "corant.microprofile.health-check.readiness.endpoint.enable",
     predicate = ValuePredicate.EQ, value = "true", type = Boolean.class)
-public class SmallRyeHealthServlet extends AbstractSmallRyeHealthServlet {
+public class SmallRyeReadinessServlet extends AbstractSmallRyeHealthServlet {
 
-  private static final long serialVersionUID = 5810626055768809257L;
+  private static final long serialVersionUID = 588125650071252966L;
 
   @Override
   protected SmallRyeHealth getHealth(HttpServletRequest req, HttpServletResponse resp) {
-    return reporter.getHealth();
+    return reporter.getReadiness();
   }
 }

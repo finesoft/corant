@@ -56,8 +56,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  */
 @ApplicationScoped
 @Transactional
-@RequiredConfiguration(key = "corant.ddd.message.disable-jms-dispatcher",
-    predicate = ValuePredicate.EQ, type = Boolean.class, value = "false")
+@RequiredConfiguration(key = "corant.ddd.message.jms-dispatcher.enable",
+    predicate = ValuePredicate.EQ, type = Boolean.class, value = "true")
 public class JMSMessageDispatcher implements MessageDispatcher {
 
   protected final Map<Class<?>, Set<MessageDestinationMetaData>> metas = new ConcurrentHashMap<>();

@@ -44,8 +44,8 @@ import org.corant.shared.util.Classes;
  */
 @Experimental
 @ApplicationScoped
-@RequiredConfiguration(key = "corant.validation.disable-default-command-validator",
-    predicate = ValuePredicate.EQ, type = Boolean.class, value = "false")
+@RequiredConfiguration(key = "corant.validation.default-command-validator.enable",
+    predicate = ValuePredicate.EQ, type = Boolean.class, value = "true")
 public class DefaultCommandValidator implements CommandValidator {
 
   protected Map<Class<?>, Class<?>[]> groups = new ConcurrentHashMap<>();

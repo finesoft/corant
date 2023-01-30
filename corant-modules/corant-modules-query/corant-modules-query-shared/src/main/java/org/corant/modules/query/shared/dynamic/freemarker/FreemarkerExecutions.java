@@ -87,7 +87,7 @@ public class FreemarkerExecutions
   public static Template resolveExecution(Query query) {
     return executions.computeIfAbsent(query.getScript().getId(), k -> {
       try {
-        return new Template(query.getScript().getId(), scriptResolver.resolve(query), FM_CFG);
+        return new Template(query.getVersionedName(), scriptResolver.resolve(query), FM_CFG);
       } catch (Exception e) {
         throw new QueryRuntimeException(e,
             "An error occurred while executing the query template [%s].", query.getName());

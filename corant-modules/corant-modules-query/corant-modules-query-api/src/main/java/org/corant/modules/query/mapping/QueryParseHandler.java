@@ -73,7 +73,7 @@ public class QueryParseHandler extends DefaultHandler {
   @Override
   public void characters(char[] ch, int start, int length) throws SAXException {
     String cqn = currentQName();
-    if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(cqn) || SchemaNames.X_DESC.equalsIgnoreCase(cqn)
+    if (SchemaNames.COMMON_SEGMENT.equalsIgnoreCase(cqn) || SchemaNames.X_DESC.equalsIgnoreCase(cqn)
         || SchemaNames.X_SCRIPT.equalsIgnoreCase(cqn)
         || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(cqn)
         || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(cqn)) {
@@ -84,7 +84,7 @@ public class QueryParseHandler extends DefaultHandler {
   @Override
   public void endDocument() throws SAXException {
     mapping.setCommonSegment(commonSegment);
-    mapping.paraMapping
+    mapping.paramMappings
         .putAll(paraMappings.stream().collect(Collectors.toMap(ParameterMapping::getName, p -> p)));
     mapping.queries.addAll(queries);
     mapping.assembly();// FIXME
@@ -108,7 +108,7 @@ public class QueryParseHandler extends DefaultHandler {
       }
     } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(false, qName, null);
-    } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.COMMON_SEGMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(false, qName, null);
     } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Query) {
@@ -127,7 +127,7 @@ public class QueryParseHandler extends DefaultHandler {
 
   public QueryMapping getMapping() {
     mapping.getQueries().forEach(q -> {
-      q.setParamMappings(mapping.getParaMapping());
+      q.setParamMappings(mapping.getParamMappings());
       q.postConstruct();
     });
     return mapping;
@@ -155,7 +155,7 @@ public class QueryParseHandler extends DefaultHandler {
       }
     } else if (SchemaNames.QUE_HINT_ELE.equalsIgnoreCase(qName)) {
       handleQueryHint(true, qName, attributes);
-    } else if (SchemaNames.COMMON_SGEMENT.equalsIgnoreCase(qName)) {
+    } else if (SchemaNames.COMMON_SEGMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(true, qName, attributes);
     } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Query) {
@@ -236,7 +236,9 @@ public class QueryParseHandler extends DefaultHandler {
         for (int i = 0; i < attributes.getLength(); i++) {
           String aqn = attributes.getQName(i);
           String atv = attributes.getValue(i);
-          if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
+          if (SchemaNames.X_GROUP.equalsIgnoreCase(aqn)) {
+            fqp.setGroup(atv);
+          } else if (SchemaNames.X_NAME.equalsIgnoreCase(aqn)) {
             fqp.setName(atv);
           } else if (SchemaNames.FQE_ELE_PARAM_ATT_SRC.equalsIgnoreCase(aqn)) {
             fqp.setSource(toEnum(atv, FetchQueryParameterSource.class));

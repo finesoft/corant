@@ -47,6 +47,6 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: 'cicd'
-          slack-message: "github build result: ${{ job.status }} @here"
+          slack-message: "github build result: ${{ job.status }} ,version ${{ inputs.CI_COMMIT_TAG }} ! @here"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}

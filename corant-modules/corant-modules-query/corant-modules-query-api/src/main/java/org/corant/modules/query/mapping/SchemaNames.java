@@ -21,7 +21,7 @@ package org.corant.modules.query.mapping;
  */
 public class SchemaNames {
 
-  public static final String COMMON_SGEMENT = "common-segment";
+  public static final String COMMON_SEGMENT = "common-segment";
 
   public static final String X_NAME = "name";
   public static final String X_VALUE = "value";
@@ -36,6 +36,7 @@ public class SchemaNames {
   public static final String X_PRO = "property";
   public static final String X_DISTINCT = "distinct";
   public static final String X_SINGLE_AS_LIST = "single-as-list";
+  public static final String X_GROUP = "group";
 
   public static final String PARAM_ELE = "parameters-mapping";
 
@@ -46,7 +47,7 @@ public class SchemaNames {
   public static final String QUE_ATT_RST_CLS = "result-class";
   public static final String QUE_ATT_RST_SET_CLS = "result-set-mapping";
   public static final String QUE_ATT_CACHE = "cache";
-  public static final String QUE_ATT_CACHE_RS_MD = "cache-resuleset-metadata";
+  public static final String QUE_ATT_CACHE_RS_MD = "cache-result-set-metadata";
   public static final String QUE_ATT_VER = "version";
 
   public static final String FQE_ELE_PARAM_ATT_SRC = "source";

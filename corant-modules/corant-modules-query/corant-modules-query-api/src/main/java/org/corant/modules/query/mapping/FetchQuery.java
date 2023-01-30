@@ -96,10 +96,7 @@ public class FetchQuery implements Serializable {
     if (this == obj) {
       return true;
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
+    if ((obj == null) || (getClass() != obj.getClass())) {
       return false;
     }
     FetchQuery other = (FetchQuery) obj;
@@ -281,10 +278,12 @@ public class FetchQuery implements Serializable {
     private boolean distinct = true;
     private boolean singleAsList = false;
     private Script script;
+    private String group;
 
     public FetchQueryParameter() {}
 
     /**
+     * @param group the parameter group use for aggregate parameters to a collection
      * @param name the parameter name
      * @param sourceName the source name used with source
      * @param source indicates the value source of the fetch query parameter
@@ -298,8 +297,10 @@ public class FetchQuery implements Serializable {
      * @param distinct whether to de-duplicate when there are multiple parameter values
      * @param singleAsList when the value is a single value, whether to convert it to a list
      */
-    public FetchQueryParameter(String name, String sourceName, FetchQueryParameterSource source,
-        String value, Class<?> type, Script script, boolean distinct, boolean singleAsList) {
+    public FetchQueryParameter(String group, String name, String sourceName,
+        FetchQueryParameterSource source, String value, Class<?> type, Script script,
+        boolean distinct, boolean singleAsList) {
+      setGroup(group);
       setName(name);
       setSourceName(sourceName);
       setSource(source);
@@ -308,6 +309,10 @@ public class FetchQuery implements Serializable {
       setScript(script);
       setDistinct(distinct);
       setSingleAsList(singleAsList);
+    }
+
+    public String getGroup() {
+      return group;
     }
 
     /**
@@ -377,6 +382,10 @@ public class FetchQuery implements Serializable {
 
     protected void setDistinct(boolean distinct) {
       this.distinct = distinct;
+    }
+
+    protected void setGroup(String group) {
+      this.group = group;
     }
 
     protected void setName(String name) {

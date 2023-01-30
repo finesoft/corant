@@ -16,6 +16,7 @@ package org.corant.modules.query.shared;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_FETCH_QUERY;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Conversions.toBoolean;
+import static org.corant.shared.util.Conversions.toCollection;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -56,6 +57,8 @@ import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings.WildcardMatcher;
 
 /**
@@ -195,44 +198,62 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       QueryParameter parentQueryParameter) {
     Map<String, Object> criteria = extractCriteria(parentQueryParameter);
     Map<String, Object> fetchCriteria = new HashMap<>();
+    Map<String, Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria =
+        new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       final Class<?> type = parameter.getType();
       final boolean distinct = parameter.isDistinct();
       final boolean singleAsList = parameter.isSingleAsList();
       final String name = parameter.getName();
       final FetchQueryParameterSource source = parameter.getSource();
+      final String group = parameter.getGroup();
+      final boolean useGroup = isNotBlank(group);
+      Object value = null;
+
       if (source == FetchQueryParameterSource.C) {
-        fetchCriteria.put(name, convertCriteriaValue(parameter.getValue(), type));
+        // Handle values from a specified constant
+        value = resolveFetchQueryCriteriaValue(parameter.getValue(), type, distinct, singleAsList);
       } else if (source == FetchQueryParameterSource.P) {
-        String sourceName = parameter.getSourceName();
-        fetchCriteria.put(name, convertCriteriaValue(criteria.get(sourceName), type));
+        // Handle values from parent query parameters
+        value = resolveFetchQueryCriteriaValue(criteria.get(parameter.getSourceName()), type,
+            distinct, singleAsList);
       } else if (source == FetchQueryParameterSource.S) {
-        // the parameter script handling
+        // handle values from a specified script
         Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchParameter(parameter);
         List<Object> parentResults = result instanceof List ? (List) result : listOf(result);
-        Object resultValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
-        resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
-        fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
+        Object funValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
+        value = resolveFetchQueryCriteriaValue(funValue, type, distinct, singleAsList);
       } else if (result != null) {
         String[] namePath = parameter.getSourceNamePath();
         try {
           if (result instanceof List) {
-            // handle multi results
-            Collection<Object> values = distinct ? new LinkedHashSet<>() : new ArrayList<>();
-            for (Object resultItem : (List<?>) result) {
-              Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
-              if (resultItemValue instanceof Collection) {
-                values.addAll((Collection) convertCriteriaValue(resultItemValue, type));
-              } else if (resultItemValue != null) {
-                values.add(convertCriteriaValue(resultItemValue, type));
+            // handle values from parent multi results
+            List<Object> resultValues = new ArrayList<>(((List<?>) result).size());
+            if (useGroup) {
+              for (Object resultItem : (List<?>) result) {
+                Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
+                resultValues.add(convertCriteriaValue(resultItemValue, type));
               }
+              value = resultValues;
+            } else {
+              for (Object resultItem : (List<?>) result) {
+                Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
+                if (resultItemValue instanceof Collection) {
+                  resultValues.addAll((Collection) resultItemValue);
+                } else if (resultItemValue != null) {
+                  resultValues.add(resultItemValue);
+                }
+              }
+              value = resolveFetchQueryCriteriaValue(resultValues, type, distinct, singleAsList);
             }
-            fetchCriteria.put(name, values);
           } else {
-            // handle single results
+            // handle values from parent single result
             Object resultValue = objectMapper.getMappedValue(result, namePath);
-            resultValue = resolveFetchQueryCriteriaValueResult(resultValue, distinct, singleAsList);
-            fetchCriteria.put(name, convertCriteriaValue(resultValue, type));
+            if (useGroup) {
+              value = listOf(convertCriteriaValue(resultValue, type));
+            } else {
+              value = resolveFetchQueryCriteriaValue(resultValue, type, distinct, singleAsList);
+            }
           }
         } catch (Exception e) {
           throw new QueryRuntimeException(e,
@@ -240,18 +261,69 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
               fetchQuery.getReferenceQuery());
         }
       }
+      if (useGroup) {
+        Map<String, Pair<FetchQueryParameterSource, Object>> groupCriteria =
+            groupFetchCriteria.computeIfAbsent(group, k -> new HashMap<>());
+        groupCriteria.put(name, Pair.of(source, value));
+      } else {
+        fetchCriteria.put(name, value);
+      }
+    }
+    if (!groupFetchCriteria.isEmpty()) {
+      resolveFetchQueryCriteriaGroupValue(fetchCriteria, groupFetchCriteria);
     }
     return fetchCriteria;
   }
 
-  protected Object resolveFetchQueryCriteriaValueResult(Object resultValue, boolean distinct,
+  protected void resolveFetchQueryCriteriaGroupValue(Map<String, Object> fetchCriteria,
+      Map<String, Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria) {
+    groupFetchCriteria.forEach((g, vs) -> {
+      Map<String, List<Object>> resultCriteria = new HashMap<>();
+      Map<String, Object> notResultCriteria = new HashMap<>();
+      vs.forEach((pn, pv) -> {
+        if (pv.left() == FetchQueryParameterSource.R) {
+          if (pv.right() != null) {
+            resultCriteria.put(pn, (List) pv.right());
+          }
+        } else {
+          notResultCriteria.put(pn, pv.right());
+        }
+      });
+
+      List<Map<String, Object>> criteria = new ArrayList<>();
+      int size = resultCriteria.values().stream().filter(Objects::isNotNull).mapToInt(List::size)
+          .min().orElse(0);
+      if (size > 0) {
+        for (int i = 0; i < size; i++) {
+          Map<String, Object> map = new HashMap<>(notResultCriteria);
+          final int ii = i;
+          resultCriteria.forEach((k, v) -> map.put(k, v.get(ii)));
+          criteria.add(map);
+        }
+      } else {
+        criteria.add(notResultCriteria);
+      }
+      fetchCriteria.put(g, criteria);
+    });
+  }
+
+  protected Object resolveFetchQueryCriteriaValue(Object value, Class<?> type, boolean distinct,
       boolean singleAsList) {
-    Object theValue = resultValue;
+    Object theValue = value;
     if (theValue instanceof Collection) {
-      if (distinct && !(theValue instanceof Set)) {
-        theValue = new LinkedHashSet<>((Collection) theValue);
+      if (distinct) {
+        if (type != null) {
+          theValue = toCollection(theValue, type, LinkedHashSet::new);
+        } else if (!(theValue instanceof Set)) {
+          theValue = new LinkedHashSet<>((Collection) theValue);
+        }
+      } else if (type != null) {
+        theValue = toCollection(theValue, type, ArrayList::new);
       }
     } else if (singleAsList && theValue != null) {
+      if (type != null) {
+        theValue = toObject(theValue, type);
+      }
       theValue = distinct ? setOf(theValue) : listOf(theValue);
     }
     return theValue;

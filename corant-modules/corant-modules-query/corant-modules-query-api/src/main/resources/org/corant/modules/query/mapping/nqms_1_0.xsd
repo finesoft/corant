@@ -131,7 +131,7 @@
                 <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="cache-resultset-metadata" type="xsd:boolean" use="optional" default="false">
+        <xsd:attribute name="cache-result-set-metadata" type="xsd:boolean" use="optional" default="false">
             <xsd:annotation>
                 <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
             </xsd:annotation>
@@ -303,7 +303,17 @@ In the default implementation, all injections may be only reference injections, 
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-		</xsd:sequence>        
+		</xsd:sequence>    
+        <xsd:attribute name="group" type="xsd:string" use="optional">
+            <xsd:annotation>
+                 <xsd:documentation>
+                  <![CDATA[
+                    The fetch query parameter group use for aggregate parameters to a collection. 
+                    Note: this is experimental and not recommended for production environments.
+                    ]]>
+                 </xsd:documentation>
+             </xsd:annotation>
+        </xsd:attribute>        
         <xsd:attribute name="name" type="xsd:string" use="required">
             <xsd:annotation>
                  <xsd:documentation>

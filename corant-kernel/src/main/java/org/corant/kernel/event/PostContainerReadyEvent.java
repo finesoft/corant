@@ -20,7 +20,7 @@ import org.corant.kernel.spi.CorantBootHandler;
  * corant-kernel
  *
  * <p>
- * CDI container started, embedded server started, ready for service.
+ * CDI container started
  * <p>
  * Note: The event observation is in accordance with the CDI specification, which means that if one
  * of the observation methods throws an exception, the other observation methods after that and the

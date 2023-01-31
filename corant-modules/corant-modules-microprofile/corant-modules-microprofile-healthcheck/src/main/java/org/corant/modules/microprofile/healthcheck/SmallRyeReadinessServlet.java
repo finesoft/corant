@@ -29,7 +29,7 @@ import io.smallrye.health.SmallRyeHealth;
  */
 @ApplicationScoped
 @WebServlet(name = "SmallRyeReadinessServlet",
-    urlPatterns = "${corant.microprofile.health-check.readiness.endpoint.url:/health/readiness}")
+    urlPatterns = "${corant.microprofile.health-check.readiness.endpoint.url:/health/ready}")
 @RequiredConfiguration(key = "corant.microprofile.health-check.readiness.endpoint.enable",
     predicate = ValuePredicate.EQ, value = "true", type = Boolean.class)
 public class SmallRyeReadinessServlet extends AbstractSmallRyeHealthServlet {

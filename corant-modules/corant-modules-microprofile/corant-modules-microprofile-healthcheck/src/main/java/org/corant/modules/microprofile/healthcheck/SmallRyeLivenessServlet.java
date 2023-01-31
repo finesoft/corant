@@ -29,7 +29,7 @@ import io.smallrye.health.SmallRyeHealth;
  */
 @ApplicationScoped
 @WebServlet(name = "SmallRyeLivenessServlet",
-    urlPatterns = "${corant.microprofile.health-check.liveness.endpoint.url:/health/liveness}")
+    urlPatterns = "${corant.microprofile.health-check.liveness.endpoint.url:/health/live}")
 @RequiredConfiguration(key = "corant.microprofile.health-check.liveness.endpoint.enable",
     predicate = ValuePredicate.EQ, value = "true", type = Boolean.class)
 public class SmallRyeLivenessServlet extends AbstractSmallRyeHealthServlet {

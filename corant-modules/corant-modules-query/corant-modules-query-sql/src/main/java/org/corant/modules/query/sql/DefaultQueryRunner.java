@@ -13,15 +13,16 @@
  */
 package org.corant.modules.query.sql;
 
+import static org.corant.shared.util.Objects.containsNotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import javax.sql.DataSource;
-import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
+import org.corant.modules.datasource.shared.util.DbUtilQueryRunner;
 
 /**
  * corant-modules-query-sql
@@ -29,58 +30,64 @@ import org.apache.commons.dbutils.StatementConfiguration;
  * @author bingo 下午1:21:08
  *
  */
-public class DefaultQueryRunner extends QueryRunner {
+public class DefaultQueryRunner extends DbUtilQueryRunner {
 
-  /**
-   *
-   */
   public DefaultQueryRunner() {}
 
-  /**
-   * @param pmdKnownBroken
-   */
   public DefaultQueryRunner(boolean pmdKnownBroken) {
     super(pmdKnownBroken);
   }
 
-  /**
-   * @param ds
-   */
   public DefaultQueryRunner(DataSource ds) {
     super(ds);
   }
 
-  /**
-   * @param ds
-   * @param pmdKnownBroken
-   */
   public DefaultQueryRunner(DataSource ds, boolean pmdKnownBroken) {
     super(ds, pmdKnownBroken);
   }
 
-  /**
-   * @param ds
-   * @param pmdKnownBroken
-   * @param stmtConfig
-   */
   public DefaultQueryRunner(DataSource ds, boolean pmdKnownBroken,
       StatementConfiguration stmtConfig) {
     super(ds, pmdKnownBroken, stmtConfig);
   }
 
-  /**
-   * @param ds
-   * @param stmtConfig
-   */
+  public DefaultQueryRunner(DataSource ds, boolean pmdKnownBroken,
+      StatementConfiguration stmtConfig, ResultSetConfiguration resultSetConfig) {
+    super(ds, pmdKnownBroken, stmtConfig, resultSetConfig);
+  }
+
   public DefaultQueryRunner(DataSource ds, StatementConfiguration stmtConfig) {
     super(ds, stmtConfig);
   }
 
-  /**
-   * @param stmtConfig
-   */
+  public DefaultQueryRunner(DataSource ds, StatementConfiguration stmtConfig,
+      ResultSetConfiguration resultSetConfig) {
+    super(ds, stmtConfig, resultSetConfig);
+  }
+
+  public DefaultQueryRunner(SqlQueryConfiguration confiuration) {
+    this(confiuration, null);
+  }
+
+  public DefaultQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
+    this(confiuration.getDataSource(),
+        new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
+            confiuration.getMaxFieldSize(), null,
+            timeout == null ? null : (int) timeout.toSeconds()),
+        containsNotNull(confiuration.getResultSetType(), confiuration.getResultSetConcurrency(),
+            confiuration.getResultSetHoldability())
+                ? new ResultSetConfiguration(confiuration.getResultSetType(),
+                    confiuration.getResultSetConcurrency(), confiuration.getResultSetHoldability())
+                : null);
+  }
+
   public DefaultQueryRunner(StatementConfiguration stmtConfig) {
     super(stmtConfig);
+  }
+
+  public DefaultQueryRunner(StatementConfiguration stmtConfig,
+      ResultSetConfiguration resultSetConfig) {
+    super(stmtConfig, resultSetConfig);
   }
 
   public <T> T select(String sql, ResultSetHandler<T> rsh, int expectRows, Duration timeout)

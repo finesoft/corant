@@ -77,6 +77,25 @@ public interface SqlQueryConfiguration {
     return null;
   }
 
+  /*************************** Statement Construction Parameters ********************************/
+  default Integer getResultSetConcurrency() {
+    return null;
+  }
+
+  default Integer getResultSetHoldability() {
+    return null;
+  }
+
+  default Integer getResultSetType() {
+    return null;
+  }
+
+  /**
+   * corant-modules-query-sql
+   *
+   * @author bingo 下午3:28:38
+   *
+   */
   class Builder {
 
     final DefaultSqlQueryConfiguration cfg = new DefaultSqlQueryConfiguration();
@@ -124,8 +143,29 @@ public interface SqlQueryConfiguration {
       cfg.queryTimeout = queryTimeout;
       return this;
     }
+
+    public Builder resultSetConcurrency(Integer resultSetConcurrency) {
+      cfg.resultSetConcurrency = resultSetConcurrency;
+      return this;
+    }
+
+    public Builder resultSetHoldability(Integer resultSetHoldability) {
+      cfg.resultSetHoldability = resultSetHoldability;
+      return this;
+    }
+
+    public Builder resultSetType(Integer resultSetType) {
+      cfg.resultSetType = resultSetType;
+      return this;
+    }
   }
 
+  /**
+   * corant-modules-query-sql
+   *
+   * @author bingo 下午3:28:31
+   *
+   */
   class DefaultSqlQueryConfiguration implements SqlQueryConfiguration {
 
     protected DataSource dataSource;
@@ -135,6 +175,10 @@ public interface SqlQueryConfiguration {
     protected Integer maxFieldSize = 0;
     protected Integer queryTimeout;
     protected Integer maxRows;
+    // Statement Construction Parameters
+    protected Integer resultSetType;
+    protected Integer resultSetConcurrency;
+    protected Integer resultSetHoldability;
 
     @Override
     public DataSource getDataSource() {
@@ -171,6 +215,21 @@ public interface SqlQueryConfiguration {
     @Deprecated(since = "1.6.2")
     public Integer getQueryTimeout() {
       return queryTimeout;
+    }
+
+    @Override
+    public Integer getResultSetConcurrency() {
+      return resultSetConcurrency;
+    }
+
+    @Override
+    public Integer getResultSetHoldability() {
+      return resultSetHoldability;
+    }
+
+    @Override
+    public Integer getResultSetType() {
+      return resultSetType;
     }
 
   }

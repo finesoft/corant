@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
@@ -50,9 +49,7 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 
   public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
     this.confiuration = confiuration;
-    runner = new DefaultQueryRunner(confiuration.getDataSource(),
-        new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
-            confiuration.getMaxFieldSize(), null, null));
+    runner = new DefaultQueryRunner(confiuration);
     dialect = confiuration.getDialect();
   }
 

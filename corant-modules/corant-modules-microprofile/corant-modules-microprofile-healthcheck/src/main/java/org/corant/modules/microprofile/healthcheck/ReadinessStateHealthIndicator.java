@@ -11,6 +11,7 @@ import org.eclipse.microprofile.health.Readiness;
 
 /**
  * A HealthIndicator that checks the ReadinessState of the application.
+ *
  * @author don
  * @date 2023/1/29
  */
@@ -22,7 +23,7 @@ public class ReadinessStateHealthIndicator {
 
   @Produces
   @Readiness
-  HealthCheck check2() {
+  HealthCheck check() {
     return () -> HealthCheckResponse.named(name).status(ready).build();
   }
 

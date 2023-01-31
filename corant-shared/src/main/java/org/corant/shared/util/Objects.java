@@ -126,6 +126,18 @@ public class Objects {
   }
 
   /**
+   * Return true if at least one of the given parameter is not null and false otherwise.
+   */
+  public static boolean containsNotNull(Object... objs) {
+    for (Object obj : objs) {
+      if (isNotNull(obj)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * If the first given parameter is not null, returns the value, otherwise returns the result of
    * the given supplier.
    *

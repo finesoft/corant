@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.modules.datasource.shared.DBMS;
@@ -52,6 +53,7 @@ import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.datasource.shared.DriverManagerDataSource;
 import org.corant.modules.datasource.shared.SqlStatements;
 import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
+import org.corant.modules.datasource.shared.util.DbUtilQueryRunner.ResultSetConfiguration;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
@@ -236,7 +238,9 @@ public class SqlQueryTemplate {
    * @see QueryParameter#getLimit()
    */
   public SqlQueryTemplate limit(int limit) {
-    this.limit = Objects.max(limit, 1);
+    // For evil mysql driver, they use Integer.MIN_VALUE as a signal to the driver to stream result
+    // sets row-by-row.
+    this.limit = limit == Integer.MIN_VALUE ? limit : Objects.max(limit, 1);
     return this;
   }
 
@@ -384,7 +388,10 @@ public class SqlQueryTemplate {
           useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
               : SqlStatements.normalize(sql, ordinaryParameters);
       try {
-        return new StreamableQueryRunner(null, limit, null, null, null).streamQuery(
+        final StatementConfiguration sf = config.statementConfig == null
+            ? new StatementConfiguration(null, limit, null, null, null)
+            : config.statementConfig;
+        return new StreamableQueryRunner(sf, config.resultSetConfig).streamQuery(
             dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater,
             config.autoClose, ps.value());
       } catch (SQLException e) {
@@ -454,6 +461,10 @@ public class SqlQueryTemplate {
     protected Set<Class<? extends Throwable>> stopOn;
 
     protected boolean autoClose = false;
+
+    protected StatementConfiguration statementConfig;
+
+    protected ResultSetConfiguration resultSetConfig;
 
     public StreamConfig autoClose(boolean autoClose) {
       this.autoClose = autoClose;
@@ -528,6 +539,11 @@ public class SqlQueryTemplate {
       return this;
     }
 
+    public StreamConfig resultSetConfig(ResultSetConfiguration config) {
+      resultSetConfig = config;
+      return this;
+    }
+
     /**
      * Set up a retry back-off strategy for query retrying, only the {@link #retryTimes} >0 this
      * retry back-off strategy can take effect.
@@ -554,6 +570,11 @@ public class SqlQueryTemplate {
      */
     public StreamConfig retryTimes(int retryTimes) {
       this.retryTimes = max(retryTimes, 0);
+      return this;
+    }
+
+    public StreamConfig statementConfig(StatementConfiguration config) {
+      statementConfig = config;
       return this;
     }
 

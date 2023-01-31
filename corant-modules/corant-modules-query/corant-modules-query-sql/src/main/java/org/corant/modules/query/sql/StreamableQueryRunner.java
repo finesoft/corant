@@ -13,7 +13,6 @@
  */
 package org.corant.modules.query.sql;
 
-import static org.corant.shared.util.Objects.max;
 import java.lang.ref.Cleaner;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,7 +26,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -39,20 +37,17 @@ import org.corant.shared.ubiquity.Mutable.MutableInteger;
  * @author bingo 上午10:00:38
  *
  */
-public class StreamableQueryRunner extends QueryRunner {
+public class StreamableQueryRunner extends DefaultQueryRunner {
 
   public StreamableQueryRunner() {}
 
-  public StreamableQueryRunner(Integer fetchDirection, Integer batchSize, Integer maxFieldSize,
-      Integer maxRows, Integer queryTimeout) {
-    super(new StatementConfiguration(fetchDirection, max(batchSize, 1), maxFieldSize, maxRows,
-        queryTimeout));
+  public StreamableQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
+    super(confiuration, timeout);
   }
 
-  public StreamableQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
-    super(new StatementConfiguration(confiuration.getFetchDirection(),
-        max(confiuration.getFetchSize(), 1), confiuration.getMaxFieldSize(), null,
-        timeout == null ? null : (int) timeout.getSeconds()));
+  public StreamableQueryRunner(StatementConfiguration stmtConfig,
+      ResultSetConfiguration resultSetConfig) {
+    super(stmtConfig, resultSetConfig);
   }
 
   <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,

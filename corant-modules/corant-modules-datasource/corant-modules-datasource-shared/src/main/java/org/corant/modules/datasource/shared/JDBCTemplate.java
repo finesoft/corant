@@ -46,6 +46,7 @@ import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.corant.modules.datasource.shared.util.DbUtilBasicRowProcessor;
+import org.corant.modules.datasource.shared.util.DbUtilQueryRunner;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
@@ -775,12 +776,17 @@ public class JDBCTemplate {
 
   }
 
-  static class StreamableQueryRunner extends QueryRunner {
+  static class StreamableQueryRunner extends DbUtilQueryRunner {
 
     public StreamableQueryRunner() {}
 
     public StreamableQueryRunner(StatementConfiguration stmtConfig) {
       super(stmtConfig);
+    }
+
+    public StreamableQueryRunner(StatementConfiguration stmtConfig,
+        ResultSetConfiguration resultSetConfig) {
+      super(stmtConfig, resultSetConfig);
     }
 
     void streamBatch(Connection conn, boolean closeConn, String sql, int batchSubmitSize,

@@ -251,7 +251,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    int maxSelectSize = querier.resolveMaxSelectSize();
+    int maxSelectSize = querier.resolveSelectSize();
     FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
     List<Document> docList = collect(fi);
     List<Map<String, Object>> list = new ArrayList<>();

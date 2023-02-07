@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,8 +65,8 @@ public class Validates {
    * Check if input stream is image format, the process prereads the input stream. If input stream
    * not support mark, then return false.
    *
-   * @param is
-   * @return
+   * @param is the image input stream to be checked
+   * @param format the supports format
    */
   public static boolean isImage(InputStream is, String... format) {
     if (is == null || !is.markSupported()) {
@@ -99,19 +100,54 @@ public class Validates {
   }
 
   /**
-   * @param ipAddress
-   * @return
+   * Returns true if the given string is integer otherwise false.
+   *
+   * @param string the string to be checked
+   */
+  public static boolean isInteger(String string) {
+    if (isBlank(string)) {
+      return false;
+    }
+    try {
+      Integer.parseInt(string);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Returns true if the given string is IP V4 address otherwise false.
+   *
+   * @param ipAddress the given IP V4 address to be checked
    */
   public static boolean isIp4Address(String ipAddress) {
     return isNotBlank(ipAddress) && IP_V4_PTN.matcher(ipAddress).matches();
   }
 
   /**
-   * @param mailAddress
-   * @return
+   * Returns true if the given string is mail address otherwise false.
+   *
+   * @param mailAddress the given mail address to be checked
    */
   public static boolean isMailAddress(String mailAddress) {
     return isNotBlank(mailAddress) && MAIL_ADDR_PTN.matcher(mailAddress).matches();
+  }
+
+  /**
+   * Returns true if the given string is positive integer otherwise false.
+   *
+   * @param string the string to be checked
+   */
+  public static boolean isPositiveInteger(String string) {
+    if (isBlank(string)) {
+      return false;
+    }
+    try {
+      return Integer.parseInt(string) > 0;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   public static boolean isValidMacAddress(byte[] address) {
@@ -129,7 +165,7 @@ public class Validates {
   /**
    * Return http(s)/ftp/file/rtsp url
    *
-   * @param url
+   * @param url the url to be checked
    * @return isHttpUrl
    */
   public static boolean isWebUrl(String url) {
@@ -137,70 +173,80 @@ public class Validates {
   }
 
   /**
-   * @param idCardNumber
-   * @return
+   * Returns true if the given string is Chinese ID card number otherwise false.
+   *
+   * @param idCardNumber the ID card number to be checked
    */
   public static boolean isZhIDCardNumber(String idCardNumber) {
     return isNotBlank(idCardNumber) && ZH_ID_PTN.matcher(idCardNumber).matches();
   }
 
   /**
-   * @param mobileNumber
-   * @return
+   * Returns true if the given string is Chinese mobile number otherwise false.
+   *
+   * @param mobileNumber the mobile number to be checked
    */
   public static boolean isZhMobileNumber(String mobileNumber) {
     return isNotBlank(mobileNumber) && MOB_NUM_PTN.matcher(mobileNumber).matches();
   }
 
   /**
-   * @param phoneNumber
-   * @return
+   * Returns true if the given string is Chinese phone number otherwise false.
+   *
+   * @param phoneNumber the phone number to be checked
    */
   public static boolean isZhPhoneNumber(String phoneNumber) {
     return isNotBlank(phoneNumber) && ZH_PHONE_PTN.matcher(phoneNumber).matches();
   }
 
   /**
-   * @param postcode
-   * @return
+   * Returns true if the given string is Chinese post number otherwise false.
+   *
+   * @param postcode the postcode to be checked
    */
   public static boolean isZhPostcode(String postcode) {
     return isNotBlank(postcode) && ZH_PC_PTN.matcher(postcode).matches();
   }
 
   /**
-   * @param text
-   * @param maxLen
-   * @return
+   * Returns true if the given text is not null and does not exceed the given length otherwise
+   * false.
+   *
+   * @param text the text to be checked
+   * @param maxLen the length to be checked
    */
   public static boolean maxLength(String text, int maxLen) {
     return text == null || text.length() <= maxLen;
   }
 
   /**
-   * @param text
-   * @param minLen
-   * @return
+   * Returns true if the given string is not null and does not less than the given length otherwise
+   * false.
+   *
+   * @param text the text to be checked
+   * @param minLen the length to be checked
    */
   public static boolean minLength(String text, int minLen) {
     return text != null && text.length() >= minLen;
   }
 
   /**
-   * @param text
-   * @param minLen
-   * @param maxLen
-   * @return
+   * Returns true if the given string is not null and not less than the given min length and not
+   * greater than the given max length otherwise false.
+   *
+   * @param text the text to be checked
+   * @param minLen the min length to be checked
+   * @param maxLen the max length to be checked
    */
   public static boolean minMaxLength(String text, int minLen, int maxLen) {
     return text != null && text.length() <= maxLen && text.length() >= minLen;
   }
 
   /**
-   * Validate Xml document with schema
+   * Validate XML document with schema
    *
-   * @param doc
-   * @param schema
+   * @param doc the document to be checked
+   * @param schema the xml schema to be checked
    * @return validateXmlDocument
    */
   public static List<Exception> validateXmlDocument(Document doc, Schema schema) {

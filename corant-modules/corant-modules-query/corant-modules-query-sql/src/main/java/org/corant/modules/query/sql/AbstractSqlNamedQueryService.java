@@ -170,7 +170,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
-    int maxSelectSize = querier.resolveMaxSelectSize();
+    int maxSelectSize = querier.resolveSelectSize();
     Duration timeout = querier.resolveTimeout();
     // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
     log(queryName, scriptParameter, sql);

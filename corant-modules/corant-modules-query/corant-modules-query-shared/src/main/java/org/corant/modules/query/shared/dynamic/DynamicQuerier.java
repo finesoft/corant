@@ -53,8 +53,7 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
 
   /**
    * Check the size of the result set, trim according to the appropriate
-   * size({@link #resolveMaxSelectSize()}) if necessary, and return the size of the final result
-   * set.
+   * size({@link #resolveSelectSize()}) if necessary, and return the size of the final result set.
    *
    * @param results
    */
@@ -66,8 +65,7 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    *
    * <p>
    * Note: If the limit value <=0 then returns {@link DefaultQuerierConfig#getMaxLimit()}, if the
-   * limit value great than the {@link #resolveMaxSelectSize()} a {@link QueryRuntimeException}
-   * thrown.
+   * limit value great than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveLimit();
 
@@ -78,15 +76,6 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    * @param fetchQuery
    */
   int resolveMaxFetchSize(Object parentResult, FetchQuery fetchQuery);
-
-  /**
-   * Returns either the value of the query max select size property(the property name is
-   * {@link DefaultQuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the
-   * value of {@link DefaultQuerierConfig#getDefaultSelectSize()}.
-   * <p>
-   * Note: If the value <=0 then returns {@link DefaultQuerierConfig#getMaxSelectSize()}
-   */
-  int resolveMaxSelectSize();
 
   /**
    * Returns the offset from query parameter
@@ -108,13 +97,21 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
   <X> X resolveProperty(String key, Class<X> cls, X dflt);
 
   /**
+   * Returns either the value of the query select size property(the property name is
+   * {@link DefaultQuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the
+   * value of {@link DefaultQuerierConfig#getDefaultSelectSize()}.
+   * <p>
+   * Note: If the value <=0 then returns {@link DefaultQuerierConfig#getMaxSelectSize()}
+   */
+  int resolveSelectSize();
+
+  /**
    * Returns either the limit value from the query parameter, or if the value is {@code null}, the
    * value of {@link DefaultQuerierConfig#getDefaultStreamLimit()}.
    *
    * <p>
    * Note: If the limit value <=0 then returns {@link DefaultQuerierConfig#getMaxLimit()}, if the
-   * limit value great than the {@link #resolveMaxSelectSize()} a {@link QueryRuntimeException}
-   * thrown.
+   * limit value great than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveStreamLimit();
 

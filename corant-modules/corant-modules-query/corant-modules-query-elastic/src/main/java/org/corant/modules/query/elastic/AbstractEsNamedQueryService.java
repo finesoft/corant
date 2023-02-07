@@ -144,7 +144,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   @Override
   protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
     EsNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    Pair<Long, List<T>> hits = searchHits(queryName, querier, null, querier.resolveMaxSelectSize());
+    Pair<Long, List<T>> hits = searchHits(queryName, querier, null, querier.resolveSelectSize());
     return hits.getValue();
   }
 

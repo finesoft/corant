@@ -13,9 +13,11 @@
  */
 package org.corant.modules.query.shared.spi;
 
+import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.extractMapKeyPathValue;
+import static org.corant.shared.util.Maps.getMapKeyPathValue;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -40,10 +42,71 @@ import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryHint.QueryHintParameter;
 import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.normal.Names;
-import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-modules-query-shared
+ *
+ * <p>
+ * The simple result map reduce hints.
+ * <ul>
+ * <li>The key is 'result-map-reduce'</li>
+ * <li>The value of the parameter that named 'reduce-field-names' are the reduce field names during
+ * reduction.</li>
+ * <li>Multiple reduce field names use ',' to split, and if the field name end with ':?1@?2', the
+ * '?1' is the projection name, '?2' is the projection type class name, both '?1' and '?2' are
+ * optional.</li>
+ * <li>The value of the parameter named 'retain-reduce-fields' is used to keep the reduced fields,
+ * default is false.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Use case:
+ *
+ * <pre>
+* &lt;query name="QueryService.get" result-class="java.util.Map"&gt;
+*       &lt;script&gt;
+*           &lt;![CDATA[
+*               SELECT id, name, binId, binName FROM Table
+*           ]]&gt;
+*       &lt;/script&gt;
+*        &lt;hint key="result-map-reduce"
+*         &lt;parameter name="reduce-field-names" value="binId:id,binName:name" /&gt;
+*         &lt;parameter name="map-field-name" value="bin" /&gt;
+*         &lt;parameter name="retain-reduce-fields" value="false" /&gt;
+*       &lt;/hint&gt;
+* &lt;/query&gt;
+ * </pre>
+ *
+ * <pre>
+ * Use case explain:
+ *
+ *      the query results before map-reduce like below:
+ *
+ *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one"}
+ *          record1: {"id":2, "name":"b", "binId":"2", "binName":"two"}
+ *
+ *      the query results after map-reduce like below:
+ *
+ *          record1: {"id":1, "name":"a", bin:{"id":"1", "name":"one"}}
+ *          record2: {"id":2, "name":"b", bin:{"id":"2", "name":"two"}}
+ *
+ *      and if the hint parameter "retain-reduce-fields" is true:
+ *
+ *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one", bin:{"id":"1", "name":"one"}}
+ *          record2: {"id":2, "name":"b", "binId":"2", "binName":"two", bin:{"id":"2", "name":"two"}}
+ *
+ *      or if the hint parameter "reduce-field-names" contains ':' or '@', for example:
+ *
+ *          &lt;parameter name="reduce-field-names" value="binId:id@java.lang.Integer, binName:name" /&gt; the results:
+ *
+ *          record1: {"id":1, "name":"a", bin:{"binId":1, "binName":"one"}}
+ *          record2: {"id":2, "name":"b", bin:{"binId":2, "binName":"two"}}
+ *
+ *
+ * </pre>
  *
  * @author bingo 下午7:53:36
  *
@@ -55,7 +118,9 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   public static final String HINT_NAME = "result-map-reduce";
   public static final String HNIT_PARA_REDUCE_FIELD_NME = "reduce-field-names";
   public static final String HNIT_PARA_MAP_FIELD_NME = "map-field-name";
-  public static final String HINT_PARA_MAP_TYP_NME = "java.util.Map";
+  public static final String HINT_PARA_RETAIN_FEILDS = "retain-reduce-fields";
+  public static final String TYPE_VALUE_PREFIX = "@";
+  public static final char TYPE_VALUE_PREFIX_SIGN = '@';
 
   protected final Map<String, Consumer<Map>> caches = new ConcurrentHashMap<>();// static?
   protected final Set<String> brokens = new CopyOnWriteArraySet<>();// static?
@@ -107,12 +172,24 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     } else {
       try {
         final String mapFieldName = resolveMapFieldname(qh);
-        final List<Pair<String, String[]>> reduceFields = resolveReduceFields(qh);
+        // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
+        final List<Triple<String, String[], Class<?>>> reduceFields = resolveReduceFields(qh);
+        final boolean retainFields = resolveRetainFields(qh);
         if (isNotEmpty(reduceFields) && isNotBlank(mapFieldName)) {
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
             Map<String, Object> obj = new HashMap<>();
-            for (Pair<String, String[]> rfn : reduceFields) {
-              obj.put(rfn.getLeft(), extractMapKeyPathValue(map, rfn.getRight()));
+            if (retainFields) {
+              for (Triple<String, String[], Class<?>> rfn : reduceFields) {
+                obj.put(rfn.getLeft(),
+                    rfn.right() != null ? getMapKeyPathValue(map, rfn.getMiddle(), rfn.right())
+                        : getMapKeyPathValue(map, rfn.getMiddle()));
+              }
+            } else {
+              for (Triple<String, String[], Class<?>> rfn : reduceFields) {
+                obj.put(rfn.getLeft(),
+                    rfn.right() != null ? extractMapKeyPathValue(map, rfn.getMiddle(), rfn.right())
+                        : extractMapKeyPathValue(map, rfn.getMiddle()));
+              }
             }
             map.put(mapFieldName, obj);
           });
@@ -130,19 +207,70 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     return isNotEmpty(params) ? params.get(0).getValue() : null;
   }
 
-  protected List<Pair<String, String[]>> resolveReduceFields(QueryHint qh) {
-    List<Pair<String, String[]>> fields = new ArrayList<>();
+  protected Triple<String, String[], Class<?>> resolveReduceField(String fieldExp) {
+    if (!fieldExp.contains(Names.DOMAIN_SPACE_SEPARATORS)
+        && !fieldExp.contains(TYPE_VALUE_PREFIX)) {
+      System.out.println(fieldExp);
+      return Triple.of(fieldExp, split(fieldExp, Names.NAME_SPACE_SEPARATORS, true, true),
+          java.lang.Object.class);
+    } else {
+      int e = -1;
+      int pps = -1;
+      int ppe = -1;
+      int cps = -1;
+      int cpe = -1;
+      int len = fieldExp.length();
+      for (int i = 0; i < len; i++) {
+        char c = fieldExp.charAt(i);
+        if (c == Names.DOMAIN_SPACE_SEPARATOR) {
+          if (e == -1) {
+            e = i;
+          }
+          if (pps == -1) {
+            pps = ppe = i + 1;
+            for (; ppe < len; ppe++) {
+              c = fieldExp.charAt(ppe);
+              if (c == TYPE_VALUE_PREFIX_SIGN || c == Names.DOMAIN_SPACE_SEPARATOR) {
+                break;
+              }
+            }
+          }
+        } else if (c == TYPE_VALUE_PREFIX_SIGN) {
+          if (e == -1) {
+            e = i;
+          }
+          if (cps == -1) {
+            cps = cpe = i + 1;
+            for (; cpe < len; cpe++) {
+              c = fieldExp.charAt(cpe);
+              if (c == Names.DOMAIN_SPACE_SEPARATOR || c == TYPE_VALUE_PREFIX_SIGN) {
+                break;
+              }
+            }
+          }
+        }
+      }
+      String fieldName = fieldExp.substring(0, e);
+      String projectName = ppe > pps ? fieldExp.substring(pps, ppe) : fieldName;
+      String className = cpe > cps ? fieldExp.substring(cps, cpe) : null;
+      return Triple.of(projectName, split(fieldName, Names.NAME_SPACE_SEPARATORS, true, true),
+          className == null ? null : Classes.asClass(className));
+    }
+  }
+
+  protected List<Triple<String, String[], Class<?>>> resolveReduceFields(QueryHint qh) {
+    // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
+    List<Triple<String, String[], Class<?>>> fields = new ArrayList<>();
     List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
     if (isNotEmpty(params)) {
-      linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).forEach(fn -> {
-        String[] pathAndKey = split(fn, Names.DOMAIN_SPACE_SEPARATORS, true, true);
-        if (pathAndKey.length > 1) {
-          fields.add(Pair.of(pathAndKey[1], split(pathAndKey[0], ".", true, true)));
-        } else if (pathAndKey.length > 0) {
-          fields.add(Pair.of(pathAndKey[0], split(pathAndKey[0], ".", true, true)));
-        }
-      });
+      linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).stream()
+          .map(this::resolveReduceField).forEach(fields::add);
     }
     return fields;
+  }
+
+  protected boolean resolveRetainFields(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_RETAIN_FEILDS);
+    return isNotEmpty(params) ? toBoolean(params.get(0).getValue()) : false;
   }
 }

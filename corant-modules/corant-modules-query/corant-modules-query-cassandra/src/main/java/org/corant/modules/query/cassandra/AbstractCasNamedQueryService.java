@@ -130,7 +130,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
-    int maxSelectSize = querier.resolveMaxSelectSize();
+    int maxSelectSize = querier.resolveSelectSize();
     Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
     List<Map<String, Object>> results =

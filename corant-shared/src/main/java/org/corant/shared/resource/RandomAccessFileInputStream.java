@@ -14,9 +14,12 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
@@ -27,9 +30,17 @@ import java.io.RandomAccessFile;
  * @author bingo 上午12:14:53
  *
  */
-public class RandomAccessFileInputStream extends InputStream {
+public class RandomAccessFileInputStream extends InputStream implements CountingStream {
 
   protected final RandomAccessFile file;
+
+  public RandomAccessFileInputStream(File file) {
+    try {
+      this.file = new RandomAccessFile(file, "r");
+    } catch (FileNotFoundException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
 
   public RandomAccessFileInputStream(RandomAccessFile file) {
     this.file = shouldNotNull(file);
@@ -43,6 +54,15 @@ public class RandomAccessFileInputStream extends InputStream {
   public void close() throws IOException {
     super.close();
     file.close();
+  }
+
+  @Override
+  public long getCount() {
+    try {
+      return file.getFilePointer();
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   public RandomAccessFile getFile() {
@@ -64,10 +84,6 @@ public class RandomAccessFileInputStream extends InputStream {
     return file.read(bytes, offset, length);
   }
 
-  public void seek(final long position) throws IOException {
-    file.seek(position);
-  }
-
   @Override
   public long skip(final long skipCount) throws IOException {
     if (skipCount <= 0) {
@@ -84,5 +100,9 @@ public class RandomAccessFileInputStream extends InputStream {
       seek(newPos);
     }
     return file.getFilePointer() - filePointer;
+  }
+
+  void seek(final long position) throws IOException {
+    file.seek(position);
   }
 }

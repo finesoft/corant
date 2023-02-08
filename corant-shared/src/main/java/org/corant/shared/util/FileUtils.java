@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.normal.Defaults.FOUR_KB;
+import static org.corant.shared.normal.Defaults.FOUR_KBS;
 import static org.corant.shared.normal.Defaults.SIXTEEN_KBS;
 import static org.corant.shared.ubiquity.Throwing.uncheckedConsumer;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
@@ -143,7 +143,7 @@ public class FileUtils {
 
   public static void copyToFile(final InputStream source, final File destination)
       throws IOException {
-    copyToFile(source, destination, FOUR_KB);
+    copyToFile(source, destination, FOUR_KBS);
   }
 
   public static void copyToFile(final InputStream source, final File destination, int bufferSize)

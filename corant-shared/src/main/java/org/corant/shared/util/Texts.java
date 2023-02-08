@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -36,22 +37,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.resource.RandomAccessFileLineInputStream;
 import org.corant.shared.resource.Resource;
+import org.corant.shared.ubiquity.Experimental;
 
 /**
  * corant-shared
@@ -107,8 +112,8 @@ public class Texts {
     } catch (FileNotFoundException e1) {
       throw new CorantRuntimeException(e1);
     }
-    return asCSVLines(fis, defaultObject(charset, StandardCharsets.UTF_8), offset,
-        (i, t) -> limit >= 1 && i > limit).onClose(() -> {
+    return asCSVLines(fis, defaultObject(charset, UTF_8), offset, (i, t) -> limit >= 1 && i > limit)
+        .onClose(() -> {
           try {
             fis.close();
           } catch (IOException e) {
@@ -119,23 +124,25 @@ public class Texts {
 
   /**
    * CSV rows from input stream, use for read CSV file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
+   * </p>
    *
    * @param is the CSV format input stream
    * @return streamCSVRows
    */
   public static Stream<List<String>> asCSVLines(final InputStream is) {
-    return asCSVLines(is, StandardCharsets.UTF_8, 0, null);
+    return asCSVLines(is, UTF_8, 0, null);
   }
 
   /**
    * CSV rows from input stream, use for read CSV file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
+   * </p>
    *
    * @param is the CSV format input stream
-   * @param charset
+   * @param charset the content charset
    * @param offset the offset start from 0
    * @param terminator used to brake out the stream, terminator return true means need to brake out
    */
@@ -148,18 +155,18 @@ public class Texts {
   /**
    * Convert string to byte array input stream.
    *
-   * @param data
+   * @param data the input stream data
    * @return asInputStream
    */
   public static InputStream asInputStream(final String data) {
-    return asInputStream(data, StandardCharsets.UTF_8);
+    return asInputStream(data, UTF_8);
   }
 
   /**
    * Convert string to byte array input stream with charset
    *
-   * @param data
-   * @param charset
+   * @param data the input stream data
+   * @param charset the data charset
    * @return asInputStream
    */
   public static InputStream asInputStream(final String data, final Charset charset) {
@@ -185,8 +192,8 @@ public class Texts {
     } catch (FileNotFoundException e1) {
       throw new CorantRuntimeException(e1);
     }
-    return asXSVLines(fis, StandardCharsets.UTF_8, offset, (i, t) -> limit >= 1 && i > limit,
-        delimiter).onClose(() -> {
+    return asXSVLines(fis, UTF_8, offset, (i, t) -> limit >= 1 && i > limit, delimiter)
+        .onClose(() -> {
           try {
             fis.close();
           } catch (IOException e) {
@@ -213,11 +220,12 @@ public class Texts {
    * contains the delimiter, the delimiter in field value must be escaped with a backslash ('\'); if
    * field value contains carriage return ('\r') or newline character ('\n'), also those characters
    * must be escaped with a backslash.
-   *
+   * <p>
    * NOTE: The caller must maintain resource release by himself.
+   * </p>
    *
    * @param is the input stream
-   * @param charset
+   * @param charset the input stream charset
    * @param offset the offset start from 0, use for skip lines
    * @param terminator used to brake out the stream, terminator return true means need to brake out
    * @param delimiter the field delimiter
@@ -243,8 +251,9 @@ public class Texts {
   /**
    * Read by line and use any character string as a delimiter to split the line into a field list,
    * support delimiter escape.
-   *
+   * <p>
    * NOTE: The caller must maintain resource release by himself.
+   * </p>
    *
    * @see #asXSVLines(InputStream, Charset, int, BiPredicate, String)
    *
@@ -253,37 +262,37 @@ public class Texts {
    * @return asXSVLines
    */
   public static Stream<List<String>> asXSVLines(final InputStream is, final String delimiter) {
-    return asXSVLines(is, StandardCharsets.UTF_8, 0, null, delimiter);
+    return asXSVLines(is, UTF_8, 0, null, delimiter);
   }
 
   /**
    * Reads a string from given input stream with 'UTF-8' charset.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
+   * </p>
    *
-   * @param is
-   * @return
+   * @param is the input stream to read into the string
    * @throws IOException fromInputStream
    */
   public static String fromInputStream(final InputStream is) throws IOException {
-    return fromInputStream(is, StandardCharsets.UTF_8);
+    return fromInputStream(is, UTF_8);
   }
 
   /**
    * Reads a string from given input stream with given charset.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
+   * </p>
    *
    * @param is the input stream
    * @param charset the charset used by input stream reader
-   * @return
    * @throws IOException fromInputStream
    */
   public static String fromInputStream(final InputStream is, final Charset charset)
       throws IOException {
     StringBuilder sb = new StringBuilder();
-    try (Reader reader = new BufferedReader(
-        new InputStreamReader(is, defaultObject(charset, StandardCharsets.UTF_8)))) {
+    try (Reader reader =
+        new BufferedReader(new InputStreamReader(is, defaultObject(charset, UTF_8)))) {
       int c;
       while ((c = reader.read()) != -1) {
         sb.append((char) c);
@@ -372,7 +381,6 @@ public class Texts {
   /**
    * String lines from file, use for read text line by line.
    *
-   *
    * @param file the file to read
    * @param offset used to skip lines, the offset start from 0
    * @param limit the number of lines returned
@@ -395,18 +403,18 @@ public class Texts {
 
   /**
    * String lines from input stream, use for read text file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
    * @param is the text input stream
    */
   public static Stream<String> lines(final InputStream is) {
-    return lines(new InputStreamReader(is, StandardCharsets.UTF_8), 0, null);
+    return lines(new InputStreamReader(is, UTF_8), 0, null);
   }
 
   /**
    * String lines from input stream, use for read text line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
    * @param is the text input stream
@@ -421,7 +429,7 @@ public class Texts {
 
   /**
    * String lines from input stream, use for read text file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
    * @param is the text input stream
@@ -430,12 +438,12 @@ public class Texts {
    */
   public static Stream<String> lines(final InputStream is, final int offset,
       final BiPredicate<Integer, String> terminator) {
-    return lines(new InputStreamReader(is, StandardCharsets.UTF_8), offset, terminator);
+    return lines(new InputStreamReader(is, UTF_8), offset, terminator);
   }
 
   /**
    * String lines from input stream, use for read text file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
    * @param is the text file input stream
@@ -443,13 +451,12 @@ public class Texts {
    * @param limit the number of lines returned
    */
   public static Stream<String> lines(final InputStream is, final int offset, final int limit) {
-    return lines(new InputStreamReader(is, StandardCharsets.UTF_8), offset,
-        (i, t) -> limit >= 1 && i > limit);
+    return lines(new InputStreamReader(is, UTF_8), offset, (i, t) -> limit >= 1 && i > limit);
   }
 
   /**
    * String lines from input stream reader, use for read text file line by line.
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
    * @param isr the text input stream reader
@@ -473,8 +480,130 @@ public class Texts {
   }
 
   /**
-   * Parse CSV line to field list
+   * String lines from file, use for read text file line by line.
    *
+   * @see #locableLines(File, long, Charset, int, Predicate)
+   * @param file the text file
+   * @return a LocableFileLine object stream which contain line data and line offset info.
+   */
+  @Experimental
+  public static Stream<LocableFileLine> locableLines(final File file) {
+    return locableLines(file, 0, UTF_8, 0, t -> false);
+  }
+
+  /**
+   * String lines from file, use for read text file line by line.
+   *
+   * @see #locableLines(File, long, Charset, int, Predicate)
+   *
+   * @param file the text file
+   * @param skipBytes the offset position, measured in bytes from the beginning of the file, at
+   *        which to set the file pointer.
+   * @return a LocableFileLine object stream which contain line data and line offset info.
+   */
+  @Experimental
+  public static Stream<LocableFileLine> locableLines(final File file, final long skipBytes) {
+    return locableLines(file, skipBytes, UTF_8, 0, t -> false);
+  }
+
+  /**
+   * String lines from file, use for read text file line by line.
+   * <p>
+   * Note: The caller must maintain resource release by himself, the method is not thread-safe.
+   *
+   * @param file the text file
+   * @param skipBytes the offset position, measured in bytes from the beginning of the file, at
+   *        which to set the file pointer.
+   * @param charset the content charset
+   * @param bufferIncrement the line buffer increment, use to increase the line read buffer size and
+   *        reduce byte array copy.
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
+   * @return a LocableFileLine object stream which contain line data and line offset info.
+   *
+   * @see LocableFileLine
+   * @see RandomAccessFileLineInputStream
+   * @see RandomAccessFile
+   */
+  @Experimental
+  public static Stream<LocableFileLine> locableLines(final File file, final long skipBytes,
+      final Charset charset, final int bufferIncrement,
+      final Predicate<LocableFileLine> terminator) {
+    final RandomAccessFileLineInputStream reader =
+        new RandomAccessFileLineInputStream(file, charset, bufferIncrement);
+    final Stream<LocableFileLine> stream = streamOf(new Iterator<>() {
+      final Predicate<LocableFileLine> useTerminator = terminator == null ? l -> false : terminator;
+      LocableFileLine nextLine = null;
+      boolean valid = true;
+      // skip read bytes if necessary
+      {
+        try {
+          if (skipBytes > 0) {
+            valid = reader.skip(skipBytes) > 0;
+          }
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e, "Skip bytes error!");
+        }
+      }
+
+      @Override
+      public boolean hasNext() {
+        if (!valid || Thread.currentThread().isInterrupted()) {
+          return false;
+        }
+        try {
+          long bp = reader.getCount();
+          String content = reader.readLine();
+          long ep = reader.getCount();
+          if (content != null) {
+            nextLine = new LocableFileLine(bp, ep, content);
+          } else {
+            nextLine = null;
+          }
+          return nextLine != null && !useTerminator.test(nextLine);
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
+      }
+
+      @Override
+      public LocableFileLine next() {
+        if (valid && (nextLine != null || hasNext())) {
+          LocableFileLine line = nextLine;
+          nextLine = null;
+          return line;
+        } else {
+          throw new NoSuchElementException();
+        }
+      }
+    });
+    return stream.onClose(() -> {
+      try {
+        reader.close();
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+  }
+
+  /**
+   * String lines from file, use for read text file line by line.
+   *
+   * @see #locableLines(File, long, Charset, int, Predicate)
+   *
+   * @param file the text file
+   * @param skipBytes the offset position, measured in bytes from the beginning of the file, at
+   *        which to set the file pointer.
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
+   * @return a LocableFileLine object stream which contain line data and line offset info.
+   */
+  public static Stream<LocableFileLine> locableLines(final File file, final long skipBytes,
+      final Predicate<LocableFileLine> terminator) {
+    return locableLines(file, skipBytes, UTF_8, 0, terminator);
+  }
+
+  /**
+   * Parse CSV line to field list
+   * <p>
    * NOTE: Some codes come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform
    * me(finesoft@gmail.com).
    *
@@ -547,7 +676,7 @@ public class Texts {
   /**
    * Return string lines from file path.
    *
-   * @param path
+   * @param path the file path
    * @return readFromFile
    */
   public static List<String> readLines(final String path) {
@@ -557,7 +686,7 @@ public class Texts {
   /**
    * Format objects to CSV line string.
    *
-   * @param objects
+   * @param objects the objects which compose a CSV line
    * @return toCSVLine
    */
   public static String toCSVLine(final Iterable<?> objects) {
@@ -580,7 +709,7 @@ public class Texts {
   /**
    * Format objects to CSV line string.
    *
-   * @param objects
+   * @param objects the objects array which compose a CSV line
    * @return toCSVLine
    */
   public static String toCSVLine(Object... objects) {
@@ -590,8 +719,8 @@ public class Texts {
   /**
    * Format objects to XSV line string.
    *
-   * @param objects
-   * @param delimiter
+   * @param objects the objects which compose a XSV line
+   * @param delimiter the field delimiter in XSV line
    * @return toXSVLine
    */
   public static String toXSVLine(final Iterable<?> objects, String delimiter) {
@@ -605,10 +734,10 @@ public class Texts {
 
   /**
    * Convert input stream to String
-   *
+   * <p>
    * Note: The caller must maintain resource release by himself
    *
-   * @param is
+   * @param is the input stream
    * @return tryFromInputStream
    */
   public static String tryFromInputStream(final InputStream is) {
@@ -630,8 +759,7 @@ public class Texts {
 
   public static void tryWriteToFile(File file, boolean append, String data) {
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWriter =
-            new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
+        BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(os, UTF_8))) {
       fileWriter.append(data);
     } catch (IOException e) {
       // Noop!
@@ -677,8 +805,8 @@ public class Texts {
       shouldBeTrue(file.createNewFile());
     }
     try (OutputStream os = new FileOutputStream(file, append);
-        BufferedWriter fileWriter = new BufferedWriter(
-            new OutputStreamWriter(os, defaultObject(charset, StandardCharsets.UTF_8)))) {
+        BufferedWriter fileWriter =
+            new BufferedWriter(new OutputStreamWriter(os, defaultObject(charset, UTF_8)))) {
       while (lines.hasNext() && !Thread.currentThread().isInterrupted()) {
         Object line = lines.next();
         if (line == null) {
@@ -693,14 +821,14 @@ public class Texts {
   }
 
   public static void writeToFile(File file, boolean append, Stream<?> lines) throws IOException {
-    writeToFile(file, append, StandardCharsets.UTF_8, shouldNotNull(lines).iterator());
+    writeToFile(file, append, UTF_8, shouldNotNull(lines).iterator());
   }
 
   /**
    * Write string to file line by line, string lines will be written to the beginning of the file.
    *
-   * @param file
-   * @param data
+   * @param file the destination file which the data write to
+   * @param data the data to be written
    * @throws IOException writeToFile
    */
   public static void writeToFile(File file, Iterable<?> data) throws IOException {
@@ -722,6 +850,52 @@ public class Texts {
   /**
    * corant-shared
    *
+   * @author bingo 上午11:21:07
+   *
+   */
+  public static class LocableFileLine implements Serializable {
+    private static final long serialVersionUID = -3379179413769504801L;
+    final long beginPosition;
+    final long endPosition;
+    final String content;
+
+    public LocableFileLine(long beginPosition, long endPosition, String content) {
+      this.beginPosition = beginPosition;
+      this.endPosition = endPosition;
+      this.content = content;
+    }
+
+    /**
+     * Returns the offset from the beginning of the line in file, in bytes.
+     */
+    public long getBeginPosition() {
+      return beginPosition;
+    }
+
+    /**
+     * Returns the line
+     */
+    public String getContent() {
+      return content;
+    }
+
+    /**
+     * Returns the offset from the ending of the line in file, in bytes.
+     */
+    public long getEndPosition() {
+      return endPosition;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("[%d-%d] %s", beginPosition, endPosition, content);
+    }
+
+  }
+
+  /**
+   * corant-shared
+   * <p>
    * Special reader, used to deal with CSV line breaks.
    *
    * @author bingo 上午11:00:21

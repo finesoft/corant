@@ -1084,7 +1084,9 @@ public class Texts {
     }
 
     long skipBytes(long skipBytes) throws IOException {
-      chuckBuffer.limit(0);
+      if (chuckBuffer != null) {
+        chuckBuffer.limit(0);
+      }
       long useSkipBytes = Math.max(skipBytes, 0);
       if (useSkipBytes > channel.size()) {
         lastChannelOffset = channel.size();

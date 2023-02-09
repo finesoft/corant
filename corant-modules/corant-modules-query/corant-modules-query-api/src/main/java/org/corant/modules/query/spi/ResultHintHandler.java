@@ -46,6 +46,6 @@ public interface ResultHintHandler extends AutoCloseable {
     return false;
   }
 
-  default void validate(QueryHint qh) {}
+  default void validate(QueryHint qh) {} // TODO FIXME
 
 }

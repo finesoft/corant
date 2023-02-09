@@ -15,10 +15,12 @@ package org.corant.shared.util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.NEWLINE;
@@ -28,6 +30,7 @@ import static org.corant.shared.util.Strings.replace;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,7 +44,11 @@ import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +61,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.resource.RandomAccessFileLineInputStream;
+import org.corant.shared.normal.Defaults;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.ubiquity.Experimental;
 
@@ -148,7 +155,8 @@ public class Texts {
    */
   public static Stream<List<String>> asCSVLines(final InputStream is, final Charset charset,
       final int offset, final BiPredicate<Integer, String> terminator) {
-    final BufferedReader reader = new CSVBufferedReader(new InputStreamReader(is, charset));
+    final BufferedReader reader = new CSVBufferedReader(
+        new InputStreamReader(shouldNotNull(is), defaultObject(charset, UTF_8)));
     return lines(reader, offset, terminator, Texts::readCSVFields);
   }
 
@@ -225,16 +233,17 @@ public class Texts {
    * </p>
    *
    * @param is the input stream
-   * @param charset the input stream charset
+   * @param charset the input stream charset, if null use default utf-8 charset
    * @param offset the offset start from 0, use for skip lines
    * @param terminator used to brake out the stream, terminator return true means need to brake out
    * @param delimiter the field delimiter
    */
   public static Stream<List<String>> asXSVLines(final InputStream is, final Charset charset,
       final int offset, final BiPredicate<Integer, String> terminator, final String delimiter) {
-    shouldNotNull(delimiter);
-    final BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-    final Pattern pattern = escapedPattern(Strings.BACK_SLASH, delimiter);
+    shouldNoneNull(is, delimiter);
+    final BufferedReader reader =
+        new BufferedReader(new InputStreamReader(is, defaultObject(charset, UTF_8)));
+    final Pattern pattern = shouldNotNull(escapedPattern(Strings.BACK_SLASH, delimiter));
     final String esacpedDelimiter = Strings.BACK_SLASH.concat(delimiter);
     final Function<String, List<String>> converter = line -> {
       ArrayList<String> list = new ArrayList<>(10);
@@ -291,8 +300,8 @@ public class Texts {
   public static String fromInputStream(final InputStream is, final Charset charset)
       throws IOException {
     StringBuilder sb = new StringBuilder();
-    try (Reader reader =
-        new BufferedReader(new InputStreamReader(is, defaultObject(charset, UTF_8)))) {
+    try (Reader reader = new BufferedReader(
+        new InputStreamReader(shouldNotNull(is), defaultObject(charset, UTF_8)))) {
       int c;
       while ((c = reader.read()) != -1) {
         sb.append((char) c);
@@ -320,6 +329,7 @@ public class Texts {
 
   public static <T> Stream<T> lines(final BufferedReader reader, final int offset,
       final BiPredicate<Integer, String> terminator, final Function<String, T> converter) {
+    shouldNoneNull(reader, converter);
     return streamOf(new Iterator<>() {
       final BiPredicate<Integer, String> useTerminator =
           terminator == null ? (i, t) -> false : terminator;
@@ -409,7 +419,7 @@ public class Texts {
    * @param is the text input stream
    */
   public static Stream<String> lines(final InputStream is) {
-    return lines(new InputStreamReader(is, UTF_8), 0, null);
+    return lines(new InputStreamReader(shouldNotNull(is), UTF_8), 0, null);
   }
 
   /**
@@ -424,7 +434,8 @@ public class Texts {
    */
   public static Stream<String> lines(final InputStream is, final Charset charset, final int offset,
       final BiPredicate<Integer, String> terminator) {
-    return lines(new InputStreamReader(is, charset), offset, terminator);
+    return lines(new InputStreamReader(shouldNotNull(is), defaultObject(charset, UTF_8)), offset,
+        terminator);
   }
 
   /**
@@ -438,7 +449,7 @@ public class Texts {
    */
   public static Stream<String> lines(final InputStream is, final int offset,
       final BiPredicate<Integer, String> terminator) {
-    return lines(new InputStreamReader(is, UTF_8), offset, terminator);
+    return lines(new InputStreamReader(shouldNotNull(is), UTF_8), offset, terminator);
   }
 
   /**
@@ -451,7 +462,8 @@ public class Texts {
    * @param limit the number of lines returned
    */
   public static Stream<String> lines(final InputStream is, final int offset, final int limit) {
-    return lines(new InputStreamReader(is, UTF_8), offset, (i, t) -> limit >= 1 && i > limit);
+    return lines(new InputStreamReader(shouldNotNull(is), UTF_8), offset,
+        (i, t) -> limit >= 1 && i > limit);
   }
 
   /**
@@ -465,7 +477,7 @@ public class Texts {
    */
   public static Stream<String> lines(final InputStreamReader isr, final int offset,
       final BiPredicate<Integer, String> terminator) {
-    final BufferedReader reader = new BufferedReader(isr);
+    final BufferedReader reader = new BufferedReader(shouldNotNull(isr));
     return lines(reader, offset, terminator, UnaryOperator.identity());
   }
 
@@ -515,21 +527,21 @@ public class Texts {
    * @param skipBytes the offset position, measured in bytes from the beginning of the file, at
    *        which to set the file pointer.
    * @param charset the content charset
-   * @param bufferIncrement the line buffer increment, use to increase the line read buffer size and
-   *        reduce byte array copy.
+   * @param lineBufferIncrement the line buffer increment, use to increase the line read buffer size
+   *        and reduce byte array copy.
    * @param terminator used to brake out the stream, terminator return true means need to brake out
    * @return a LocableFileLine object stream which contain line data and line offset info.
    *
    * @see LocableFileLine
-   * @see RandomAccessFileLineInputStream
+   * @see LocablelFileLineReader
    * @see RandomAccessFile
    */
   @Experimental
   public static Stream<LocableFileLine> locableLines(final File file, final long skipBytes,
-      final Charset charset, final int bufferIncrement,
+      final Charset charset, final int lineBufferIncrement,
       final Predicate<LocableFileLine> terminator) {
-    final RandomAccessFileLineInputStream reader =
-        new RandomAccessFileLineInputStream(file, charset, bufferIncrement);
+    final LocablelFileLineReader reader =
+        new LocablelFileLineReader(file, charset, skipBytes, lineBufferIncrement);
     final Stream<LocableFileLine> stream = streamOf(new Iterator<>() {
       final Predicate<LocableFileLine> useTerminator = terminator == null ? l -> false : terminator;
       LocableFileLine nextLine = null;
@@ -538,7 +550,7 @@ public class Texts {
       {
         try {
           if (skipBytes > 0) {
-            valid = reader.skip(skipBytes) > 0;
+            valid = reader.skipBytes(skipBytes) > 0;
           }
         } catch (IOException e) {
           throw new CorantRuntimeException(e, "Skip bytes error!");
@@ -551,9 +563,9 @@ public class Texts {
           return false;
         }
         try {
-          long bp = reader.getCount();
+          long bp = reader.readBytes();
           String content = reader.readLine();
-          long ep = reader.getCount();
+          long ep = reader.readBytes();
           if (content != null) {
             nextLine = new LocableFileLine(bp, ep, content);
           } else {
@@ -940,6 +952,148 @@ public class Texts {
         result.append(c);
       }
       return result.toString();
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 下午2:45:27
+   *
+   */
+  static class LocablelFileLineReader implements Closeable {
+
+    static final int THRESHOLD = (int) (2 * Defaults.ONE_MB);
+    static final int DFLT_LINE_INC = 8192;
+    static final int DFLT_CHUNK_FACTOR = 256;
+
+    final RandomAccessFile file;
+    final FileChannel channel;
+    final int lineBufferIncrement;
+    final int chuckBufferSize;
+    final CharsetDecoder decoder;
+
+    ByteBuffer chuckBuffer;
+    byte[] lineBuffer = null;
+    long lastChannelOffset;
+
+    LocablelFileLineReader(File file, Charset charset, long skipBytes, int lineBufferIncrement) {
+      try {
+        this.file = new RandomAccessFile(shouldNotNull(file), "r");
+        this.lineBufferIncrement = max(lineBufferIncrement, DFLT_LINE_INC);
+        chuckBufferSize = this.lineBufferIncrement * DFLT_CHUNK_FACTOR;
+        channel = this.file.getChannel();
+        lastChannelOffset = channel.position();
+        decoder = defaultObject(charset, StandardCharsets.UTF_8).newDecoder();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      }
+    }
+
+    @Override
+    public void close() throws IOException {
+      if (chuckBuffer != null) {
+        chuckBuffer.clear();
+      }
+      if (channel != null) {
+        channel.close();
+      }
+      if (file != null) {
+        file.close();
+      }
+    }
+
+    byte[] growLineBuffer(byte[] useLineBuffer) {
+      if (useLineBuffer.length < lineBufferIncrement) {
+        return new byte[useLineBuffer.length * 2];
+      } else {
+        return new byte[useLineBuffer.length + lineBufferIncrement];
+      }
+    }
+
+    byte read() throws IOException {
+      if (chuckBuffer == null) {
+        chuckBuffer = ByteBuffer.allocate(chuckBufferSize);
+        lastChannelOffset = channel.position();
+        if (channel.read(chuckBuffer) != -1) {
+          chuckBuffer.flip();
+          return chuckBuffer.get();
+        }
+        chuckBuffer.limit(0);
+        return -1;
+      } else if (chuckBuffer.hasRemaining()) {
+        return chuckBuffer.get();
+      } else {
+        chuckBuffer.clear();
+        lastChannelOffset = channel.position();
+        if (channel.read(chuckBuffer) != -1) {
+          chuckBuffer.flip();
+          return chuckBuffer.get();
+        }
+        chuckBuffer.limit(0);
+        return -1;
+      }
+    }
+
+    long readBytes() {
+      return lastChannelOffset + (chuckBuffer == null ? 0 : chuckBuffer.position());
+    }
+
+    String readLine() throws IOException {
+
+      byte[] useLineBuffer = lineBuffer;
+      if (useLineBuffer == null || useLineBuffer.length > THRESHOLD) {
+        useLineBuffer = lineBuffer = new byte[256];
+      }
+
+      int c = -1, limit = useLineBuffer.length, offset = 0;
+      boolean eol = false;
+
+      while (!eol) {
+        switch (c = read()) {
+          case -1:
+          case '\n':
+            eol = true;
+            break;
+          case '\r':
+            eol = true;
+            long pos = readBytes();
+            if ((read()) != '\n') {
+              skipBytes(pos);
+            }
+            break;
+          default:
+            if (--limit < 0) {
+              // reach limit, need to grow.
+              useLineBuffer = growLineBuffer(useLineBuffer);
+              limit = useLineBuffer.length - offset - 1;
+              System.arraycopy(lineBuffer, 0, useLineBuffer, 0, offset);
+              lineBuffer = useLineBuffer;
+            }
+            useLineBuffer[offset++] = (byte) c;
+            break;
+        }
+      }
+
+      if ((c == -1) && (offset == 0)) {
+        return null;
+      }
+
+      return decoder.decode(ByteBuffer.wrap(useLineBuffer, 0, offset)).toString();
+    }
+
+    long skipBytes(long skipBytes) throws IOException {
+      chuckBuffer.limit(0);
+      long useSkipBytes = Math.max(skipBytes, 0);
+      if (useSkipBytes > channel.size()) {
+        lastChannelOffset = channel.size();
+        return -1;
+      } else {
+        channel.position(useSkipBytes);
+        lastChannelOffset = useSkipBytes;
+        return useSkipBytes;
+      }
     }
 
   }

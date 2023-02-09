@@ -20,8 +20,10 @@ import static org.corant.shared.util.Maps.extractMapKeyPathValue;
 import static org.corant.shared.util.Maps.getMapKeyPathValue;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.linkedHashSetOf;
+import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
+import static org.corant.shared.util.Strings.strip;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -254,7 +256,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
       String projectName = ppe > pps ? fieldExp.substring(pps, ppe) : fieldName;
       String className = cpe > cps ? fieldExp.substring(cps, cpe) : null;
       return Triple.of(projectName, split(fieldName, Names.NAME_SPACE_SEPARATORS, true, true),
-          className == null ? null : Classes.asClass(className));
+          isBlank(className) ? null : Classes.asClass(strip(className)));
     }
   }
 

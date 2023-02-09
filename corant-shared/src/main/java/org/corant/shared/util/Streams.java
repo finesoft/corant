@@ -13,7 +13,7 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.normal.Defaults.FOUR_KB;
+import static org.corant.shared.normal.Defaults.FOUR_KBS;
 import static org.corant.shared.normal.Defaults.MAX_BUFFERED_BYTES;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -223,7 +223,7 @@ public class Streams {
    * @see #copy(InputStream, OutputStream, int)
    */
   public static long copy(InputStream input, OutputStream output) throws IOException {
-    return copy(input, output, FOUR_KB);
+    return copy(input, output, FOUR_KBS);
   }
 
   /**
@@ -240,7 +240,7 @@ public class Streams {
    */
   public static long copy(InputStream input, OutputStream output, Checksum checksum)
       throws IOException {
-    return copy(input, output, FOUR_KB, checksum);
+    return copy(input, output, FOUR_KBS, checksum);
   }
 
   /**
@@ -303,7 +303,7 @@ public class Streams {
    * @see #copy(Reader, Writer, int)
    */
   public static long copy(Reader reader, Writer writer) throws IOException {
-    return copy(reader, writer, FOUR_KB);
+    return copy(reader, writer, FOUR_KBS);
   }
 
   /**
@@ -360,7 +360,7 @@ public class Streams {
    * @throws IOException If I/O errors occur
    */
   public static byte[] readAllBytes(InputStream is) throws IOException {
-    return readAllBytes(is, FOUR_KB);
+    return readAllBytes(is, FOUR_KBS);
   }
 
   /**

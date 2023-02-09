@@ -171,10 +171,10 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
               "yyyy-MM-dd-HH.mm.ss.SSSSSS", true),
 
           // SQL timestamp NOTE:imprecision for MSSQL SERVER
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}\\:\\d{2}\\:\\d{2}\\.\\d{3,}$",
+          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}\\:\\d{2}\\:\\d{2}\\.\\d{1,}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive()
                   .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                  .appendFraction(NANO_OF_SECOND, 3, 9, true).toFormatter(),
+                  .appendFraction(NANO_OF_SECOND, 1, 9, true).toFormatter(),
               "yyyy-MM-dd HH:mm:ss.[S...]", true),
 
           // 星期三, 14 十一月 1979 11:14:08

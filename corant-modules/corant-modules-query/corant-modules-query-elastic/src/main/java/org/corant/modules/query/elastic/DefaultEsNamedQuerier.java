@@ -91,8 +91,8 @@ public class DefaultEsNamedQuerier extends
    * Result window is too large, from + size must be less than or equal to: [10000]
    */
   @Override
-  public int resolveMaxSelectSize() {
-    return min(super.resolveMaxSelectSize(), getUnLimitSize());
+  public int resolveSelectSize() {
+    return min(super.resolveSelectSize(), getUnLimitSize());
   }
 
   @Override

@@ -55,7 +55,7 @@ import org.corant.modules.query.spi.ResultHintHandler;
  * Use case:
  *
  * <pre>
- * &lt;query name="GeneralCriterias.get" result-class="java.util.Map"&gt;
+ * &lt;query name="QueryService.get" result-class="java.util.Map"&gt;
  *       &lt;script&gt;
  *           &lt;![CDATA[
  *               SELECT id,enum FROM Table

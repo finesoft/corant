@@ -212,7 +212,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
     Class<T> resultClass = (Class<T>) querier.getQuery().getResultClass();
     Object[] queryParam = querier.getScriptParameter();
     Map<String, String> properties = querier.getQuery().getProperties();
-    int maxSelectSize = querier.resolveMaxSelectSize();
+    int maxSelectSize = querier.resolveSelectSize();
     Duration timeout = querier.resolveTimeout();
     String ql = querier.getScript();
     log(queryName, queryParam, ql);

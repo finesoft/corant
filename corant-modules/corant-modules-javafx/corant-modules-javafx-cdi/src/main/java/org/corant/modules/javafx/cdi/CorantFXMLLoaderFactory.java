@@ -23,7 +23,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
-import org.corant.context.Beans;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 
@@ -47,7 +46,9 @@ public class CorantFXMLLoaderFactory {
         : ResourceBundle.getBundle(Configs.assemblyStringConfigProperty(fxml.bundle()));
     final Charset charset = fxml == null || isBlank(fxml.charset()) ? UTF_8
         : Charset.forName(Configs.assemblyStringConfigProperty(fxml.charset()));
-    return new FXMLLoader(url, bundle, new JavaFXBuilderFactory(), Beans::resolve, charset);
+
+    return FXMLLoaders.builder().location(url).builderFactory(new JavaFXBuilderFactory())
+        .charset(charset).resources(bundle).build();
   }
 
 }

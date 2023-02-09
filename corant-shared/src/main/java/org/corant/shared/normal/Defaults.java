@@ -43,9 +43,9 @@ public interface Defaults {
 
   int ONE_KB = 1024;
 
-  int FOUR_KB = ONE_KB << 2;
+  int FOUR_KBS = ONE_KB << 2;
 
-  int SIXTEEN_KBS = FOUR_KB << 2;
+  int SIXTEEN_KBS = FOUR_KBS << 2;
 
   long ONE_MB = ONE_KB * (long) ONE_KB;
 

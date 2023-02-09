@@ -52,7 +52,7 @@ public class TemporaryResource implements WritableResource {
   protected SimpleDeferredFileOutputStream dfos;
 
   public TemporaryResource() {
-    this(Defaults.FOUR_KB);
+    this(Defaults.FOUR_KBS);
   }
 
   public TemporaryResource(int memoryThreshold) {
@@ -60,7 +60,7 @@ public class TemporaryResource implements WritableResource {
   }
 
   public TemporaryResource(String filename) {
-    this(filename, Defaults.FOUR_KB, null);
+    this(filename, Defaults.FOUR_KBS, null);
   }
 
   public TemporaryResource(String filename, int memoryThreshold, String tempDir,

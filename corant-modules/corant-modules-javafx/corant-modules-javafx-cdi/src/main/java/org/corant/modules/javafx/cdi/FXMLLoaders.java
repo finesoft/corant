@@ -13,20 +13,27 @@
  */
 package org.corant.modules.javafx.cdi;
 
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import org.corant.context.Beans;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResourceLoader;
 import org.corant.shared.resource.URLResource;
+import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Resources;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
+import javafx.util.Callback;
 
 /**
  * corant-modules-javafx-cdi
@@ -39,6 +46,14 @@ import javafx.util.BuilderFactory;
 public class FXMLLoaders {
 
   private FXMLLoaders() {}
+
+  /**
+   * Returns a simple FXMLLoader builder for build a FXMLLoader instance. The controller factory in
+   * the document is taken over by CDI.
+   */
+  public static FXMLLoaderBuilder builder() {
+    return new FXMLLoaderBuilder();
+  }
 
   /**
    * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
@@ -152,4 +167,80 @@ public class FXMLLoaders {
     return null;
   }
 
+  /**
+   * corant-modules-javafx-cdi
+   *
+   * @author bingo 下午4:40:25
+   *
+   */
+  public static class FXMLLoaderBuilder {
+    URL location;
+    ResourceBundle resources;
+    BuilderFactory builderFactory;
+    Charset charset = StandardCharsets.UTF_8;
+    LinkedList<FXMLLoader> loaders;
+    Object parameter;
+    Annotation[] controllerQualifiers = Annotations.EMPTY_ARRAY;
+
+    public FXMLLoader build() {
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      final Callback<Class<?>, Object> controllerFactory = t -> {
+        Object ctrl = Beans.resolve(t, controllerQualifiers);
+        if (ctrl instanceof ExtendedInitializable) {
+          ((ExtendedInitializable) ctrl).beforeInitialize(parameter);
+        }
+        return ctrl;
+      };
+      return new FXMLLoader(location, resources, builderFactory, controllerFactory, charset,
+          defaultObject(loaders, LinkedList::new));
+    }
+
+    public FXMLLoaderBuilder builderFactory(BuilderFactory builderFactory) {
+      this.builderFactory = builderFactory;
+      return this;
+    }
+
+    public FXMLLoaderBuilder charset(Charset charset) {
+      this.charset = charset;
+      return this;
+    }
+
+    public FXMLLoaderBuilder controllerQualifiers(Annotation... controllerQualifiers) {
+      if (controllerQualifiers.length > 0) {
+        this.controllerQualifiers =
+            Arrays.copyOf(controllerQualifiers, controllerQualifiers.length);
+      }
+      return this;
+    }
+
+    public FXMLLoaderBuilder loaders(LinkedList<FXMLLoader> loaders) {
+      this.loaders = loaders;
+      return this;
+    }
+
+    public FXMLLoaderBuilder location(String pathOrExp) {
+      try {
+        Optional<URLResource> res = Resources.from(pathOrExp).findAny();
+        location = res.isPresent() ? res.get().getURL() : null;
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+      return this;
+    }
+
+    public FXMLLoaderBuilder location(URL location) {
+      this.location = location;
+      return this;
+    }
+
+    public FXMLLoaderBuilder parameter(Object parameter) {
+      this.parameter = parameter;
+      return this;
+    }
+
+    public FXMLLoaderBuilder resources(ResourceBundle resources) {
+      this.resources = resources;
+      return this;
+    }
+  }
 }

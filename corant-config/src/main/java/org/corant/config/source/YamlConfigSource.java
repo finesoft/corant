@@ -13,17 +13,15 @@
  */
 package org.corant.config.source;
 
-import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Maps.flatStringMap;
-import static org.corant.shared.util.Objects.forceCast;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
  * corant-config
@@ -38,15 +36,17 @@ public class YamlConfigSource extends AbstractCorantConfigSource {
   final Map<String, String> properties;
 
   YamlConfigSource(Resource resource, int ordinal) {
-    Class<?> yamlCls = tryAsClass("org.yaml.snakeyaml.Yaml");
+    // Class<?> yamlCls = tryAsClass("org.yaml.snakeyaml.Yaml");
     this.ordinal = ordinal;
     try (InputStream in = resource.openInputStream()) {
       // Yaml yaml = forceCast(yamlCls.newInstance());//JDK8
-      Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
+      // Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
+
+      // yaml is required from 2023-02-10 even though it has security issues
+      Yaml yaml = new Yaml(new Constructor(Map.class));
       properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
       name = resource.getLocation();
-    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-        | InvocationTargetException | NoSuchMethodException | SecurityException | IOException e) {
+    } catch (IllegalArgumentException | SecurityException | IOException e) {
       throw new CorantRuntimeException(e);
     }
   }

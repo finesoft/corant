@@ -112,6 +112,13 @@ public class DbUtilBasicRowProcessor extends BasicRowProcessor {
      */
     private final Map<String, String> lowerCaseMap = new HashMap<>();
 
+    @Override
+    public Object clone() {
+      CaseInsensitiveHashMap m = (CaseInsensitiveHashMap) super.clone();
+      m.lowerCaseMap.putAll(lowerCaseMap);
+      return m;
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean containsKey(Object key) {
@@ -160,5 +167,6 @@ public class DbUtilBasicRowProcessor extends BasicRowProcessor {
       Object realKey = lowerCaseMap.remove(key.toString().toLowerCase(Locale.ENGLISH));
       return super.remove(realKey);
     }
+
   }
 }

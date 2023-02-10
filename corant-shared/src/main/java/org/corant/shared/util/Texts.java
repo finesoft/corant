@@ -81,6 +81,8 @@ public class Texts {
   public static final String XSV_CR_REP = "\\r";
   public static final String XSV_LF_REP = "\\n";
   public static final String XSV_DOUBLE_BACK_SLASH = "\\\\";
+  public static final byte CR = 0x0D;
+  public static final byte LF = 0x0A;
 
   private Texts() {}
 
@@ -541,7 +543,7 @@ public class Texts {
       final Charset charset, final int lineBufferIncrement,
       final Predicate<LocableFileLine> terminator) {
     final LocablelFileLineReader reader =
-        new LocablelFileLineReader(file, charset, skipBytes, lineBufferIncrement);
+        new LocablelFileLineReader(file, charset, lineBufferIncrement);
     final Stream<LocableFileLine> stream = streamOf(new Iterator<>() {
       final Predicate<LocableFileLine> useTerminator = terminator == null ? l -> false : terminator;
       LocableFileLine nextLine = null;
@@ -978,7 +980,7 @@ public class Texts {
     byte[] lineBuffer = null;
     long lastChannelOffset;
 
-    LocablelFileLineReader(File file, Charset charset, long skipBytes, int lineBufferIncrement) {
+    LocablelFileLineReader(File file, Charset charset, int lineBufferIncrement) {
       try {
         this.file = new RandomAccessFile(shouldNotNull(file), "r");
         this.lineBufferIncrement = max(lineBufferIncrement, DFLT_LINE_INC);
@@ -1053,19 +1055,19 @@ public class Texts {
       while (!eol) {
         switch (c = read()) {
           case -1:
-          case '\n':
+          case LF:
             eol = true;
             break;
-          case '\r':
+          case CR:
             eol = true;
             long pos = readBytes();
-            if ((read()) != '\n') {
+            if ((read()) != LF) { // for windows '\r\n'
               skipBytes(pos);
             }
             break;
           default:
             if (--limit < 0) {
-              // reach limit, need to grow.
+              // reach limit, need to grow up.
               useLineBuffer = growLineBuffer(useLineBuffer);
               limit = useLineBuffer.length - offset - 1;
               System.arraycopy(lineBuffer, 0, useLineBuffer, 0, offset);

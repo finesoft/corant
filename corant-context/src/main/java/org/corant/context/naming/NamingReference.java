@@ -47,6 +47,15 @@ public class NamingReference extends Reference {
   }
 
   @Override
+  public Object clone() {
+    NamingReference r = (NamingReference) super.clone();
+    if (qualifiers.length > 0) {
+      r.qualifiers = Arrays.copyOf(qualifiers, qualifiers.length);
+    }
+    return r;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;

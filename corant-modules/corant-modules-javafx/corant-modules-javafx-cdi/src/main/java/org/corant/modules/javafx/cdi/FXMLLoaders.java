@@ -15,15 +15,17 @@ package org.corant.modules.javafx.cdi;
 
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import org.corant.context.Beans;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResourceLoader;
@@ -31,7 +33,6 @@ import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Resources;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.BuilderFactory;
 import javafx.util.Callback;
 
@@ -67,14 +68,7 @@ public class FXMLLoaders {
    * @see Resources#from(String)
    */
   public static <T> T load(String pathOrExp) throws IOException {
-    Optional<URLResource> resource = Resources.from(pathOrExp).findAny();
-    if (resource.isPresent()) {
-      try (InputStream is = resource.get().openInputStream()) {
-        return new FXMLLoader(null, null, new JavaFXBuilderFactory(), Beans::resolve,
-            StandardCharsets.UTF_8).load(is);
-      }
-    }
-    return null;
+    return builder().location(pathOrExp).build().load();
   }
 
   /**
@@ -88,7 +82,7 @@ public class FXMLLoaders {
    * @return the loaded object hierarchy
    */
   public static <T> T load(URL location) throws IOException {
-    return FXMLLoader.load(location, null, null, Beans::resolve);
+    return builder().location(location).build().load();
   }
 
   /**
@@ -103,7 +97,7 @@ public class FXMLLoaders {
    * @return the loaded object hierarchy
    */
   public static <T> T load(URL location, ResourceBundle resources) throws IOException {
-    return FXMLLoader.load(location, resources, null, Beans::resolve);
+    return builder().location(location).resources(resources).build().load();
   }
 
   /**
@@ -120,7 +114,8 @@ public class FXMLLoaders {
    */
   public static <T> T load(URL location, ResourceBundle resources, BuilderFactory builderFactory)
       throws IOException {
-    return FXMLLoader.load(location, resources, builderFactory, Beans::resolve);
+    return builder().location(location).resources(resources).builderFactory(builderFactory).build()
+        .load();
   }
 
   /**
@@ -140,7 +135,8 @@ public class FXMLLoaders {
    */
   public static <T> T load(URL location, ResourceBundle resources, BuilderFactory builderFactory,
       Charset charset) throws IOException {
-    return FXMLLoader.load(location, resources, builderFactory, Beans::resolve, charset);
+    return builder().location(location).resources(resources).builderFactory(builderFactory)
+        .charset(charset).build().load();
   }
 
   /**
@@ -159,10 +155,7 @@ public class FXMLLoaders {
   public static <T> T loadRelative(Class<?> relative, String path) throws IOException {
     URLResource resource = Resources.fromRelativeClass(relative, path);
     if (resource != null) {
-      try (InputStream is = resource.openInputStream()) {
-        return new FXMLLoader(null, null, new JavaFXBuilderFactory(), Beans::resolve,
-            StandardCharsets.UTF_8).load(is);
-      }
+      return builder().location(resource.getURL()).build().load();
     }
     return null;
   }
@@ -173,21 +166,25 @@ public class FXMLLoaders {
    * @author bingo 下午4:40:25
    *
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public static class FXMLLoaderBuilder {
     URL location;
     ResourceBundle resources;
     BuilderFactory builderFactory;
     Charset charset = StandardCharsets.UTF_8;
     LinkedList<FXMLLoader> loaders;
-    Object parameter;
     Annotation[] controllerQualifiers = Annotations.EMPTY_ARRAY;
+    Map<Class<?>, Consumer> postControllerFactoryCalls = new LinkedHashMap<>();
 
     public FXMLLoader build() {
-      @SuppressWarnings({"unchecked", "rawtypes"})
       final Callback<Class<?>, Object> controllerFactory = t -> {
         Object ctrl = Beans.resolve(t, controllerQualifiers);
-        if (ctrl instanceof ExtendedInitializable) {
-          ((ExtendedInitializable) ctrl).beforeInitialize(parameter);
+        if (!postControllerFactoryCalls.isEmpty()) {
+          postControllerFactoryCalls.forEach((c, s) -> {
+            if (c.isInstance(ctrl)) {
+              s.accept(ctrl);
+            }
+          });
         }
         return ctrl;
       };
@@ -221,7 +218,7 @@ public class FXMLLoaders {
     public FXMLLoaderBuilder location(String pathOrExp) {
       try {
         Optional<URLResource> res = Resources.from(pathOrExp).findAny();
-        location = res.isPresent() ? res.get().getURL() : null;
+        location = res.map(URLResource::getURL).orElse(null);
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }
@@ -233,8 +230,30 @@ public class FXMLLoaders {
       return this;
     }
 
-    public FXMLLoaderBuilder parameter(Object parameter) {
-      this.parameter = parameter;
+    /**
+     * Attaches a controller factory callback to the builder that will be invoked after CDI resolves
+     * the controller instance and before FXML initializes it.
+     *
+     * @param <C> the controller type that consumed by the callback
+     * @param ctrlClass the controller class that consumed by the callback
+     * @param postControllerFactoryCall the callback that will be invoked after CDI resolves the
+     *        controller instance and before FXML initializes it.
+     * @return the builder
+     */
+    public <C> FXMLLoaderBuilder putPostControllerFactoryCall(Class<C> ctrlClass,
+        Consumer<C> postControllerFactoryCall) {
+      postControllerFactoryCalls.put(ctrlClass, postControllerFactoryCall);
+      return this;
+    }
+
+    /**
+     * Removes previously placed controller factory callback based on the specified controller type.
+     *
+     * @param ctrlClass the controller class that consumed by the callback
+     * @return the builder
+     */
+    public FXMLLoaderBuilder removePostControllerFactoryCall(Class<?> ctrlClass) {
+      postControllerFactoryCalls.remove(ctrlClass);
       return this;
     }
 

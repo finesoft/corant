@@ -65,7 +65,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 public class Jsons {
 
   static final Logger logger = Logger.getLogger(Jsons.class.getName());
-  static final ObjectMapper objectMapper = new ObjectMapper();
+  static final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
   static {
     SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
         .addDeserializer(Pair.class, new PairDeserializer())

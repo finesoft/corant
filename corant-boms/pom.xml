@@ -547,7 +547,11 @@
         <artifactId>corant-modules-javafx-cdi</artifactId>
         <version>${revision}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-modules-javafx-jackson</artifactId>
+        <version>${revision}</version>
+      </dependency>
       <!-- Java & Javax & Jakarta & Javafx -->
       <dependency>
         <groupId>jakarta.enterprise</groupId>

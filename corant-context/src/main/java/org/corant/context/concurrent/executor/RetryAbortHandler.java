@@ -34,9 +34,6 @@ public class RetryAbortHandler implements RejectedExecutionHandler {
   final String name;
   final Duration retryDelay;
 
-  /**
-   * @param name
-   */
   public RetryAbortHandler(String name, Duration retryDelay) {
     this.name = name;
     this.retryDelay = defaultObject(retryDelay, () -> Duration.ofSeconds(4L));

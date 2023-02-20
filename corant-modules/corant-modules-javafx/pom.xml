@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>corant-modules-javafx-cdi</module>
+  	<module>corant-modules-javafx-jackson</module>
   </modules>
 </project>

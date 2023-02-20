@@ -11,18 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.javafx.cdi;
-
-import javafx.fxml.Initializable;
-
 /**
- * corant-modules-javafx-cdi
- *
- * @author bingo 上午10:53:12
+ * corant-modules-javafx-jackson
+ * 
+ * @author bingo 下午9:32:59
  *
  */
-public interface ExtendedInitializable<P> extends Initializable {
-
-  void beforeInitialize(P parameter);
-
-}
+package org.corant.modules.javafx.jackson.databind;

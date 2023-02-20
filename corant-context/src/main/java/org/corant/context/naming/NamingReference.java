@@ -20,9 +20,10 @@ import org.corant.shared.util.Annotations;
 
 /**
  * corant-context
- *
+ * <p>
  * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
  * ApplicationScoped.
+ * </p>
  *
  * @author bingo 下午7:42:38
  *
@@ -34,8 +35,8 @@ public class NamingReference extends Reference {
   protected Annotation[] qualifiers = Annotations.EMPTY_ARRAY;
 
   /**
-   * @param objectClass
-   * @param qualifiers
+   * @param objectClass the naming CDI bean class
+   * @param qualifiers the naming CDI bean qualifiers
    */
   public NamingReference(Class<?> objectClass, Annotation... qualifiers) {
     super(objectClass.getName(), NamingObjectFactory.class.getName(), null);

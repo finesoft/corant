@@ -24,6 +24,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -174,10 +175,9 @@ public interface CorantJunit4Runner {
         return true;
       });
       if (isNotEmpty(ms)) {
-        ms.sort((m1, m2) -> {
-          int r = Integer.compare(m1.right().order(), m2.right().order());
-          return r != 0 ? r : m1.left().getName().compareTo(m2.left().getName());
-        });
+        ms.sort(
+            Comparator.comparingInt((Pair<Method, BeforeCorantInitialized> m) -> m.right().order())
+                .thenComparing(m -> m.left().getName()));
         for (Pair<Method, BeforeCorantInitialized> m : ms) {
           try {
             AccessController.doPrivileged((PrivilegedAction<Method>) () -> {

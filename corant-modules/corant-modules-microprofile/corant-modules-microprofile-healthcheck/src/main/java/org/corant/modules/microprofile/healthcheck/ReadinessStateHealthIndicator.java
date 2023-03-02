@@ -1,8 +1,13 @@
 package org.corant.modules.microprofile.healthcheck;
 
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.SEVERE;
+
+import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
 import org.eclipse.microprofile.health.HealthCheck;
@@ -21,9 +26,17 @@ public class ReadinessStateHealthIndicator {
   protected final String name = "ReadinessState";
   protected boolean ready = false;
 
+  @Inject
+  Logger logger;
+
   @Produces
   @Readiness
   HealthCheck check() {
+    if (ready == false) {
+      logger.log(SEVERE, "ReadinessState:" + ready);
+    } else {
+      logger.log(FINE, "ReadinessState:" + ready);
+    }
     return () -> HealthCheckResponse.named(name).status(ready).build();
   }
 

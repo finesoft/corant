@@ -39,7 +39,9 @@ public class CorantJavaFXApplication extends Application {
 
   @Override
   public final void start(Stage primaryStage) throws Exception {
-    CDIs.fireEvent(primaryStage, StartupScene.INSTANCE);
+    if (primaryStage != null && CDIs.isEnabled()) {
+      CDIs.fireEvent(primaryStage, StartupScene.INSTANCE);
+    }
     doStart(primaryStage);
   }
 

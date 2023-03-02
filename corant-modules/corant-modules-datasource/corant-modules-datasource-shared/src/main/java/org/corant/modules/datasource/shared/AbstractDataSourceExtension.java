@@ -14,6 +14,7 @@
 package org.corant.modules.datasource.shared;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.annotation.Annotation;
 import java.sql.SQLException;
@@ -103,7 +104,10 @@ public abstract class AbstractDataSourceExtension implements Extension {
       if (cfg.isVerifyDeployment()) {
         try {
           for (int i = 0; i < cfg.getMinSize(); i++) {
-            logger.info(() -> String.format("Check data source %s connection", cfg.connectionUrl));
+            logger.info(() -> String.format(
+                "Check data source %s connection, takes up to about %s seconds.",
+                defaultString(cfg.connectionUrl, cfg.getJdbcProperties().get("URL")),
+                cfg.getAcquisitionTimeout().getSeconds()));
             resolve(DataSource.class, quas).getConnection().close();// FIXME use another ways.
           }
         } catch (SQLException e) {

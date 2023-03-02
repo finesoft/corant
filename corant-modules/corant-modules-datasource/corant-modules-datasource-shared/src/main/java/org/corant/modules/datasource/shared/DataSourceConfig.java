@@ -13,6 +13,8 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -322,7 +324,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   @Override
   public boolean isValid() {
-    return driver != null && enable;
+    return driver != null && enable && (isNotBlank(connectionUrl) || isNotEmpty(jdbcProperties));
   }
 
   /**

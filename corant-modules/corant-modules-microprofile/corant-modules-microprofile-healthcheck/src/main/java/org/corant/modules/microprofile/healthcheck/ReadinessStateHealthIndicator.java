@@ -16,7 +16,6 @@ import org.eclipse.microprofile.health.Readiness;
 
 /**
  * A HealthIndicator that checks the ReadinessState of the application.
- *
  * @author don
  * @date 2023/1/29
  */
@@ -32,12 +31,14 @@ public class ReadinessStateHealthIndicator {
   @Produces
   @Readiness
   HealthCheck check() {
-    if (ready == false) {
-      logger.log(SEVERE, "ReadinessState:" + ready);
-    } else {
-      logger.log(FINE, "ReadinessState:" + ready);
-    }
-    return () -> HealthCheckResponse.named(name).status(ready).build();
+    return () -> {
+      if (ready == false) {
+        logger.log(SEVERE, "ReadinessState:" + ready);
+      } else {
+        logger.log(FINE, "ReadinessState:" + ready);
+      }
+      return HealthCheckResponse.named(name).status(ready).build();
+    };
   }
 
   void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {

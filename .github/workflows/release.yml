@@ -43,7 +43,7 @@ jobs:
         run: |
           git checkout -B for_release
           ./mvnw versions:set-property -DgenerateBackupPoms=false  -Dproperty=revision -DnewVersion=${{ inputs.CI_COMMIT_TAG }} 
-          ./mvnw clean deploy -U -Dmaven.test.skip=true --batch-mode -s /home/runner/.m2/settings.xml
+          ./mvnw clean deploy -Dmaven.test.skip=true --batch-mode -s /home/runner/.m2/settings.xml
           git config --global user.email "ci-bot@corant.org"
           git config --global user.name  "ci-bot"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY

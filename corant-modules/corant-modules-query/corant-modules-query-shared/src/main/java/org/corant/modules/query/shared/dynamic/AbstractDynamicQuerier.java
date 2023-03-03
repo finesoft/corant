@@ -153,7 +153,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       synchronized (this) {
         if (limit == null) {
           Integer useLimit = getQueryParameter().getLimit();
-          if (useLimit <= 0) {
+          if (useLimit == null || useLimit <= 0) {
             Integer proLimit = resolveProperty(QuerierConfig.PRO_KEY_LIMIT, Integer.class,
                 config.getDefaultLimit());
             useLimit = proLimit <= 0 ? config.getMaxLimit() : proLimit;
@@ -245,7 +245,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       synchronized (this) {
         if (streamLimit == null) {
           Integer useStreamLimit = getQueryParameter().getLimit();
-          if (useStreamLimit <= 0) {
+          if (useStreamLimit == null || useStreamLimit <= 0) {
             Integer proStreamLimit = resolveProperty(QuerierConfig.PRO_KEY_STREAM_LIMIT,
                 Integer.class, config.getDefaultStreamLimit());
             useStreamLimit = proStreamLimit <= 0 ? config.getMaxLimit() : proStreamLimit;

@@ -89,7 +89,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       String sql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
       log(queryName, scriptParameter, sql);
-      return batchStream(querier.getQueryParameter().getLimit(), getExecutor().stream(sql,
+      return batchStream(querier.resolveStreamLimit(), getExecutor().stream(sql,
           useQueryParam.getTerminator(), timeout, useQueryParam.isAutoClose(), scriptParameter))
               .flatMap(list -> {
                 this.fetch(list, querier);

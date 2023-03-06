@@ -25,9 +25,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
@@ -90,7 +92,7 @@ public class Beans {
    * @throws UnsupportedOperationException if the active context object for the scope type of the
    *         bean does not support destroying bean instances
    */
-  public static void destory(Object instance) {
+  public static void destroy(Object instance) {
     if (instance != null) {
       if (!CDIs.isEnabled()) {
         throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
@@ -224,6 +226,34 @@ public class Beans {
    */
   public static <T> Optional<T> findService(Class<T> instanceClass) {
     return Services.findRequired(instanceClass);
+  }
+
+  /**
+   * Returns the CDI bean scope of the given type and qualifiers or null if the given type is not a
+   * CDI bean type.
+   *
+   * @param <T> the bean type
+   * @param type the bean class
+   * @param qualifiers
+   * @return the CDI bean scope of the given type and qualifiers or null if the given type is not a
+   *         CDI bean type.
+   * @throws AmbiguousResolutionException if the ambiguous dependency resolution rules fail
+   * @throws IllegalStateException if called during application initialization, before the
+   *         {@link AfterBeanDiscovery} event is fired or CDI container be closed.
+   */
+  public static Class<? extends Annotation> getBeanScope(final Class<?> type,
+      Annotation... qualifiers) {
+    if (!CDIs.isEnabled()) {
+      throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
+    }
+    if (type != null) {
+      BeanManager bm = CDI.current().getBeanManager();
+      Bean<?> bean = bm.resolve(bm.getBeans(type, qualifiers));
+      if (bean != null) {
+        return bean.getScope();
+      }
+    }
+    return null;
   }
 
   @Deprecated

@@ -26,11 +26,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import javax.enterprise.inject.Instance;
 import org.corant.context.Beans;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResourceLoader;
 import org.corant.shared.resource.URLResource;
 import org.corant.shared.util.Annotations;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import javafx.fxml.FXMLLoader;
 import javafx.util.BuilderFactory;
@@ -50,15 +52,15 @@ public class FXMLLoaders {
 
   /**
    * Returns a simple FXMLLoader builder for build a FXMLLoader instance. The controller factory in
-   * the document is taken over by CDI.
+   * the document may be taken over by CDI.
    */
   public static FXMLLoaderBuilder builder() {
     return new FXMLLoaderBuilder();
   }
 
   /**
-   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
-   * over by CDI.
+   * Loads an object hierarchy from a FXML document. The controller factory in the document may be
+   * taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param pathOrExp the resource path or path expression
@@ -72,8 +74,8 @@ public class FXMLLoaders {
   }
 
   /**
-   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
-   * over by CDI.
+   * Loads an object hierarchy from a FXML document. The controller factory in the document may be
+   * taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param location the location used to resolve relative path attribute values
@@ -86,8 +88,8 @@ public class FXMLLoaders {
   }
 
   /**
-   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
-   * over by CDI.
+   * Loads an object hierarchy from a FXML document. The controller factory in the document may be
+   * taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param location the location used to resolve relative path attribute values
@@ -101,8 +103,8 @@ public class FXMLLoaders {
   }
 
   /**
-   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
-   * over by CDI.
+   * Loads an object hierarchy from a FXML document. The controller factory in the document may be
+   * taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param location the location used to resolve relative path attribute values
@@ -119,8 +121,8 @@ public class FXMLLoaders {
   }
 
   /**
-   * Loads an object hierarchy from a FXML document. The controller factory in the document is taken
-   * over by CDI.
+   * Loads an object hierarchy from a FXML document. The controller factory in the document may be
+   * taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param location the location used to resolve relative path attribute values
@@ -141,7 +143,7 @@ public class FXMLLoaders {
 
   /**
    * Loads an object hierarchy from a FXML document with a relative path through a class and path.
-   * The controller factory in the document is taken over by CDI.
+   * The controller factory in the document may be taken over by CDI.
    *
    * @param <T> the type of the root object
    * @param relative the relative class use to search the resource
@@ -163,6 +165,11 @@ public class FXMLLoaders {
   /**
    * corant-modules-javafx-cdi
    *
+   * <p>
+   * A convenient FXMLLoader Builder for building FXMLLoader instance in a fluent way.
+   *
+   * @see #build()
+   *
    * @author bingo 下午4:40:25
    *
    */
@@ -175,10 +182,45 @@ public class FXMLLoaders {
     LinkedList<FXMLLoader> loaders;
     Annotation[] controllerQualifiers = Annotations.EMPTY_ARRAY;
     Map<Class<?>, Consumer> postControllerFactoryCalls = new LinkedHashMap<>();
+    boolean autoInjection = true;
 
+    /**
+     * Set whether to use auto-injection for controller instance construction. Default is true.
+     */
+    public FXMLLoaderBuilder autoInjection(boolean autoInjection) {
+      this.autoInjection = autoInjection;
+      return this;
+    }
+
+    /**
+     * Returns an FXMLLoader, the controller factory may be provided by CDI. When
+     * {@link #autoInjection(boolean)} is true, if the specified controller type is CDI bean type,
+     * CDI is responsible for constructing the controller instance, if the specified controller type
+     * is not a CDI bean type, it will automatically use CDI SPI to construct unmanaged controller
+     * and handle related injection; when {@link #autoInjection(boolean)} is false, regardless of
+     * whether the specified controller type is a CDI bean type, call the default constructor of the
+     * controller class for construction. Default {@link #autoInjection} is true.
+     * <p>
+     * Note: When the CDI bean scope is {@link javax.enterprise.context.Dependent}, in order to
+     * prevent memory leaks, users need to call the
+     * {@link javax.enterprise.inject.spi.CDI#destroy(Object)} method themselves, or bind the method
+     * to the listener of the relevant control disposing.
+     *
+     * @return a FXMLLoader
+     */
     public FXMLLoader build() {
       final Callback<Class<?>, Object> controllerFactory = t -> {
-        Object ctrl = Beans.resolve(t, controllerQualifiers);
+        final Object ctrl;
+        if (autoInjection) {
+          Instance<?> inst = Beans.select(t, controllerQualifiers);
+          if (!inst.isUnsatisfied()) {
+            ctrl = inst.get();
+          } else {
+            ctrl = Beans.manageable(Objects.newInstance(t));
+          }
+        } else {
+          ctrl = Objects.newInstance(t);
+        }
         if (!postControllerFactoryCalls.isEmpty()) {
           postControllerFactoryCalls.forEach((c, s) -> {
             if (c.isInstance(ctrl)) {
@@ -202,6 +244,10 @@ public class FXMLLoaders {
       return this;
     }
 
+    /**
+     * Set CDI bean qualifiers to obtain Controller instances through CDI, if
+     * {@link #autoInjection(boolean)} is false, this setting is invalid.
+     */
     public FXMLLoaderBuilder controllerQualifiers(Annotation... controllerQualifiers) {
       if (controllerQualifiers.length > 0) {
         this.controllerQualifiers =
@@ -212,6 +258,11 @@ public class FXMLLoaders {
 
     public FXMLLoaderBuilder loaders(LinkedList<FXMLLoader> loaders) {
       this.loaders = loaders;
+      return this;
+    }
+
+    public FXMLLoaderBuilder location(Class<?> configClass, String path) {
+      location = configClass.getResource(path);
       return this;
     }
 

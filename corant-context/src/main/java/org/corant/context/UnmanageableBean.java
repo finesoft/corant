@@ -19,8 +19,6 @@ import static org.corant.shared.util.Objects.forceCast;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.CDI;
-import org.jboss.weld.bean.builtin.BeanManagerProxy;
-import org.jboss.weld.injection.InterceptionFactoryImpl;
 import org.jboss.weld.manager.api.WeldInjectionTarget;
 import org.jboss.weld.manager.api.WeldManager;
 
@@ -179,11 +177,11 @@ public class UnmanageableBean<T> implements AutoCloseable {
       throw new IllegalStateException("Trying to call produce() on an already disposed instance");
     }
     instance =
-        // originalInstance == null ? injectionTarget.produce(creationalContext) : originalInstance;
-        InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
-            .ignoreFinalMethods().createInterceptedInstance(
-                originalInstance == null ? injectionTarget.produce(creationalContext)
-                    : originalInstance);
+        originalInstance == null ? injectionTarget.produce(creationalContext) : originalInstance;
+    // InterceptionFactoryImpl.of(BeanManagerProxy.unwrap(bm), creationalContext, annotatedType)
+    // .ignoreFinalMethods().createInterceptedInstance(
+    // originalInstance == null ? injectionTarget.produce(creationalContext)
+    // : originalInstance);
     return this;
   }
 

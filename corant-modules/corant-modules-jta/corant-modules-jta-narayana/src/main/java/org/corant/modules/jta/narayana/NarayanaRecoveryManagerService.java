@@ -110,7 +110,7 @@ public class NarayanaRecoveryManagerService extends RecoveryManagerService {
       }
       helpers.forEach(helper -> {
         XARecoveryModule.getRegisteredXARecoveryModule().removeXAResourceRecoveryHelper(helper);
-        helper.destory();
+        helper.destroy();
       });
       helpers.clear();
       if (extension.getConfig().isAutoRecovery()) {

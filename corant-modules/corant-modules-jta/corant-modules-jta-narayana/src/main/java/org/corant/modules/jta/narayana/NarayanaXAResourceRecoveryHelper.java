@@ -31,7 +31,7 @@ public class NarayanaXAResourceRecoveryHelper implements XAResourceRecoveryHelpe
     this.integration = integration;
   }
 
-  public void destory() {
+  public void destroy() {
     if (integration != null) {
       integration.destroy();
     }

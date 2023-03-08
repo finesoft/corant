@@ -105,6 +105,7 @@ public class Beans {
    * Returns an {@link Optional} CDI bean instance that matches the given instance class and
    * qualifiers, ambiguous and unsatisfied return an empty {@link Optional}.
    *
+   * <p>
    * Use with care, there may be a memory leak.
    *
    * @param <T> the bean type to be resolved
@@ -123,7 +124,7 @@ public class Beans {
   /**
    * Returns an {@link Optional} CDI bean instance that matches the given instance type and
    * qualifiers, ambiguous and unsatisfied return an empty {@link Optional}.
-   *
+   * <p>
    * Use with care, there may be a memory leak.
    *
    * @param <T> the bean type to be resolved
@@ -142,12 +143,13 @@ public class Beans {
   /**
    * Returns an {@link Optional} bean instance from CDI or ServiceLoader that matches the given
    * instance class and qualifiers.
-   *
+   * <p>
    * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
    * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
    * {@link org.corant.shared.util.Services#findRequired(Class)}. If there are multiple instances
    * and the given instance class is {@link Sortable}, then return the one with the highest
    * priority.
+   * </p>
    *
    * @param <T> the bean type to be resolved
    * @param instanceClass the bean instance class to be resolved
@@ -215,9 +217,10 @@ public class Beans {
    * Returns an {@link Optional} instance that matches the given instance class from ServiceLoader
    * or return an empty {@link Optional} if not found or found multiple instances or not meet the
    * conditions.
-   *
+   * <p>
    * Note: If there are multiple service instances found by ServiceLoader and given instance class
    * is {@link Sortable} then return the highest priority instance.
+   * </p>
    *
    * @param <T> the instance type to be resolved
    * @param instanceClass the instance class to be resolved
@@ -232,9 +235,8 @@ public class Beans {
    * Returns the CDI bean scope of the given type and qualifiers or null if the given type is not a
    * CDI bean type.
    *
-   * @param <T> the bean type
    * @param type the bean class
-   * @param qualifiers
+   * @param qualifiers the type instance qualifiers
    * @return the CDI bean scope of the given type and qualifiers or null if the given type is not a
    *         CDI bean type.
    * @throws AmbiguousResolutionException if the ambiguous dependency resolution rules fail
@@ -286,9 +288,10 @@ public class Beans {
   }
 
   /**
-   * Returns CDI bean instance or throws exception if can't resolve.
-   *
+   * Returns CDI bean instance, throws exception when it cannot be resolved.
+   * <p>
    * Use with care, there may be a memory leak.
+   * </p>
    *
    * @param <T> the instance type to be resolved
    * @param instanceClass the bean instance class to be resolved
@@ -299,9 +302,10 @@ public class Beans {
   }
 
   /**
-   * Returns CDI bean instance or throws exception if can't resolve.
-   *
+   * Returns CDI bean instance, throws exception when it cannot be resolved.
+   * <p>
    * Use with care, there may be a memory leak.
+   * </p>
    *
    * @param <T> the instance type to be resolved
    * @param instanceType the bean instance type to be resolved
@@ -312,7 +316,7 @@ public class Beans {
   }
 
   /**
-   * Resolve CDI bean instance and consumer it or throws exception if can't resolve.
+   * Resolve CDI bean instance and consumer it, throws exception when it cannot be resolved.
    *
    * @param <T> the instance type to be resolved
    * @param instanceClass the bean instance class to be resolved
@@ -328,13 +332,14 @@ public class Beans {
    * Returns bean instance from CDI or Service Loader or throws exception if not found.
    *
    * <p>
-   * Note: First lookup in CDI through the given instance class and qualifiers, if find a hit, it
+   * Note: First lookup in CDI through the given instance class and qualifiers, when find a hit, it
    * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
    * {@link org.corant.shared.util.Services#findRequired(Class)}. If there are multiple instances
    * and the given instance class is {@link Sortable}, then return the one with the highest
    * priority; If none of the above searches are found, an exception is thrown.
-   *
+   * <p>
    * Use with care, there may be a memory leak.
+   * </p>
    *
    * @param <T> the instance type to be resolved
    * @param instanceClass the instance class to be resolved

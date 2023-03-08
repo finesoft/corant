@@ -61,6 +61,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.with-dist")
   protected boolean withDist;
 
+  @Parameter(defaultValue = "true", property = "corant.maven-mojo.with-jvm-opts")
+  protected boolean withJvmOpts;
+
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.use-javaw")
   protected boolean useJavaw;
 
@@ -179,7 +182,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public boolean isJar() {
-    return project.getPackaging().equals("jar");
+    return "jar".equals(project.getPackaging());
   }
 
   public boolean isUseDirectRunner() {
@@ -191,7 +194,7 @@ public class PackageMojo extends AbstractMojo {
   }
 
   public boolean isWar() {
-    return project.getPackaging().equals("war");
+    return "war".equals(project.getPackaging());
   }
 
   public boolean isWithAttach() {
@@ -200,6 +203,10 @@ public class PackageMojo extends AbstractMojo {
 
   public boolean isWithDist() {
     return withDist;
+  }
+
+  public boolean isWithJvmOpts() {
+    return withJvmOpts;
   }
 
   public boolean isWithUber() {

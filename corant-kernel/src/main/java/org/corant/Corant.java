@@ -51,13 +51,13 @@ import org.corant.kernel.jmx.Power;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.spi.CorantBootHandler;
 import org.corant.kernel.util.CommandLine;
-import org.corant.kernel.util.Launchs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.ubiquity.Configurator;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
+import org.corant.shared.util.Launches;
 import org.corant.shared.util.Services;
 import org.corant.shared.util.StopWatch;
 import org.corant.shared.util.Strings;
@@ -620,10 +620,10 @@ public class Corant implements AutoCloseable {
           logInfo("The %s has started, takes %ss.", APP_NAME, tt);
         }
         logInfo("Application info: process-id: %s, java-version: %s, locale: %s, timezone: %s.",
-            Launchs.getPid(), Launchs.getJavaVersion(), Locale.getDefault(),
+            Launches.getPid(), Launches.getJavaVersion(), Locale.getDefault(),
             TimeZone.getDefault().getID());
-        logInfo("Final memory: %sM/%sM/%sM%s", Launchs.getUsedMemoryMb(),
-            Launchs.getTotalMemoryMb(), Launchs.getMaxMemoryMb(), boostLine("-"));
+        logInfo("Final memory: %sM/%sM/%sM%s", Launches.getUsedMemoryMb(),
+            Launches.getTotalMemoryMb(), Launches.getMaxMemoryMb(), boostLine("-"));
       });
 
       // emit post corant ready events

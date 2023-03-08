@@ -178,7 +178,9 @@ public class DistPackager implements Packager {
         entries.add(FileEntry.of(new File(artDir, file)));
       }
     }
-    entries.add(ClassPathEntry.of(JVM_OPT, JVM_OPT));
+    if (getMojo().isWithJvmOpts()) {
+      entries.add(ClassPathEntry.of(JVM_OPT, JVM_OPT));
+    }
     return entries;
   }
 

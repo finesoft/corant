@@ -10,7 +10,7 @@
   </parent>
   <artifactId>corant-boms</artifactId>
   <properties>
-    <version.agroal>1.16</version.agroal>
+    <version.agroal>1.17</version.agroal>
     <version.aliyun-java-sdk-core>4.5.13</version.aliyun-java-sdk-core>
     <version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
     <version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>

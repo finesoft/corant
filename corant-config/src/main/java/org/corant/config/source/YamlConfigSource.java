@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -43,7 +44,7 @@ public class YamlConfigSource extends AbstractCorantConfigSource {
       // Yaml yaml = forceCast(yamlCls.getDeclaredConstructor().newInstance());// JDK9+
 
       // yaml is required from 2023-02-10 even though it has security issues
-      Yaml yaml = new Yaml(new Constructor(Map.class));
+      Yaml yaml = new Yaml(new Constructor(Map.class, new LoaderOptions()));
       properties = Collections.unmodifiableMap(flatStringMap(yaml.load(in), ".", 16));
       name = resource.getLocation();
     } catch (IllegalArgumentException | SecurityException | IOException e) {

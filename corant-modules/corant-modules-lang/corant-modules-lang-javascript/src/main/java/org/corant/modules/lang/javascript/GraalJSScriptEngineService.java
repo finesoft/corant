@@ -54,7 +54,7 @@ public class GraalJSScriptEngineService implements ScriptEngineService {
       ThreadLocal.withInitial(HashMap::new);
 
   /**
-   * Complie a thread local consumer with specified id and script and parameter names that are used
+   * Compile a thread local consumer with specified id and script and parameter names that are used
    * in script, all complied consumers are not thread safe, means that don't share the complied
    * consumer in multi threads. the script was complied only once in every thread. we don't use
    * script as id, because the script may have very large size.
@@ -63,17 +63,17 @@ public class GraalJSScriptEngineService implements ScriptEngineService {
    * NOTE: Usually, the passed in script should be a IIFE (Immediately Invoked Function Expression).
    * Example:
    *    (function(p){
-   *         //do somthing;
+   *         //do something;
    *     })(p);
    * </pre>
    *
    * @see <a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression">IIFE</a>
    *
-   * @param id the specified id, client use this id to retrive the appropriate consumer
-   * @param scriptAndParamNames the script and parameter names use for compling.
+   * @param id the specified id, client use this id to retrieve the appropriate consumer
+   * @param scriptAndParamNames the script and parameter names use for compiling.
    * @return the complied consumer
    */
-  public Consumer<Object[]> complieConsumer(Object id,
+  public Consumer<Object[]> compileConsumer(Object id,
       Supplier<Pair<String, String[]>> scriptAndParamNames) {
     return CONSUMERS.get().computeIfAbsent(id, k -> {
       try {
@@ -100,7 +100,7 @@ public class GraalJSScriptEngineService implements ScriptEngineService {
   }
 
   /**
-   * Complie a thread local function with specified id and script and parameter names that are used
+   * Compile a thread local function with specified id and script and parameter names that are used
    * in script, all complied functions are not thread safe, means that don't share the complied
    * function in multi threads. the script was complied only once in every thread. we don't use
    * script as id, because the script may have very large size
@@ -109,17 +109,17 @@ public class GraalJSScriptEngineService implements ScriptEngineService {
    * NOTE: Usually, the passed in script should be a IIFE (Immediately Invoked Function Expression).
    * Example:
    *    (function(p){
-   *         //do somthing;
+   *         //do something;
    *         return true;
    *     })(p);
    * </pre>
    *
    * @see <a href="https://en.wikipedia.org/wiki/Immediately_invoked_function_expression">IIFE</a>
-   * @param id the specified id, client use this id to retrive the appropriate function
-   * @param scriptAndParamNames the script and parameter names use for compling.
+   * @param id the specified id, client use this id to retrieve the appropriate function
+   * @param scriptAndParamNames the script and parameter names use for compiling.
    * @return the complied function
    */
-  public Function<Object[], Object> complieFunction(Object id,
+  public Function<Object[], Object> compileFunction(Object id,
       Supplier<Pair<String, String[]>> scriptAndParamNames) {
     return FUNCTIONS.get().computeIfAbsent(id, k -> {
       try {

@@ -54,9 +54,9 @@ public class JavaScriptProcessor extends AbstractCompilableScriptProcessor {
     PARAM_RESULT_FUNCTIONS.get().clear();
     PARAM_RESULT_PAIR_FUNCTIONS.get().clear();
     if (QueryExtension.verifyDeployment) {
-      logger.info("Start javascript query scripts precompiling.");
+      logger.info("Start javascript query scripts pre-compiling.");
       int cs = resolveAll(queries, initializedVersion);
-      logger.info("Complete " + cs + " javascript query scripts precompiling.");
+      logger.info("Complete " + cs + " javascript query scripts pre-compiling.");
     }
   }
 

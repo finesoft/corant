@@ -1,0 +1,2 @@
+org.corant.modules.lang.javascript.GraalJSScriptEngineService
+org.corant.modules.lang.javascript.NashornScriptEngineService

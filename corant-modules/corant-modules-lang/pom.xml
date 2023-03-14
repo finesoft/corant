@@ -13,5 +13,6 @@
     <module>corant-modules-lang-javascript</module>
     <module>corant-modules-lang-groovy</module>
     <module>corant-modules-lang-kotlin</module>
+    <module>corant-modules-lang-shared</module>
   </modules>
 </project>

@@ -11,6 +11,7 @@ import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
  * @author sushuaihao 2021/6/10
  * @since 1.7.0
  */
+@SuppressWarnings({"removal"})
 public class GraalJSScriptEngines {
   public static ScriptEngine createEngine() {
     return GraalJSScriptEngine.create(null,

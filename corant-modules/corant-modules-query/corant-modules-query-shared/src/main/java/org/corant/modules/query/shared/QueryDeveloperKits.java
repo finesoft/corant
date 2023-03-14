@@ -26,7 +26,7 @@ import java.util.Map;
 import org.corant.Corant;
 import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
-import org.corant.modules.lang.javascript.NashornScriptEngines;
+import org.corant.modules.lang.shared.ScriptEngineService;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -34,6 +34,8 @@ import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResult;
 import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerExecutions;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Services;
 import freemarker.core.Environment;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -151,7 +153,9 @@ public class QueryDeveloperKits {
       }
     } else if (query.getScript().getType() == ScriptType.JS) {
       try {
-        NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
+        Services.selectRequired(ScriptEngineService.class).findFirst()
+            .orElseThrow(NotSupportedException::new)
+            .createFunction(query.getScript().getCode(), "p", "up");
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "QUERY-ERROR : [%s]", query.getName()));
       }

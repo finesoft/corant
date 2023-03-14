@@ -14,12 +14,14 @@
 package org.corant.modules.query.shared.dynamic.javascript;
 
 import java.util.function.Function;
-import org.corant.modules.lang.javascript.NashornScriptEngines;
+import org.corant.modules.lang.shared.ScriptEngineService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-query-shared
@@ -30,12 +32,16 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 public abstract class JavaScriptDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
+  protected static final ScriptEngineService scriptEngineService =
+      Services.selectRequired(ScriptEngineService.class).findFirst()
+          .orElseThrow(NotSupportedException::new);
+
   protected JavaScriptDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
   }
 
   protected Function<Object[], Object> getExecution() {
-    return NashornScriptEngines.createFunction(query.getScript().getCode(), "p", "up");
+    return scriptEngineService.createFunction(query.getScript().getCode(), "p", "up");
   }
 }

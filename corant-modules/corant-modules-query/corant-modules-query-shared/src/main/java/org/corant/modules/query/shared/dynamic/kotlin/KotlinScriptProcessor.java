@@ -14,16 +14,20 @@
 package org.corant.modules.query.shared.dynamic.kotlin;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import javax.inject.Singleton;
 import javax.script.Compilable;
-import org.corant.modules.lang.kotlin.KotlinScriptEngines;
+import org.corant.modules.lang.shared.ScriptEngineService;
+import org.corant.modules.lang.shared.ScriptLang;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.AbstractCompilableScriptProcessor;
 import org.corant.modules.query.shared.cdi.QueryExtension;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Services;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -63,7 +67,12 @@ public class KotlinScriptProcessor extends AbstractCompilableScriptProcessor {
 
   @Override
   protected Compilable getCompilable(ScriptType type) {
-    return (Compilable) KotlinScriptEngines.createEngine();
+    Optional<ScriptEngineService> service = Services.selectRequired(ScriptEngineService.class)
+        .filter(s -> s.supports(ScriptLang.Kotlin)).findFirst();
+    if (service.isEmpty()) {
+      throw new NotSupportedException("Can't support query handling script %s", type);
+    }
+    return (Compilable) service.get().createEngine();
   }
 
   @Override

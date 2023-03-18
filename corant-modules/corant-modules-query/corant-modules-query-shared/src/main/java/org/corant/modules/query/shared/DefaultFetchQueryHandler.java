@@ -325,6 +325,8 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
         theValue = toObject(theValue, type);
       }
       theValue = distinct ? setOf(theValue) : listOf(theValue);
+    } else if (type != null) {
+      theValue = toObject(theValue, type);
     }
     return theValue;
   }

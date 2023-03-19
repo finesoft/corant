@@ -13,8 +13,11 @@
  */
 package org.corant.modules.websocket;
 
+import static org.corant.context.Beans.getBeanScope;
 import static org.corant.context.Beans.resolve;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
+import org.corant.context.Beans;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-modules-websocket
@@ -26,6 +29,9 @@ public class DefaultServerEndpointConfigurator extends Configurator {
 
   @Override
   public <T> T getEndpointInstance(Class<T> endpointClass) throws InstantiationException {
+    if (getBeanScope(endpointClass) == null) {
+      return Beans.manageable(Objects.newInstance(endpointClass));
+    }
     return resolve(endpointClass);
   }
 

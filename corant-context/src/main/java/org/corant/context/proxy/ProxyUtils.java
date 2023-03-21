@@ -201,9 +201,48 @@ public class ProxyUtils {
     }
   }
 
+  /**
+   * Returns whether the given class is CDI un-proxyable bean class.
+   * <p>
+   * Unproxyable bean class: classes which are declared final,or expose final methods, or have no
+   * non-private no-args constructor.
+   *
+   * (see CDI 2.0 spec, section 3.11)
+   *
+   * @param clazz the class to check
+   * @return true if the given class is CDI un-proxyable bean class otherwise false.
+   */
+  public static boolean isCDIUnproxyableClass(Class<?> clazz) {
+    return Modifier.isFinal(clazz.getModifiers()) || hasNonPrivateNonStaticFinalMethod(clazz)
+        || hasNoNonPrivateNoArgsConstructor(clazz);
+  }
+
   public static boolean isProxyOfSameInterfaces(Object arg, Class<?> proxyClass) {
     return proxyClass.isInstance(arg) || Proxy.isProxyClass(arg.getClass())
         && Arrays.equals(arg.getClass().getInterfaces(), proxyClass.getInterfaces());
+  }
+
+  static boolean hasNoNonPrivateNoArgsConstructor(Class<?> clazz) {
+    Constructor<?> constructor;
+    try {
+      constructor = clazz.getConstructor();
+    } catch (NoSuchMethodException exception) {
+      return true;
+    }
+    return Modifier.isPrivate(constructor.getModifiers());
+  }
+
+  static boolean hasNonPrivateNonStaticFinalMethod(Class<?> type) {
+    for (Class<?> clazz = type; clazz != null && clazz != Object.class; clazz =
+        clazz.getSuperclass()) {
+      for (Method method : clazz.getDeclaredMethods()) {
+        if (Modifier.isFinal(method.getModifiers()) && !Modifier.isPrivate(method.getModifiers())
+            && !Modifier.isStatic(method.getModifiers())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   static List<Annotation> merge(List<Annotation> methodLevelBindings,

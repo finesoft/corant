@@ -30,6 +30,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
@@ -54,6 +55,11 @@ import org.jboss.weld.bean.proxy.ProxyObject;
  */
 public class Beans {
 
+  public static final String JAVAX_EJB_STATELESS = "javax.ejb.Stateless";
+  public static final String JAVAX_EJB_SINGLETON = "javax.ejb.Singleton";
+  public static final String JAKARTA_EJB_STATELESS = "jakarta.ejb.Stateless";
+  public static final String JAKARTA_EJB_SINGLETON = "jakarta.ejb.Singleton";
+
   public static <T> T create(Class<T> clazz, Annotation... qualifiers) {
     if (clazz != null && CDIs.isEnabled()) {
       BeanManager bm = CDI.current().getBeanManager();
@@ -63,12 +69,10 @@ public class Beans {
           beans = beans.stream().filter(b -> (b.getBeanClass().equals(clazz) || b.isAlternative()))
               .collect(Collectors.toSet());
         }
-        if (isNotEmpty(beans)) {
-          Bean<?> bean = bm.resolve(beans);
-          if (bean != null) {
-            CreationalContext<?> context = bm.createCreationalContext(bean);
-            return context != null ? clazz.cast(bm.getReference(bean, clazz, context)) : null;
-          }
+        Bean<?> bean = bm.resolve(beans);
+        if (bean != null) {
+          CreationalContext<?> context = bm.createCreationalContext(bean);
+          return context != null ? clazz.cast(bm.getReference(bean, clazz, context)) : null;
         }
       }
     }
@@ -272,6 +276,56 @@ public class Beans {
   }
 
   /**
+   * Test the given annotation type with CDI current bean manager to determine if it is a scope
+   * type.
+   *
+   * @param annotatedType the annotated type to check
+   * @return true if the annotation type is a scope type
+   */
+  public static boolean isScopeDefined(AnnotatedType<?> annotatedType) {
+    return isScopeDefined(annotatedType, CDI.current().getBeanManager());
+  }
+
+  /**
+   * Test the given annotation type to determine if it is a scope type.
+   *
+   * @param annotatedType the annotated type to check
+   * @param manager the bean manager
+   * @return true if the annotation type is a scope type
+   */
+  public static boolean isScopeDefined(AnnotatedType<?> annotatedType, BeanManager manager) {
+    for (Annotation annotation : annotatedType.getAnnotations()) {
+      if (manager.isScope(annotation.annotationType())) {
+        return true;
+      }
+      if (manager.isStereotype(annotation.annotationType())
+          && isScopeDefined(annotation.annotationType(), manager)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns whether the given annotated type is an EJB session bean
+   *
+   * @param annotatedType the given annotated type to check
+   * @return true if the given annotated type is EJB session bean
+   */
+  public static boolean isSessionBean(AnnotatedType<?> annotatedType) {
+    for (Annotation annotation : annotatedType.getAnnotations()) {
+      Class<?> annotationType = annotation.annotationType();
+      if (JAVAX_EJB_STATELESS.equals(annotationType.getName())
+          || JAVAX_EJB_SINGLETON.equals(annotationType.getName())
+          || JAKARTA_EJB_STATELESS.equals(annotationType.getName())
+          || JAKARTA_EJB_SINGLETON.equals(annotationType.getName())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Make given object manageable, if given object is already managed in CDI then return it
    * directly.
    *
@@ -446,7 +500,7 @@ public class Beans {
       Annotation... qualifiers) {
     T instance = tryResolve(instanceClass, qualifiers);
     if (instance != null) {
-      return shouldNotNull(shouldNotNull(function)).apply(instance);
+      return shouldNotNull(function).apply(instance);
     }
     return null;
   }
@@ -470,5 +524,18 @@ public class Beans {
       return Optional.of(inst.get());
     }
     return Optional.empty();
+  }
+
+  static boolean isScopeDefined(Class<?> clazz, BeanManager manager) {
+    for (Annotation annotation : clazz.getAnnotations()) {
+      if (manager.isScope(annotation.annotationType())) {
+        return true;
+      }
+      if (manager.isStereotype(annotation.annotationType())
+          && isScopeDefined(annotation.annotationType(), manager)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

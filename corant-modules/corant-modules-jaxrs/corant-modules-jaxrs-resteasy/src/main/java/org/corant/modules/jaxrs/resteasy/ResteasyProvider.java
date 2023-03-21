@@ -32,7 +32,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import org.corant.context.required.RequiredExtension;
+import org.corant.modules.jaxrs.shared.JaxrsExtension;
 import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
@@ -43,7 +43,6 @@ import org.corant.shared.util.Objects;
 import org.corant.shared.util.Services;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
-import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyDeploymentImpl;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
@@ -73,7 +72,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
   protected Optional<String> alternativeApplicationIfUnresolved;
 
   @Inject
-  protected ResteasyCdiExtension extension;
+  protected JaxrsExtension extension;
 
   protected final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
 
@@ -97,10 +96,6 @@ public class ResteasyProvider implements WebMetaDataProvider {
 
   @PostConstruct
   protected void onPostConstruct() {
-
-    // global bean vetos
-    extension.getResources().removeIf(RequiredExtension::isVetoed);
-    extension.getProviders().removeIf(RequiredExtension::isVetoed);
 
     Application application = find(Application.class).orElseGet(() -> {
       if (alternativeApplicationIfUnresolved.isPresent()) {

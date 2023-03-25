@@ -26,6 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Immutable.ImmutableSetBuilder;
 
 /**
@@ -112,7 +114,7 @@ public class Sets {
   public static <E> Set<E> intersection(Set<? extends E> left, Set<? extends E> right) {
     Set<E> intersections = new HashSet<>();
     if (isNotEmpty(left) && isNotEmpty(right)) {
-      left.stream().filter(k -> right.contains(k)).forEach(intersections::add);
+      left.stream().filter(right::contains).forEach(intersections::add);
     }
     return intersections;
   }
@@ -204,6 +206,19 @@ public class Sets {
    */
   public static <E> Set<E> setOf(final Iterator<? extends E> iterator) {
     return collectionOf(HashSet::new, iterator);
+  }
+
+  /**
+   * Use the specified conversion function to convert the given set element type
+   *
+   * @param <S> the source element type
+   * @param <T> the target element type
+   * @param set the source element set
+   * @param convert the conversion function
+   */
+  public static <S, T> Set<T> transform(final Set<S> set,
+      final Function<? super S, ? extends T> convert) {
+    return set == null ? null : set.stream().map(convert).collect(Collectors.toSet());
   }
 
   /**

@@ -53,7 +53,7 @@ public class ProxyUtils {
    *
    * @param annotations the annotations to find out interceptor bindings
    * @param beanManager the bean manager use to filter
-   * @return a annotations list in the given annotation that match the interceptor binding
+   * @return an annotations list in the given annotation that match the interceptor binding
    */
   public static List<Annotation> getInterceptorBindings(Annotation[] annotations,
       BeanManager beanManager) {
@@ -82,7 +82,7 @@ public class ProxyUtils {
    * @param beanType the target bean interface type with some interceptors
    * @return a maps that key is the method of target bean interface and value is the interceptor
    *         invocations of the method， the interceptor invocation contains interceptor instance and
-   *         the meta object of the interceptor.
+   *         the metaobject of the interceptor.
    *
    * @see BeanManager#resolveInterceptors(InterceptionType, Annotation...)
    * @see InterceptorInvocation
@@ -131,7 +131,7 @@ public class ProxyUtils {
    * @param creationalContext the creational context use for interceptor instantiation
    * @param method the target bean method type with some interceptors
    * @return a list contains the interceptor invocations of the method， the interceptor invocation
-   *         contains interceptor instance and the meta object of the interceptor.
+   *         contains interceptor instance and the metaobject of the interceptor.
    *
    * @see BeanManager#resolveInterceptors(InterceptionType, Annotation...)
    * @see InterceptorInvocation
@@ -205,9 +205,7 @@ public class ProxyUtils {
    * Returns whether the given class is CDI un-proxyable bean class.
    * <p>
    * Unproxyable bean class: classes which are declared final,or expose final methods, or have no
-   * non-private no-args constructor.
-   *
-   * (see CDI 2.0 spec, section 3.11)
+   * non-private no-args constructor. (see CDI 2.0 spec, section 3.11)
    *
    * @param clazz the class to check
    * @return true if the given class is CDI un-proxyable bean class otherwise false.

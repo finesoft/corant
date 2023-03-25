@@ -416,25 +416,30 @@ public class Iterables {
   /**
    * Use the specified conversion function to convert the iterable element type
    *
-   * @param <E> the element type
+   * @param <S> the source element type
+   * @param <T> the target element type
    * @param it the source element iterable
    * @param convert the conversion function
    */
-  public static <E> Iterable<E> transform(final Iterable<?> it, final Function<Object, E> convert) {
-    return () -> transform(it == null ? (Iterator<?>) null : it.iterator(), convert);
+  public static <S, T> Iterable<T> transform(final Iterable<S> it,
+      final Function<? super S, ? extends T> convert) {
+    return () -> transform(it == null ? (Iterator<S>) null : it.iterator(), convert);
   }
 
   /**
    * Use the specified conversion function to convert the iterator element type
    *
-   * @param <E> the element type
+   * @param <S> the source element type
+   * @param <T> the target element type
    * @param it the source element iterable
    * @param convert the conversion function
    */
-  public static <E> Iterator<E> transform(final Iterator<?> it, final Function<Object, E> convert) {
+  public static <S, T> Iterator<T> transform(final Iterator<S> it,
+      final Function<? super S, ? extends T> convert) {
     return it == null ? emptyIterator() : new Iterator<>() {
-      final Iterator<?> fromIterator = it;
-      final Function<Object, E> useConvert = defaultObject(convert, Objects::forceCast);
+      final Iterator<S> fromIterator = it;
+      final Function<? super S, ? extends T> useConvert =
+          defaultObject(convert, Objects::forceCast);
 
       @Override
       public boolean hasNext() {
@@ -442,7 +447,7 @@ public class Iterables {
       }
 
       @Override
-      public E next() {
+      public T next() {
         return useConvert.apply(fromIterator.next());
       }
 

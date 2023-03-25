@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Immutable.ImmutableListBuilder;
@@ -466,6 +467,19 @@ public class Lists {
    */
   public static <E> void swap(List<? extends E> l, int i, int j) {
     Collections.swap(l, i, j);
+  }
+
+  /**
+   * Use the specified conversion function to convert the given list element type
+   *
+   * @param <S> the source element type
+   * @param <T> the target element type
+   * @param list the source element list
+   * @param convert the conversion function
+   */
+  public static <S, T> List<T> transform(final List<S> list,
+      final Function<? super S, ? extends T> convert) {
+    return list == null ? null : list.stream().map(convert).collect(Collectors.toList());
   }
 
   /**

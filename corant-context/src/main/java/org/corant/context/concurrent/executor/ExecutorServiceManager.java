@@ -32,7 +32,6 @@ import org.corant.context.concurrent.ConcurrentExtension;
 import org.corant.context.concurrent.ManagedExecutorConfig;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
-import org.corant.shared.util.Threads;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService;
 import org.glassfish.enterprise.concurrent.AbstractManagedThread;
 
@@ -129,6 +128,7 @@ public class ExecutorServiceManager {
         while (isRunning()) {
           setRunning(false);
           try {
+            hungLogger.interrupt();
             monitor.wait();
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -170,7 +170,7 @@ public class ExecutorServiceManager {
     public void run() {
       try {
         while (manager.isRunning()) {
-          Threads.tryThreadSleep(checkPeriod);
+          Thread.sleep(checkPeriod);
           if (!manager.getExecutorService().isEmpty() && manager.isRunning()) {
             for (AbstractManagedExecutorService es : manager.getExecutorService()) {
               if (!manager.isRunning()) {
@@ -188,6 +188,8 @@ public class ExecutorServiceManager {
             }
           }
         }
+      } catch (InterruptedException e) {
+        // Noop, here sleeping is forcibly interrupted, that OK!
       } finally {
         synchronized (manager.monitor) {
           logger.fine("The hung task logger is about to exit.");

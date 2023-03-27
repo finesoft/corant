@@ -15,6 +15,7 @@ package org.corant.shared.util;
 
 import static org.corant.shared.ubiquity.Throwing.uncheckedRunner;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +23,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
@@ -95,6 +97,16 @@ public class Threads {
     delayRunInDaemon(threadName, delay, uncheckedRunner(runner));
   }
 
+  public static SimplePeriodRunner periodRunnerOf(String name, boolean daemon, long period,
+      Runnable runnable) {
+    return new SimplePeriodRunner(name, daemon, period, runnable);
+  }
+
+  public static SimplePeriodRunner periodRunnerOf(String name, boolean daemon, long period,
+      TimeUnit periodUnit, Runnable runnable) {
+    return new SimplePeriodRunner(name, daemon, period, periodUnit, runnable);
+  }
+
   public static void runInDaemon(Runnable runner) {
     runInDaemon(DAEMON_THREAD_NAME_PREFIX, runner);
   }
@@ -121,4 +133,133 @@ public class Threads {
     }
   }
 
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:24:59
+   *
+   */
+  public static class SimplePeriodRunnable implements Runnable {
+
+    protected final Logger logger = Logger.getLogger(getClass().getName());
+    protected final long period;
+    protected final TimeUnit periodUnit;
+    protected final Object monitor;
+    protected final Runnable runnable;
+    protected volatile boolean activated = true;
+
+    public SimplePeriodRunnable(long period, Runnable runnable) {
+      this(period, TimeUnit.MILLISECONDS, null, runnable);
+    }
+
+    public SimplePeriodRunnable(long period, TimeUnit periodUnit, Object monitor,
+        Runnable runnable) {
+      this.period = period;
+      this.periodUnit = defaultObject(periodUnit, TimeUnit.MILLISECONDS);
+      this.monitor = monitor;
+      this.runnable = shouldNotNull(runnable, "The runnable for runner can't null");
+    }
+
+    public void deactivate() {
+      activated = false;
+    }
+
+    public boolean isActivated() {
+      return activated;
+    }
+
+    @Override
+    public void run() {
+      final long periodMilliSeconds =
+          period > 0 ? TimeUnit.MILLISECONDS.convert(period, periodUnit) : 0;
+      try {
+        while (activated) {
+          if (periodMilliSeconds > 0) {
+            Thread.sleep(periodMilliSeconds);
+          }
+          if (activated) {
+            runnable.run();
+          }
+        }
+      } catch (InterruptedException e) {
+        // Noop, here sleeping is forcibly interrupted, that OK!
+      } finally {
+        if (monitor != null) {
+          synchronized (monitor) {
+            logger.fine(() -> String.format("The period runnable %s is about to exit.",
+                Thread.currentThread().getName()));
+            if (!activated) {
+              monitor.notifyAll();
+            } else {
+              activated = false;
+            }
+            logger.fine(() -> String.format("The period runnable %s exits.",
+                Thread.currentThread().getName()));
+          }
+        } else {
+          activated = false;
+        }
+      }
+    }
+
+  }
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 上午10:54:19
+   *
+   */
+  public static class SimplePeriodRunner {
+
+    protected Thread thread;
+    protected final Object monitor = new Object();
+    protected final SimplePeriodRunnable runnable;
+    protected final String name;
+    protected final boolean daemon;
+
+    public SimplePeriodRunner(String name, boolean daemon, long period, Runnable runnable) {
+      this(name, daemon, period, TimeUnit.MILLISECONDS, runnable);
+    }
+
+    public SimplePeriodRunner(String name, boolean daemon, long period, TimeUnit periodUnit,
+        Runnable runnable) {
+      this.runnable = new SimplePeriodRunnable(period, periodUnit, monitor, runnable);
+      this.daemon = daemon;
+      this.name = name;
+    }
+
+    public SimplePeriodRunner start() {
+      synchronized (monitor) {
+        if (thread == null) {
+          runnable.activated = true;
+          thread = new Thread(runnable);
+          thread.setDaemon(daemon);
+          if (name != null) {
+            thread.setName(name);
+          }
+          thread.start();
+        }
+      }
+      return this;
+    }
+
+    public SimplePeriodRunner stop() {
+      synchronized (monitor) {
+        if (thread != null) {
+          while (runnable.isActivated()) {
+            runnable.deactivate();
+            try {
+              thread.interrupt();
+              monitor.wait();
+            } catch (InterruptedException ex) {
+              Thread.currentThread().interrupt();
+            }
+          }
+          thread = null;
+        }
+      }
+      return this;
+    }
+  }
 }

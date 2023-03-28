@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.jsonexpression;
 
+import static java.util.Collections.singletonList;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -22,6 +23,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
@@ -65,6 +67,9 @@ import net.jcip.annotations.GuardedBy;
 
 /**
  * corant-modules-query-shared
+ * <p>
+ * Processor for query scripts that execute JSON expressions. The JSON expression is mainly used to
+ * execute fetch query condition judgment and injection processing.
  *
  * @author bingo 下午3:00:31
  *
@@ -212,20 +217,33 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         if (keyPath.length > 0) {
           if (v instanceof Map) {
             Map<?, ?> vm = (Map<?, ?>) v;
-            String name = getMapString(vm, PROJECTION_RENAME_KEY, k);
-            String[] rename = split(name, Names.NAME_SPACE_SEPARATORS, true, true);
             String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
             Class<?> type = typeName != null ? asClass(typeName) : null;
-            mappings.add(new Mapping(keyPath, rename, type));
+            Object robj = defaultObject(vm.get(PROJECTION_RENAME_KEY), k);
+            if (robj instanceof String) {
+              // for single injection
+              String[] rename = split(robj.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
+              mappings.add(new Mapping(keyPath, singletonList(rename), type));
+            } else if (robj instanceof Collection) {
+              // for multiple injections
+              List<String[]> renames = new ArrayList<>(((Collection<?>) robj).size());
+              for (Object ro : (Collection<?>) robj) {
+                if (ro != null) {
+                  renames.add(split(ro.toString(), Names.NAME_SPACE_SEPARATORS, true, true));
+                }
+              }
+              mappings.add(new Mapping(keyPath, renames, type));
+            }
           } else if (toBoolean(v)) {
-            mappings.add(new Mapping(keyPath, keyPath, null));
+            mappings.add(new Mapping(keyPath, singletonList(keyPath), null));
           }
         }
       }
     });
     if (isEmpty(mappings)) {
       throw new QueryRuntimeException("The projection can't empty!");
-    } else if (single && mappings.size() > 1) {
+    } else if (single && (mappings.size() > 1
+        || (mappings.size() == 1 && mappings.iterator().next().injectPaths.size() > 1))) {
       throw new QueryRuntimeException(
           "In a single case, the projection can't contain multi fields mapping!");
     }
@@ -259,12 +277,12 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    */
   static class Mapping {
     final String[] extractPath;
-    final String[] injectPath;
+    final List<String[]> injectPaths;
     final Class<?> type;
 
-    Mapping(String[] extractPath, String[] injectPath, Class<?> type) {
+    Mapping(String[] extractPath, List<String[]> injectPaths, Class<?> type) {
       this.extractPath = extractPath;
-      this.injectPath = injectPath;
+      this.injectPaths = injectPaths;
       this.type = type;
     }
 
@@ -430,7 +448,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
             if (mapping.type != null) {
               extracted = toObject(extracted, mapping.type);
             }
-            objectMapper.putMappedValue(result, mapping.injectPath, extracted);
+            for (String[] injectPath : mapping.injectPaths) {
+              objectMapper.putMappedValue(result, injectPath, extracted);
+            }
           }
           results.add(result);
         }

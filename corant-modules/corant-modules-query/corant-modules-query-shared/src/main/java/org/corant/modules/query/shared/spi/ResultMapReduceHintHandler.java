@@ -212,7 +212,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   protected Triple<String, String[], Class<?>> resolveReduceField(String fieldExp) {
     if (!fieldExp.contains(Names.DOMAIN_SPACE_SEPARATORS)
         && !fieldExp.contains(TYPE_VALUE_PREFIX)) {
-      System.out.println(fieldExp);
+      // System.out.println(fieldExp);
       return Triple.of(fieldExp, split(fieldExp, Names.NAME_SPACE_SEPARATORS, true, true),
           java.lang.Object.class);
     } else {

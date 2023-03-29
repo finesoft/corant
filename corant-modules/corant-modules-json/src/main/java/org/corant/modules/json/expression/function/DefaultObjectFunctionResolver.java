@@ -34,17 +34,17 @@ import org.corant.shared.util.Strings;
  * corant-modules-json
  *
  * <p>
- * An experimental simple object method or constructor invoke function resolver, generally used to
- * perform method invoke on objects or static method invokes of object types or invoke object
- * constructor.
+ * An experimental simple object call function resolver using object methods or constructors,
+ * typically used to perform method calls on objects or static method calls of object types or call
+ * object constructors.
  *
  * <p>
- * The full object class name and method name use {@code ::} connection to represent the key of the
- * function, if the method name is {@code new} it means it is a constructor. An array is used to
- * represent the input parameters of the invocation. An empty array [] is used to represent a method
- * or constructor invocations without input parameters; if it is a non-static method invocation, the
- * first element of the input parameter array is the invoked object itself, on the contrary, all
- * arrays are input parameters.
+ * The string formed by the complete object type name and method name with :: symbolic connection is
+ * used as the key of the function, if the method name is {@code new} it means it is a constructor.
+ * An array is used to represent the input parameters of the invocation. An empty array [] is used
+ * to represent a method or constructor invocations without input parameters; if it is a non-static
+ * method invocation, the first element of the input parameter array is the invoked object itself,
+ * on the contrary, all arrays are input parameters.
  *
  * <p>
  * NOTE: Since the methods of java objects can be overloaded, for example, multiple method
@@ -72,7 +72,7 @@ import org.corant.shared.util.Strings;
 public class DefaultObjectFunctionResolver implements FunctionResolver {
 
   static final Map<String, Pair<Class<?>, String>> holder = new ConcurrentHashMap<>();
-  static final Object[] emptyParams = new Object[0];
+  static final Object[] emptyParams = {};
   static final Class<?>[] emptyParamTypes = new Class[0];
   static final String NEW = "new";
   static final String delimiter = "::";
@@ -84,7 +84,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
       Class<?> cls = sign.first();
       String invokerName = sign.second();
       //// FIXME Currently treated parameter type as java.lang.Object if parameter is null
-      if (invokerName.equals(NEW)) {
+      if (NEW.equals(invokerName)) {
         // constructor invoking
         return invokeConstructor(fs, cls);
       } else {
@@ -105,7 +105,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
         if (tmp.length == 2) {
           Class<?> klass = Classes.tryAsClass(tmp[0]);
           if (klass != null && (Arrays.stream(klass.getDeclaredMethods())
-              .anyMatch(m -> m.getName().equals(tmp[1])) || tmp[1].equals(NEW))) {
+              .anyMatch(m -> m.getName().equals(tmp[1])) || NEW.equals(tmp[1]))) {
             holder.computeIfAbsent(name, x -> Pair.of(klass, tmp[1]));
             return true;
           }
@@ -160,6 +160,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     if (method == null) {
       // match static method
       invokedObject = null;
+      params = fs;
       paramTypes = new Class[length];
       for (int i = 0; i < length; i++) {
         paramTypes[i] = fs[i] == null ? Object.class : fs[i].getClass();

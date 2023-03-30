@@ -202,7 +202,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       if (left != null) {
         return left.equals(right);
       } else if (right != null) {
-        return right.equals(left);
+        return false;
       }
       return false;
     }

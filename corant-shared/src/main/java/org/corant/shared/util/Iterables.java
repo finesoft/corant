@@ -364,7 +364,7 @@ public class Iterables {
 
   /**
    * @see #range(int, int)
-   * @param length
+   * @param length the (inclusive) initial value
    * @return range
    */
   public static int[] range(int length) {

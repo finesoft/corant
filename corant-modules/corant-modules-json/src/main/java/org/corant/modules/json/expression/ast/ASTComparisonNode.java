@@ -199,7 +199,12 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       if (left instanceof Number && right instanceof Number) {
         return compare(left, right) == 0;
       }
-      return areEqual(left, right);
+      if (left != null) {
+        return left.equals(right);
+      } else if (right != null) {
+        return right.equals(left);
+      }
+      return false;
     }
   }
 

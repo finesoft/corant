@@ -475,11 +475,11 @@ public class Lists {
    * @param <S> the source element type
    * @param <T> the target element type
    * @param list the source element list
-   * @param convert the conversion function
+   * @param converter the conversion function
    */
   public static <S, T> List<T> transform(final List<S> list,
-      final Function<? super S, ? extends T> convert) {
-    return list == null ? null : list.stream().map(convert).collect(Collectors.toList());
+      final Function<? super S, ? extends T> converter) {
+    return list == null ? null : list.stream().map(converter).collect(Collectors.toList());
   }
 
   /**

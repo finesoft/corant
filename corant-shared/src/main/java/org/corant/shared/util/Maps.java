@@ -1241,6 +1241,62 @@ public class Maps {
   }
 
   /**
+   * Use the specified key and value conversion functions to convert the given map to new target
+   * hash map.
+   *
+   * @param <SK> the source key type
+   * @param <SV> the source key value
+   * @param <TK> the target key type of new map
+   * @param <TV> the target value type of new map
+   * @param map a map to be converted
+   * @param keyConverter the key conversion function
+   * @param valueConverter the value conversion function
+   * @return a new map
+   */
+  public static <SK, SV, TK, TV> Map<TK, TV> transform(final Map<SK, SV> map,
+      final Function<? super SK, ? extends TK> keyConverter,
+      final Function<? super SV, ? extends TV> valueConverter) {
+    if (map == null) {
+      return null;
+    } else {
+      Map<TK, TV> newMap = map instanceof LinkedHashMap ? new LinkedHashMap<>(map.size())
+          : new HashMap<>(map.size());
+      map.forEach((key, value) -> newMap.put(keyConverter.apply(key), valueConverter.apply(value)));
+      return newMap;
+    }
+  }
+
+  /**
+   * Use the specified key conversion function to convert the given map to new target hash map.
+   *
+   * @param <SK> the source key type
+   * @param <SV> the source key value
+   * @param <TK> the target key type of new map
+   * @param map a map to be converted
+   * @param keyConverter the key conversion function
+   * @return a new map
+   */
+  public static <SK, SV, TK> Map<TK, SV> transformKey(final Map<SK, SV> map,
+      final Function<? super SK, ? extends TK> keyConverter) {
+    return transform(map, keyConverter, Function.identity());
+  }
+
+  /**
+   * Use the specified value conversion function to convert the given map to new target hash map.
+   *
+   * @param <SK> the source key type
+   * @param <SV> the source key value
+   * @param <TV> the target value type of new map
+   * @param map a map to be converted
+   * @param valueConverter the value conversion function
+   * @return a new map
+   */
+  public static <SK, SV, TV> Map<SK, TV> transformValue(final Map<SK, SV> map,
+      final Function<? super SV, ? extends TV> valueConverter) {
+    return transform(map, Function.identity(), valueConverter);
+  }
+
+  /**
    * Returns a new map containing the given maps. The Map.putAll(Map) operation is used to append
    * the given maps into a new map.
    *

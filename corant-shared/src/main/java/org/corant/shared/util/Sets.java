@@ -214,11 +214,11 @@ public class Sets {
    * @param <S> the source element type
    * @param <T> the target element type
    * @param set the source element set
-   * @param convert the conversion function
+   * @param converter the conversion function
    */
   public static <S, T> Set<T> transform(final Set<S> set,
-      final Function<? super S, ? extends T> convert) {
-    return set == null ? null : set.stream().map(convert).collect(Collectors.toSet());
+      final Function<? super S, ? extends T> converter) {
+    return set == null ? null : set.stream().map(converter).collect(Collectors.toSet());
   }
 
   /**

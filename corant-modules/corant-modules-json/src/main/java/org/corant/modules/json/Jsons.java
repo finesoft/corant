@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -45,6 +47,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -88,6 +91,7 @@ public class Jsons {
         .forEach(c -> c.configure(objectMapper));
   }
   static final JavaType mapType = objectMapper.constructType(Map.class);
+  static final JavaType listType = objectMapper.constructType(List.class);
   static final ObjectReader mapReader = objectMapper.readerFor(mapType);
 
   private Jsons() {}
@@ -285,6 +289,60 @@ public class Jsons {
    */
   public static ObjectMapper copyMapper() {
     return objectMapper.copy();
+  }
+
+  /**
+   * Returns a Map object from given JSON string.
+   * <p>
+   * Note: If the given JSON string is expressed as an array, it will return ArrayList, if it is
+   * expressed as an object, it will return LinkedHashMap; if it is expressed as other Java basic
+   * types, such as floating point numbers, it will return BigDecimal, and if it is expressed as a
+   * 32/16 bits integer numbers, it will return int, 64 bits will return long, more than 64 bits
+   * will return BigInteger.
+   *
+   * @see ObjectMapper#readTree(String)
+   * @see JsonNode
+   *
+   * @param jsonString the string used to read JSON content for building the JSON tree
+   * @return an object that the given JSON string expressed
+   */
+  public static Object fromAnyString(String jsonString) {
+    if (jsonString == null) {
+      return null;
+    }
+    try {
+      JsonNode node = objectMapper.readTree(jsonString);
+      if (node.isArray()) {
+        return objectMapper.treeToValue(node, listType);
+      } else if (node.isObject()) {
+        return objectMapper.treeToValue(node, mapType);
+      } else if (node.isFloat()) {
+        return node.floatValue();
+      } else if (node.isDouble()) {
+        return node.doubleValue();
+      } else if (node.isBoolean()) {
+        return node.booleanValue();
+      } else if (node.isShort()) {
+        return node.shortValue();
+      } else if (node.isInt()) {
+        return node.intValue();
+      } else if (node.isLong()) {
+        return node.longValue();
+      } else if (node.isBigInteger()) {
+        return node.bigIntegerValue();
+      } else if (node.isBigDecimal()) {
+        return node.decimalValue();
+      } else if (node.isTextual()) {
+        return node.textValue();
+      } else if (node.isBinary()) {
+        return node.binaryValue();
+      } else if (node.isNull()) {
+        return null;
+      }
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+    throw new NotSupportedException();
   }
 
   /**

@@ -93,6 +93,7 @@ public class Jsons {
   static final JavaType mapType = objectMapper.constructType(Map.class);
   static final JavaType listType = objectMapper.constructType(List.class);
   static final ObjectReader mapReader = objectMapper.readerFor(mapType);
+  static final ObjectReader listReader = objectMapper.readerFor(listType);
 
   private Jsons() {}
 
@@ -292,14 +293,31 @@ public class Jsons {
   }
 
   /**
-   * Returns a Map object from given JSON string.
-   * <p>
-   * Note: If the given JSON string is expressed as an array, it will return ArrayList, if it is
-   * expressed as an object, it will return LinkedHashMap; if it is expressed as other Java basic
-   * types, such as floating point numbers, it will return BigDecimal, and if it is expressed as a
-   * 32/16 bits integer numbers, it will return int, 64 bits will return long, more than 64 bits
-   * will return BigInteger.
+   * Returns an object from any given JSON string.
    *
+   * @see Jsons#fromJsonNode(JsonNode)
+   * @see ObjectMapper#readTree(byte[])
+   * @see JsonNode
+   * @param jsonBytes the bytes used to read JSON content for building the JSON tree
+   * @return an object that the given JSON bytes expressed
+   */
+  public static Object fromAnyBytes(byte[] jsonBytes) {
+    if (jsonBytes == null || jsonBytes.length == 0) {
+      return null;
+    }
+    final JsonNode node;
+    try {
+      node = objectMapper.readTree(jsonBytes);
+    } catch (IOException e) {
+      throw new CorantRuntimeException(e);
+    }
+    return fromJsonNode(node);
+  }
+
+  /**
+   * Returns an object from any given JSON string.
+   *
+   * @see Jsons#fromJsonNode(JsonNode)
    * @see ObjectMapper#readTree(String)
    * @see JsonNode
    *
@@ -310,39 +328,13 @@ public class Jsons {
     if (jsonString == null) {
       return null;
     }
+    final JsonNode node;
     try {
-      JsonNode node = objectMapper.readTree(jsonString);
-      if (node.isArray()) {
-        return objectMapper.treeToValue(node, listType);
-      } else if (node.isObject()) {
-        return objectMapper.treeToValue(node, mapType);
-      } else if (node.isFloat()) {
-        return node.floatValue();
-      } else if (node.isDouble()) {
-        return node.doubleValue();
-      } else if (node.isBoolean()) {
-        return node.booleanValue();
-      } else if (node.isShort()) {
-        return node.shortValue();
-      } else if (node.isInt()) {
-        return node.intValue();
-      } else if (node.isLong()) {
-        return node.longValue();
-      } else if (node.isBigInteger()) {
-        return node.bigIntegerValue();
-      } else if (node.isBigDecimal()) {
-        return node.decimalValue();
-      } else if (node.isTextual()) {
-        return node.textValue();
-      } else if (node.isBinary()) {
-        return node.binaryValue();
-      } else if (node.isNull()) {
-        return null;
-      }
+      node = objectMapper.readTree(jsonString);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
-    throw new NotSupportedException();
+    return fromJsonNode(node);
   }
 
   /**
@@ -418,6 +410,57 @@ public class Jsons {
         throw new CorantRuntimeException(e);
       }
     }
+  }
+
+  /**
+   * Returns an object from any given JSON node.
+   * <p>
+   * Note: If the given JSON node is expressed as an array, it will return ArrayList, if it is
+   * expressed as an object, it will return LinkedHashMap; if it is expressed as other Java basic
+   * types, such as floating point numbers, it will return BigDecimal, and if it is expressed as a
+   * 32/16 bits integer numbers, it will return int, 64 bits will return long, more than 64 bits
+   * will return BigInteger.
+   *
+   * @see JsonNode
+   * @param node the JSON node to be extracted
+   * @return an object
+   */
+  public static Object fromJsonNode(JsonNode node) {
+    if (node == null) {
+      return null;
+    }
+    try {
+      if (node.isArray()) {
+        return objectMapper.treeToValue(node, listType);
+      } else if (node.isObject()) {
+        return objectMapper.treeToValue(node, mapType);
+      } else if (node.isFloat()) {
+        return node.floatValue();
+      } else if (node.isDouble()) {
+        return node.doubleValue();
+      } else if (node.isBoolean()) {
+        return node.booleanValue();
+      } else if (node.isShort()) {
+        return node.shortValue();
+      } else if (node.isInt()) {
+        return node.intValue();
+      } else if (node.isLong()) {
+        return node.longValue();
+      } else if (node.isBigInteger()) {
+        return node.bigIntegerValue();
+      } else if (node.isBigDecimal()) {
+        return node.decimalValue();
+      } else if (node.isTextual()) {
+        return node.textValue();
+      } else if (node.isBinary()) {
+        return node.binaryValue();
+      } else if (node.isNull()) {
+        return null;
+      }
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+    throw new NotSupportedException();
   }
 
   /**

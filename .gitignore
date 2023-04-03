@@ -1,9 +1,13 @@
-target/
-.flattened-pom.xml
 .externalToolBuilders/
 .settings/
+.idea/
+log/
+target/
+
 .classpath
 .project
-
-.idea/
+.flattened-pom.xml
+*.iws
 *.iml
+*.ipr
+*-me.*

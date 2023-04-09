@@ -14,16 +14,32 @@
 package org.corant.modules.datasource.hikari;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.getOpt;
+import static org.corant.shared.util.Maps.getOptMapObject;
+import static org.corant.shared.util.Maps.toProperties;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.io.Closeable;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.Duration;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Experimental;
+import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Services;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -33,42 +49,139 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author bingo 下午7:56:58
  *
  */
+@Experimental
 public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
   void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
-        event.<DataSource>addBean().addQualifiers(dsn)
-            .addTransitiveTypeClosure(HikariDataSource.class).beanClass(HikariDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              try {
-                return produce(beans, dsc);
-              } catch (NamingException e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((dataSource, beans) -> dataSource.close());
-        if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
-          registerJndi(dsc.getName(), dsn);
+        if (dsc.isEnable()) {
+          event.<DataSource>addBean().addQualifiers(dsn).addTransitiveTypeClosure(DataSource.class)
+              .addTransitiveTypeClosure(Closeable.class).beanClass(ExtendedDataSource.class)
+              .scope(ApplicationScoped.class).produceWith(beans -> {
+                try {
+                  return produce(beans, dsc);
+                } catch (NamingException | SQLException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              }).disposeWith((dataSource, beans) -> {
+                try {
+                  ((Closeable) dataSource).close();
+                } catch (IOException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              });
+          if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
+            registerJndi(dsc.getName(), dsn);
+          }
         }
       });
     }
   }
 
-  HikariDataSource produce(Instance<Object> instance, DataSourceConfig cfg) throws NamingException {
-    shouldBeFalse(cfg.isJta() || cfg.isXa());
-    HikariConfig cfgs = new HikariConfig();
-    cfgs.setJdbcUrl(cfg.getConnectionUrl());
-    cfgs.setDriverClassName(cfg.getDriver().getName());
+  @SuppressWarnings("resource")
+  DataSource produce(Instance<Object> instance, DataSourceConfig cfg)
+      throws NamingException, SQLException {
+    if (!cfg.isEnableCustomTransactionIntegration()) {
+      shouldBeFalse(cfg.isJta() || cfg.isXa());
+    }
+    HikariConfig hcfg = new HikariConfig();
+    getOptMapObject(cfg.getCtrlProperties(), "allow-pool-suspension", Conversions::toBoolean)
+        .ifPresent(hcfg::setAllowPoolSuspension);
+    hcfg.setAutoCommit(cfg.isAutoCommit());
+    getOpt(cfg.getCtrlProperties(), "catalog").ifPresent(hcfg::setCatalog);
+    hcfg.setConnectionInitSql(cfg.getInitialSql());
+    getOpt(cfg.getCtrlProperties(), "test-query").ifPresent(hcfg::setConnectionTestQuery);
+    hcfg.setConnectionTimeout(cfg.getAcquisitionTimeout().toMillis());
+    getOpt(cfg.getCtrlProperties(), "data-source-class-name")
+        .ifPresent(hcfg::setDataSourceClassName);
+    getOpt(cfg.getCtrlProperties(), "data-source-jndi").ifPresent(hcfg::setDataSourceJNDI);
+    if (isNotEmpty(cfg.getJdbcProperties())) {
+      hcfg.setDataSourceProperties(toProperties(cfg.getJdbcProperties()));
+    }
+
+    if (cfg.getDriver() != null) {
+      hcfg.setDriverClassName(cfg.getDriver().getName());
+    }
+
+    getOpt(cfg.getCtrlProperties(), "exception-override-class-name")
+        .ifPresent(hcfg::setExceptionOverrideClassName);
+
+    // cfgs.setHealthCheckProperties(); // Use Configurator SPI
+    // cfgs.setHealthCheckRegistry(); //Use Configurator SPI
+
+    hcfg.setIdleTimeout(cfg.getReapTimeout().toMillis());
+
+    getOptMapObject(cfg.getCtrlProperties(), "initialization-fail-timeout", Conversions::toLong)
+        .ifPresent(hcfg::setInitializationFailTimeout);
+
+    getOptMapObject(cfg.getCtrlProperties(), "isolate-internal-queries", Conversions::toBoolean)
+        .ifPresent(hcfg::setIsolateInternalQueries);
+
+    hcfg.setJdbcUrl(cfg.getConnectionUrl());
+
+    getOptMapObject(cfg.getCtrlProperties(), "keep-alive-time", Conversions::toLong)
+        .ifPresent(hcfg::setKeepaliveTime);
+
+    hcfg.setLeakDetectionThreshold(cfg.getLeakTimeout().toMillis());
+
+    hcfg.setMaximumPoolSize(cfg.getMaxSize());
+
+    hcfg.setMaxLifetime(cfg.getMaxLifetime().toMillis());
+
+    hcfg.setMinimumIdle(cfg.getMinSize());
+
     if (cfg.getUsername() != null) {
-      cfgs.setUsername(cfg.getUsername());
+      hcfg.setUsername(cfg.getUsername());
     }
     if (cfg.getPassword() != null) {
-      cfgs.setPassword(cfg.getPassword());
+      hcfg.setPassword(cfg.getPassword());
     }
-    cfgs.setMinimumIdle(cfg.getMinSize());
-    cfgs.setMaximumPoolSize(cfg.getMaxSize());
-    cfgs.setPoolName(cfg.getName());
-    cfgs.setValidationTimeout(cfg.getValidationTimeout().toMillis());
-    return new HikariDataSource(cfgs);
+    hcfg.setPoolName(cfg.getName());
+
+    getOptMapObject(cfg.getCtrlProperties(), "read-only", Conversions::toBoolean)
+        .ifPresent(hcfg::setReadOnly);
+
+    hcfg.setRegisterMbeans(cfg.isEnableMetrics());
+
+    getOpt(cfg.getCtrlProperties(), "schema").ifPresent(hcfg::setSchema);
+
+    if (cfg.getIsolationLevel() > -1) {
+      switch (cfg.getIsolationLevel()) {
+        case Connection.TRANSACTION_READ_COMMITTED:
+          hcfg.setTransactionIsolation("TRANSACTION_READ_COMMITTED");
+          break;
+        case Connection.TRANSACTION_READ_UNCOMMITTED:
+          hcfg.setTransactionIsolation("TRANSACTION_READ_UNCOMMITTED");
+          break;
+        case Connection.TRANSACTION_REPEATABLE_READ:
+          hcfg.setTransactionIsolation("TRANSACTION_REPEATABLE_READ");
+          break;
+        case Connection.TRANSACTION_SERIALIZABLE:
+          hcfg.setTransactionIsolation("TRANSACTION_SERIALIZABLE");
+          break;
+        default:
+          hcfg.setTransactionIsolation("TRANSACTION_NONE");
+          break;
+      }
+    }
+
+    hcfg.setValidationTimeout(cfg.getValidationTimeout().toMillis());
+
+    Services.selectRequired(HikariCPDataSourceConfigurator.class, defaultClassLoader())
+        .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, hcfg));
+
+    HikariDataSource hikariDataSource = new HikariDataSource(hcfg);
+    if (!Duration.ZERO.equals(cfg.getLoginTimeout())) {
+      hikariDataSource.setLoginTimeout((int) cfg.getLoginTimeout().toSeconds());
+    }
+
+    if (cfg.isEnableCustomTransactionIntegration()) {
+      return new ExtendedDataSource(hikariDataSource,
+          instance.select(TransactionManager.class).get(),
+          instance.select(TransactionSynchronizationRegistry.class).get());
+    } else {
+      return hikariDataSource;
+    }
   }
 }

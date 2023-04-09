@@ -65,17 +65,19 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
   protected void onAfterBeanDiscovery(@Observes final AfterBeanDiscovery event) {
     if (event != null) {
       getConfigManager().getAllWithQualifiers().forEach((dsc, dsn) -> {
-        event.<DataSource>addBean().addQualifiers(dsn)
-            .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
-            .scope(ApplicationScoped.class).produceWith(beans -> {
-              try {
-                return produce(beans, dsc);
-              } catch (NamingException | SQLException e) {
-                throw new CorantRuntimeException(e);
-              }
-            }).disposeWith((dataSource, beans) -> dataSource.close());
-        if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
-          registerJndi(dsc.getName(), dsn);
+        if (dsc.isEnable()) {
+          event.<DataSource>addBean().addQualifiers(dsn)
+              .addTransitiveTypeClosure(AgroalDataSource.class).beanClass(AgroalDataSource.class)
+              .scope(ApplicationScoped.class).produceWith(beans -> {
+                try {
+                  return produce(beans, dsc);
+                } catch (NamingException | SQLException e) {
+                  throw new CorantRuntimeException(e);
+                }
+              }).disposeWith((dataSource, beans) -> dataSource.close());
+          if (isNotBlank(dsc.getName()) && dsc.isBindToJndi()) {
+            registerJndi(dsc.getName(), dsn);
+          }
         }
       });
     }
@@ -124,6 +126,8 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .autoCommit(cfg.isAutoCommit());
     cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+        .trackJdbcResources(cfg.isEnableTrackJdbcResources());
+    cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
         .jdbcTransactionIsolation(TransactionIsolation.fromLevel(cfg.getIsolationLevel()));
 
     // auth
@@ -147,6 +151,11 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     if (isNotBlank(cfg.getInitialSql())) {
       cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
           .initialSql(cfg.getInitialSql());
+    }
+
+    if (!cfg.getLoginTimeout().equals(Duration.ZERO)) {
+      cfgs.connectionPoolConfiguration().connectionFactoryConfiguration()
+          .loginTimeout(cfg.getLoginTimeout());
     }
 
     // connection pool

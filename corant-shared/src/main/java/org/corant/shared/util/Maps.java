@@ -823,6 +823,21 @@ public class Maps {
   }
 
   /**
+   * Returns the converted value of the map value corresponding to the given key in the given map,
+   * using the given converter if type conversion is involved.
+   *
+   * @param <T> the expected value type
+   * @param map the map that value comes from
+   * @param key the key that value gets from
+   * @param converter the type converter for value type conversion
+   * @return an typed object
+   */
+  public static <T> T getMapMapObject(final Map<?, ?> map, final Object key,
+      Function<Map<?, ?>, T> converter) {
+    return converter.apply(getMapMap(map, key));
+  }
+
+  /**
    * Get the list of maps value corresponding to the given key from the given map, use force cast
    * convert.
    *
@@ -836,6 +851,21 @@ public class Maps {
    */
   public static <K, V> List<Map<K, V>> getMapMaps(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, Objects::forceCast);
+  }
+
+  /**
+   * Returns the converted list value of the map value list corresponding to the given key in the
+   * given map, using the given converter if type conversion is involved.
+   *
+   * @param <T> the expected value type
+   * @param map the map that value comes from
+   * @param key the key that value gets from
+   * @param converter the type converter for value type conversion
+   * @return an typed object list
+   */
+  public static <T> List<T> getMapMapsList(final Map<?, ?> map, final Object key,
+      Function<Map<?, ?>, T> converter) {
+    return Lists.transform(getMapMaps(map, key), converter);
   }
 
   /**
@@ -880,9 +910,9 @@ public class Maps {
   }
 
   /**
-   * Returns the converted value corresponding to the given key in the given map or return the given
-   * default value when the key value is not found or the mapped value is null, use the given
-   * converter if involve type conversion.
+   * Returns the converted value of the value corresponding to the given key in the given map or
+   * return the given default value when the key value is not found or the mapped value is null, use
+   * the given converter if involve type conversion.
    *
    * @param <T> the expected value type
    * @param map the map to use

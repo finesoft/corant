@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,23 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.jta.shared;
+package org.corant.modules.datasource.hikari;
+
+import org.corant.modules.datasource.shared.DataSourceConfig;
+import org.corant.shared.ubiquity.Experimental;
+import org.corant.shared.ubiquity.Sortable;
+import com.zaxxer.hikari.HikariConfig;
 
 /**
- * corant-modules-jta-shared
+ * corant-modules-datasource-hikari
  *
- * @author bingo 下午4:48:08
+ * @author bingo 下午12:43:35
  *
  */
-// TODO
-public interface TransactionAwareObject {
-
-  void transactionCommit() throws Exception;
-
-  void transactionEnd() throws Exception;
-
-  void transactionRollback() throws Exception;
-
-  void transactionStart() throws Exception;
-
+@Experimental
+public interface HikariCPDataSourceConfigurator extends Sortable {
+  void config(DataSourceConfig config, HikariConfig hikariConfig);
 }

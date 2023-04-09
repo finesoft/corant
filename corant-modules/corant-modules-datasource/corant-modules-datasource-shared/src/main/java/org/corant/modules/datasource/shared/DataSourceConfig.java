@@ -81,6 +81,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   protected int isolationLevel = -1;
 
   @ConfigKeyItem(defaultValue = "PT0S")
+  protected Duration loginTimeout = Duration.ofSeconds(0);
+
+  @ConfigKeyItem(defaultValue = "PT0S")
   protected Duration leakTimeout = Duration.ofSeconds(0);
 
   @ConfigKeyItem(defaultValue = "PT0M")
@@ -103,6 +106,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
   protected Map<String, String> jdbcProperties = new HashMap<>();
+
+  @ConfigKeyItem(pattern = DeclarativePattern.PREFIX)
+  protected Map<String, String> ctrlProperties = new HashMap<>();
 
   @ConfigKeyItem(defaultValue = "true")
   protected boolean enableTrackJdbcResources = true;
@@ -133,6 +139,14 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public String getConnectionUrl() {
     return connectionUrl;
+  }
+
+  /**
+   * Return specific control configuration information, such as returning specific configuration
+   * information for a specific connection pool, etc.
+   */
+  public Map<String, String> getCtrlProperties() {
+    return ctrlProperties;
   }
 
   /**
@@ -203,6 +217,13 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public Duration getLeakTimeout() {
     return leakTimeout;
+  }
+
+  /**
+   * Maximum time to wait while attempting to connect to a database. Resolution in seconds.
+   */
+  public Duration getLoginTimeout() {
+    return loginTimeout;
   }
 
   /**

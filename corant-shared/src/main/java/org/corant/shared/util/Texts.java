@@ -395,6 +395,31 @@ public class Texts {
    *
    * @param file the file to read
    * @param offset used to skip lines, the offset start from 0
+   * @param terminator used to brake out the stream, terminator return true means need to brake out
+   * @return lines
+   */
+  public static Stream<String> lines(final File file, int offset,
+      final BiPredicate<Integer, String> terminator) {
+    final FileInputStream fis;
+    try {
+      fis = new FileInputStream(shouldNotNull(file));
+    } catch (FileNotFoundException e1) {
+      throw new CorantRuntimeException(e1);
+    }
+    return lines(fis, offset, terminator).onClose(() -> {
+      try {
+        fis.close();
+      } catch (IOException e) {
+        throw new CorantRuntimeException(e);
+      }
+    });
+  }
+
+  /**
+   * String lines from file, use for read text line by line.
+   *
+   * @param file the file to read
+   * @param offset used to skip lines, the offset start from 0
    * @param limit the number of lines returned
    */
   public static Stream<String> lines(final File file, int offset, int limit) {
@@ -799,7 +824,7 @@ public class Texts {
   public static void writeCSVFile(File file, boolean append, Charset charset,
       List<List<String>> list) throws IOException {
     writeToFile(file, append, charset,
-        Iterables.transform(shouldNotNull(list).iterator(), e -> toCSVLine((Iterable<?>) e)));
+        Iterables.transform(shouldNotNull(list).iterator(), Texts::toCSVLine));
   }
 
   public static void writeCSVFile(File file, boolean append, Charset charset,
@@ -809,7 +834,7 @@ public class Texts {
 
   public static void writeCSVFile(File file, List<List<String>> data) throws IOException {
     writeToFile(file, false, null,
-        Iterables.transform(shouldNotNull(data).iterator(), e -> toCSVLine((Iterable<?>) e)));
+        Iterables.transform(shouldNotNull(data).iterator(), Texts::toCSVLine));
   }
 
   public static void writeToFile(File file, boolean append, Charset charset, Iterator<?> lines)
@@ -851,8 +876,8 @@ public class Texts {
 
   public static void writeXSVFile(File file, boolean append, Charset charset, String delimiter,
       List<List<String>> list) throws IOException {
-    writeToFile(file, append, charset, Iterables.transform(shouldNotNull(list).iterator(),
-        s -> toXSVLine((Iterable<?>) s, delimiter)));
+    writeToFile(file, append, charset,
+        Iterables.transform(shouldNotNull(list).iterator(), s -> toXSVLine(s, delimiter)));
   }
 
   public static void writeXSVFile(File file, boolean append, Charset charset, String delimiter,

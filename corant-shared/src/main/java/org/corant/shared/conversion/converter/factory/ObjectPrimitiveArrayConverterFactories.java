@@ -78,7 +78,7 @@ public class ObjectPrimitiveArrayConverterFactories {
       return result;
     } else {
       throw new ConversionException(
-          "The primitives array converter only support Array or Itreable objects");
+          "The primitives array converter only support Array or Iterable objects");
     }
   }
 

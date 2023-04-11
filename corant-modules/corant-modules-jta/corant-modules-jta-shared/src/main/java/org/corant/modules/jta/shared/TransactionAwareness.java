@@ -15,7 +15,6 @@ package org.corant.modules.jta.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.Callable;
 
 /**
@@ -79,53 +78,33 @@ public interface TransactionAwareness {
     @Override
     public void transactionCommit() throws Exception {
       shouldBeTrue(enlisted);
-      try {
-        connection.commit();
-      } catch (SQLException se) {
-        throw se;
-      }
+      connection.commit();
     }
 
     @Override
     public void transactionEnd() throws Exception {
       enlisted = false;
-      try {
-        if (needResetAutoCommit) {
-          connection.setAutoCommit(true);
-        }
-      } finally {
-
+      if (needResetAutoCommit) {
+        connection.setAutoCommit(true);
       }
-      try {
-        if (closeConnectionOnEnd) {
-          connection.close();
-        }
-      } catch (Exception e) {
-        throw e;
+      if (closeConnectionOnEnd) {
+        connection.close();
       }
     }
 
     @Override
     public void transactionRollback() throws Exception {
       shouldBeTrue(enlisted);
-      try {
-        connection.rollback();
-      } catch (SQLException se) {
-        throw se;
-      }
+      connection.rollback();
     }
 
     @Override
     public void transactionStart() throws Exception {
-      try {
-        if (!enlisted && connection.getAutoCommit()) {
-          connection.setAutoCommit(false);
-          needResetAutoCommit = true;
-        }
-        enlisted = true;
-      } catch (SQLException se) {
-        throw se;
+      if (!enlisted && connection.getAutoCommit()) {
+        connection.setAutoCommit(false);
+        needResetAutoCommit = true;
       }
+      enlisted = true;
     }
 
   }

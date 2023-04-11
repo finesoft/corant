@@ -100,7 +100,7 @@ public class Objects {
 
   /**
    * Null safe comparison of Comparables. null is assumed to be less than a non-null value.
-   *
+   * <p>
    * Note: Code come from apache.
    *
    * @param <T> the comparable object type

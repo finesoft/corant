@@ -24,7 +24,7 @@ import org.corant.shared.util.Systems;
 
 /**
  * corant-shared
- *
+ * <p>
  * Describe class path resource include class resource.
  *
  * @author bingo 下午2:04:58

@@ -128,7 +128,7 @@ public class ExtendedDataSource implements DataSource, Closeable {
    */
   public static final class UsedConnection extends WrappedConnection {
 
-    protected final TransactionIntegrator transactionIntegrator;
+    protected TransactionIntegrator transactionIntegrator;
 
     public UsedConnection(Connection connection, TransactionIntegrator transactionIntegrator) {
       super(connection);

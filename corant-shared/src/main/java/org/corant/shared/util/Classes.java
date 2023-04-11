@@ -38,7 +38,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
- *
+ * <p>
  * The class utility class.
  *
  * @author bingo 下午10:31:37

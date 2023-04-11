@@ -42,7 +42,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-shared
- *
+ * <p>
  * A simple tool class use for register, de-register or invoke MBean operations.
  *
  * @author bingo 12:00:58

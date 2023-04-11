@@ -73,11 +73,10 @@ public class Identifiers {
   }
 
   /**
+   * corant-shared
+   * <p>
    * The general snowflake UUID generator, Use time increment as a prefix, use numerical increment
    * as a suffix, support multi-segment infix, return 64-bit unsigned long UUID.
-   *
-   *
-   * corant-shared
    *
    * @author bingo 下午8:31:09
    *
@@ -381,10 +380,9 @@ public class Identifiers {
   }
 
   /**
-   * UUID generator use {@link java.util.UUID#randomUUID()}
-   *
-   *
    * corant-shared
+   * <p>
+   * UUID generator use {@link java.util.UUID#randomUUID()}
    *
    * @author bingo 下午11:20:53
    *
@@ -462,12 +460,12 @@ public class Identifiers {
   }
 
   /**
+   * corant-shared
+   * <p>
    * Use the host part of IPV4 as the work segment, the time increments in seconds as the prefix,
    * and the suffix is a 16-digit increment; it is usually used for K8s cluster UUID generation.
    * Note that since it is incremented by second, {@code timeGener} must also be seconds from the
    * epoch of 1970-01-01T00:00:00Z.
-   *
-   * corant-shared
    *
    * @author bingo 下午8:49:33
    *
@@ -538,6 +536,9 @@ public class Identifiers {
   }
 
   /**
+   * corant-shared
+   *
+   * <p>
    * The simple snowflake buffered UUID generator.
    *
    * <pre>
@@ -549,9 +550,6 @@ public class Identifiers {
    * the second segment is the work process,
    * and the third segment is the serial number.
    * </pre>
-   *
-   *
-   * corant-shared
    *
    * @author bingo 下午11:22:34
    *

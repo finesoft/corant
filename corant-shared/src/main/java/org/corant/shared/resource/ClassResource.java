@@ -18,7 +18,7 @@ import org.corant.shared.util.Classes;
 
 /**
  * corant-shared
- *
+ * <p>
  * Describe class resource, but doesn't load it right away.
  *
  * @author bingo 下午2:04:09

@@ -93,7 +93,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
 
   /**
    * Returns a stripped decimal point and trailing zero string for integer type conversion. If it
-   * cannot be stripped or it is empty after stripping, the original string is returned.
+   * cannot be stripped, or it is empty after stripping, the original string is returned.
    *
    * @param value the value to strip
    */

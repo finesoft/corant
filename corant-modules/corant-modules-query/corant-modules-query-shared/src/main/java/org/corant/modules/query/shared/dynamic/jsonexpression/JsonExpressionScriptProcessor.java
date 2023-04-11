@@ -25,7 +25,6 @@ import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
-import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -213,7 +212,8 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     Set<Mapping> mappings = new LinkedHashSet<>();
     projectionMap.forEach((k, v) -> {
       if (k != null && v != null) {
-        String[] keyPath = split(k, Names.NAME_SPACE_SEPARATORS, true, true);
+        // String[] keyPath = split(k, Names.NAME_SPACE_SEPARATORS, true, true);
+        String[] keyPath = Names.splitNameSpace(k, true, false);
         if (keyPath.length > 0) {
           if (v instanceof Map) {
             Map<?, ?> vm = (Map<?, ?>) v;
@@ -222,14 +222,16 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
             Object robj = defaultObject(vm.get(PROJECTION_RENAME_KEY), k);
             if (robj instanceof String) {
               // for single injection
-              String[] rename = split(robj.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
+              // String[] rename = split(robj.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
+              String[] rename = Names.splitNameSpace(robj.toString(), true, false);
               mappings.add(new Mapping(keyPath, singletonList(rename), type));
             } else if (robj instanceof Collection) {
               // for multiple injections
               List<String[]> renames = new ArrayList<>(((Collection<?>) robj).size());
               for (Object ro : (Collection<?>) robj) {
                 if (ro != null) {
-                  renames.add(split(ro.toString(), Names.NAME_SPACE_SEPARATORS, true, true));
+                  // renames.add(split(ro.toString(), Names.NAME_SPACE_SEPARATORS, true, true));
+                  renames.add(Names.splitNameSpace(ro.toString(), true, false));
                 }
               }
               mappings.add(new Mapping(keyPath, renames, type));
@@ -341,11 +343,16 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     MyASTVariableNode(String name) {
       super(name);
       if (name.startsWith(PARENT_RESULT_VAR_PREFIX)) {
-        namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
+        // namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN),
+        // Names.NAME_SPACE_SEPARATORS);
+        namePath = Names.splitNameSpace(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), true, false);
       } else if (name.startsWith(FETCH_RESULT_VAR_PREFIX)) {
-        namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
+        // namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN),
+        // Names.NAME_SPACE_SEPARATORS);
+        namePath = Names.splitNameSpace(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), true, false);
       } else if (name.startsWith(PARAMETER_VAR_PREFIX)) {
-        namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
+        // namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
+        namePath = Names.splitNameSpace(name.substring(PARAMETER_VAR_PREFIX_LEN), true, false);
       } else {
         throw new NotSupportedException(
             "Dynamic query json expression variable with name [%s] is not supported!", name);

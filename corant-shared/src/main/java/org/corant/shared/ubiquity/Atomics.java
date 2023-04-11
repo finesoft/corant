@@ -46,7 +46,7 @@ public class Atomics {
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
    * called, otherwise an exception will be thrown, the {@code supplier} may be called more than
    * once.
-   *
+   * <p>
    * Partial code block come from org.apache.commons.
    *
    * @param <T> the instance type
@@ -74,13 +74,13 @@ public class Atomics {
 
   /**
    * Return the atomic instance supplier, and ensure that the incoming {@code supplier} is only
-   * called once. Suitable for singleton object construction inmulti-threaded scenarios; in most
+   * called once. Suitable for singleton object construction in multi-threaded scenarios; in most
    * cases, it can replace those code blocks that use the volatile or synchronized keywords for
    * one-off singleton object construction.
    * <p>
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
    * called, otherwise an exception will be thrown.
-   *
+   * <p>
    * Partial code block come from org.apache.commons.
    *
    * @param <T> the instance type

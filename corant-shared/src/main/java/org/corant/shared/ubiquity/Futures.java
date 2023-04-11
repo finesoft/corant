@@ -36,7 +36,7 @@ public interface Futures {
   /**
    * corant-shared
    * <p>
-   * This class is use to wrap some asynchronous compute result.
+   * This class is used to wrap some asynchronous compute result.
    *
    * @author bingo 下午10:26:51
    *
@@ -193,7 +193,7 @@ public interface Futures {
       if (cancelled) {
         throw new CancellationException();
       }
-      return this.result;
+      return result;
     }
   }
 }

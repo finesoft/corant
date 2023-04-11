@@ -79,7 +79,6 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     }
   }
 
-  @SuppressWarnings("resource")
   DataSource produce(Instance<Object> instance, DataSourceConfig cfg)
       throws NamingException, SQLException {
     if (!cfg.isEnableCustomTransactionIntegration()) {

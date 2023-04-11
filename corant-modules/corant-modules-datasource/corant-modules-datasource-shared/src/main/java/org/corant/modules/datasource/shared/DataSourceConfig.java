@@ -161,7 +161,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Connections idle for longer than this time period are validated before being acquired
-   * (foreground validation). A duration of {@link Duration#ZERO} means that a this feature is
+   * (foreground validation). A duration of {@link Duration#ZERO} means that this feature is
    * disabled. Default is 30 minutes.
    */
   public Duration getIdleValidationTimeout() {
@@ -213,7 +213,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Connections acquired for longer than this time period may be reported as leaking. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled. Default is disabled.
+   * {@link Duration#ZERO} means that this feature is disabled. Default is disabled.
    */
   public Duration getLeakTimeout() {
     return leakTimeout;
@@ -228,7 +228,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Connections that are older than this time period are flushed from the pool. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled. Default is disabled.
+   * {@link Duration#ZERO} means that this feature is disabled. Default is disabled.
    */
   public Duration getMaxLifetime() {
     return maxLifetime;
@@ -260,7 +260,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Connections idle for longer than this time period are flushed from the pool. A duration of
-   * {@link Duration#ZERO} means that a this feature is disabled. Default is 16 seconds.
+   * {@link Duration#ZERO} means that this feature is disabled. Default is 16 seconds.
    */
   public Duration getReapTimeout() {
     return reapTimeout;
@@ -321,8 +321,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Since the mainstream JTA implementations support Resource Local, if the main purpose of the
-   * data source corresponding to the configuration is write operation, it is necessary to set this
-   * attribute to true to meet the write operation transactionally. Default is true.
+   * data source corresponding to the configuration is written operation, it is necessary to set
+   * this attribute to true to meet the write operation transactional. Default is true.
    *
    * <p>
    * In general, for Resource Local transaction management, the mainstream JTA coordinator approach

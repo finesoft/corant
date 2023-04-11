@@ -13,6 +13,13 @@
  */
 package org.corant.shared.normal;
 
+import static org.corant.shared.util.Strings.escapedPattern;
+import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.replace;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 
 /**
@@ -27,9 +34,13 @@ public interface Names {
 
   char NAME_SPACE_SEPARATOR = '.';
 
-  char DOMAIN_SPACE_SEPARATOR = ':';
-
   String NAME_SPACE_SEPARATORS = ".";
+
+  Pattern NAME_SPACE_SPLITTER_PATTERN = escapedPattern("\\", NAME_SPACE_SEPARATORS);
+
+  String NAME_SPACE_SPLITTER_ESCAPES = "\\" + NAME_SPACE_SEPARATORS;
+
+  char DOMAIN_SPACE_SEPARATOR = ':';
 
   String DOMAIN_SPACE_SEPARATORS = ":";
 
@@ -45,6 +56,24 @@ public interface Names {
 
   static String applicationName() {
     return Systems.getProperty(CORANT_APP_NAME_KEY, CORANT);
+  }
+
+  static String[] splitNameSpace(final String nameSpaceString, final boolean removeBlank,
+      final boolean strip) {
+    String[] array;
+    if (nameSpaceString == null
+        || (array = NAME_SPACE_SPLITTER_PATTERN.split(nameSpaceString)).length == 0) {
+      return Strings.EMPTY_ARRAY;
+    }
+    String[] result = new String[array.length];
+    int i = 0;
+    for (String e : array) {
+      if (isNotBlank(e) || isBlank(e) && !removeBlank) {
+        String te = replace(e, NAME_SPACE_SPLITTER_ESCAPES, NAME_SPACE_SEPARATORS);
+        result[i++] = strip ? Strings.strip(te) : te;
+      }
+    }
+    return Arrays.copyOf(result, i);
   }
 
   interface ConfigNames {

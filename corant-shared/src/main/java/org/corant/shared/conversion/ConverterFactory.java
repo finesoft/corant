@@ -18,7 +18,7 @@ import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-shared
- *
+ * <p>
  * Object converter factory, used to build the converter for conversion between objects, allows
  * support for multiple source types and target types. In actual applications, the converter created
  * by the converter factory may be cached or combined into a combined converter.

@@ -21,7 +21,7 @@ import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-shared
- *
+ * <p>
  * Object converter, used for conversion between objects, the generic parameter S is the source type
  * that converter accepts and the generic parameter T is the target type that converter will convert
  * source to.
@@ -54,16 +54,6 @@ public interface Converter<S, T> extends Sortable {
   }
 
   /**
-   * Convert an object, allowing intervention through the given hints parameters during the
-   * conversion process such as specifying time zone, etc.
-   *
-   * @param t the source object that will be converted
-   * @param hints the conversion hints use to intervene in the conversion process
-   * @return the converted target object
-   */
-  T convert(S t, Map<String, ?> hints);
-
-  /**
    * Returns a composed converter that first applies the {@code before} converter to its input, and
    * then applies this converter to the result. If evaluation of either converter throws an
    * exception, it is relayed to the caller of the composed converter.
@@ -77,6 +67,16 @@ public interface Converter<S, T> extends Sortable {
   default <V> Converter<V, T> compose(Converter<? super V, ? extends S> before) {
     return (v, hints) -> convert(shouldNotNull(before).convert(v, hints), hints);
   }
+
+  /**
+   * Convert an object, allowing intervention through the given hints parameters during the
+   * conversion process such as specifying time zone, etc.
+   *
+   * @param t the source object that will be converted
+   * @param hints the conversion hints use to intervene in the conversion process
+   * @return the converted target object
+   */
+  T convert(S t, Map<String, ?> hints);
 
   /**
    * Returns the nesting depth of converters, non-combined converters return 1, and combined

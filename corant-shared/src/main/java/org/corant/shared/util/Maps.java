@@ -830,7 +830,7 @@ public class Maps {
    * @param map the map that value comes from
    * @param key the key that value gets from
    * @param converter the type converter for value type conversion
-   * @return an typed object
+   * @return a typed object
    */
   public static <T> T getMapMapObject(final Map<?, ?> map, final Object key,
       Function<Map<?, ?>, T> converter) {
@@ -861,7 +861,7 @@ public class Maps {
    * @param map the map that value comes from
    * @param key the key that value gets from
    * @param converter the type converter for value type conversion
-   * @return an typed object list
+   * @return a typed object list
    */
   public static <T> List<T> getMapMapsList(final Map<?, ?> map, final Object key,
       Function<Map<?, ?>, T> converter) {

@@ -25,9 +25,9 @@ import java.util.Set;
 
 /**
  * corant-shared
- *
+ * <p>
  * The annotation utility class.
- *
+ * <p>
  * NOTE: Starting with Java8 we recommend using AnnotatedElement
  *
  * @author bingo 下午10:06:13

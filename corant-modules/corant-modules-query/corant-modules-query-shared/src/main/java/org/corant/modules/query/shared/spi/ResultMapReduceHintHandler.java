@@ -213,7 +213,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     if (!fieldExp.contains(Names.DOMAIN_SPACE_SEPARATORS)
         && !fieldExp.contains(TYPE_VALUE_PREFIX)) {
       // System.out.println(fieldExp);
-      return Triple.of(fieldExp, split(fieldExp, Names.NAME_SPACE_SEPARATORS, true, true),
+      return Triple.of(fieldExp, Names.splitNameSpace(fieldExp, true, false),
           java.lang.Object.class);
     } else {
       int e = -1;
@@ -255,7 +255,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
       String fieldName = fieldExp.substring(0, e);
       String projectName = ppe > pps ? fieldExp.substring(pps, ppe) : fieldName;
       String className = cpe > cps ? fieldExp.substring(cps, cpe) : null;
-      return Triple.of(projectName, split(fieldName, Names.NAME_SPACE_SEPARATORS, true, true),
+      return Triple.of(projectName, Names.splitNameSpace(fieldName, true, false),
           isBlank(className) ? null : Classes.asClass(strip(className)));
     }
   }

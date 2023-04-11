@@ -14,7 +14,6 @@
 package org.corant.modules.query.mapping;
 
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.split;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -215,7 +214,8 @@ public class FetchQuery implements Serializable {
 
   protected void setInjectPropertyName(String injectPropertyName) {
     this.injectPropertyName = injectPropertyName;
-    injectPropertyNamePath = split(injectPropertyName, Names.NAME_SPACE_SEPARATORS, true, false);
+    // injectPropertyNamePath = split(injectPropertyName, Names.NAME_SPACE_SEPARATORS, true, false);
+    injectPropertyNamePath = Names.splitNameSpace(injectPropertyName, true, false);
   }
 
   protected void setMaxSize(int maxSize) {
@@ -406,7 +406,8 @@ public class FetchQuery implements Serializable {
 
     protected void setSourceName(String sourceName) {
       this.sourceName = sourceName;
-      sourceNamePath = split(sourceName, Names.NAME_SPACE_SEPARATORS, true, false);
+      // sourceNamePath = split(sourceName, Names.NAME_SPACE_SEPARATORS, true, false);
+      sourceNamePath = Names.splitNameSpace(sourceName, true, false);
     }
 
     protected void setType(Class<?> type) {

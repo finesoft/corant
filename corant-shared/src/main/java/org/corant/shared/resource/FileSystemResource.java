@@ -32,7 +32,7 @@ import org.corant.shared.util.FileUtils;
 
 /**
  * corant-shared
- *
+ * <p>
  * Describe system file
  *
  * @author bingo 下午6:53:19

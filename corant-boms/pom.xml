@@ -175,7 +175,7 @@
     <version.swagger>2.1.12</version.swagger>
     <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.21.Final</version.undertow>
+    <version.undertow>2.2.24.Final</version.undertow>
     <version.vertx>4.3.8</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>

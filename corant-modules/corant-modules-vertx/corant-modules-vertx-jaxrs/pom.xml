@@ -25,6 +25,10 @@
     </dependency>
     <!-- Standard JEE -->
     <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>    
+    <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>

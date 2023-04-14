@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-modules-vertx-web
- *
- * @author bingo 下午3:03:40
+ * corant-modules-vertx-jaxrs
+ * 
+ * @author bingo 上午10:45:56
  *
  */
-package org.corant.modules.vertx.web.command;
+package org.corant.modules.vertx.jaxrs;

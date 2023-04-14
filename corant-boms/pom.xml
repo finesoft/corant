@@ -139,7 +139,7 @@
     <version.mysql>5.1.48</version.mysql>
     <version.narayana>5.13.1.Final</version.narayana>
     <version.ndarray>0.3.3</version.ndarray>
-    <version.netty>4.1.52.Final</version.netty>
+    <version.netty>4.1.87.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
     <version.opencv>3.4.2-2</version.opencv>
@@ -156,7 +156,7 @@
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.17.6</version.redisson>
     <version.rest-assured>4.3.1</version.rest-assured>
-    <version.resteasy>4.7.7.Final</version.resteasy>
+    <version.resteasy>4.7.9.Final</version.resteasy>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
     <version.slf4j>1.7.32</version.slf4j>
@@ -175,7 +175,7 @@
     <version.swagger>2.1.12</version.swagger>
     <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.21.Final</version.undertow>
+    <version.undertow>2.2.24.Final</version.undertow>
     <version.vertx>4.3.8</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
@@ -557,6 +557,16 @@
         <artifactId>corant-modules-javafx-jackson</artifactId>
         <version>${revision}</version>
       </dependency>
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-modules-vertx-shared</artifactId>
+        <version>${revision}</version>
+      </dependency>   
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-modules-vertx-jaxrs</artifactId>
+        <version>${revision}</version>
+      </dependency>          
       <!-- Java & Javax & Jakarta & Javafx -->
       <dependency>
         <groupId>jakarta.enterprise</groupId>
@@ -946,6 +956,11 @@
             <artifactId>weld-api</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-vertx</artifactId>
+        <version>${version.resteasy}</version>
       </dependency>
 
       <!-- Third Party -->
@@ -1888,6 +1903,12 @@
         <artifactId>vertx-hazelcast</artifactId>
         <version>${version.vertx}</version>
       </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-unit</artifactId>
+        <version>${version.vertx}</version>
+        <scope>test</scope>
+      </dependency>      
 
       <!-- Osgi -->
       <dependency>

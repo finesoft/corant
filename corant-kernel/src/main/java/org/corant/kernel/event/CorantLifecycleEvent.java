@@ -13,10 +13,6 @@
  */
 package org.corant.kernel.event;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
 /**
  * corant-kernel
  *
@@ -25,18 +21,4 @@ import javax.inject.Inject;
  */
 public interface CorantLifecycleEvent {
 
-  @ApplicationScoped
-  class LifecycleEventEmitter {
-    @Inject
-    protected Event<CorantLifecycleEvent> events;
-
-    public void fire(CorantLifecycleEvent event, boolean async) {
-      if (async) {
-        events.fireAsync(event);
-      } else {
-        events.fire(event);
-      }
-    }
-
-  }
 }

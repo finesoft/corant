@@ -10,6 +10,7 @@
   <artifactId>corant-modules-vertx</artifactId>
   <packaging>pom</packaging>
   <modules>
-    <module>corant-modules-vertx-web</module>
+    <module>corant-modules-vertx-shared</module>
+    <module>corant-modules-vertx-jaxrs</module>
   </modules>
 </project>

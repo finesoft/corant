@@ -12,9 +12,9 @@
  * the License.
  */
 /**
- * corant-modules-vertx-web
- *
- * @author bingo 下午2:27:21
+ * corant-modules-vertx-shared
+ * 
+ * @author bingo 下午11:41:27
  *
  */
-package org.corant.modules.vertx.web.annotation;
+package org.corant.modules.vertx.shared;

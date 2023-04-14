@@ -33,9 +33,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.se.SeContainer;
 import javax.enterprise.inject.se.SeContainerInitializer;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -43,7 +45,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.inject.spi.Extension;
-import org.corant.kernel.event.CorantLifecycleEvent.LifecycleEventEmitter;
 import org.corant.kernel.event.PostContainerReadyEvent;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.kernel.event.PostCorantReadyEvent;
@@ -536,9 +537,9 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * This method is not normally used, and should be use CDI.current().getBeanManager().
-   *
-   * @return getBeanManager
+   * Returns a CDI BeanManager for current container, or throws exception if the current CDI
+   * container is not started. This method is not normally used, and should be use
+   * CDI.current().getBeanManager()
    */
   public synchronized BeanManager getBeanManager() {
     shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
@@ -550,6 +551,24 @@ public class Corant implements AutoCloseable {
    */
   public ClassLoader getClassLoader() {
     return classLoader;
+  }
+
+  /**
+   * Returns a new {@link Event} object whose event type is <tt>Object</tt> and qualifier
+   * <tt>@Default</tt>, or throws exception if the current CDIcontainer is not started. This method
+   * is not normally used, and should be use <tt> CDI.current().getBeanManager().getEvent()</tt>.
+   */
+  public synchronized Event<Object> getEvent() {
+    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
+    return container.getBeanManager().getEvent();
+  }
+
+  /**
+   * Returns current CDI container, or throws exception if the current CDIcontainer is not started.
+   */
+  public synchronized Instance<Object> getInstance() {
+    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
+    return container;
   }
 
   /**
@@ -602,8 +621,7 @@ public class Corant implements AutoCloseable {
     try {
       // emit post container ready events
       stopWatch.start();
-      LifecycleEventEmitter emitter = container.select(LifecycleEventEmitter.class).get();
-      emitter.fire(new PostContainerReadyEvent(arguments), false);
+      container.getBeanManager().getEvent().fire(new PostContainerReadyEvent(arguments));
       stopWatch
           .stop(t -> logInfo("All modules have been initialized, takes %s ms.", t.getTimeMillis()));
 
@@ -628,8 +646,8 @@ public class Corant implements AutoCloseable {
 
       // emit post corant ready events
       stopWatch.start();
-      emitter.fire(new PostCorantReadyEvent(arguments), false);
-      emitter.fire(new PostCorantReadyAsyncEvent(arguments), true);// since 1.8 2022-01-12
+      container.getBeanManager().getEvent().fire(new PostCorantReadyEvent(arguments));
+      container.getBeanManager().getEvent().fireAsync(new PostCorantReadyAsyncEvent(arguments));
       stopWatch.destroy(sw -> logInfo("All preparations have been triggered, takes %s ms.%s",
           sw.getLastTaskInfo().getTimeMillis(), boostLine(".")));
     } catch (Throwable e) {

@@ -46,7 +46,7 @@ public @interface VertxConsumer {
    */
   String value();
 
-  public final class Literal extends AnnotationLiteral<VertxConsumer> implements VertxConsumer {
+  final class Literal extends AnnotationLiteral<VertxConsumer> implements VertxConsumer {
 
     private static final long serialVersionUID = 1L;
 

@@ -63,7 +63,7 @@ public class VertxAsynchronousWorker {
   /**
    * Returns a non-contextual instance.
    *
-   * @param vertx
+   * @param vertx the vertx for performing
    * @return a new worker instance
    */
   public static VertxAsynchronousWorker from(Vertx vertx) {
@@ -73,7 +73,7 @@ public class VertxAsynchronousWorker {
   /**
    * Performs the specified action using the event-loop thread. The action should never block.
    *
-   * @param action
+   * @param action the specified action
    * @return a completion stage with the result of the specified action
    */
   public <V> CompletionStage<V> perform(Callable<V> action) {
@@ -91,7 +91,7 @@ public class VertxAsynchronousWorker {
   /**
    * Performs the specified action using a thread from the worker pool.
    *
-   * @param action
+   * @param action the specified action
    * @return a completion stage with the result of the specified action
    * @see Vertx#executeBlocking(io.vertx.core.Handler, io.vertx.core.Handler)
    */

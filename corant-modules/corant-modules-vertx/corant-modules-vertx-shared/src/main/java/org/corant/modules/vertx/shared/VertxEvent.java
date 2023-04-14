@@ -46,43 +46,37 @@ public interface VertxEvent {
    * Aborts the processing of the event - no other observer methods will be called (unless the
    * thrown {@link RecipientFailure} is swallowed).
    *
-   * @param code
-   * @param message
+   * @param code a failure code to pass back to the sender
+   * @param message a failure message to pass back to the sender
    * @see Message#fail(int, String)
-   * @throws RecipientFailure
    */
   void fail(int code, String message);
 
   /**
-   *
-   * @return the address the message was sent to
+   * @return the address the message was sends to
    * @see Message#address()
    */
   String getAddress();
 
   /**
-   *
    * @return the message headers
    * @see Message#headers()
    */
   MultiMap getHeaders();
 
   /**
-   *
    * @return the message body/payload
    * @see Message#body()
    */
   Object getMessageBody();
 
   /**
-   *
    * @return the reply address, or null in case of the message was sent without a reply handler
    * @see Message#replyAddress()
    */
   String getReplyAddress();
 
   /**
-   *
    * @return <code>true</code> if a reply was previously set, <code>false</code> otherwise
    * @see #setReply(Object)
    */
@@ -91,7 +85,7 @@ public interface VertxEvent {
   /**
    * Send/publish messages using the Vertx event bus.
    *
-   * @param address
+   * @param address the address that message sends to
    * @return a message
    */
   VertxMessage messageTo(String address);
@@ -108,9 +102,9 @@ public interface VertxEvent {
    * this method returns <code>false</code>.
    * </p>
    *
-   * @param reply
+   * @param reply the message to reply with.
    * @see Message#reply(Object)
-   * @return <tt>true</tt> if the reply was sucessfully set
+   * @return <tt>true</tt> if the reply was successfully set
    */
   boolean setReply(Object reply);
 }

@@ -25,8 +25,7 @@ import io.vertx.core.eventbus.Message;
  * <b> NOTE: The code in this class comes from the Weld-Vertx project, if there is any infringement,
  * please inform me(finesoft@gmail.com) </b>
  * <p>
- * An instance of this handler is registered per each address found by
- * {@link org.jboss.weld.vertx.VertxExtension}}.
+ * An instance of this handler is registered per each address found by {@link VertxExtension}.
  *
  * @author Martin Kouba
  */

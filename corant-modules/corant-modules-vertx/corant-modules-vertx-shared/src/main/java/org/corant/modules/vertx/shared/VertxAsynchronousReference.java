@@ -48,7 +48,7 @@ import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
  * <ul>
  * <ol>
  * the set of qualifiers of this bean is enhanced so that it satisfies all injection points with
- * required type {@link AsyncReference} - see
+ * required type {@link AsynchronousReference} - see
  * {@link VertxExtension#processAsyncReferenceInjectionPoints(javax.enterprise.inject.spi.ProcessInjectionPoint))}
  * </ol>
  * <ol>
@@ -164,7 +164,7 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
         if (throwable != null) {
           failure(throwable);
         } else {
-          sucess(result);
+          success(result);
         }
       });
     } else {
@@ -197,14 +197,14 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
       promise.complete(beanInstance);
     }), r -> {
       if (r.succeeded()) {
-        sucess((T) r.result());
+        success((T) r.result());
       } else {
         failure(r.cause());
       }
     });
   }
 
-  private void sucess(T result) {
+  private void success(T result) {
     complete(result, null);
   }
 

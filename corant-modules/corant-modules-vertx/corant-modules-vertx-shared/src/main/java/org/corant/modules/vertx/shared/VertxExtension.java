@@ -126,7 +126,7 @@ public class VertxExtension implements Extension {
           vertx.eventBus().consumer(address, VertxHandler.from(vertx, event, address));
       consumer.completionHandler(ar -> {
         if (ar.succeeded()) {
-          LOGGER.fine(String.format("Sucessfully registered event consumer for %s", address));
+          LOGGER.fine(String.format("Successfully registered event consumer for %s", address));
           latch.countDown();
         } else {
           LOGGER.log(Level.SEVERE, String.format("Cannot register event consumer for %s", address),
@@ -189,10 +189,9 @@ public class VertxExtension implements Extension {
     return beanTypes;
   }
 
-  private Annotation getQualifier(ObserverMethod<?> observerMethod,
-      Class<? extends Annotation> annotationType) {
+  private Annotation getQualifier(ObserverMethod<?> observerMethod) {
     for (Annotation qualifier : observerMethod.getObservedQualifiers()) {
-      if (qualifier.annotationType().equals(annotationType)) {
+      if (qualifier.annotationType().equals(VertxConsumer.class)) {
         return qualifier;
       }
     }
@@ -200,7 +199,7 @@ public class VertxExtension implements Extension {
   }
 
   private String getVertxAddress(ObserverMethod<?> observerMethod) {
-    Annotation qualifier = getQualifier(observerMethod, VertxConsumer.class);
+    Annotation qualifier = getQualifier(observerMethod);
     String address = qualifier != null ? ((VertxConsumer) qualifier).value() : null;
     return Configs.assemblyStringConfigProperty(address);
   }

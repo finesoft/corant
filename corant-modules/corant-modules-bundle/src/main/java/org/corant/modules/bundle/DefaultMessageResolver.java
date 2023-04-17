@@ -58,7 +58,7 @@ import org.corant.shared.util.Strings;
  *
  * @see MessageSourceManager#stream()
  * @see MessageSource#getMessage(Locale, Object, Function)
- * @see MessageInterpreter#apply(Object[], Locale)
+ * @see MessageInterpreter#apply(Object, Object)
  * @see MessageParameterResolver#handle(Locale, Object)
  *
  * @author bingo 下午8:01:13

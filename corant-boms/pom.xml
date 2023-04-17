@@ -138,7 +138,7 @@
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
     <version.narayana>5.13.1.Final</version.narayana>
-    <version.ndarray>0.3.3</version.ndarray>
+    <version.ndarray>0.4.0</version.ndarray>
     <version.netty>4.1.87.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
@@ -561,7 +561,12 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-vertx-shared</artifactId>
         <version>${revision}</version>
-      </dependency>   
+      </dependency> 
+      <dependency>
+        <groupId>org.corant</groupId>
+        <artifactId>corant-modules-vertx-serviceproxy</artifactId>
+        <version>${revision}</version>
+      </dependency>         
       <dependency>
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-vertx-jaxrs</artifactId>

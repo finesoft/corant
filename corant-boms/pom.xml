@@ -62,13 +62,13 @@
     <version.grpc>1.40.1</version.grpc>
     <version.hanlp>portable-1.7.8</version.hanlp>
     <version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-    <version.hibernate-orm-core>5.3.28.Final</version.hibernate-orm-core>
+    <version.hibernate-orm-core>5.3.29.Final</version.hibernate-orm-core>
     <version.hibernate-validator-cdi>6.2.5.Final</version.hibernate-validator-cdi>
     <version.hikariCP>5.0.1</version.hikariCP>
     <version.hppc>0.9.1</version.hppc>
     <version.hsqldb>2.7.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
-    <version.jackson>2.14.1</version.jackson>
+    <version.jackson>2.14.2</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javafx>11.0.2</version.javafx>
@@ -1898,6 +1898,16 @@
         <artifactId>vertx-web</artifactId>
         <version>${version.vertx}</version>
       </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-service-proxy</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>      
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-codegen</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>       
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-hazelcast</artifactId>

@@ -10,7 +10,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.corant.modules.vertx.shared;
+package org.corant.modules.vertx.serviceproxy;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
+import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 
 /**
@@ -28,35 +29,39 @@ import javax.inject.Qualifier;
  * is no longer updated, we have partially modified the source code to update it synchronously with
  * the dependent library. If there is any infringement, please inform me(finesoft@gmail.com). </b>
  * <p>
- * An observer method must declare an event parameter of the type {@link VertxEvent} with
- * {@link VertxConsumer} qualifier in order to be notified when a message is sent via
- * {@link io.vertx.core.eventbus.EventBus}.
+ * This qualifier is used to:
+ * <ul>
+ * <li>distinguish a custom service proxy bean from implementation</li>
+ * <li>specify the service address on an injection point (non-binding value)</li>
+ * <ul>
  *
  * @author Martin Kouba
- * @see VertxEvent
  */
 @Qualifier
 @Target({TYPE, METHOD, PARAMETER, FIELD})
 @Retention(RUNTIME)
-public @interface VertxConsumer {
-
+public @interface ServiceProxy {
   /**
-   * @return the address the consumer will be registered to
+   *
+   * @return the address on which the service is published
    */
+  @Nonbinding
   String value();
 
-  final class Literal extends AnnotationLiteral<VertxConsumer> implements VertxConsumer {
+  class ServiceProxyLiteral extends AnnotationLiteral<ServiceProxy> implements ServiceProxy {
 
     private static final long serialVersionUID = 1L;
 
+    static final ServiceProxyLiteral EMPTY = new ServiceProxyLiteral("");
+
     private final String value;
 
-    private Literal(String value) {
+    private ServiceProxyLiteral(String value) {
       this.value = value;
     }
 
-    public static Literal of(String value) {
-      return new Literal(value);
+    public static ServiceProxyLiteral of(String value) {
+      return new ServiceProxyLiteral(value);
     }
 
     @Override
@@ -65,5 +70,4 @@ public @interface VertxConsumer {
     }
 
   }
-
 }

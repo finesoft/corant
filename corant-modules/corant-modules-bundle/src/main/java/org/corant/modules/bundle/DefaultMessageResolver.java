@@ -118,7 +118,8 @@ public class DefaultMessageResolver implements MessageResolver {
   @PreDestroy
   protected void onPreDestroy() {
     try {
-      close();
+      holder.clear();
+      validKeys.clear();
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }

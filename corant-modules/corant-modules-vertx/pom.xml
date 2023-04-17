@@ -12,5 +12,6 @@
   <modules>
     <module>corant-modules-vertx-shared</module>
     <module>corant-modules-vertx-jaxrs</module>
+    <module>corant-modules-vertx-serviceproxy</module>
   </modules>
 </project>

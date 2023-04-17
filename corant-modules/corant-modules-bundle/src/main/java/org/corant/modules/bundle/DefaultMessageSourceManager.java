@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -46,6 +47,7 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
 
   @Override
   public void refresh() {
+    logger.fine("Refresh the message sources");
     Lock writeLock = rwl.writeLock();
     try {
       writeLock.lock();
@@ -59,6 +61,7 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
 
   @Override
   public void release() {
+    logger.fine("Release the message sources");
     Lock writeLock = rwl.writeLock();
     try {
       writeLock.lock();
@@ -93,5 +96,10 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
   @PostConstruct
   protected void onPostConstruct() {
     refresh();
+  }
+
+  @PreDestroy
+  protected void onPreDestroy() {
+    release();
   }
 }

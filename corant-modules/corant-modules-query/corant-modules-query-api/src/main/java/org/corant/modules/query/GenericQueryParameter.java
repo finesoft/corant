@@ -16,7 +16,6 @@ package org.corant.modules.query;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Maps.newHashMap;
 import static org.corant.shared.util.Objects.forceCast;
-import java.beans.Transient;
 import java.util.Map;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 
@@ -47,7 +46,6 @@ public class GenericQueryParameter<T> extends DefaultQueryParameter {
     return setCriteria(forceCast(criteria));
   }
 
-  @Transient
   @Override
   public Map<String, Object> getContext() {
     return context;

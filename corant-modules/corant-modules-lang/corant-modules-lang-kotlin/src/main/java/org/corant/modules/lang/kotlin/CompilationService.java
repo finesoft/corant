@@ -24,10 +24,6 @@ import java.util.Set;
  */
 public interface CompilationService {
 
-  Set<String> acceptExtensions();
-
-  void compile(Context context);
-
   class Context {
     private final String id;
     private final Set<File> classpaths;
@@ -65,4 +61,8 @@ public interface CompilationService {
     }
 
   }
+
+  Set<String> acceptExtensions();
+
+  void compile(Context context);
 }

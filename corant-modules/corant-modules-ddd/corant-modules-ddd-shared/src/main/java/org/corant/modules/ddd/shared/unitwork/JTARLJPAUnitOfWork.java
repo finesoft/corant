@@ -16,7 +16,7 @@ package org.corant.modules.ddd.shared.unitwork;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.LinkedList;
-import javax.transaction.Transaction;
+import jakarta.transaction.Transaction;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.MessageStorage;
 import org.corant.modules.ddd.SagaService;

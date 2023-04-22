@@ -15,7 +15,7 @@ package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Objects.forceCast;
 import java.util.function.Supplier;
-import javax.persistence.LockModeType;
+import jakarta.persistence.LockModeType;
 import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.annotation.Events;
 

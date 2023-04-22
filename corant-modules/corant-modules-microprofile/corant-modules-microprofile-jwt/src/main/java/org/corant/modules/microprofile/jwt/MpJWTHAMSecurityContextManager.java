@@ -13,9 +13,9 @@
  */
 package org.corant.modules.microprofile.jwt;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.annotation.PreDestroy;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**

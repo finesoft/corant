@@ -2,12 +2,12 @@ package org.corant.modules.jcache.shared;
 
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterTypeDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterTypeDiscovery;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.Extension;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jsr107.ri.annotations.DefaultGeneratedCacheKey;
 import org.jsr107.ri.annotations.cdi.CachePutInterceptor;

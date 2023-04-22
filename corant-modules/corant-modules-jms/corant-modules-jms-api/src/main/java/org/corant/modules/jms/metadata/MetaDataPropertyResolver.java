@@ -14,8 +14,8 @@
 package org.corant.modules.jms.metadata;
 
 import static org.corant.shared.util.Conversions.toObject;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Systems;
 

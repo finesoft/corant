@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.persistence.Cache;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaQuery;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Entity;
@@ -206,7 +206,7 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
-   * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}
+   * {@link jakarta.persistence.PersistenceUnitUtil#isLoaded(Object)}
    */
   default boolean isLoaded(Object object) {
     return object != null && getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(object);

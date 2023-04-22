@@ -14,12 +14,12 @@
 package org.corant.modules.javafx.cdi;
 
 import static org.corant.context.Beans.resolve;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.inject.Singleton;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.inject.Singleton;
 import org.corant.Corant;
 import javafx.application.Application;
 import javafx.application.Application.Parameters;

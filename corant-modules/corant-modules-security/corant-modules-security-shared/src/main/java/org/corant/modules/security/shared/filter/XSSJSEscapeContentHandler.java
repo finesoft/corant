@@ -14,7 +14,7 @@
 package org.corant.modules.security.shared.filter;
 
 import static org.corant.shared.util.Strings.isBlank;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * corant-modules-security-shared

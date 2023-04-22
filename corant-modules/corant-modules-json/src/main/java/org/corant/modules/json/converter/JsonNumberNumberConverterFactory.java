@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.json.JsonNumber;
+import jakarta.json.JsonNumber;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;

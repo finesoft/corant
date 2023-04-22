@@ -14,9 +14,12 @@
 package org.corant.modules.jpa.hibernate.orm;
 
 import java.sql.Types;
-import org.hibernate.dialect.SQLServer2012Dialect;
+import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.descriptor.jdbc.JdbcType;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -24,22 +27,29 @@ import org.hibernate.type.StandardBasicTypes;
  * @author bingo 下午10:40:19
  *
  */
-public class HibernateSQLServer2012Dialect extends SQLServer2012Dialect {
+public class HibernateSQLServer2012Dialect extends SQLServerDialect {
 
   public static final int MAX_LENGTH = 8000;
 
   public HibernateSQLServer2012Dialect() {
-    this.registerColumnType(Types.VARCHAR, "nvarchar($l)");
-    this.registerColumnType(Types.VARCHAR, MAX_LENGTH, "nvarchar($l)");
-    this.registerColumnType(Types.CLOB, "nvarchar(MAX)");
-    this.registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
-    this.registerHibernateType(Types.NCLOB, StandardBasicTypes.STRING.getName());
-    this.registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.STRING.getName());
+    super(DatabaseVersion.make(11));
   }
 
   @Override
   public NameQualifierSupport getNameQualifierSupport() {
     return NameQualifierSupport.NONE;
+  }
+
+  @Override
+  public JdbcType resolveSqlTypeDescriptor(String columnTypeName, int jdbcTypeCode, int precision,
+      int scale, JdbcTypeRegistry jdbcTypeRegistry) {
+
+    switch (jdbcTypeCode) {
+      case Types.VARCHAR -> jdbcTypeCode = StandardBasicTypes.NSTRING.getSqlTypeCode();
+      case Types.CHAR -> jdbcTypeCode = StandardBasicTypes.CHARACTER_NCHAR.getSqlTypeCode();
+    }
+    return super.resolveSqlTypeDescriptor(columnTypeName, jdbcTypeCode, precision, scale,
+        jdbcTypeRegistry);
   }
 
 }

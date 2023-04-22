@@ -13,26 +13,30 @@
  */
 package org.corant.modules.keycloak.client;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import org.apache.http.client.methods.RequestBuilder;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authorization.client.AuthzClient;
-import org.keycloak.authorization.client.ClientAuthenticator;
 import org.keycloak.authorization.client.Configuration;
 import org.keycloak.authorization.client.representation.ServerConfiguration;
 import org.keycloak.authorization.client.util.HttpMethod;
+import org.keycloak.protocol.oidc.client.authentication.ClientCredentialsProvider;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.adapters.config.AdapterConfig;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.util.BasicAuthHelper;
 import org.keycloak.util.JsonSerialization;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * corant-modules-keycloak-client
@@ -58,6 +62,7 @@ public class KeycloakAuthzClient {
   protected AuthzClient authzClient = null;
   protected ServerConfiguration serverConfiguration = null;
   protected Configuration configuration = null;
+  protected ClientCredentialsProvider clientCredentialsProvider;
 
   public AuthzClient getAuthzClient() {
     return authzClient;
@@ -84,22 +89,11 @@ public class KeycloakAuthzClient {
         .addHeader("Authorization", BasicAuthHelper.createHeader(configuration.getResource(),
             (String) configuration.getCredentials().get("secret")));
     HttpMethod<AccessTokenResponse> method =
-        new HttpMethod<>(configuration, createDefaultClientAuthenticator(configuration), builder);
+        new HttpMethod<>(configuration, clientCredentialsProvider, builder);
     method.param(OAuth2Constants.GRANT_TYPE, OAuth2Constants.REFRESH_TOKEN);
     method.param(OAuth2Constants.REFRESH_TOKEN, refreshToken);
     method.authorizationBearer(configuration.getCredentials().get("secret").toString());
     return method.response().json(AccessTokenResponse.class).execute();
-  }
-
-  protected ClientAuthenticator createDefaultClientAuthenticator(Configuration configuration) {
-    return (requestParams, requestHeaders) -> {
-      String secret = (String) configuration.getCredentials().get("secret");
-      if (secret == null) {
-        throw new RuntimeException("Client secret not provided.");
-      }
-      requestHeaders.put("Authorization",
-          BasicAuthHelper.createHeader(configuration.getResource(), secret));
-    };
   }
 
   @PostConstruct
@@ -110,17 +104,54 @@ public class KeycloakAuthzClient {
             .create(JsonSerialization.readValue(keycloakJson.get(), Configuration.class));
         logger.fine(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
       } else {
-        authzClient =
-            AuthzClient.create(Resources.from(keycloakJsonLocation).findFirst().get().openInputStream());
+        authzClient = AuthzClient
+            .create(Resources.from(keycloakJsonLocation).findFirst().get().openInputStream());
         logger.fine(
             () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       }
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
+      clientCredentialsProvider = new SimpleClientCredentialsProvider(configuration);
       // http = new Http(configuration, createDefaultClientAuthenticator(configuration));
     } catch (RuntimeException | IOException e) {
       throw new CorantRuntimeException(e, "Can't find keycloak.json from %s.",
           keycloakJsonLocation);
+    }
+  }
+
+  class SimpleClientCredentialsProvider implements ClientCredentialsProvider {
+
+    public static final String PROVIDER_ID = CredentialRepresentation.SECRET;
+
+    private final String clientSecret;
+
+    SimpleClientCredentialsProvider(Configuration config) {
+      clientSecret = shouldNotNull((String) config.getCredentials().get("secret"));
+    }
+
+    @Override
+    public String getId() {
+      return PROVIDER_ID;
+    }
+
+    @Override
+    public void init(AdapterConfig deployment, Object config) {}
+
+    @Override
+    public void setClientCredentials(AdapterConfig deployment, Map<String, String> requestHeaders,
+        Map<String, String> formParams) {
+      String clientId = deployment.getResource();
+
+      if (!deployment.isPublicClient()) {
+        if (clientSecret != null) {
+          String authorization = BasicAuthHelper.RFC6749.createHeader(clientId, clientSecret);
+          requestHeaders.put("Authorization", authorization);
+        } else {
+          logger.warning(String.format("Client '%s' doesn't have secret available", clientId));
+        }
+      } else {
+        formParams.put(OAuth2Constants.CLIENT_ID, clientId);
+      }
     }
   }
 }

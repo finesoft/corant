@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 import org.corant.context.Beans;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResourceLoader;
@@ -201,9 +201,9 @@ public class FXMLLoaders {
      * whether the specified controller type is a CDI bean type, call the default constructor of the
      * controller class for construction. Default {@link #autoInjection} is true.
      * <p>
-     * Note: When the CDI bean scope is {@link javax.enterprise.context.Dependent}, in order to
+     * Note: When the CDI bean scope is {@link jakarta.enterprise.context.Dependent}, in order to
      * prevent memory leaks, users need to call the
-     * {@link javax.enterprise.inject.spi.CDI#destroy(Object)} method themselves, or bind the method
+     * {@link jakarta.enterprise.inject.spi.CDI#destroy(Object)} method themselves, or bind the method
      * to the listener of the relevant control disposing.
      *
      * @return a FXMLLoader

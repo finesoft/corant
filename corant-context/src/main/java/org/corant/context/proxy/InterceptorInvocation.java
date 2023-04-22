@@ -13,9 +13,9 @@
  */
 package org.corant.context.proxy;
 
-import javax.enterprise.inject.spi.InterceptionType;
-import javax.enterprise.inject.spi.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.enterprise.inject.spi.InterceptionType;
+import jakarta.enterprise.inject.spi.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * corant-context

@@ -27,6 +27,6 @@ import org.corant.shared.ubiquity.Sortable;
  *
  */
 @FunctionalInterface
-public interface JMSMessagePreDispatchHandler extends Consumer<javax.jms.Message>, Sortable {
+public interface JMSMessagePreDispatchHandler extends Consumer<jakarta.jms.Message>, Sortable {
 
 }

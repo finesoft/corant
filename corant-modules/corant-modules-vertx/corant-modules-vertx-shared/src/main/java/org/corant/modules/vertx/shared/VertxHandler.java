@@ -12,8 +12,8 @@
  */
 package org.corant.modules.vertx.shared;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Vetoed;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;

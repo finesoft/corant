@@ -21,14 +21,14 @@ import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.EntityManager;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
-import javax.persistence.Version;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Version;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.AggregateAssistant;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
@@ -69,7 +69,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   @Override
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   public synchronized Lifecycle getLifecycle() {
     return lifecycle;
   }
@@ -123,7 +123,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @return currentUnitOfWork
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   protected Optional<? extends UnitOfWork> currentUnitOfWork() {
     return callAssistant().currentUnitOfWork();
   }
@@ -153,7 +153,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @see DefaultAggregateListener
    * @see PreRemove
    * @see EntityManager#flush()
-   * @see EntityManager#setFlushMode(javax.persistence.FlushModeType)
+   * @see EntityManager#setFlushMode(jakarta.persistence.FlushModeType)
    */
   protected void onPreDestroy() {}
 
@@ -170,7 +170,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * @see PrePersist
    * @see PreUpdate
    * @see EntityManager#flush()
-   * @see EntityManager#setFlushMode(javax.persistence.FlushModeType)
+   * @see EntityManager#setFlushMode(jakarta.persistence.FlushModeType)
    */
   protected void onPrePreserve() {}
 

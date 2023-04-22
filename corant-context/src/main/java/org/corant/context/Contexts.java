@@ -25,11 +25,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.util.TypeLiteral;
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.util.TypeLiteral;
+import jakarta.annotation.PreDestroy;
 import org.corant.config.Configs;
 import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.WeldAlterableContext;
@@ -130,13 +131,13 @@ public class Contexts {
    *
    * <p>
    * <b>Note</b>: This is only suitable for Weld and cannot be used for other CDI implementations.
-   * {@link javax.annotation.PreDestroy} / {@link javax.enterprise.inject.Disposes} on your beans
+   * {@link PreDestroy} / {@link jakarta.enterprise.inject.Disposes} on your beans
    * could cause inconsistent state based on how you perform the propagation. Since the same bean is
    * now used in several threads, all of them can, in invalidating and deactivating contexts,
    * trigger these methods but the bean will still exist in yet another thread. In current
    * implemention, we avoid calling context.invalidate() and only performs context.deactivate() -
-   * this avoids invoking {@link javax.annotation.PreDestroy} /
-   * {@link javax.enterprise.inject.Disposes} methods but could possibly lead to never invoking them
+   * this avoids invoking {@link PreDestroy} /
+   * {@link jakarta.enterprise.inject.Disposes} methods but could possibly lead to never invoking them
    * if no thread does it. Note that this problem only concerns request, session and conversation
    * beans.
    *

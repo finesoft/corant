@@ -17,11 +17,11 @@ import static org.corant.modules.jms.JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
 import static org.corant.modules.jms.JMSNames.REPLY_MSG_MARSHAL_SCHEMA;
 import static org.corant.modules.jms.JMSNames.SECURITY_CONTEXT_PROPERTY_NAME;
 import static org.corant.shared.util.Strings.defaultString;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Session;
 import org.corant.modules.jms.metadata.MessageReplyMetaData;
 import org.corant.modules.jms.receive.ManagedMessageReceiveReplier;
 

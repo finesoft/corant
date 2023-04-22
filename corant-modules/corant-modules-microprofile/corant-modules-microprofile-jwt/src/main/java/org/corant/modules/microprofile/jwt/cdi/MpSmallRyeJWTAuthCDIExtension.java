@@ -14,10 +14,10 @@
 package org.corant.modules.microprofile.jwt.cdi;
 
 import static org.corant.shared.util.Classes.tryAsClass;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthJaxRsFeature;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTHttpAuthenticationMechanism;

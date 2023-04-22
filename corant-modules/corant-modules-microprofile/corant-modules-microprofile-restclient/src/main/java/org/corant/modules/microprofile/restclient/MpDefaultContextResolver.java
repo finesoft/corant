@@ -1,6 +1,6 @@
 package org.corant.modules.microprofile.restclient;
 
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.ContextResolver;
 import org.corant.modules.json.Jsons;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

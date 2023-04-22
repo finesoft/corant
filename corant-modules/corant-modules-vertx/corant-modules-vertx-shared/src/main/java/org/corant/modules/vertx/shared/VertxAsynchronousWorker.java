@@ -14,8 +14,8 @@ package org.corant.modules.vertx.shared;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import io.vertx.core.Vertx;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 

@@ -14,8 +14,8 @@
 package org.corant.modules.microprofile.restclient;
 
 import java.util.logging.Logger;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;

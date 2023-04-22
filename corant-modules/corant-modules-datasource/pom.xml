@@ -13,7 +13,7 @@
   <modules>
     <module>corant-modules-datasource-shared</module>
     <module>corant-modules-datasource-agroal</module>
-    <module>corant-modules-datasource-dbcp</module>
+    <!--<module>corant-modules-datasource-dbcp</module>-->
     <module>corant-modules-datasource-hikari</module>
   </modules>
 </project>

@@ -13,7 +13,7 @@
 package org.corant.modules.vertx.shared;
 
 import java.util.logging.Logger;
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;

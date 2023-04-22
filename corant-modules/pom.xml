@@ -45,7 +45,7 @@
     <module>corant-modules-microprofile</module>
     <module>corant-modules-security</module>
     <module>corant-modules-mongodb</module>
-    <module>corant-modules-mvc</module>
+    <!--<module>corant-modules-mvc</module>-->
     <module>corant-modules-quartz</module>
     <module>corant-modules-query</module>
     <module>corant-modules-rpc</module>

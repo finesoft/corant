@@ -21,10 +21,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.transaction.TransactionScoped;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.transaction.TransactionScoped;
+import jakarta.annotation.PreDestroy;
 import org.jboss.weld.environment.se.contexts.ThreadScoped;
 
 /**

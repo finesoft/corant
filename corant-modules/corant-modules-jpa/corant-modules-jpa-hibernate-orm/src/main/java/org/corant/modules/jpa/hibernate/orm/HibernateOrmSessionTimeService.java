@@ -13,7 +13,6 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
-import static org.corant.shared.util.Conversions.toObject;
 import java.sql.Timestamp;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.hibernate.Session;
@@ -41,8 +40,7 @@ public class HibernateOrmSessionTimeService implements HibernateSessionTimeServi
           .getDialect().getCurrentTimestampSelectString();
       try (Session session = sessionFactory.openTemporarySession()) {
         final long epochMillis =
-            toObject(session.createNativeQuery(timeSql).getSingleResult(), Timestamp.class)
-                .getTime();
+            session.createNativeQuery(timeSql, Timestamp.class).getSingleResult().getTime();
         return useEpochSeconds ? epochMillis / 1000L + 1 : epochMillis;
       } catch (Exception e) {
         throw new CorantRuntimeException(e);

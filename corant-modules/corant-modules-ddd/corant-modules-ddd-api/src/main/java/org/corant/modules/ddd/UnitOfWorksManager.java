@@ -14,8 +14,8 @@
 package org.corant.modules.ddd;
 
 import java.util.stream.Stream;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * corant-modules-ddd-api

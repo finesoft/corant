@@ -20,14 +20,14 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.PersistenceProperty;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.SynchronizationType;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceProperty;
+import jakarta.persistence.PersistenceUnit;
+import jakarta.persistence.SynchronizationType;
 import org.corant.context.qualifier.Qualifiers;
 
 /**

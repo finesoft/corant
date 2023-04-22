@@ -12,6 +12,6 @@
   <modules>
     <module>corant-modules-jpa-shared</module>
     <module>corant-modules-jpa-hibernate-orm</module>
-    <module>corant-modules-jpa-hibernate-ogm</module>
+    <!--<module>corant-modules-jpa-hibernate-ogm</module>-->
   </modules>
 </project>

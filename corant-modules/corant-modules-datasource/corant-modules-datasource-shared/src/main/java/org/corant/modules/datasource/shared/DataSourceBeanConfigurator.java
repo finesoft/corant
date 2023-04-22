@@ -13,7 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
-import javax.enterprise.inject.spi.configurator.BeanConfigurator;
+import jakarta.enterprise.inject.spi.configurator.BeanConfigurator;
 import javax.sql.DataSource;
 import org.corant.shared.ubiquity.Sortable;
 

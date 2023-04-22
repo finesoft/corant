@@ -13,10 +13,10 @@
  */
 package org.corant.modules.elastic.data.service;
 
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.inject.Inject;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.literal.NamedLiteral;
+import jakarta.inject.Inject;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.elastic.data.ElasticExtension;
 import org.elasticsearch.client.transport.TransportClient;

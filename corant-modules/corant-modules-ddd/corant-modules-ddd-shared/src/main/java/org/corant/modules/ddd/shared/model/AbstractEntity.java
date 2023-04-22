@@ -14,7 +14,7 @@
 package org.corant.modules.ddd.shared.model;
 
 import java.util.logging.Logger;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 import org.corant.modules.ddd.Entity;
 
 /**

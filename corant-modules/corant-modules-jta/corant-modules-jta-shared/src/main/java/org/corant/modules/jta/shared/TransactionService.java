@@ -14,13 +14,13 @@
 package org.corant.modules.jta.shared;
 
 import static org.corant.context.Beans.resolveAnyway;
-import javax.transaction.RollbackException;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 import org.corant.modules.jta.shared.TransactionalAction.TransactionalActuator;
 import org.corant.shared.exception.CorantRuntimeException;

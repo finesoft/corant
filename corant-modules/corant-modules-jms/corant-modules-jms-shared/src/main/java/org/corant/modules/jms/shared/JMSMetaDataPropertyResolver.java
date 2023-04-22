@@ -14,7 +14,7 @@
 package org.corant.modules.jms.shared;
 
 import static org.corant.shared.util.Conversions.toObject;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.corant.config.Configs;
 import org.corant.modules.jms.metadata.MetaDataPropertyResolver;
 

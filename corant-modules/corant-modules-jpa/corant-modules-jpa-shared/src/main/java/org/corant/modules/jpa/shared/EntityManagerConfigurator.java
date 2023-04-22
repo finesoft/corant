@@ -14,7 +14,7 @@
 package org.corant.modules.jpa.shared;
 
 import java.util.function.UnaryOperator;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

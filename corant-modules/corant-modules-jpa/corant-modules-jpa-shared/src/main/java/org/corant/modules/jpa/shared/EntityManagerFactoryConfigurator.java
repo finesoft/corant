@@ -14,7 +14,7 @@
 package org.corant.modules.jpa.shared;
 
 import java.util.function.Consumer;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

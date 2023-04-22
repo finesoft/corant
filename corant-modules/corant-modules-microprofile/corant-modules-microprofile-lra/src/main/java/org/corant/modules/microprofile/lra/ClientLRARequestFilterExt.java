@@ -1,7 +1,7 @@
 package org.corant.modules.microprofile.lra;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.ext.Provider;
 import io.narayana.lra.filter.ClientLRARequestFilter;
 
 /**

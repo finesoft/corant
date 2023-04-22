@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
-import javax.persistence.Cache;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaQuery;
 import org.corant.context.Contexts;
 import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
@@ -154,7 +154,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   T getReference(Serializable id);
 
   /**
-   * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}
+   * {@link jakarta.persistence.PersistenceUnitUtil#isLoaded(Object)}
    */
   default boolean isLoaded(Object object) {
     return object != null

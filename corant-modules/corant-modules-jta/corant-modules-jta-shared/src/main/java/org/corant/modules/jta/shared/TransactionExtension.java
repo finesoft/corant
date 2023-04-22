@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jta.shared;
 
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.Extension;
 
 /**
  * corant-modules-jta-shared

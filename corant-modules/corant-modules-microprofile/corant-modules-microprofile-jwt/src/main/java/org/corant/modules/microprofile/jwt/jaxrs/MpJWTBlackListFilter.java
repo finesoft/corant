@@ -13,11 +13,11 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import javax.annotation.Priority;
-import javax.enterprise.inject.spi.CDI;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
 import org.jboss.logging.Logger;
 
 /**

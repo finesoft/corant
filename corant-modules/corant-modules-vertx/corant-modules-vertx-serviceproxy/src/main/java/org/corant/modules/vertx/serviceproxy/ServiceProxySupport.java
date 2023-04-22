@@ -13,8 +13,8 @@
 package org.corant.modules.vertx.serviceproxy;
 
 import java.util.concurrent.Executor;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 

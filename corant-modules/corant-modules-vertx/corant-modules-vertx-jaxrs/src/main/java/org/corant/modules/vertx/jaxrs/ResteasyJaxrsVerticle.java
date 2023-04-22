@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.ws.rs.ApplicationPath;
+import jakarta.ws.rs.ApplicationPath;
 import org.corant.config.Configs;
 import org.corant.modules.jaxrs.shared.JaxrsExtension;
 import org.corant.modules.vertx.shared.CorantVerticle;

@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import javax.script.Compilable;
 import org.corant.modules.lang.shared.ScriptEngineService;
 import org.corant.modules.lang.shared.ScriptLang;

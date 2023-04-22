@@ -13,8 +13,8 @@
  */
 package org.corant.modules.javafx.cdi;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Singleton;
 import javafx.application.Application.Parameters;
 
 /**

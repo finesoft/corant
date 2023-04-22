@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.context;
 
-import javax.jms.JMSContext;
+import jakarta.jms.JMSContext;
 
 /**
  * corant-modules-jms-api

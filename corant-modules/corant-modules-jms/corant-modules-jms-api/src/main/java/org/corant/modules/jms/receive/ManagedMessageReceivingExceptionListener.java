@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.receive;
 
-import javax.jms.ExceptionListener;
+import jakarta.jms.ExceptionListener;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

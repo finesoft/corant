@@ -14,7 +14,7 @@
 package org.corant.modules.query.shared.dynamic.javabean;
 
 import static org.corant.context.Beans.resolve;
-import javax.enterprise.inject.literal.NamedLiteral;
+import jakarta.enterprise.inject.literal.NamedLiteral;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.mapping.Query;

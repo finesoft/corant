@@ -13,9 +13,9 @@
  */
 package org.corant.modules.jms.receive;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 /**
  * corant-modules-jms-api

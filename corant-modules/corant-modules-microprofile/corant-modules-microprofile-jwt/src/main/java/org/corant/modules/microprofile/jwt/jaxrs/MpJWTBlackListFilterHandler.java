@@ -13,7 +13,7 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 /**
  * corant-modules-microprofile-jwt

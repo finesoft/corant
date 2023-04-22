@@ -13,10 +13,10 @@
  */
 package org.corant.modules.jms.shared.context;
 
-import javax.enterprise.context.RequestScoped;
-import javax.jms.JMSContext;
-import javax.jms.JMSRuntimeException;
-import javax.transaction.TransactionScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.jms.JMSContext;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.transaction.TransactionScoped;
 import org.corant.context.ComponentManager.AbstractComponentManager;
 
 /**

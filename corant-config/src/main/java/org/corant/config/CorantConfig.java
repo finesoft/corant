@@ -108,7 +108,7 @@ public class CorantConfig implements Config, Serializable {
   }
 
   public <T> Optional<T> getOptionalValue(String propertyName,
-      javax.enterprise.util.TypeLiteral<T> propertyType) {
+      jakarta.enterprise.util.TypeLiteral<T> propertyType) {
     T value = forceCast(configConversion.convert(configSources.get().getValue(propertyName),
         propertyType.getType()));
     return Optional.ofNullable(value);

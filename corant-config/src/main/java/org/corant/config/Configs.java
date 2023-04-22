@@ -177,7 +177,7 @@ public class Configs {
    * @see CorantConfig
    */
   public static <T> T getValue(String propertyName,
-      javax.enterprise.util.TypeLiteral<T> propertyTypeLiteral) {
+      jakarta.enterprise.util.TypeLiteral<T> propertyTypeLiteral) {
     return getValue(propertyName, propertyTypeLiteral, null);
   }
 
@@ -193,7 +193,7 @@ public class Configs {
    * @see CorantConfig
    */
   public static <T> T getValue(String propertyName,
-      javax.enterprise.util.TypeLiteral<T> propertyTypeLiteral, T nvl) {
+                               jakarta.enterprise.util.TypeLiteral<T> propertyTypeLiteral, T nvl) {
     return ((CorantConfig) ConfigProvider.getConfig())
         .getOptionalValue(propertyName, propertyTypeLiteral).orElse(nvl);
   }

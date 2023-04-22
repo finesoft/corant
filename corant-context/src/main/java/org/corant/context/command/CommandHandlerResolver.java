@@ -19,16 +19,16 @@ import static org.corant.shared.util.Empties.sizeOf;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.AmbiguousResolutionException;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Specializes;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.AmbiguousResolutionException;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Specializes;
+import jakarta.enterprise.inject.UnsatisfiedResolutionException;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * corant-context
@@ -42,7 +42,7 @@ import javax.inject.Singleton;
  * application scenarios, for example, it can support the inheritance relationship of command object
  * types, etc.
  *
- * @see CommandExtension#arrange(javax.enterprise.inject.spi.ProcessAnnotatedType)
+ * @see CommandExtension#arrange(jakarta.enterprise.inject.spi.ProcessAnnotatedType)
  *
  * @author bingo 下午10:01:33
  *

@@ -14,7 +14,7 @@
 package org.corant.modules.jta.shared;
 
 import java.util.function.IntConsumer;
-import javax.transaction.Synchronization;
+import jakarta.transaction.Synchronization;
 
 /**
  * corant-modules-jta-shared

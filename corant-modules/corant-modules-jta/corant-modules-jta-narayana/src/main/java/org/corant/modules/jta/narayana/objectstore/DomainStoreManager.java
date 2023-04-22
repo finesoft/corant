@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jta.narayana.objectstore;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.corant.modules.jta.narayana.objectstore.accessor.DomainJDBCAccess;
 
 /**

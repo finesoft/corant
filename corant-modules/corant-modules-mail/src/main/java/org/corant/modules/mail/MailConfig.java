@@ -17,7 +17,7 @@ import static org.corant.shared.util.Maps.toProperties;
 import static org.corant.shared.util.Strings.isNoneBlank;
 import java.util.Map;
 import java.util.Properties;
-import javax.mail.Authenticator;
+import jakarta.mail.Authenticator;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;

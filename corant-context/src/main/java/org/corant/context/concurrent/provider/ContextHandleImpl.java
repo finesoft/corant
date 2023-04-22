@@ -13,7 +13,7 @@
  */
 package org.corant.context.concurrent.provider;
 
-import javax.transaction.Transaction;
+import jakarta.transaction.Transaction;
 import org.corant.context.Contexts.ContextInstaller;
 import org.corant.context.Contexts.ContextRestorer;
 import org.corant.context.security.SecurityContext;

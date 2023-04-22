@@ -18,8 +18,6 @@ import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.HashMap;
 import java.util.Map;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.persistence.EntityManagerFactory;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
@@ -28,6 +26,8 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 import org.hibernate.jpa.boot.spi.EntityManagerFactoryBuilder;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -49,7 +49,7 @@ public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenc
       Map thePros = properties == null ? new HashMap<>() : new HashMap<>(properties);
       HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach((k, v) -> thePros.putIfAbsent(k, v));
       thePros.put(AvailableSettings.JTA_PLATFORM, JTAPlatform.INSTANCE);
-      thePros.put(AvailableSettings.CDI_BEAN_MANAGER, resolve(BeanManager.class));
+      thePros.put(AvailableSettings.JAKARTA_CDI_BEAN_MANAGER, resolve(BeanManager.class));
       EntityManagerFactoryBuilder builder = resolveBuilder(persistenceUnitName, thePros);
       if (builder != null) {
         return builder.build();
@@ -81,7 +81,7 @@ public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenc
           pui.with(pui.getProperties(), pui.getPersistenceUnitTransactionType());
       find(DataSourceService.class).ifPresent(ds -> thePui.configDataSource(ds::tryResolve));
       Map thePros = new HashMap<>(map);
-      thePros.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
+      thePros.put(org.hibernate.cfg.AvailableSettings.PERSISTENCE_UNIT_NAME,
           defaultString(pui.getPersistenceUnitName()));
       return getEntityManagerFactoryBuilder(new PersistenceUnitInfoDescriptor(thePui), thePros,
           (ClassLoader) null);

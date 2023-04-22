@@ -17,7 +17,7 @@ import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Collection;
-import javax.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.AnnotatedType;
 import org.corant.config.CorantConfigResolver;
 import org.corant.shared.service.SimpleRequired;
 import org.eclipse.microprofile.config.ConfigProvider;

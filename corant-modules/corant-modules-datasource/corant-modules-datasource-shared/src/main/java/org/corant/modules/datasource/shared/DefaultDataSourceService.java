@@ -16,7 +16,7 @@ package org.corant.modules.datasource.shared;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isNotBlank;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;

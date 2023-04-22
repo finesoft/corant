@@ -23,14 +23,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -144,7 +144,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     }
     // ds.setConnectionProperties(connectionProperties);
 
-    ds.setTransactionManager(instance.select(TransactionManager.class).get());
+//    ds.setTransactionManager(instance.select(TransactionManager.class).get());
     ds.setDriverClassName(cfg.getDriver().getName());
     ds.setUrl(cfg.getConnectionUrl());
     ds.setUsername(cfg.getUsername());

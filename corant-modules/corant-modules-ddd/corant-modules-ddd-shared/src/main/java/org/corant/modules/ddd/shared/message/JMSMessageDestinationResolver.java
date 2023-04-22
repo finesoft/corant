@@ -14,7 +14,7 @@
 package org.corant.modules.ddd.shared.message;
 
 import java.util.function.BiFunction;
-import javax.jms.JMSContext;
+import jakarta.jms.JMSContext;
 import org.corant.modules.ddd.Message;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -30,7 +30,7 @@ import org.corant.shared.ubiquity.Sortable;
  */
 @FunctionalInterface
 public interface JMSMessageDestinationResolver
-    extends BiFunction<JMSContext, Message, javax.jms.Destination>, Sortable {
+    extends BiFunction<JMSContext, Message, jakarta.jms.Destination>, Sortable {
 
   default boolean supports(Message message) {
     return false;

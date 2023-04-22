@@ -15,7 +15,7 @@ package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Arrays;
-import javax.servlet.annotation.WebInitParam;
+import jakarta.servlet.annotation.WebInitParam;
 import org.corant.config.Configs;
 
 /**

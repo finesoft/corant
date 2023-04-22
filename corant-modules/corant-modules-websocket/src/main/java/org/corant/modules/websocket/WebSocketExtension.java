@@ -16,11 +16,11 @@ package org.corant.modules.websocket;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.WithAnnotations;
-import javax.websocket.server.ServerEndpoint;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.WithAnnotations;
+import jakarta.websocket.server.ServerEndpoint;
 import org.corant.shared.util.Services;
 
 /**

@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import org.corant.Corant;
 import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.NamedQueryService;

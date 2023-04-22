@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
-import javax.inject.Inject;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.modules.servlet.metadata.HttpConstraintMetaData;
 import org.corant.modules.servlet.metadata.HttpMethodConstraintMetaData;
 import org.corant.modules.servlet.metadata.ServletSecurityMetaData;
@@ -158,7 +158,7 @@ public class UndertowWebServer extends AbstractWebServer {
 
   protected EmptyRoleSemantic resolveEmptyRoleSemantic(HttpConstraintMetaData hcm) {
     if (hcm != null
-        && hcm.getValue() == javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic.PERMIT) {
+        && hcm.getValue() == jakarta.servlet.annotation.ServletSecurity.EmptyRoleSemantic.PERMIT) {
       return EmptyRoleSemantic.PERMIT;
     } else {
       return EmptyRoleSemantic.DENY;

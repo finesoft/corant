@@ -14,7 +14,7 @@
 package org.corant.modules.datasource.shared;
 
 import java.sql.SQLException;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.corant.shared.exception.GeneralRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeExceptionConverter;
 import org.corant.shared.ubiquity.Experimental;

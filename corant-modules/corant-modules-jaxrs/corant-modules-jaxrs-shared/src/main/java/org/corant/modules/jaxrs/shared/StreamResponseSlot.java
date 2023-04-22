@@ -15,9 +15,9 @@ package org.corant.modules.jaxrs.shared;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.StreamingOutput;
 import org.corant.modules.servlet.HttpStreamOutput;
 
 /**

@@ -13,7 +13,7 @@
  */
 package org.corant.context;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.corant.shared.ubiquity.Configurator;
 import org.jboss.weld.environment.se.Weld;
 

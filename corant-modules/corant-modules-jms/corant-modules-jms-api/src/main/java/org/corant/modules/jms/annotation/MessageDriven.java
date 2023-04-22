@@ -22,8 +22,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.inject.Stereotype;
-import javax.jms.Session;
+import jakarta.enterprise.inject.Stereotype;
+import jakarta.jms.Session;
 import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 
 /**
@@ -199,7 +199,7 @@ public @interface MessageDriven {
    * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
    * be obtained from the system property or configuration.
    *
-   * @see Session#createConsumer(javax.jms.Destination, String)
+   * @see Session#createConsumer(jakarta.jms.Destination, String)
    * @return selector
    */
   String selector() default EMPTY;

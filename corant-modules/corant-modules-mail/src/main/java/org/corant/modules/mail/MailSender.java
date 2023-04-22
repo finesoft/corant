@@ -15,9 +15,9 @@ package org.corant.modules.mail;
 
 import java.util.List;
 import java.util.function.Function;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeMessage;
 import org.corant.shared.resource.Resource;
 
 /**

@@ -33,7 +33,7 @@ public interface Reference<T> extends Supplier<T>, Serializable {
 
   @Override
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   default T get() {
     return retrieve();
   }
@@ -42,7 +42,7 @@ public interface Reference<T> extends Supplier<T>, Serializable {
    * Retrieve the object to which the reference refers, and throws an exception if it is not found.
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   T retrieve();
 
   /**
@@ -51,7 +51,7 @@ public interface Reference<T> extends Supplier<T>, Serializable {
    * @return tryRetrieve
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   default Optional<T> tryRetrieve() {
     return Optional.empty();
   }

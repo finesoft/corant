@@ -14,8 +14,8 @@
 package org.corant.modules.jta.shared;
 
 import java.util.logging.Logger;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import javax.transaction.xa.XAResource;
 import org.corant.context.CDIs;
 

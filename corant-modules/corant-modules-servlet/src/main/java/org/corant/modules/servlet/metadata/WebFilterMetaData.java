@@ -18,9 +18,9 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.annotation.WebFilter;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.annotation.WebFilter;
 import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 

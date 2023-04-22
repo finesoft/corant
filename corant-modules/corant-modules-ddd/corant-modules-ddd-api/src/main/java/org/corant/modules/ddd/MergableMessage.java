@@ -32,7 +32,7 @@ public interface MergableMessage extends Message {
   }
 
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   default boolean isValid() {
     return true;
   }

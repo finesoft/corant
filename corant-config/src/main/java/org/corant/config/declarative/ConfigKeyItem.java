@@ -19,7 +19,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.AnnotationLiteral;
 import org.corant.shared.util.Strings;
 
 /**

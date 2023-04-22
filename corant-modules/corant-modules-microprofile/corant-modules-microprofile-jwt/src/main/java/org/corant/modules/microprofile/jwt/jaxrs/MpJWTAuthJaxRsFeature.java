@@ -13,11 +13,11 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Feature;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 import org.corant.modules.microprofile.jwt.cdi.MpSmallRyeJWTAuthCDIExtension;
 import org.corant.modules.security.shared.SecurityExtension;
 import org.eclipse.microprofile.auth.LoginConfig;

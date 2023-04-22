@@ -13,10 +13,10 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
 import org.corant.modules.jta.shared.TransactionService;
 import org.hibernate.engine.transaction.jta.platform.internal.AbstractJtaPlatform;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.UserTransaction;
 
 /**
  * corant-modules-jpa-hibernate-orm

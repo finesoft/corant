@@ -19,8 +19,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Singleton;
+import jakarta.enterprise.inject.Stereotype;
+import jakarta.inject.Singleton;
 
 /**
  * corant-context

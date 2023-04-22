@@ -14,10 +14,10 @@
 package org.corant.modules.ddd.shared.unitwork;
 
 import java.io.Serializable;
-import javax.annotation.PreDestroy;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionScoped;
+import jakarta.annotation.PreDestroy;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionScoped;
 import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -73,7 +73,7 @@ public abstract class AbstractUnitOfWorkService implements Serializable {
   protected void onComplete(boolean success) {}
 
   /**
-   * Called by {@link javax.transaction.Synchronization#afterCompletion(int)}
+   * Called by {@link jakarta.transaction.Synchronization#afterCompletion(int)}
    */
   @PreDestroy
   protected void onPreDestroy() {

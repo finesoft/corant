@@ -17,11 +17,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.declarative.DeclarativeConfigKey;
 import org.corant.config.declarative.DeclarativeConfigKey.DeclarativeConfigKeyLiteral;
 
@@ -90,7 +90,7 @@ public class DeclarativeConfigBean<T> implements Bean<T> {
     return false;
   }
 
-  @Override
+  //@Override since jakartaEE10
   public boolean isNullable() {
     return false;
   }

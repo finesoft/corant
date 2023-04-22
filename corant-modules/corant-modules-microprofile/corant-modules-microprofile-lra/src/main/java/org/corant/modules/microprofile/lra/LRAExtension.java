@@ -1,11 +1,11 @@
 package org.corant.modules.microprofile.lra;
 
 import static org.corant.shared.util.Objects.defaultObject;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
 import org.corant.config.Configs;
 import org.corant.shared.util.Systems;
 import io.narayana.lra.filter.ClientLRARequestFilter;

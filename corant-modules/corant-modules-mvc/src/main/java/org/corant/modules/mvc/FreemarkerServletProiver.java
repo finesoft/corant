@@ -16,7 +16,7 @@ package org.corant.modules.mvc;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.corant.config.Configs;
 import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;

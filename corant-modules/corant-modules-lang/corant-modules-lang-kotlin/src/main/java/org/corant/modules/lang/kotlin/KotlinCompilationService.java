@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.jetbrains.kotlin.cli.common.ExitCode;
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments;
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation;
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity;
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation;
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector;
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler;
 import org.jetbrains.kotlin.config.Services;
@@ -36,6 +36,33 @@ import org.jetbrains.kotlin.config.Services;
  *
  */
 public class KotlinCompilationService implements CompilationService {
+
+  public static class SimpleMessageCollector implements MessageCollector {
+
+    final List<String> errors = new ArrayList<>();
+
+    @Override
+    public void clear() {}
+
+    @Override
+    public boolean hasErrors() {
+      return !errors.isEmpty();
+    }
+
+    @Override
+    public void report(CompilerMessageSeverity severity, String error,
+        CompilerMessageSourceLocation location) {
+      if (severity.isError()) {
+        if (location != null && location.getLineContent() != null) {
+          errors.add(String.format("%sn%s:%d:%d", location.getLineContent(), location.getPath(),
+              location.getLine(), location.getColumn()));
+        } else {
+          errors.add(error);
+        }
+      }
+
+    }
+  }
 
   @Override
   public Set<String> acceptExtensions() {
@@ -58,32 +85,6 @@ public class KotlinCompilationService implements CompilationService {
     }
     if (smc.hasErrors()) {
       throw new CorantRuntimeException("Compilation failed" + String.join(NEWLINE, smc.errors));
-    }
-  }
-
-  public static class SimpleMessageCollector implements MessageCollector {
-
-    final List<String> errors = new ArrayList<>();
-
-    @Override
-    public void clear() {}
-
-    @Override
-    public boolean hasErrors() {
-      return !errors.isEmpty();
-    }
-
-    @Override
-    public void report(CompilerMessageSeverity severity, String error,
-        CompilerMessageLocation location) {
-      if (severity.isError()) {
-        if (location != null && location.getLineContent() != null) {
-          errors.add(String.format("%sn%s:%d:%d", location.getLineContent(), location.getPath(),
-              location.getLine(), location.getColumn()));
-        } else {
-          errors.add(error);
-        }
-      }
     }
   }
 }

@@ -14,9 +14,12 @@
 package org.corant.modules.jpa.hibernate.orm;
 
 import java.sql.Types;
-import org.hibernate.dialect.MySQL8Dialect;
+import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.descriptor.jdbc.JdbcType;
+import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -24,20 +27,27 @@ import org.hibernate.type.StandardBasicTypes;
  * @author bingo 下午2:05:36
  *
  */
-public class HibernateMySQL8Dialect extends MySQL8Dialect {
+public class HibernateMySQL8Dialect extends MySQLDialect {
 
   public HibernateMySQL8Dialect() {
-    this.registerColumnType(Types.CLOB, "longtext");
-    this.registerColumnType(Types.NCLOB, "longtext");
-    this.registerColumnType(Types.LONGNVARCHAR, "longtext");
-    this.registerColumnType(Types.NUMERIC, "decimal(19,6)");
-    this.registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName());
-    this.registerHibernateType(Types.NCLOB, StandardBasicTypes.STRING.getName());
-    this.registerHibernateType(Types.LONGNVARCHAR, StandardBasicTypes.STRING.getName());
+    super(DatabaseVersion.make(8));
   }
 
   @Override
   public NameQualifierSupport getNameQualifierSupport() {
     return NameQualifierSupport.NONE;
+  }
+
+  @Override
+  public JdbcType resolveSqlTypeDescriptor(String columnTypeName, int jdbcTypeCode, int precision,
+      int scale, JdbcTypeRegistry jdbcTypeRegistry) {
+
+    switch (jdbcTypeCode) {
+      case Types.VARCHAR -> jdbcTypeCode = StandardBasicTypes.NSTRING.getSqlTypeCode();
+      case Types.CHAR -> jdbcTypeCode = StandardBasicTypes.CHARACTER_NCHAR.getSqlTypeCode();
+      case Types.LONGNVARCHAR -> jdbcTypeCode = StandardBasicTypes.NTEXT.getSqlTypeCode();
+    }
+    return super.resolveSqlTypeDescriptor(columnTypeName, jdbcTypeCode, precision, scale,
+        jdbcTypeRegistry);
   }
 }

@@ -14,9 +14,9 @@
 package org.corant.modules.ddd.shared.event;
 
 import static org.corant.shared.util.Objects.forceCast;
-import javax.persistence.EntityManager;
-import javax.transaction.Synchronization;
-import javax.transaction.TransactionSynchronizationRegistry;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.ddd.AbstractEvent;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;

@@ -1,9 +1,9 @@
 package org.corant.modules.microprofile.lra;
 
 import java.io.IOException;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.client.ClientRequestContext;
+import jakarta.ws.rs.client.ClientResponseContext;
+import jakarta.ws.rs.ext.Provider;
 import io.narayana.lra.filter.ClientLRAResponseFilter;
 
 /**

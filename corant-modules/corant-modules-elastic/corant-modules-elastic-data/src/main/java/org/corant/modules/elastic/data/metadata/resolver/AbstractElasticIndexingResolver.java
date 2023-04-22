@@ -41,9 +41,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
+
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
 import org.corant.modules.elastic.data.ElasticConfig;
 import org.corant.modules.elastic.data.metadata.ElasticIndexing;
 import org.corant.modules.elastic.data.metadata.ElasticMapping;

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.shared.receive;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 
 @ApplicationScoped

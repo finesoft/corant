@@ -14,11 +14,11 @@
 package org.corant.modules.jpa.shared.cdi;
 
 import static org.corant.context.Beans.resolveApply;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnit;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceUnit;
 import org.corant.context.CDIs;
 import org.corant.context.ResourceReferences;
 import org.corant.modules.jpa.shared.ExtendedEntityManager;

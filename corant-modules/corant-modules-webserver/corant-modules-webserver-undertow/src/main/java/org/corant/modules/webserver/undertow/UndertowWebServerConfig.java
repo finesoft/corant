@@ -16,8 +16,8 @@ package org.corant.modules.webserver.undertow;
 import static org.corant.shared.util.Objects.max;
 import java.util.Optional;
 import java.util.Set;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**

@@ -52,12 +52,12 @@ public interface Aggregate extends Entity {
    * @see Lifecycle
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   Lifecycle getLifecycle();
 
   /**
    * The aggregate evolution version number, use as persistence version
-   * {@link javax.persistence.Version} by default.
+   * {@link jakarta.persistence.Version} by default.
    */
   Long getVn();
 
@@ -68,7 +68,7 @@ public interface Aggregate extends Entity {
    * {@link Lifecycle#POST_REMOVED}, {@link Lifecycle#DESTROYED}.
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   default boolean isPhantom() {
     return !getLifecycle().signPreserved();
   }
@@ -78,7 +78,7 @@ public interface Aggregate extends Entity {
    * {@link #isPhantom()}.
    */
   @Transient
-  @javax.persistence.Transient
+  @jakarta.persistence.Transient
   default boolean isPreserved() {
     return getLifecycle().signPreserved();
   }
@@ -172,37 +172,37 @@ public interface Aggregate extends Entity {
     /**
      * Aggregate will be persist to storage
      *
-     * @see javax.persistence.PrePersist
+     * @see jakarta.persistence.PrePersist
      */
     PRE_PERSIST(8),
     /**
      * Aggregate will be update to storage
      *
-     * @see javax.persistence.PreUpdate
+     * @see jakarta.persistence.PreUpdate
      */
     PRE_UPDATE(16),
     /**
      * Aggregate will be remove from storage
      *
-     * @see javax.persistence.PreRemove
+     * @see jakarta.persistence.PreRemove
      */
     PRE_REMOVE(32),
     /**
      * Aggregate has been persisted to storage
      *
-     * @see javax.persistence.PostPersist
+     * @see jakarta.persistence.PostPersist
      */
     POST_PERSISTED(64),
     /**
      * Aggregate has been update to storage
      *
-     * @see javax.persistence.PostUpdate
+     * @see jakarta.persistence.PostUpdate
      */
     POST_UPDATED(128),
     /**
      * Aggregate has been removed from storage
      *
-     * @see javax.persistence.PostRemove
+     * @see jakarta.persistence.PostRemove
      */
     POST_REMOVED(256),
     /**

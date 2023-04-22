@@ -16,10 +16,11 @@ package org.corant.modules.flyway;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.normal.Priorities.MODULES_HIGHER;
 import java.util.logging.Logger;
-import javax.annotation.Priority;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.Extension;
+
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.annotation.Priority;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**

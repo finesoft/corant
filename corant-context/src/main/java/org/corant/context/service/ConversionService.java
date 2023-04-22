@@ -16,7 +16,7 @@ package org.corant.context.service;
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Collection;
 import java.util.function.IntFunction;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterRegistry;

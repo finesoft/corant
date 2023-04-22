@@ -19,8 +19,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
 import org.corant.config.Configs;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;

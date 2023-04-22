@@ -15,10 +15,10 @@ package org.corant.modules.jta.narayana;
 
 import static java.security.AccessController.doPrivileged;
 import java.security.PrivilegedAction;
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.Transactional.TxType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.Transactional.TxType;
 import org.corant.modules.jta.shared.TransactionalAction.UserTransactionActionHandler;
 import org.jboss.tm.usertx.UserTransactionOperationsProvider;
 import com.arjuna.ats.jta.common.jtaPropertyManager;

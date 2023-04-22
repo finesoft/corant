@@ -15,7 +15,7 @@ package org.corant.modules.microprofile.restclient;
 
 import static org.corant.context.Beans.select;
 import java.util.logging.Logger;
-import javax.ws.rs.Priorities;
+import jakarta.ws.rs.Priorities;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;

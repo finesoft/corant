@@ -15,11 +15,11 @@ package org.corant.modules.ddd.shared.unitwork;
 
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
 import org.corant.modules.jpa.shared.PersistenceService;

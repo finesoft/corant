@@ -18,13 +18,13 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.AmbiguousResolutionException;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Typed;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.AmbiguousResolutionException;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Typed;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 import org.corant.context.concurrent.AsynchronousReference;
 import org.jboss.weld.inject.WeldInstance;
 import org.jboss.weld.inject.WeldInstance.Handler;
@@ -48,7 +48,7 @@ import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
  * <ol>
  * the set of qualifiers of this bean is enhanced so that it satisfies all injection points with
  * required type {@link AsynchronousReference} - see
- * {@link VertxExtension#processAsyncReferenceInjectionPoints(javax.enterprise.inject.spi.ProcessInjectionPoint))}
+ * {@link VertxExtension#processAsyncReferenceInjectionPoints(jakarta.enterprise.inject.spi.ProcessInjectionPoint))}
  * </ol>
  * <ol>
  * the set of bean types of this bean is restricted

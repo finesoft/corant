@@ -19,7 +19,7 @@ import java.lang.reflect.Proxy;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import javax.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeanManager;
 
 /**
  * corant-context

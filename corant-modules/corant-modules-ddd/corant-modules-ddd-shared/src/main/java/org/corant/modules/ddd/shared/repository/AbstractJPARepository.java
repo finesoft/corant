@@ -15,11 +15,11 @@ package org.corant.modules.ddd.shared.repository;
 
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Objects.defaultObject;
-import javax.annotation.PostConstruct;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.inject.Named;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.inject.literal.NamedLiteral;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.corant.modules.ddd.shared.unitwork.AbstractJPAUnitOfWorksManager;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceContextLiteral;
 

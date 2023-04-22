@@ -17,8 +17,8 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.jms.JMSProducer;
-import javax.jms.Message;
+import jakarta.jms.JMSProducer;
+import jakarta.jms.Message;
 import org.corant.modules.jms.JMSNames;
 import org.corant.modules.jms.marshaller.MessageMarshaller;
 

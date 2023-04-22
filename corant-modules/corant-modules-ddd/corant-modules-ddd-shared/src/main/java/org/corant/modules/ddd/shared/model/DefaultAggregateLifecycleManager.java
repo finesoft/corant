@@ -14,13 +14,13 @@
 package org.corant.modules.ddd.shared.model;
 
 import java.util.logging.Logger;
-import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.TransactionPhase;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;

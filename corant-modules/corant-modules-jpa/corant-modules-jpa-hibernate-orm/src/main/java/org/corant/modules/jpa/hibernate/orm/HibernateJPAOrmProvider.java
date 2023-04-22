@@ -18,17 +18,19 @@ import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManagerFactory;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.jpa.shared.JPAProvider;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.jpa.SpecHints;
+import org.hibernate.tool.schema.Action;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -43,13 +45,13 @@ public class HibernateJPAOrmProvider implements JPAProvider {
   protected static final Map<String, Object> DEFAULT_PROPERTIES;
   static {
     Map<String, Object> tmp = new HashMap<>();
-    tmp.put("hibernate.show_sql", false);
-    tmp.put("hibernate.format_sql", false);
-    tmp.put("hibernate.use_sql_comments", false);
-    tmp.put("hibernate.connection.autocommit", false);
-    tmp.put("hibernate.archive.autodetection", "class, hbm");
-    tmp.put("javax.persistence.query.timeout", 100000);
-    // tmp.put("javax.persistence.schema-generation.database.action", Action.NONE);
+    tmp.put(AvailableSettings.SHOW_SQL, false);
+    tmp.put(AvailableSettings.FORMAT_SQL, false);
+    tmp.put(AvailableSettings.USE_SQL_COMMENTS, false);
+    tmp.put(AvailableSettings.AUTOCOMMIT, false);
+    tmp.put(AvailableSettings.SCANNER_DISCOVERY, "class, hbm");
+    tmp.put(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, Action.NONE);
+    tmp.put(SpecHints.HINT_SPEC_QUERY_TIMEOUT, 100000);
     DEFAULT_PROPERTIES = Collections.unmodifiableMap(tmp);
   }
 
@@ -72,7 +74,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     if (additionalProperties != null) {
       properties.putAll(additionalProperties);
     }
-    properties.put(org.hibernate.jpa.AvailableSettings.ENTITY_MANAGER_FACTORY_NAME,
+    properties.put(AvailableSettings.PERSISTENCE_UNIT_NAME,
         defaultString(metaData.getPersistenceUnitName()));
     return new HibernatePersistenceProvider().createContainerEntityManagerFactory(metaData,
         properties);
@@ -81,7 +83,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
   @PostConstruct
   protected void onPostConstruct() {
     defaultProperties.put(AvailableSettings.JTA_PLATFORM, JTAPlatform.INSTANCE);
-    defaultProperties.put(AvailableSettings.CDI_BEAN_MANAGER, beanManager);
+    defaultProperties.put(AvailableSettings.JAKARTA_CDI_BEAN_MANAGER, beanManager);
   }
 
 }

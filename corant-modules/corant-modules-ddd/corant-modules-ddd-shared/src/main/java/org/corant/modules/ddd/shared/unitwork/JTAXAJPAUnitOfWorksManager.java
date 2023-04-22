@@ -13,8 +13,8 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transaction;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transaction;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
 import org.corant.modules.ddd.shared.annotation.JTAXA;
 

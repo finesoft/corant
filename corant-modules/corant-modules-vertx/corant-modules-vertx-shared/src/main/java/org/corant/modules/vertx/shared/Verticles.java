@@ -14,7 +14,7 @@
 package org.corant.modules.vertx.shared;
 
 import java.util.function.Consumer;
-import javax.enterprise.inject.se.SeContainerInitializer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 import org.corant.Corant;
 import io.vertx.core.Vertx;
 

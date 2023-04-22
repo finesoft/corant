@@ -20,10 +20,11 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.persistence.Cache;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
+
+import jakarta.persistence.Cache;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.annotation.PostConstruct;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;

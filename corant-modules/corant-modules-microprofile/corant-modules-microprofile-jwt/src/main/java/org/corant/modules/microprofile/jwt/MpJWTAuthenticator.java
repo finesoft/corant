@@ -17,7 +17,7 @@ import static java.util.Collections.singletonList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.context.Beans.select;
 import java.util.stream.Stream;
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 import org.corant.modules.security.AuthenticationData;
 import org.corant.modules.security.AuthenticationException;
 import org.corant.modules.security.AuthenticatorCallback;

@@ -22,9 +22,9 @@ import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.inject.Qualifier;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.datasource.shared.DBMS;
 

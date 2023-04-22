@@ -16,8 +16,8 @@ package org.corant.modules.servlet.metadata;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
-import javax.servlet.Servlet;
-import javax.servlet.annotation.ServletSecurity;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.annotation.ServletSecurity;
 
 /**
  * corant-modules-servlet

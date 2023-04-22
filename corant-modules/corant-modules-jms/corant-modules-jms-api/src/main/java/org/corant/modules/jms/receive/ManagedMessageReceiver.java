@@ -13,7 +13,7 @@
  */
 package org.corant.modules.jms.receive;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 
 /**
  * corant-modules-jms-api

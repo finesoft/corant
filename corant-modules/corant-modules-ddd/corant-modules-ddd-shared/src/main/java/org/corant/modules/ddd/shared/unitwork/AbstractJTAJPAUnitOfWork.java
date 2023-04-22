@@ -13,11 +13,11 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-import javax.persistence.FlushModeType;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
+import jakarta.persistence.FlushModeType;
+import jakarta.transaction.Status;
+import jakarta.transaction.Synchronization;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
 import org.corant.modules.ddd.MessageDispatcher;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;

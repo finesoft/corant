@@ -15,9 +15,9 @@ package org.corant.modules.jcache.redisson;
 
 import static org.corant.shared.util.Empties.isEmpty;
 import javax.cache.Caching;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.Extension;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Systems;
 

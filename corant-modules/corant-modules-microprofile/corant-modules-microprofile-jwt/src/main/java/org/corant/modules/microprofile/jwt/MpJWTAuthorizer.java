@@ -18,7 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 import org.corant.context.security.SecurityContext;
 import org.corant.modules.security.AuthorizerCallback;
 import org.corant.modules.security.shared.AbstractAuthorizer;

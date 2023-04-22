@@ -14,7 +14,7 @@
 package org.corant.modules.ddd.shared.unitwork;
 
 import java.util.LinkedList;
-import javax.transaction.Transaction;
+import jakarta.transaction.Transaction;
 import org.corant.modules.ddd.Message;
 import org.corant.shared.exception.CorantRuntimeException;
 

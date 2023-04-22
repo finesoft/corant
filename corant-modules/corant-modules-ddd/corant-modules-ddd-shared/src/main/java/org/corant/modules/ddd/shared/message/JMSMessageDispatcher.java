@@ -24,16 +24,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.inject.Inject;
-import javax.jms.Destination;
-import javax.jms.JMSContext;
-import javax.transaction.Transactional;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.literal.NamedLiteral;
+import jakarta.inject.Inject;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSContext;
+import jakarta.transaction.Transactional;
+import jakarta.annotation.PreDestroy;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.Message.BinaryMessage;
 import org.corant.modules.ddd.MessageDispatcher;
@@ -106,7 +106,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
     final Destination dest = resolveDestination(message, ctx, multicast, destination);
     logger.finer(() -> String.format("Resolved JMS message destination %s for domain message %s",
         dest, message.getClass()));
-    final javax.jms.Message jmsMsg = createJMSMessage(ctx, message);
+    final jakarta.jms.Message jmsMsg = createJMSMessage(ctx, message);
     if (isNotEmpty(properties)) {
       properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
     }
@@ -118,8 +118,8 @@ public class JMSMessageDispatcher implements MessageDispatcher {
     return multicast ? ctx.createTopic(destination) : ctx.createQueue(destination);
   }
 
-  protected javax.jms.Message createJMSMessage(JMSContext ctx, Message message) {
-    final javax.jms.Message jmsMsg;
+  protected jakarta.jms.Message createJMSMessage(JMSContext ctx, Message message) {
+    final jakarta.jms.Message jmsMsg;
     if (message instanceof BinaryMessage) {
       try (InputStream is = ((BinaryMessage) message).openStream()) {
         jmsMsg = binaryMarshaller.serialize(ctx, is);
@@ -160,7 +160,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
     metas.clear();
   }
 
-  protected void onPreDispatch(javax.jms.Message jmsMsg) {
+  protected void onPreDispatch(jakarta.jms.Message jmsMsg) {
     if (!preDispatchHandlers.isUnsatisfied()) {
       preDispatchHandlers.stream().sorted(Sortable::compare).forEach(h -> h.accept(jmsMsg));
       logger.finer(() -> "Complete the preprocessing before dispatching the message.");

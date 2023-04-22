@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import javax.enterprise.inject.literal.NamedLiteral;
+import jakarta.enterprise.inject.literal.NamedLiteral;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import com.mongodb.ConnectionString;

@@ -15,9 +15,9 @@ package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
-import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
+import jakarta.servlet.annotation.HttpConstraint;
+import jakarta.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
+import jakarta.servlet.annotation.ServletSecurity.TransportGuarantee;
 import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 

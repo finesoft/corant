@@ -13,7 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 import org.corant.modules.ddd.AggregateAssistant;
 
 /**

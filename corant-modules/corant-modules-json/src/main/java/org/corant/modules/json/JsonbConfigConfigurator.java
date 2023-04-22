@@ -13,7 +13,7 @@
  */
 package org.corant.modules.json;
 
-import javax.json.bind.JsonbConfig;
+import jakarta.json.bind.JsonbConfig;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

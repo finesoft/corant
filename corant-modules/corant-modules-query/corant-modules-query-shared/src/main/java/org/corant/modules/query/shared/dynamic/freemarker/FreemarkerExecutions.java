@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Script.ScriptType;

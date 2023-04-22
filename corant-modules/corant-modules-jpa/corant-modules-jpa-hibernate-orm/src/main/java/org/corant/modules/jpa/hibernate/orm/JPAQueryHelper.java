@@ -14,12 +14,12 @@
 package org.corant.modules.jpa.hibernate.orm;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
-import javax.inject.Singleton;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import org.corant.modules.jpa.shared.JPQLHelper;
 import org.corant.modules.jpa.shared.JPQLHelper.JPQLResolver;
 import org.hibernate.query.NativeQuery;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 /**
  * corant-modules-jpa-hibernate-orm

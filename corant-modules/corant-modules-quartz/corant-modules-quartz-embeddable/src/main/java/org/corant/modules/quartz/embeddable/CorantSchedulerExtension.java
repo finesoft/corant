@@ -4,11 +4,12 @@ import static java.util.Collections.newSetFromMap;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Priority;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.WithAnnotations;
+
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.WithAnnotations;
+import jakarta.annotation.Priority;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.proxy.ProxyBuilder;
 import org.corant.shared.normal.Priorities;

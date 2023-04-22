@@ -15,7 +15,7 @@ package org.corant.context.naming;
 
 import static org.corant.shared.util.Classes.asClass;
 import java.util.Hashtable;
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;

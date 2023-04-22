@@ -16,10 +16,10 @@ package org.corant.modules.jta.shared;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.CDI;
-import javax.transaction.Transactional;
+import jakarta.enterprise.inject.spi.AnnotatedMethod;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.transaction.Transactional;
 
 /**
  * corant-modules-jta-shared

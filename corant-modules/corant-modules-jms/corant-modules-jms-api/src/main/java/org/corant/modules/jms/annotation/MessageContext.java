@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import javax.jms.JMSContext;
+import jakarta.jms.JMSContext;
 
 /**
  * corant-modules-jms-api

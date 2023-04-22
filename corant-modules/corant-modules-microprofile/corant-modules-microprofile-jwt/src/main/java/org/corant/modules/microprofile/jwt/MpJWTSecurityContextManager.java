@@ -14,10 +14,10 @@
 package org.corant.modules.microprofile.jwt;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.SecurityContext;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 /**

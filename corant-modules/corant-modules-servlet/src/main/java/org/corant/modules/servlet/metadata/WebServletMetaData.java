@@ -18,10 +18,10 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.Servlet;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.ServletSecurity;
+import jakarta.servlet.annotation.WebServlet;
 import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 

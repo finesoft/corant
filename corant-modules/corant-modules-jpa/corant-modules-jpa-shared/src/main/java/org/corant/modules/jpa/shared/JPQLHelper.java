@@ -15,8 +15,8 @@ package org.corant.modules.jpa.shared;
 
 import static org.corant.context.Beans.resolve;
 import java.util.Locale;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 /**
  * corant-modules-jpa-shared

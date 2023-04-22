@@ -16,7 +16,7 @@ package org.corant.modules.websocket;
 import static org.corant.context.Beans.getBeanScope;
 import static org.corant.context.Beans.manageable;
 import static org.corant.context.Beans.resolve;
-import javax.websocket.server.ServerEndpointConfig.Configurator;
+import jakarta.websocket.server.ServerEndpointConfig.Configurator;
 import org.corant.shared.util.Objects;
 
 /**

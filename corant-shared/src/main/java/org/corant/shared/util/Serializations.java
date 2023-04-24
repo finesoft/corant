@@ -13,7 +13,6 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Classes.checkPackageAccess;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,8 +30,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class Serializations {
 
-  private Serializations() {
-  }
+  private Serializations() {}
 
   public static Object deserialize(byte[] bytes) {
     if (bytes == null) {
@@ -75,10 +73,8 @@ public class Serializations {
       if (loader == null) {
         return super.resolveClass(aClass);
       } else {
-        String name = aClass.getName();
-        checkPackageAccess(name);
         // Query the class loader ...
-        return Class.forName(name, false, loader);
+        return Class.forName(aClass.getName(), false, loader);
       }
     }
   }

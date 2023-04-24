@@ -34,8 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -178,8 +176,7 @@ public class ClassPathResourceScanner {
       tmpDir.toFile().deleteOnExit();
     }
     return cachedClassLoaders.put(path,
-        AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(
-            urls.toArray(new URL[urls.size()]), parentClassLoader)));
+        new URLClassLoader(urls.toArray(new URL[urls.size()]), parentClassLoader));
   }
 
   public Set<ClassPathResource> getResources() {

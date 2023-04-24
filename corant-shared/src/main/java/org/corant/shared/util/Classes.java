@@ -18,17 +18,12 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Functions.trySupplied;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isBlank;
-import static org.corant.shared.util.Throwables.asUncheckedException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -98,40 +93,6 @@ public class Classes {
       return asClass(defaultClassLoader(), className, true);
     } catch (ClassNotFoundException e) {
       throw new CorantRuntimeException(e);
-    }
-  }
-
-  public static void checkPackageAccess(Class<?> clazz) {
-    checkPackageAccess(clazz.getName());
-    if (Proxy.isProxyClass(clazz)) {
-      checkProxyPackageAccess(clazz);
-    }
-  }
-
-  public static void checkPackageAccess(String name) {
-    SecurityManager s = System.getSecurityManager();
-    if (s != null) {
-      String cname = name.replace('/', PACKAGE_SEPARATOR_CHAR);
-      if (!cname.isEmpty() && cname.charAt(0) == '[') {
-        int b = cname.lastIndexOf('[') + 2;
-        if (b > 1 && b < cname.length()) {
-          cname = cname.substring(b);
-        }
-      }
-      int i = cname.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
-      if (i != -1) {
-        s.checkPackageAccess(cname.substring(0, i));
-      }
-    }
-  }
-
-  public static void checkProxyPackageAccess(Class<?> clazz) {
-    SecurityManager s = System.getSecurityManager();
-    if (s != null && Proxy.isProxyClass(clazz)) {
-      // check proxy interfaces if the given class is a proxy class
-      for (Class<?> intf : clazz.getInterfaces()) {
-        checkPackageAccess(intf);
-      }
     }
   }
 
@@ -301,29 +262,7 @@ public class Classes {
 
   public static <T> Constructor<? extends T> getDeclaredConstructor(Class<T> clazz,
       Class<?>... paramTypes) throws NoSuchMethodException {
-    if (System.getSecurityManager() == null) {
-      return clazz.getDeclaredConstructor(paramTypes);
-    } else {
-      try {
-        return AccessController
-            .doPrivileged((PrivilegedExceptionAction<Constructor<? extends T>>) () -> {
-              Constructor<? extends T> constructor = null;
-              try {
-                constructor = clazz.getDeclaredConstructor(paramTypes);
-              } catch (SecurityException ex) {
-                // Noop!
-              }
-              return constructor;
-            });
-      } catch (PrivilegedActionException e) {
-        Exception ex = e.getException();
-        if (ex instanceof NoSuchMethodException) {
-          throw (NoSuchMethodException) ex;
-        } else {
-          throw asUncheckedException(ex);
-        }
-      }
-    }
+    return clazz.getDeclaredConstructor(paramTypes);
   }
 
   public static String getPackageName(String fullClassName) {

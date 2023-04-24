@@ -13,8 +13,6 @@
  */
 package org.corant.modules.jta.narayana;
 
-import static java.security.AccessController.doPrivileged;
-import java.security.PrivilegedAction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
@@ -50,14 +48,7 @@ public class NarayanaUserTransactionActionHandler implements UserTransactionActi
 
   protected void setAvailability(UserTransactionOperationsProvider userTransactionProvider,
       boolean available) {
-    if (System.getSecurityManager() == null) {
-      userTransactionProvider.setAvailability(available);
-    } else {
-      doPrivileged((PrivilegedAction<Object>) () -> {
-        userTransactionProvider.setAvailability(available);
-        return null;
-      });
-    }
+    userTransactionProvider.setAvailability(available);
   }
 
   protected boolean setUserTransactionAvailable(boolean available) {

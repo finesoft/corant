@@ -31,7 +31,6 @@ import org.corant.shared.util.Systems;
  * @author bingo 下午12:58:15
  *
  */
-@SuppressWarnings({"removal"})
 public class KotlinScriptEngines {
 
   static {

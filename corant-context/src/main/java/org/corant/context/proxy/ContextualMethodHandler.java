@@ -23,8 +23,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -84,10 +82,7 @@ public class ContextualMethodHandler implements Serializable {
         if (methodPredicate.test(m)) {
           if (!Modifier.isPublic(m.getModifiers())
               || !Modifier.isPublic(m.getDeclaringClass().getModifiers())) {
-            AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
-              m.setAccessible(true);
-              return null;
-            });
+            m.setAccessible(true);
           }
           handlers.add(new ContextualMethodHandler(clazz, m, qualifiers));
         }

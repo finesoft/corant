@@ -35,7 +35,6 @@ public class AttachPackager implements Packager {
    * @param mojo
    */
   public AttachPackager(PackageMojo mojo) {
-    super();
     this.mojo = mojo;
     log = mojo.getLog();
   }
@@ -45,6 +44,7 @@ public class AttachPackager implements Packager {
     return mojo;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void pack() throws Exception {
     log.debug("(corant)----------------------------[pack attach]----------------------------");

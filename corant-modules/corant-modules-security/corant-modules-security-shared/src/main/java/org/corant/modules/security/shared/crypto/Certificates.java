@@ -173,8 +173,8 @@ public class Certificates {
           .getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded()));
 
       X509v3CertificateBuilder certGen =
-          new X509v3CertificateBuilder(new X500Name(caCert.getSubjectDN().getName()), serialNumber,
-              notBefore, notAfter, subjectDN, subjPubKeyInfo);
+          new X509v3CertificateBuilder(new X500Name(caCert.getSubjectX500Principal().getName()),
+              serialNumber, notBefore, notAfter, subjectDN, subjPubKeyInfo);
 
       DigestCalculator digCalc = new BcDigestCalculatorProvider()
           .get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1));

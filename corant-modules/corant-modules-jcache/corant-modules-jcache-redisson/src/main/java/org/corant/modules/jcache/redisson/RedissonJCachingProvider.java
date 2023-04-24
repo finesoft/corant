@@ -19,8 +19,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -160,11 +158,8 @@ public class RedissonJCachingProvider implements CachingProvider {
 
   protected JCacheManager createCacheManager(Redisson redisson, ClassLoader classLoader,
       Properties properties, URI uri) {
-    Constructor<?> cst = AccessController.doPrivileged((PrivilegedAction<Constructor<?>>) () -> {
-      Constructor<?> c = JCacheManager.class.getDeclaredConstructors()[0];
-      c.setAccessible(true);
-      return c;
-    });
+    Constructor<?> cst = JCacheManager.class.getDeclaredConstructors()[0];
+    cst.setAccessible(true);
     try {
       return forceCast(cst.newInstance(redisson, classLoader, this, properties, uri));
     } catch (InstantiationException | IllegalAccessException | IllegalArgumentException

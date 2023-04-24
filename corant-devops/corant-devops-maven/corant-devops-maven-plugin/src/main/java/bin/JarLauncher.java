@@ -26,9 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -106,18 +104,16 @@ public class JarLauncher {
 
   ClassLoader buildClassLoader() {
     final boolean logClassPaths = hasCommand(CMD_LOG_CLASS_PATHS);
-    return AccessController
-        .doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(DFLT_APP_NAME,
-            classpaths.stream().map(path -> {
-              try {
-                if (logClassPaths) {
-                  log(true, "Add class path: %s", path.toString());
-                }
-                return path.toUri().toURL();
-              } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-              }
-            }).toArray(URL[]::new), this.getClass().getClassLoader()));
+    return new URLClassLoader(DFLT_APP_NAME, classpaths.stream().map(path -> {
+      try {
+        if (logClassPaths) {
+          log(true, "Add class path: %s", path.toString());
+        }
+        return path.toUri().toURL();
+      } catch (MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }).toArray(URL[]::new), this.getClass().getClassLoader());
   }
 
   void cleanWorkDir() {

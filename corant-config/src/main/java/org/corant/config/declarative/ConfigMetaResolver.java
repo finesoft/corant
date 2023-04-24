@@ -19,12 +19,9 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Fields.traverseFields;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
@@ -57,31 +54,28 @@ public class ConfigMetaResolver {
     traverseFields(klass, field -> {
       if (!Modifier.isFinal(field.getModifiers())
           && (!ignore || field.getAnnotation(ConfigKeyItem.class) != null)) {
-        Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-          field.setAccessible(true);
-          return field;
-        });
-        ConfigKeyItem cfgKeyItem = ConfigClasses.resolveItem(theField);
+        field.setAccessible(true);
+        ConfigKeyItem cfgKeyItem = ConfigClasses.resolveItem(field);
         String keyItem = cfgKeyItem.name();
         DeclarativePattern pattern = cfgKeyItem.pattern();
         String defaultValue = cfgKeyItem.defaultValue();
         String defaultKey = concatKey(root, keyItem);
         String defaultNull = ConfigKeyItem.NO_DFLT_VALUE;
         if (pattern == DeclarativePattern.PREFIX) {
-          Type fieldType = theField.getGenericType();
+          Type fieldType = field.getGenericType();
           if (fieldType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) fieldType).getRawType();
             shouldBeTrue(rawType.equals(Map.class),
                 "We only support Map field type for PREFIX pattern %s %s.", klass.getName(),
-                theField.getName());
+                field.getName());
           } else {
             shouldBeTrue(fieldType.equals(Map.class),
                 "We only support Map field type for PREFIX pattern %s %s.", klass.getName(),
-                theField.getName());
+                field.getName());
           }
         }
-        configClass.addField(new ConfigMetaField(configClass, theField, keyItem, pattern,
-            defaultValue, defaultKey, defaultNull));
+        configClass.addField(new ConfigMetaField(configClass, field, keyItem, pattern, defaultValue,
+            defaultKey, defaultNull));
       }
     });
     return configClass;
@@ -102,10 +96,7 @@ public class ConfigMetaResolver {
         new ConfigMetaClass(defaultString(prefix, configProperties.prefix()), 0, clazz, false);
     traverseFields(clazz, field -> {
       if (!Modifier.isFinal(field.getModifiers())) {
-        Field theField = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-          field.setAccessible(true);
-          return field;
-        });
+        field.setAccessible(true);
         ConfigProperty configProperty = field.getAnnotation(ConfigProperty.class);
         String keyItem = configProperty == null || isBlank(configProperty.name()) ? field.getName()
             : configProperty.name();
@@ -113,7 +104,7 @@ public class ConfigMetaResolver {
             : ConfigProperty.UNCONFIGURED_VALUE;
         String defaultKey = concatKey(prefix, keyItem);
         String defaultNull = ConfigProperty.UNCONFIGURED_VALUE;
-        configClass.addField(new ConfigMetaField(configClass, theField, keyItem,
+        configClass.addField(new ConfigMetaField(configClass, field, keyItem,
             ConfigInjector.DEFAULT_INJECTOR, defaultValue, defaultKey, defaultNull));
       }
     });

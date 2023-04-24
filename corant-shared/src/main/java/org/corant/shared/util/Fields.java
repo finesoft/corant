@@ -20,8 +20,6 @@ import static org.corant.shared.util.Classes.getAllInterfaces;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -151,14 +149,7 @@ public class Fields {
   static Object readFieldValue(Field field, Object target) {
     try {
       if (!field.canAccess(target)) {
-        if (System.getSecurityManager() == null) {
-          field.setAccessible(true);
-        } else {
-          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            field.setAccessible(true);
-            return null;
-          });
-        }
+        field.setAccessible(true);
       }
       return field.get(target);
     } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -169,14 +160,7 @@ public class Fields {
   static void writeFieldValue(Field field, Object target, Object value) {
     try {
       if (!field.canAccess(target)) {
-        if (System.getSecurityManager() == null) {
-          field.setAccessible(true);
-        } else {
-          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            field.setAccessible(true);
-            return null;
-          });
-        }
+        field.setAccessible(true);
       }
       field.set(target, value);
     } catch (IllegalArgumentException | IllegalAccessException e) {

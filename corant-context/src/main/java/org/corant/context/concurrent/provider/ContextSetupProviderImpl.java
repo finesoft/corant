@@ -16,8 +16,6 @@ package org.corant.context.concurrent.provider;
 import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -115,14 +113,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
       final ClassLoader classLoaderToSet = contextHandle.getContextClassLoader();
       final Thread currentThread = Thread.currentThread();
       if (classLoaderToSet != currentThread.getContextClassLoader()) {
-        if (System.getSecurityManager() == null) {
-          currentThread.setContextClassLoader(classLoaderToSet);
-        } else {
-          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            currentThread.setContextClassLoader(classLoaderToSet);
-            return null;
-          });
-        }
+        currentThread.setContextClassLoader(classLoaderToSet);
       }
     }
   }
@@ -203,14 +194,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
       final Thread currentThread = Thread.currentThread();
       final ClassLoader originalClassLoader = currentThread.getContextClassLoader();
       if (classLoaderToSet != originalClassLoader) {
-        if (System.getSecurityManager() == null) {
-          currentThread.setContextClassLoader(classLoaderToSet);
-        } else {
-          AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            currentThread.setContextClassLoader(classLoaderToSet);
-            return null;
-          });
-        }
+        currentThread.setContextClassLoader(classLoaderToSet);
       }
       logger.fine(() -> String.format("Setup class loader %s", classLoaderToSet));
       resetContextHandle.setContextClassLoader(originalClassLoader);

@@ -21,13 +21,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.AmbiguousResolutionException;
 import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance.Handle;
 import jakarta.enterprise.inject.Typed;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
 import org.corant.context.concurrent.AsynchronousReference;
 import org.jboss.weld.inject.WeldInstance;
-import org.jboss.weld.inject.WeldInstance.Handler;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.jboss.weld.logging.BeanManagerLogger;
 import org.jboss.weld.util.ForwardingCompletionStage;
@@ -106,7 +106,7 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
           + requiredType + " with qualifiers " + injectionPoint.getQualifiers()));
     } else if (!completionStage.isUnsatisfied()) {
       // Use the produced CompletionStage
-      initWithCompletionStage(completionStage.getHandler());
+      initWithCompletionStage(completionStage.getHandle());
     } else {
       // Use Vertx worker thread
       initWithWorker(requiredType, qualifiers, vertx, beanManager);
@@ -156,7 +156,7 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
   }
 
   @SuppressWarnings("unchecked")
-  private void initWithCompletionStage(Handler<Object> completionStage) {
+  private void initWithCompletionStage(Handle<Object> completionStage) {
     Object possibleStage = completionStage.get();
     if (possibleStage instanceof CompletionStage) {
       ((CompletionStage<T>) possibleStage).whenComplete((result, throwable) -> {
@@ -186,7 +186,7 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
             .injectionPointHasAmbiguousDependencies(Arrays.toString(qualifiers), requiredType, ""));
         return;
       }
-      Handler<Object> handler = asyncInstance.getHandler();
+      Handle<Object> handler = asyncInstance.getHandle();
       Object beanInstance = handler.get();
       if (beanManager.isNormalScope(handler.getBean().getScope())
           && beanInstance instanceof TargetInstanceProxy) {

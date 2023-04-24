@@ -13,11 +13,9 @@
  */
 package org.corant.shared.util;
 
-import static java.security.AccessController.doPrivileged;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Functions.emptyPredicate;
 import static org.corant.shared.util.Objects.defaultObject;
-import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
@@ -78,9 +76,7 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findPreferentially(Class<S> serviceClass) {
-    return findPreferentially(
-        doPrivileged((PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass)),
-        serviceClass, emptyPredicate(true));
+    return findPreferentially(ServiceLoader.load(serviceClass), serviceClass, emptyPredicate(true));
   }
 
   /**
@@ -97,9 +93,8 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findPreferentially(Class<S> serviceClass, ClassLoader classLoader) {
-    return findPreferentially(doPrivileged(
-        (PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass, classLoader)),
-        serviceClass, emptyPredicate(true));
+    return findPreferentially(ServiceLoader.load(serviceClass, classLoader), serviceClass,
+        emptyPredicate(true));
   }
 
   /**
@@ -115,10 +110,8 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findPreferentially(ModuleLayer layer, Class<S> serviceClass) {
-    return findPreferentially(
-        doPrivileged(
-            (PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(layer, serviceClass)),
-        serviceClass, emptyPredicate(true));
+    return findPreferentially(ServiceLoader.load(layer, serviceClass), serviceClass,
+        emptyPredicate(true));
   }
 
   /**
@@ -183,9 +176,7 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findRequired(Class<S> serviceClass) {
-    return findPreferentially(
-        doPrivileged((PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass)),
-        serviceClass, Services::required);
+    return findPreferentially(ServiceLoader.load(serviceClass), serviceClass, Services::required);
   }
 
   /**
@@ -208,9 +199,8 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findRequired(Class<S> serviceClass, ClassLoader classLoader) {
-    return findPreferentially(doPrivileged(
-        (PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass, classLoader)),
-        serviceClass, Services::required);
+    return findPreferentially(ServiceLoader.load(serviceClass, classLoader), serviceClass,
+        Services::required);
   }
 
   /**
@@ -231,10 +221,8 @@ public class Services {
    * @see #findPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Optional<S> findRequired(ModuleLayer layer, Class<S> serviceClass) {
-    return findPreferentially(
-        doPrivileged(
-            (PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(layer, serviceClass)),
-        serviceClass, Services::required);
+    return findPreferentially(ServiceLoader.load(layer, serviceClass), serviceClass,
+        Services::required);
   }
 
   public static Required getRequired() {
@@ -339,9 +327,7 @@ public class Services {
    * @see #selectPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Stream<S> selectRequired(Class<S> serviceClass) {
-    return selectPreferentially(
-        doPrivileged((PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass)),
-        serviceClass, Services::required);
+    return selectPreferentially(ServiceLoader.load(serviceClass), serviceClass, Services::required);
   }
 
   /**
@@ -363,9 +349,8 @@ public class Services {
    * @see #selectPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Stream<S> selectRequired(Class<S> serviceClass, ClassLoader classLoader) {
-    return selectPreferentially(doPrivileged(
-        (PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(serviceClass, classLoader)),
-        serviceClass, Services::required);
+    return selectPreferentially(ServiceLoader.load(serviceClass, classLoader), serviceClass,
+        Services::required);
   }
 
   /**
@@ -386,9 +371,7 @@ public class Services {
    * @see #selectPreferentially(ServiceLoader, Class, Predicate)
    */
   public static <S> Stream<S> selectRequired(ModuleLayer layer, Class<S> service) {
-    return selectPreferentially(
-        doPrivileged((PrivilegedAction<ServiceLoader<S>>) () -> ServiceLoader.load(layer, service)),
-        service, Services::required);
+    return selectPreferentially(ServiceLoader.load(layer, service), service, Services::required);
   }
 
   public static boolean shouldVeto(Class<?> type) {

@@ -554,7 +554,7 @@ public class JPAQueries {
         @Override
         public void populateQuery(EntityManager entityManager, Query query) {
           if (parameters != null) {
-            int counter = 0;
+            int counter = 1;
             for (Object parameter : parameters) {
               query.setParameter(counter++, parameter);
             }

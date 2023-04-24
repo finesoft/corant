@@ -24,9 +24,6 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -98,7 +95,7 @@ public class Systems {
   }
 
   public static Map<String, String> getEnvironmentVariables() {
-    return AccessController.doPrivileged((PrivilegedAction<Map<String, String>>) System::getenv);
+    return System.getenv();
   }
 
   public static String getFileEncoding() {
@@ -261,30 +258,12 @@ public class Systems {
 
   public static String getProperty(final String name, final String defaultValue) {
     shouldNotNull(name);
-    try {
-      if (System.getSecurityManager() == null) {
-        return defaultObject(System.getProperty(name), defaultValue);
-      } else {
-        return defaultObject(AccessController
-            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name)), defaultValue);
-      }
-    } catch (final Exception ignore) {
-    }
-    return defaultValue;
+    return defaultObject(System.getProperty(name), defaultValue);
   }
 
   public static Set<String> getPropertyNames() {
-    try {
-      if (System.getSecurityManager() == null) {
-        return System.getProperties().keySet().stream().map(Objects::asString)
-            .collect(Collectors.toSet());
-      } else {
-        return AccessController.doPrivileged((PrivilegedAction<Set<String>>) () -> System
-            .getProperties().keySet().stream().map(Objects::asString).collect(Collectors.toSet()));
-      }
-    } catch (final Exception ignore) {
-    }
-    return Collections.emptySet();
+    return System.getProperties().keySet().stream().map(Objects::asString)
+        .collect(Collectors.toSet());
   }
 
   public static byte[] getSecureMungedAddress(Random rd) {
@@ -430,22 +409,7 @@ public class Systems {
   }
 
   public static String setProperty(final String name, final String value) {
-    String preValue = null;
-    try {
-      if (System.getSecurityManager() == null) {
-        preValue = System.getProperty(name);
-        System.setProperty(name, value);
-      } else {
-        preValue = AccessController
-            .doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-          System.setProperty(name, value);
-          return null;
-        });
-      }
-    } catch (final Exception ignore) {
-    }
-    return preValue;
+    return System.setProperty(name, value);
   }
 
   static boolean detectOS(final String osNamePrefix) {

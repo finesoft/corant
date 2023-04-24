@@ -15,7 +15,6 @@ package org.corant.modules.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Objects.setAccessible;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -156,10 +155,10 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
       this.pojoClass = shouldNotNull(pojoClass);
       constructor = lookupConstructor(pojoClass);
       if (constructor != null) {
-        setAccessible(constructor, true);
+        constructor.setAccessible(true);
         List<Field> fields = Fields.getAllFields(pojoClass);
         for (Method method : pojoClass.getMethods()) {
-          setAccessible(method, true);
+          method.setAccessible(true);
           String name = method.getName();
           Class<?>[] parameterTypes = method.getParameterTypes();
           if (parameterTypes.length == 1) {

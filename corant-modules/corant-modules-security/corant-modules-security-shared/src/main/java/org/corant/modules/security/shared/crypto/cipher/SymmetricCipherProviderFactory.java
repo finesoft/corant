@@ -30,9 +30,9 @@ public enum SymmetricCipherProviderFactory {
 
   //@formatter:off
   // symmetric
-  AES_128_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 128, 96),
-  AES_192_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 192, 96),
-  AES_256_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 256, 96),
+  // AES_128_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 128, 96), --GCM is a stream cipher mode and does not use padding
+  // AES_192_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 192, 96), --GCM is a stream cipher mode and does not use padding
+  // AES_256_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 256, 96), --GCM is a stream cipher mode and does not use padding
 
   AES_128_IV_GCM("AES/GCM/NoPadding", 128, 96),
   AES_192_IV_GCM("AES/GCM/NoPadding", 192, 96),
@@ -86,7 +86,7 @@ public enum SymmetricCipherProviderFactory {
 
   CHA_CHA_20("ChaCha20", 256, 96),
   // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8249844
-  //CHA_CHA_20_POLY1305("ChaCha20-Poly1305/None/NoPadding", 256, 96),
+  CHA_CHA_20_POLY1305("ChaCha20-Poly1305/None/NoPadding", 256, 96),
 
   DESEDE_112_IV_CTR("DESede/CTR/NoPadding", 112, 0),
   DESEDE_168_IV_CTR("DESede/CTR/NoPadding", 168, 0),

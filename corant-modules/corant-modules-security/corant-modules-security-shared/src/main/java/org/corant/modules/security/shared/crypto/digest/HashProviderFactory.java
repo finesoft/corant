@@ -26,6 +26,7 @@ public enum HashProviderFactory {
   //@formatter:off
   MD2("MD2"),
   MD5("MD5"),
+  SHA1("SHA1"),
   SHA224("SHA-224"),
   SHA256("SHA-256"),
   SHA384("SHA-384"),

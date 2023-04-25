@@ -160,7 +160,7 @@
     <version.resteasy-microprofile>2.1.1.Final</version.resteasy-microprofile>
     <version.rsocket>1.1.1</version.rsocket>
     <version.shiro-all>1.7.1</version.shiro-all>
-    <version.slf4j>	2.0.7</version.slf4j>
+    <version.slf4j>1.7.36</version.slf4j>
     <version.smallrye-config>2.6.0</version.smallrye-config>
     <version.smallrye-fault-tolerance>6.2.2</version.smallrye-fault-tolerance>
     <version.smallrye-open-api>3.3.2</version.smallrye-open-api>

@@ -24,7 +24,7 @@ public enum KeyManagementAlgorithm {
   //@formatter:off
 
   //asymmetric
-  RSA1_5(true, "RSA1_5", "RSA", 2048, "RSAES-PKCS1-v1_5"),
+  RSA1_5(true, "RSA1_5", "RSA", 2048, "RSAES-PKCS1-v1_5"), // blocked by jose4j 0.9.3
   RSA_OAEP(true, "RSA-OAEP", "RSA", 2048, "RSA_OAEP"),
   RSA_OAEP_256(true, "RSA-OAEP-256", "RSA", 2048, "RSA_OAEP_256"),
   ECDH_ES(true,"ECDH-ES", "EC", null, "ECDH_ES"),

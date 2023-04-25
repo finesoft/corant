@@ -30,9 +30,9 @@ public enum SymmetricCipherProviderFactory {
 
   //@formatter:off
   // symmetric
-  AES_128_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 128, 96),
-  AES_192_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 192, 96),
-  AES_256_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 256, 96),
+  // AES_128_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 128, 96), --GCM is a stream cipher mode and does not use padding
+  // AES_192_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 192, 96), --GCM is a stream cipher mode and does not use padding
+  // AES_256_IV_GCM_PKCS5("AES/GCM/PKCS5Padding", 256, 96), --GCM is a stream cipher mode and does not use padding
 
   AES_128_IV_GCM("AES/GCM/NoPadding", 128, 96),
   AES_192_IV_GCM("AES/GCM/NoPadding", 192, 96),

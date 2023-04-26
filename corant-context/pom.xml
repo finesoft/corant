@@ -57,20 +57,37 @@
     <dependency>
       <groupId>org.eclipse.microprofile.context-propagation</groupId>
       <artifactId>microprofile-context-propagation-api</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.enterprise.concurrent</groupId>
       <artifactId>jakarta.enterprise.concurrent-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.el</groupId>
+      <artifactId>jakarta.el-api</artifactId>
+      <scope>compile</scope>
+    </dependency>    
+    <dependency>
+      <groupId>jakarta.interceptor</groupId>
+      <artifactId>jakarta.interceptor-api</artifactId>
+      <scope>compile</scope>
+    </dependency>      
+    <dependency>
       <groupId>jakarta.transaction</groupId>
-      <artifactId>jakarta.transaction-api</artifactId>    
+      <artifactId>jakarta.transaction-api</artifactId>   
+      <scope>compile</scope> 
     </dependency>    
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>

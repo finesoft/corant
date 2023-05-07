@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,22 +11,14 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.microprofile.jwt.jaxrs;
+package org.corant.modules.microprofile.jwt.servlet;
 
-import java.io.IOException;
-import java.util.Set;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.security.enterprise.AuthenticationException;
-import jakarta.security.enterprise.AuthenticationStatus;
-import jakarta.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
-import jakarta.security.enterprise.authentication.mechanism.http.HttpMessageContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.annotation.PostConstruct;
 import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
 import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
 import org.corant.modules.microprofile.jwt.MpJWTPrincipal;
@@ -35,7 +27,6 @@ import org.corant.modules.security.Authenticator;
 import org.corant.modules.security.SecurityContextManager;
 import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.AbstractBearerTokenExtractor;
 import io.smallrye.jwt.auth.cdi.PrincipalProducer;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
@@ -44,17 +35,10 @@ import io.smallrye.jwt.auth.principal.JWTParser;
 /**
  * corant-modules-microprofile-jwt
  *
- * <p>
- * Note: Code base from smallrye jwt, if there is infringement, please inform
- * me(finesoft@gmail.com).
- *
- * @author bingo 下午2:38:48
+ * @author bingo 上午11:23:46
  *
  */
-public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMechanism {
-
-  protected static final Logger logger = Logger.getLogger(MpJWTHttpAuthenticationMechanism.class);
-  protected static final boolean debugLogging = logger.isDebugEnabled();
+public abstract class AbstractMPJWTHttpServletAuthentication {
 
   @Inject
   protected JWTAuthContextInfo authContextInfo;
@@ -75,38 +59,16 @@ public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMecha
 
   protected Authenticator authenticator = MpJWTAuthenticator.DFLT_INST;
 
-  @Override
-  public AuthenticationStatus validateRequest(HttpServletRequest request,
-      HttpServletResponse response, HttpMessageContext httpMessageContext)
-      throws AuthenticationException {
-    AbstractBearerTokenExtractor extractor = new BearerTokenExtractor(request, authContextInfo);
-    String bearerToken = extractor.getBearerToken();
-    if (bearerToken != null) {
-      try {
-        AuthenticationData authcData =
-            authenticator.authenticate(new MpJWTJsonWebToken(bearerToken, request));
-        JsonWebToken jwtPrincipal = authcData.getPrincipal(MpJWTPrincipal.class);
-        producer.setJsonWebToken(jwtPrincipal);
-        Set<String> groups = jwtPrincipal.getGroups();
-        request.setAttribute(JsonWebToken.class.getCanonicalName(), jwtPrincipal);
-        if (securityManagers.isResolvable()) {
-          securityManagers.get().bind(request);
-        }
-        return httpMessageContext.notifyContainerAboutLogin(jwtPrincipal, groups);
-      } catch (org.corant.modules.security.AuthenticationException e) {
-        if (debugLogging) {
-          logger.warnf(e, "Unable to parse/validate JWT: %s.", e.getMessage());
-        } else {
-          logger.warnf("Unable to parse/validate JWT: %s.", e.getMessage());
-        }
-        return httpMessageContext.responseUnauthorized();
-      } catch (Exception e) {
-        return reportInternalError(httpMessageContext);
-      }
-    } else {
-      return httpMessageContext.isProtected() ? httpMessageContext.responseUnauthorized()
-          : httpMessageContext.doNothing();
+  protected JsonWebToken authenticate(String token, HttpServletRequest request) {
+    AuthenticationData authcData =
+        authenticator.authenticate(new MpJWTJsonWebToken(token, request));
+    JsonWebToken jwtPrincipal = authcData.getPrincipal(MpJWTPrincipal.class);
+    producer.setJsonWebToken(jwtPrincipal);
+    request.setAttribute(JsonWebToken.class.getCanonicalName(), jwtPrincipal);
+    if (securityManagers.isResolvable()) {
+      securityManagers.get().bind(request);
     }
+    return jwtPrincipal;
   }
 
   @PostConstruct
@@ -118,20 +80,21 @@ public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMecha
     }
   }
 
-  protected AuthenticationStatus reportInternalError(HttpMessageContext httpMessageContext) {
-    try {
-      httpMessageContext.getResponse().sendError(500);
-    } catch (IOException ioException) {
-      throw new IllegalStateException(ioException);
-    }
-    return AuthenticationStatus.SEND_FAILURE;
+  protected String resolveToken(HttpServletRequest request) {
+    return new BearerTokenExtractor(request, authContextInfo).getBearerToken();
   }
 
+  /**
+   * corant-modules-microprofile-jwt
+   *
+   * @author bingo 上午11:38:16
+   *
+   */
   protected static class BearerTokenExtractor extends AbstractBearerTokenExtractor {
 
     private final HttpServletRequest request;
 
-    BearerTokenExtractor(HttpServletRequest request, JWTAuthContextInfo authContextInfo) {
+    protected BearerTokenExtractor(HttpServletRequest request, JWTAuthContextInfo authContextInfo) {
       super(authContextInfo);
       this.request = request;
     }
@@ -159,5 +122,4 @@ public class MpJWTHttpAuthenticationMechanism implements HttpAuthenticationMecha
       return request.getHeader(headerName);
     }
   }
-
 }

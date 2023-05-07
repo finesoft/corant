@@ -12,6 +12,7 @@
  */
 package org.corant.modules.vertx.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -119,6 +120,7 @@ public class VertxExtension implements Extension {
   }
 
   public void registerConsumers(Vertx vertx, Event<Object> event) {
+    shouldNotNull(vertx);
     CountDownLatch latch = new CountDownLatch(consumerAddresses.size());
     for (String address : consumerAddresses) {
       MessageConsumer<?> consumer =
@@ -134,7 +136,7 @@ public class VertxExtension implements Extension {
       });
     }
     Context context = this.context;
-    if (context == null && vertx != null) {
+    if (context == null) {
       context = vertx.getOrCreateContext();
     }
     long timeout =

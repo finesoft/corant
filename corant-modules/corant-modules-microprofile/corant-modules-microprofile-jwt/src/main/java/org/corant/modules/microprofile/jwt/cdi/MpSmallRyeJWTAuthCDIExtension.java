@@ -20,7 +20,7 @@ import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.Extension;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthJaxRsFeature;
 import org.corant.modules.microprofile.jwt.jaxrs.MpJWTAuthenticationFilter;
-import org.corant.modules.microprofile.jwt.jaxrs.MpJWTHttpAuthenticationMechanism;
+import org.corant.modules.microprofile.jwt.servlet.MpJWTHttpAuthenticationMechanism;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import io.smallrye.jwt.auth.cdi.ClaimValueProducer;

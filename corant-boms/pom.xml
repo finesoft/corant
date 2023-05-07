@@ -62,7 +62,7 @@
     <version.grpc>1.54.1</version.grpc>
     <version.hanlp>portable-1.7.8</version.hanlp>
     <version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-    <version.hibernate-orm-core>6.2.1.Final</version.hibernate-orm-core>
+    <version.hibernate-orm-core>6.2.2.Final</version.hibernate-orm-core>
     <version.hibernate-validator-cdi>8.0.0.Final</version.hibernate-validator-cdi>
     <version.hikariCP>5.0.1</version.hikariCP>
     <version.hppc>0.9.1</version.hppc>
@@ -138,7 +138,7 @@
     <version.mokito>4.0.0</version.mokito>
     <version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
     <version.mysql>5.1.48</version.mysql>
-    <version.narayana>6.0.0.Final</version.narayana>
+    <version.narayana>6.0.1.Final</version.narayana>
     <version.ndarray>0.4.0</version.ndarray>
     <version.netty>4.1.87.Final</version.netty>
     <version.ognl>3.2.13</version.ognl>

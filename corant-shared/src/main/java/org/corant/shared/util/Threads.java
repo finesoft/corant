@@ -147,6 +147,7 @@ public class Threads {
     protected final Object monitor;
     protected final Runnable runnable;
     protected volatile boolean activated = true;
+    protected final long periodMs;
 
     public SimplePeriodRunnable(long period, Runnable runnable) {
       this(period, TimeUnit.MILLISECONDS, null, runnable);
@@ -158,6 +159,7 @@ public class Threads {
       this.periodUnit = defaultObject(periodUnit, TimeUnit.MILLISECONDS);
       this.monitor = monitor;
       this.runnable = shouldNotNull(runnable, "The runnable for runner can't null");
+      periodMs = period > 0 ? TimeUnit.MILLISECONDS.convert(period, periodUnit) : 0;
     }
 
     public void deactivate() {
@@ -170,12 +172,10 @@ public class Threads {
 
     @Override
     public void run() {
-      final long periodMilliSeconds =
-          period > 0 ? TimeUnit.MILLISECONDS.convert(period, periodUnit) : 0;
       try {
         while (activated) {
-          if (periodMilliSeconds > 0) {
-            Thread.sleep(periodMilliSeconds);
+          if (periodMs > 0) {
+            Thread.sleep(periodMs);
           }
           if (activated) {
             runnable.run();

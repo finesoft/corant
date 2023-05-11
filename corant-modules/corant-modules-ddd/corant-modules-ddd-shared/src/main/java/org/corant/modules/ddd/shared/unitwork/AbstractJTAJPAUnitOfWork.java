@@ -18,7 +18,11 @@ import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
+import org.corant.context.CDIs;
+import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.MessageDispatcher;
+import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
+import org.corant.modules.ddd.shared.event.AggregateEvolutionaryEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;
 
@@ -89,6 +93,15 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     }); // flush to dump dirty
     handleMessage();
     handlePreComplete();
+    if (EMIT_AGGREGATE_VOLUTIONARY_EVENT) {
+      evolutionaryAggregates.forEach((k, v) -> {
+        Aggregate aggregate = registeredAggregates.get(k);
+        if (aggregate != null) {
+          CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate),
+              AggregateTypeLiteral.of(aggregate));
+        }
+      });
+    }
   }
 
   @Override
@@ -141,5 +154,4 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
   protected boolean isActivated() {
     return activated && isInTransaction();
   }
-
 }

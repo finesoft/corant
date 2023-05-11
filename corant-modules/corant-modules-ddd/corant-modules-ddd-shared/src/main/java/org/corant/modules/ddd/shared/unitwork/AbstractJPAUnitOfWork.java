@@ -17,6 +17,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Maps.transformValue;
 import static org.corant.shared.util.Objects.areEqual;
 import java.util.Collection;
 import java.util.Comparator;
@@ -71,12 +72,15 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
       .orElse(Boolean.FALSE);
+  static final boolean EMIT_AGGREGATE_VOLUTIONARY_EVENT = ConfigProvider.getConfig()
+      .getOptionalValue("corant.ddd.unitofwork.emit-aggregate-evolutionary-event", Boolean.class)
+      .orElse(Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected final UnitOfWorksManager manager;
   protected final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
-  protected final Map<AggregateIdentifier, Lifecycle> registeredAggregates = new LinkedHashMap<>();
+  protected final Map<AggregateIdentifier, Aggregate> registeredAggregates = new LinkedHashMap<>();
   protected final Map<AggregateIdentifier, Lifecycle> evolutionaryAggregates =
       new LinkedHashMap<>();
   protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
@@ -124,8 +128,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    *
    * @return the registered aggregates
    */
-  public Map<AggregateIdentifier, Lifecycle> getAggregates() {
-    return unmodifiableMap(registeredAggregates);
+  public Collection<Aggregate> getAggregates() {
+    return unmodifiableCollection(registeredAggregates.values());
   }
 
   /**
@@ -202,8 +206,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
         Aggregate aggregate = (Aggregate) obj;
         if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
+          registeredAggregates.put(ai, aggregate);
           Lifecycle al = aggregate.getLifecycle();
-          registeredAggregates.put(ai, al);
           if (al.signFlushed()) {
             evolutionaryAggregates.put(ai, al);
           }
@@ -297,7 +301,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     final Map<Object, Object> variables;
 
     Registration(AbstractJPAUnitOfWork uow) {
-      aggregates = unmodifiableMap(new LinkedHashMap<>(uow.registeredAggregates));
+      aggregates = unmodifiableMap(
+          new LinkedHashMap<>(transformValue(uow.registeredAggregates, Aggregate::getLifecycle)));
       variables = unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
     }
 

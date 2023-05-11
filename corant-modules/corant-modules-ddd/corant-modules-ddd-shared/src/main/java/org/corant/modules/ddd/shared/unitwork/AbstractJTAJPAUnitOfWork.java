@@ -93,7 +93,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     }); // flush to dump dirty
     handleMessage();
     handlePreComplete();
-    if (EMIT_AGGREGATE_VOLUTIONARY_EVENT) {
+    if (EMIT_AGGREGATE_EVOLUTIONARY_EVENT) {
       evolutionaryAggregates.forEach((k, v) -> {
         Aggregate aggregate = registeredAggregates.get(k);
         if (aggregate != null) {

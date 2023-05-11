@@ -72,7 +72,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
       .orElse(Boolean.FALSE);
-  static final boolean EMIT_AGGREGATE_VOLUTIONARY_EVENT = ConfigProvider.getConfig()
+  static final boolean EMIT_AGGREGATE_EVOLUTIONARY_EVENT = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.emit-aggregate-evolutionary-event", Boolean.class)
       .orElse(Boolean.FALSE);
 

@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
 import org.corant.modules.jpa.shared.PersistenceService;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-ddd-shared
@@ -64,7 +65,7 @@ public abstract class AbstractJPAUnitOfWorksManager implements UnitOfWorksManage
   @Override
   public Stream<UnitOfWorksHandler> getHandlers() {
     if (!handlers.isUnsatisfied()) {
-      return handlers.stream().sorted(UnitOfWorksHandler::compare);
+      return handlers.stream().sorted(Sortable::compare);
     }
     return Stream.empty();
   }

@@ -173,8 +173,9 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
       try {
-        T object = resultSetHandler.handle(resultSet);
-        boolean hasMore = object != null;
+        T object = null;
+        boolean hasMore =
+            !resultSet.isClosed() && (object = resultSetHandler.handle(resultSet)) != null;
         if (hasMore) {
           hasMore = terminater == null || terminater.test(counter.incrementAndGet(), object);
         }

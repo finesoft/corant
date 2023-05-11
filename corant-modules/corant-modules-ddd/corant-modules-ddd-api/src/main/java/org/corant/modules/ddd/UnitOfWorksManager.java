@@ -16,6 +16,7 @@ package org.corant.modules.ddd;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-ddd-api
@@ -61,15 +62,7 @@ public interface UnitOfWorksManager {
    *
    */
   @FunctionalInterface
-  interface UnitOfWorksHandler {
-
-    static int compare(UnitOfWorksHandler h1, UnitOfWorksHandler h2) {
-      return Integer.compare(h1.getOrdinal(), h2.getOrdinal());
-    }
-
-    default int getOrdinal() {
-      return 0;
-    }
+  interface UnitOfWorksHandler extends Sortable {
 
     /**
      * Callback notified before the unit of work is completed.

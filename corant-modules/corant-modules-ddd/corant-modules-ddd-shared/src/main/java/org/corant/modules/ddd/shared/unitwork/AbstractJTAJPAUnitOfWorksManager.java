@@ -43,6 +43,9 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   protected final Map<Object, AbstractJTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
+  protected UnitOfWorkExtension extension;
+
+  @Inject
   protected TransactionManager transactionManager;
 
   @Inject
@@ -67,6 +70,10 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     } catch (SystemException | IllegalStateException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
+  }
+
+  public UnitOfWorkExtension getExtension() {
+    return extension;
   }
 
   public MessageDispatcher getMessageDispatcher() {

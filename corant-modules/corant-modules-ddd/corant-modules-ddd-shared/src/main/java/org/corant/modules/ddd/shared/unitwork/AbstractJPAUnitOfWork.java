@@ -17,6 +17,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Maps.transformValue;
 import static org.corant.shared.util.Objects.areEqual;
 import java.util.Collection;
 import java.util.Comparator;
@@ -41,11 +42,10 @@ import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
-import org.corant.modules.ddd.shared.event.AggregatePersistEvent;
+import org.corant.modules.ddd.shared.event.AggregatePersistedEvent;
 import org.corant.modules.jpa.shared.ExtendedEntityManager;
 import org.corant.shared.exception.GeneralRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Maps;
 import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
@@ -71,9 +71,6 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
 
   static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
-      .orElse(Boolean.FALSE);
-  static final boolean EMIT_AGGREGATE_EVOLUTIONARY_EVENT = ConfigProvider.getConfig()
-      .getOptionalValue("corant.ddd.unitofwork.emit-aggregate-evolutionary-event", Boolean.class)
       .orElse(Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
@@ -263,9 +260,9 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     });
     if (success) {
       evolutionaryAggregates.forEach((k, v) -> {
-        if (v.signFlushed()) {
+        if (v.signFlushed() && supportsPersistedObserver(k.getTypeCls())) {
           try {
-            CDIs.fireAsyncEvent(new AggregatePersistEvent(k, v),
+            CDIs.fireAsyncEvent(new AggregatePersistedEvent(k, v),
                 AggregateTypeLiteral.of(k.getTypeCls()));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");
@@ -289,6 +286,10 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     return activated;
   }
 
+  protected boolean supportsPersistedObserver(Class<?> aggregateClass) {
+    return true;
+  }
+
   /**
    * corant-modules-ddd-shared
    *
@@ -301,8 +302,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     final Map<Object, Object> variables;
 
     Registration(AbstractJPAUnitOfWork uow) {
-      aggregates = unmodifiableMap(new LinkedHashMap<>(
-          Maps.transformValue(uow.registeredAggregates, Aggregate::getLifecycle)));
+      aggregates = unmodifiableMap(
+          new LinkedHashMap<>(transformValue(uow.registeredAggregates, Aggregate::getLifecycle)));
       variables = unmodifiableMap(new LinkedHashMap<>(uow.registeredVariables));
     }
 

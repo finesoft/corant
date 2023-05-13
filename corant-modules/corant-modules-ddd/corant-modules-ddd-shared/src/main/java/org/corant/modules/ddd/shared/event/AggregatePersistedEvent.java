@@ -40,21 +40,21 @@ import org.corant.modules.ddd.annotation.Events;
  * @author bingo 上午9:39:28
  */
 @Events
-public class AggregatePersistEvent extends AbstractEvent {
+public class AggregatePersistedEvent extends AbstractEvent {
 
   private static final long serialVersionUID = -5079236126615952794L;
 
   private final Lifecycle lifecycle;
 
-  public AggregatePersistEvent(Aggregate source) {
+  public AggregatePersistedEvent(Aggregate source) {
     this(source, source.getLifecycle());
   }
 
-  public AggregatePersistEvent(Aggregate source, Lifecycle lifecycle) {
+  public AggregatePersistedEvent(Aggregate source, Lifecycle lifecycle) {
     this(new DefaultAggregateIdentifier(source), lifecycle);
   }
 
-  public AggregatePersistEvent(AggregateIdentifier source, Lifecycle lifecycle) {
+  public AggregatePersistedEvent(AggregateIdentifier source, Lifecycle lifecycle) {
     super(source);
     this.lifecycle = lifecycle;
   }

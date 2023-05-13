@@ -25,6 +25,7 @@ import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
 import org.corant.modules.ddd.shared.event.AggregateEvolutionaryEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.shared.ubiquity.Mutable.MutableBoolean;
 
 /**
  * corant-modules-ddd-shared
@@ -46,10 +47,12 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
 
   protected final Transaction transaction;
   protected final MessageDispatcher messageDispatcher;
+  protected final UnitOfWorkExtension extension;
 
   protected AbstractJTAJPAUnitOfWork(AbstractJTAJPAUnitOfWorksManager manager,
       Transaction transaction) {
     super(manager);
+    extension = manager.getExtension();
     this.transaction = transaction;
     messageDispatcher = manager.getMessageDispatcher();
     messageDispatcher.prepare();
@@ -69,39 +72,24 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
 
   @Override
   public void beforeCompletion() {
-    entityManagers.values().forEach(em -> {
-      logger.fine(() -> String.format(
-          "Enforce entity managers %s flush to collect the messages, before %s completion.", em,
-          transaction.toString()));
-      if (USE_MANUAL_FLUSH_MODEL) {
-        final FlushModeType fm = em.getFlushMode();
-        try {
-          if (fm != FlushModeType.COMMIT) {
-            em.setFlushMode(FlushModeType.COMMIT);
-          }
-          em.flush();
-        } catch (Exception e) {
-          throw new CorantRuntimeException(e);
-        } finally {
-          if (fm != em.getFlushMode()) {
-            em.setFlushMode(fm);
-          }
-        }
-      } else {
-        em.flush();
+    // fan-out the aggregate state changes in the current unit of work
+    flushEntityManagers();
+    MutableBoolean fired = new MutableBoolean(false);
+    evolutionaryAggregates.forEach((k, v) -> {
+      Aggregate aggregate = registeredAggregates.get(k);
+      if (aggregate != null && extension.supportsEvolutionaryObserver(k.getTypeCls())) {
+        CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate),
+            AggregateTypeLiteral.of(k.getTypeCls()));
+        fired.set(true);
       }
-    }); // flush to dump dirty
+    });
+    if (fired.get()) {
+      // the state of the aggregate in the current unit of work may change again, fan-out again
+      flushEntityManagers();
+    }
+    // fan-out the collected domain messages
     handleMessage();
     handlePreComplete();
-    if (EMIT_AGGREGATE_EVOLUTIONARY_EVENT) {
-      evolutionaryAggregates.forEach((k, v) -> {
-        Aggregate aggregate = registeredAggregates.get(k);
-        if (aggregate != null) {
-          CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate),
-              AggregateTypeLiteral.of(aggregate));
-        }
-      });
-    }
   }
 
   @Override
@@ -143,6 +131,31 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     }
   }
 
+  protected void flushEntityManagers() {
+    entityManagers.values().forEach(em -> {
+      logger.fine(() -> String.format(
+          "Enforce entity managers %s flush to collect the messages, before %s completion.", em,
+          transaction.toString()));
+      if (USE_MANUAL_FLUSH_MODEL) {
+        final FlushModeType fm = em.getFlushMode();
+        try {
+          if (fm != FlushModeType.COMMIT) {
+            em.setFlushMode(FlushModeType.COMMIT);
+          }
+          em.flush();
+        } catch (Exception e) {
+          throw new CorantRuntimeException(e);
+        } finally {
+          if (fm != em.getFlushMode()) {
+            em.setFlushMode(fm);
+          }
+        }
+      } else {
+        em.flush();
+      }
+    });
+  }
+
   @Override
   protected AbstractJTAJPAUnitOfWorksManager getManager() {
     return (AbstractJTAJPAUnitOfWorksManager) super.getManager();
@@ -154,4 +167,10 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
   protected boolean isActivated() {
     return activated && isInTransaction();
   }
+
+  @Override
+  protected boolean supportsPersistedObserver(Class<?> aggregateClass) {
+    return extension.supportsPersistedObserver(aggregateClass);
+  }
+
 }

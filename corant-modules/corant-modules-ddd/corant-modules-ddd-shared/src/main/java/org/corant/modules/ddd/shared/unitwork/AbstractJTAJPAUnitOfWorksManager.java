@@ -16,7 +16,7 @@ package org.corant.modules.ddd.shared.unitwork;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -24,7 +24,6 @@ import jakarta.transaction.RollbackException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
-import jakarta.annotation.PreDestroy;
 import org.corant.modules.ddd.MessageDispatcher;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -42,6 +41,9 @@ import org.corant.shared.exception.CorantRuntimeException;
 public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOfWorksManager {
 
   protected final Map<Object, AbstractJTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
+
+  @Inject
+  protected UnitOfWorkExtension extension;
 
   @Inject
   protected TransactionManager transactionManager;
@@ -68,6 +70,10 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     } catch (SystemException | IllegalStateException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
+  }
+
+  public UnitOfWorkExtension getExtension() {
+    return extension;
   }
 
   public MessageDispatcher getMessageDispatcher() {

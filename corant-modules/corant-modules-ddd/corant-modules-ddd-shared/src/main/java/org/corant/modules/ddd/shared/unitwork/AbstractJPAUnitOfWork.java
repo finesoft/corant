@@ -69,16 +69,18 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
 
-  static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
+  protected static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
       .orElse(Boolean.FALSE);
+  protected static final int MAX_CHANGES_ITERATIONS = ConfigProvider.getConfig()
+      .getOptionalValue("corant.ddd.unitofwork.max-changes-iterations", Integer.class).orElse(32);
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
 
   protected final UnitOfWorksManager manager;
   protected final Map<PersistenceContext, EntityManager> entityManagers = new HashMap<>();
   protected final Map<AggregateIdentifier, Aggregate> registeredAggregates = new LinkedHashMap<>();
-  protected final Map<AggregateIdentifier, Lifecycle> evolutionaryAggregates =
+  protected final Map<AggregateIdentifier, Pair<Integer, Lifecycle>> evolutionaryAggregates =
       new LinkedHashMap<>();
   protected final Map<Object, Object> registeredVariables = new LinkedHashMap<>();
   protected final LinkedList<WrappedMessage> registeredMessages = new LinkedList<>();
@@ -206,7 +208,12 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
           registeredAggregates.put(ai, aggregate);
           Lifecycle al = aggregate.getLifecycle();
           if (al.signFlushed()) {
-            evolutionaryAggregates.put(ai, al);
+            int evos = 1;
+            Pair<Integer, Lifecycle> exists = evolutionaryAggregates.get(ai);
+            if (exists != null) {
+              evos = exists.getLeft().intValue() + 1;
+            }
+            evolutionaryAggregates.put(ai, Pair.of(evos, al));
           }
           for (Message message : aggregate.extractMessages(true)) {
             WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage(message, ai));
@@ -260,9 +267,9 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     });
     if (success) {
       evolutionaryAggregates.forEach((k, v) -> {
-        if (v.signFlushed() && supportsPersistedObserver(k.getTypeCls())) {
+        if (v.right().signFlushed() && supportsPersistedObserver(k.getTypeCls())) {
           try {
-            CDIs.fireAsyncEvent(new AggregatePersistedEvent(k, v),
+            CDIs.fireAsyncEvent(new AggregatePersistedEvent(k, v.right()),
                 AggregateTypeLiteral.of(k.getTypeCls()));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");

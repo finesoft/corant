@@ -13,13 +13,15 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.persistence.FlushModeType;
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
 import org.corant.context.CDIs;
-import org.corant.modules.ddd.Aggregate;
+import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.MessageDispatcher;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
 import org.corant.modules.ddd.shared.event.AggregateEvolutionaryEvent;
@@ -72,23 +74,11 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
 
   @Override
   public void beforeCompletion() {
-    // fan-out the aggregate state changes in the current unit of work
-    flushEntityManagers();
-    MutableBoolean fired = new MutableBoolean(false);
-    evolutionaryAggregates.forEach((k, v) -> {
-      Aggregate aggregate = registeredAggregates.get(k);
-      if (aggregate != null && extension.supportsEvolutionaryObserver(k.getTypeCls())) {
-        CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate),
-            AggregateTypeLiteral.of(k.getTypeCls()));
-        fired.set(true);
-      }
-    });
-    if (fired.get()) {
-      // the state of the aggregate in the current unit of work may change again, fan-out again
-      flushEntityManagers();
-    }
+    // fan-out the aggregate state changes to inform the event handlers in the current unit of work
+    fanoutEvolutions();
     // fan-out the collected domain messages
-    handleMessage();
+    fanoutMessage();
+    // handle unit of work call-backs
     handlePreComplete();
   }
 
@@ -131,6 +121,53 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     }
   }
 
+  protected void fanoutEvolutions() {
+    // flush the aggregate state changes to persistence in the current unit of work
+    flushEntityManagers();
+    if (!evolutionaryAggregates.isEmpty()) {
+      Map<AggregateIdentifier, Integer> evolutions = new HashMap<>();
+      Map<AggregateIdentifier, Integer> temp = new HashMap<>(evolutionaryAggregates.size());
+      MutableBoolean fanout = new MutableBoolean(false);
+      int i = MAX_CHANGES_ITERATIONS;
+      while (true) {
+        temp.clear();
+        fanout.set(false);
+        evolutionaryAggregates.forEach((k, v) -> {
+          if (extension.supportsEvolutionaryObserver(k.getTypeCls())) {
+            temp.put(k, v.left());
+          }
+        });
+        if (temp.isEmpty() || evolutions.equals(temp)) {
+          break;
+        }
+        temp.forEach((k, v) -> {
+          Integer last = evolutions.get(k);
+          if (last == null || last.intValue() != v.intValue()) {
+            evolutions.put(k, v);
+            CDIs.fireEvent(new AggregateEvolutionaryEvent(registeredAggregates.get(k)),
+                AggregateTypeLiteral.of(k.getTypeCls()));
+            fanout.set(true);
+          }
+        });
+        if (fanout.get()) {
+          // the state of the aggregate in the current unit of work may change again, flush again
+          flushEntityManagers();
+        } else {
+          break;
+        }
+        if (--i < 0) {
+          throw new CorantRuntimeException(
+              "Reach max changes iterations [%s], can't handle aggregate evolutionary event! ",
+              MAX_CHANGES_ITERATIONS);
+        }
+      }
+      evolutions.clear();
+      temp.clear();
+    }
+  }
+
+  protected abstract void fanoutMessage();
+
   protected void flushEntityManagers() {
     entityManagers.values().forEach(em -> {
       logger.fine(() -> String.format(
@@ -160,8 +197,6 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
   protected AbstractJTAJPAUnitOfWorksManager getManager() {
     return (AbstractJTAJPAUnitOfWorksManager) super.getManager();
   }
-
-  protected abstract void handleMessage();
 
   @Override
   protected boolean isActivated() {

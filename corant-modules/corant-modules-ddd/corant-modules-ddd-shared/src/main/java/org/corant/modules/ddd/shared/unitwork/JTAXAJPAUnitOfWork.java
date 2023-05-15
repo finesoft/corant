@@ -45,18 +45,19 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   }
 
   @Override
-  protected void handleMessage() {
+  protected void fanoutMessage() {
     logger.fine(() -> String.format(
         "Sorted the flushed messages and store them if necessary, dispatch them to the message dispatcher, before %s completion.",
         transaction.toString()));
     LinkedList<WrappedMessage> messages = new LinkedList<>();
     extractMessages(messages);
-    int cycles = 128;
+    int cycles = MAX_CHANGES_ITERATIONS;
     WrappedMessage wm;
     while ((wm = messages.poll()) != null) {
       messageDispatcher.accept(new Message[] {wm.delegate});
       if (extractMessages(messages) && --cycles < 0) {
-        throw new CorantRuntimeException("Can not handle messages!");
+        throw new CorantRuntimeException(
+            "Reach max changes iterations [%s], can't handle messages! ", MAX_CHANGES_ITERATIONS);
       }
     }
   }

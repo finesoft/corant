@@ -80,7 +80,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   }
 
   @Override
-  protected void fanoutMessage() {
+  protected void fanoutMessages() {
     logger.fine(() -> String.format(
         "Sorted the flushed messages and trigger them if necessary, store them to the message storage, before %s completion.",
         transaction.toString()));

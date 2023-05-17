@@ -77,7 +77,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     // fan-out the aggregate state changes to inform the event handlers in the current unit of work
     fanoutEvolutions();
     // fan-out the collected domain messages
-    fanoutMessage();
+    fanoutMessages();
     // handle unit of work call-backs
     handlePreComplete();
   }
@@ -166,7 +166,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     }
   }
 
-  protected abstract void fanoutMessage();
+  protected abstract void fanoutMessages();
 
   protected void flushEntityManagers() {
     entityManagers.values().forEach(em -> {

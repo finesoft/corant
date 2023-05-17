@@ -40,7 +40,7 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
   }
 
   @Override
-  protected void fanoutMessage() {
+  protected void fanoutMessages() {
     logger.fine(() -> String.format(
         "Sorted the flushed messages and store them if necessary, dispatch them to the message dispatcher, before %s completion.",
         transaction.toString()));

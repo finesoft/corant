@@ -95,7 +95,7 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Remove the data for the given entity from the cache.
    *
-   * @param entity entity to be evict
+   * @param entity entity to be evicted
    */
   default void evictCache(Entity entity) {
     if (entity == null || entity.getId() == null) {

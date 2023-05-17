@@ -28,7 +28,8 @@ import org.corant.shared.util.Strings;
  */
 public class DefaultStringPredicatesFunctionResolver implements FunctionResolver {
 
-  public static final Set<String> SIGNS = immutableSetOf("isBlank,isEmpty,contains,matchWildcard");
+  public static final Set<String> SIGNS = immutableSetOf(
+      "isBlank,isEmpty,contains,matchWildcard,length,trim,substring,indexOf,lastIndexOf");
 
   @Override
   public Function<Object[], Object> resolve(String name) {
@@ -37,8 +38,32 @@ public class DefaultStringPredicatesFunctionResolver implements FunctionResolver
       String object = fs[0] == null ? null : fs[0].toString();
       if ("isBlank".equals(name)) {
         return Strings.isBlank(object);
+      } else if ("length".equals(name)) {
+        return object == null ? 0 : object.length();
+      } else if ("trim".equals(name)) {
+        return Strings.trim(object);
       } else if ("isEmpty".equals(name)) {
         return object == null || object.isEmpty();
+      } else if ("substring".equals(name)) {
+        shouldBeTrue(fs.length >= 2 && fs[1] != null);
+        if (fs.length > 2) {
+          return object.substring(Integer.parseInt(fs[1].toString()),
+              Integer.parseInt(fs[2].toString()));
+        } else {
+          return object.substring(Integer.parseInt(fs[1].toString()));
+        }
+      } else if ("indexOf".equals(name)) {
+        shouldBeTrue(fs.length >= 2 && fs[1] != null);
+        if (fs.length > 2) {
+          return object.indexOf(fs[1].toString(), Integer.parseInt(fs[2].toString()));
+        }
+        return object.indexOf(fs[1].toString());
+      } else if ("lastIndexOf".equals(name)) {
+        shouldBeTrue(fs.length >= 2 && fs[1] != null);
+        if (fs.length > 2) {
+          return object.lastIndexOf(fs[1].toString(), Integer.parseInt(fs[2].toString()));
+        }
+        return object.lastIndexOf(fs[1].toString());
       } else if ("contains".equals(name)) {
         shouldBeTrue(fs.length >= 2 && fs[1] != null);
         return Strings.contains(object, fs[1].toString());

@@ -73,7 +73,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
       .orElse(Boolean.FALSE);
   protected static final int MAX_CHANGES_ITERATIONS = ConfigProvider.getConfig()
-      .getOptionalValue("corant.ddd.unitofwork.max-changes-iterations", Integer.class).orElse(32);
+      .getOptionalValue("corant.ddd.unitofwork.max-changes-iterations", Integer.class).orElse(128);
 
   protected final Logger logger = Logger.getLogger(this.getClass().toString());
 
@@ -211,7 +211,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
             int evos = 1;
             Pair<Integer, Lifecycle> exists = evolutionaryAggregates.get(ai);
             if (exists != null) {
-              evos = exists.getLeft().intValue() + 1;
+              evos = exists.getLeft() + 1;
             }
             evolutionaryAggregates.put(ai, Pair.of(evos, al));
           }

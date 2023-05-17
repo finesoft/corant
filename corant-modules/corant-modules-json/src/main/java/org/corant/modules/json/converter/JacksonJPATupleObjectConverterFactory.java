@@ -29,7 +29,7 @@ import org.corant.shared.service.RequiredClassPresent;
  * @author bingo 上午12:06:55
  *
  */
-@RequiredClassPresent("javax.persistence.Tuple")
+@RequiredClassPresent("jakarta.persistence.Tuple")
 public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 
   @Override

@@ -46,6 +46,9 @@ public class HibernateMySQL8Dialect extends MySQLDialect {
       case Types.VARCHAR -> jdbcTypeCode = StandardBasicTypes.NSTRING.getSqlTypeCode();
       case Types.CHAR -> jdbcTypeCode = StandardBasicTypes.CHARACTER_NCHAR.getSqlTypeCode();
       case Types.LONGNVARCHAR -> jdbcTypeCode = StandardBasicTypes.NTEXT.getSqlTypeCode();
+      default -> {
+        break;
+      }
     }
     return super.resolveSqlTypeDescriptor(columnTypeName, jdbcTypeCode, precision, scale,
         jdbcTypeRegistry);

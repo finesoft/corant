@@ -47,6 +47,9 @@ public class HibernateSQLServer2012Dialect extends SQLServerDialect {
     switch (jdbcTypeCode) {
       case Types.VARCHAR -> jdbcTypeCode = StandardBasicTypes.NSTRING.getSqlTypeCode();
       case Types.CHAR -> jdbcTypeCode = StandardBasicTypes.CHARACTER_NCHAR.getSqlTypeCode();
+      default -> {
+        break;
+      }
     }
     return super.resolveSqlTypeDescriptor(columnTypeName, jdbcTypeCode, precision, scale,
         jdbcTypeRegistry);

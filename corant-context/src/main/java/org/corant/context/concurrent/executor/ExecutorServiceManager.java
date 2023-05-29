@@ -90,8 +90,8 @@ public class ExecutorServiceManager {
           .filter(c -> !c.isLongRunningTasks() && c.isValid())
           .map(ManagedExecutorConfig::getHungTaskThreshold).min(Long::compare).orElse(0L);
       if (checkPeriod > 0) {
-        checkPeriod = checkPeriod / 2;
-        final long useCheckPeriod = max(checkPeriod, 1000L);
+        checkPeriod = checkPeriod >>> 2;
+        final long useCheckPeriod = max(checkPeriod, 2000L);
         hungLogger = new HungLogger(this, useCheckPeriod);
         hungLogger.start();
         logger.info(() -> String.format(

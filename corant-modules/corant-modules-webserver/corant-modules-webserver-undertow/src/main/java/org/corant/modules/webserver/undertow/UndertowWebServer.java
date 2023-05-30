@@ -55,6 +55,7 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
+import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.builder.PredicatedHandler;
 import io.undertow.server.handlers.builder.PredicatedHandlersParser;
@@ -392,6 +393,11 @@ public class UndertowWebServer extends AbstractWebServer {
         wsdi.addEndpoint(es);
         logger.fine(() -> String.format("Resolve websocket endpoint class [%s].", es.getName()));
       });
+      wsdi.setBuffers(new DefaultByteBufferPool(specConfig.isWebsocketBufferPoolDirectBuffer(),
+          specConfig.getWebsocketBufferPoolBufferSize(),
+          specConfig.getWebsocketBufferPoolMaxPoolSize(),
+          specConfig.getWebsocketBufferPoolCacheSize(),
+          specConfig.getWebsocketBufferPoolLeakDecetionPercent()));
       di.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, wsdi);
     }
   }

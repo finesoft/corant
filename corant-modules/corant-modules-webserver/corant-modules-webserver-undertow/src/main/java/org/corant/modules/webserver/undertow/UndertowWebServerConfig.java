@@ -134,50 +134,51 @@ public class UndertowWebServerConfig {
   @ConfigProperty(name = "corant.webserver.default-response-charset")
   protected Optional<String> defaultResponseCharset;
 
-  /**
-   *
-   * @return the backLog
-   */
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.websocket.buffer-pool.direct-buffer",
+      defaultValue = "false")
+  protected boolean websocketBufferPoolDirectBuffer;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.websocket.buffer-pool.buffer-size",
+      defaultValue = "1024")
+  protected Integer websocketBufferPoolBufferSize;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.websocket.buffer-pool.max-pool-size",
+      defaultValue = "100")
+  protected Integer websocketBufferPoolMaxPoolSize;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.websocket.buffer-pool.cache-size",
+      defaultValue = "12")
+  protected Integer websocketBufferPoolCacheSize;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.websocket.buffer-pool.leak-decetion-percent",
+      defaultValue = "0")
+  protected Integer websocketBufferPoolLeakDecetionPercent;
+
   public int getBackLog() {
     return backLog;
   }
 
-  /**
-   *
-   * @return the balancingConnections
-   */
   public int getBalancingConnections() {
     return balancingConnections;
   }
 
-  /**
-   *
-   * @return the balancingTokens
-   */
   public int getBalancingTokens() {
     return balancingTokens;
   }
 
-  /**
-   *
-   * @return the bufferSize
-   */
   public int getBufferSize() {
     return bufferSize;
   }
 
-  /**
-   *
-   * @return the defaultRequestCharset
-   */
   public Optional<String> getDefaultRequestCharset() {
     return defaultRequestCharset;
   }
 
-  /**
-   *
-   * @return the defaultResponseCharset
-   */
   public Optional<String> getDefaultResponseCharset() {
     return defaultResponseCharset;
   }
@@ -186,18 +187,10 @@ public class UndertowWebServerConfig {
     return defaultSessionTimeout;
   }
 
-  /**
-   *
-   * @return the highWater
-   */
   public int getHighWater() {
     return highWater;
   }
 
-  /**
-   *
-   * @return the ioThreads
-   */
   public Integer getIoThreads() {
     return ioThreads.orElse(max(Runtime.getRuntime().availableProcessors() * 2, 2));
   }
@@ -206,128 +199,88 @@ public class UndertowWebServerConfig {
     return jspContentPath;
   }
 
-  /**
-   *
-   * @return the jspServingPath
-   */
   public Optional<String> getJspServingPath() {
     return jspServingPath;
   }
 
-  /**
-   *
-   * @return the lowWater
-   */
   public int getLowWater() {
     return lowWater;
   }
 
-  /**
-   *
-   * @return the notRequestTimeout
-   */
   public int getNotRequestTimeout() {
     return notRequestTimeout;
   }
 
-  /**
-   *
-   * @return the staticContentPaths
-   */
   public Optional<String> getStaticContentPath() {
     return staticContentPath;
   }
 
-  /**
-   *
-   * @return the staticPaths
-   */
   public Optional<String> getStaticPaths() {
     return staticPaths;
   }
 
-  /**
-   *
-   * @return the staticServingPath
-   */
   public Optional<String> getStaticServingPath() {
     return staticServingPath;
+  }
+
+  public Integer getWebsocketBufferPoolBufferSize() {
+    return websocketBufferPoolBufferSize;
+  }
+
+  public Integer getWebsocketBufferPoolCacheSize() {
+    return websocketBufferPoolCacheSize;
+  }
+
+  public Integer getWebsocketBufferPoolLeakDecetionPercent() {
+    return websocketBufferPoolLeakDecetionPercent;
+  }
+
+  public Integer getWebsocketBufferPoolMaxPoolSize() {
+    return websocketBufferPoolMaxPoolSize;
   }
 
   public Set<String> getWelcomePages() {
     return welcomePages;
   }
 
-  /**
-   *
-   * @return the cork
-   */
   public boolean isCork() {
     return cork;
   }
 
-  /**
-   *
-   * @return the eagerFilterInit
-   */
   public boolean isEagerFilterInit() {
     return eagerFilterInit;
   }
 
-  /**
-   *
-   * @return the enableAjp
-   */
   public boolean isEnableAjp() {
     return enableAjp;
   }
 
-  /**
-   *
-   * @return the enableDefaultServlet
-   */
   public boolean isEnableDefaultServlet() {
     return enableDefaultServlet;
   }
 
-  /**
-   *
-   * @return the enableHttp2
-   */
   public boolean isEnableHttp2() {
     return enableHttp2;
   }
 
-  /**
-   *
-   * @return the escapeErrorMessage
-   */
   public boolean isEscapeErrorMessage() {
     return escapeErrorMessage;
   }
 
-  /**
-   *
-   * @return isPersistenceSession
-   */
   public boolean isPersistenceSession() {
     return persistenceSession;
   }
 
-  /**
-   *
-   * @return the reuseAddress
-   */
   public boolean isReuseAddress() {
     return reuseAddress;
   }
 
-  /**
-   *
-   * @return the tcpNoDelay
-   */
   public boolean isTcpNoDelay() {
     return tcpNoDelay;
+  }
+
+  public boolean isWebsocketBufferPoolDirectBuffer() {
+    return websocketBufferPoolDirectBuffer;
   }
 
 }

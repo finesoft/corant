@@ -1,5 +1,6 @@
 package org.corant.modules.jcache.shared;
 
+import java.util.function.Function;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import jakarta.enterprise.event.Observes;
@@ -8,6 +9,8 @@ import jakarta.enterprise.inject.spi.AfterTypeDiscovery;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Fields;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jsr107.ri.annotations.DefaultGeneratedCacheKey;
 import org.jsr107.ri.annotations.cdi.CachePutInterceptor;
@@ -29,8 +32,36 @@ public class JCacheExtension implements Extension {
 
   protected CachingProvider cachingProvider;
 
-  public static DefaultGeneratedCacheKey resolveDefaultCacheKey(Object... parameters) {
-    return new DefaultGeneratedCacheKey(parameters);
+  public static Object unwrapKey(Object key) {
+    if (key instanceof CorantGeneratedCacheKey) {
+      return ((CorantGeneratedCacheKey) key).get(0);
+    } else if (key instanceof DefaultGeneratedCacheKey) {
+      DefaultGeneratedCacheKey ck = (DefaultGeneratedCacheKey) key;
+      Object[] data = (Object[]) Fields.getFieldValue("parameters", ck);
+      if (data != null) {
+        return data[0];
+      }
+    }
+    return key;
+  }
+
+  public static <K> K unwrapKey(Object key, Class<K> clazz) {
+    return clazz.cast(unwrapKey(key));
+  }
+
+  public static <K> K unwrapKey(Object key, Function<Object[], K> converter) {
+    if (key instanceof CorantGeneratedCacheKey) {
+      return converter.apply(((CorantGeneratedCacheKey) key).parameters());
+    } else if (key instanceof DefaultGeneratedCacheKey) {
+      DefaultGeneratedCacheKey ck = (DefaultGeneratedCacheKey) key;
+      Object[] data = (Object[]) Fields.getFieldValue("parameters", ck);
+      converter.apply(data);
+    }
+    throw new NotSupportedException();
+  }
+
+  public static CorantGeneratedCacheKey wrapKey(Object... parameters) {
+    return new CorantGeneratedCacheKey(parameters);
   }
 
   public void observeAfterBeanDiscovery(@Observes AfterBeanDiscovery abd, final BeanManager bm) {

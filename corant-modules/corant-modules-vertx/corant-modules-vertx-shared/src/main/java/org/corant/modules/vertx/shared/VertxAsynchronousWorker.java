@@ -34,7 +34,7 @@ import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
  * class Hello {
  *
  *     &#64;Inject
- *     AsyncWorker worker;
+ *     VertxAsynchronousWorker worker;
  *
  *     &#64;Inject
  *     Service service;

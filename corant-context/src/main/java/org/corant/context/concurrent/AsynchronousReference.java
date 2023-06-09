@@ -30,7 +30,7 @@ import java.util.function.BiConsumer;
  * class Hello {
  *
  *   &#64;Inject
- *   AsynReference&lt;ServiceWithBlockingInit&gt; service;
+ *   AsynchronousReference&lt;ServiceWithBlockingInit&gt; service;
  *
  *   CompletionStage&lt;String&gt; hello() {
  *     return service.thenApply((s) -> "Hello" + s.getName() + "!");

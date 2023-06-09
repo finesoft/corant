@@ -1943,6 +1943,11 @@
       </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
+        <artifactId>vertx-web-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>      
+      <dependency>
+        <groupId>io.vertx</groupId>
         <artifactId>vertx-unit</artifactId>
         <version>${version.vertx}</version>
         <scope>test</scope>

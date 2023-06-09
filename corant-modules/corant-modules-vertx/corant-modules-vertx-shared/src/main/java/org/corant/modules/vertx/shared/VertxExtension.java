@@ -89,6 +89,10 @@ public class VertxExtension implements Extension {
     this(null, null);
   }
 
+  public VertxExtension(Vertx vertx) {
+    this(vertx, vertx.getOrCreateContext());
+  }
+
   public VertxExtension(Vertx vertx, Context context) {
     consumerAddresses = new HashSet<>();
     asyncReferenceQualifiers = new HashSet<>();

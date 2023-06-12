@@ -130,8 +130,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
                         if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
                           el.putEnumClass(enumCls, v);
                         } else {
-                          throw new CorantRuntimeException("Enum class %s on %s error", enumClsName,
-                              res.getUri());
+                          throw new CorantRuntimeException("Enum class %s error", enumClsName);
                         }
                       }
                       if (enumItemKey != null) {

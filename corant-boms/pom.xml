@@ -62,13 +62,13 @@
     <version.grpc>1.40.1</version.grpc>
     <version.hanlp>portable-1.7.8</version.hanlp>
     <version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-    <version.hibernate-orm-core>5.3.29.Final</version.hibernate-orm-core>
+    <version.hibernate-orm-core>5.3.30.Final</version.hibernate-orm-core>
     <version.hibernate-validator-cdi>6.2.5.Final</version.hibernate-validator-cdi>
     <version.hikariCP>5.0.1</version.hikariCP>
     <version.hppc>0.9.1</version.hppc>
     <version.hsqldb>2.7.0</version.hsqldb>
     <version.icu4j>67.1</version.icu4j>
-    <version.jackson>2.15.0</version.jackson>
+    <version.jackson>2.15.2</version.jackson>
     <version.jandex>2.4.2.Final</version.jandex>
     <version.jasperreports>6.10.0</version.jasperreports>
     <version.javafx>11.0.2</version.javafx>
@@ -175,7 +175,7 @@
     <version.swagger>2.1.12</version.swagger>
     <version.swagger-ui-webjars>4.10.3</version.swagger-ui-webjars>
     <version.testng>6.9.9</version.testng>
-    <version.undertow>2.2.24.Final</version.undertow>
+    <version.undertow>2.2.25.Final</version.undertow>
     <version.vertx>4.3.8</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>

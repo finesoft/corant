@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.annotation.PreDestroy;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -130,8 +130,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
                         if (enumCls != null && Enum.class.isAssignableFrom(enumCls)) {
                           el.putEnumClass(enumCls, v);
                         } else {
-                          throw new CorantRuntimeException("Enum class %s on %s error", enumClsName,
-                              res.getUri());
+                          throw new CorantRuntimeException("Enum class %s error", enumClsName);
                         }
                       }
                       if (enumItemKey != null) {

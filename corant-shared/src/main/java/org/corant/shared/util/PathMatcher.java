@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.removeLeading;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -37,9 +38,21 @@ public interface PathMatcher extends Predicate<String> {
   int SYNTAX_REGEX_LEN = SYNTAX_REGEX.length();
 
   /**
+   * {@link #decidePathMatcher(String, boolean, boolean, String)}
+   *
+   * @param pathExp the path expression to decide
+   * @param dos whether the path is windows DOS
+   * @param ignoreCase whether to ignore case when matching
+   * @return decidePathMatcher
+   */
+  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+    return decidePathMatcher(pathExp, dos, ignoreCase, null);
+  }
+
+  /**
    * Decide {@code PathMatcher} from path expressions. Returns a {@code PathMatcher} that performs
    * match operations on the {@code String} representation of path by interpreting a given pattern.
-   *
+   * <p>
    * The pathExp parameter identifies the syntax and the pattern and takes the form: <blockquote>
    *
    * <pre>
@@ -64,21 +77,27 @@ public interface PathMatcher extends Predicate<String> {
    * {@code CaseInsensitiveMatcher}</del></li>
    * </ul>
    *
-   * @param pathExp
-   * @param dos
-   * @param ignoreCase
-   * @return decidePathMatcher
+   * @param pathExp the path expression to decide
+   * @param dos whether the path is windows DOS
+   * @param ignoreCase whether to ignore case when matching
+   * @param ignoreLeading the leading string to be ignored
+   * @return a path matcher or null
    */
-  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase,
+      String ignoreLeading) {
     PathMatcher matcher = null;
     String path = defaultStrip(pathExp);
     if (path.startsWith(SYNTAX_REGEX)) {
-      matcher = new RegexMatcher(ignoreCase, shouldNotBlank(path.substring(SYNTAX_REGEX_LEN)));
+      path = shouldNotBlank(path.substring(SYNTAX_REGEX_LEN));
+      if (ignoreLeading != null) {
+        path = removeLeading(path, ignoreLeading);
+      }
+      matcher = new RegexMatcher(ignoreCase, path);
     } else {
       if (isBlank(path) || path.endsWith(dos ? "\\" : "/")) {
         path += "**";
       }
-      boolean glob = false;
+      boolean glob;
       if (path.startsWith(SYNTAX_GLOB)) {
         path = shouldNotBlank(path.substring(SYNTAX_GLOB_LEN));
         glob = true;
@@ -86,6 +105,9 @@ public interface PathMatcher extends Predicate<String> {
         glob = path.chars().anyMatch(c -> c == '?' || c == '*');// auto discovery
       }
       if (glob) {
+        if (ignoreLeading != null) {
+          path = removeLeading(path, ignoreLeading);
+        }
         matcher = new GlobMatcher(dos, ignoreCase, path);
       }
       // else if (ignoreCase) {
@@ -159,7 +181,7 @@ public interface PathMatcher extends Predicate<String> {
     private final String express;
 
     /**
-     * @param express
+     * @param express the path expression
      */
     protected CaseInsensitiveMatcher(String express) {
       this.express = express;
@@ -183,7 +205,7 @@ public interface PathMatcher extends Predicate<String> {
 
   /**
    * corant-shared
-   *
+   * <p>
    * Use Glob wildcards for filtering.
    *
    * @author bingo 下午8:32:50
@@ -197,9 +219,9 @@ public interface PathMatcher extends Predicate<String> {
     private final Pattern pattern;
 
     /**
-     * @param isDos
-     * @param ignoreCase
-     * @param globExpress
+     * @param isDos whether the glob path expression is windows DOS
+     * @param ignoreCase whether to ignore case when matching
+     * @param globExpress the glob path expression
      */
     protected GlobMatcher(boolean isDos, boolean ignoreCase, String globExpress) {
       this.isDos = isDos;
@@ -455,7 +477,8 @@ public interface PathMatcher extends Predicate<String> {
     /**
      * Creates a regex pattern from the given glob expression.
      *
-     * @throws PatternSyntaxException
+     * @throws PatternSyntaxException if the given glob expression can't convert to regex
+     *         expression.
      */
     private static String toRegexPattern(String globPattern, boolean isDos) {
       boolean inGroup = false;
@@ -621,8 +644,8 @@ public interface PathMatcher extends Predicate<String> {
     private final Pattern pattern;
 
     /**
-     * @param ignoreCase
-     * @param express
+     * @param ignoreCase whether to ignore case when matching
+     * @param express the regex path expression
      */
     protected RegexMatcher(boolean ignoreCase, String express) {
       this.ignoreCase = ignoreCase;

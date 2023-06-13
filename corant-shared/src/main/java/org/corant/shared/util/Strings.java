@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import java.util.StringJoiner;
@@ -509,9 +510,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String join(CharSequence delimiter, Iterable<?> elements) {
     return joinIf(delimiter, elements, null);
@@ -523,9 +525,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String join(CharSequence delimiter, Object... elements) {
     shouldNoneNull(delimiter, elements);
@@ -538,9 +541,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String joinIfNotBlank(CharSequence delimiter, Iterable<?> elements) {
     return joinIf(delimiter, elements, (e, s) -> e != null && isNotBlank(s));
@@ -552,9 +556,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String joinIfNotBlank(CharSequence delimiter, Object... elements) {
     shouldNoneNull(delimiter, elements);
@@ -567,9 +572,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String joinIfNotEmpty(CharSequence delimiter, Iterable<?> elements) {
     return joinIf(delimiter, elements, (e, s) -> e != null && isNotEmpty(s));
@@ -581,9 +587,10 @@ public class Strings {
    *
    * @see Objects#asString(Object)
    *
-   * @param delimiter
-   * @param elements
-   * @return join
+   * @param delimiter the delimiter that separates each element
+   * @param elements the elements to join together.
+   * @return join a new {@code String} that is composed of the {@code elements} separated by the
+   *         {@code delimiter}
    */
   public static String joinIfNotEmpty(CharSequence delimiter, Object... elements) {
     shouldNoneNull(delimiter, elements);
@@ -878,6 +885,173 @@ public class Strings {
       return str;
     }
     return removeCharIf(str, s -> sample.indexOf(s) != -1);
+  }
+
+  /**
+   * <p>
+   * Continuously remove a substring until it is not at the beginning of a source string, otherwise
+   * return to the original string.
+   * </p>
+   *
+   * <p>
+   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * the empty string. A {@code null} search string will return the source string.
+   * </p>
+   *
+   * <pre>
+   * Strings.removeLeading(null, *)               = null
+   * Strings.removeLeading("", *)                 = ""
+   * Strings.removeLeading(*, null)               = *
+   * Strings.removeLeading("/x/y/z", "/")         = "x/y/z"
+   * Strings.removeLeading("/////x/y/z", "/")     = "x/y/z"
+   * Strings.removeLeading("/x/y/z", "/y")        = "/x/y/z"
+   * Strings.removeLeading("bingo", "")           = "bingo"
+   * </pre>
+   *
+   * @param str the source String to search, may be null
+   * @param remove the String to search for and remove, may be null
+   * @return the substring with the string removed if found, {@code null} if null String input
+   */
+  public static String removeLeading(final String str, final String remove) {
+    return removeLeading(str, remove, false, -1);
+  }
+
+  /**
+   * <p>
+   * Continuously remove a substring until it is not at the beginning of a source string, otherwise
+   * return to the original string.
+   * </p>
+   *
+   * <p>
+   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * the empty string. A {@code null} search string will return the source string.
+   * </p>
+   *
+   * <pre>
+   * Strings.removeLeading(null, "*", true, -1)               = null
+   * Strings.removeLeading("", "*", true, -1)                 = ""
+   * Strings.removeLeading(*, null, true, -1)                 = "*"
+   * Strings.removeLeading("/x/y/z", "/", true, -1)           = "x/y/z"
+   * Strings.removeLeading("/////x/y/z", "/", true, -1)       = "x/y/z"
+   * Strings.removeLeading("/////x/y/z", "//", true, -1)      = "x/y/z"
+   * Strings.removeLeading("/////x/y/z", "/", true, 4)        = "/x/y/z"
+   * Strings.removeLeading("/x/y/z", "/y", true, -1)          = "/x/y/z"
+   * Strings.removeLeading("bingo", "", true, -1)             = "bingo"
+   * </pre>
+   *
+   * @param str the source String to search, may be null
+   * @param remove the String to search for and remove, may be null
+   * @param ignoreCase whether to ignore case when searching
+   * @param limit the number of consecutive removals. When the removed result still starts with the
+   *        specified remove string, can continue to remove. When the number of removals reaches the
+   *        limit, no more removals, &lt; 1 means remove all.
+   * @return the substring with the string removed if found, {@code null} if null String input
+   */
+  public static String removeLeading(final String str, final String remove,
+      final boolean ignoreCase, final int limit) {
+    if (isEmpty(str) || isEmpty(remove)) {
+      return str;
+    }
+    String ustr = ignoreCase ? str.toLowerCase(Locale.getDefault()) : str;
+    String urem = ignoreCase ? remove.toLowerCase(Locale.getDefault()) : remove;
+    int it = 0;
+    boolean l = limit > 0;
+    int i = 0;
+    int r = urem.length();
+    while (ustr.startsWith(urem, i)) {
+      if (l && ++it > limit) {
+        break;
+      }
+      i += r;
+    }
+    if (i > 0) {
+      return str.substring(i);
+    }
+    return str;
+  }
+
+  /**
+   * <p>
+   * Continuously remove a substring until it is not at the ending of a source string, otherwise
+   * return to the original string.
+   * </p>
+   *
+   * <p>
+   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * the empty string. A {@code null} search string will return the source string.
+   * </p>
+   *
+   * <pre>
+   * Strings.removeTrailing(null, "*")                   = null
+   * Strings.removeTrailing("", "*")                     = ""
+   * Strings.removeTrailing("*", null)                   = "*"
+   * Strings.removeTrailing("x/y/z/", "/")               = "x/y/z"
+   * Strings.removeTrailing("x/y/z/////", "/")           = "x/y/z"
+   * Strings.removeTrailing("x/y/z", "/y")               = "x/y/z"
+   * Strings.removeTrailing("bingo", "")                 = "bingo"
+   * </pre>
+   *
+   * @param str the source String to search, may be null
+   * @param remove the String to search for and remove, may be null
+   * @return the substring with the string removed if found, {@code null} if null String input
+   */
+  public static String removeTrailing(final String str, final String remove) {
+    return removeTrailing(str, remove, false, -1);
+  }
+
+  /**
+   * <p>
+   * Continuously remove a substring until it is not at the ending of a source string, otherwise
+   * return to the original string.
+   * </p>
+   *
+   * <p>
+   * A {@code null} source string will return {@code null}. An empty ("") source string will return
+   * the empty string. A {@code null} search string will return the source string.
+   * </p>
+   *
+   * <pre>
+   * Strings.removeTrailing(null, "*", true, -1)               = null
+   * Strings.removeTrailing("", "*", true, -1)                 = ""
+   * Strings.removeTrailing(*, null, true, -1)                 = "*"
+   * Strings.removeTrailing("x/y/z/", "/", true, -1)           = "x/y/z"
+   * Strings.removeTrailing("x/y/z/////", "/", true, -1)       = "x/y/z"
+   * Strings.removeTrailing("x/y/z/////", "//", true, -1)      = "x/y/z/"
+   * Strings.removeTrailing("x/y/z/////", "/", true, 4)        = "x/y/z/"
+   * Strings.removeTrailing("/x/y/z", "/y", true, -1)          = "/x/y/z"
+   * Strings.removeTrailing("bingo", "", true, -1)             = "bingo"
+   * </pre>
+   *
+   * @param str the source String to search, may be null
+   * @param remove the String to search for and remove, may be null
+   * @param ignoreCase whether to ignore case when searching
+   * @param limit the number of consecutive removals. When the removed result still ends with the
+   *        specified remove string, can continue to remove. When the number of removals reaches the
+   *        limit, no more removals, &lt; 1 means remove all.
+   * @return the substring with the string removed if found, {@code null} if null String input
+   */
+  public static String removeTrailing(final String str, final String remove,
+      final boolean ignoreCase, final int limit) {
+    if (isEmpty(str) || isEmpty(remove)) {
+      return str;
+    }
+    String ustr = ignoreCase ? str.toLowerCase(Locale.getDefault()) : str;
+    String urem = ignoreCase ? remove.toLowerCase(Locale.getDefault()) : remove;
+    int len = ustr.length();
+    int it = 0;
+    boolean l = limit > 0;
+    int r = urem.length();
+    int i = 0;
+    while (ustr.startsWith(urem, len - r - i)) {
+      if (l && ++it > limit) {
+        break;
+      }
+      i += r;
+    }
+    if (i > 0) {
+      return str.substring(0, len - i);
+    }
+    return str;
   }
 
   /**
@@ -1225,9 +1399,9 @@ public class Strings {
 
   /**
    * Null-safe strip string
-   *
-   *
+   * <p>
    * from JDK-11
+   * </p>
    *
    * @see String#strip()
    */
@@ -1243,9 +1417,10 @@ public class Strings {
   }
 
   /**
-   * Null-safe strip trainling
-   *
+   * Null-safe strip trailing
+   * <p>
    * from JDK-11
+   * </p>
    *
    * @see String#strip()
    */
@@ -1411,8 +1586,9 @@ public class Strings {
 
   /**
    * corant-shared
-   *
+   * <p>
    * Use wildcards for filtering, algorithm from apache.org.
+   * </p>
    *
    * @author bingo 下午8:32:50
    *
@@ -1579,6 +1755,5 @@ public class Strings {
       }
       return list.toArray(new String[0]);
     }
-
   }
 }

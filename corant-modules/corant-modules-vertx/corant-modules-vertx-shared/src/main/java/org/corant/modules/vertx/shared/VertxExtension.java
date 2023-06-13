@@ -12,6 +12,7 @@
  */
 package org.corant.modules.vertx.shared;
 
+import static java.lang.String.format;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -22,12 +23,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ObserverMethod;
@@ -38,8 +41,10 @@ import org.corant.config.Configs;
 import org.corant.context.concurrent.AsynchronousReference;
 import org.jboss.weld.bean.builtin.BeanManagerProxy;
 import org.jboss.weld.util.reflection.Reflections;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 
 /**
@@ -120,6 +125,10 @@ public class VertxExtension implements Extension {
     event.addBean().types(getBeanTypes(context.getClass(), Context.class))
         .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
         .scope(ApplicationScoped.class).createWith(c -> context);
+
+    event.addBean().types(getBeanTypes(vertx.eventBus().getClass(), EventBus.class))
+        .addQualifiers(Any.Literal.INSTANCE, Default.Literal.INSTANCE)
+        .scope(ApplicationScoped.class).createWith(c -> vertx.eventBus());
   }
 
   public void registerConsumers(Vertx vertx, Event<Object> event) {
@@ -169,9 +178,9 @@ public class VertxExtension implements Extension {
   @SuppressWarnings("rawtypes")
   void addAsyncReferenceQualifiers(
       @Observes ProcessBeanAttributes<VertxAsynchronousReference> event) {
-    // Add all discovered qualifiers to AsyncReferenceImpl bean attributes
+    // Add all discovered qualifiers to VertxAsynchronousReference bean attributes
     if (!asyncReferenceQualifiers.isEmpty()) {
-      LOGGER.fine(String.format("Adding additional AsyncReference qualifiers: %s",
+      LOGGER.fine(String.format("Adding additional AsynchronousReference qualifiers: %s",
           asyncReferenceQualifiers));
       event.configureBeanAttributes().addQualifiers(asyncReferenceQualifiers);
     }
@@ -181,6 +190,33 @@ public class VertxExtension implements Extension {
   void processAsyncReferenceInjectionPoints(
       @Observes ProcessInjectionPoint<?, ? extends AsynchronousReference> event) {
     asyncReferenceQualifiers.addAll(event.getInjectionPoint().getQualifiers());
+  }
+
+  void undeployVerticles(@Observes @BeforeDestroyed(ApplicationScoped.class) Object event,
+      BeanManager beanManager) {
+    if (vertx == null) {
+      return;
+    }
+    Set<Bean<?>> beans = beanManager.getBeans(AbstractVerticle.class, Any.Literal.INSTANCE);
+    javax.enterprise.context.spi.Context applicationContext =
+        beanManager.getContext(ApplicationScoped.class);
+    for (Bean<?> bean : beans) {
+      if (ApplicationScoped.class.equals(bean.getScope())) {
+        // Only beans with @ApplicationScoped are considered
+        Object instance = applicationContext.get(bean);
+        if (instance != null) {
+          // Only existing instances are considered
+          try {
+            AbstractVerticle verticle = (AbstractVerticle) instance;
+            vertx.undeploy(verticle.deploymentID()).result();
+            LOGGER.fine(format("Undeployed verticle: %s", instance.getClass()));
+          } catch (Exception e) {
+            LOGGER.warning(
+                format("Unable to undeploy verticle %s: %s", instance.getClass(), e.toString()));
+          }
+        }
+      }
+    }
   }
 
   private Set<Type> getBeanTypes(Class<?> implClazz, Type... types) {

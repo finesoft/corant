@@ -130,8 +130,6 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
       MutableBoolean fanout = new MutableBoolean(false);
       int i = MAX_CHANGES_ITERATIONS;
       while (true) {
-        temp.clear();
-        fanout.set(false);
         evolutionaryAggregates.forEach((k, v) -> {
           if (extension.supportsEvolutionaryObserver(k.getTypeCls())) {
             temp.put(k, v.left());
@@ -160,6 +158,8 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
               "Reach max changes iterations [%s], can't handle aggregate evolutionary event! ",
               MAX_CHANGES_ITERATIONS);
         }
+        temp.clear();
+        fanout.set(false);
       }
       evolutions.clear();
       temp.clear();

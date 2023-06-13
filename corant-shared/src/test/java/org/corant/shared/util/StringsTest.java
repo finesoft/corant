@@ -34,6 +34,7 @@ import static org.corant.shared.util.Strings.parseDollarTemplate;
 import static org.corant.shared.util.Strings.remove;
 import static org.corant.shared.util.Strings.split;
 import static org.junit.Assert.assertArrayEquals;
+import java.io.IOException;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.junit.Test;
@@ -102,50 +103,50 @@ public class StringsTest extends TestCase {
 
   @Test
   public void testDefaultBlank() {
-    assertTrue(defaultBlank("x", (Supplier<String>) () -> "x").equals("x"));
-    assertTrue(defaultBlank(null, (Supplier<String>) () -> "x").equals("x"));
+    assertTrue("x".equals(defaultBlank("x", (Supplier<String>) () -> "x")));
+    assertTrue("x".equals(defaultBlank(null, (Supplier<String>) () -> "x")));
     assertTrue(defaultBlank(null, (Supplier<String>) () -> null) == null);
     assertTrue(defaultBlank("   ", (Supplier<String>) () -> null) == null);
-    assertTrue(defaultBlank("", (Supplier<String>) () -> "bingo").equals("bingo"));
-    assertTrue(defaultBlank("x", "x").equals("x"));
-    assertTrue(defaultBlank(null, "x").equals("x"));
+    assertTrue("bingo".equals(defaultBlank("", (Supplier<String>) () -> "bingo")));
+    assertTrue("x".equals(defaultBlank("x", "x")));
+    assertTrue("x".equals(defaultBlank(null, "x")));
     assertTrue(defaultBlank(null, (String) null) == null);
     assertTrue(defaultBlank("   ", (String) null) == null);
-    assertTrue(defaultBlank("", "bingo").equals("bingo"));
+    assertTrue("bingo".equals(defaultBlank("", "bingo")));
   }
 
   @Test
   public void testDefaultString() {
-    assertTrue(defaultString("x", "y").equals("x"));
-    assertTrue(defaultString(null, "x").equals("x"));
+    assertTrue("x".equals(defaultString("x", "y")));
+    assertTrue("x".equals(defaultString(null, "x")));
     assertTrue(defaultString(null, null) == null);
-    assertTrue(defaultString("   ", null).equals("   "));
-    assertTrue(defaultString("", "bingo").equals(""));
+    assertTrue("   ".equals(defaultString("   ", null)));
+    assertTrue("".equals(defaultString("", "bingo")));
 
-    assertTrue(defaultString(null).equals(EMPTY));
-    assertTrue(defaultString("   ").equals("   "));
-    assertTrue(defaultString("bingo").equals("bingo"));
-    assertTrue(defaultString("").equals(""));
+    assertTrue(EMPTY.equals(defaultString(null)));
+    assertTrue("   ".equals(defaultString("   ")));
+    assertTrue("bingo".equals(defaultString("bingo")));
+    assertTrue("".equals(defaultString("")));
   }
 
   @Test
   public void testDefaultStrip() {
-    assertTrue(defaultStrip("x ").equals("x"));
-    assertTrue(defaultStrip(" x").equals("x"));
-    assertTrue(defaultStrip(null).equals(EMPTY));
-    assertTrue(defaultStrip(" x ").equals("x"));
-    assertTrue(defaultStrip(" 全角ａ　　　　").equals("全角ａ"));
-    assertTrue(defaultStrip(" 中文    ").equals("中文"));
+    assertTrue("x".equals(defaultStrip("x ")));
+    assertTrue("x".equals(defaultStrip(" x")));
+    assertTrue(EMPTY.equals(defaultStrip(null)));
+    assertTrue("x".equals(defaultStrip(" x ")));
+    assertTrue("全角ａ".equals(defaultStrip(" 全角ａ　　　　")));
+    assertTrue("中文".equals(defaultStrip(" 中文    ")));
   }
 
   @Test
   public void testDefaultTrim() {
-    assertTrue(defaultTrim("x ").equals("x"));
-    assertTrue(defaultTrim(" x").equals("x"));
-    assertTrue(defaultTrim(null).equals(EMPTY));
-    assertTrue(defaultTrim(" x ").equals("x"));
-    assertFalse(defaultTrim(" 全角ａ　　　　").equals("全角ａ"));
-    assertTrue(defaultTrim(" 中文    ").equals("中文"));
+    assertTrue("x".equals(defaultTrim("x ")));
+    assertTrue("x".equals(defaultTrim(" x")));
+    assertTrue(EMPTY.equals(defaultTrim(null)));
+    assertTrue("x".equals(defaultTrim(" x ")));
+    assertFalse("全角ａ".equals(defaultTrim(" 全角ａ　　　　")));
+    assertTrue("中文".equals(defaultTrim(" 中文    ")));
   }
 
   @Test
@@ -188,6 +189,32 @@ public class StringsTest extends TestCase {
     Map<String, String> escaped = mapOf("firstName", "Bingo");
     assertEquals(parseDollarTemplate(tpl, escaped::get),
         "My name is Bingo Chen, do not escaped ${reserve}");
+  }
 
+  public void testRemoveLeading() throws IOException {
+    assertNull(Strings.removeLeading(null, "*"));
+    assertEquals(Strings.removeLeading("", "*"), "");
+    assertEquals(Strings.removeLeading("*", null), "*");
+    assertEquals(Strings.removeLeading("/x/y/z", "/"), "x/y/z");
+    assertEquals(Strings.removeLeading("/////x/y/z", "/"), "x/y/z");
+    assertEquals(Strings.removeLeading("/////x/y/z", "//"), "/x/y/z");
+    assertEquals(Strings.removeLeading("/x/y/z", "/y"), "/x/y/z");
+    assertEquals(Strings.removeLeading("/////x/y/z", "/", true, 4), "/x/y/z");
+    assertEquals(Strings.removeLeading("bingo", ""), "bingo");
+  }
+
+  public void testRemoveTrailing() throws IOException {
+    assertNull(Strings.removeTrailing(null, "*", true, 0));
+    assertEquals(Strings.removeTrailing("", "*", true, 0), "");
+    assertEquals(Strings.removeTrailing("*", null, true, 0), "*");
+    assertEquals(Strings.removeTrailing("/x/y/z/", "/", true, 0), "/x/y/z");
+    assertEquals(Strings.removeTrailing("x/y/z/////", "/", true, 0), "x/y/z");
+    assertEquals(Strings.removeTrailing("x/y/z/////", "//", true, 0), "x/y/z/");
+    assertEquals(Strings.removeTrailing("/x/y/z", "/y", true, 0), "/x/y/z");
+    assertEquals(Strings.removeTrailing("/x/y/z////", "/", true, 3), "/x/y/z/");
+    assertEquals(Strings.removeTrailing("/x/y/z////", "/", true, 2), "/x/y/z//");
+    assertEquals(Strings.removeTrailing("bingo", "", true, 0), "bingo");
+    assertEquals(Strings.removeTrailing("/////", "/", true, 0), "");
+    assertEquals(Strings.removeTrailing("bingobingobingobingo", "bingo", true, 0), "");
   }
 }

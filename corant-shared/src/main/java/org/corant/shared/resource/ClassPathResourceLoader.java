@@ -97,10 +97,14 @@ public class ClassPathResourceLoader implements ResourceLoader {
    * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
-   * 4.if path is blank ({@code Strings.isBlank}) then will scan all class path in the system.
+   * 4.if path is blank then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
+   * <p>
+   * NOTE: A leading slash will be removed, as the ClassLoader resource access methods will not
+   * accept it. If the supplied ClassLoader is null, the default class loader will be used for
+   * loading the resource.
    *
    * @see PathMatcher#decidePathMatcher(String, boolean, boolean)
    *
@@ -111,7 +115,8 @@ public class ClassPathResourceLoader implements ResourceLoader {
   @Override
   public Set<ClassPathResource> load(Object location) throws IOException {
     String path = SourceType.CLASS_PATH.resolve(location == null ? null : location.toString());
-    Optional<PathMatcher> pathMatcher = PathMatcher.decidePathMatcher(path, false, ignoreCase);
+    Optional<PathMatcher> pathMatcher = PathMatcher.decidePathMatcher(path, false, ignoreCase,
+        ClassPathResourceScanner.PATH_SEPARATOR_STRING);
     if (pathMatcher.isPresent()) {
       ClassPathResourceScanner scanner = new ClassPathResourceScanner(pathMatcher.get());
       for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(scanner.getRoot()).entrySet()) {

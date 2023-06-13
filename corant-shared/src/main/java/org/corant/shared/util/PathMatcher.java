@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isBlank;
+import static org.corant.shared.util.Strings.removeLeading;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -35,6 +36,18 @@ public interface PathMatcher extends Predicate<String> {
   int SYNTAX_GLOB_LEN = SYNTAX_GLOB.length();
   String SYNTAX_REGEX = "regex:";
   int SYNTAX_REGEX_LEN = SYNTAX_REGEX.length();
+
+  /**
+   * {@link #decidePathMatcher(String, boolean, boolean, String)}
+   *
+   * @param pathExp the path expression to decide
+   * @param dos whether the path is windows DOS
+   * @param ignoreCase whether to ignore case when matching
+   * @return decidePathMatcher
+   */
+  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+    return decidePathMatcher(pathExp, dos, ignoreCase, null);
+  }
 
   /**
    * Decide {@code PathMatcher} from path expressions. Returns a {@code PathMatcher} that performs
@@ -64,16 +77,22 @@ public interface PathMatcher extends Predicate<String> {
    * {@code CaseInsensitiveMatcher}</del></li>
    * </ul>
    *
-   * @param pathExp
-   * @param dos
-   * @param ignoreCase
-   * @return decidePathMatcher
+   * @param pathExp the path expression to decide
+   * @param dos whether the path is windows DOS
+   * @param ignoreCase whether to ignore case when matching
+   * @param ignoreLeading the leading string to be ignore
+   * @return a path matcher or null
    */
-  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase) {
+  static Optional<PathMatcher> decidePathMatcher(String pathExp, boolean dos, boolean ignoreCase,
+      String ignoreLeading) {
     PathMatcher matcher = null;
     String path = defaultStrip(pathExp);
     if (path.startsWith(SYNTAX_REGEX)) {
-      matcher = new RegexMatcher(ignoreCase, shouldNotBlank(path.substring(SYNTAX_REGEX_LEN)));
+      path = shouldNotBlank(path.substring(SYNTAX_REGEX_LEN));
+      if (ignoreLeading != null) {
+        path = removeLeading(path, ignoreLeading);
+      }
+      matcher = new RegexMatcher(ignoreCase, path);
     } else {
       if (isBlank(path) || path.endsWith(dos ? "\\" : "/")) {
         path += "**";
@@ -86,6 +105,9 @@ public interface PathMatcher extends Predicate<String> {
         glob = path.chars().anyMatch(c -> c == '?' || c == '*');// auto discovery
       }
       if (glob) {
+        if (ignoreLeading != null) {
+          path = removeLeading(path, ignoreLeading);
+        }
         matcher = new GlobMatcher(dos, ignoreCase, path);
       }
       // else if (ignoreCase) {

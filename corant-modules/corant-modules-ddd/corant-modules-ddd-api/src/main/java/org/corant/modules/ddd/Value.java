@@ -60,7 +60,7 @@ public interface Value extends Serializable {
 
     private SimpleValueMap(Map<String, Object> contents) {
       this.contents = Collections.unmodifiableMap(newHashMap(contents));
-      hash = 31 + (contents == null ? 0 : contents.hashCode());
+      hash = 31 + this.contents.hashCode();
     }
 
     public static SimpleValueMapBuilder builder() {

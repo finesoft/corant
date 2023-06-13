@@ -47,7 +47,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.replace.Replace;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.LateralSubSelect;
@@ -62,12 +61,13 @@ import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.select.WithItem;
 import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.statement.upsert.Upsert;
 import net.sf.jsqlparser.util.deparser.DeleteDeParser;
 import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 import net.sf.jsqlparser.util.deparser.InsertDeParser;
-import net.sf.jsqlparser.util.deparser.ReplaceDeParser;
 import net.sf.jsqlparser.util.deparser.SelectDeParser;
 import net.sf.jsqlparser.util.deparser.UpdateDeParser;
+import net.sf.jsqlparser.util.deparser.UpsertDeParser;
 
 /**
  * corant-modules-datasource-shared
@@ -307,14 +307,14 @@ public class SqlStatements {
       expressionDeParser.setBuffer(buffer);
       UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser, buffer);
       updateDeParser.deParse(update);
-    } else if (statement instanceof Replace) {
-      Replace replace = (Replace) statement;
+    } else if (statement instanceof Upsert) {
+      Upsert upsert = (Upsert) statement;
       SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(selectDeParser);
       expressionDeParser.setBuffer(buffer);
-      ReplaceDeParser replaceDeParser =
-          new ReplaceDeParser(expressionDeParser, selectDeParser, buffer);
-      replaceDeParser.deParse(replace);
+      UpsertDeParser upsertDeParser =
+          new UpsertDeParser(expressionDeParser, selectDeParser, buffer);
+      upsertDeParser.deParse(upsert);
     } else {
       throw new NotSupportedException("Only supports SELECT/UPDATE/INSERT/DELETE statemens!");
     }

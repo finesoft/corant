@@ -151,6 +151,7 @@
     <version.org.osgi.service.cdi>1.0.0</version.org.osgi.service.cdi>
     <version.osgi.annotation>7.0.0</version.osgi.annotation>
     <version.pinyin4j>2.5.1</version.pinyin4j>
+    <version.projectreactor>3.5.7</version.projectreactor>
     <version.prometheus>0.15.0</version.prometheus>
     <version.quartz>2.3.2</version.quartz>
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
@@ -1928,8 +1929,23 @@
         <artifactId>vertx-unit</artifactId>
         <version>${version.vertx}</version>
         <scope>test</scope>
-      </dependency>      
-
+      </dependency>
+      <dependency>
+	    <groupId>io.projectreactor</groupId>
+	    <artifactId>reactor-core</artifactId>
+	    <version>${version.projectreactor}</version>
+	  </dependency>            
+      <dependency>
+	    <groupId>io.projectreactor</groupId>
+	    <artifactId>reactor-test</artifactId>
+	    <version>${version.projectreactor}</version>
+	  </dependency> 
+      <dependency>
+	    <groupId>io.projectreactor</groupId>
+	    <artifactId>reactor-tools</artifactId>
+	    <version>${version.projectreactor}</version>
+	  </dependency> 	  
+	   
       <!-- Osgi -->
       <dependency>
         <groupId>org.osgi</groupId>

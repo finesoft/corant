@@ -23,14 +23,13 @@ import javafx.beans.value.ObservableValue;
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午7:24:16
- *
  */
 public class ExtendedBiBinding<A, B> implements ChangeListener<Object>, WeakListener {
   private final int cachedHashCode;
   private boolean updating;
   private final WeakReference<Property<A>> propertyRefA;
   private final WeakReference<Property<B>> propertyRefB;
-  private final ExtendedBiBinding.ExtendedBiBindingConverter<A, B> converter;
+  private final WeakReference<ExtendedBiBinding.ExtendedBiBindingConverter<A, B>> converterRef;
 
   public ExtendedBiBinding(Property<A> propertyA, Property<B> propertyB,
       ExtendedBiBinding.ExtendedBiBindingConverter<A, B> converter) {
@@ -38,7 +37,7 @@ public class ExtendedBiBinding<A, B> implements ChangeListener<Object>, WeakList
     cachedHashCode = propertyA.hashCode() * propertyB.hashCode();
     propertyRefA = new WeakReference<>(propertyA);
     propertyRefB = new WeakReference<>(propertyB);
-    this.converter = converter;
+    converterRef = new WeakReference<>(converter);
   }
 
   static void checkParameters(Object propertyA, Object propertyB) {
@@ -75,9 +74,9 @@ public class ExtendedBiBinding<A, B> implements ChangeListener<Object>, WeakList
         try {
           updating = true;
           if (propertyA == sourceProperty) {
-            propertyB.setValue(converter.from((A) newValue));
+            propertyB.setValue(converterRef.get().from((A) newValue));
           } else {
-            propertyA.setValue(converter.to((B) newValue));
+            propertyA.setValue(converterRef.get().to((B) newValue));
           }
         } catch (RuntimeException e) {
           try {
@@ -169,7 +168,6 @@ public class ExtendedBiBinding<A, B> implements ChangeListener<Object>, WeakList
    * corant-modules-javafx-cdi
    *
    * @author bingo 下午8:11:24
-   *
    */
   public static class ExtendedBiUnBinding<T, B> extends ExtendedBiBinding<T, B> {
 

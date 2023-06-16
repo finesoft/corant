@@ -135,7 +135,7 @@ public class VertxExtension implements Extension {
     CountDownLatch latch = new CountDownLatch(consumerAddresses.size());
     for (String address : consumerAddresses) {
       MessageConsumer<?> consumer =
-          vertx.eventBus().consumer(address, VertxHandler.from(vertx, event, address));
+          vertx.eventBus().consumer(address, VertxMessageHandler.from(vertx, event, address));
       consumer.completionHandler(ar -> {
         if (ar.succeeded()) {
           LOGGER.fine(String.format("Successfully registered event consumer for %s", address));

@@ -30,19 +30,19 @@ import io.vertx.core.eventbus.Message;
  * @author Martin Kouba
  */
 @Vetoed
-public class VertxHandler implements Handler<Message<Object>> {
+public class VertxMessageHandler implements Handler<Message<Object>> {
 
   private final Vertx vertx;
 
   private final Event<VertxEvent> event;
 
-  private VertxHandler(Vertx vertx, Event<VertxEvent> event) {
+  private VertxMessageHandler(Vertx vertx, Event<VertxEvent> event) {
     this.vertx = vertx;
     this.event = event;
   }
 
-  static VertxHandler from(Vertx vertx, Event<Object> event, String address) {
-    return new VertxHandler(vertx,
+  static VertxMessageHandler from(Vertx vertx, Event<Object> event, String address) {
+    return new VertxMessageHandler(vertx,
         event.select(VertxEvent.class, VertxConsumer.Literal.of(address)));
   }
 

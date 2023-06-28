@@ -182,7 +182,7 @@
     <version.vertx>4.3.8</version.vertx>
     <version.weld-junit4>2.0.2.Final</version.weld-junit4>
     <version.weld-junit5>2.0.2.Final</version.weld-junit5>
-    <version.weld>5.1.0.Final</version.weld>
+    <version.weld>5.1.1.Final</version.weld>
     <version.weld-api>5.0.SP3</version.weld-api>
     <version.wxpay-sdk>3.0.9</version.wxpay-sdk>
     <version.xadisk>1.2.2</version.xadisk>

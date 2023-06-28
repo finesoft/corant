@@ -15,6 +15,7 @@ package org.corant.modules.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.areEqual;
@@ -114,7 +115,8 @@ public class JPAService implements PersistenceService {
   @Override
   public EntityManagerFactory getEntityManagerFactory(PersistenceUnit pu) {
     return emfs.computeIfAbsent(pu, p -> {
-      PersistenceUnitInfoMetaData puim = extension.getPersistenceUnitInfoMetaData(pu);
+      PersistenceUnitInfoMetaData puim = shouldNotNull(extension.getPersistenceUnitInfoMetaData(pu),
+          "Can't find any metadata for persistence unit %s", pu);
       Named jp = NamedLiteral.of(puim.getPersistenceProviderClassName());
       Instance<JPAProvider> provider = providers.select(jp);
       shouldBeTrue(provider.isResolvable(), "Can not find jpa provider named %s.", jp.value());

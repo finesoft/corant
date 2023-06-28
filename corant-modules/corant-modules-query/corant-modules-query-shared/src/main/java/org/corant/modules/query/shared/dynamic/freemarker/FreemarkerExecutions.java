@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.freemarker;
 
+import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +25,10 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.QueryMappingService.AfterQueryMappingInitializedHandler;
 import org.corant.modules.query.shared.QueryMappingService.BeforeQueryMappingInitializeHandler;
 import org.corant.modules.query.shared.cdi.QueryExtension;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Services;
+import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import net.jcip.annotations.GuardedBy;
@@ -68,7 +72,7 @@ public class FreemarkerExecutions
   protected static final Logger logger =
       Logger.getLogger(FreemarkerExecutions.class.getCanonicalName());
 
-  protected static final Map<Object, Template> executions = new ConcurrentHashMap<>();
+  protected static final Map<Object, Pair<Template, String>> executions = new ConcurrentHashMap<>();
 
   protected static final FreemarkerDynamicQueryScriptResolver scriptResolver =
       Services.findRequired(FreemarkerDynamicQueryScriptResolver.class)
@@ -84,15 +88,49 @@ public class FreemarkerExecutions
 
   protected FreemarkerExecutions() {}
 
-  public static Template resolveExecution(Query query) {
+  public static Pair<Template, String> resolveExecution(Query query) {
     return executions.computeIfAbsent(query.getScript().getId(), k -> {
+      String script = null;
       try {
-        return new Template(query.getVersionedName(), scriptResolver.resolve(query), FM_CFG);
+        script = defaultString(scriptResolver.resolve(query));
+        return Pair.of(new Template(query.getVersionedName(), script, FM_CFG), script);
+      } catch (ParseException pe) {
+        throw new QueryRuntimeException(pe,
+            "An error occurred while executing the query template [%s]. %s", query.getName(),
+            resolveScriptExceptionInfo(script, pe.getLineNumber(), pe.getEndLineNumber()));
       } catch (Exception e) {
         throw new QueryRuntimeException(e,
             "An error occurred while executing the query template [%s].", query.getName());
       }
     });
+  }
+
+  public static String resolveScriptExceptionInfo(String script, Integer lineNumber,
+      Integer endLineNumber) {
+    String src = script;
+    final String lsp = System.lineSeparator();
+    if (lineNumber != null) {
+      int es = lineNumber;
+      int ee = endLineNumber == null ? -1 : endLineNumber;
+      StringBuilder sb = new StringBuilder();
+      MutableInteger lines = new MutableInteger(0);
+      script.lines().forEach(line -> {
+        int idx = lines.incrementAndGet();
+        if (es == idx) {
+          sb.append("[*" + idx + "*] " + line).append(lsp);
+        } else if (idx > es && idx <= ee) {
+          sb.append("[*" + idx + "*] " + line).append(lsp);
+        } else {
+          sb.append(idx + ". " + line).append(lsp);
+        }
+      });
+      src = sb.toString();
+    }
+    return String.format("Source script:%n>>>%n%s%n<<<", src);
+  }
+
+  public static FreemarkerDynamicQueryScriptResolver scriptResolver() {
+    return scriptResolver;
   }
 
   @GuardedBy("QueryMappingService.rwl.writeLock")

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.function.Consumer;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
@@ -47,7 +48,6 @@ import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.hbm2ddl.SchemaValidator;
 import org.hibernate.tool.schema.TargetType;
 import org.hibernate.tool.schema.UniqueConstraintSchemaUpdateStrategy;
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -58,54 +58,6 @@ import jakarta.persistence.spi.PersistenceUnitTransactionType;
 public class HibernateOrmDeveloperKits {
 
   public static final String JPA_ORM_XML_NAME_END_WITH = "JpaOrm.xml";
-
-  protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
-      String... integrations) {
-    Properties props = propertiesOf(integrations);
-    props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
-        UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
-    props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
-    props.put(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, "none");
-    JPAExtension extension = select(JPAExtension.class).get();
-    DataSourceService dataSourceService = select(DataSourceService.class).get();
-    PersistenceUnitInfoMetaData pum =
-        shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
-    PersistenceUnitInfoMetaData usePum =
-        pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource(dsn -> dataSourceService.tryResolve(dsn));
-    props.putAll(usePum.getProperties());
-    return EntityManagerFactoryBuilderImpl.class
-        .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
-  }
-
-  protected static MetadataImplementor createMetadataImplementor(String pu,
-      String... integrations) {
-    EntityManagerFactoryBuilderImpl entityManagerFactoryBuilderImpl =
-        createEntityManagerFactoryBuilderImpl(pu, integrations);
-    entityManagerFactoryBuilderImpl.build();
-    return entityManagerFactoryBuilderImpl.getMetadata();
-  }
-
-  protected static void out(boolean end) {
-    if (!end) {
-      System.out.println("\n/**-->>>>>>>> Schema output start**/");
-    } else {
-      String version = "V" + DateTimeFormatter.ofPattern("yyMMddHHmm").format(LocalDateTime.now());
-      System.out.println("\n/**--Version: " + version + "__todo.sql");
-      System.out.println("\n--<<<<<<<< Schema output end. **/\n");
-    }
-  }
-
-  protected static Corant prepare() {
-    LoggerFactory.disableAccessWarnings();
-    LoggerFactory.disableLogger();
-    CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
-        "corant.flyway.migrate.enable", "false", "corant.jta.transaction.auto-recovery", "false");
-    return Corant.startup(HibernateOrmDeveloperKits.class,
-        new String[] {Corant.DISABLE_BOOST_LINE_CMD,
-            new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,
-                "org.corant.modules.logging.Log4jProvider").toString()});
-  }
 
   public static void stdoutPersistClasses(String pkg, Consumer<String> out) {
     try (Corant corant = prepare()) {
@@ -203,5 +155,54 @@ public class HibernateOrmDeveloperKits {
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }
+  }
+
+  protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
+      String... integrations) {
+    Properties props = propertiesOf(integrations);
+    props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
+        UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
+    props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
+    props.put(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, "none");
+    JPAExtension extension = select(JPAExtension.class).get();
+    DataSourceService dataSourceService = select(DataSourceService.class).get();
+    PersistenceUnitInfoMetaData pum =
+        shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)),
+            "Can't find any metadata for persistence unit %s", pu);
+    PersistenceUnitInfoMetaData usePum =
+        pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
+    usePum.configDataSource(dsn -> dataSourceService.tryResolve(dsn));
+    props.putAll(usePum.getProperties());
+    return EntityManagerFactoryBuilderImpl.class
+        .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
+  }
+
+  protected static MetadataImplementor createMetadataImplementor(String pu,
+      String... integrations) {
+    EntityManagerFactoryBuilderImpl entityManagerFactoryBuilderImpl =
+        createEntityManagerFactoryBuilderImpl(pu, integrations);
+    entityManagerFactoryBuilderImpl.build();
+    return entityManagerFactoryBuilderImpl.getMetadata();
+  }
+
+  protected static void out(boolean end) {
+    if (!end) {
+      System.out.println("\n/**-->>>>>>>> Schema output start**/");
+    } else {
+      String version = "V" + DateTimeFormatter.ofPattern("yyMMddHHmm").format(LocalDateTime.now());
+      System.out.println("\n/**--Version: " + version + "__todo.sql");
+      System.out.println("\n--<<<<<<<< Schema output end. **/\n");
+    }
+  }
+
+  protected static Corant prepare() {
+    LoggerFactory.disableAccessWarnings();
+    LoggerFactory.disableLogger();
+    CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
+        "corant.flyway.migrate.enable", "false", "corant.jta.transaction.auto-recovery", "false");
+    return Corant.startup(HibernateOrmDeveloperKits.class,
+        new String[] {Corant.DISABLE_BOOST_LINE_CMD,
+            new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,
+                "org.corant.modules.logging.Log4jProvider").toString()});
   }
 }

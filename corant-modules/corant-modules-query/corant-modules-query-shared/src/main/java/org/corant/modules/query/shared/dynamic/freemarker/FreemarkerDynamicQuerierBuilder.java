@@ -27,13 +27,14 @@ import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerierBuilder;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import org.corant.modules.query.spi.ParameterReviser;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
-import org.corant.shared.util.Services;
 import freemarker.core.Environment;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -47,11 +48,9 @@ import freemarker.template.TemplateModelException;
 public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 
-  protected static final FreemarkerDynamicQueryScriptResolver scriptResolver =
-      Services.findRequired(FreemarkerDynamicQueryScriptResolver.class)
-          .orElse(FreemarkerDynamicQueryScriptResolver.DEFAULT_INST);
-
   protected final Template execution;
+
+  protected final String syntheticScript;
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -65,14 +64,9 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   protected FreemarkerDynamicQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
-    execution = FreemarkerExecutions.resolveExecution(query);
-    // try {
-    // String scriptSource = scriptResolver.resolve(query);
-    // execution = new Template(query.getName(), scriptSource, FreemarkerExecutions.FM_CFG);
-    // } catch (IOException e) {
-    // throw new QueryRuntimeException(e,
-    // "An error occurred while executing the query template [%s].", query.getName());
-    // }
+    Pair<Template, String> exes = FreemarkerExecutions.resolveExecution(query);
+    execution = exes.left();
+    syntheticScript = exes.right();
   }
 
   @Override
@@ -137,6 +131,11 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       // setEnvironmentVariables(e, ow); deprecated since 1.6.2
       e.process();
       return Triple.of(param, tmm.getParameters(), sw.toString());
+    } catch (TemplateException te) {
+      throw new QueryRuntimeException(te,
+          "Freemarker dynamic querier builder [%s] execute occurred error! %s",
+          getQuery().getName(), FreemarkerExecutions.resolveScriptExceptionInfo(syntheticScript,
+              te.getLineNumber(), te.getEndLineNumber()));
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "Freemarker dynamic querier builder [%s] execute occurred error!", getQuery().getName());

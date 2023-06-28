@@ -16,6 +16,7 @@ package org.corant.modules.query.shared.dynamic.freemarker;
 import static org.corant.shared.util.Strings.defaultString;
 import org.corant.modules.query.mapping.Query;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-query-shared
@@ -42,7 +43,8 @@ public interface FreemarkerDynamicQueryScriptResolver extends Sortable {
 
     @Override
     public String resolve(Query query) {
-      return defaultString(query.getMacroScript()).concat(query.getScript().getCode());
+      return defaultString(query.getMacroScript()).concat(Strings.NEWLINE)
+          .concat(query.getScript().getCode());
     }
 
   }

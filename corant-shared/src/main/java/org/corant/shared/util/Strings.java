@@ -939,6 +939,12 @@ public class Strings {
    * Strings.removeLeading("bingo", "", true, -1)             = "bingo"
    * </pre>
    *
+   * <p>
+   * Note: Case mapping is base don the Unicode Standard version specified by the Character class.
+   * Since case mappings are not always 1:1 char mappings, the resulting String may be a different
+   * length than the original String, so when the parameter ignoreCase=true, it may lead to wrong
+   * results in some locale.
+   *
    * @param str the source String to search, may be null
    * @param remove the String to search for and remove, may be null
    * @param ignoreCase whether to ignore case when searching
@@ -946,6 +952,9 @@ public class Strings {
    *        specified remove string, can continue to remove. When the number of removals reaches the
    *        limit, no more removals, &lt; 1 means remove all.
    * @return the substring with the string removed if found, {@code null} if null String input
+   *
+   * @see String#toLowerCase()
+   * @see String#toLowerCase(Locale)
    */
   public static String removeLeading(final String str, final String remove,
       final boolean ignoreCase, final int limit) {
@@ -1022,6 +1031,12 @@ public class Strings {
    * Strings.removeTrailing("bingo", "", true, -1)             = "bingo"
    * </pre>
    *
+   * <p>
+   * Note: Case mapping is base don the Unicode Standard version specified by the Character class.
+   * Since case mappings are not always 1:1 char mappings, the resulting String may be a different
+   * length than the original String, so when the parameter ignoreCase=true, it may lead to wrong
+   * results in some locale.
+   *
    * @param str the source String to search, may be null
    * @param remove the String to search for and remove, may be null
    * @param ignoreCase whether to ignore case when searching
@@ -1029,6 +1044,9 @@ public class Strings {
    *        specified remove string, can continue to remove. When the number of removals reaches the
    *        limit, no more removals, &lt; 1 means remove all.
    * @return the substring with the string removed if found, {@code null} if null String input
+   *
+   * @see String#toLowerCase()
+   * @see String#toLowerCase(Locale)
    */
   public static String removeTrailing(final String str, final String remove,
       final boolean ignoreCase, final int limit) {

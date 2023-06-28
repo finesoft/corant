@@ -166,7 +166,8 @@ public class HibernateOrmDeveloperKits {
     JPAExtension extension = select(JPAExtension.class).get();
     DataSourceService dataSourceService = select(DataSourceService.class).get();
     PersistenceUnitInfoMetaData pum =
-        shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)));
+        shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)),
+            "Can't find any metadata for persistence unit %s", pu);
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
     usePum.configDataSource(dsn -> dataSourceService.tryResolve(dsn));

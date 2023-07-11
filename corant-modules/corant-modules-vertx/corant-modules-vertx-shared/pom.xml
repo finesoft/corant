@@ -24,6 +24,10 @@
       <artifactId>vertx-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-config</artifactId>
+    </dependency>        
+    <dependency>
       <groupId>me.escoffier.vertx</groupId>
       <artifactId>vertx-completable-future</artifactId>
       <version>0.1.2</version>
@@ -35,25 +39,25 @@
       <scope>provided</scope>
     </dependency>
     <!--Test-->
-	<dependency>
-	  <groupId>io.vertx</groupId>
-	  <artifactId>vertx-unit</artifactId>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>junit</groupId>
-	  <artifactId>junit</artifactId>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>org.awaitility</groupId>
-	  <artifactId>awaitility</artifactId>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>org.slf4j</groupId>
-	  <artifactId>slf4j-simple</artifactId>
-	  <scope>test</scope>
-	</dependency>    
+		<dependency>
+		  <groupId>io.vertx</groupId>
+		  <artifactId>vertx-unit</artifactId>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>junit</groupId>
+		  <artifactId>junit</artifactId>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.awaitility</groupId>
+		  <artifactId>awaitility</artifactId>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.slf4j</groupId>
+		  <artifactId>slf4j-simple</artifactId>
+		  <scope>test</scope>
+		</dependency>    
   </dependencies>
 </project>

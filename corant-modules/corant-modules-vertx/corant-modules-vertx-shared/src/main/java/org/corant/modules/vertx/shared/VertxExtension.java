@@ -79,15 +79,15 @@ public class VertxExtension implements Extension {
 
   public static final long DEFAULT_CONSUMER_REGISTRATION_TIMEOUT = 10000L;
 
-  private static final Logger LOGGER = Logger.getLogger(VertxExtension.class.getName());
+  protected static final Logger LOGGER = Logger.getLogger(VertxExtension.class.getName());
 
-  private final Set<String> consumerAddresses;
+  protected final Set<String> consumerAddresses;
 
-  private final Set<Annotation> asyncReferenceQualifiers;
+  protected final Set<Annotation> asyncReferenceQualifiers;
 
-  private final Vertx vertx;
+  protected final Vertx vertx;
 
-  private final Context context;
+  protected final Context context;
 
   public VertxExtension() {
     this(null, null);

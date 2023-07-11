@@ -24,6 +24,10 @@
       <artifactId>vertx-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-config</artifactId>
+    </dependency>    
+    <dependency>
       <groupId>me.escoffier.vertx</groupId>
       <artifactId>vertx-completable-future</artifactId>
       <version>0.1.2</version>

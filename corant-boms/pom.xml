@@ -1900,6 +1900,11 @@
         <version>${version.vertx}</version>
       </dependency>
       <dependency>
+		<groupId>io.vertx</groupId>
+		<artifactId>vertx-config</artifactId>
+		<version>${version.vertx}</version>   
+      </dependency>      
+      <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
         <version>${version.vertx}</version>

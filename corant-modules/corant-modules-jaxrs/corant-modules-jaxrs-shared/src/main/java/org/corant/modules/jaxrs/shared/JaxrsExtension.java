@@ -28,7 +28,7 @@ import jakarta.enterprise.inject.spi.WithAnnotations;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.ext.Provider;
 import org.corant.context.proxy.ProxyUtils;
-import org.corant.context.required.RequiredExtension;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-jaxrs-shared
@@ -66,7 +66,7 @@ public class JaxrsExtension implements Extension {
     final Class<T> clazz = annotatedType.getJavaClass();
     if (!clazz.isInterface() && !isSessionBean(annotatedType)
         && !ProxyUtils.isCDIUnproxyableClass(clazz)) {
-      if (!RequiredExtension.isVetoed(clazz)) {
+      if (!Services.getRequired().shouldVeto(clazz)) {
         providers.add(clazz);
         logger.fine(() -> String.format("Find a jaxrs provider %s", clazz));
       } else {
@@ -83,7 +83,7 @@ public class JaxrsExtension implements Extension {
     final AnnotatedType<T> annotatedType = event.getAnnotatedType();
     final Class<T> clazz = annotatedType.getJavaClass();
     if (!clazz.isInterface() && !isSessionBean(annotatedType)) {
-      if (!RequiredExtension.isVetoed(clazz)) {
+      if (!Services.getRequired().shouldVeto(clazz)) {
         resources.add(clazz);
         logger.fine(() -> String.format("Find a jaxrs resource %s", clazz));
       } else {

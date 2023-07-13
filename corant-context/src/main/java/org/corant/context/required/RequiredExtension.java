@@ -15,13 +15,19 @@ package org.corant.context.required;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isNotEmpty;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessBeanAttributes;
 import javax.enterprise.inject.spi.WithAnnotations;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.service.RequiredClassNotPresent;
@@ -47,22 +53,19 @@ public class RequiredExtension implements Extension {
     return beanType != null && Services.getRequired().addVeto(getUserClass(beanType));
   }
 
-  public static boolean cancelVeto(Class<?> beanType) {
+  public static boolean removeVeto(Class<?> beanType) {
     shouldBeFalse(afterBeanDiscovery,
         "Unable to cancel the veto bean [%s], the bean processing phase has passed!", beanType);
     return beanType != null && Services.getRequired().removeVeto(getUserClass(beanType));
-  }
-
-  public static boolean isVetoed(Class<?> beanType) {
-    return beanType != null && Services.getRequired().shouldVeto(getUserClass(beanType));
   }
 
   protected void onProcessAnnotatedType(
       @Observes @Priority(Priorities.FRAMEWORK_LOWER) @WithAnnotations({
           RequiredClassNotPresent.class, RequiredClassPresent.class,
           RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
+    // Veto bean which was discovered by normal scope
     AnnotatedType<?> type = event.getAnnotatedType();
-    if (isVetoed(type.getJavaClass())) {
+    if (Services.getRequired().shouldVeto(getUserClass(type.getJavaClass()))) {
       event.veto();
       logger.info(() -> String.format("The bean type %s was ignored!",
           event.getAnnotatedType().getJavaClass().getName()));
@@ -71,6 +74,30 @@ public class RequiredExtension implements Extension {
 
   void afterBeanDiscovery(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterBeanDiscovery e) {
     afterBeanDiscovery = true;
+  }
+
+  void onProcessBeanAttributes(
+      @Observes @Priority(Priorities.FRAMEWORK_LOWER) ProcessBeanAttributes<?> event) {
+    // Veto bean which was discovered by producer method or producer field if necessary
+    Annotated annotated = event.getAnnotated();
+    if (annotated instanceof AnnotatedMethod || annotated instanceof AnnotatedField) {
+      Set<RequiredClassNotPresent> requiredClassNotPresents =
+          annotated.getAnnotations(RequiredClassNotPresent.class);
+      Set<RequiredClassPresent> requiredClassPresents =
+          annotated.getAnnotations(RequiredClassPresent.class);
+      Set<RequiredConfiguration> requiredConfigurations =
+          annotated.getAnnotations(RequiredConfiguration.class);
+      if ((isNotEmpty(requiredClassNotPresents) || isNotEmpty(requiredClassPresents)
+          || isNotEmpty(requiredConfigurations))
+          && Services.getRequired().shouldVeto(this.getClass().getClassLoader(),
+              requiredClassPresents.toArray(RequiredClassPresent[]::new),
+              requiredClassNotPresents.toArray(RequiredClassNotPresent[]::new),
+              requiredConfigurations.toArray(RequiredConfiguration[]::new))) {
+        event.veto();
+        logger.info(() -> String.format("The bean type %s was ignored!",
+            event.getAnnotated().getBaseType().getTypeName()));
+      }
+    }
   }
 
 }

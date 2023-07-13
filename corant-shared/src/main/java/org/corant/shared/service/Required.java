@@ -53,4 +53,16 @@ public interface Required extends Sortable {
    */
   boolean shouldVeto(Class<?> type);
 
+  /**
+   * Check whether the given annotations can be vetoed.
+   *
+   * @param classLoader the class loader
+   * @param requiredClassNames the RequiredClassPresent annotation
+   * @param requiredNotClassNames the RequiredClassNotPresent annotation
+   * @param requireConfigs the RequiredConfiguration annotation
+   * @return true if the given service class should be vetoed else false
+   */
+  boolean shouldVeto(ClassLoader classLoader, RequiredClassPresent[] requiredClassNames,
+      RequiredClassNotPresent[] requiredNotClassNames, RequiredConfiguration[] requireConfigs);
+
 }

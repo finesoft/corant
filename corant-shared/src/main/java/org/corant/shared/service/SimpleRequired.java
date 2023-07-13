@@ -97,6 +97,7 @@ public class SimpleRequired implements Required {
     }
   }
 
+  @Override
   public boolean shouldVeto(ClassLoader classLoader, RequiredClassPresent[] requiredClassNames,
       RequiredClassNotPresent[] requiredNotClassNames, RequiredConfiguration[] requireConfigs) {
     boolean veto = false;

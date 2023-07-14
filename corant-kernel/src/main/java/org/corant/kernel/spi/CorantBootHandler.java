@@ -33,7 +33,7 @@ import org.corant.shared.util.Services;
  * @author bingo 下午2:30:23
  *
  */
-public interface CorantBootHandler extends Sortable, AutoCloseable {
+public interface CorantBootHandler extends Sortable {
 
   /**
    * Return the sorted CorantBootHandler instance stream, using {@link java.util.ServiceLoader} and
@@ -53,9 +53,6 @@ public interface CorantBootHandler extends Sortable, AutoCloseable {
           .filter(h -> Iterables.search(excludeClassNames, h.getClass().getName()) == -1);
     }
   }
-
-  @Override
-  default void close() throws Exception {}
 
   /**
    * Called after the container was started, the CDI context is available.

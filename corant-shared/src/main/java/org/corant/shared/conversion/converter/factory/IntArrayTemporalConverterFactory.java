@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.Temporal;
+import java.util.Arrays;
 import org.corant.shared.conversion.ConversionException;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
@@ -37,7 +38,8 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
       if (sizeOf(value) == 3) {
         return LocalDate.of(value[0], value[1], value[2]);
       }
-      throw new ConversionException("Can't convert value to LocalDate from int array.");
+      throw new ConversionException("Can't convert %s to LocalDate from int array.",
+          Arrays.toString(value));
     }
   }
 
@@ -54,7 +56,8 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
         return LocalDateTime.of(value[0], value[1], value[2], value[3], value[4], value[5],
             value[6]);
       }
-      throw new ConversionException("Can't convert value to LocalDateTime from int array.");
+      throw new ConversionException("Can't convert %s to LocalDateTime from int array.",
+          Arrays.toString(value));
     }
   }
 
@@ -68,7 +71,8 @@ public class IntArrayTemporalConverterFactory implements ConverterFactory<int[],
       } else if (size == 4) {
         return LocalTime.of(value[0], value[1], value[2], value[3]);
       }
-      throw new ConversionException("Can't convert value to LocalTime from int array.");
+      throw new ConversionException("Can't convert %s to LocalTime from int array.",
+          Arrays.toString(value));
     }
   }
 

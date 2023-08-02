@@ -10,7 +10,7 @@
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<properties>
-		<version.agroal>2.1</version.agroal>
+		<version.agroal>2.2</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.13</version.aliyun-java-sdk-core>
 		<version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
 		<version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
@@ -55,15 +55,15 @@
 		<version.exec-maven-plugin>3.1.0</version.exec-maven-plugin>
 		<version.feign>12.3</version.feign>
 		<version.flatten-maven-plugin>1.4.1</version.flatten-maven-plugin>
-		<version.flyway>6.0.6</version.flyway>
+		<version.flyway>9.21.1</version.flyway>
 		<version.freemarker>2.3.32</version.freemarker>
 		<version.graalvm>22.3.2</version.graalvm>
 		<version.groovy>4.0.11</version.groovy>
 		<version.grpc>1.54.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-		<version.hibernate-orm-core>6.2.4.Final</version.hibernate-orm-core>
-		<version.hibernate-validator-cdi>8.0.0.Final</version.hibernate-validator-cdi>
+		<version.hibernate-orm-core>6.2.7.Final</version.hibernate-orm-core>
+		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.1</version.hsqldb>
@@ -103,7 +103,7 @@
 		<version.junit>4.13.2</version.junit>
 		<version.jython>2.7.3</version.jython>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
-		<version.keycloak>21.1.0</version.keycloak>
+		<version.keycloak>22.0.1</version.keycloak>
 		<version.kotlin>1.8.20</version.kotlin>
 		<version.kryo>5.5.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>
@@ -136,9 +136,9 @@
 		<version.minio>8.3.0</version.minio>
 		<version.mongodb>3.12.10</version.mongodb>
 		<version.mokito>4.0.0</version.mokito>
-		<version.mssql-jdbc>9.2.1.jre11</version.mssql-jdbc>
+		<version.mssql-jdbc>12.4.0.jre11</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
-		<version.narayana>6.0.1.Final</version.narayana>
+		<version.narayana>7.0.0.Final</version.narayana>
 		<version.ndarray>0.4.0</version.ndarray>
 		<version.netty>4.1.87.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
@@ -182,7 +182,7 @@
 		<version.vertx>4.3.8</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
-		<version.weld>5.1.1.Final</version.weld>
+		<version.weld>5.1.1.SP1</version.weld>
 		<version.weld-api>5.0.SP3</version.weld-api>
 		<version.wxpay-sdk>3.0.9</version.wxpay-sdk>
 		<version.xadisk>1.2.2</version.xadisk>

@@ -16,7 +16,6 @@ package org.corant.modules.query.sql;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
-import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
@@ -45,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.StatementConfiguration;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
@@ -61,6 +61,8 @@ import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.sql.dialect.Dialect;
 import org.corant.modules.query.sql.dialect.Dialects;
+import org.corant.shared.conversion.Converter;
+import org.corant.shared.conversion.Converters;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
@@ -210,7 +212,7 @@ public class SqlQueryTemplate {
         .withResults(forwarding.getResults().stream().map(converter).collect(Collectors.toList()));
   }
 
-  public Map<?, ?> get() {
+  public Map<String, Object> get() {
     Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
         : SqlStatements.normalize(sql, ordinaryParameters);
     return get(ps.getLeft(), ps.getRight());
@@ -220,8 +222,8 @@ public class SqlQueryTemplate {
     return getAs(r -> resolve(QueryObjectMapper.class).toObject(r, clazz));
   }
 
-  public <T> T getAs(final Function<Object, T> converter) {
-    Map<?, ?> r = get();
+  public <T> T getAs(final Function<Map<String, Object>, T> converter) {
+    Map<String, Object> r = get();
     return r == null ? null : converter.apply(r);
   }
 
@@ -321,15 +323,22 @@ public class SqlQueryTemplate {
   }
 
   public <T> T single(final Class<T> clazz) {
-    List<Map<String, Object>> result = select();
+    List<T> result = singles(clazz);
     if (isEmpty(result)) {
       return null;
     } else {
-      shouldBeTrue(result.size() == 1 && result.get(0).size() == 1, () -> new QueryRuntimeException(
-          "The size %s of query result set must not greater than one and the result record must have only one field. SQL: %s.",
-          result.size(), sql));
-      return toObject(result.get(0).entrySet().iterator().next().getValue(), clazz);
+      shouldBeTrue(result.size() == 1,
+          () -> new QueryRuntimeException(
+              "The size %s of query result set must not greater than one. SQL: %s.", result.size(),
+              sql));
+      return result.get(0);
     }
+  }
+
+  public <T> List<T> singles(final Class<T> clazz) {
+    Pair<String, Object[]> ps = useNamedParameter ? SqlStatements.normalize(sql, namedParameters)
+        : SqlStatements.normalize(sql, ordinaryParameters);
+    return querySingle(clazz, ps.key(), ps.value());
   }
 
   /**
@@ -423,6 +432,38 @@ public class SqlQueryTemplate {
       logger.fine(() -> String.format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
           String.join(", ", asStrings(parameter)), sql));
       return defaultObject(runner.query(sql, mapListHander, parameter), ArrayList::new);
+    } catch (SQLException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  protected <T> List<T> querySingle(Class<T> resultClass, String sql, Object... parameter) {
+    try {
+      logger.fine(() -> String.format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
+          String.join(", ", asStrings(parameter)), sql));
+      return defaultObject(runner.query(sql, (ResultSetHandler<List<T>>) rs -> {
+        if (rs != null) {
+          shouldBeTrue(rs.getMetaData().getColumnCount() == 1,
+              "The result record must have only one field in single column query!");
+          List<T> rows = new ArrayList<>();
+          Converter converter = null;
+          while (rs.next()) {
+            Object row = rs.getObject(1);
+            if (row == null) {
+              rows.add(null);
+            } else {
+              if (converter == null) {
+                converter = Converters.lookup(row.getClass(), resultClass)
+                    .orElse((t, m) -> resultClass.cast(t));
+              }
+              rows.add((T) converter.convert(row, null));
+            }
+          }
+          return rows;
+        }
+        return null;
+      }, parameter), ArrayList::new);
     } catch (SQLException e) {
       throw new QueryRuntimeException(e);
     }

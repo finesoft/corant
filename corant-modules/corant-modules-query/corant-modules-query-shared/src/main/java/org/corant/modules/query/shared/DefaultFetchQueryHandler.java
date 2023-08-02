@@ -43,7 +43,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import org.corant.context.service.ConversionService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
@@ -70,9 +69,6 @@ import org.corant.shared.util.Strings.WildcardMatcher;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
 public class DefaultFetchQueryHandler implements FetchQueryHandler {
-
-  @Inject
-  protected ConversionService conversionService;
 
   @Inject
   protected QueryObjectMapper objectMapper;

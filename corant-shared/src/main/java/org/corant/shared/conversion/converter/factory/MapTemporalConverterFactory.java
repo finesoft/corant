@@ -45,7 +45,7 @@ public class MapTemporalConverterFactory implements ConverterFactory<Map, Tempor
       } else if (value.containsKey("epochSecond")) {
         return Instant.ofEpochSecond(resolveLong(value.get("epochSecond")));
       }
-      throw new ConversionException("Can't found the value of 'epochSecond'");
+      throw new ConversionException("Can't find the value of 'epochSecond'");
     }
   }
 

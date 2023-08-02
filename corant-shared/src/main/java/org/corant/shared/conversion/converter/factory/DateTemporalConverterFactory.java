@@ -49,7 +49,7 @@ public class DateTemporalConverterFactory implements ConverterFactory<Date, Temp
       ZoneId zoneId = AbstractTemporalConverter.resolveHintZoneId(hints)
           .orElseGet(() -> !AbstractConverter.isStrict(hints) ? ZoneId.systemDefault() : null);
       if (zoneId == null) {
-        throw new ConversionException("Can't convert Date to %s, zone id not find!",
+        throw new ConversionException("Can't convert Date %s to %s, zone id not find!", value,
             targetClass.getName());
       }
       if (targetClass.equals(ZonedDateTime.class)) {
@@ -62,7 +62,7 @@ public class DateTemporalConverterFactory implements ConverterFactory<Date, Temp
         return (T) LocalDate.ofInstant(value.toInstant(), zoneId);
       }
     }
-    throw new ConversionException("Can't convert Date to %s!", targetClass.getName());
+    throw new ConversionException("Can't convert Date %s to %s!", value, targetClass.getName());
   }
 
   @Override

@@ -25,8 +25,9 @@ import org.corant.shared.util.Chars;
  */
 public abstract class AbstractNumberConverter<S, T extends Number> extends AbstractConverter<S, T> {
 
+  // FIXME supports OctalDigits
   static final String[] NUMERIC_PREFIXES =
-      {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#", "0", "-0", "+0"};
+      {"0x", "0X", "-0x", "-0X", "+0x", "+0X", "#", "-#", "+#", /* "0", */ "-0", "+0"};
 
   /**
    * @see AbstractConverter#AbstractConverter()

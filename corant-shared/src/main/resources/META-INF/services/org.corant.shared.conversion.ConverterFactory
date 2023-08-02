@@ -6,3 +6,4 @@ org.corant.shared.conversion.converter.factory.ListTemporalConverterFactory
 org.corant.shared.conversion.converter.factory.IntArrayTemporalConverterFactory
 org.corant.shared.conversion.converter.factory.MapTemporalConverterFactory
 org.corant.shared.conversion.converter.factory.DateTemporalConverterFactory
+org.corant.shared.conversion.converter.factory.NumberPrimitiveConverterFactory

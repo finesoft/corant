@@ -38,13 +38,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
-
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.annotation.PreDestroy;
-import org.corant.context.service.ConversionService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
@@ -71,9 +69,6 @@ import org.corant.shared.util.Strings.WildcardMatcher;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
 public class DefaultFetchQueryHandler implements FetchQueryHandler {
-
-  @Inject
-  protected ConversionService conversionService;
 
   @Inject
   protected QueryObjectMapper objectMapper;

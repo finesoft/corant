@@ -370,11 +370,7 @@ public class Maps {
       final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz,
       final Map<String, ?> hints) {
     Object obj = map == null ? null : map.get(key);
-    if (obj == null) {
-      return null;
-    } else {
-      return Conversion.convert(obj, elementClazz, collectionFactory, hints, false);
-    }
+    return Conversion.convert(obj, elementClazz, collectionFactory, hints, false);
   }
 
   /**
@@ -1162,11 +1158,7 @@ public class Maps {
   public static <T, C extends Collection<T>> C popMapCollection(final Map<?, ?> map,
       final Object key, final IntFunction<C> collectionFactory, final Class<T> elementClazz) {
     Object obj = map == null ? null : map.remove(key);
-    if (obj == null) {
-      return null;
-    } else {
-      return Conversion.convert(obj, elementClazz, collectionFactory, null, false);
-    }
+    return Conversion.convert(obj, elementClazz, collectionFactory, null, false);
   }
 
   /**

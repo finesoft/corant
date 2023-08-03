@@ -229,6 +229,9 @@ public class Conversion {
    */
   public static <T, C extends Collection<T>> C convert(Object value, Class<T> targetItemClass,
       IntFunction<C> collectionFactory, Map<String, ?> hints, boolean supportsSingleton) {
+    if (value == null) {
+      return null;
+    }
     shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     Iterable<T> it = null;
     int size = 10;
@@ -247,21 +250,22 @@ public class Conversion {
       it = convert(iterableOf((Enumeration) value), targetItemClass, hints);
     } else if (value != null) {
       if (value.getClass().isArray()) {
+        // primitives array
         Object[] array = wrapArray(value);
         size = array.length;
         it = convert(iterableOf(array), targetItemClass, hints);
       } else if (supportsSingleton) {
+        size = 1;
         it = convert(iterableOf(value), targetItemClass, hints);
-      } else {
-        throw new ConversionException(
-            "The given value can't be converted, the value class of the conversion must be iterable/array/iterator/enumeration");
       }
     }
+    if (it == null) {
+      throw new ConversionException(
+          "The given value can't be converted, the value class of the conversion must be iterable/array/iterator/enumeration");
+    }
     final C collection = collectionFactory.apply(size);
-    if (it != null) {
-      for (T item : it) {
-        collection.add(item);
-      }
+    for (T item : it) {
+      collection.add(item);
     }
     return collection;
   }
@@ -343,10 +347,10 @@ public class Conversion {
    */
   public static <T> T[] convert(Object[] value, Class<T> targetItemClass,
       IntFunction<T[]> arrayFactory, Map<String, ?> hints) {
-    shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     if (value == null) {
-      return arrayFactory.apply(0);
+      return null;
     }
+    shouldNotNull(targetItemClass, "The target item class of the conversion can't be null");
     T[] array = arrayFactory.apply(value.length);
     int i = 0;
     for (T t : convert(iterableOf(value), targetItemClass, hints)) {
@@ -390,15 +394,18 @@ public class Conversion {
    * @return the converted object
    */
   public static <T> T[] convertArray(Object value, Class<T> targetClass, Map<String, ?> hints) {
-    shouldNotNull(targetClass, "The target class can't null");
     if (value == null) {
-      return (T[]) Array.newInstance(targetClass, 0);
-    } else if (value.getClass().isArray()) {
+      return null;
+    }
+    shouldNotNull(targetClass, "The target class can't null");
+    if (value.getClass().isArray()) {
       Object[] array = wrapArray(value);
       int length = array.length;
       T[] result = (T[]) Array.newInstance(targetClass, length);
-      for (int i = 0; i < length; i++) {
-        result[i] = convert(array[i], targetClass, hints);
+      int i = 0;
+      for (T t : convert(iterableOf(array), targetClass, hints)) {
+        result[i] = t;
+        i++;
       }
       return forceCast(result);
     } else if (value instanceof Collection) {
@@ -406,8 +413,8 @@ public class Conversion {
       int length = collection.size();
       T[] result = (T[]) Array.newInstance(targetClass, length);
       int i = 0;
-      for (Object e : collection) {
-        result[i] = convert(e, targetClass, hints);
+      for (T t : convert(collection, targetClass, hints)) {
+        result[i] = t;
         i++;
       }
       return forceCast(result);
@@ -487,7 +494,7 @@ public class Conversion {
           return Tuple.pairOf(convert(list.get(0), argClasses[0], hints),
               convert(list.get(1), argClasses[1], hints));
         }
-      } else if (value instanceof Object[] || value.getClass().isArray()) {
+      } else if (value.getClass().isArray()) {
         Object[] array = wrapArray(value);
         if (array.length > 1) {
           return Tuple.pairOf(convert(array[0], argClasses[0], hints),
@@ -514,7 +521,7 @@ public class Conversion {
               convert(list.get(1), argClasses[1], hints),
               convert(list.get(2), argClasses[2], hints));
         }
-      } else if (value instanceof Object[] || value.getClass().isArray()) {
+      } else if (value.getClass().isArray()) {
         Object[] array = wrapArray(value);
         if (array.length > 2) {
           return Tuple.tripleOf(convert(array[0], argClasses[0], hints),

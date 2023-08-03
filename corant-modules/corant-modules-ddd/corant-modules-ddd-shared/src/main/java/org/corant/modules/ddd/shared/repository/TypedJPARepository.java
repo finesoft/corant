@@ -13,8 +13,8 @@
  */
 package org.corant.modules.ddd.shared.repository;
 
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -27,13 +27,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaQuery;
-import org.corant.context.Contexts;
 import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 
 /**
  * corant-modules-ddd-shared
@@ -51,17 +49,12 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @param entityClass the entity type to be used in the repository
    * @return an auto created Typed JPA repository
    */
-  public static <T extends Entity> TypedJPARepository<T> instance(Class<T> entityClass,
+  static <T extends Entity> TypedJPARepository<T> instance(Class<T> entityClass,
       Annotation... qualifiers) {
     if (qualifiers.length == 0) {
-      return forceCast(Contexts.getWeldInstance()
-          .select(new ParameterizedTypeImpl(TypedJPARepository.class, entityClass),
-              AutoCreated.INST)
-          .get());
+      return resolve(TypedJPARepository.class, new Class[] {entityClass}, AutoCreated.INST);
     } else {
-      return forceCast(Contexts.getWeldInstance()
-          .select(new ParameterizedTypeImpl(TypedJPARepository.class, entityClass), qualifiers)
-          .get());
+      return resolve(TypedJPARepository.class, new Class[] {entityClass}, qualifiers);
     }
   }
 

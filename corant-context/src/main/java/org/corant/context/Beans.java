@@ -19,6 +19,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -43,6 +44,7 @@ import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Services;
 import org.jboss.weld.bean.proxy.ProxyObject;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 
 /**
  * corant-context
@@ -356,6 +358,35 @@ public class Beans {
   }
 
   /**
+   * Returns a parameterized typed CDI bean instance that matches the given raw type and actual type
+   * arguments and qualifiers or throws an exception if CDI is disabled.
+   *
+   * @param <T> the instance type to be resolved
+   * @param rawType the raw type
+   * @param actualTypeArguments the actual type arguments
+   * @param qualifiers the bean qualifiers that use to resolve
+   */
+  public static <T> T resolve(Type rawType, Type[] actualTypeArguments, Annotation... qualifiers) {
+    return forceCast(selectParameterized(rawType, actualTypeArguments).select(qualifiers).get());
+  }
+
+  /**
+   * Returns a parameterized typed CDI bean instance that matches the given raw type and actual type
+   * arguments and owner type and qualifiers or throws an exception if CDI is disabled.
+   *
+   * @param <T> the instance type to be resolved
+   * @param rawType the raw type
+   * @param actualTypeArguments the actual type arguments
+   * @param ownerType the owner type
+   * @param qualifiers the bean qualifiers that use to resolve
+   */
+  public static <T> T resolve(Type rawType, Type[] actualTypeArguments, Type ownerType,
+      Annotation... qualifiers) {
+    return forceCast(
+        selectParameterized(rawType, actualTypeArguments, ownerType).select(qualifiers).get());
+  }
+
+  /**
    * Returns CDI bean instance, throws exception when it cannot be resolved.
    * <p>
    * Use with care, there may be a memory leak.
@@ -451,6 +482,40 @@ public class Beans {
       throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
     }
     return CDI.current().select(shouldNotNull(subtype), qualifiers);
+  }
+
+  /**
+   * Returns a parameterized typed instance that matches the given raw type and actual type
+   * arguments or throws an exception if CDI is disabled.
+   *
+   * @param <T> the instance type to be selected
+   * @param rawType the raw type
+   * @param actualTypeArguments the actual type arguments
+   */
+  public static <T> Instance<T> selectParameterized(Type rawType, Type... actualTypeArguments) {
+    if (!CDIs.isEnabled()) {
+      throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
+    }
+    return Contexts.getWeldInstance()
+        .select(new ParameterizedTypeImpl(rawType, actualTypeArguments));
+  }
+
+  /**
+   * Returns a parameterized typed instance that matches the given raw type and actual type
+   * arguments and ownerType or throws an exception if CDI is disabled.
+   *
+   * @param <T> the instance type to be selected
+   * @param rawType the raw type
+   * @param actualTypeArguments the actual type arguments
+   * @param ownerType the owner type
+   */
+  public static <T> Instance<T> selectParameterized(Type rawType, Type[] actualTypeArguments,
+      Type ownerType) {
+    if (!CDIs.isEnabled()) {
+      throw new IllegalStateException("Unable to access CDI, the CDI container may be closed.");
+    }
+    return Contexts.getWeldInstance()
+        .select(new ParameterizedTypeImpl(rawType, actualTypeArguments, ownerType));
   }
 
   public static void touch(Class<?>... cas) {

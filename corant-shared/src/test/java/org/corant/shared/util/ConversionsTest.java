@@ -295,7 +295,7 @@ public class ConversionsTest extends TestCase {
     assertEquals(toInteger("-0xff"), toInteger("-255"));
     assertEquals(toObject("0xff", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 10)),
         toInteger("255"));
-    assertEquals(toInteger("0377"), toInteger("0xff"));
+    assertEquals(toInteger("+0377"), toInteger("0xff"));
     assertEquals(toObject("377", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 8)),
         toInteger("0xff"));
     assertEquals(toObject("ff", Integer.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 16)),
@@ -306,7 +306,7 @@ public class ConversionsTest extends TestCase {
     assertEquals(toBigInteger("0xff"), toBigInteger("255"));
     assertEquals(toObject("0xff", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 10)),
         toBigInteger("255"));
-    assertEquals(toBigInteger("0377"), toBigInteger("0xff"));
+    assertEquals(toBigInteger("+0377"), toBigInteger("0xff"));
     assertEquals(toObject("377", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 8)),
         toBigInteger("0xff"));
     assertEquals(toObject("ff", BigInteger.class, mapOf(ConverterHints.CVT_NUMBER_RADIX_KEY, 16)),

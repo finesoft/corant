@@ -375,11 +375,7 @@ public class Conversions {
   }
 
   public static <T> List<T> toList(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (obj == null) {
-      return null;
-    } else {
-      return Conversion.convert(obj, clazz, ArrayList::new, hints, false);
-    }
+    return Conversion.convert(obj, clazz, ArrayList::new, hints, false);
   }
 
   public static <T> List<T> toList(Object obj, Function<Object, T> convert) {
@@ -587,11 +583,7 @@ public class Conversions {
   }
 
   public static <T> Set<T> toSet(Object obj, Class<T> clazz, Map<String, ?> hints) {
-    if (obj == null) {
-      return null;
-    } else {
-      return Conversion.convert(obj, clazz, HashSet::new, hints, false);
-    }
+    return Conversion.convert(obj, clazz, HashSet::new, hints, false);
   }
 
   public static <T> Set<T> toSet(Object obj, Function<Object, T> convert) {

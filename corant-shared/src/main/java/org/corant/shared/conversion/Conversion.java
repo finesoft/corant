@@ -248,16 +248,14 @@ public class Conversion {
       it = convert(() -> ((Iterator) value), targetItemClass, hints);
     } else if (value instanceof Enumeration) {
       it = convert(iterableOf((Enumeration) value), targetItemClass, hints);
-    } else if (value != null) {
-      if (value.getClass().isArray()) {
-        // primitives array
-        Object[] array = wrapArray(value);
-        size = array.length;
-        it = convert(iterableOf(array), targetItemClass, hints);
-      } else if (supportsSingleton) {
-        size = 1;
-        it = convert(iterableOf(value), targetItemClass, hints);
-      }
+    } else if (value.getClass().isArray()) {
+      // primitives array
+      Object[] array = wrapArray(value);
+      size = array.length;
+      it = convert(iterableOf(array), targetItemClass, hints);
+    } else if (supportsSingleton) {
+      size = 1;
+      it = convert(iterableOf(value), targetItemClass, hints);
     }
     if (it == null) {
       throw new ConversionException(

@@ -208,10 +208,15 @@ public class ConversionsTest extends TestCase {
     values.add(Pair.of("11/14/1979", "MM/dd/yyyy"));
     values.add(Pair.of("1979/11/14", "yyyy/MM/dd"));
     values.add(Pair.of("1979.11.14", "yyyy.MM.dd"));
+    values.add(Pair.of("1979.1.1", "yyyy.MM.dd"));
     values.add(Pair.of("1979年11月14日", "yyyy年MM月dd日"));
+    values.add(Pair.of("1979年1月14日", "yyyy年MM月dd日"));
+    values.add(Pair.of("1979年1月4日", "yyyy年MM月dd日"));
     values.add(Pair.of("14 Nov 1979", "dd MMM yyyy"));
+    values.add(Pair.of("4 Nov 1979", "dd MMM yyyy"));
     values.add(Pair.of("14-Nov-1979", "dd-MMM-yyyy"));
     values.add(Pair.of("14 November 1979", "dd MMMM yyyy"));
+    values.add(Pair.of("4 November 1979", "dd MMMM yyyy"));
     values.add(Pair.of("1979-W46-3", "yyyy-Www-D"));
     values.add(Pair.of("1979W463", "yyyyWwwD"));
     values.add(Pair.of("197911141114", "yyyyMMddHHmm"));
@@ -219,10 +224,17 @@ public class ConversionsTest extends TestCase {
     values.add(Pair.of("14-11-1979 11:14", "dd-MM-yyyy HH:mm"));
     values.add(Pair.of("1979-11-14 11:14", "yyyy-MM-dd HH:mm"));
     values.add(Pair.of("1979年11月14日 11时14分", "yyyy年MM月dd日 HH时mm分"));
+    values.add(Pair.of("1979年11月14日11时14分", "yyyy年MM月dd日HH时mm分"));
+    values.add(Pair.of("1979年11月14日1时1分", "yyyy年MM月dd日HH时mm分"));
+    values.add(Pair.of("1979年11月14日 11点14分", "yyyy年MM月dd日 HH点mm分"));
+    values.add(Pair.of("1979年11月14日11点14分", "yyyy年MM月dd日HH点mm分"));
+    values.add(Pair.of("1979年11月14日1点1分", "yyyy年MM月dd日HH点mm分"));
     values.add(Pair.of("11/14/1979 11:14", "MM/dd/yyyy HH:mm"));
     values.add(Pair.of("1979/11/14 11:14", "yyyy/MM/dd HH:mm"));
     values.add(Pair.of("14 Nov 1979 11:14", "dd MMM yyyy HH:mm"));
+    values.add(Pair.of("4 Nov 1979 11:14", "dd MMM yyyy HH:mm"));
     values.add(Pair.of("14 November 1979 11:14", "dd MMMM yyyy HH:mm"));
+    values.add(Pair.of("4 November 1979 11:14", "dd MMMM yyyy HH:mm"));
     values.add(Pair.of("19791114111408", "yyyyMMddHHmmss"));
     values.add(Pair.of("19791114 111408", "yyyyMMdd HHmmss"));
     values.add(Pair.of("14-11-1979 11:14:08", "dd-MM-yyyy HH:mm:ss"));
@@ -237,14 +249,20 @@ public class ConversionsTest extends TestCase {
     values.add(Pair.of("11/14/1979 11:14:08", "MM/dd/yyyy HH:mm:ss"));
     values.add(Pair.of("1979/11/14 11:14:08", "yyyy/MM/dd HH:mm:ss"));
     values.add(Pair.of("14 Nov 1979 11:14:08", "dd MMM yyyy HH:mm:ss"));
+    values.add(Pair.of("4 Nov 1979 11:14:08", "dd MMM yyyy HH:mm:ss"));
     values.add(Pair.of("14 November 1979 11:14:08", "dd MMMM yyyy HH:mm:ss"));
+    values.add(Pair.of("4 November 1979 11:14:08", "dd MMMM yyyy HH:mm:ss"));
     values.add(Pair.of("1979-11-14-11.14.08.888888", "yyyy-MM-dd-HH.mm.ss.SSSSSS"));
     values.add(Pair.of("1979-11-14 11:14:08.8888", "yyyy-MM-dd HH:mm:ss.[S...]"));
     values.add(Pair.of("Wed, 14 Nov 1979 11:14:08 GMT", "RFC_1123_DATE_TIME"));
+    values.add(Pair.of("Sun, 4 Nov 1979 11:14:08 GMT", "RFC_1123_DATE_TIME"));
     values.add(Pair.of("Wed, 14 Nov 1979 11:14:08", "RFC_1123_DATE_TIMEX"));
+    values.add(Pair.of("Sun, 4 Nov 1979 11:14:08", "RFC_1123_DATE_TIMEX"));
     values.add(Pair.of("星期三, 14 十一月 1979 11:14:08 GMT", "RFC_1123_DATE_TIME(ZH)"));
+    values.add(Pair.of("星期日, 4 十一月 1979 11:14:08 GMT", "RFC_1123_DATE_TIME(ZH)"));
     values.add(Pair.of("Wed Nov 14 11:14:08 GMT 1979", "java.util.Date().toString()"));
     values.add(Pair.of("星期三 十一月 14 11:26:28 CST 1979", "ZH java.util.Date().toString()"));
+    values.add(Pair.of(new java.util.Date().toString(), "java.util.Date().toString()"));
     values.forEach(v -> {
       Optional<TemporalFormatter> tf = AbstractTemporalConverter.decideFormatter(v.getKey());
       if (tf.isPresent()) {

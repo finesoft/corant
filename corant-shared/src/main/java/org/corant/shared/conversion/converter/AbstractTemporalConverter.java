@@ -48,15 +48,8 @@ import org.corant.shared.conversion.ConverterHints;
 public abstract class AbstractTemporalConverter<S, T extends Temporal>
     extends AbstractConverter<S, T> {
 
-  public static final Map<Long, String> DEFAULT_DAY_OF_WEEK_LP = // NOSONAR
-      immutableMapOf(1L, "Mon", 2L, "Tue", 3L, "Wed", 4L, "Thu", 5L, "Fri", 6L, "Sat", 7L, "Sun");
-
   public static final Map<Long, String> DEFAULT_ZH_DAY_OF_WEEK_LP = // NOSONAR
       immutableMapOf(1L, "星期一", 2L, "星期二", 3L, "星期三", 4L, "星期四", 5L, "星期五", 6L, "星期六", 7L, "星期日");
-
-  public static final Map<Long, String> DEFAULT_MONTH_OF_YEAR_LP = // NOSONAR
-      immutableMapOf(1L, "Jan", 2L, "Feb", 3L, "Mar", 4L, "Apr", 5L, "May", 6L, "Jun", 7L, "Jul",
-          8L, "Aug", 9L, "Sep", 10L, "Oct", 11L, "Nov", 12L, "Dec");
 
   public static final Map<Long, String> DEFAULT_ZH_MONTH_OF_YEAR_LP = // NOSONAR
       immutableMapOf(1L, "一月", 2L, "二月", 3L, "三月", 4L, "四月", 5L, "五月", 6L, "六月", 7L, "七月", 8L, "八月",
@@ -66,38 +59,53 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
 
       immutableListOf(
 
-          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy", false),
+          new TemporalFormatter("^\\d{2}-\\d{2}-\\d{4}$", "dd-MM-yyyy", false, 10, 10),
 
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}(\\+\\d{2}:\\d{2})?$",
-              DateTimeFormatter.ISO_DATE, "yyyy-MM-dd", false),
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}(\\+\\d{2}:\\d{2})?$",
+              DateTimeFormatter.ISO_DATE, "yyyy-MM-dd", false, 10, 10),
 
-          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}$", "MM/dd/yyyy", false),
+          new TemporalFormatter("^\\d{2}/\\d{2}/\\d{4}$", "MM/dd/yyyy", false, 10, 10),
 
-          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd", false),
+          new TemporalFormatter("^\\d{4}/\\d{2}/\\d{2}$", "yyyy/MM/dd", false, 10, 10),
 
           new TemporalFormatter("^\\d{4}\\.\\d{1,2}\\.\\d{1,2}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
-                  .appendLiteral('.').appendValue(MONTH_OF_YEAR, 2).appendLiteral('.')
-                  .appendValue(DAY_OF_MONTH, 2).toFormatter(),
-              "yyyy.MM.dd", false),
+                  .appendLiteral('.').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('.').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .toFormatter(),
+              "yyyy.MM.dd", false, 8, 10),
 
           // 1979年11月14日
-          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日$", "yyyy年MM月dd日", false),
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').toFormatter(),
+              "yyyy年MM月dd日", false, 9, 11),
 
           // 14 Nov 1979 only for US
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}$", "dd MMM yyyy", Locale.US,
-              false),
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.SHORT).appendLiteral(' ')
+                  .appendValue(YEAR, 4).toFormatter(Locale.US),
+              "dd MMM yyyy", false, 10, 11),
 
           // 14-Nov-1979 only for US
-          new TemporalFormatter("^\\d{1,2}-[a-zA-Z]{3}-\\d{4}$", "dd-MMM-yyyy", Locale.US, false),
+          new TemporalFormatter("^\\d{2}-[a-zA-Z]{3}-\\d{4}$", "dd-MMM-yyyy", Locale.US, false, 11,
+              11),
 
           // 14 November 1979 only for US
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4,9}$", "dd MMMM yyyy", Locale.US,
-              false),
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,9}\\s\\d{4}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.FULL).appendLiteral(' ').appendValue(YEAR, 4)
+                  .toFormatter(Locale.US),
+              "dd MMMM yyyy", false, 10, 17),
 
           // ISO Week dates
           new TemporalFormatter("^\\d{4}-W\\d{2}-\\d{1}$", DateTimeFormatter.ISO_WEEK_DATE,
-              "yyyy-Www-D", false),
+              "yyyy-Www-D", false, 10, 10),
 
           // ISO Week dates
           new TemporalFormatter("^\\d{4}W\\d{2}\\d{1}$",
@@ -105,81 +113,193 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .appendValue(IsoFields.WEEK_BASED_YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
                   .appendLiteral("W").appendValue(IsoFields.WEEK_OF_WEEK_BASED_YEAR, 2)
                   .appendValue(DAY_OF_WEEK, 1).toFormatter(),
-              "yyyyWwwD", false),
+              "yyyyWwwD", false, 8, 8),
 
-          new TemporalFormatter("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm", true),
+          new TemporalFormatter("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm", true, 13, 13),
 
-          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}$", "dd-MM-yyyy HH:mm",
-              true),
+          new TemporalFormatter("^\\d{1}-\\d{1}-\\d{4}\\s\\d{1}:\\d{2}$", "dd-MM-yyyy HH:mm", true,
+              16, 16),
 
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy-MM-dd HH:mm",
-              true),
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}$", "yyyy-MM-dd HH:mm", true,
+              16, 16),
 
-          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{2}分$",
-              "yyyy年MM月dd日 HH时mm分", true),
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{1,2}分$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('时')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('分')
+                  .toFormatter(),
+              "yyyy年MM月dd日 HH时mm分", true, 14, 18),
 
-          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}$", "MM/dd/yyyy HH:mm",
-              true),
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}:\\d{1,2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).toFormatter(),
+              "yyyy年MM月dd日 HH:mm", true, 13, 17),
 
-          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}$", "yyyy/MM/dd HH:mm",
-              true),
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\d{1,2}时\\d{1,2}分$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('时').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('分').toFormatter(),
+              "yyyy年MM月dd日HH时mm分", true, 13, 17),
 
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-              "dd MMM yyyy HH:mm", Locale.US, true),
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\d{1,2}点\\d{1,2}分$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('点').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('分').toFormatter(),
+              "yyyy年MM月dd日HH点mm分", true, 13, 17),
 
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-              "dd MMMM yyyy HH:mm", Locale.US, true),
+          new TemporalFormatter("^\\d{2}/\\d{2}/\\d{4}\\s\\d{2}:\\d{2}$", "MM/dd/yyyy HH:mm", true,
+              16, 16),
 
-          new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false),
+          new TemporalFormatter("^\\d{4}/\\d{2}/\\d{2}\\s\\d{2}:\\d{2}$", "yyyy/MM/dd HH:mm", true,
+              16, 16),
 
-          new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true),
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{1,2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.SHORT).appendLiteral(' ')
+                  .appendValue(YEAR, 4).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).toFormatter(Locale.US),
+              "dd MMM yyyy HH:mm", true, 14, 17),
 
-          new TemporalFormatter("^\\d{14}$", "yyyyMMddHHmmss", true),
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,9}\\s\\d{4}\\s\\d{1,2}:\\d{1,2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.FULL).appendLiteral(' ').appendValue(YEAR, 4)
+                  .appendLiteral(' ').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral(':').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .toFormatter(Locale.US),
+              "dd MMMM yyyy HH:mm", true, 14, 23),
 
-          new TemporalFormatter("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss", true),
+          new TemporalFormatter("^\\d{8}$", DateTimeFormatter.BASIC_ISO_DATE, "yyyyMMdd", false, 8,
+              8),
 
-          new TemporalFormatter("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "dd-MM-yyyy HH:mm:ss", true),
+          new TemporalFormatter("^\\d{12}$", "yyyyMMddHHmm", true, 12, 12),
 
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "yyyy-MM-dd HH:mm:ss", true),
+          new TemporalFormatter("^\\d{14}$", "yyyyMMddHHmmss", true, 14, 14),
 
-          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{2}分\\d{2}秒$",
-              "yyyy年MM月dd日 HH时mm分ss秒", true),
+          new TemporalFormatter("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss", true, 15, 15),
+
+          new TemporalFormatter("^\\d{2}-\\d{2}-\\d{4}\\s\\d{2}:\\d{2}:\\d{2}$",
+              "dd-MM-yyyy HH:mm:ss", true, 19, 19),
+
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}$",
+              "yyyy-MM-dd HH:mm:ss", true, 19, 19),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}时\\d{1,2}分\\d{1,2}秒$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('时')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('分')
+                  .appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('秒')
+                  .toFormatter(),
+              "yyyy年MM月dd日 HH时mm分ss秒", true, 16, 21),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}:\\d{1,2}:\\d{1,2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE).toFormatter(),
+              "yyyy年MM月dd日 HH:mm:ss", true, 15, 20),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\d{1,2}时\\d{1,2}分\\d{1,2}秒$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('时').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('分').appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('秒').toFormatter(),
+              "yyyy年MM月dd日HH时mm分ss秒", true, 15, 20),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\s\\d{1,2}点\\d{1,2}分\\d{1,2}秒$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('点')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('分')
+                  .appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral('秒')
+                  .toFormatter(),
+              "yyyy年MM月dd日 HH点mm分ss秒", true, 16, 21),
+
+          new TemporalFormatter("^\\d{4}年\\d{1,2}月\\d{1,2}日\\d{1,2}点\\d{1,2}分\\d{1,2}秒$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive().appendValue(YEAR, 4)
+                  .appendLiteral('年').appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('月').appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('日').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('点').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('分').appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral('秒').toFormatter(),
+              "yyyy年MM月dd日HH点mm分ss秒", true, 15, 20),
 
           // ISO_INSTANT
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}Z$",
-              DateTimeFormatter.ISO_INSTANT, "ISO_INSTANT yyyy-MM-ddTHH:mm:ssZ", true),
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              DateTimeFormatter.ISO_INSTANT, "ISO_INSTANT yyyy-MM-ddTHH:mm:ssZ", true, 20, 20),
 
           // ISO_DATE_TIME
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{2}:\\d{2}(.*)?$",
-              DateTimeFormatter.ISO_DATE_TIME, "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]", true),
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(.*)?$",
+              DateTimeFormatter.ISO_DATE_TIME, "ISO_DATE_TIME yyyy-MM-ddTHH:mm:ss+o[z]", true, 21,
+              Integer.MAX_VALUE),
 
-          new TemporalFormatter("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "MM/dd/yyyy HH:mm:ss", true),
+          new TemporalFormatter("^\\d{2}/\\d{2}/\\d{4}\\s\\d{2}:\\d{2}:\\d{2}$",
+              "MM/dd/yyyy HH:mm:ss", true, 19, 19),
 
-          new TemporalFormatter("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "yyyy/MM/dd HH:mm:ss", true),
+          new TemporalFormatter("^\\d{4}/\\d{2}/\\d{2}\\s\\d{2}:\\d{2}:\\d{2}$",
+              "yyyy/MM/dd HH:mm:ss", true, 19, 19),
 
           new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "dd MMM yyyy HH:mm:ss", Locale.US, true),
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.SHORT).appendLiteral(' ')
+                  .appendValue(YEAR, 4).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .toFormatter(Locale.US),
+              "dd MMM yyyy HH:mm:ss", true, 16, 20),
 
-          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-              "dd MMMM yyyy HH:mm:ss", Locale.US, true),
+          new TemporalFormatter("^\\d{1,2}\\s[a-zA-Z]{4,9}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              new DateTimeFormatterBuilder().parseCaseInsensitive()
+                  .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.FULL).appendLiteral(' ').appendValue(YEAR, 4)
+                  .appendLiteral(' ').appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral(':').appendValue(MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE)
+                  .toFormatter(Locale.US),
+              "dd MMMM yyyy HH:mm:ss", true, 16, 26),
 
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}-\\d{1,2}\\.\\d{2}\\.\\d{2}\\.\\d{1,6}$",
-              "yyyy-MM-dd-HH.mm.ss.SSSSSS", true),
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}-\\d{2}\\.\\d{2}\\.\\d{2}\\.\\d{1,6}$",
+              "yyyy-MM-dd-HH.mm.ss.SSSSSS", true, 21, 26),
 
           // SQL timestamp NOTE:imprecision for MSSQL SERVER
-          new TemporalFormatter("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}\\:\\d{2}\\:\\d{2}\\.\\d{1,}$",
+          new TemporalFormatter("^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}\\:\\d{2}\\:\\d{2}\\.\\d{1,9}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive()
                   .append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                   .appendFraction(NANO_OF_SECOND, 1, 9, true).toFormatter(),
-              "yyyy-MM-dd HH:mm:ss.[S...]", true),
+              "yyyy-MM-dd HH:mm:ss.[S...]", true, 21, 29),
 
           // 星期三, 14 十一月 1979 11:14:08
           new TemporalFormatter(
-              "^([\u4E00-\u9FA5]{3}\\,\\s)?\\d{1,2}\\s[\u4E00-\u9FA5]{2,3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}(.*)?$",
+              "^([\u4E00-\u9FA5]{3}\\,\\s)?\\d{1,2}\\s[\u4E00-\u9FA5]{2,3}\\s\\d{4}\\s\\d{2}:\\d{2}:\\d{2}(.*)?$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart()
                   .appendText(DAY_OF_WEEK, DEFAULT_ZH_DAY_OF_WEEK_LP).appendLiteral(", ")
                   .optionalEnd().appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
@@ -189,51 +309,55 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
                   .optionalStart().appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).optionalEnd()
                   .optionalStart().appendLiteral(' ').appendOffset("+HHMM", "GMT").optionalEnd()
                   .toFormatter(),
-              "RFC_1123_DATE_TIME(ZH)", true),
+              "RFC_1123_DATE_TIME(ZH)", true, 23, 25),
 
           // Wed, 14 Nov 1979 11:14:08
           new TemporalFormatter(
-              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
+              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{2}:\\d{2}:\\d{2}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart()
-                  .appendText(DAY_OF_WEEK, DEFAULT_DAY_OF_WEEK_LP).appendLiteral(", ").optionalEnd()
+                  .appendText(DAY_OF_WEEK, TextStyle.SHORT).appendLiteral(", ").optionalEnd()
                   .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
-                  .appendText(MONTH_OF_YEAR, DEFAULT_MONTH_OF_YEAR_LP).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.SHORT).appendLiteral(' ')
                   .appendValue(YEAR, 4).appendLiteral(' ').appendValue(HOUR_OF_DAY, 2)
                   .appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2).optionalStart()
                   .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).optionalEnd().optionalStart()
-                  .appendLiteral(' ').appendOffset("+HHMM", "GMT").optionalEnd().toFormatter(),
-              "RFC_1123_DATE_TIMEX", true),
+                  .appendLiteral(' ').appendOffset("+HHMM", "GMT").optionalEnd()
+                  .toFormatter(Locale.US),
+              "RFC_1123_DATE_TIMEX", true, 24, 25),
 
           // Wed, 14 Nov 1979 11:14:08 GMT
           new TemporalFormatter(
-              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[a-zA-Z]{1,}$",
-              DateTimeFormatter.RFC_1123_DATE_TIME, "RFC_1123_DATE_TIME", true),
+              "^([a-zA-Z]{3}\\,\\s)?\\d{1,2}\\s[a-zA-Z]{3}\\s\\d{4}\\s\\d{2}:\\d{2}:\\d{2}\\s[a-zA-Z]{1,}$",
+              DateTimeFormatter.RFC_1123_DATE_TIME, "RFC_1123_DATE_TIME", true, 26,
+              Integer.MAX_VALUE),
 
           // Wed Nov 14 11:26:28 CST 1979 java.util.Date string
           new TemporalFormatter(
               "^[a-zA-Z]{3}\\s[a-zA-Z]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                  .appendText(DAY_OF_WEEK, DEFAULT_DAY_OF_WEEK_LP).appendLiteral(' ')
-                  .appendText(MONTH_OF_YEAR, DEFAULT_MONTH_OF_YEAR_LP).appendLiteral(' ')
+                  .appendText(DAY_OF_WEEK, TextStyle.SHORT).appendLiteral(' ')
+                  .appendText(MONTH_OF_YEAR, TextStyle.SHORT).appendLiteral(' ')
                   .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
-                  .appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2)
-                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 2).appendLiteral(':')
+                  .appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
                   .appendZoneText(TextStyle.SHORT).appendLiteral(' ').appendValue(YEAR, 4)
-                  .toFormatter(),
-              "java.util.Date().toString()", true),
+                  .toFormatter(Locale.US),
+              "java.util.Date().toString()", true, 24, 28),
 
           // 星期三 十一月 14 11:26:28 CST 1979 java.util.Date string
           new TemporalFormatter(
-              "^[\u4E00-\u9FA5]{3}\\s[\u4E00-\u9FA5]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
+              "^[\u4E00-\u9FA5]{3}\\s[\u4E00-\u9FA5]{2,3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[A-Z]{1,3}\\s\\d{4}$",
               new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
                   .appendText(DAY_OF_WEEK, DEFAULT_ZH_DAY_OF_WEEK_LP).appendLiteral(' ')
                   .appendText(MONTH_OF_YEAR, DEFAULT_ZH_MONTH_OF_YEAR_LP).appendLiteral(' ')
                   .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(' ')
-                  .appendValue(HOUR_OF_DAY, 2).appendLiteral(':').appendValue(MINUTE_OF_HOUR, 2)
-                  .appendLiteral(':').appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
+                  .appendValue(HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE).appendLiteral(':')
+                  .appendValue(MINUTE_OF_HOUR, 2).appendLiteral(':')
+                  .appendValue(SECOND_OF_MINUTE, 2).appendLiteral(' ')
                   .appendZoneText(TextStyle.SHORT).appendLiteral(' ').appendValue(YEAR, 4)
                   .toFormatter(),
-              "ZH java.util.Date().toString()", true)
+              "ZH java.util.Date().toString()", true, 23, 28)
 
       );
 
@@ -268,7 +392,10 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
   }
 
   public static Stream<TemporalFormatter> decideFormatters(String value) {
-    return DEFAULT_FORMATTERS.stream().filter(tm -> tm.match(value));
+    return DEFAULT_FORMATTERS.stream().filter(tm -> {
+      int len = value.length();
+      return len >= tm.getMinLength() && len <= tm.getMaxLength();
+    }).filter(tm -> tm.match(value));
   }
 
   public static Optional<DateTimeFormatter> resolveHintFormatter(Map<String, ?> hints) {
@@ -304,30 +431,29 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
     final DateTimeFormatter formatter;
     final boolean withTime;
     final String description;
-    final Locale locale;
+    final int minLength;
+    final int maxLength;
 
     TemporalFormatter(String regex, DateTimeFormatter formatter, String description,
-        boolean withTime) {
-      this(regex, formatter, description, Locale.getDefault(), withTime);
-    }
-
-    TemporalFormatter(String regex, DateTimeFormatter formatter, String description, Locale locale,
-        boolean withTime) {
+        boolean withTime, int minLength, int maxLength) {
       this.regex = regex;
       this.formatter = formatter.withZone(ZoneId.systemDefault());
       pattern = Pattern.compile(regex);
       this.withTime = withTime;
       this.description = description;
-      this.locale = locale;
+      this.minLength = minLength;
+      this.maxLength = maxLength;
     }
 
-    TemporalFormatter(String regex, String pattern, boolean withTime) {
-      this(regex, pattern, Locale.getDefault(), withTime);
+    TemporalFormatter(String regex, String pattern, boolean withTime, int minLength,
+        int maxLength) {
+      this(regex, pattern, Locale.getDefault(), withTime, minLength, maxLength);
     }
 
-    TemporalFormatter(String regex, String pattern, Locale locale, boolean withTime) {
+    TemporalFormatter(String regex, String pattern, Locale locale, boolean withTime, int minLength,
+        int maxLength) {
       this(regex, new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern(pattern)
-          .toFormatter(locale), pattern, withTime);
+          .toFormatter(locale), pattern, withTime, minLength, maxLength);
     }
 
     public boolean find(String value) {
@@ -342,8 +468,12 @@ public abstract class AbstractTemporalConverter<S, T extends Temporal>
       return formatter;
     }
 
-    public Locale getLocale() {
-      return locale;
+    public int getMaxLength() {
+      return maxLength;
+    }
+
+    public int getMinLength() {
+      return minLength;
     }
 
     public Pattern getPattern() {

@@ -43,7 +43,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
 
   /**
    * Returns a typed JPA repository, the underling processing depend on CDI & Weld. If qualifiers
-   * are not assigned, return a auto created instance.
+   * are not assigned, return an auto created instance.
    *
    * @param <T> the entity type to be used in the repository
    * @param entityClass the entity type to be used in the repository
@@ -138,8 +138,9 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
 
   /**
    * Retrieve object reference from repository by id and object class
-   *
+   * <p>
    * {@link EntityManager#getReference(Class, Object)}
+   * </p>
    *
    * @param id the entity identifier
    * @return the entity reference
@@ -173,7 +174,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Merge the state of the given object into repository.
    *
-   *
    * @param obj the entity instance
    * @return the merged entity
    */
@@ -189,7 +189,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @param preHandler merge operation preprocessor, used to configure the entity manager, such as
    *        setting batch size, etc. This is related to the Hints provided by the JPA provider.
    * @param postHandler merge operation post-processor, use to configure the entity manager, such as
-   *        flushing to underlying data base,etc.
+   *        flushing to underlying database,etc.
    */
   default void mergeAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
@@ -243,7 +243,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Save the state of the given object into repository
    *
-   *
    * @param obj the entity instance
    */
   @Override
@@ -260,7 +259,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    *        such as setting batch size, etc. This is related to the Hints provided by the JPA
    *        provider.
    * @param postHandler persistence operation post-processor, use to configure the entity manager,
-   *        such as flushing to underlying data base,etc.
+   *        such as flushing to underlying database,etc.
    */
   default void persistAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
@@ -320,8 +319,9 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Refresh the state of the instance from the database,overwriting changes made to the entity, if
    * any, and lock it with respect to given lock mode type.
-   *
+   * <p>
    * {@link EntityManager#refresh(Object, LockModeType)}
+   * </p>
    *
    * @param entity entity instance
    * @param lockMode lock mode
@@ -335,8 +335,9 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Refresh the state of the instance from the database, overwriting changes made to the entity, if
    * any, and lock it with respect to given lock mode type and with specified properties.
-   *
+   * <p>
    * {@link EntityManager#refresh(Object, LockModeType, Map)}
+   * </p>
    *
    * @param entity entity instance
    * @param lockMode lock mode
@@ -349,10 +350,11 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   }
 
   /**
-   * Refresh the state of the instance from the database, usingthe specified properties, and
+   * Refresh the state of the instance from the database, using the specified properties, and
    * overwriting changes made to the entity, if any.
-   *
+   * <p>
    * {@link EntityManager#refresh(Object, Map)}
+   * </p>
    *
    * @param entity entity instance
    * @param properties standard and vendor-specific properties and hints
@@ -365,7 +367,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
 
   /**
    * Remove the entity from repository
-   *
    *
    * @param obj the entity instance
    * @return true means successfully
@@ -391,7 +392,6 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
 
   /**
    * Retrieve objects from repository by query object
-   *
    *
    * @param q the query object
    * @return object list

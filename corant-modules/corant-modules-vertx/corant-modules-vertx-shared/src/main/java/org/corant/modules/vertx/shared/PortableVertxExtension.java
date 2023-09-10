@@ -20,8 +20,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.BeforeShutdown;
 import org.corant.config.Configs;
+import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -64,7 +64,8 @@ public class PortableVertxExtension extends VertxExtension {
     return Vertx.vertx(configJson == null ? new VertxOptions() : new VertxOptions(configJson));
   }
 
-  void onBeforeShutdown(@Observes @Priority(Integer.MAX_VALUE - 5) BeforeShutdown event) {
+  void onPreContainerStopEvent(
+      @Observes @Priority(Integer.MAX_VALUE - 5) PreContainerStopEvent event) {
     try {
       Duration timeout =
           Configs.getValue(CLOSE_TIME_OUT_KEY, Duration.class, Duration.ofSeconds(8));

@@ -48,7 +48,7 @@ public class BytesTest extends TestCase {
     for (int i = 0; i < 36; i++) {
       ba.setBit(63 - i, true);
     }
-    for (int i = 0; i < ba.getInitSize(); i++) {
+    for (int i = 0; i < ba.length(); i++) {
       System.out.print(ba.getBit(i) ? "1" : 0);
     }
     System.out.println();
@@ -67,7 +67,7 @@ public class BytesTest extends TestCase {
     System.out.println(f.getEpochSecond());
     Bytes.toBytes(f.getEpochSecond());
     ba = Bytes.asBitArray(Bytes.toBytes(f.getEpochSecond()));
-    for (int i = 0; i < ba.getInitSize(); i++) {
+    for (int i = 0; i < ba.length(); i++) {
       System.out.print(ba.getBit(i) ? "1" : 0);
     }
     System.out.println();
@@ -86,9 +86,10 @@ public class BytesTest extends TestCase {
 
   @Test
   public void testBitArray() {
-    byte[] bytes = new byte[] {127, 0};// 01111111,00000000
+    byte[] bytes = {127, 0};// 01111111,00000000
     BitArray array = Bytes.asBitArray(bytes);
-    int size = array.getInitSize();
+    System.out.println("****\t" + array.toString() + "\t****");
+    int size = array.length();
     for (int i = 0; i < size; i++) {
       if (i < 7) {
         assertTrue(array.getBit(i));
@@ -103,7 +104,7 @@ public class BytesTest extends TestCase {
 
   @Test
   public void testToBytes() {
-    byte[] array = new byte[] {10, 32, 23, 12, 34, 23, 35, 17};
+    byte[] array = {10, 32, 23, 12, 34, 23, 35, 17};
     assertTrue(Objects.areDeepEqual(toBytes(toLong(array)), array));
     assertTrue(
         Objects.areDeepEqual(toBytes(toInt(Arrays.copyOf(array, 4))), Arrays.copyOf(array, 4)));

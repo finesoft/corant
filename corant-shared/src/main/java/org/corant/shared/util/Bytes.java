@@ -304,47 +304,165 @@ public class Bytes {
     return (short) (bytes[0] << 8 | bytes[1] & 0xFF);
   }
 
-  public static class BitArray {
+  /**
+   * corant-shared
+   * <p>
+   * A simple bits array, no thread-safe.
+   *
+   * @author bingo 上午10:35:39
+   *
+   */
+  public static class BitArray implements Cloneable {
 
     private byte[] array = EMPTY_ARRAY;
 
-    private int size = 0;
+    private int length = 0;
 
+    /**
+     * Create a new bit array containing all the bits in the given byte array.
+     *
+     * @param bytes a byte array containing a little-endian representation of a sequence of bits to
+     *        be used as the initial bits of the new bit array
+     */
     public BitArray(byte[] bytes) {
       if (bytes != null) {
         int len = bytes.length;
+        length = len << 3;
         array = Arrays.copyOf(bytes, len);
-        size = len << 3;
       }
-    }
-
-    public BitArray(int size, boolean in) {
-      if (size < 1) {
-        throw new CorantRuntimeException("The size must be greater then 0 zero!");
-      }
-      array = new byte[(size >> 3) + ((size & 7) == 0 ? 0 : 1)];
-      for (int i = 0; i < size; i++) {
-        setBit(i, in);
-      }
-      this.size = size;
     }
 
     /**
-     * Obtain bit value
+     * Creates a new bit array with the given bits length which containing all the bits in the given
+     * byte array.
+     *
+     * @param array the bytes array to be initialized
+     * @param length the bits length
+     */
+    public BitArray(byte[] array, int length) {
+      int arrayBitLen = array.length << 3;
+      if (length > arrayBitLen) {
+        throw new IndexOutOfBoundsException("length can't > " + arrayBitLen);
+      }
+      this.array = Arrays.copyOf(array, array.length);
+      this.length = length;
+    }
+
+    /**
+     * Creates a bit array whose initial size is {@code length} represent bits with indices in the
+     * range {@code 0} through {@code length-1}. All bits are initially {@code in}.
+     *
+     * @param length the initial length of the bits in array
+     * @param in the initial value
+     */
+    public BitArray(int length, boolean in) {
+      if (length < 1) {
+        throw new CorantRuntimeException("The size must be greater then 0 zero!");
+      }
+      this.length = length;
+      array = new byte[(length >> 3) + ((length & 7) == 0 ? 0 : 1)];
+      for (int i = 0; i < length; i++) {
+        setBit(i, in);
+      }
+    }
+
+    /**
+     * Returns the underlying bytes array length
+     */
+    public int byteLength() {
+      return array.length;
+    }
+
+    @Override
+    public BitArray clone() throws CloneNotSupportedException {
+      return new BitArray(array, length);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof BitArray)) {
+        return false;
+      }
+      BitArray other = (BitArray) obj;
+      if (!Arrays.equals(array, other.array)) {
+        return false;
+      }
+      if (length != other.length) {
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     * Returns the value of the bit with the specified index. The value is {@code true} if the bit
+     * with the index {@code pos} is currently set in this {@code BitArray}; otherwise, the result
+     * is {@code false}.
      *
      * @param pos the position
-     * @return getBit
+     * @return the value of the bit with the specified position
+     * @throws IndexOutOfBoundsException if the specified pos is negative
      */
     public boolean getBit(int pos) {
+      if (pos < 0) {
+        throw new IndexOutOfBoundsException("pos < 0: " + pos);
+      }
       return (array[pos >> 3] & 1 << (pos & 7)) != 0;
     }
 
+    /**
+     * Returns a new {@code BitArray} composed of bits from this {@code BitArray} from
+     * {@code fromIndex} (inclusive) to {@code toIndex} (exclusive).
+     *
+     * @param fromIndex index of the first bit to include
+     * @param toIndex index after the last bit to include
+     * @return a new {@code BitArray} from a range of this {@code BitArray}
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, or {@code toIndex} is
+     *         negative, or {@code fromIndex} is larger than {@code toIndex}, or {@code toIndex} is
+     *         larger than the length of this {@code BitArray}
+     */
+    public BitArray getBits(int fromIndex, int toIndex) {
+      if (fromIndex < 0) {
+        throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+      }
+      if (toIndex < 0) {
+        throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+      }
+      if (fromIndex > toIndex) {
+        throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
+      }
+      if (toIndex > length) {
+        throw new IndexOutOfBoundsException("toIndex can't > " + length);
+      }
+      BitArray ba = new BitArray(toIndex - fromIndex, false);
+      for (int i = 0; i < ba.length; i++) {
+        ba.setBit(i, getBit(i + fromIndex));
+      }
+      return ba;
+    }
+
+    /**
+     * Returns the underlying bytes array
+     */
     public byte[] getBytes() {
       return Arrays.copyOf(array, array.length);
     }
 
-    public int getInitSize() {
-      return size;
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + Arrays.hashCode(array);
+      return prime * result + length;
+    }
+
+    /**
+     * Returns the bits length
+     */
+    public int length() {
+      return length;
     }
 
     /**
@@ -354,6 +472,9 @@ public class Bytes {
      * @param b setBit the bit to set
      */
     public void setBit(int pos, boolean b) {
+      if (pos >= length) {
+        throw new IndexOutOfBoundsException("pos can't >= " + length);
+      }
       byte b8 = array[pos >> 3];
       byte posBit = (byte) (1 << (pos & 7));
       if (b) {
@@ -363,5 +484,44 @@ public class Bytes {
       }
       array[pos >> 3] = b8;
     }
+
+    /**
+     * Re-initial the underlying bytes array
+     *
+     * @param data the bytes array to be initialized
+     */
+    public void setBytes(byte[] data) {
+      setBytes(data, (data.length << 3));
+    }
+
+    /**
+     * Re-initial the underlying bytes array and given bits length
+     *
+     * @param data the bytes array to be initialized
+     * @param length the bits length
+     */
+    public void setBytes(byte[] data, int length) {
+      int dataBitLen = data.length << 3;
+      if (length > dataBitLen) {
+        throw new IndexOutOfBoundsException("length can't > " + dataBitLen);
+      }
+      this.length = length;
+      array = new byte[data.length];
+      System.arraycopy(data, 0, array, 0, data.length);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder((length << 1) + 2);
+      sb.append('[');
+      String[] bits = new String[length];
+      for (int i = 0; i < length; i++) {
+        bits[i] = getBit(i) ? "1" : "0";
+      }
+      sb.append(String.join(",", bits));
+      sb.append(']');
+      return sb.toString();
+    }
+
   }
 }

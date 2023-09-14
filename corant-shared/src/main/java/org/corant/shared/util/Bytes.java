@@ -310,7 +310,6 @@ public class Bytes {
    * A simple bits array, no thread-safe.
    *
    * @author bingo 上午10:35:39
-   *
    */
   public static class BitArray implements Cloneable {
 
@@ -340,12 +339,7 @@ public class Bytes {
      * @param length the bits length
      */
     public BitArray(byte[] array, int length) {
-      int arrayBitLen = array.length << 3;
-      if (length > arrayBitLen) {
-        throw new IndexOutOfBoundsException("length can't > " + arrayBitLen);
-      }
-      this.array = Arrays.copyOf(array, array.length);
-      this.length = length;
+      setBytes(array, length);
     }
 
     /**
@@ -361,8 +355,10 @@ public class Bytes {
       }
       this.length = length;
       array = new byte[(length >> 3) + ((length & 7) == 0 ? 0 : 1)];
-      for (int i = 0; i < length; i++) {
-        setBit(i, in);
+      if (!in) {
+        Arrays.fill(array, (byte) 0);
+      } else {
+        Arrays.fill(array, (byte) -1);
       }
     }
 
@@ -375,7 +371,9 @@ public class Bytes {
 
     @Override
     public BitArray clone() throws CloneNotSupportedException {
-      return new BitArray(array, length);
+      BitArray clone = (BitArray) super.clone();
+      clone.setBytes(array, length);
+      return clone;
     }
 
     @Override
@@ -398,18 +396,18 @@ public class Bytes {
 
     /**
      * Returns the value of the bit with the specified index. The value is {@code true} if the bit
-     * with the index {@code pos} is currently set in this {@code BitArray}; otherwise, the result
+     * with the index {@code index} is currently set in this {@code BitArray}; otherwise, the result
      * is {@code false}.
      *
-     * @param pos the position
-     * @return the value of the bit with the specified position
-     * @throws IndexOutOfBoundsException if the specified pos is negative
+     * @param index the position
+     * @return the value of the bit with the specified index
+     * @throws IndexOutOfBoundsException if the specified index is negative
      */
-    public boolean getBit(int pos) {
-      if (pos < 0) {
-        throw new IndexOutOfBoundsException("pos < 0: " + pos);
+    public boolean getBit(int index) {
+      if (index < 0 || index >= length) {
+        throw new IndexOutOfBoundsException("pos must in [0," + length + "), current " + index);
       }
-      return (array[pos >> 3] & 1 << (pos & 7)) != 0;
+      return (array[index >> 3] & 1 << (index & 7)) != 0;
     }
 
     /**
@@ -466,23 +464,46 @@ public class Bytes {
     }
 
     /**
+     * Reset the bits length, if new length greater than old, all the grow up bits are set to false.
+     *
+     * @param newLength the new length to be set
+     */
+    public void resetLength(int newLength) {
+      if (newLength < 0) {
+        throw new IndexOutOfBoundsException("new length can't < 0 ");
+      }
+      if (newLength > length) {
+        setBit(newLength, false);
+      } else if (newLength < length) {
+        byte[] oa = Arrays.copyOf(array, (newLength >> 3) + ((newLength & 7) == 0 ? 0 : 1));
+        setBytes(oa, newLength);
+      }
+    }
+
+    /**
      * Set bit value into array
      *
-     * @param pos the position
-     * @param b setBit the bit to set
+     * @param index the index to be set to
+     * @param b the bit to set
      */
-    public void setBit(int pos, boolean b) {
-      if (pos >= length) {
-        throw new IndexOutOfBoundsException("pos can't >= " + length);
+    public void setBit(int index, boolean b) {
+      if (index < 0) {
+        throw new IndexOutOfBoundsException("index can't < 0 ");
       }
-      byte b8 = array[pos >> 3];
-      byte posBit = (byte) (1 << (pos & 7));
+      int arrayIndex = index >> 3;
+      // grow up if necessary, all grow up bit set false
+      if (arrayIndex >= array.length) {
+        array = Arrays.copyOf(array, arrayIndex + 1);
+        length = index + 1;
+      }
+      byte b8 = array[arrayIndex];
+      byte posBit = (byte) (1 << (index & 7));
       if (b) {
         b8 |= posBit;
       } else {
-        b8 &= 255 - posBit;
+        b8 &= (~posBit); // opposite
       }
-      array[pos >> 3] = b8;
+      array[arrayIndex] = b8;
     }
 
     /**
@@ -502,12 +523,23 @@ public class Bytes {
      */
     public void setBytes(byte[] data, int length) {
       int dataBitLen = data.length << 3;
-      if (length > dataBitLen) {
-        throw new IndexOutOfBoundsException("length can't > " + dataBitLen);
+      if (length > dataBitLen || length < 0) {
+        throw new IndexOutOfBoundsException("length can't > " + dataBitLen + " and must >= 0");
       }
       this.length = length;
-      array = new byte[data.length];
-      System.arraycopy(data, 0, array, 0, data.length);
+      if (length == dataBitLen) {
+        array = Arrays.copyOf(data, data.length);
+      } else {
+        array = new byte[data.length];
+        for (int i = 0; i < dataBitLen; i++) {
+          if (i >= length) {
+            setBit(i, false);
+          } else {
+            int idx = i >> 3;
+            setBit(i, (data[idx] & 1 << (i & 7)) != 0);
+          }
+        }
+      }
     }
 
     @Override

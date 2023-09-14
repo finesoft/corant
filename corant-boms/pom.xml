@@ -95,7 +95,7 @@
     <version.jakarta.jaxb-api>2.3.3</version.jakarta.jaxb-api>
     <version.jakarta.jnosql>1.0.0-b3</version.jakarta.jnosql>
     <version.jcip-annotations>1.0-1</version.jcip-annotations>
-    <version.jetty>10.0.12</version.jetty>
+    <version.jetty>10.0.16</version.jetty>
     <version.jose4j>0.7.9</version.jose4j>
     <version.jsqlparser>4.3</version.jsqlparser>
     <version.jsoup>1.14.2</version.jsoup>

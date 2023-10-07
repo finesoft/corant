@@ -18,8 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.event.Observes;
 import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -29,6 +27,8 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.event.Observes;
 
 /**
  * corant-modules-vertx-shared
@@ -40,6 +40,7 @@ public class PortableVertxExtension extends VertxExtension {
 
   public static final String OPTIONS_PATH_KEY = "corant.vertx.shared.vertx-options-path";
   public static final String CLOSE_TIME_OUT_KEY = "corant.vertx.shared.vertx-close-timeout";
+  public static final String CLUSTERED_KEY = "corant.vertx.shared.use-clustered";
 
   public PortableVertxExtension() {
     super(resolveVertx());
@@ -48,6 +49,7 @@ public class PortableVertxExtension extends VertxExtension {
   static Vertx resolveVertx() {
     JsonObject configJson = null;
     String path = Configs.getValue(OPTIONS_PATH_KEY, String.class);
+    boolean cluster = Configs.getValue(CLUSTERED_KEY, Boolean.class, false);
     if (isNotBlank(path)) {
       try {
         final Vertx configVertx = Vertx.vertx();
@@ -61,7 +63,13 @@ public class PortableVertxExtension extends VertxExtension {
         throw new CorantRuntimeException(e);
       }
     }
-    return Vertx.vertx(configJson == null ? new VertxOptions() : new VertxOptions(configJson));
+    if (cluster) {
+      return Vertx
+          .clusteredVertx(configJson == null ? new VertxOptions() : new VertxOptions(configJson))
+          .result();
+    } else {
+      return Vertx.vertx(configJson == null ? new VertxOptions() : new VertxOptions(configJson));
+    }
   }
 
   void onPreContainerStopEvent(

@@ -13,27 +13,31 @@
  */
 package org.corant.context.required;
 
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Set;
 import java.util.logging.Logger;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.Annotated;
-import jakarta.enterprise.inject.spi.AnnotatedField;
-import jakarta.enterprise.inject.spi.AnnotatedMethod;
-import jakarta.enterprise.inject.spi.AnnotatedType;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
-import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
-import jakarta.enterprise.inject.spi.WithAnnotations;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.service.RequiredClassNotPresent;
 import org.corant.shared.service.RequiredClassPresent;
 import org.corant.shared.service.RequiredConfiguration;
 import org.corant.shared.util.Services;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.Annotated;
+import jakarta.enterprise.inject.spi.AnnotatedField;
+import jakarta.enterprise.inject.spi.AnnotatedMethod;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
+import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
+import jakarta.enterprise.inject.spi.WithAnnotations;
 
 /**
  * corant-context
@@ -74,6 +78,15 @@ public class RequiredExtension implements Extension {
 
   void afterBeanDiscovery(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterBeanDiscovery e) {
     afterBeanDiscovery = true;
+  }
+
+  void afterDeploymentValidation(
+      @Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterDeploymentValidation e,
+      BeanManager bm) {
+    Instance<RequiredValidator> validators = select(RequiredValidator.class);
+    if (!validators.isUnsatisfied()) {
+      validators.forEach(v -> v.validate(e, bm));
+    }
   }
 
   void onProcessBeanAttributes(

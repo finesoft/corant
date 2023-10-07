@@ -13,6 +13,7 @@
  */
 package org.corant.context.required;
 
+import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -20,11 +21,14 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBeanAttributes;
@@ -74,6 +78,15 @@ public class RequiredExtension implements Extension {
 
   void afterBeanDiscovery(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterBeanDiscovery e) {
     afterBeanDiscovery = true;
+  }
+
+  void afterDeploymentValidation(
+      @Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterDeploymentValidation e,
+      BeanManager bm) {
+    Instance<RequiredValidator> validators = select(RequiredValidator.class);
+    if (!validators.isUnsatisfied()) {
+      validators.forEach(v -> v.validate(e, bm));
+    }
   }
 
   void onProcessBeanAttributes(

@@ -39,4 +39,7 @@ public class ASTValueNode implements ASTNode<Object> {
     return value;
   }
 
+  public Object value() {
+    return value;
+  }
 }

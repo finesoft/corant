@@ -21,25 +21,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
-import jakarta.annotation.PreDestroy;
 import org.bson.Document;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.modules.query.mongodb.Decimal128Utils;
 import org.corant.modules.query.mongodb.MgNamedQuerier;
-import org.corant.modules.query.mongodb.MgNamedQueryService;
 import org.corant.modules.query.mongodb.MongoDatabases;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.mongodb.client.MongoDatabase;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-sql
@@ -52,7 +51,7 @@ import com.mongodb.client.MongoDatabase;
 // @Alternative
 public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, MgNamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
+  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>(); // FIXME
   // scope
 
   @Inject
@@ -70,7 +69,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected boolean convertDecimal;
 
   @Override
-  public MgNamedQueryService get(Object qualifier) {
+  public NamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String databaseName =
@@ -94,7 +93,7 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Produces
   @MgQuery
-  protected MgNamedQueryService produce(InjectionPoint ip) {
+  protected NamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(MgQuery.class)) {

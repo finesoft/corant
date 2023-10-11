@@ -43,6 +43,7 @@ public class DefaultMgNamedQuerier
   protected String collectionName;
   protected final EnumMap<MgOperator, Object> script = new EnumMap<>(MgOperator.class);
   protected final String originalScript;
+  protected MgOperator rootOperator;
 
   /**
    * @param query
@@ -68,6 +69,10 @@ public class DefaultMgNamedQuerier
   @Override
   public String getOriginalScript() {
     return originalScript;
+  }
+
+  public MgOperator getRootOperator() {
+    return rootOperator;
   }
 
   @Override
@@ -97,6 +102,14 @@ public class DefaultMgNamedQuerier
         for (MgOperator mgo : MgOperator.values()) {
           Object x = queryScript.get(mgo.getOps());
           if (x != null) {
+            if (mgo.isIndependent()) {
+              if (rootOperator == null) {
+                rootOperator = mgo;
+              } else {
+                throw new QueryRuntimeException(
+                    "For now we only support one root mongodb operator");
+              }
+            }
             try {
               if (x instanceof Collection) {
                 script.put(mgo, Bsons.toBsons((Collection<?>) x));
@@ -111,6 +124,9 @@ public class DefaultMgNamedQuerier
           }
         }
       }
+    }
+    if (rootOperator == null) {
+      rootOperator = MgOperator.FILTER;
     }
   }
 }

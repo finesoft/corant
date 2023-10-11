@@ -30,6 +30,11 @@ public interface ASTFunctionNode extends ASTNode<Object> {
 
   String getName();
 
+  /**
+   * corant-modules-json
+   *
+   * @author bingo 下午2:48:46
+   */
   class ASTDefaultFunctionNode implements ASTFunctionNode {
 
     protected final String name;
@@ -64,6 +69,6 @@ public interface ASTFunctionNode extends ASTNode<Object> {
     public Object getValue(EvaluationContext ctx) {
       return ctx.resolveFunction(this).apply(children.stream().map(c -> c.getValue(ctx)).toArray());
     }
-
   }
+
 }

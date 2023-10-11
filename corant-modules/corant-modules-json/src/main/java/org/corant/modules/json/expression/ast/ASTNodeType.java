@@ -31,6 +31,7 @@ import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNorNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNotNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicOrNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicXorNode;
+import org.corant.modules.json.expression.ast.ASTNode.ASTTernaryNode;
 import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariableNode;
 
 /**
@@ -95,6 +96,26 @@ public enum ASTNodeType {
       return new ASTLogicXorNode();
     }
   },
+
+  /**
+   * Performs a ternary operation on an array with three expressions.
+   */
+  TERNARY("$?", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTTernaryNode();
+    }
+  },
+
+  /**
+   * Performs a lambda operation on an array. examples: {"λ(x,y)":...]
+   */
+  // LAMBDA("λ", false) {
+  // @Override
+  // public ASTNode<?> buildNode(Object object) {
+  // return new ASTTernaryNode();
+  // }
+  // },
 
   /**
    * The equality comparator operator.

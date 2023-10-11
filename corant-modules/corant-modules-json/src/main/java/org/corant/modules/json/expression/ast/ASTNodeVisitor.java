@@ -42,7 +42,9 @@ public interface ASTNodeVisitor extends Sortable {
         ((ASTRegexNode) node).initialize();
         break;
       case CP_BTW:
-        shouldBeTrue(node.getChildren().size() == 3);
+      case TERNARY:
+        shouldBeTrue(node.getChildren().size() == 3
+            && node.getChildren().get(0) instanceof ASTPredicateNode);
         break;
       case CP_IN:
       case CP_NIN:

@@ -26,6 +26,7 @@ import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.ref.Cleaner;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,9 +49,11 @@ import org.corant.shared.util.Conversions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationAlternate;
 import com.mongodb.client.model.CollationCaseFirst;
@@ -102,24 +105,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     try {
       MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
       log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-      List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
-      AggregateIterable<Document> ai =
-          getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
-      Map<String, String> pros = querier.getQuery().getProperties();
-      getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
-
-      Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong);
-      if (maxTimeMs.isPresent()) {
-        ai.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
-      } else if (querier.resolveTimeout() != null) {
-        ai.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
-      }
-      getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
-          .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
-      Optional<Bson> bson =
-          Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
-      bson.ifPresent(ai::hint);
-      resovleCollation(querier).ifPresent(ai::collation);
+      AggregateIterable<Document> ai = handleAggregate(querier);
       List<Document> docList = null;
       try (MongoCursor<Document> cursor = ai.iterator()) {
         docList = listOf(cursor);
@@ -146,15 +132,15 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
-      FindIterable<Document> fi = query(querier);
-      if (maxFetchSize > 0) {
-        fi.limit(maxFetchSize);
+      final MongoIterable<Document> mi = query(querier);
+      if (maxFetchSize > 0 && mi instanceof FindIterable) {
+        ((FindIterable<Document>) mi).limit(maxFetchSize);
       }
       if (!querier.getQuery().getProperties().containsKey(PRO_KEY_BATCH_SIZE)) {
-        fi.batchSize(min(maxFetchSize, 128));
+        mi.batchSize(min(maxFetchSize, 128));
       }
       List<Map<String, Object>> fetchedList = null;
-      try (MongoCursor<Document> cursor = fi.iterator()) {
+      try (MongoCursor<Document> cursor = mi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
       return new FetchResult(fetchQuery, querier, fetchedList);
@@ -165,7 +151,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
   }
 
-  protected List<Document> collect(FindIterable<Document> fi) {
+  protected List<Document> collect(MongoIterable<Document> fi) {
     List<Document> docList = null;
     try (MongoCursor<Document> cursor = fi.iterator()) {
       docList = listOf(cursor);
@@ -186,7 +172,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int fetchLimit = limit + 1;
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
-    FindIterable<Document> fi = query(querier).batchSize(fetchLimit).skip(offset).limit(fetchLimit);
+    MongoIterable<Document> fi = query(querier);
+    fi.batchSize(fetchLimit);
+    if (fi instanceof FindIterable) {
+      ((FindIterable<Document>) fi).skip(offset).limit(fetchLimit);
+    }
+    // handleFind(querier).batchSize(fetchLimit).skip(offset).limit(fetchLimit);
     List<Document> docList = collect(fi);
     List<Map<String, Object>> list = new ArrayList<>();
     if (docList != null) {
@@ -208,10 +199,14 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   protected <T> T doGet(String queryName, Object parameter) throws Exception {
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).limit(1);
+    Iterable<Document> fi = query(querier);
     Document result = null;
-    try (MongoCursor<Document> cursor = fi.iterator()) {
-      result = cursor.tryNext();
+    if (fi instanceof MongoIterable) {
+      try (MongoCursor<Document> cursor = ((MongoIterable<Document>) fi).iterator()) {
+        result = cursor.tryNext();
+      }
+    } else if (fi.iterator().hasNext()) {
+      result = fi.iterator().next();
     }
     Map<String, Object> theResult = null;
     if (result != null) {
@@ -228,8 +223,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     int limit = querier.resolveLimit();
     Paging<T> result = Paging.of(offset, limit);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    FindIterable<Document> fi = query(querier).batchSize(limit).skip(offset).limit(limit);
-    List<Document> docList = collect(fi);
+    MongoIterable<Document> mi = query(querier);
+    if (mi instanceof FindIterable) {
+      ((FindIterable<Document>) mi).batchSize(limit).skip(offset).limit(limit);
+    }
+    List<Document> docList = collect(mi);
     List<Map<String, Object>> list = new ArrayList<>();
     if (docList != null) {
       final boolean setId = isAutoSetIdField(querier);
@@ -239,7 +237,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         if (list.size() < limit) {
           result.withTotal(offset + list.size());
         } else {
-          result.withTotal((int) queryCount(querier));
+          result.withTotal((int) handleCount(querier));
         }
         this.fetch(list, querier);
       }
@@ -252,8 +250,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
     int maxSelectSize = querier.resolveSelectSize();
-    FindIterable<Document> fi = query(querier).limit(maxSelectSize + 1);
-    List<Document> docList = collect(fi);
+    MongoIterable<Document> mi = query(querier);
+    if (mi instanceof FindIterable) {
+      ((FindIterable<Document>) mi).limit(maxSelectSize + 1);
+    }
+    List<Document> docList = collect(mi);
     List<Map<String, Object>> list = new ArrayList<>();
     if (docList != null) {
       final boolean setId = isAutoSetIdField(querier);
@@ -282,7 +283,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
-    final MongoCursor<Document> cursor = query(querier).batchSize(parameter.getLimit()).iterator();
+    final MongoIterable<Document> mi = query(querier);
+    final MongoCursor<Document> cursor = mi.batchSize(parameter.getLimit()).iterator();
     final boolean autoClose = parameter.isAutoClose();
     final Iterator<T> iterator = new Iterator<>() {
       int counter = 0;
@@ -353,11 +355,72 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   @Override
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
 
-  protected boolean isAutoSetIdField(MgNamedQuerier querier) {
-    return querier.resolveProperty(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+  protected AggregateIterable<Document> handleAggregate(MgNamedQuerier querier) {
+    List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
+    AggregateIterable<Document> ai =
+        getDataBase().getCollection(resolveCollectionName(querier)).aggregate(pipeline);
+    Map<String, String> pros = querier.getQuery().getProperties();
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(ai::batchSize);
+
+    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong);
+    if (maxTimeMs.isPresent()) {
+      ai.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+    } else if (querier.resolveTimeout() != null) {
+      ai.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
+    getOptMapObject(pros, PRO_KEY_MAX_AWAIT_TIMEMS, Conversions::toLong)
+        .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
+    Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
+    bson.ifPresent(ai::hint);
+    resovleCollation(querier).ifPresent(ai::collation);
+    return ai;
   }
 
-  protected FindIterable<Document> query(MgNamedQuerier querier) {
+  protected long handleCount(MgNamedQuerier querier) {
+    CountOptions co = new CountOptions();
+    if (querier.getScript().get(MgOperator.HINT) != null) {
+      co.hint((Bson) querier.getScript(null).get(MgOperator.HINT));
+    }
+    Map<String, String> pros = querier.getQuery().getProperties();
+    getOptMapObject(pros, PRO_KEY_CO_LIMIT, Conversions::toInteger).ifPresent(co::limit);
+
+    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, Conversions::toLong);
+    if (maxTimeMs.isPresent()) {
+      co.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+    } else if (querier.resolveTimeout() != null) {
+      co.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    getOptMapObject(pros, PRO_KEY_CO_SKIP, Conversions::toInteger).ifPresent(co::skip);
+    resovleCollation(querier).ifPresent(co::collation);
+    if (co.getLimit() <= 0) {
+      co.limit(max(resolveCountOptionsLimit(), 1));
+    }
+    Bson bson =
+        forceCast(querier.getScript(null).getOrDefault(MgOperator.FILTER, new BasicDBObject()));
+    return getDataBase().getCollection(resolveCollectionName(querier)).countDocuments(bson, co);
+  }
+
+  protected DistinctIterable<Document> handleDistinct(MgNamedQuerier querier) {
+    EnumMap<MgOperator, Object> script = querier.getScript();
+    Map<String, String> pros = querier.getQuery().getProperties();
+    DistinctIterable<Document> di = getDataBase().getCollection(resolveCollectionName(querier))
+        .distinct(script.get(MgOperator.FIELD_NAME).toString(), Document.class);
+    Optional<Bson> filter = Optional.ofNullable(forceCast(script.get(MgOperator.FILTER)));
+    filter.ifPresent(di::filter);
+    di.batchSize(querier.resolveLimit());
+    getOptMapObject(pros, PRO_KEY_BATCH_SIZE, Conversions::toInteger).ifPresent(di::batchSize);
+    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_MAX_TIMEMS, Conversions::toLong);
+    if (maxTimeMs.isPresent()) {
+      di.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
+    } else if (querier.resolveTimeout() != null) {
+      di.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+    }
+    resovleCollation(querier).ifPresent(di::collation);
+    return di;
+  }
+
+  protected FindIterable<Document> handleFind(MgNamedQuerier querier) {
     FindIterable<Document> fi = getDataBase().getCollection(resolveCollectionName(querier)).find();
     EnumMap<MgOperator, Object> script = querier.getScript();
     for (MgOperator op : MgOperator.values()) {
@@ -419,29 +482,20 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return fi;
   }
 
-  protected long queryCount(MgNamedQuerier querier) {
-    CountOptions co = new CountOptions();
-    if (querier.getScript().get(MgOperator.HINT) != null) {
-      co.hint((Bson) querier.getScript(null).get(MgOperator.HINT));
-    }
-    Map<String, String> pros = querier.getQuery().getProperties();
-    getOptMapObject(pros, PRO_KEY_CO_LIMIT, Conversions::toInteger).ifPresent(co::limit);
+  protected boolean isAutoSetIdField(MgNamedQuerier querier) {
+    return querier.resolveProperty(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
+  }
 
-    Optional<Long> maxTimeMs = getOptMapObject(pros, PRO_KEY_CO_MAX_TIMEMS, Conversions::toLong);
-    if (maxTimeMs.isPresent()) {
-      co.maxTime(maxTimeMs.get(), TimeUnit.MILLISECONDS);
-    } else if (querier.resolveTimeout() != null) {
-      co.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
+  protected <T extends Iterable<Document>> T query(MgNamedQuerier querier) {
+    if (querier.getRootOperator() == MgOperator.AGGREGATE) {
+      return forceCast(handleAggregate(querier));
+    } else if (querier.getRootOperator() == MgOperator.COUNT) {
+      return forceCast(Collections.singletonList(new Document("count", handleCount(querier))));
+    } else if (querier.getRootOperator() == MgOperator.DISTINCT) {
+      return forceCast(handleDistinct(querier));
+    } else {
+      return forceCast(handleFind(querier));
     }
-
-    getOptMapObject(pros, PRO_KEY_CO_SKIP, Conversions::toInteger).ifPresent(co::skip);
-    resovleCollation(querier).ifPresent(co::collation);
-    if (co.getLimit() <= 0) {
-      co.limit(max(resolveCountOptionsLimit(), 1));
-    }
-    Bson bson =
-        forceCast(querier.getScript(null).getOrDefault(MgOperator.FILTER, new BasicDBObject()));
-    return getDataBase().getCollection(resolveCollectionName(querier)).countDocuments(bson, co);
   }
 
   protected String resolveCollectionName(MgNamedQuerier querier) {

@@ -31,18 +31,46 @@ public interface MgNamedQuerier
 
   String getOriginalScript();
 
+  MgOperator getRootOperator(); // from 2023-10-11
+
   enum MgOperator {
-    AGGREGATE("aggregate"), FILTER("filter"), PROJECTION("projection"), MIN("min"), MAX(
-        "max"), HINT("hint"), SORT("sort");
+
+    AGGREGATE("aggregate", true),
+
+    FILTER("filter", true),
+
+    DISTINCT("distinct", true),
+
+    COUNT("count", true),
+
+    PROJECTION("projection", false),
+
+    MIN("min", false),
+
+    MAX("max", false),
+
+    HINT("hint", false),
+
+    SORT("sort", false),
+
+    FIELD_NAME("fieldName", false);
 
     private final String ops;
 
-    MgOperator(String ops) {
+    private final boolean independent;
+
+    MgOperator(String ops, boolean independent) {
       this.ops = ops;
+      this.independent = independent;
     }
 
     public String getOps() {
       return ops;
     }
+
+    public boolean isIndependent() {
+      return independent;
+    }
+
   }
 }

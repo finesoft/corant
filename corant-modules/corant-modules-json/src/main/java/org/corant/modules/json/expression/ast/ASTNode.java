@@ -13,7 +13,10 @@
  */
 package org.corant.modules.json.expression.ast;
 
+import static org.corant.shared.util.Conversions.toBoolean;
+import java.util.ArrayList;
 import java.util.List;
+import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.shared.exception.NotSupportedException;
 
@@ -41,4 +44,34 @@ public interface ASTNode<T> extends Node<T> {
 
   ASTNodeType getType();
 
+  /**
+   * corant-modules-json
+   *
+   * @author bingo 下午2:22:18
+   */
+  class ASTTernaryNode implements ASTNode<Object> {
+
+    protected List<ASTNode<?>> children = new ArrayList<>();
+
+    @Override
+    public boolean addChild(Node<?> child) {
+      return children.add((ASTNode<?>) child);
+    }
+
+    @Override
+    public List<? extends Node<?>> getChildren() {
+      return children;
+    }
+
+    @Override
+    public ASTNodeType getType() {
+      return ASTNodeType.TERNARY;
+    }
+
+    @Override
+    public Object getValue(EvaluationContext ctx) {
+      return toBoolean(getChildren().get(0).getValue(ctx)) ? getChildren().get(1).getValue(ctx)
+          : getChildren().get(2).getValue(ctx);
+    }
+  }
 }

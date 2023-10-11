@@ -57,12 +57,13 @@ public class JsonExpressionTest extends TestCase {
         return r.get(((ASTVariableNode) node).getName());
       }
     };
-    String[] exps =
-        new String[] {"{\"#java.lang.String::substring\":[\"@r.name\",\"@r.s\",\"@r.e\"]}",
-            "{\"#java.lang.String::indexOf\":[\"@r.name\",\"@r.indexof\"]}",
-            "{\"#java.lang.System::currentTimeMillis\":[]}", "{\"#java.util.Date::new\":[]}",
-            "{\"#java.util.UUID::toString\":[{\"#java.util.UUID::randomUUID\":[]}]}",
-            "{\"#sizeOf\":\"@r.name\"}", "{\"#sizeOf\":\"@r.size\"}"};
+
+    String[] exps = {"{\"#java.lang.String::substring\":[\"@r.name\",\"@r.s\",\"@r.e\"]}",
+        "{\"#java.lang.String::indexOf\":[\"@r.name\",\"@r.indexof\"]}",
+        "{\"#java.lang.System::currentTimeMillis\":[]}", "{\"#java.util.Date::new\":[]}",
+        "{\"#java.util.UUID::toString\":[{\"#java.util.UUID::randomUUID\":[]}]}",
+        "{\"#sizeOf\":\"@r.name\"}", "{\"#sizeOf\":\"@r.size\"}",
+        "{\"$?\":[{\"$gt\":[{\"#sizeOf\":\"@r.name\"},9]},\"yes\",\"no\"]}"};
     Node<?>[] nodes = Arrays.stream(exps).map(SimpleParser::parse).toArray(Node[]::new);
     for (Node<?> node : nodes) {
       Object val = node.getValue(ec);

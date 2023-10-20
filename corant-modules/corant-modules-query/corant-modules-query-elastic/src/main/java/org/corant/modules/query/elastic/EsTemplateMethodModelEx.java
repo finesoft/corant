@@ -15,8 +15,10 @@ package org.corant.modules.query.elastic;
 
 import static org.corant.shared.util.Classes.getComponentClass;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,18 @@ public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
           Class<?> argCls = getUserClass(arg.getClass());
           if (isPrimitiveOrWrapper(argCls)) {
             return arg;
+          } else if (argCls.isArray()) {
+            if (isEmpty(arg)) {
+              return arg;
+            } else if (isSimpleType(getComponentClass(arg))) {
+              return OM.writeValueAsString(arg);
+            }
+          } else if (Collection.class.isAssignableFrom(argCls)) {
+            if (isEmpty(arg)) {
+              return arg;
+            } else if (isSimpleType(getComponentClass(arg))) {
+              return OM.writeValueAsString(arg);
+            }
           } else if (isSimpleType(getComponentClass(arg))) {
             return OM.writeValueAsString(arg);
           } else {

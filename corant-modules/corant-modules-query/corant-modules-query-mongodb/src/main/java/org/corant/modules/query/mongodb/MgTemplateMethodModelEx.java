@@ -16,10 +16,12 @@ package org.corant.modules.query.mongodb;
 import static org.corant.modules.query.mongodb.converter.Bsons.EXTJSON_CONVERTERS;
 import static org.corant.shared.util.Classes.getComponentClass;
 import static org.corant.shared.util.Conversions.toList;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Primitives.wrap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,18 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
             return OM.writeValueAsString(toBsonValue(arg));
           } else if (isPrimitiveOrWrapper(argCls)) {
             return arg;
+          } else if (argCls.isArray()) {
+            if (isEmpty(arg)) {
+              return arg;
+            } else if (isSimpleType(getComponentClass(arg))) {
+              return OM.writeValueAsString(toBsonValue(arg));
+            }
+          } else if (Collection.class.isAssignableFrom(argCls)) {
+            if (isEmpty(arg)) {
+              return arg;
+            } else if (isSimpleType(getComponentClass(arg))) {
+              return OM.writeValueAsString(toBsonValue(arg));
+            }
           } else if (isSimpleType(getComponentClass(arg))) {
             return OM.writeValueAsString(toBsonValue(arg));
           } else {

@@ -17,26 +17,45 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Lists.listOf;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import org.bson.AbstractBsonWriter;
+import org.bson.BsonArray;
 import org.bson.BsonBinary;
 import org.bson.BsonBinaryReader;
 import org.bson.BsonBinarySubType;
 import org.bson.BsonBinaryWriter;
 import org.bson.BsonBoolean;
+import org.bson.BsonContextType;
+import org.bson.BsonDateTime;
+import org.bson.BsonDbPointer;
 import org.bson.BsonDecimal128;
 import org.bson.BsonDocument;
 import org.bson.BsonDouble;
 import org.bson.BsonInt32;
 import org.bson.BsonInt64;
+import org.bson.BsonJavaScript;
+import org.bson.BsonNull;
 import org.bson.BsonObjectId;
+import org.bson.BsonRegularExpression;
 import org.bson.BsonString;
+import org.bson.BsonSymbol;
+import org.bson.BsonTimestamp;
+import org.bson.BsonUndefined;
 import org.bson.BsonValue;
+import org.bson.BsonWriterSettings;
 import org.bson.ByteBufNIO;
 import org.bson.Document;
 import org.bson.Transformer;
@@ -49,6 +68,7 @@ import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.DocumentCodecProvider;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.ValueCodecProvider;
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.jsr310.Jsr310CodecProvider;
 import org.bson.io.BasicOutputBuffer;
@@ -59,6 +79,7 @@ import org.bson.types.ObjectId;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Bytes;
+import org.corant.shared.util.Primitives;
 
 /**
  * corant-modules-json
@@ -223,9 +244,10 @@ public class Bsons {
    *        ObjectId/String/Double/Integer/Float/Boolean/byte[]/Long/Resource/BigDecimal/BigInteger
    * @return a bson value
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static BsonValue toSimpleBsonValue(Object source) {
     if (source == null) {
-      return null;
+      return BsonNull.VALUE;
     }
     if (source instanceof BsonValue) {
       return (BsonValue) source;
@@ -241,6 +263,12 @@ public class Bsons {
     }
     if (source instanceof Integer) {
       return new BsonInt32((Integer) source);
+    }
+    if (source instanceof Short) {
+      return new BsonInt32((Short) source);
+    }
+    if (source instanceof Byte) {
+      return new BsonInt32((Byte) source);
     }
     if (source instanceof Long) {
       return new BsonInt64((Long) source);
@@ -260,6 +288,19 @@ public class Bsons {
     if (source instanceof BigDecimal) {
       return new BsonDecimal128(new Decimal128((BigDecimal) source));
     }
+    if (source instanceof Date) {
+      return new BsonDateTime(((Date) source).getTime());
+    }
+    if (source instanceof Instant) {
+      return new BsonDateTime(((Instant) source).toEpochMilli());
+    }
+    if (source instanceof ZonedDateTime) {
+      return new BsonDateTime(((ZonedDateTime) source).toInstant().toEpochMilli());
+    }
+    if (source instanceof Timestamp) {
+      Timestamp ts = (Timestamp) source;
+      return new BsonTimestamp(ts.toInstant().getEpochSecond());
+    }
     if (source instanceof Resource) {
       try {
         return new BsonBinary(((Resource) source).getBytes());
@@ -267,8 +308,22 @@ public class Bsons {
         throw new CorantRuntimeException(e);
       }
     }
-    throw new IllegalArgumentException(String.format("Unable to convert %s (%s) to BsonValue.",
-        source, source.getClass().getName()));
+    try {
+      Object value = source;
+      if (Primitives.isPrimitiveArray(source.getClass())) {
+        value = listOf(Primitives.wrapArray(source));
+      }
+      Codec codec = BSON_DOCUMENT_REGISTRY.get(value.getClass());
+      SimpleBsonWriter writer = new SimpleBsonWriter(value.getClass());
+      codec.encode(writer, value,
+          value instanceof Collection<?> || value instanceof Object[]
+              ? EncoderContext.builder().build()
+              : null);
+      return writer.getValue();
+    } catch (CodecConfigurationException e) {
+      throw new IllegalArgumentException(String.format("Unable to convert %s to BsonValue.",
+          source != null ? source.getClass().getName() : "null"));
+    }
   }
 
   static Object decodeTransformer(Object objectToTransform) {
@@ -279,5 +334,156 @@ public class Bsons {
       }
     }
     return objectToTransform;
+  }
+
+  /**
+   * corant-modules-json
+   *
+   * @author bingo 下午5:30:28
+   *
+   */
+  static class SimpleBsonWriter extends AbstractBsonWriter {
+
+    private final List<BsonValue> values = new ArrayList<>();
+
+    public SimpleBsonWriter(Class<?> type) {
+      super(new BsonWriterSettings());
+
+      if (Map.class.isAssignableFrom(type)) {
+        setContext(new Context(null, BsonContextType.DOCUMENT));
+      } else if (Collection.class.isAssignableFrom(type) || type.isArray()) {
+        setContext(new Context(null, BsonContextType.ARRAY));
+      } else {
+        setContext(new Context(null, BsonContextType.DOCUMENT));
+      }
+    }
+
+    @Override
+    public void flush() {
+      values.clear();
+    }
+
+    @Override
+    public void writeEndArray() {
+      setState(State.NAME);
+    }
+
+    @Override
+    public void writeStartArray() {
+      setState(State.VALUE);
+    }
+
+    @Override
+    protected void doWriteBinaryData(BsonBinary value) {
+      values.add(value);
+    }
+
+    @Override
+    protected void doWriteBoolean(boolean value) {
+      values.add(BsonBoolean.valueOf(value));
+    }
+
+    @Override
+    protected void doWriteDateTime(long value) {
+      values.add(new BsonDateTime(value));
+    }
+
+    @Override
+    protected void doWriteDBPointer(BsonDbPointer value) {
+      values.add(value);
+    }
+
+    @Override
+    protected void doWriteDecimal128(Decimal128 value) {
+      values.add(new BsonDecimal128(value));
+    }
+
+    @Override
+    protected void doWriteDouble(double value) {
+      values.add(new BsonDouble(value));
+    }
+
+    @Override
+    protected void doWriteEndArray() {}
+
+    @Override
+    protected void doWriteEndDocument() {}
+
+    @Override
+    protected void doWriteInt32(int value) {
+      values.add(new BsonInt32(value));
+    }
+
+    @Override
+    protected void doWriteInt64(long value) {
+      values.add(new BsonInt64(value));
+    }
+
+    @Override
+    protected void doWriteJavaScript(String value) {
+      values.add(new BsonJavaScript(value));
+    }
+
+    @Override
+    protected void doWriteJavaScriptWithScope(String value) {
+      throw new UnsupportedOperationException("Cannot capture JavaScriptWith");
+    }
+
+    @Override
+    protected void doWriteMaxKey() {}
+
+    @Override
+    protected void doWriteMinKey() {}
+
+    @Override
+    protected void doWriteNull() {
+      values.add(new BsonNull());
+    }
+
+    @Override
+    protected void doWriteObjectId(ObjectId value) {
+      values.add(new BsonObjectId(value));
+    }
+
+    @Override
+    protected void doWriteRegularExpression(BsonRegularExpression value) {
+      values.add(value);
+    }
+
+    @Override
+    protected void doWriteStartArray() {}
+
+    @Override
+    protected void doWriteStartDocument() {}
+
+    @Override
+    protected void doWriteString(String value) {
+      values.add(new BsonString(value));
+    }
+
+    @Override
+    protected void doWriteSymbol(String value) {
+      values.add(new BsonSymbol(value));
+    }
+
+    @Override
+    protected void doWriteTimestamp(BsonTimestamp value) {
+      values.add(value);
+    }
+
+    @Override
+    protected void doWriteUndefined() {
+      values.add(new BsonUndefined());
+    }
+
+    BsonValue getValue() {
+      if (values.isEmpty()) {
+        return null;
+      }
+      if (!BsonContextType.ARRAY.equals(getContext().getContextType())) {
+        return values.get(0);
+      }
+      return new BsonArray(values);
+    }
   }
 }

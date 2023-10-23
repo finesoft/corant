@@ -71,6 +71,7 @@ public class DefaultMgNamedQuerier
     return originalScript;
   }
 
+  @Override
   public MgOperator getRootOperator() {
     return rootOperator;
   }
@@ -91,7 +92,7 @@ public class DefaultMgNamedQuerier
    *
    * @param mgQuery init
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   protected void init(Map<?, ?> mgQuery) {
     // resolve collection name and query script
     if (isNotEmpty(mgQuery)) {
@@ -99,30 +100,33 @@ public class DefaultMgNamedQuerier
       collectionName = asDefaultString(entry.getKey());
       Map queryScript = forceCast(entry.getValue());
       if (isNotEmpty(queryScript)) {
-        for (MgOperator mgo : MgOperator.values()) {
-          Object x = queryScript.get(mgo.getOps());
-          if (x != null) {
-            if (mgo.isIndependent()) {
-              if (rootOperator == null) {
-                rootOperator = mgo;
-              } else {
-                throw new QueryRuntimeException(
-                    "For now we only support one root mongodb operator");
-              }
-            }
-            try {
-              if (x instanceof Collection) {
-                script.put(mgo, Bsons.toBsons((Collection<?>) x));
-              } else if (x.getClass().isArray()) {
-                script.put(mgo, Bsons.toBsons(wrapArray(x)));
-              } else {
-                script.put(mgo, Bsons.toBson(x));
-              }
-            } catch (Exception e) {
-              throw new QueryRuntimeException(e);
+        queryScript.forEach((k, x) -> {
+          MgOperator mgo = MgOperator.FILTER;
+          for (MgOperator mo : MgOperator.values()) {
+            if (mo.getOps().equals(k)) {
+              mgo = mo;
+              break;
             }
           }
-        }
+          if (mgo.isIndependent()) {
+            if (rootOperator == null) {
+              rootOperator = mgo;
+            } else {
+              throw new QueryRuntimeException("For now we only support one root mongodb operator");
+            }
+          }
+          try {
+            if (x instanceof Collection) {
+              script.put(mgo, Bsons.toBsons((Collection<?>) x));
+            } else if (x != null && x.getClass().isArray()) {
+              script.put(mgo, Bsons.toBsons(wrapArray(x)));
+            } else {
+              script.put(mgo, Bsons.toBson(x));
+            }
+          } catch (Exception e) {
+            throw new QueryRuntimeException(e);
+          }
+        });
       }
     }
     if (rootOperator == null) {

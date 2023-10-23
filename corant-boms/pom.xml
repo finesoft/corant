@@ -59,7 +59,7 @@
 		<version.freemarker>2.3.32</version.freemarker>
 		<version.graalvm>22.3.2</version.graalvm>
 		<version.groovy>4.0.11</version.groovy>
-		<version.grpc>1.54.1</version.grpc>
+		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
 		<version.hibernate-orm-core>6.2.7.Final</version.hibernate-orm-core>

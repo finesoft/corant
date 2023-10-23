@@ -53,7 +53,13 @@ public interface MgNamedQuerier
 
     SORT("sort", false),
 
-    FIELD_NAME("fieldName", false);
+    FIELD_NAME("fieldName", false),
+
+    FIELD_TYPE("fieldType", false),
+
+    // READ_PREFERENCE("readPreference", false),
+
+    READ_CONCERN("readConcern", false);
 
     private final String ops;
 

@@ -209,15 +209,7 @@ public class DefaultQueryHandler implements QueryHandler {
     final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
     if (needConvert) {
       if (isSimpleClass(expectedClass)) {
-        if (result == null) {
-          return null;
-        }
-        Object object = ((Map<?, ?>) result).entrySet().iterator().next().getValue();
-        if (object != null && isSimpleClass(object.getClass())) {
-          return Conversions.toObject(object, expectedClass);
-        }
-        throw new QueryRuntimeException("Can't support result type from %s to %s conversion.",
-            result.getClass(), expectedClass);
+        return convertSimpleRecord(result, expectedClass);
       } else {
         return objectMapper.toObject(result, expectedClass);
       }
@@ -237,16 +229,7 @@ public class DefaultQueryHandler implements QueryHandler {
     final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
     if (needConvert) {
       if (isSimpleClass(expectedClass)) {
-        records.replaceAll(e -> {
-          if (e == null) {
-            return null;
-          }
-          Map<?, ?> em = (Map<?, ?>) e;
-          // FIXME assert or not?
-          // shouldBeTrue(em.size() == 1, "Can't support result type from %s to %s conversion.",
-          // e.getClass(), expectedClass);
-          return Conversions.toObject(em.entrySet().iterator().next().getValue(), expectedClass);
-        });
+        records.replaceAll(e -> convertSimpleRecord(e, expectedClass));
         return forceCast(records);
       } else {
         return objectMapper.toObjects(records, expectedClass);
@@ -254,6 +237,24 @@ public class DefaultQueryHandler implements QueryHandler {
     } else {
       return forceCast(records);
     }
+  }
+
+  protected <T> T convertSimpleRecord(Object result, Class<T> expectedClass) {
+    if (result == null) {
+      return null;
+    }
+    if (result instanceof Map) {
+      Object object = ((Map<?, ?>) result).entrySet().iterator().next().getValue();
+      if (object == null) {
+        return null;
+      } else {
+        return Conversions.toObject(object, expectedClass);
+      }
+    } else if (expectedClass.isInstance(result)) {
+      return forceCast(result);
+    }
+    throw new QueryRuntimeException("Can't support result type from %s to %s conversion.",
+        result.getClass(), expectedClass);
   }
 
   @PostConstruct

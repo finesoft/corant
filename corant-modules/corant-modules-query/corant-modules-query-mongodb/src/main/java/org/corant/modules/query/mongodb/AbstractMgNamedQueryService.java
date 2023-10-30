@@ -482,7 +482,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return querier.resolveProperty(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
   }
 
-  protected <T extends Iterable<Document>> T query(MgNamedQuerier querier) {
+  protected <T extends MongoIterable<Document>> T query(MgNamedQuerier querier) {
     if (querier.getRootOperator() == MgOperator.AGGREGATE) {
       return forceCast(handleAggregate(querier));
     } else if (querier.getRootOperator() == MgOperator.COUNT) {

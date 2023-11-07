@@ -2,7 +2,9 @@ package org.corant.shared.ubiquity;
 
 import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -28,68 +30,102 @@ public class Locks {
   public static class KeyLock<K> {
 
     protected final Map<K, Semaphore> semaphores = new ConcurrentHashMap<>();
-    protected final int availables;
+    protected final int permits;
 
     public KeyLock() {
       this(1);
     }
 
-    public KeyLock(int availables) {
-      this.availables = availables;
+    public KeyLock(int permits) {
+      this.permits = permits;
     }
 
-    public void lock(K key) {
-      shouldNotNull(key);
-      Semaphore semaphore =
-          semaphores.compute(key, (k, v) -> v == null ? new Semaphore(availables) : v);
-      semaphore.acquireUninterruptibly();
+    public Lock get(K key) {
+      return new LockInstance(shouldNotNull(key));
+    }
+
+    public Set<K> keySet() {
+      return new HashSet<>(semaphores.keySet());
     }
 
     public Semaphore remove(K key) {
-      if (key != null) {
-        return semaphores.remove(key);
-      }
-      return null;
-    }
-
-    public boolean tryLock(K key) {
-      shouldNotNull(key);
-      Semaphore semaphore =
-          semaphores.compute(key, (k, v) -> v == null ? new Semaphore(availables) : v);
-      return semaphore.tryAcquire();
-    }
-
-    public boolean tryLock(K key, long time, TimeUnit unit) throws InterruptedException {
-      shouldNotNull(key);
-      Semaphore semaphore =
-          semaphores.compute(key, (k, v) -> v == null ? new Semaphore(availables) : v);
-      return semaphore.tryAcquire(time, unit);
-    }
-
-    public void unlock(K key) {
-      shouldNotNull(key);
-      Semaphore semaphore = semaphores.get(key);
-      if (semaphore != null) {
-        semaphore.release();
-        return;
-      }
-      throw new IllegalMonitorStateException();
+      return semaphores.remove(shouldNotNull(key));
     }
 
     public <T> T withLock(K key, Supplier<T> supply) {
       shouldNoneNull(key, supply);
+      final Lock lock = get(key);
       boolean acquire = false;
       try {
-        lock(key);
+        lock.lock();
         acquire = true;
         return supply.get();
       } finally {
         if (acquire) {
-          unlock(key);
+          lock.unlock();
         }
       }
     }
 
+    /**
+     * corant-shared
+     * <p>
+     * The inner key lock object
+     *
+     * @author bingo 上午11:58:23
+     */
+    protected class LockInstance implements Lock {
+
+      protected final K key;
+
+      protected LockInstance(K key) {
+        this.key = key;
+      }
+
+      @Override
+      public void lock() {
+        Semaphore semaphore =
+            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+        semaphore.acquireUninterruptibly();
+      }
+
+      @Override
+      public void lockInterruptibly() throws InterruptedException {
+        if (Thread.interrupted()) {
+          throw new InterruptedException();
+        }
+        this.lock();
+      }
+
+      @Override
+      public Condition newCondition() {
+        throw new NotSupportedException();
+      }
+
+      @Override
+      public boolean tryLock() {
+        Semaphore semaphore =
+            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+        return semaphore.tryAcquire();
+      }
+
+      @Override
+      public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        Semaphore semaphore =
+            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+        return semaphore.tryAcquire(time, unit);
+      }
+
+      @Override
+      public void unlock() {
+        Semaphore semaphore = semaphores.get(key);
+        if (semaphore != null) {
+          semaphore.release();
+          return;
+        }
+        throw new IllegalMonitorStateException();
+      }
+    }
   }
 
   /**

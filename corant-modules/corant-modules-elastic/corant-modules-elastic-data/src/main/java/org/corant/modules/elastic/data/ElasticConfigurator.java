@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,20 +11,19 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.datasource.agroal;
+package org.corant.modules.elastic.data;
 
-import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.ubiquity.Sortable;
-import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
+import org.elasticsearch.common.settings.Settings.Builder;
 
 /**
- * corant-modules-datasource-agroal
+ * corant-modules-elastic-data
  *
- * @author bingo 下午8:10:27
+ * @author bingo 上午10:32:22
  *
  */
-public interface AgroalCPDataSourceConfigurator extends Sortable {
+public interface ElasticConfigurator extends Sortable {
 
-  void configure(DataSourceConfig config, AgroalDataSourceConfigurationSupplier agroalConfig);
+  void configure(ElasticConfig config, Builder builder);
 
 }

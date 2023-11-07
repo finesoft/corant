@@ -26,16 +26,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
-import jakarta.transaction.TransactionManager;
-import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.datasource.agroal.patch.MyNarayanaTransactionIntegration;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -51,6 +44,13 @@ import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplie
 import io.agroal.api.security.NamePrincipal;
 import io.agroal.api.security.SimplePassword;
 import io.agroal.narayana.NarayanaTransactionIntegration;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 
 /**
  * corant-modules-datasource.agroal
@@ -180,7 +180,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
       }
     }
     Services.selectRequired(AgroalCPDataSourceConfigurator.class, defaultClassLoader())
-        .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, cfgs));
+        .sorted(Sortable::reverseCompare).forEach(c -> c.configure(cfg, cfgs));
     AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
     if (cfg.isEnableMetrics()) {
       registerMetricsMBean(cfg.getName());

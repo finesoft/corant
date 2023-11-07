@@ -18,19 +18,12 @@ import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import jakarta.transaction.TransactionManager;
 import org.apache.commons.dbcp2.managed.BasicManagedDataSource;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -50,6 +43,11 @@ import com.arjuna.ats.internal.jta.recovery.arjunacore.JTATransactionLogXAResour
 import com.arjuna.ats.internal.jta.recovery.arjunacore.XARecoveryModule;
 import com.arjuna.ats.jdbc.TransactionalDriver;
 import com.arjuna.ats.jta.common.jtaPropertyManager;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 
 /**
  * corant-modules-datasource-dbcp
@@ -121,7 +119,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     TxControl.disable(true);
     RecoveryManager.manager().terminate();
     Collections.list(DriverManager.getDrivers()).stream()
-        .filter(d -> d instanceof TransactionalDriver).forEach(d -> {
+        .filter(TransactionalDriver.class::isInstance).forEach(d -> {
           try {
             DriverManager.deregisterDriver(d);
           } catch (SQLException e) {
@@ -144,7 +142,7 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     }
     // ds.setConnectionProperties(connectionProperties);
 
-//    ds.setTransactionManager(instance.select(TransactionManager.class).get());
+    // ds.setTransactionManager(instance.select(TransactionManager.class).get());
     ds.setDriverClassName(cfg.getDriver().getName());
     ds.setUrl(cfg.getConnectionUrl());
     ds.setUsername(cfg.getUsername());
@@ -152,9 +150,9 @@ public class DBCPDataSourceExtension extends AbstractDataSourceExtension {
     ds.setInitialSize(cfg.getInitialSize());
     ds.setMaxTotal(cfg.getMaxSize());
     ds.setMinIdle(cfg.getMinSize());
-    ds.setMaxConnLifetimeMillis(cfg.getMaxLifetime().get(ChronoUnit.MILLIS));
-    ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
-    ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
+    // ds.setMaxConnLifetimeMillis(cfg.getMaxLifetime().get(ChronoUnit.MILLIS));
+    // ds.setMaxWaitMillis(cfg.getAcquisitionTimeout().get(ChronoUnit.MILLIS));
+    // ds.setMinEvictableIdleTimeMillis(cfg.getIdleValidationTimeout().get(ChronoUnit.MILLIS));
 
     Services.selectRequired(DBCPDataSourceConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(c -> c.config(cfg, ds));

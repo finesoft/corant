@@ -39,7 +39,7 @@
 		<version.commons-codec>1.15</version.commons-codec>
 		<version.commons-collections4>4.4</version.commons-collections4>
 		<version.commons-compress>1.23.0</version.commons-compress>
-		<version.commons-dbcp2>2.9.0</version.commons-dbcp2>
+		<version.commons-dbcp2>2.11.0</version.commons-dbcp2>
 		<version.commons-dbutils>1.7</version.commons-dbutils>
 		<version.commons-io>2.11.0</version.commons-io>
 		<version.commons-lang3>3.12.0</version.commons-lang3>
@@ -62,14 +62,14 @@
 		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-		<version.hibernate-orm-core>6.2.7.Final</version.hibernate-orm-core>
+		<version.hibernate-orm-core>6.3.1.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.1</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
 		<version.jackson>2.15.2</version.jackson>
-		<version.jandex>2.4.3.Final</version.jandex>
+		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.7</version.javafx>
 		<version.javassist>3.29.2-GA</version.javassist>
@@ -158,7 +158,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.17.6</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
-		<version.resteasy>6.2.4.Final</version.resteasy>
+		<version.resteasy>6.2.6.Final</version.resteasy>
 		<version.resteasy-microprofile>2.1.1.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro-all>1.7.1</version.shiro-all>
@@ -178,11 +178,11 @@
 		<version.swagger>2.2.8</version.swagger>
 		<version.swagger-ui-webjars>4.18.2</version.swagger-ui-webjars>
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.3.7.Final</version.undertow>
+		<version.undertow>2.3.10.Final</version.undertow>
 		<version.vertx>4.3.8</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
-		<version.weld>5.1.1.SP1</version.weld>
+		<version.weld>5.1.2.Final</version.weld>
 		<version.weld-api>5.0.SP3</version.weld-api>
 		<version.wxpay-sdk>3.0.9</version.wxpay-sdk>
 		<version.xadisk>1.2.2</version.xadisk>

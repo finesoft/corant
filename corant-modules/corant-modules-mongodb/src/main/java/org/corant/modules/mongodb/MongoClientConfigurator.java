@@ -16,6 +16,7 @@ package org.corant.modules.mongodb;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoClientSettings.Builder;
@@ -26,7 +27,7 @@ import com.mongodb.MongoClientSettings.Builder;
  * @author bingo 下午5:04:39
  *
  */
-public interface MongoClientConfigurator {
+public interface MongoClientConfigurator extends Sortable {
 
   static Map<String, Pair<Method, Class<?>[]>> createSettingsMap() {
     Map<String, Pair<Method, Class<?>[]>> settingsMap = new HashMap<>();
@@ -43,5 +44,5 @@ public interface MongoClientConfigurator {
     return settingsMap;
   }
 
-  void configure(Builder optionsBuilder);
+  void configure(MongoClientConfig config, Builder optionsBuilder);
 }

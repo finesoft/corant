@@ -35,22 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.enterprise.inject.spi.InjectionPoint;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
 import org.bson.BsonInt32;
 import org.bson.BsonInt64;
 import org.bson.BsonString;
@@ -65,6 +51,7 @@ import org.corant.modules.mongodb.MongoClientConfig.MongodbConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.mongodb.MongoClientSettings.Builder;
 import com.mongodb.MongoCredential;
@@ -74,6 +61,19 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
 
 /**
  * corant-modules-mongodb
@@ -200,7 +200,8 @@ public class MongoClientExtension implements Extension {
       builder.credential(credential);
     }
     if (!beans.select(MongoClientConfigurator.class).isUnsatisfied()) {
-      beans.select(MongoClientConfigurator.class, qualifiers).forEach(h -> h.configure(builder));
+      beans.select(MongoClientConfigurator.class, qualifiers).stream()
+          .sorted(Sortable::reverseCompare).forEach(h -> h.configure(cfg, builder));
     }
     return MongoClients.create(builder.build());
   }

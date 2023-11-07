@@ -22,9 +22,11 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
+ * <p>
+ * A config-source adjuster, use to adjust the config-source, for example: the adjuster can be used
+ * to do some configuration value decryption works.
  *
  * @author bingo 下午8:50:45
- *
  */
 @FunctionalInterface
 public interface ConfigAdjuster extends Sortable {

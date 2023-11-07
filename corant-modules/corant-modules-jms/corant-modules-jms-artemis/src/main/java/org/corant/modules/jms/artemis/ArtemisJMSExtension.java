@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.artemis;
 
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -21,11 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import org.apache.activemq.artemis.api.core.TransportConfiguration;
 import org.apache.activemq.artemis.api.jms.ActiveMQJMSClient;
 import org.apache.activemq.artemis.api.jms.JMSFactoryType;
@@ -35,8 +31,15 @@ import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Services;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 
 /**
  * corant-modules-jms-artemis
@@ -172,7 +175,9 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
       }
     });
     // The CF will probably be GCed since it was injected, so we disable the finalize check
-    return activeMQConnectionFactory;//.disableFinalizeChecks();
+    Services.selectRequired(ArtemisConfigurator.class, defaultClassLoader())
+        .sorted(Sortable::reverseCompare).forEach(c -> c.configure(cfg, activeMQConnectionFactory));
+    return activeMQConnectionFactory;
   }
 
 }

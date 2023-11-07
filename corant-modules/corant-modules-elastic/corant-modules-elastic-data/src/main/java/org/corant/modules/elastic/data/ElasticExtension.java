@@ -16,6 +16,7 @@ package org.corant.modules.elastic.data;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.split;
@@ -27,17 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.inject.Singleton;
 import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.qualifier.Qualifiers;
@@ -51,6 +41,8 @@ import org.corant.modules.elastic.data.service.ElasticDocumentService;
 import org.corant.modules.elastic.data.service.ElasticIndicesService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Services;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
 import org.elasticsearch.client.transport.TransportClient;
@@ -59,6 +51,17 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.inject.Singleton;
 
 /**
  * corant-modules-elastic-data
@@ -181,6 +184,8 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     Builder builder = Settings.builder();
     cfg.getProperties().forEach(builder::put);
     builder.put("cluster.name", cfg.getClusterName());
+    Services.selectRequired(ElasticConfigurator.class, defaultClassLoader())
+        .sorted(Sortable::reverseCompare).forEach(c -> c.configure(cfg, builder));
     PreBuiltTransportClient tc = new PreBuiltTransportClient(builder.build());
     for (String clusterNode : split(cfg.getClusterNodes(), ",", true, true)) {
       final String[] hostPort = split(clusterNode, ":", true, true);

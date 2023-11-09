@@ -9,7 +9,7 @@
   <name>corant root</name>
   <description>Microservice stack with CDI MicroProfile.</description>
   <properties>
-    <revision>999-SNAPSHOT</revision>
+    <revision>1.23.0</revision>
   </properties>
   <modules>
     <module>corant-boms</module>

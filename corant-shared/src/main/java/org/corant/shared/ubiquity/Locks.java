@@ -24,6 +24,8 @@ public class Locks {
 
   /**
    * corant-shared
+   * <p>
+   * A lock use to lock/unlock on a specific key.
    *
    * @author bingo 上午11:09:35
    */
@@ -41,7 +43,7 @@ public class Locks {
     }
 
     public Lock get(K key) {
-      return new LockInstance(shouldNotNull(key));
+      return new LockInstance(shouldNotNull(key, "The key to be locked can't null"));
     }
 
     public Set<K> keySet() {
@@ -49,7 +51,7 @@ public class Locks {
     }
 
     public Semaphore remove(K key) {
-      return semaphores.remove(shouldNotNull(key));
+      return semaphores.remove(shouldNotNull(key, "The key to be removed can't null"));
     }
 
     public <T> T withLock(K key, Supplier<T> supply) {
@@ -79,7 +81,7 @@ public class Locks {
       protected final K key;
 
       protected LockInstance(K key) {
-        this.key = key;
+        this.key = shouldNotNull(key, "The key to be locked can't null");
       }
 
       @Override

@@ -230,7 +230,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
 
   protected boolean resolveNullableReduce(QueryHint qh) {
     List<QueryHintParameter> params = qh.getParameters(HINT_PARA_NULLABLE_REDUCE);
-    if (isNotEmpty(params)) {
+    if (isEmpty(params)) {
       return true;
     }
     return toBoolean(params.get(0).getValue());

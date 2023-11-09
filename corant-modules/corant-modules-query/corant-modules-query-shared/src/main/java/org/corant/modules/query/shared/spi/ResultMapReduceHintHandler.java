@@ -25,7 +25,7 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
 import static org.corant.shared.util.Strings.strip;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +46,7 @@ import org.corant.modules.query.spi.ResultHintHandler;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Classes;
+import org.corant.shared.util.Objects;
 
 /**
  * corant-modules-query-shared
@@ -61,6 +62,10 @@ import org.corant.shared.util.Classes;
  * optional.</li>
  * <li>The value of the parameter named 'retain-reduce-fields' is used to keep the reduced fields,
  * default is false.</li>
+ * <li>The value of the parameter named 'nullable-reduce' is used to determine whether or not to
+ * keep the reduced object. If 'nullable-reduce' is false, a null value is reduced if all mapped
+ * fields are null, otherwise the reduced object is returned, but all properties of the object are
+ * null, default is true.</li>
  * </ul>
  * </p>
  *
@@ -89,16 +94,19 @@ import org.corant.shared.util.Classes;
  *
  *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one"}
  *          record1: {"id":2, "name":"b", "binId":"2", "binName":"two"}
+ *          record1: {"id":3, "name":"c", "binId":null, "binName":null}
  *
  *      the query results after map-reduce like below:
  *
  *          record1: {"id":1, "name":"a", bin:{"id":"1", "name":"one"}}
  *          record2: {"id":2, "name":"b", bin:{"id":"2", "name":"two"}}
+ *          record2: {"id":3, "name":"c", bin:{"id":null, "name":null}}
  *
  *      and if the hint parameter "retain-reduce-fields" is true:
  *
  *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one", bin:{"id":"1", "name":"one"}}
  *          record2: {"id":2, "name":"b", "binId":"2", "binName":"two", bin:{"id":"2", "name":"two"}}
+ *          record2: {"id":3, "name":"c", "binId":null, "binName":null, bin:{"id":null, "name":null}}
  *
  *      or if the hint parameter "reduce-field-names" contains ':' or '@', for example:
  *
@@ -106,8 +114,13 @@ import org.corant.shared.util.Classes;
  *
  *          record1: {"id":1, "name":"a", bin:{"binId":1, "binName":"one"}}
  *          record2: {"id":2, "name":"b", bin:{"binId":2, "binName":"two"}}
+ *          record2: {"id":3, "name":"c", bin:{"binId":null, "binName":null}}
  *
+ *      or if the hint parameter "nullable-reduce" is false:
  *
+ *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one", bin:{"id":"1", "name":"one"}}
+ *          record2: {"id":2, "name":"b", "binId":"2", "binName":"two", bin:{"id":"2", "name":"two"}}
+ *          record2: {"id":3, "name":"c", "binId":null, "binName":null, bin:null}
  * </pre>
  *
  * @author bingo 下午7:53:36
@@ -121,6 +134,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   public static final String HNIT_PARA_REDUCE_FIELD_NME = "reduce-field-names";
   public static final String HNIT_PARA_MAP_FIELD_NME = "map-field-name";
   public static final String HINT_PARA_RETAIN_FEILDS = "retain-reduce-fields";
+  public static final String HINT_PARA_NULLABLE_REDUCE = "nullable-reduce";
   public static final String TYPE_VALUE_PREFIX = "@";
   public static final char TYPE_VALUE_PREFIX_SIGN = '@';
 
@@ -177,9 +191,10 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
         // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
         final List<Triple<String, String[], Class<?>>> reduceFields = resolveReduceFields(qh);
         final boolean retainFields = resolveRetainFields(qh);
+        final boolean nullableReduce = resolveNullableReduce(qh);
         if (isNotEmpty(reduceFields) && isNotBlank(mapFieldName)) {
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
-            Map<String, Object> obj = new HashMap<>();
+            Map<String, Object> obj = new LinkedHashMap<>();
             if (retainFields) {
               for (Triple<String, String[], Class<?>> rfn : reduceFields) {
                 obj.put(rfn.getLeft(),
@@ -193,7 +208,11 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
                         : extractMapKeyPathValue(map, rfn.getMiddle()));
               }
             }
-            map.put(mapFieldName, obj);
+            if (!nullableReduce && obj.values().stream().allMatch(Objects::isNull)) {
+              map.put(mapFieldName, null);
+            } else {
+              map.put(mapFieldName, obj);
+            }
           });
         }
       } catch (Exception e) {
@@ -207,6 +226,14 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   protected String resolveMapFieldname(QueryHint qh) {
     List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
     return isNotEmpty(params) ? params.get(0).getValue() : null;
+  }
+
+  protected boolean resolveNullableReduce(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_NULLABLE_REDUCE);
+    if (isNotEmpty(params)) {
+      return true;
+    }
+    return toBoolean(params.get(0).getValue());
   }
 
   protected Triple<String, String[], Class<?>> resolveReduceField(String fieldExp) {

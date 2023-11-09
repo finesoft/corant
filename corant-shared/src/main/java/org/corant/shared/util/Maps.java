@@ -819,6 +819,24 @@ public class Maps {
   }
 
   /**
+   * Get the map value corresponding to the given key from the given map, use force cast convert.
+   *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped map value
+   */
+  public static <K, V> Map<K, V> getMapMap(final Map<?, ?> map, final Object key, Map<K, V> nvt) {
+    return getMapObject(map, key, Objects::forceCast, nvt);
+  }
+
+  /**
    * Returns the converted value of the map value corresponding to the given key in the given map,
    * using the given converter if type conversion is involved.
    *
@@ -847,6 +865,24 @@ public class Maps {
    */
   public static <K, V> List<Map<K, V>> getMapMaps(final Map<?, ?> map, final Object key) {
     return getMapList(map, key, Objects::forceCast);
+  }
+
+  /**
+   * Get the list of maps value corresponding to the given key from the given map, use force cast
+   * convert.
+   *
+   * <p>
+   * Note: If the value returned by this method is changed by another processing, it may affect the
+   * given original map.
+   *
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param nvt default value when the key value is not found or the mapped value is null.
+   * @return the mapped list maps value
+   */
+  public static <K, V> List<Map<K, V>> getMapMaps(final Map<?, ?> map, final Object key,
+      List<Map<K, V>> nvt) {
+    return defaultObject(getMapMaps(map, key), nvt);
   }
 
   /**

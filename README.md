@@ -128,3 +128,8 @@ Hello World!
 Congratulations you have created a simple and lightweight Java EE app.
 
 [For some demo projects, please check](https://github.com/sushuaihao/corant-demo)
+
+Notices: 
+This codebase is only used for learning or reference, not in the production environment; 
+If you use the codebase in a production environment or redistributeit, any problems arising therefrom are irrelevant to us, 
+we do not assume any legal responsibility.

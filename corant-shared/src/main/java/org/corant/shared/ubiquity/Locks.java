@@ -31,7 +31,7 @@ public class Locks {
    */
   public static class KeyLock<K> {
 
-    protected final Map<K, Semaphore> semaphores = new ConcurrentHashMap<>();
+    private final Map<K, Semaphore> semaphores = new ConcurrentHashMap<>();
     protected final int permits;
 
     public KeyLock() {
@@ -47,11 +47,11 @@ public class Locks {
     }
 
     public Set<K> keySet() {
-      return new HashSet<>(semaphores.keySet());
+      return new HashSet<>(getSemaphores().keySet());
     }
 
     public Semaphore remove(K key) {
-      return semaphores.remove(shouldNotNull(key, "The key to be removed can't null"));
+      return getSemaphores().remove(shouldNotNull(key, "The key to be removed can't null"));
     }
 
     public <T> T withLock(K key, Supplier<T> supply) {
@@ -67,6 +67,10 @@ public class Locks {
           lock.unlock();
         }
       }
+    }
+
+    protected Map<K, Semaphore> getSemaphores() {
+      return semaphores;
     }
 
     /**
@@ -87,7 +91,7 @@ public class Locks {
       @Override
       public void lock() {
         Semaphore semaphore =
-            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
         semaphore.acquireUninterruptibly();
       }
 
@@ -107,20 +111,20 @@ public class Locks {
       @Override
       public boolean tryLock() {
         Semaphore semaphore =
-            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
         return semaphore.tryAcquire();
       }
 
       @Override
       public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
         Semaphore semaphore =
-            semaphores.compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
         return semaphore.tryAcquire(time, unit);
       }
 
       @Override
       public void unlock() {
-        Semaphore semaphore = semaphores.get(key);
+        Semaphore semaphore = getSemaphores().get(key);
         if (semaphore != null) {
           semaphore.release();
           return;

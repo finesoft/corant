@@ -67,7 +67,7 @@ public class Streams {
    * @return the list stream
    */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
-    final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
+    final int useBatchSize = batchSize < 1 ? DFLT_BATCH_SIZE : batchSize;
     final MutableInteger counter = new MutableInteger(0);
     return shouldNotNull(source)
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
@@ -107,7 +107,7 @@ public class Streams {
 
     return streamOf(new Iterator<>() {
 
-      final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
+      final int useBatchSize = batchSize < 1 ? DFLT_BATCH_SIZE : batchSize;
       final Iterator<? extends T> useIt = shouldNotNull(it);
       final List<T> buffer = new ArrayList<>(useBatchSize);
       boolean end = false;
@@ -502,7 +502,7 @@ public class Streams {
     protected AbstractBatchHandlerSpliterator(long est, int additionalCharacteristics,
         int forEachBathSize, Consumer<Long> handler) {
       super(est, additionalCharacteristics);
-      this.batchSize = forEachBathSize;
+      batchSize = forEachBathSize;
       this.handler = handler == null ? emptyConsumer() : handler;
     }
 
@@ -510,12 +510,12 @@ public class Streams {
     public void forEachRemaining(Consumer<? super T> action) {
       long j = 0;
       do {
-        if (j % this.batchSize == 0 && j > 0) {
-          this.handler.accept(j);
+        if (j % batchSize == 0 && j > 0) {
+          handler.accept(j);
         }
         j++;
       } while (tryAdvance(action) && !Thread.currentThread().isInterrupted());
-      this.handler.accept(j);
+      handler.accept(j);
     }
 
     @Override

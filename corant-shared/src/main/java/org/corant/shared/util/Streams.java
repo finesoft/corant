@@ -67,7 +67,7 @@ public class Streams {
    * @return the list stream
    */
   public static <T> Stream<List<T>> batchCollectStream(int batchSize, Stream<T> source) {
-    final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
+    final int useBatchSize = batchSize < 1 ? DFLT_BATCH_SIZE : batchSize;
     final MutableInteger counter = new MutableInteger(0);
     return shouldNotNull(source)
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / useBatchSize)).values()
@@ -107,7 +107,7 @@ public class Streams {
 
     return streamOf(new Iterator<>() {
 
-      final int useBatchSize = batchSize < 0 ? DFLT_BATCH_SIZE : batchSize;
+      final int useBatchSize = batchSize < 1 ? DFLT_BATCH_SIZE : batchSize;
       final Iterator<? extends T> useIt = shouldNotNull(it);
       final List<T> buffer = new ArrayList<>(useBatchSize);
       boolean end = false;
@@ -176,7 +176,7 @@ public class Streams {
    * must be an <code>List</code> that produces objects whose run-time type is
    * <code>InputStream</code>. The input streams that are produced by the iterator of given
    * inputStreams will be read, in order, to provide the bytes to be read from this
-   * <code>SequenceInputStream</code>. After each input stream from the the iterator of given
+   * <code>SequenceInputStream</code>. After each input stream from the iterator of given
    * inputStreams is exhausted, it is closed by calling its <code>close</code> method.
    * <p>
    * In some scenarios, such as wanting to know the number of bytes of each input stream, the user

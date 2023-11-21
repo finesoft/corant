@@ -19,12 +19,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.corant.modules.query.QueryService;
+import org.corant.modules.query.mapping.Query;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Stereotype;
-import jakarta.enterprise.util.AnnotationLiteral;
-import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.query.QueryService;
-import org.corant.modules.query.mapping.Query.QueryType;
 
 /**
  * corant-modules-query-shared
@@ -36,6 +34,10 @@ import org.corant.modules.query.mapping.Query.QueryType;
  *
  * <pre>
  * NOTE:
+ * <b>
+ *  This annotation must be used with the kind of Query that has a specified query type {@link Query#getType()}
+ *  and qualifier {@link Query#getQualifier()}
+ * </b>
  *
  * 1. The interface method with default static modifier will not be dynamic implemented.
  *
@@ -67,71 +69,5 @@ import org.corant.modules.query.mapping.Query.QueryType;
 @Inherited
 @ApplicationScoped
 @Stereotype
-public @interface DeclarativeQueryService {
-
-  /**
-   * The query qualifier, typically represents a data source, here data source means sql data source
-   * or mongodb database or elastic and cassandra cluster.
-   *
-   * <pre>
-   *
-   *  1. In SQL query <i>({@code type()} is QueryType.SQL)</i>, the qualifier represents the
-   *  data source name and the database dialect and use ':' to concat.
-   *  example: blog:MYSQL, blog is the data source name, MYSQL is the dialect.
-   *
-   *  2. In Mongodb <i>(query {@code type()})</i> is QueryType.MG, the qualifier represents the
-   *  mongodb data base name.
-   *
-   *  3. In elastic and cassandra query <i>({@code type()} is QueryType.ES or QueryType.CAS) </i>,
-   *  the qualifier represents the cluster name.
-   *
-   *  Default is empty string, meaning that if there is only one data source for the particular
-   *  query type ({@code type()}) in the application, then the qualifier represents that data source.
-   *
-   * </pre>
-   *
-   * @return qualifier
-   */
-  String qualifier() default Qualifiers.EMPTY_NAME;
-
-  /**
-   * The query type
-   *
-   * @return type
-   */
-  QueryType type() default QueryType.SQL;
-
-  /**
-   * corant-modules-query-shared
-   *
-   * @author bingo 下午7:20:19
-   *
-   */
-  class DeclarativeQueryServiceLiteral extends AnnotationLiteral<DeclarativeQueryService>
-      implements DeclarativeQueryService {
-
-    private static final long serialVersionUID = 8160691461505134491L;
-
-    final String qualifier;
-    final QueryType type;
-
-    DeclarativeQueryServiceLiteral(QueryType type, String qualifier) {
-      this.qualifier = qualifier;
-      this.type = type;
-    }
-
-    public static DeclarativeQueryServiceLiteral of(QueryType type, String qualifier) {
-      return new DeclarativeQueryServiceLiteral(type, qualifier);
-    }
-
-    @Override
-    public String qualifier() {
-      return qualifier;
-    }
-
-    @Override
-    public QueryType type() {
-      return type;
-    }
-  }
+public @interface DeclarativeQuery {
 }

@@ -21,11 +21,6 @@ import static org.corant.shared.util.Strings.defaultBlank;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.spi.CreationalContext;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Default;
-import jakarta.enterprise.inject.spi.BeanManager;
 import org.corant.config.Configs;
 import org.corant.context.AbstractBean;
 import org.corant.context.proxy.MethodInvoker;
@@ -36,6 +31,11 @@ import org.corant.modules.query.QueryService.QueryWay;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.shared.normal.Names;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.BeanManager;
 
 /**
  * corant-modules-query-shared
@@ -59,13 +59,19 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
     qualifiers.add(AutoCreated.INST);
     qualifiers.add(Default.Literal.INSTANCE);
     qualifiers.add(Any.Literal.INSTANCE);
-    stereotypes.add(DeclarativeQueryService.class);
     types.add(proxyType);
     scope = ApplicationScoped.class;
     DeclarativeQueryService declaratives =
-        shouldNotNull(proxyType.getDeclaredAnnotation(DeclarativeQueryService.class));
-    queryQualifier = Configs.assemblyStringConfigProperty(declaratives.qualifier());
-    queryType = declaratives.type();
+        proxyType.getDeclaredAnnotation(DeclarativeQueryService.class);
+    if (declaratives != null) {
+      queryQualifier = Configs.assemblyStringConfigProperty(declaratives.qualifier());
+      queryType = declaratives.type();
+      stereotypes.add(DeclarativeQueryService.class);
+    } else {
+      stereotypes.add(DeclarativeQuery.class);
+      queryQualifier = null;
+      queryType = null;
+    }
   }
 
   @Override
@@ -94,7 +100,6 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 
   @SuppressWarnings({"rawtypes"})
   private MethodInvoker createExecution(Method method) {
-    final QueryService queryService = resolveQueryService();
     final QueryMethod[] queryMethods = method.getAnnotationsByType(QueryMethod.class);
     final QueryMethod queryMethod = isNotEmpty(queryMethods) ? queryMethods[0] : null;
     String queryName =
@@ -106,6 +111,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
     } else {
       queryWay = QueryWay.fromMethodName(method.getName());
     }
+    final QueryService queryService = resolveQueryService(queryName);
     return createExecution(queryService, queryName, queryWay);
   }
 
@@ -126,7 +132,10 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   }
 
   @SuppressWarnings("rawtypes")
-  private QueryService resolveQueryService() {
+  private QueryService resolveQueryService(String queryName) {
+    if (queryType == null) {
+      return NamedQueryServiceManager.resolveQueryService(queryName);
+    }
     return shouldNotNull(NamedQueryServiceManager.resolveQueryService(queryType, queryQualifier),
         "Can't find any query service to execute declarative query %s %s %s.", proxyType, queryType,
         queryQualifier);

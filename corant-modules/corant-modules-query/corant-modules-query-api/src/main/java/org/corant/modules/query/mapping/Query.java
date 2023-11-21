@@ -240,6 +240,10 @@ public class Query implements Serializable {
     return defaultObject(getProperty(name, cls), altVal);
   }
 
+  /**
+   * Returns the query qualifier, the query qualifier typically represents a data source, the data
+   * source may SQL data source or NoSQL database etc.
+   */
   public String getQualifier() {
     return qualifier;
   }
@@ -266,6 +270,11 @@ public class Query implements Serializable {
     return script;
   }
 
+  /**
+   * Returns the query type
+   *
+   * @see QueryType
+   */
   public QueryType getType() {
     return type;
   }

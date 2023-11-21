@@ -130,7 +130,7 @@ public class SqlHelper {
         .noneMatch(p -> p instanceof Collection || p != null && p.getClass().isArray())) {
       return Pair.of(sql, parameters);
     }
-    LinkedList<Object> orginalParams = linkedListOf(parameters);
+    LinkedList<Object> originalParams = linkedListOf(parameters);
     List<Object> fixedParams = new ArrayList<>();
     StringBuilder fixedSql = new StringBuilder();
     int escapes = 0;
@@ -141,7 +141,7 @@ public class SqlHelper {
         fixedSql.append(c);
         escapes++;
       } else if (c == SQL_PARAM_PH_C && escapes % 2 == 0) {
-        Object param = orginalParams.remove();
+        Object param = originalParams.remove();
         if (param instanceof Iterable) {
           Iterable<?> iterableParam = (Iterable<?>) param;
           if (isNotEmpty(iterableParam)) {
@@ -168,7 +168,7 @@ public class SqlHelper {
         fixedSql.append(c);
       }
     }
-    if (escapes % 2 != 0 || !orginalParams.isEmpty()) {
+    if (escapes % 2 != 0 || !originalParams.isEmpty()) {
       throw new QueryRuntimeException("Parameters and sql statements not match!");
     }
     return Pair.of(fixedSql.toString(), fixedParams.toArray());
@@ -181,7 +181,7 @@ public class SqlHelper {
 
   public static void main(String... regex) {
     String sql = "SELECT distinct a.*,basd,asd as aa ,asdasd,"
-        + "(selectr top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
+        + "(select top 1 sss from xxx where sss.sdd = aass order by aa asc) " + "FROM TABLE "
         + "WHERE " + "XXXX IN (SELECT TOP 1 X FROM XX ORDER BY XX) "
         + "order \t \n by ss asc,sss desc,assss asc";
     System.out.println("ORIGINAL:\n" + sql);
@@ -256,7 +256,7 @@ public class SqlHelper {
   }
 
   /**
-   * Geneartes a list of {@code IgnoreRange} objects that represent nested sections of the provided
+   * Generates a list of {@code IgnoreRange} objects that represent nested sections of the provided
    * SQL buffer that should be ignored when performing regular expression matches.
    *
    * @param sql The SQL buffer.

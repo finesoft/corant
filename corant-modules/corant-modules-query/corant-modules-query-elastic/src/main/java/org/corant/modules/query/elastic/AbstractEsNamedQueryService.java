@@ -56,7 +56,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -67,7 +67,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
-      return new FetchResult(fetchQuery, querier, fetchedList);
+      return new FetchedResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -85,7 +85,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       return getExecutor()
           .scrolledSearch(resolveIndexName(querier), script, scrollKeepAlive, batchSize)
           .map(result -> {
-            this.fetch(result, querier);
+            handleFetching(result, querier);
             return querier.handleResult(result);
           });
     } catch (Exception e) {
@@ -180,7 +180,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
         script, properties, querier.getHintKeys());
     List<T> result = new ArrayList<>();
     if (!isEmpty(hits.getValue())) {
-      this.fetch(hits.getValue(), querier);
+      handleFetching(hits.getValue(), querier);
       result = querier.handleResults(hits.getValue());
     }
     return Pair.of(hits.getLeft(), result);

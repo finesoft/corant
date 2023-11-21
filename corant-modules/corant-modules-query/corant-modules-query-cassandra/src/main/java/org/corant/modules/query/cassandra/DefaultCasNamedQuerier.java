@@ -49,12 +49,7 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
     this.script = script.replaceAll("[\\t\\n\\r]", SPACE);
   }
 
-  @Override
-  public QueryParameter getQueryParameter() {
-    return queryParameter;
-  }
-
-  @Override
+    @Override
   public String getScript(Map<?, ?> additionals) {
     return script;
   }

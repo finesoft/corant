@@ -47,7 +47,7 @@ import javax.inject.Qualifier;
 public @interface MgQuery {
 
   /**
-   * The mongo data base name
+   * The mongo database name
    *
    * @return value
    */

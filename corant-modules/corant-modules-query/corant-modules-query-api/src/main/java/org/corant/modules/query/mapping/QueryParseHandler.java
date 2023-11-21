@@ -339,6 +339,10 @@ public class QueryParseHandler extends DefaultHandler {
             q.setResultSetMapping(isBlank(atv) ? null : asClass(atv));
           } else if (SchemaNames.QUE_ATT_VER.equalsIgnoreCase(aqn)) {
             q.setVersion(defaultString(atv));
+          } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
+            q.setType(isBlank(atv) ? null : toEnum(atv, QueryType.class));
+          } else if (SchemaNames.X_QUA.equalsIgnoreCase(aqn)) {
+            q.setQualifier(atv);
           }
         }
       }

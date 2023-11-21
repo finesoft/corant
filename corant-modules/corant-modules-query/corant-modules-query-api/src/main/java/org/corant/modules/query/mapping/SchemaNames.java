@@ -26,6 +26,7 @@ public class SchemaNames {
   public static final String X_NAME = "name";
   public static final String X_VALUE = "value";
   public static final String X_TYPE = "type";
+  public static final String X_QUA = "qualifier";
   public static final String X_SRC = "src";
   public static final String X_PARAM = "parameter";
   public static final String X_SCRIPT = "script";

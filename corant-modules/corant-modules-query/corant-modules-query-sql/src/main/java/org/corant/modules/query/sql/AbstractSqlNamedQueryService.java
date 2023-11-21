@@ -40,7 +40,7 @@ import org.corant.modules.query.sql.dialect.Dialect;
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -50,7 +50,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       Duration timeout = querier.resolveTimeout();
       Object[] scriptParameter = querier.getScriptParameter();
       log("fetch-> " + refQueryName, scriptParameter, sql);
-      return new FetchResult(fetchQuery, querier,
+      return new FetchedResult(fetchQuery, querier,
           getExecutor().select(sql, maxFetchSize, timeout, scriptParameter));
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
@@ -92,7 +92,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       return batchStream(querier.resolveStreamLimit(), getExecutor().stream(sql,
           useQueryParam.getTerminator(), timeout, useQueryParam.isAutoClose(), scriptParameter))
               .flatMap(list -> {
-                this.fetch(list, querier);
+                handleFetching(list, querier);
                 List<T> results = querier.handleResults(list);
                 return results.stream();
               });
@@ -118,7 +118,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
         list.remove(limit);
         result.withHasNext(true);
       }
-      this.fetch(list, querier);
+      handleFetching(list, querier);
     }
     return result.withResults(querier.handleResults(list));
 
@@ -132,7 +132,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, sql);
     Map<String, Object> result = getExecutor().get(sql, timeout, scriptParameter);
-    this.fetch(result, querier);
+    handleFetching(result, querier);
     return querier.handleResult(result);
 
   }
@@ -160,7 +160,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
         result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
             Dialect.COUNT_FIELD_NAME));
       }
-      this.fetch(list, querier);
+      handleFetching(list, querier);
     }
     return result.withResults(querier.handleResults(list));
   }
@@ -177,7 +177,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     List<Map<String, Object>> results =
         getExecutor().select(sql, maxSelectSize + 1, timeout, scriptParameter);
     if (querier.handleResultSize(results) > 0) {
-      this.fetch(results, querier);
+      handleFetching(results, querier);
     }
     return querier.handleResults(results);
   }

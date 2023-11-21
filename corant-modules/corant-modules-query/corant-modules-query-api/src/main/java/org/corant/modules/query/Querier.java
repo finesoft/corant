@@ -69,7 +69,7 @@ public interface Querier {
   /**
    * Handle single result, handle hints and conversions.
    *
-   * @param <T> the finally query result object type
+   * @param <T> the final query result object type
    * @param result the result to be handled
    * @see QueryHandler#handleResult(Object, Query, QueryParameter)
    */

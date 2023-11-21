@@ -84,7 +84,7 @@ public interface QueryService<Q, P> {
    * <pre>
    * Example: try(Stream stream = QueryService.stream(q,p)){
    *    stream.forEach(row->{
-   *        //do somthing
+   *        //do something
    *    })
    * }
    * </pre>

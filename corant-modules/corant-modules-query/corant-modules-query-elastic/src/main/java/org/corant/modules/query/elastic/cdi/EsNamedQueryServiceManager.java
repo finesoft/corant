@@ -50,8 +50,7 @@ import org.elasticsearch.client.transport.TransportClient;
 // @Alternative
 public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME
-                                                                                        // scope
+  protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;

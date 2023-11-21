@@ -49,11 +49,6 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
   }
 
   @Override
-  public QueryParameter getQueryParameter() {
-    return queryParameter;
-  }
-
-  @Override
   public String getScript(Map<?, ?> additionals) {
     return script;
   }

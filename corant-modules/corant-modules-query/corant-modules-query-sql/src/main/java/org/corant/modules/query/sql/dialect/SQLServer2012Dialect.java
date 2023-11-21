@@ -46,7 +46,7 @@ public class SQLServer2012Dialect extends SQLServer2005Dialect {
    * <p>
    * The LIMIT SQL will look like:
    * <p>
-   * SELET XXX FROM T OFFSET offset FETCH NEXT limit ROWS ONLY;
+   * SELECT XXX FROM T OFFSET offset FETCH NEXT limit ROWS ONLY;
    * <p>
    *
    * <pre>

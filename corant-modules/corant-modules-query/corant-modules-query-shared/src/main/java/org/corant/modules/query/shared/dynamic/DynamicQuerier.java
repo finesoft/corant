@@ -65,7 +65,7 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    *
    * <p>
    * Note: If the limit value <=0 then returns {@link DefaultQuerierConfig#getMaxLimit()}, if the
-   * limit value great than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
+   * limit value greater than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveLimit();
 
@@ -111,7 +111,7 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    *
    * <p>
    * Note: If the limit value <=0 then returns {@link DefaultQuerierConfig#getMaxLimit()}, if the
-   * limit value great than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
+   * limit value greater than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
    */
   int resolveStreamLimit();
 

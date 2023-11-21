@@ -41,8 +41,8 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
 
   public StreamableQueryRunner() {}
 
-  public StreamableQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
-    super(confiuration, timeout);
+  public StreamableQueryRunner(SqlQueryConfiguration configuration, Duration timeout) {
+    super(configuration, timeout);
   }
 
   public StreamableQueryRunner(StatementConfiguration stmtConfig,

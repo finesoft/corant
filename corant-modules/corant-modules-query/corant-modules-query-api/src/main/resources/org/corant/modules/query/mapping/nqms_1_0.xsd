@@ -136,6 +136,24 @@
                 <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
+        <xsd:attribute name="type" type="nqms:query-type" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>
+                <![CDATA[
+                    The query type of actual execution query for query, If not set use default setting.
+                    ]]>
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>        
+        <xsd:attribute name="qualifier" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation>
+                <![CDATA[
+                    The query qualifier of actual execution query for query.
+                    ]]>
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>           
         <xsd:attribute name="version" type="xsd:string" use="optional"></xsd:attribute>
     </xsd:complexType>
 

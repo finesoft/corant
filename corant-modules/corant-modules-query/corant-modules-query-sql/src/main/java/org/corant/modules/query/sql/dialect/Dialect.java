@@ -101,7 +101,7 @@ public interface Dialect {
   }
 
   /**
-   * Return whether the underling data base supports limitation sql.
+   * Return whether the underling database supports limitation sql.
    *
    * @return supportsLimit
    */

@@ -50,7 +50,7 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
   public EsNamedQuerier resolve(String name, Object param) {
     FreemarkerEsQuerierBuilder builder = builders.get(name);
     if (builder == null) {
-      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      // Note: this.builders & QueryMappingService.queries may cause deadlock
       Query query = resolveQuery(name);
       builder = builders.computeIfAbsent(name, k -> createBuilder(query));
     }

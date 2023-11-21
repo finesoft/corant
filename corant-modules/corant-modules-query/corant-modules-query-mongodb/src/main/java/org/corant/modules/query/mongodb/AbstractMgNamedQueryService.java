@@ -119,7 +119,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       if (docList != null) {
         final boolean setId = isAutoSetIdField(querier);
         list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
       return querier.handleResults(list);
     } catch (Exception e) {
@@ -130,7 +130,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -148,7 +148,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       try (MongoCursor<Document> cursor = mi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
-      return new FetchResult(fetchQuery, querier, fetchedList);
+      return new FetchedResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -194,7 +194,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           list.remove(limit);
           result.withHasNext(true);
         }
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return result.withResults(querier.handleResults(list));
@@ -216,7 +216,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Map<String, Object> theResult = null;
     if (result != null) {
       theResult = convertDocument(result, querier, isAutoSetIdField(querier));
-      this.fetch(theResult, querier);
+      handleFetching(theResult, querier);
     }
     return querier.handleResult(theResult);
   }
@@ -244,7 +244,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         } else {
           result.withTotal((int) handleCount(querier, true));
         }
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return result.withResults(querier.handleResults(list));
@@ -266,7 +266,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
       docList.clear();
       if (querier.handleResultSize(list) > 0) {
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return querier.handleResults(list);
@@ -333,7 +333,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         while (it.hasNext() && --size >= 0) {
           list.add(it.next());
         }
-        fetch(list, querier);
+        handleFetching(list, querier);
         return Forwarding.of(querier.handleResults(list), it.hasNext());
       }
 

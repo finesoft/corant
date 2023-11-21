@@ -62,7 +62,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   public DefaultCasNamedQuerier resolve(String name, Object param) {
     DynamicQuerierBuilder builder = builders.get(name);
     if (builder == null) {
-      // Note: this.builders & QueryMappingService.queries may cause dead lock
+        /* Note: this.builders & QueryMappingService.queries may cause deadlock */
       Query query = resolveQuery(name);
       builder = builders.computeIfAbsent(name, k -> createBuilder(query));
     }

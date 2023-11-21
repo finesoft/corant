@@ -28,13 +28,13 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.cassandra.AbstractCasNamedQueryService;
 import org.corant.modules.query.cassandra.CasNamedQuerier;
 import org.corant.modules.query.cassandra.CasQueryExecutor;
 import org.corant.modules.query.cassandra.DefaultCasQueryExecutor;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -51,7 +51,7 @@ import com.datastax.driver.core.Cluster;
 // @Alternative
 public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();
+  protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -68,7 +68,7 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Optional<String> defaultQualifierValue;
 
   @Override
-  public NamedQueryService get(Object qualifier) {
+  public FetchableNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String clusterName =
@@ -92,7 +92,7 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Produces
   @CasQuery
-  protected NamedQueryService produce(InjectionPoint ip) {
+  protected FetchableNamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(CasQuery.class)) {

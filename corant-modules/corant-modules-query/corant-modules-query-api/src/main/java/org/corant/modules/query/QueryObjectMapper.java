@@ -36,7 +36,7 @@ public interface QueryObjectMapper {
    * Copy an object
    *
    * @param <T> the object type
-   * @param object the object to be copyed
+   * @param object the object to be copied
    * @param type the object type
    */
   default <T> T copy(T object, TypeLiteral<T> type) {
@@ -62,9 +62,9 @@ public interface QueryObjectMapper {
   Object getMappedValue(Object object, Object key);
 
   /**
-   * Since the query processing process requires free extraction and conversion, a large number of
-   * Map structure objects are used in the query process. This method is used to read JSON strings
-   * and convert them to Map or convert ordinary POJO objects to Map.
+   * Since the query processing requires free extraction and conversion, a large number of Map
+   * structure objects are used in the query process. This method is used to read JSON strings and
+   * convert them to Map or convert ordinary POJO objects to Map.
    *
    * @param object the object may be JSON strings or POJO object
    * @param convert if true use for POJO and Map conversion otherwise use for read JSON strings to

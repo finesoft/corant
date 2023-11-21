@@ -37,7 +37,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public static final String PRO_KEY_KEYSPACE = "cassandra.query.keyspace";
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -54,7 +54,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         fetchedList = getExecutor().select(ks, cql, timeout, scriptParameter);
       }
-      return new FetchResult(fetchQuery, querier, fetchedList);
+      return new FetchedResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -81,7 +81,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
         list.remove(limit);
         result.withHasNext(true);
       }
-      this.fetch(list, querier);
+      handleFetching(list, querier);
     }
     return result.withResults(querier.handleResults(list));
   }
@@ -95,7 +95,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     log(queryName, scriptParameter, cql);
     Map<String, Object> result = getExecutor().get(ks, cql, timeout, scriptParameter);
-    this.fetch(result, querier);
+    handleFetching(result, querier);
     return querier.handleResult(result);
   }
 
@@ -119,7 +119,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       } else {
         result.withTotal(getExecutor().total(ks, cql, timeout, scriptParameter));
       }
-      this.fetch(list, querier);
+      handleFetching(list, querier);
     }
     return result.withResults(querier.handleResults(list));
   }
@@ -136,7 +136,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     List<Map<String, Object>> results =
         getExecutor().paging(ks, cql, 0, maxSelectSize + 1, timeout, scriptParameter);
     if (querier.handleResultSize(results) > 0) {
-      this.fetch(results, querier);
+      handleFetching(results, querier);
     }
     return querier.handleResults(results);
   }

@@ -23,14 +23,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.dynamic.DynamicQuerierBuilder;
 import org.corant.shared.exception.NotSupportedException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -70,7 +70,7 @@ public class DefaultSqlNamedQuerierResolver extends AbstractNamedQuerierResolver
   public DefaultSqlNamedQuerier resolve(String name, Object param) {
     DynamicQuerierBuilder builder = builders.get(name);
     if (builder == null) {
-      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      // Note: this.builders & QueryMappingService.queries may cause deadlock
       Query query = resolveQuery(name);
       builder = builders.computeIfAbsent(name, k -> createBuilder(query));
     }

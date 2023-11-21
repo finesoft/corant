@@ -25,20 +25,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.datasource.shared.DBMS;
-import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.modules.query.sql.AbstractSqlNamedQueryService;
 import org.corant.modules.query.sql.DefaultSqlQueryExecutor;
@@ -51,6 +46,11 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-sql
@@ -63,7 +63,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 // @Alternative
 public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+  protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -92,8 +92,8 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected DBMS defaultQualifierDialect;
 
   @Override
-  public NamedQueryService get(Object qualifier) {
-    String key = resolveQualifer(qualifier);
+  public FetchableNamedQueryService get(Object qualifier) {
+    String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       String dataSourceName = defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME);
       DBMS dialect = defaultQualifierDialect;
@@ -129,7 +129,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Produces
   @SqlQuery
-  protected NamedQueryService produce(InjectionPoint ip) {
+  protected FetchableNamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(SqlQuery.class)) {
@@ -140,7 +140,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
     return get(qualifier);
   }
 
-  protected String resolveQualifer(Object qualifier) {
+  protected String resolveQualifier(Object qualifier) {
     if (qualifier instanceof SqlQuery) {
       SqlQuery q = forceCast(qualifier);
       // try {

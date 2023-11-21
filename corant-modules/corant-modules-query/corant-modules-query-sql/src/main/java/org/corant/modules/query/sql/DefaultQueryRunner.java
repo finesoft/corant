@@ -132,7 +132,7 @@ public class DefaultQueryRunner extends DbUtilQueryRunner {
         stmt.setMaxRows(expectRows);// force max rows
       }
       if (timeout != null) {
-        stmt.setQueryTimeout((int) timeout.toSeconds());// set the time out
+        stmt.setQueryTimeout((int) timeout.toSeconds());// set the time-out
       }
       fillStatement(stmt, params);
       rs = wrap(stmt.executeQuery());

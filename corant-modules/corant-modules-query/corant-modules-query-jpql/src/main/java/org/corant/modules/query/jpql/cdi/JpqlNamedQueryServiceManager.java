@@ -20,23 +20,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
+import org.corant.config.Configs;
+import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.jpa.shared.PersistenceService;
+import org.corant.modules.query.jpql.AbstractJpqlNamedQueryService;
+import org.corant.modules.query.jpql.JpqlNamedQuerier;
+import org.corant.modules.query.mapping.Query.QueryType;
+import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.modules.query.shared.FetchableNamedQueryService;
+import org.corant.modules.query.shared.NamedQueryServiceManager;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.annotation.PreDestroy;
-import org.corant.config.Configs;
-import org.corant.context.qualifier.Qualifiers;
-import org.corant.modules.jpa.shared.PersistenceService;
-import org.corant.modules.query.NamedQueryService;
-import org.corant.modules.query.jpql.AbstractJpqlNamedQueryService;
-import org.corant.modules.query.jpql.JpqlNamedQuerier;
-import org.corant.modules.query.mapping.Query.QueryType;
-import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.NamedQueryServiceManager;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-modules-query-jpql
@@ -49,7 +48,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 // @Alternative
 public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, NamedQueryService> services = new ConcurrentHashMap<>();// FIXME scope
+  protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;
@@ -65,7 +64,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Optional<String> defaultQualifierValue;
 
   @Override
-  public NamedQueryService get(Object qualifier) {
+  public FetchableNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
       final String pu = isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
@@ -88,7 +87,7 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   @Produces
   @JpqlQuery
-  protected NamedQueryService produce(InjectionPoint ip) {
+  protected FetchableNamedQueryService produce(InjectionPoint ip) {
     Annotation qualifier = null;
     for (Annotation a : ip.getQualifiers()) {
       if (a.annotationType().equals(JpqlQuery.class)) {

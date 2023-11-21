@@ -28,7 +28,7 @@ import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
  */
 public interface QueryStatistics {
 
-  List<QueryStatisticsRecord> getHightFrequencyQueries();
+  List<QueryStatisticsRecord> getHeightFrequencyQueries();
 
   List<QueryStatisticsRecord> getSlowestEntranceQueries();
 

@@ -64,6 +64,7 @@ import jakarta.inject.Inject;
  * corant-modules-query-shared
  *
  * @author bingo 下午6:50:41
+ *
  */
 @ApplicationScoped
 // @Alternative
@@ -130,7 +131,7 @@ public class DefaultQueryHandler implements QueryHandler {
           return true;
         };
       }
-      query.getHints().stream().filter(predicate::test).forEach(qh -> {
+      query.getHints().stream().filter(predicate).forEach(qh -> {
         AtomicBoolean exclusive = new AtomicBoolean(false);
         resultHintHandlers.stream().filter(h -> h.supports(originalResultClass, qh))
             .sorted(ResultHintHandler::compare).forEachOrdered(h -> {

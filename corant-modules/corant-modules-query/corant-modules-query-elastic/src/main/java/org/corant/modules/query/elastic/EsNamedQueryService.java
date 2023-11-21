@@ -15,7 +15,7 @@ package org.corant.modules.query.elastic;
 
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**
@@ -23,12 +23,12 @@ import org.elasticsearch.common.unit.TimeValue;
  *
  * <p>
  * Note: The query of Elastic Search is special, and there may be long-tail data, so when the result
- * set returned by select exceeds the limit, no throws exception.
+ * set returned by select exceeds the limit, no throws' exception.
  *
  * @author bingo 下午3:07:55
  *
  */
-public interface EsNamedQueryService extends NamedQueryService {
+public interface EsNamedQueryService extends FetchableNamedQueryService {
 
   Map<String, Object> aggregate(String q, Object param);
 

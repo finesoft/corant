@@ -105,7 +105,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_BACKWARDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -123,7 +123,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       try (MongoCursor<Document> cursor = mi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
-      return new FetchResult(fetchQuery, querier, fetchedList);
+      return new FetchedResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
@@ -169,7 +169,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
           list.remove(limit);
           result.withHasNext(true);
         }
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return result.withResults(querier.handleResults(list));
@@ -191,7 +191,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     Map<String, Object> theResult = null;
     if (result != null) {
       theResult = convertDocument(result, querier, isAutoSetIdField(querier));
-      this.fetch(theResult, querier);
+      handleFetching(theResult, querier);
     }
     return querier.handleResult(theResult);
   }
@@ -219,7 +219,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         } else {
           result.withTotal((int) handleCount(querier, true));
         }
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return result.withResults(querier.handleResults(list));
@@ -241,7 +241,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
       docList.clear();
       if (querier.handleResultSize(list) > 0) {
-        this.fetch(list, querier);
+        handleFetching(list, querier);
       }
     }
     return querier.handleResults(list);
@@ -308,7 +308,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         while (it.hasNext() && --size >= 0) {
           list.add(it.next());
         }
-        fetch(list, querier);
+        handleFetching(list, querier);
         return Forwarding.of(querier.handleResults(list), it.hasNext());
       }
 
@@ -482,7 +482,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     return querier.resolveProperty(PRO_KEY_AUTO_SET_ID_FIELD, Boolean.class, Boolean.TRUE);
   }
 
-  protected <T extends MongoIterable<Document>> T query(MgNamedQuerier querier) {
+  protected <T extends Iterable<Document>> T query(MgNamedQuerier querier) {
     if (querier.getRootOperator() == MgOperator.AGGREGATE) {
       return forceCast(handleAggregate(querier));
     } else if (querier.getRootOperator() == MgOperator.COUNT) {

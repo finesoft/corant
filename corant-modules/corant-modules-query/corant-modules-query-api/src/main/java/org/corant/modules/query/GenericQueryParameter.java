@@ -27,6 +27,7 @@ import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
  *
  */
 public class GenericQueryParameter<T> extends DefaultQueryParameter {
+
   private static final long serialVersionUID = 7809436027996029494L;
 
   public GenericQueryParameter() {}
@@ -44,11 +45,6 @@ public class GenericQueryParameter<T> extends DefaultQueryParameter {
   @Override
   public GenericQueryParameter<T> criteria(Object criteria) {
     return setCriteria(forceCast(criteria));
-  }
-
-  @Override
-  public Map<String, Object> getContext() {
-    return context;
   }
 
   @Override

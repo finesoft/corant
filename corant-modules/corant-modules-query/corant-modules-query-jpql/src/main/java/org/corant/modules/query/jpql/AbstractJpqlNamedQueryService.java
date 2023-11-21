@@ -24,17 +24,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.corant.modules.query.Querier;
+import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.modules.query.shared.AbstractNamedQueryService;
+import org.corant.shared.exception.NotSupportedException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.SynchronizationType;
-import org.corant.modules.query.Querier;
-import org.corant.modules.query.mapping.FetchQuery;
-import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.AbstractNamedQueryService;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-query-jpql
@@ -51,7 +51,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
 
   @Override
-  public FetchResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
     throw new NotSupportedException();
   }
 

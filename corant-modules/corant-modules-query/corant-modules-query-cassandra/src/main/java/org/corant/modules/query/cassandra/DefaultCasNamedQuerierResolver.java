@@ -19,10 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.annotation.PreDestroy;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -32,6 +28,9 @@ import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQueri
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -63,7 +62,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   public DefaultCasNamedQuerier resolve(String name, Object param) {
     DynamicQuerierBuilder builder = builders.get(name);
     if (builder == null) {
-      // Note: this.builders & QueryMappingService.queries may cause dead lock
+      /* Note: this.builders & QueryMappingService.queries may cause deadlock */
       Query query = resolveQuery(name);
       builder = builders.computeIfAbsent(name, k -> createBuilder(query));
     }

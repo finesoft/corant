@@ -21,11 +21,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.elastic.AbstractEsNamedQueryService;
@@ -38,6 +33,11 @@ import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-elastic
@@ -50,8 +50,7 @@ import org.elasticsearch.client.transport.TransportClient;
 // @Alternative
 public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
-  protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();// FIXME
-                                                                                        // scope
+  protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();
 
   @Inject
   protected Logger logger;

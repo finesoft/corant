@@ -13,10 +13,12 @@
  */
 package org.corant.modules.query.shared;
 
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import org.corant.context.Beans;
 import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Query.QueryType;
-import org.corant.shared.ubiquity.Mutable.MutableObject;
 
 /**
  * corant-modules-query-shared
@@ -27,20 +29,34 @@ import org.corant.shared.ubiquity.Mutable.MutableObject;
 public interface NamedQueryServiceManager {
 
   /**
-   * Resolve the named query service by query type and qualifier
+   * Resolves the named query service by query type and qualifier
    *
-   * @param queryType
-   * @param qualifier
-   * @return NamedQueryService
+   * @param queryType the query type
+   * @param qualifier the query qualifier
    */
   static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
-    MutableObject<NamedQueryService> ref = new MutableObject<>();
-    Beans.select(NamedQueryServiceManager.class).forEach(nqs -> {
-      if (nqs.getType() == queryType) {
-        ref.set(nqs.get(qualifier));
+    for (NamedQueryServiceManager nqsm : Beans.select(NamedQueryServiceManager.class)) {
+      if (nqsm.getType() == queryType) {
+        NamedQueryService nqs = nqsm.get(qualifier);
+        if (nqs != null) {
+          return nqs;
+        }
       }
-    });
-    return ref.get();
+    }
+    throw new QueryRuntimeException(
+        "Can't find any query service with query type: %s, qualifier: %s", queryType, qualifier);
+  }
+
+  /**
+   * Resolves the named query service by query name
+   *
+   * @param queryName the query name
+   * @since 2023-11-20
+   */
+  static NamedQueryService resolveQueryService(String queryName) {
+    Query query = shouldNotNull(Beans.resolve(QueryMappingService.class).getQuery(queryName),
+        () -> new QueryRuntimeException("Can't find any named '%s' query", queryName));
+    return resolveQueryService(query.getType(), query.getQualifier());
   }
 
   /**

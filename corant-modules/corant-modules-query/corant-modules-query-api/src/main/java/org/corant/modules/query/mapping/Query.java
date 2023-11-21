@@ -61,6 +61,8 @@ public class Query implements Serializable {
   private Map<String, String> properties = new HashMap<>();
   private String mappingFilePath;
   private String macroScript;// FIXME temporary
+  private QueryType type; // since 2023-11-21
+  private String qualifier; // since 2023-11-21
 
   public Query() {}
 
@@ -238,6 +240,10 @@ public class Query implements Serializable {
     return defaultObject(getProperty(name, cls), altVal);
   }
 
+  public String getQualifier() {
+    return qualifier;
+  }
+
   /**
    * Return the result class, if not setting return java.util.Map.class
    */
@@ -258,6 +264,10 @@ public class Query implements Serializable {
    */
   public Script getScript() {
     return script;
+  }
+
+  public QueryType getType() {
+    return type;
   }
 
   /**
@@ -375,6 +385,10 @@ public class Query implements Serializable {
     this.properties = properties;
   }
 
+  protected void setQualifier(String qualifier) {
+    this.qualifier = qualifier;
+  }
+
   protected void setResultClass(Class<?> resultClass) {
     this.resultClass = resultClass;
   }
@@ -385,6 +399,10 @@ public class Query implements Serializable {
 
   protected void setScript(Script script) {
     this.script = defaultObject(script, Script.EMPTY);
+  }
+
+  protected void setType(QueryType type) {
+    this.type = type;
   }
 
   protected void setVersion(String version) {

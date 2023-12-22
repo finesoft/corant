@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
@@ -49,6 +50,7 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Retry;
 import jakarta.annotation.PreDestroy;
 
@@ -331,7 +333,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
-    return fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
+    FetchableNamedQueryService service = fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
       final Query query =
           resolve(QueryMappingService.class).getQuery(fq.getReferenceQuery().getVersionedName());
       final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
@@ -345,6 +347,9 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
             "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
       }
     });
+    logger.fine(() -> format("Resolve fetch query [%s] service [%s]",
+        fq.getReferenceQuery().getName(), Classes.getUserClass(service)));
+    return service;
   }
 
   protected <T> void serialFetch(List<T> results, Querier parentQuerier) {

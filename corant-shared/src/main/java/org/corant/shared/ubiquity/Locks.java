@@ -22,6 +22,20 @@ import org.corant.shared.util.Systems;
  */
 public class Locks {
 
+  public static <T> T withLock(Lock lock, Supplier<T> supplier) {
+    shouldNoneNull(lock, supplier);
+    boolean acquire = false;
+    try {
+      lock.lock();
+      acquire = true;
+      return supplier.get();
+    } finally {
+      if (acquire) {
+        lock.unlock();
+      }
+    }
+  }
+
   /**
    * corant-shared
    * <p>
@@ -33,13 +47,19 @@ public class Locks {
 
     private final Map<K, Semaphore> semaphores = new ConcurrentHashMap<>();
     protected final int permits;
+    protected final boolean fair;
 
     public KeyLock() {
       this(1);
     }
 
     public KeyLock(int permits) {
+      this(permits, false);
+    }
+
+    public KeyLock(int permits, boolean fair) {
       this.permits = permits;
+      this.fair = fair;
     }
 
     public Lock get(K key) {
@@ -54,14 +74,14 @@ public class Locks {
       return getSemaphores().remove(shouldNotNull(key, "The key to be removed can't null"));
     }
 
-    public <T> T withLock(K key, Supplier<T> supply) {
-      shouldNoneNull(key, supply);
+    public <T> T withLock(K key, Supplier<T> supplier) {
+      shouldNoneNull(key, supplier);
       final Lock lock = get(key);
       boolean acquire = false;
       try {
         lock.lock();
         acquire = true;
-        return supply.get();
+        return supplier.get();
       } finally {
         if (acquire) {
           lock.unlock();
@@ -91,7 +111,7 @@ public class Locks {
       @Override
       public void lock() {
         Semaphore semaphore =
-            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits, fair) : v);
         semaphore.acquireUninterruptibly();
       }
 
@@ -111,14 +131,14 @@ public class Locks {
       @Override
       public boolean tryLock() {
         Semaphore semaphore =
-            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits, fair) : v);
         return semaphore.tryAcquire();
       }
 
       @Override
       public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
         Semaphore semaphore =
-            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits) : v);
+            getSemaphores().compute(key, (k, v) -> v == null ? new Semaphore(permits, fair) : v);
         return semaphore.tryAcquire(time, unit);
       }
 

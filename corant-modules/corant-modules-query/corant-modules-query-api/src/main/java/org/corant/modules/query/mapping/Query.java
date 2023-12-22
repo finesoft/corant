@@ -447,6 +447,10 @@ public class Query implements Serializable {
     /**
      * Indicates that the query is a cassandra query.
      */
-    CAS
+    CAS,
+    /**
+     * Indicates that the query can be any query.
+     */
+    $$
   }
 }

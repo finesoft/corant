@@ -61,8 +61,9 @@ public class Configs {
    * name variables of the input value separately and then return the assembled values. If there is
    * no attribute name variable, the passed value is not changed, and it is returned directly. This
    * is used to enhance some annotated configuration flexibility.
-   *
+   * <p>
    * NOTE: This function only supports at most one variable
+   * </p>
    *
    * @param value the configuration property key or the original value
    * @return the assembled values or the original given values if it can't expand
@@ -81,13 +82,13 @@ public class Configs {
 
   /**
    * Returns an assembled configuration properties from Microprofile-config. According to the input
-   * values, and analyze whether the values contains the configuration property name variable, for
+   * values, and analyze whether the values contain the configuration property name variable, for
    * example:'${property.name}'. If the property name variable exists, replace the name variable
    * with the relevant configuration property value, and then return the assembled value, If there
    * are no property name variable, it doesn't change the passed value and directly return it. This
    * is use for enhance some annotated configuration flexibility.
    *
-   * @param originals
+   * @param originals the original values
    * @return assemblyStringConfigProperty
    */
   public static String[] assemblyStringConfigProperties(String[] originals) {
@@ -102,11 +103,11 @@ public class Configs {
 
   /**
    * Returns the assembled configuration properties from Microprofile-config. According to the input
-   * string array, analyze whether the value contains the configuration property name variable one
-   * by one in order, for example: '${property.name}', if the property name variable exists, replace
-   * the name variable with the relevant configuration property value, if without the property name
-   * variable, the passed value is not changed, and the parsed-replaced array is finally returned,
-   * which is used to enhance some of the annotated configuration flexibility.
+   * string, analyze whether the value contains the configuration property name variable, for
+   * example: '${property.name}', if the property name variable exists, replace the name variable
+   * with the relevant configuration property value, and the parsed-replaced string is finally
+   * returned, if without the property name variable, the passed value is not changed and returned
+   * directly. It is used to enhance some of the annotated configuration flexibility.
    *
    * @param value the configuration property key or the original value
    * @return the assembled value or the original given value if it can't expand
@@ -193,7 +194,7 @@ public class Configs {
    * @see CorantConfig
    */
   public static <T> T getValue(String propertyName,
-                               jakarta.enterprise.util.TypeLiteral<T> propertyTypeLiteral, T nvl) {
+      jakarta.enterprise.util.TypeLiteral<T> propertyTypeLiteral, T nvl) {
     return ((CorantConfig) ConfigProvider.getConfig())
         .getOptionalValue(propertyName, propertyTypeLiteral).orElse(nvl);
   }
@@ -340,7 +341,7 @@ public class Configs {
       }
     }
     final Config config = ConfigProvider.getConfig();
-    return streamOf(config.getPropertyNames()).filter(predicate::test)
+    return streamOf(config.getPropertyNames()).filter(predicate)
         .map(pn -> config.getOptionalValue(pn, String.class)).filter(Optional::isPresent)
         .map(Optional::get);
   }

@@ -76,27 +76,32 @@ public class ConfigSourceLoader {
   static Optional<AbstractCorantConfigSource> load(Predicate<URL> filter, URLResource resource,
       int ordinal) {
     if (resource != null && filter.test(resource.getURL())) {
-      String location = resource.getURL().getPath().toLowerCase(Locale.ROOT);
-      if (location.endsWith(".properties")) {
-        return Optional.of(new PropertiesConfigSource(resource, ordinal));
-      } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
-        if (tryAsClass("org.yaml.snakeyaml.Yaml") == null) {
-          logger.warning(() -> String.format(
-              "Can't not load config source [%s], the [class org.yaml.snakeyaml.Yaml] not not exists!",
-              location));
-        } else {
-          return Optional.of(new YamlConfigSource(resource, ordinal));
+      try {
+        String location = resource.getURL().getPath().toLowerCase(Locale.ROOT);
+        if (location.endsWith(".properties")) {
+          return Optional.of(new PropertiesConfigSource(resource, ordinal));
+        } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
+          if (tryAsClass("org.yaml.snakeyaml.Yaml") == null) {
+            logger.warning(() -> String.format(
+                "Can't not load config source [%s], the [class org.yaml.snakeyaml.Yaml] not not exists!",
+                location));
+          } else {
+            return Optional.of(new YamlConfigSource(resource, ordinal));
+          }
+        } else if (location.endsWith(".json")) {
+          if (Services.findRequired(JsonConfigSourceResolver.class).isEmpty()) {
+            logger.warning(() -> String.format(
+                "Can't not load config source [%s], the [JsonConfigSourceResolver] not not exists!",
+                location));
+          } else {
+            return Optional.of(new JsonConfigSource(resource, ordinal));
+          }
+        } else if (location.endsWith(".xml")) {
+          return Optional.of(new XmlConfigSource(resource, ordinal));
         }
-      } else if (location.endsWith(".json")) {
-        if (Services.findRequired(JsonConfigSourceResolver.class).isEmpty()) {
-          logger.warning(() -> String.format(
-              "Can't not load config source [%s], the [JsonConfigSourceResolver] not not exists!",
-              location));
-        } else {
-          return Optional.of(new JsonConfigSource(resource, ordinal));
-        }
-      } else if (location.endsWith(".xml")) {
-        return Optional.of(new XmlConfigSource(resource, ordinal));
+      } catch (Exception ex) {
+        logger.warning(
+            () -> String.format("Can't not load config source [%s]", resource.getLocation()));
       }
     }
     return Optional.empty();

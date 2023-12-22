@@ -23,7 +23,7 @@ import jakarta.enterprise.inject.spi.Annotated;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 
-class CurrentInjectionPoint implements InjectionPoint {
+public class CurrentInjectionPoint implements InjectionPoint {
 
   static final Set<Annotation> qualifiers = Collections.singleton(Default.Literal.INSTANCE);
 

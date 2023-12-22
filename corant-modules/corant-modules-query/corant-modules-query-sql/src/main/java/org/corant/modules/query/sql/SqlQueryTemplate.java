@@ -72,6 +72,7 @@ import org.corant.shared.retry.SynchronousRetryer;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Retry;
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * corant-modules-query-sql
@@ -80,8 +81,8 @@ import org.corant.shared.util.Retry;
  * NOTE: unfinish yet!
  *
  * @author bingo 下午5:38:09
- *
  */
+@NotThreadSafe
 public class SqlQueryTemplate {
 
   protected static final Logger logger = Logger.getLogger(SqlQueryTemplate.class.getName());

@@ -33,6 +33,7 @@
             </execution>
           </executions>
           <configuration>
+            <!--suppress UnresolvedMavenProperty -->
             <mainClass>${runner-class}</mainClass>
           </configuration>
         </plugin>

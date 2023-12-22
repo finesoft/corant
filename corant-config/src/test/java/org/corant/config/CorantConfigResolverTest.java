@@ -13,6 +13,9 @@
  */
 package org.corant.config;
 
+import java.util.Optional;
+import org.corant.shared.ubiquity.TypeLiteral;
+import org.corant.shared.util.Configurations;
 import junit.framework.TestCase;
 
 /**
@@ -25,4 +28,22 @@ import junit.framework.TestCase;
  */
 public class CorantConfigResolverTest extends TestCase {
 
+  public static void main(String[] args) {
+    System.out
+        .println(Configurations.getAssembledConfigValue("bongo-${corant.datasource.arw.username}"));
+    System.out.println(Configurations.getAssembledConfigValue("bongo-"));
+    System.out
+        .println(Configurations.getConfigValue("corant.jpa.anncy.class-packages", String.class));
+    System.out.println(Configurations
+        .getConfigValue("corant.datasource.arw.max-size", new TypeLiteral<Optional<Integer>>() {})
+        .get());
+    System.out.println(
+        Configurations.getConfigValue("corant.datasource.arw.connection-url", String.class));
+    System.out.println(
+        Configurations.getConfigValue("corant.jpa.anncy.class-packages2", String.class, "alt"));
+    System.out.println("=".repeat(80));
+    for (String key : Configurations.getConfig().getKeys()) {
+      System.out.println(key + "\t" + Configurations.getConfigValue(key, String.class));
+    }
+  }
 }

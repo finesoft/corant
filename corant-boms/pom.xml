@@ -45,7 +45,7 @@
 		<version.commons-lang3>3.12.0</version.commons-lang3>
 		<version.commons-math3>3.6.1</version.commons-math3>
 		<version.commons-net>3.9.0</version.commons-net>
-		<version.commons-pool2>2.11.1</version.commons-pool2>
+		<version.commons-pool2>2.12.0</version.commons-pool2>
 		<version.commons-vfs2>2.9.0</version.commons-vfs2>
 		<version.datastax.cassandra>3.7.1</version.datastax.cassandra>
 		<version.eclipse-collections>11.1.0</version.eclipse-collections>
@@ -62,7 +62,7 @@
 		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-		<version.hibernate-orm-core>6.3.1.Final</version.hibernate-orm-core>
+		<version.hibernate-orm-core>6.4.1.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
@@ -103,7 +103,7 @@
 		<version.junit>4.13.2</version.junit>
 		<version.jython>2.7.3</version.jython>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
-		<version.keycloak>22.0.1</version.keycloak>
+		<version.keycloak>23.0.3</version.keycloak>
 		<version.kotlin>1.8.20</version.kotlin>
 		<version.kryo>5.5.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>
@@ -136,7 +136,7 @@
 		<version.minio>8.3.0</version.minio>
 		<version.mongodb>3.12.10</version.mongodb>
 		<version.mokito>4.0.0</version.mokito>
-		<version.mssql-jdbc>12.4.0.jre11</version.mssql-jdbc>
+		<version.mssql-jdbc>12.4.2.jre11</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 		<version.narayana>7.0.0.Final</version.narayana>
 		<version.ndarray>0.4.0</version.ndarray>

@@ -41,6 +41,7 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.SourceType;
 import org.corant.shared.resource.URLResource;
+import org.corant.shared.util.Configurations;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.Texts;
 import org.xml.sax.Attributes;
@@ -199,7 +200,7 @@ public class QueryParseHandler extends DefaultHandler {
           } else if (SchemaNames.FQE_ATT_REF_QUE_TYP.equalsIgnoreCase(aqn)) {
             fq.setReferenceQueryType(toEnum(atv, QueryType.class));
           } else if (SchemaNames.FQE_ATT_REF_QUE_QUA.equalsIgnoreCase(aqn)) {
-            fq.setReferenceQueryQualifier(atv);
+            fq.setReferenceQueryQualifier(Configurations.getAssembledConfigValue(atv));
           } else if (SchemaNames.FQE_ATT_MAX_SIZE.equalsIgnoreCase(aqn)) {
             fq.setMaxSize(toInteger(atv));
           } else if (SchemaNames.FQE_ATT_PRO_NAME.equalsIgnoreCase(aqn)) {
@@ -342,7 +343,7 @@ public class QueryParseHandler extends DefaultHandler {
           } else if (SchemaNames.X_TYPE.equalsIgnoreCase(aqn)) {
             q.setType(isBlank(atv) ? null : toEnum(atv, QueryType.class));
           } else if (SchemaNames.X_QUA.equalsIgnoreCase(aqn)) {
-            q.setQualifier(atv);
+            q.setQualifier(Configurations.getAssembledConfigValue(atv));
           }
         }
       }

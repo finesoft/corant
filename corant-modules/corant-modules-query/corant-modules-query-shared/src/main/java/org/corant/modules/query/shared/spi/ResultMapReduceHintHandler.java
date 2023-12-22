@@ -192,7 +192,8 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
         final List<Triple<String, String[], Class<?>>> reduceFields = resolveReduceFields(qh);
         final boolean retainFields = resolveRetainFields(qh);
         final boolean nullableReduce = resolveNullableReduce(qh);
-        if (isNotEmpty(reduceFields) && isNotBlank(mapFieldName)) {
+        final boolean mapped = isNotBlank(mapFieldName);
+        if (isNotEmpty(reduceFields)) {
           return caches.computeIfAbsent(qh.getId(), k -> map -> {
             Map<String, Object> obj = new LinkedHashMap<>();
             if (retainFields) {
@@ -209,9 +210,13 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
               }
             }
             if (!nullableReduce && obj.values().stream().allMatch(Objects::isNull)) {
-              map.put(mapFieldName, null);
-            } else {
+              if (mapped) {
+                map.put(mapFieldName, null);
+              }
+            } else if (mapped) {
               map.put(mapFieldName, obj);
+            } else {
+              map.putAll(obj);
             }
           });
         }

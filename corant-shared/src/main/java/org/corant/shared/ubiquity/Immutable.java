@@ -27,7 +27,6 @@ import java.util.Set;
  * corant-shared
  *
  * @author bingo 下午12:13:46
- *
  */
 public interface Immutable {
 
@@ -35,7 +34,6 @@ public interface Immutable {
    * corant-shared
    *
    * @author bingo 下午6:44:00
-   *
    */
   class ImmutableListBuilder<E> {
 
@@ -97,7 +95,7 @@ public interface Immutable {
     }
 
     public ImmutableListBuilder<E> clear() {
-      this.list.clear();
+      list.clear();
       return this;
     }
 
@@ -108,10 +106,8 @@ public interface Immutable {
 
     @SuppressWarnings("unchecked")
     public ImmutableListBuilder<E> removeAll(final E... eles) {
-      if (eles.length > 0) {
-        for (E ele : eles) {
-          list.remove(ele);
-        }
+      for (E ele : eles) {
+        list.remove(ele);
       }
       return this;
     }
@@ -135,7 +131,6 @@ public interface Immutable {
    * corant-shared
    *
    * @author bingo 下午6:44:00
-   *
    */
   class ImmutableMapBuilder<K, V> {
 
@@ -147,7 +142,6 @@ public interface Immutable {
       putAll(map);
     }
 
-    @SafeVarargs
     public ImmutableMapBuilder(final Object... eles) {
       putAll(eles);
     }
@@ -161,12 +155,12 @@ public interface Immutable {
     }
 
     public ImmutableMapBuilder<K, V> clear() {
-      this.map.clear();
+      map.clear();
       return this;
     }
 
     public ImmutableMapBuilder<K, V> put(K k, V v) {
-      this.map.put(k, v);
+      map.put(k, v);
       return this;
     }
 
@@ -194,7 +188,7 @@ public interface Immutable {
     }
 
     public ImmutableMapBuilder<K, V> remove(K k) {
-      this.map.remove(k);
+      map.remove(k);
       return this;
     }
   }
@@ -203,7 +197,6 @@ public interface Immutable {
    * corant-shared
    *
    * @author bingo 下午6:44:00
-   *
    */
   class ImmutableSetBuilder<E> {
 
@@ -265,7 +258,7 @@ public interface Immutable {
     }
 
     public ImmutableSetBuilder<E> clear() {
-      this.set.clear();
+      set.clear();
       return this;
     }
 
@@ -276,10 +269,8 @@ public interface Immutable {
 
     @SuppressWarnings("unchecked")
     public ImmutableSetBuilder<E> removeAll(final E... eles) {
-      if (eles.length > 0) {
-        for (E ele : eles) {
-          set.remove(ele);
-        }
+      for (E ele : eles) {
+        set.remove(ele);
       }
       return this;
     }

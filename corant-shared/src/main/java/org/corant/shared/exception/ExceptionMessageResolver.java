@@ -165,8 +165,7 @@ public interface ExceptionMessageResolver extends Sortable {
      */
     @Override
     public String getMessage(Exception exception, Locale locale) {
-      if (exception instanceof GeneralRuntimeException) {
-        GeneralRuntimeException gre = (GeneralRuntimeException) exception;
+      if (exception instanceof GeneralRuntimeException gre) {
         String message = null;
         if (gre.getMessageKey() != null) {
           message = getMessage(locale, gre.getMessageKey().toString(), gre.getMessageParameters());

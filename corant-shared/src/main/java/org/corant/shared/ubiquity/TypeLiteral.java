@@ -48,8 +48,7 @@ public abstract class TypeLiteral<T> {
 
   private static Type getTypeParameter(Class<?> superclass) {
     Type type = superclass.getGenericSuperclass();
-    if (type instanceof ParameterizedType) {
-      ParameterizedType parameterizedType = (ParameterizedType) type;
+    if (type instanceof ParameterizedType parameterizedType) {
       if (parameterizedType.getActualTypeArguments().length == 1) {
         return parameterizedType.getActualTypeArguments()[0];
       }
@@ -59,8 +58,7 @@ public abstract class TypeLiteral<T> {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof TypeLiteral<?>) {
-      TypeLiteral<?> that = (TypeLiteral<?>) obj;
+    if (obj instanceof TypeLiteral<?> that) {
       return this.getType().equals(that.getType());
     }
     return false;

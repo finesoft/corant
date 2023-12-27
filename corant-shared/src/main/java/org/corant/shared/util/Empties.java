@@ -44,7 +44,7 @@ public class Empties {
    * </pre>
    */
   public static boolean isEmpty(final CharSequence object) {
-    return object == null || object.length() == 0;
+    return object == null || object.isEmpty();
   }
 
   /**
@@ -139,7 +139,7 @@ public class Empties {
   }
 
   /**
-   * Return true if object is null and object.length == 0
+   * Return true if object is null and object.length() == 0
    *
    * @param object the object array to check
    * @return isEmpty
@@ -252,7 +252,7 @@ public class Empties {
   }
 
   /**
-   * Return true if and only if object is not null and object.length > 0
+   * Return true if and only if object is not null and object.length() > 0
    *
    * @param object the object array to check
    * @return isNotEmpty
@@ -388,8 +388,7 @@ public class Empties {
   /**
    * Returns the number of times the passed in iterator can iterate
    *
-   * @param iterator
-   * @return sizeOf
+   * @param iterator the iterator
    */
   @Deprecated
   public static int sizeOf(final Iterator<?> iterator) {

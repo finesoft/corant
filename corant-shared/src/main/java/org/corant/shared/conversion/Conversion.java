@@ -406,8 +406,7 @@ public class Conversion {
         i++;
       }
       return forceCast(result);
-    } else if (value instanceof Collection) {
-      Collection<?> collection = (Collection<?>) value;
+    } else if (value instanceof Collection<?> collection) {
       int length = collection.size();
       T[] result = (T[]) Array.newInstance(targetClass, length);
       int i = 0;
@@ -435,8 +434,7 @@ public class Conversion {
     shouldNoneNull(keyClass, valueClass);
     if (value == null) {
       return null;
-    } else if (value instanceof Map) {
-      Map vm = (Map) value;
+    } else if (value instanceof Map vm) {
       Map<K, V> map;
       if (value instanceof LinkedHashMap) {
         map = new LinkedHashMap<>(vm.size());
@@ -477,8 +475,7 @@ public class Conversion {
   static Tuple convertTuple(Object value, Class<? extends Tuple> targetClass, Class<?>[] argClasses,
       Map<String, ?> hints) {
     if (Pair.class.isAssignableFrom(targetClass)) {
-      if (value instanceof Map) {
-        Map map = (Map) value;
+      if (value instanceof Map map) {
         if (map.containsKey("key") && map.containsKey("value")) {
           return Tuple.pairOf(convert(map.get("key"), argClasses[0], hints),
               convert(map.get("value"), argClasses[1], hints));
@@ -486,8 +483,7 @@ public class Conversion {
           return Tuple.pairOf(convert(map.get("left"), argClasses[0], hints),
               convert(map.get("right"), argClasses[1], hints));
         }
-      } else if (value instanceof List) {
-        List<?> list = (List<?>) value;
+      } else if (value instanceof List<?> list) {
         if (list.size() > 1) {
           return Tuple.pairOf(convert(list.get(0), argClasses[0], hints),
               convert(list.get(1), argClasses[1], hints));
@@ -500,8 +496,7 @@ public class Conversion {
         }
       }
     } else if (Triple.class.isAssignableFrom(targetClass)) {
-      if (value instanceof Map) {
-        Map map = (Map) value;
+      if (value instanceof Map map) {
         if (map.containsKey("first") && map.containsKey("second") && map.containsKey("third")) {
           return Tuple.tripleOf(convert(map.get("first"), argClasses[0], hints),
               convert(map.get("second"), argClasses[1], hints),
@@ -512,8 +507,7 @@ public class Conversion {
               convert(map.get("middle"), argClasses[1], hints),
               convert(map.get("right"), argClasses[2], hints));
         }
-      } else if (value instanceof List) {
-        List<?> list = (List<?>) value;
+      } else if (value instanceof List<?> list) {
         if (list.size() > 2) {
           return Tuple.tripleOf(convert(list.get(0), argClasses[0], hints),
               convert(list.get(1), argClasses[1], hints),

@@ -91,8 +91,7 @@ public class GeneralRuntimeException extends CorantRuntimeException {
    */
   public GeneralRuntimeException(Throwable cause) {
     super(cause);
-    if (cause instanceof GeneralRuntimeException) {
-      GeneralRuntimeException causeToUse = (GeneralRuntimeException) cause;
+    if (cause instanceof GeneralRuntimeException causeToUse) {
       messageKey = causeToUse.getMessageKey();
       if (causeToUse.getMessageParameters() != null) {
         messageParameters = Arrays.copyOf(causeToUse.getMessageParameters(),

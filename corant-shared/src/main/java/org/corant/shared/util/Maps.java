@@ -1365,11 +1365,9 @@ public class Maps {
   @SafeVarargs
   public static <K, V> Map<K, V> union(Map<? extends K, ? extends V>... maps) {
     Map<K, V> union = new HashMap<>();
-    if (maps.length > 0) {
-      for (Map<? extends K, ? extends V> map : maps) {
-        if (map != null) {
-          union.putAll(map);
-        }
+    for (Map<? extends K, ? extends V> map : maps) {
+      if (map != null) {
+        union.putAll(map);
       }
     }
     return union;

@@ -194,7 +194,7 @@ public class Streams {
     } else if (size == 1) {
       return inputStreams.get(0);
     } else {
-      return new SequenceInputStream(new Enumeration<InputStream>() {
+      return new SequenceInputStream(new Enumeration<>() {
         final Iterator<InputStream> iterator = inputStreams.iterator();
 
         @Override
@@ -502,7 +502,7 @@ public class Streams {
     protected AbstractBatchHandlerSpliterator(long est, int additionalCharacteristics,
         int forEachBathSize, Consumer<Long> handler) {
       super(est, additionalCharacteristics);
-      this.batchSize = forEachBathSize;
+      batchSize = forEachBathSize;
       this.handler = handler == null ? emptyConsumer() : handler;
     }
 
@@ -510,12 +510,12 @@ public class Streams {
     public void forEachRemaining(Consumer<? super T> action) {
       long j = 0;
       do {
-        if (j % this.batchSize == 0 && j > 0) {
-          this.handler.accept(j);
+        if (j % batchSize == 0 && j > 0) {
+          handler.accept(j);
         }
         j++;
       } while (tryAdvance(action) && !Thread.currentThread().isInterrupted());
-      this.handler.accept(j);
+      handler.accept(j);
     }
 
     @Override

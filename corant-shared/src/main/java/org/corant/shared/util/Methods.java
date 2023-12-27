@@ -145,8 +145,8 @@ public class Methods {
    * and is not generalized.
    * </p>
    *
-   * @param classArray
-   * @param toClassArray
+   * @param classArray the Class array to calculate the distance from.
+   * @param toClassArray the Class array to calculate the distance to.
    * @return the aggregate number of inheritance hops between assignable argument class types.
    *
    */
@@ -312,10 +312,9 @@ public class Methods {
       if (obj == null) {
         return false;
       }
-      if (!(obj instanceof MethodSignature)) {
+      if (!(obj instanceof MethodSignature other)) {
         return false;
       }
-      MethodSignature other = (MethodSignature) obj;
       if (methodName == null) {
         if (other.methodName != null) {
           return false;

@@ -133,8 +133,8 @@ public class Conversions {
   }
 
   /**
-   * Convert an object to rounding BigDecimal object with scale, use
-   * {@code BigDecimal#ROUND_HALF_UP}. Support converting String or Numeric type to BigDecimal type.
+   * Convert an object to rounding BigDecimal object with scale, use {@code
+   * BigDecimal#ROUND_HALF_UP}. Support converting String or Numeric type to BigDecimal type.
    *
    * @param obj the object that to be converted
    * @param scale the scale of the value to be returned.
@@ -147,6 +147,7 @@ public class Conversions {
 
   /**
    * Convert an object to BigDecimal list.
+   *
    * <p>
    * Supports String[], Number[], Iterable&lt;String&gt;, Iterable&lt;? extends Number&gt;,
    * Iterator&lt;String&gt;, Iterator&lt;? extends Number&gt;, Enumeration&lt;String&gt;,
@@ -201,8 +202,8 @@ public class Conversions {
 
   /**
    * Convert an object to Boolean object. If object is String then only {"true", "yes", "y", "on",
-   * "1", "是"} return Boolean.TRUE else return Boolean.FALSE. If object is Integer then 1 return
-   * Boolean.TRUE and 0 return Boolean.FALSE
+   * "1", "是"} return TRUE else return Boolean.FALSE. If object is Integer then 1 return TRUE and 0
+   * return FALSE
    *
    * @param obj the object that to be converted
    * @return toBoolean
@@ -448,7 +449,6 @@ public class Conversions {
     } else {
       return toLocalDateTime(obj, (Map<String, ?>) null, null);
     }
-
   }
 
   public static LocalDateTime toLocalDateTime(Object obj, ZoneId zoneId) {
@@ -675,5 +675,4 @@ public class Conversions {
     }
     return Optional.ofNullable(target);
   }
-
 }

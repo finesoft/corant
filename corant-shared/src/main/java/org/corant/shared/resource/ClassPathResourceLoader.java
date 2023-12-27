@@ -142,9 +142,7 @@ public class ClassPathResourceLoader implements ResourceLoader {
       }
       ClassLoader currClsLoader = classLoader;
       do {
-        if (currClsLoader instanceof URLClassLoader) {
-          @SuppressWarnings("resource")
-          URLClassLoader currUrlClsLoader = (URLClassLoader) currClsLoader;
+        if (currClsLoader instanceof URLClassLoader currUrlClsLoader) {
           for (URL entry : currUrlClsLoader.getURLs()) {
             entries.putIfAbsent(entry.toURI(), currClsLoader);
           }

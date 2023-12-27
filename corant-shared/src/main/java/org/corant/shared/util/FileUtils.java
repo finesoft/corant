@@ -205,7 +205,7 @@ public class FileUtils {
     if (!Files.isDirectory(directory)) {
       return;
     }
-    Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+    Files.walkFileTree(directory, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         try {
@@ -501,7 +501,7 @@ public class FileUtils {
    * @param path the specified file path
    * @param operator the update function, the input of the function is the current exists user
    *        defined attributes of the file and the output is the new user defined attributes that
-   *        will be apply to the file, if the output is empty or null then means clear all user
+   *        will be applied to the file, if the output is empty or null then means clear all user
    *        defined attributes.
    * @throws IOException if error occurred
    */

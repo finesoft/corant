@@ -129,7 +129,7 @@ public class Fields {
       Class<?> current = clazz;
       stop: while (current != null) {
         for (Field field : current.getDeclaredFields()) {
-          if (!visitor.apply(field).booleanValue()) {
+          if (!visitor.apply(field)) {
             break stop;
           }
         }
@@ -140,7 +140,7 @@ public class Fields {
 
   public static void traverseLocalFields(Class<?> clazz, Function<Field, Boolean> visitor) {
     for (Field field : clazz.getDeclaredFields()) {
-      if (!visitor.apply(field).booleanValue()) {
+      if (!visitor.apply(field)) {
         break;
       }
     }

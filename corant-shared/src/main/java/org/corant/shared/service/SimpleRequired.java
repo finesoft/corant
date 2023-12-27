@@ -152,15 +152,11 @@ public class SimpleRequired implements Required {
   @SuppressWarnings({"unchecked", "rawtypes"})
   protected boolean shouldVeto(Set<String> keys, ValuePredicate requiredValuePredicate,
       Class<?> requiredValueType, String requiredValue) {
-    if (keys.size() == 0) {
-      switch (requiredValuePredicate) {
-        case BLANK:
-        case NULL:
-        case EMPTY:
-          return false;
-        default:
-          return true;
-      }
+    if (keys.isEmpty()) {
+      return switch (requiredValuePredicate) {
+        case BLANK, NULL, EMPTY -> false;
+        default -> true;
+      };
     } else {
       final Object defaultNullValue =
           requiredValueType.equals(Boolean.class) || requiredValueType.equals(Boolean.TYPE)
@@ -223,9 +219,8 @@ public class SimpleRequired implements Required {
             }
             break;
           case REGEX:
-            match = configValue == null || value == null ? true
-                : !matchAnyRegex(value.toString(), Pattern.CASE_INSENSITIVE,
-                    configValue.toString());
+            match = configValue == null || value == null || !matchAnyRegex(value.toString(),
+                Pattern.CASE_INSENSITIVE, configValue.toString());
             break;
           default:
             match = !areEqual(value, configValue);

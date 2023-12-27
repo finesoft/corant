@@ -87,7 +87,7 @@ public interface Mutable<T> extends Supplier<T> {
       }
       if (this.getClass() == obj.getClass()) {
         final MutableBoolean that = (MutableBoolean) obj;
-        return this.value.equals(that.value);
+        return value.equals(that.value);
       }
       return false;
     }
@@ -752,14 +752,14 @@ public interface Mutable<T> extends Supplier<T> {
       }
       if (this.getClass() == obj.getClass()) {
         final MutableObject<?> that = (MutableObject<?>) obj;
-        return this.value.equals(that.value);
+        return value.equals(that.value);
       }
       return false;
     }
 
     @Override
     public T get() {
-      return this.value;
+      return value;
     }
 
     @Override
@@ -890,7 +890,7 @@ public interface Mutable<T> extends Supplier<T> {
       }
       if (this.getClass() == obj.getClass()) {
         final MutableString that = (MutableString) obj;
-        return this.value.equals(that.value);
+        return value.equals(that.value);
       }
       return false;
     }

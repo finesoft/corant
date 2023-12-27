@@ -74,20 +74,14 @@ public interface BackoffStrategy {
     }
 
     public BackoffStrategy build() {
-      switch (algorithm) {
-        case EXPO:
-          return new CappedExpoBackoffStrategy(factor, baseDuration, maxDuration);
-        case FIXED:
-          return new FixedBackoffStrategy(baseDuration);
-        case EXPO_DECORR:
-          return new CappedExpoDecorrJitterBackoffStrategy(factor, baseDuration, maxDuration);
-        case EXPO_EQUAL_JITTER:
-          return new CappedExpoEqualJitterBackoffStrategy(factor, baseDuration, maxDuration);
-        case EXPO_FULL_JITTER:
-          return new CappedExpoFullJitterBackoffStrategy(factor, baseDuration, maxDuration);
-        default:
-          return BackoffStrategy.NON_BACKOFF_STRATEGY;
-      }
+      return switch (algorithm) {
+        case EXPO -> new CappedExpoBackoffStrategy(factor, baseDuration, maxDuration);
+        case FIXED -> new FixedBackoffStrategy(baseDuration);
+        case EXPO_DECORR -> new CappedExpoDecorrJitterBackoffStrategy(factor, baseDuration, maxDuration);
+        case EXPO_EQUAL_JITTER -> new CappedExpoEqualJitterBackoffStrategy(factor, baseDuration, maxDuration);
+        case EXPO_FULL_JITTER -> new CappedExpoFullJitterBackoffStrategy(factor, baseDuration, maxDuration);
+        default -> BackoffStrategy.NON_BACKOFF_STRATEGY;
+      };
     }
 
     public BackoffStrategyBuilder factor(double factor) {

@@ -277,7 +277,7 @@ public class Identifiers {
     /**
      * Reverse analysis, returning the instant when it was generated from the incoming id parameter.
      *
-     * @param id
+     * @param id the id to be analysis
      * @return parseGeneratedInstant
      */
     public Instant parseGeneratedInstant(long id) {
@@ -290,7 +290,7 @@ public class Identifiers {
      * Reverse analysis, returning the sequence when it was generated from the incoming id
      * parameter.
      *
-     * @param id
+     * @param id the id to be analysis
      * @return parseGeneratedSequence
      */
     public long parseGeneratedSequence(long id) {
@@ -303,8 +303,8 @@ public class Identifiers {
      * Reverse analysis, returning the worker id when it was generated from the incoming id and
      * index parameters.
      *
-     * @param id
-     * @param index
+     * @param id the id to be analysis
+     * @param index the index to be analysis
      * @return parseGeneratedWorkerId
      */
     public long parseGeneratedWorkerId(long id, int index) {
@@ -408,7 +408,6 @@ public class Identifiers {
    * </pre>
    *
    * @author bingo 2016年3月9日
-   * @since
    */
   public static class SnowflakeD5W5S12UUIDGenerator extends GeneralSnowflakeUUIDGenerator {
 

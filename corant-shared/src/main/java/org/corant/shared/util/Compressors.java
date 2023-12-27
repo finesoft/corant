@@ -73,7 +73,7 @@ public class Compressors {
 
   public static void compress(InputStream is, OutputStream os) throws IOException {
     final Deflater def = new Deflater(Deflater.DEFAULT_COMPRESSION);
-    try (Closeable cdef = (Closeable) def::end;
+    try (Closeable cdef = def::end;
         DeflaterOutputStream dos = new DeflaterOutputStream(os, def, 4096, false)) {
       copy(is, dos);
     }
@@ -96,7 +96,7 @@ public class Compressors {
 
   public static void decompress(InputStream is, OutputStream os) throws IOException {
     final Inflater inf = new Inflater();
-    try (Closeable cinf = (Closeable) inf::end;
+    try (Closeable cinf = inf::end;
         InflaterInputStream iis = new InflaterInputStream(is, inf, 4096)) {
       copy(iis, os);
     }

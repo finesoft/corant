@@ -130,7 +130,7 @@ public class Services {
    * @param <S> the service type to be found
    * @param serviceLoader the service loader
    * @param serviceClass the interface or abstract class representing the service
-   * @param predicate use for filting the service instance.
+   * @param predicate use for filtering the service instance.
    * @return an appropriate service instance
    *
    * @see Sortable#compare(Sortable, Sortable)

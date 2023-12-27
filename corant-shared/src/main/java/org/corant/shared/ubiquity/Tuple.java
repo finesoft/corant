@@ -336,8 +336,7 @@ public interface Tuple {
       if (obj == this) {
         return true;
       }
-      if (obj instanceof Map.Entry<?, ?>) {
-        final Map.Entry<?, ?> other = (Map.Entry<?, ?>) obj;
+      if (obj instanceof Map.Entry<?, ?> other) {
         return Objects.areEqual(left, other.getKey()) && Objects.areEqual(right, other.getValue());
       }
       return false;
@@ -740,8 +739,7 @@ public interface Tuple {
       if (obj == this) {
         return true;
       }
-      if (obj instanceof Triple<?, ?, ?>) {
-        final Triple<?, ?, ?> other = (Triple<?, ?, ?>) obj;
+      if (obj instanceof Triple<?, ?, ?> other) {
         return Objects.areEqual(left, other.left) && Objects.areEqual(middle, other.middle)
             && Objects.areEqual(right, other.right);
       }

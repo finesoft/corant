@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * corant-shared
- *
+ * <p>
  * Describe input stream resource, can specify a specific name.
  *
  * @author bingo 下午6:54:04

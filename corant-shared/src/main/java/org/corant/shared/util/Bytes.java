@@ -381,17 +381,13 @@ public class Bytes {
       if (this == obj) {
         return true;
       }
-      if (!(obj instanceof BitArray)) {
+      if (!(obj instanceof BitArray other)) {
         return false;
       }
-      BitArray other = (BitArray) obj;
       if (!Arrays.equals(array, other.array)) {
         return false;
       }
-      if (length != other.length) {
-        return false;
-      }
-      return true;
+      return length == other.length;
     }
 
     /**
@@ -464,7 +460,8 @@ public class Bytes {
     }
 
     /**
-     * Reset the bits length, if new length greater than old, all the grow up bits are set to false.
+     * Reset the bits length, if new length greater than old, all the growth up bits are set to
+     * false.
      *
      * @param newLength the new length to be set
      */
@@ -481,7 +478,7 @@ public class Bytes {
     }
 
     /**
-     * Set bit value into array
+     * Set a bit of value into array
      *
      * @param index the index to be set to
      * @param b the bit to set
@@ -501,7 +498,7 @@ public class Bytes {
       if (b) {
         b8 |= posBit;
       } else {
-        b8 &= (~posBit); // opposite
+        b8 &= (byte) ~posBit; // opposite
       }
       array[arrayIndex] = b8;
     }
@@ -512,7 +509,7 @@ public class Bytes {
      * @param data the bytes array to be initialized
      */
     public void setBytes(byte[] data) {
-      setBytes(data, (data.length << 3));
+      setBytes(data, data.length << 3);
     }
 
     /**

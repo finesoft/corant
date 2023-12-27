@@ -137,7 +137,7 @@ public interface LimitedStream {
    * corant-shared
    *
    * <p>
-   * Wraps a {@link OutputStream}, limiting the number of bytes which can be write. Attempting to
+   * Wraps a {@link OutputStream}, limiting the number of bytes which can be written. Attempting to
    * exceed the fixed limit will result in an exception.
    *
    * @author bingo 下午2:46:08

@@ -200,7 +200,7 @@ public class Iterables {
   }
 
   /**
-   * Returns an enpty iterator
+   * Returns an empty iterator
    *
    * @param <T> the element type
    * @return emptyIterator
@@ -265,7 +265,7 @@ public class Iterables {
   }
 
   /**
-   * Returns the index-th value in iterable, throwing IndexOutOfBoundsException if there is nosuch
+   * Returns the index-th value in iterable, throwing IndexOutOfBoundsException if there is no-such
    * element.
    *
    * @param <E> the element type
@@ -284,7 +284,7 @@ public class Iterables {
   }
 
   /**
-   * Returns the index-th value in iterator, throwing IndexOutOfBoundsException if there is nosuch
+   * Returns the index-th value in iterator, throwing IndexOutOfBoundsException if there is no-such
    * element.
    *
    * @param <E> the element type
@@ -480,7 +480,6 @@ public class Iterables {
         return emptyIterator();
       }
       return new Iterator<>() {
-
         private final Queue<Iterator<T>> queue = new LinkedList<>();
         {
           queue.add(node.iterator());
@@ -521,10 +520,6 @@ public class Iterables {
           }
         }
 
-        @Override
-        public void remove() {
-          throw new UnsupportedOperationException("remove");
-        }
       };
     }
   }
@@ -545,7 +540,7 @@ public class Iterables {
     @Override
     public Iterator<T> iterator() {
       if (node == null) {
-        return null;
+        return emptyIterator();
       }
       return new Iterator<>() {
         private final Stack<Iterator<T>> stack = new Stack<>();
@@ -582,10 +577,6 @@ public class Iterables {
           }
         }
 
-        @Override
-        public void remove() {
-          throw new UnsupportedOperationException("remove");
-        }
       };
     }
   }

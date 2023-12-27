@@ -161,7 +161,7 @@ public class ClassPathResourceScanner {
           urls.add(classes.toUri().toURL());
         }
         if (lib.toFile().canRead()) {
-          Files.walkFileTree(lib, new SimpleFileVisitor<Path>() {
+          Files.walkFileTree(lib, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                 throws IOException {
@@ -176,7 +176,7 @@ public class ClassPathResourceScanner {
       tmpDir.toFile().deleteOnExit();
     }
     return cachedClassLoaders.put(path,
-        new URLClassLoader(urls.toArray(new URL[urls.size()]), parentClassLoader));
+        new URLClassLoader(urls.toArray(new URL[0]), parentClassLoader));
   }
 
   public Set<ClassPathResource> getResources() {
@@ -203,7 +203,7 @@ public class ClassPathResourceScanner {
   }
 
   /**
-   * Unfinish yet // FIXME
+   * Unfinished yet // FIXME
    */
   protected URI getClassPathEntry(File jarFile, String path) throws URISyntaxException {
     URI uri = new URI(path);
@@ -216,7 +216,7 @@ public class ClassPathResourceScanner {
   }
 
   /**
-   * Unfinish yet // FIXME
+   * Unfinished yet // FIXME
    */
   protected Set<URI> getClassPathFromManifest(File jarFile, Manifest manifest) {
     String attrName = Attributes.Name.CLASS_PATH.toString();
@@ -280,7 +280,7 @@ public class ClassPathResourceScanner {
       while (filePath.endsWith("*")) {
         filePath = filePath.substring(0, filePath.length() - 1);
       }
-      if (filePath.length() > 0) {
+      if (!filePath.isEmpty()) {
         useFile = new File(filePath);
       }
       if (!useFile.exists()) {

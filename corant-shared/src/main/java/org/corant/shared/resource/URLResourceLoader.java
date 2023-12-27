@@ -24,11 +24,10 @@ import java.util.Collection;
 
 /**
  * corant-shared
- *
+ * <p>
  * Unfinished yet!
  *
  * @author bingo 下午4:30:43
- *
  */
 public class URLResourceLoader implements ResourceLoader {
 

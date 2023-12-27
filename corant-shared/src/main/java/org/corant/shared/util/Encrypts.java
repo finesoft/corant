@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Strings.isBlank;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -37,10 +38,10 @@ public class Encrypts {
   private Encrypts() {}
 
   /**
-   * 从字母组合转为正整数，A->1，B->2...Z-26，AA-27，AB-28....
+   * 转换26进制(A-Z,从字母组合转为正整数，A->1，B->2...Z-26，AA-27，AB-28....)为十进制
    *
-   * @param alphabet
-   * @return
+   * @param alphabet 字母值
+   * @return 十进制整数
    */
   public static int alphabetToIntScale(String alphabet) {
     if (alphabet == null) {
@@ -57,8 +58,8 @@ public class Encrypts {
   /**
    * 将1010101010字符转为byte数组
    *
-   * @param s
-   * @return
+   * @param s 10101010字符串
+   * @return byte数组
    */
   public static byte[] binaryStringToBytes(String s) {
     if (s == null) {
@@ -78,11 +79,11 @@ public class Encrypts {
   /**
    * 将十六进制字符串转换成byte数组
    *
-   * @param hs
-   * @return
+   * @param hs 十六进制字串
+   * @return byte数组
    */
   public static byte[] hexStringToBytes(String hs) {
-    if (hs.length() < 1) {
+    if (isBlank(hs)) {
       return Bytes.EMPTY_ARRAY;
     }
     byte[] result = new byte[hs.length() / 2];
@@ -97,8 +98,8 @@ public class Encrypts {
   /**
    * 正整数转为26进制的大写字母组合，1->A，2->B...26->Z，27->AA...
    *
-   * @param number
-   * @return
+   * @param number 10进制正整数
+   * @return 26进制字符数
    */
   public static String intToAlphabetScale(int number) {
     int num = number;
@@ -120,8 +121,8 @@ public class Encrypts {
   /**
    * 将62进制字符串转为long型
    *
-   * @param r62String
-   * @return
+   * @param r62String 62进制字符数
+   * @return 长整型值
    */
   public static long r62StringToLong(String r62String) {
     String r62str = r62String;
@@ -151,7 +152,6 @@ public class Encrypts {
    *
    * @param s 进制字符串
    * @param radix 进制
-   * @return
    */
   public static long radixStringToLong(String s, int radix) {
     return new BigInteger(s, radix).longValue();
@@ -160,8 +160,7 @@ public class Encrypts {
   /**
    * 把字节转为字节字符串例如 00101010
    *
-   * @param b
-   * @return
+   * @param b 字节
    */
   public static String toBinaryString(byte b) {
     String formatted = Integer.toBinaryString(b);
@@ -176,8 +175,7 @@ public class Encrypts {
   /**
    * 把byte转为比特流字符串
    *
-   * @param b
-   * @return
+   * @param b 字节数组
    */
   public static String toBinaryString(byte[] b) {
     BitArray ba = new BitArray(b);
@@ -192,8 +190,7 @@ public class Encrypts {
   /**
    * 把int转为字节字符串例如 00101010
    *
-   * @param i
-   * @return
+   * @param i 整型值
    */
   public static String toBinaryString(int i) {
     String formatted = Integer.toBinaryString(i);
@@ -205,8 +202,7 @@ public class Encrypts {
   /**
    * 把long转为字节字符串例如 00101010
    *
-   * @param l
-   * @return
+   * @param l 长整型值
    */
   public static String toBinaryString(long l) {
     String formatted = Long.toBinaryString(l);
@@ -218,8 +214,7 @@ public class Encrypts {
   /**
    * 将short转为字节字符串
    *
-   * @param i
-   * @return
+   * @param i 短整型值
    */
   public static String toBinaryString(short i) {
     return toBinaryString((int) i).substring(16);
@@ -229,17 +224,16 @@ public class Encrypts {
    * 将byte数组转换成十六进制字符串
    *
    * @param b 待转换的字节数组
-   * @return
    */
   public static String toHexString(byte[] b) {
     StringBuilder hs = new StringBuilder();
-    String stmp = "";
+    String s;
     for (byte element : b) {
-      stmp = Integer.toHexString(element & 0xFF);
-      if (stmp.length() == 1) {
+      s = Integer.toHexString(element & 0xFF);
+      if (s.length() == 1) {
         hs.append("0");
       }
-      hs.append(stmp);
+      hs.append(s);
     }
     return hs.toString().toUpperCase(Locale.ENGLISH);
   }
@@ -249,7 +243,6 @@ public class Encrypts {
    *
    * @param s 字符串
    * @param charset 获取字符串字节时指定的字符集
-   * @return
    */
   public static String toHexString(String s, Charset charset) {
     if (s == null) {
@@ -262,8 +255,7 @@ public class Encrypts {
   /**
    * 转为62进制字符串
    *
-   * @param r62Number
-   * @return
+   * @param r62Number 62进制字串值
    */
   public static String toR62String(long r62Number) {
     long r62n = r62Number;
@@ -285,7 +277,6 @@ public class Encrypts {
       result.append(str.charAt(i));
     }
     return negative ? '-' + result.toString() : result.toString();
-
   }
 
   /**
@@ -293,10 +284,8 @@ public class Encrypts {
    *
    * @param n 数字
    * @param radix 进制
-   * @return
    */
   public static String toRadixString(long n, int radix) {
     return BigInteger.valueOf(n).toString(radix);
   }
-
 }

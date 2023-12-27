@@ -24,7 +24,6 @@ import java.util.logging.Level;
  * corant-shared
  *
  * @author bingo 下午3:33:58
- *
  */
 public interface WritableResource extends Resource {
 

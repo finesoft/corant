@@ -306,7 +306,7 @@ public class Assertions {
    */
   public static <T extends Comparable<T>> T shouldNotBeGreater(T obj, T comparison) {
     return shouldNotBeGreater(obj, comparison,
-        "Object should not null and must not greater than the comparad object");
+        "Object should not null and must not greater than the compared object");
   }
 
   /**
@@ -343,7 +343,7 @@ public class Assertions {
    */
   public static <T extends Comparable<T>> T shouldNotBeLess(T obj, T comparison) {
     return shouldNotBeLess(obj, comparison,
-        "Object should not null and must not less than the comparad object");
+        "Object should not null and must not less than the compared object");
   }
 
   /**
@@ -465,7 +465,6 @@ public class Assertions {
    *
    * @param obj the object to check
    * @param other the other to compare
-   * @return the given object
    */
   public static void shouldNotEquals(Object obj, Object other) {
     if (Objects.areEqual(obj, other)) {

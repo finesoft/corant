@@ -41,7 +41,7 @@ public interface Futures {
    * @author bingo 下午10:26:51
    *
    */
-  public final class FutureResult<V> implements Future<V> {
+  final class FutureResult<V> implements Future<V> {
 
     private final V resultValue;
 
@@ -57,7 +57,7 @@ public interface Futures {
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-      throw new java.lang.IllegalStateException("Object does not represent an acutal Future");
+      throw new java.lang.IllegalStateException("Object does not represent an actual Future");
     }
 
     @Override
@@ -68,17 +68,17 @@ public interface Futures {
     @Override
     public V get(long timeout, TimeUnit unit)
         throws InterruptedException, ExecutionException, TimeoutException {
-      throw new java.lang.IllegalStateException("Object does not represent an acutal Future");
+      throw new java.lang.IllegalStateException("Object does not represent an actual Future");
     }
 
     @Override
     public boolean isCancelled() {
-      throw new java.lang.IllegalStateException("Object does not represent an acutal Future");
+      throw new java.lang.IllegalStateException("Object does not represent an actual Future");
     }
 
     @Override
     public boolean isDone() {
-      throw new java.lang.IllegalStateException("Object does not represent an acutal Future");
+      throw new java.lang.IllegalStateException("Object does not represent an actual Future");
     }
   }
 

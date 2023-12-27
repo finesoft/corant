@@ -192,6 +192,21 @@ public class Lists {
   }
 
   /**
+   * Convert and returns the element at the specified position in the list. If the passing index is
+   * negative means that search element from last to first position.
+   *
+   * @param <T> the element type
+   * @param list the list to get a value from
+   * @param index the index to get
+   * @param clazz the return class
+   *
+   * @see #get(List, int)
+   */
+  public static <T> T get(List<?> list, int index, Class<T> clazz) {
+    return toObject(get(list, index), clazz);
+  }
+
+  /**
    * Returns the element at the specified position in the list. If the passing index is negative
    * means that search element from last to first position.
    *
@@ -207,21 +222,6 @@ public class Lists {
    */
   public static <E> E get(List<? extends E> list, int index) {
     return index < 0 ? list.get(sizeOf(list) + index) : list.get(index);
-  }
-
-  /**
-   * Convert and returns the element at the specified position in the list. If the passing index is
-   * negative means that search element from last to first position.
-   *
-   * @param <T> the element type
-   * @param list the list to get a value from
-   * @param index the index to get
-   * @param clazz the return class
-   *
-   * @see #get(List, int)
-   */
-  public static <T> T get(List<?> list, int index, Class<T> clazz) {
-    return toObject(get(list, index), clazz);
   }
 
   /**
@@ -492,11 +492,9 @@ public class Lists {
   @SafeVarargs
   public static <E> List<E> union(Collection<? extends E>... collections) {
     List<E> union = new ArrayList<>();
-    if (collections.length > 0) {
-      for (Collection<? extends E> collection : collections) {
-        if (collection != null) {
-          union.addAll(collection);
-        }
+    for (Collection<? extends E> collection : collections) {
+      if (collection != null) {
+        union.addAll(collection);
       }
     }
     return union;

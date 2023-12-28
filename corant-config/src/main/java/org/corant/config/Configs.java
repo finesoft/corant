@@ -102,11 +102,11 @@ public class Configs {
 
   /**
    * Returns the assembled configuration properties from Microprofile-config. According to the input
-   * string array, analyze whether the value contains the configuration property name variable one
-   * by one in order, for example: '${property.name}', if the property name variable exists, replace
-   * the name variable with the relevant configuration property value, if without the property name
-   * variable, the passed value is not changed, and the parsed-replaced array is finally returned,
-   * which is used to enhance some of the annotated configuration flexibility.
+   * string, analyze whether the value contains the configuration property name variable, for
+   * example: '${property.name}', if the property name variable exists, replace the name variable
+   * with the relevant configuration property value, and the parsed-replaced string is finally
+   * returned, if without the property name variable, the passed value is not changed and returned
+   * directly. It is used to enhance some of the annotated configuration flexibility.
    *
    * @param value the configuration property key or the original value
    * @return the assembled value or the original given value if it can't expand

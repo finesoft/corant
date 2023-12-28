@@ -278,7 +278,7 @@ public class Services {
 
   /**
    * Returns an appropriate service instance that matches the given service class and the given
-   * module layer from {@link ServiceLoader} or or throw exception if not found or not meet the
+   * module layer from {@link ServiceLoader} or throw exception if not found or not meet the
    * conditions or found multiple instances.
    *
    * @param <S> the service type to be resolved

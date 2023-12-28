@@ -38,9 +38,10 @@ import org.corant.shared.normal.Names.PersistenceNames;
 
 /**
  * corant-modules-ddd-shared
+ * <p>
+ * FIXME supports multiple persistence context for one entity class
  *
  * @author bingo 下午8:56:24
- *
  */
 @ApplicationScoped
 public class EntityManagers {

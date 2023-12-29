@@ -29,9 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -52,7 +50,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Retry;
-import jakarta.annotation.PreDestroy;
 
 /**
  * corant-modules-query-shared
@@ -60,9 +57,6 @@ import jakarta.annotation.PreDestroy;
  * @author bingo 下午4:08:58
  */
 public abstract class AbstractNamedQueryService implements FetchableNamedQueryService {
-
-  protected static final Map<String, FetchableNamedQueryService> fetchQueryServices =
-      new ConcurrentHashMap<>();// static?
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 
@@ -332,20 +326,19 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
-    FetchableNamedQueryService service = fetchQueryServices.computeIfAbsent(fq.getId(), id -> {
-      final Query query =
-          resolve(QueryMappingService.class).getQuery(fq.getReferenceQuery().getVersionedName());
-      final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
-      final String qualifier =
-          defaultObject(fq.getReferenceQuery().getQualifier(), query.getQualifier());
-      if (type == null && isBlank(qualifier)) {
-        return this;
-      } else {
-        return shouldInstanceOf(NamedQueryServiceManager.resolveQueryService(type, qualifier),
-            FetchableNamedQueryService.class,
-            "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
-      }
-    });
+    FetchableNamedQueryService service;
+    final Query query =
+        resolve(QueryMappingService.class).getQuery(fq.getReferenceQuery().getVersionedName());
+    final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
+    final String qualifier =
+        defaultObject(fq.getReferenceQuery().getQualifier(), query.getQualifier());
+    if (type == null && isBlank(qualifier)) {
+      service = this;
+    } else {
+      service = shouldInstanceOf(NamedQueryServiceManager.resolveQueryService(type, qualifier),
+          FetchableNamedQueryService.class,
+          "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
+    }
     logger.fine(() -> format("Resolve fetch query [%s] service [%s]",
         fq.getReferenceQuery().getName(), Classes.getUserClass(service)));
     return service;
@@ -384,11 +377,5 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
         postFetch(fetchQueryService, fr, parentQuerier, result);
       }
     }
-  }
-
-  @PreDestroy
-  synchronized void onPreDestroy() {
-    fetchQueryServices.clear();
-    logger.fine(() -> "Clear named query service cached fetch query services.");
   }
 }

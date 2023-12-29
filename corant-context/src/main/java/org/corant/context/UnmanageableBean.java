@@ -28,7 +28,6 @@ import org.jboss.weld.manager.api.WeldManager;
  * Handle CDI unmanageable bean class or object
  *
  * @author bingo 下午11:02:59
- *
  */
 public class UnmanageableBean<T> implements AutoCloseable {
 

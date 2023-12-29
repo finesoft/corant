@@ -15,6 +15,5 @@
  * corant-devops-test-unit
  *
  * @author bingo 下午5:43:22
- *
  */
 package org.corant.devops.test.unit;

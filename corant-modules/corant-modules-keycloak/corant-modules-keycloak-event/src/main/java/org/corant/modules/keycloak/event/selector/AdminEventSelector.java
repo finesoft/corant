@@ -27,7 +27,6 @@ import com.google.common.base.Objects;
  * corant-modules-keycloak-event
  *
  * @author bingo 下午10:18:08
- *
  */
 public class AdminEventSelector implements Predicate<AdminEvent> {
   static final Logger logger = Logger.getLogger(AdminEventSelector.class);

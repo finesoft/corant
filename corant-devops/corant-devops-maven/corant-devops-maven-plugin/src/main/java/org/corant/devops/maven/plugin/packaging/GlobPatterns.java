@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午2:12:35
- *
  */
 public class GlobPatterns {
   public static final String REG_CHARS = ".^$+{[]|()";

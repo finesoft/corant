@@ -23,7 +23,6 @@ import java.util.function.Supplier;
  * corant-shared
  *
  * @author bingo 上午11:30:02
- *
  */
 public class ThreadLocals {
 

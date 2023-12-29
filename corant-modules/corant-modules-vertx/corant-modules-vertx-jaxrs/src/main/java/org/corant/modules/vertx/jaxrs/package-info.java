@@ -15,6 +15,5 @@
  * corant-modules-vertx-jaxrs
  * 
  * @author bingo 上午10:45:56
- *
  */
 package org.corant.modules.vertx.jaxrs;

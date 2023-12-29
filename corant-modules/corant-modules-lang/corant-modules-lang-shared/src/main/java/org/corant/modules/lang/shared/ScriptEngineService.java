@@ -22,7 +22,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-lang-shared
  *
  * @author bingo 上午10:05:33
- *
  */
 public interface ScriptEngineService extends Sortable {
 

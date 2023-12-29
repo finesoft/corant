@@ -20,7 +20,6 @@ import java.util.Set;
  * corant-modules-lang-kotlin
  *
  * @author bingo 下午12:01:35
- *
  */
 public interface CompilationService {
 

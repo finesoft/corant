@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
  * Code base from springframework, if there is infringement, please inform me(finesoft@gmail.com).
  *
  * @author bingo 下午2:09:49
- *
  */
 public class ContentDispositions {
 

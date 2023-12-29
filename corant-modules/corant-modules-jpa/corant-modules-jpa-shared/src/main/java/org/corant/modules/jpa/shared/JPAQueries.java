@@ -58,7 +58,6 @@ import org.corant.shared.util.Primitives;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午4:07:53
- *
  */
 public class JPAQueries {
 

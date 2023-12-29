@@ -20,7 +20,6 @@ import jakarta.transaction.Synchronization;
  * corant-modules-jta-shared
  *
  * @author bingo 上午10:12:56
- *
  */
 public class SynchronizationAdapter implements Synchronization {
 

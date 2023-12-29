@@ -36,7 +36,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-config
  *
  * @author bingo 下午8:05:35
- *
  */
 public enum DeclarativePattern implements ConfigInjector {
 

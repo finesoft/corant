@@ -26,7 +26,6 @@ import org.corant.shared.ubiquity.Tuple.Triple;
  * corant-modules-query-elastic
  *
  * @author bingo 下午8:25:44
- *
  */
 public class FreemarkerEsQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, Map<Object, Object>, EsNamedQuerier> {

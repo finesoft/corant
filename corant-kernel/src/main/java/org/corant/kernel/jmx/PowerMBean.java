@@ -17,7 +17,6 @@ package org.corant.kernel.jmx;
  * corant-kernel
  *
  * @author bingo 下午4:53:58
- *
  */
 public interface PowerMBean {
 

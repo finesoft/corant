@@ -22,7 +22,6 @@ import java.util.Objects;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:41:08
- *
  */
 public class IdentifiablePrincipal extends SimplePrincipal {
 

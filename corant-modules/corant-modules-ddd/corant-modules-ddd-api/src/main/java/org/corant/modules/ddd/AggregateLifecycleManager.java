@@ -20,7 +20,6 @@ package org.corant.modules.ddd;
  * Manages the life cycle of an aggregate, such as persistent state or deletion
  *
  * @author bingo 上午10:33:56
- *
  */
 public interface AggregateLifecycleManager {
 

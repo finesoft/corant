@@ -43,7 +43,6 @@ import org.corant.shared.normal.Priorities;
  *
  *
  * @author bingo 下午3:45:33
- *
  */
 public class SecurityExtension implements Extension {
 

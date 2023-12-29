@@ -21,7 +21,6 @@ import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplie
  * corant-modules-datasource-agroal
  *
  * @author bingo 下午8:10:27
- *
  */
 public interface AgroalCPDataSourceConfigurator extends Sortable {
 

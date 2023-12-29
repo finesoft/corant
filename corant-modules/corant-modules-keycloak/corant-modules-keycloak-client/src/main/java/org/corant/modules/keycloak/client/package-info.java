@@ -15,6 +15,5 @@
  * corant-modules-keycloak-client
  * 
  * @author bingo 下午5:44:09
- *
  */
 package org.corant.modules.keycloak.client;

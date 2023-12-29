@@ -17,7 +17,6 @@ package org.corant.modules.lang.shared;
  * corant-modules-lang-shared
  *
  * @author bingo 上午10:19:55
- *
  */
 public enum ScriptLang {
   Javascript, Kotlin, Groovy, Python, Scala;

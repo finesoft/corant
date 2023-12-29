@@ -30,7 +30,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * A simple invocation handler implementation.
  *
  * @author bingo 下午3:20:16
- *
  */
 public class ProxyInvocationHandler implements InvocationHandler {
 

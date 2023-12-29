@@ -21,7 +21,6 @@ import java.util.Collections;
  * corant-shared
  *
  * @author bingo 下午3:27:09
- *
  */
 public interface ResourceLoader {
 

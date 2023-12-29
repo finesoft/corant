@@ -44,7 +44,6 @@ import org.elasticsearch.search.SearchModule;
  * corant-modules-query-elastic
  *
  * @author bingo 下午10:19:30
- *
  */
 public class XContentUtils {
 

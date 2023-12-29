@@ -24,7 +24,6 @@ import java.util.Locale;
  * the raw message.
  *
  * @author bingo 上午11:54:14
- *
  */
 public class DefaultMessageInterpreter implements MessageInterpreter {
 

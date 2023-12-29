@@ -28,7 +28,6 @@ import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
  * corant-context
  *
  * @author bingo 上午10:22:51
- *
  */
 public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
 

@@ -25,7 +25,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:26:05
- *
  */
 public class LocaleStringCodec implements Codec<Locale> {
   @Override

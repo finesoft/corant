@@ -17,7 +17,6 @@ package org.corant.modules.jndi;
  * corant-modules-jndi
  *
  * @author bingo 下午2:34:06
- *
  */
 public class NamingContextEntry {
 

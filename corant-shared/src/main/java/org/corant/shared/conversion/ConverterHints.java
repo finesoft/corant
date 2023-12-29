@@ -29,7 +29,6 @@ import org.corant.shared.util.Systems;
  * corant-shared
  *
  * @author bingo 下午5:49:59
- *
  */
 public class ConverterHints {
 

@@ -26,7 +26,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * corant-context
  *
  * @author bingo 下午9:24:34
- *
  */
 public class ContextualRequired extends SimpleRequired {
 

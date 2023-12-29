@@ -35,7 +35,6 @@ import javafx.stage.Stage;
  * </pre>
  *
  * @author bingo 下午11:51:55
- *
  */
 public class CorantJavaFXPreloader extends Preloader {
 

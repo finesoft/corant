@@ -38,7 +38,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-config
  *
  * @author bingo 下午4:35:31
- *
  */
 public class ConfigProducer implements Serializable {
 

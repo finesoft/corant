@@ -17,7 +17,6 @@ package org.corant.modules.jms;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:06:18
- *
  */
 public interface JMSConfig {
 

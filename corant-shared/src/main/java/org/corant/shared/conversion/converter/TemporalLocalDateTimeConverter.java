@@ -26,7 +26,6 @@ import java.util.Optional;
  * corant-shared
  *
  * @author bingo 上午10:47:31
- *
  */
 public class TemporalLocalDateTimeConverter
     extends AbstractTemporalConverter<Temporal, LocalDateTime> {

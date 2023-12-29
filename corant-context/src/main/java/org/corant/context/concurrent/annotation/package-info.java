@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 上午11:02:12
- *
  */
 package org.corant.context.concurrent.annotation;

@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jndi
  *
  * @author bingo 下午3:23:24
- *
  */
 public class NamingBindingEnumeration implements NamingEnumeration<Binding> {
 

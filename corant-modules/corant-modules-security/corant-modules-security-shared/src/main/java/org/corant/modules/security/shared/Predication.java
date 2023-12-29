@@ -23,7 +23,6 @@ import org.corant.shared.util.Strings.WildcardMatcher;
  * corant-modules-security-shared
  *
  * @author bingo 上午11:56:47
- *
  */
 public abstract class Predication {
 

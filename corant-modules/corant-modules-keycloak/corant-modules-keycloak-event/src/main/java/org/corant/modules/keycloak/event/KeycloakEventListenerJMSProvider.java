@@ -22,7 +22,6 @@ import org.keycloak.events.admin.AdminEvent;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午10:16:59
- *
  */
 public class KeycloakEventListenerJMSProvider implements EventListenerProvider {
 

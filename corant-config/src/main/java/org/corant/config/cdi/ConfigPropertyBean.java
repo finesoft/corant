@@ -19,6 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
+import org.corant.shared.util.Objects;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.spi.Bean;
@@ -26,16 +28,19 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.enterprise.inject.spi.PassivationCapable;
 import jakarta.enterprise.util.AnnotationLiteral;
-import org.corant.shared.util.Objects;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+/**
+ * corant-config
+ *
+ * @author bingo 10:42:01
+ */
 public class ConfigPropertyBean<T> implements Bean<T>, PassivationCapable {
   static final Set<Annotation> qualifiers = Collections.singleton(new ConfigPropertyLiteral());
   final BeanManager beanManager;
   final Set<Type> types;
 
   public ConfigPropertyBean(BeanManager bm, Set<Type> types) {
-    this.beanManager = bm;
+    beanManager = bm;
     this.types = Collections.unmodifiableSet(types);
   }
 

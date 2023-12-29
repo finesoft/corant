@@ -36,7 +36,6 @@ import org.corant.shared.util.Classes;
  * corant-context
  *
  * @author bingo 上午10:46:41
- *
  */
 public class AsynchronousConfig {
 

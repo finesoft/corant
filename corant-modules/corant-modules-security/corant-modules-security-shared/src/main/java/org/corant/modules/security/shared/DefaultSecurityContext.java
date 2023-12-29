@@ -30,7 +30,6 @@ import org.corant.modules.security.Subject;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:14:35
- *
  */
 public class DefaultSecurityContext implements SecurityContext {
 

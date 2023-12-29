@@ -21,7 +21,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-dsa
  *
  * @author bingo 下午5:47:44
- *
  */
 public interface Ngrams extends Iterator<String> {
 

@@ -27,7 +27,6 @@ import org.corant.shared.util.Services;
  * corant-modules-rpc-feign
  *
  * @author bingo 9:55:54
- *
  */
 public class FeignExtension implements Extension {
 

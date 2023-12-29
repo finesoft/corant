@@ -33,7 +33,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午10:23:37
- *
  */
 public class MpJWTAuthorizer extends AbstractAuthorizer {
 

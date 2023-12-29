@@ -28,7 +28,6 @@ import java.util.Map;
  * Describe input stream resource, can specify a specific name.
  *
  * @author bingo 下午6:54:04
- *
  */
 public class InputStreamResource implements Resource {
 

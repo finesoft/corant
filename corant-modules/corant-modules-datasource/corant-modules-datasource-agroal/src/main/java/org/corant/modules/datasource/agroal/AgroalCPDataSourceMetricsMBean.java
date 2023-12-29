@@ -20,7 +20,6 @@ import java.time.Duration;
  * corant-modules-datasource-agroal
  *
  * @author bingo 下午4:55:42
- *
  */
 public interface AgroalCPDataSourceMetricsMBean {
 

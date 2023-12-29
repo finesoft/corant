@@ -23,7 +23,6 @@ import org.corant.shared.util.Strings;
  * corant-kernel
  *
  * @author bingo 下午3:30:49
- *
  */
 public class Power implements PowerMBean {
 

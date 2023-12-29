@@ -23,7 +23,6 @@ import java.util.Map;
  * FIXME to be removed, since we have date temporal converter factory
  *
  * @author bingo 上午10:49:23
- *
  */
 public class DateSqlDateConverter extends AbstractConverter<Date, java.sql.Date> {
 

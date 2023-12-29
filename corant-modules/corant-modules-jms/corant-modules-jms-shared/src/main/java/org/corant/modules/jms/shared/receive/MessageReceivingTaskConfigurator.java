@@ -22,7 +22,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jms-shared
  *
  * @author bingo 下午7:27:36
- *
  */
 public interface MessageReceivingTaskConfigurator extends Sortable {
 

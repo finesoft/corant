@@ -27,7 +27,6 @@ import org.keycloak.models.KeycloakSessionFactory;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午10:19:05
- *
  */
 public class KeycloakEventListenerJMSProviderFactory implements EventListenerProviderFactory {
   static final Logger logger = Logger.getLogger(KeycloakEventListenerJMSProviderFactory.class);

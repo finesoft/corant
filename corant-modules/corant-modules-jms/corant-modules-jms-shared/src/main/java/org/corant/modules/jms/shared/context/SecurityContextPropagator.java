@@ -29,7 +29,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-shared
  *
  * @author bingo 下午4:04:48
- *
  */
 public interface SecurityContextPropagator {
 

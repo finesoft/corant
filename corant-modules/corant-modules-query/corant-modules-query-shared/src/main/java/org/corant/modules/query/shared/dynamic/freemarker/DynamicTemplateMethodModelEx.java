@@ -34,7 +34,6 @@ import freemarker.template.TemplateScalarModel;
  * corant-modules-query-shared
  *
  * @author bingo 下午5:40:20
- *
  */
 public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
 

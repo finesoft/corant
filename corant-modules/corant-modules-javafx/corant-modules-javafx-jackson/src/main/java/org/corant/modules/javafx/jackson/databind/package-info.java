@@ -15,6 +15,5 @@
  * corant-modules-javafx-jackson
  * 
  * @author bingo 下午9:32:59
- *
  */
 package org.corant.modules.javafx.jackson.databind;

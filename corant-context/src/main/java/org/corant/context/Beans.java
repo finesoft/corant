@@ -53,7 +53,6 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
  * A convenient context bean object retrieval class for retrieving bean instances
  *
  * @author bingo 下午2:22:40
- *
  */
 public class Beans {
 

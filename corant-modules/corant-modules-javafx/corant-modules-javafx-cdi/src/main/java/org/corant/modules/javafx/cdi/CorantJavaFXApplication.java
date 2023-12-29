@@ -24,7 +24,6 @@ import javafx.stage.Stage;
  * corant-modules-javafx-cdi
  *
  * @author bingo 上午12:31:43
- *
  */
 public class CorantJavaFXApplication extends Application {
 

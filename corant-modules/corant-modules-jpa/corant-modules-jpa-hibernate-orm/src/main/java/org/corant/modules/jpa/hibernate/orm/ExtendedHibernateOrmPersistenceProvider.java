@@ -36,7 +36,6 @@ import jakarta.persistence.EntityManagerFactory;
  * is configured using the .properties file.
  *
  * @author bingo 下午6:37:17
- *
  */
 public class ExtendedHibernateOrmPersistenceProvider extends HibernatePersistenceProvider {
 

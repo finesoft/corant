@@ -27,7 +27,6 @@ import org.corant.devops.maven.plugin.archive.Archive.Entry;
  * corant-devops-maven-plugin
  *
  * @author bingo 上午10:03:17
- *
  */
 public class ManifestEntry implements Entry {
 

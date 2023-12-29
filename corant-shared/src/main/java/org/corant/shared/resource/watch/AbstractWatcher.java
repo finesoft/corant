@@ -26,7 +26,6 @@ import java.util.logging.Logger;
  * corant-shared
  *
  * @author bingo 下午9:48:27
- *
  */
 public abstract class AbstractWatcher implements Watcher {
 

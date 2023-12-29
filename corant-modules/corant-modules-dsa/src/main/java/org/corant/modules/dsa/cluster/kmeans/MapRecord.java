@@ -20,7 +20,6 @@ import java.util.Map;
  * corant-modules-dsa
  *
  * @author bingo 下午2:12:15
- *
  */
 public class MapRecord {
 

@@ -17,7 +17,6 @@ package org.corant.modules.ddd;
  * corant-modules-ddd-api
  *
  * @author bingo 上午10:18:59
- *
  */
 public abstract class AbstractAggregateMessage implements Message {
 

@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-elastic-data
  *
  * @author bingo 上午10:53:48
- *
  */
 public class ElasticDeveloperKits {
 

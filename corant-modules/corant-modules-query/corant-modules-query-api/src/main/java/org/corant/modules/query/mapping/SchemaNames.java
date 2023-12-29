@@ -17,7 +17,6 @@ package org.corant.modules.query.mapping;
  * corant-modules-query-api
  *
  * @author bingo 下午6:24:18
- *
  */
 public class SchemaNames {
 

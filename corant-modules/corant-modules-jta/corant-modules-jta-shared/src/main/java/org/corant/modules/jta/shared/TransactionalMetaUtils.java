@@ -25,7 +25,6 @@ import jakarta.transaction.Transactional;
  * corant-modules-jta-shared
  *
  * @author bingo 下午7:22:15
- *
  */
 public class TransactionalMetaUtils {
 

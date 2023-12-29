@@ -17,7 +17,6 @@ package org.corant.modules.security;
  * corant-modules-security-api
  *
  * @author bingo 下午3:12:09
- *
  */
 public interface RealmSetting {
 

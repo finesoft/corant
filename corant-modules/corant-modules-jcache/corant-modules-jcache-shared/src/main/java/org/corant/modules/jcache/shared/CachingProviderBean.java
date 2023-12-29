@@ -25,7 +25,6 @@ import org.corant.context.AbstractBean;
  * corant-modules-jcache-shared
  *
  * @author sushuaihao
- *
  */
 public class CachingProviderBean extends AbstractBean<CachingProvider> {
 

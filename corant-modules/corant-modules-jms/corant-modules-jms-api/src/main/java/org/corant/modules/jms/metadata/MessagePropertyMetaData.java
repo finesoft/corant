@@ -22,7 +22,6 @@ import org.corant.modules.jms.annotation.MessageProperty;
  * corant-modules-jms-api
  *
  * @author bingo 下午5:15:27
- *
  */
 public class MessagePropertyMetaData {
   private final String name;

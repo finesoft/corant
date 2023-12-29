@@ -34,7 +34,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午7:49:51
- *
  */
 public class IdentifiersTest extends TestCase {
 

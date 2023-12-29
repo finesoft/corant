@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * interfaces.
  *
  * @author bingo 下午6:17:53
- *
  */
 public abstract class TypeLiteral<T> {
 

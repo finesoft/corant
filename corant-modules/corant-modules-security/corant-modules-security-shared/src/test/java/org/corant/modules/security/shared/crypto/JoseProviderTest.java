@@ -34,7 +34,6 @@ import junit.framework.TestCase;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:46:21
- *
  */
 public class JoseProviderTest extends TestCase {
 

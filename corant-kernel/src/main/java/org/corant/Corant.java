@@ -142,7 +142,6 @@ import org.corant.shared.util.Threads;
  * @see CorantBootHandler
  *
  * @author bingo 上午11:52:09
- *
  */
 public class Corant implements AutoCloseable {
 

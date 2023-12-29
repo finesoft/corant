@@ -34,7 +34,6 @@ import org.corant.shared.util.Streams;
  * corant-modules-query-shared
  *
  * @author bingo 下午5:15:27
- *
  */
 public class NamedQueryServices {
 

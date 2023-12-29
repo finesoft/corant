@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-json
  *
  * @author bingo 下午2:23:09
- *
  */
 public interface EvaluationContext extends Sortable {
 

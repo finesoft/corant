@@ -15,6 +15,5 @@
  * corant-modules-query-elastic
  *
  * @author bingo 上午10:48:35
- *
  */
 package org.corant.modules.query.elastic.cdi;

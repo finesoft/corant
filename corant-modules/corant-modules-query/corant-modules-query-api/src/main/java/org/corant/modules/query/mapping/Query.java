@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
  * expression.
  *
  * @author bingo 上午10:22:33
- *
  */
 public class Query implements Serializable {
 

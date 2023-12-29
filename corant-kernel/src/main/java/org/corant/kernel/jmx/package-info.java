@@ -15,6 +15,5 @@
  * corant-kernel
  *
  * @author bingo 下午7:37:27
- *
  */
 package org.corant.kernel.jmx;

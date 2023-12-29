@@ -25,7 +25,6 @@ import org.elasticsearch.client.transport.TransportClient;
  * corant-modules-elastic-data
  *
  * @author bingo 上午11:05:18
- *
  */
 public class ElasticTransportClientService {
 

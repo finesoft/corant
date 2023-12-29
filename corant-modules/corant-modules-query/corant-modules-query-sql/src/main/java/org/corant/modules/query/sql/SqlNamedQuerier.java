@@ -19,7 +19,6 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * corant-modules-query-sql
  *
  * @author bingo 下午7:11:05
- *
  */
 public interface SqlNamedQuerier extends DynamicQuerier<Object[], String> {
 

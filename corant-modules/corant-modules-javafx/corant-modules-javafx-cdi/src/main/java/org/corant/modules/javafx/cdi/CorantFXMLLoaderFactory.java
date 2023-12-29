@@ -30,7 +30,6 @@ import javafx.fxml.JavaFXBuilderFactory;
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午11:08:06
- *
  */
 public class CorantFXMLLoaderFactory {
 

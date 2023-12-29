@@ -22,7 +22,6 @@ import org.corant.shared.ubiquity.Sortable;
  * Represents an object that can be persisted or deleted.
  *
  * @author bingo 下午9:05:07
- *
  */
 public interface Evolvable<P, T> {
 

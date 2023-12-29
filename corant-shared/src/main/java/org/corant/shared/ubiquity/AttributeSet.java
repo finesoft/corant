@@ -28,7 +28,6 @@ import java.util.function.IntFunction;
  * corant-shared
  *
  * @author bingo 下午11:16:12
- *
  */
 public interface AttributeSet {
 

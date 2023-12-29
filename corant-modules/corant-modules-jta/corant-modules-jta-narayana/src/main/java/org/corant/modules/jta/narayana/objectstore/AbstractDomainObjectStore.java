@@ -31,7 +31,6 @@ import com.arjuna.ats.internal.arjuna.objectstore.jdbc.JDBCImple_driver;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午4:52:52
- *
  */
 public abstract class AbstractDomainObjectStore implements ObjectStoreAPI {
 

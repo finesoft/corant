@@ -26,7 +26,6 @@ import org.corant.modules.query.spi.QueryScriptResolver;
  * corant-modules-query-shared
  *
  * @author bingo 上午11:18:32
- *
  */
 public abstract class JavaBeanDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {

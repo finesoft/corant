@@ -23,7 +23,6 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 上午11:09:24
- *
  */
 public class HibernateOrmSessionTimeService implements HibernateSessionTimeService {
 

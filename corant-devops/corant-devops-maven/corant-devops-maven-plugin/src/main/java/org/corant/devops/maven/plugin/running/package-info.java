@@ -15,6 +15,5 @@
  * corant-devops-maven-plugin
  * 
  * @author bingo 下午3:07:06
- *
  */
 package org.corant.devops.maven.plugin.running;

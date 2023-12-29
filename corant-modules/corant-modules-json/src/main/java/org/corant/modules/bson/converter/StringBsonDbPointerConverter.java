@@ -27,7 +27,6 @@ import org.corant.shared.normal.Names;
  * corant-modules-json
  *
  * @author bingo 下午3:47:12
- *
  */
 public class StringBsonDbPointerConverter extends AbstractConverter<String, BsonDbPointer> {
 

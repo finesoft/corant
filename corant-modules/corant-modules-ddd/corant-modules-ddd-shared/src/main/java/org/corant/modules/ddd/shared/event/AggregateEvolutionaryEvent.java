@@ -24,7 +24,6 @@ import org.corant.modules.ddd.Aggregate;
  * completes (transaction commits)
  *
  * @author bingo 下午5:53:06
- *
  */
 public class AggregateEvolutionaryEvent extends AbstractEvent {
 

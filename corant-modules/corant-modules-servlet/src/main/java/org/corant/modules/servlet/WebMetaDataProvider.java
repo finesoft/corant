@@ -24,7 +24,6 @@ import org.corant.modules.servlet.metadata.WebServletMetaData;
  * corant-modules-servlet
  *
  * @author bingo 下午5:04:02
- *
  */
 public interface WebMetaDataProvider {
 

@@ -19,7 +19,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-shared
  *
  * @author bingo 下午10:57:09
- *
  */
 public interface GeneralRuntimeExceptionConverter extends Sortable {
 

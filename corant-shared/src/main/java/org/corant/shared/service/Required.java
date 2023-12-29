@@ -19,7 +19,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-shared
  *
  * @author bingo 下午2:34:19
- *
  */
 public interface Required extends Sortable {
 

@@ -45,7 +45,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-modules-json
  *
  * @author bingo 下午9:28:11
- *
  */
 public interface ASTComparisonNode extends ASTPredicateNode {
 

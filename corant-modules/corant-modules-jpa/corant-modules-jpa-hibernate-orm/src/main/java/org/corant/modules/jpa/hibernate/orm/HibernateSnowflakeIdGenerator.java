@@ -56,7 +56,6 @@ import org.hibernate.id.IdentifierGenerator;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午2:06:44
- *
  */
 public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 

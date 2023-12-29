@@ -33,7 +33,6 @@ import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午3:59:21
- *
  */
 public abstract class AbstractTypedJPARepository<T extends Entity>
     implements TypedJPARepository<T> {

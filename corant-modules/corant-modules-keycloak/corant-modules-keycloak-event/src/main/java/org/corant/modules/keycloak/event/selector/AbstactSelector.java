@@ -31,7 +31,6 @@ import com.google.common.base.Objects;
  * corant-modules-keycloak-event
  *
  * @author bingo 下午8:20:49
- *
  */
 public class AbstactSelector {
 

@@ -25,7 +25,6 @@ import java.util.function.Predicate;
  * A query properties set
  *
  * @author bingo 上午11:28:57
- *
  */
 public class Properties {
 

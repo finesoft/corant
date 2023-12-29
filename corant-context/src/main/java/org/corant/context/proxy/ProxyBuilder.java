@@ -25,7 +25,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
  * corant-context
  *
  * @author bingo 下午5:03:55
- *
  */
 public class ProxyBuilder {
 

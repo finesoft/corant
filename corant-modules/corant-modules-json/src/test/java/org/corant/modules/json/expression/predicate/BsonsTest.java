@@ -53,7 +53,6 @@ import junit.framework.TestCase;
  * corant-modules-json
  *
  * @author bingo 上午12:06:18
- *
  */
 public class BsonsTest extends TestCase {
 

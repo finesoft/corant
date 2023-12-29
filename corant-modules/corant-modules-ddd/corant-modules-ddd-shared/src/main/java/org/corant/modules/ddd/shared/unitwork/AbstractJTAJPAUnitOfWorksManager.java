@@ -36,7 +36,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * </p>
  *
  * @author bingo 下午2:14:21
- *
  */
 public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOfWorksManager {
 

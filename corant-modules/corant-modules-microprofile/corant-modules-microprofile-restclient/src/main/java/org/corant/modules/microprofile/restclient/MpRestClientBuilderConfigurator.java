@@ -20,7 +20,6 @@ import org.eclipse.microprofile.rest.client.RestClientBuilder;
  * corant-modules-microprofile-restclient
  *
  * @author bingo 上午10:21:26
- *
  */
 public interface MpRestClientBuilderConfigurator extends Sortable {
 

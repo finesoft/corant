@@ -19,7 +19,6 @@ import java.util.Collection;
  * corant-modules-security-api
  *
  * @author bingo 下午7:33:54
- *
  */
 public interface Realm {
 

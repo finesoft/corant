@@ -64,7 +64,6 @@ import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
  * FIXME relase recovery XAResources.
  *
  * @author bingo 下午7:19:18
- *
  */
 public class NarayanaExtension implements TransactionExtension {
 

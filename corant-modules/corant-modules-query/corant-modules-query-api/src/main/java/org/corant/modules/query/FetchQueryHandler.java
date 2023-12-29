@@ -24,7 +24,6 @@ import org.corant.modules.query.mapping.FetchQuery;
  * handling for fetch query.
  *
  * @author bingo 上午10:03:39
- *
  */
 public interface FetchQueryHandler {
 

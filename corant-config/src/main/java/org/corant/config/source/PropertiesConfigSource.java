@@ -29,7 +29,6 @@ import org.corant.shared.resource.Resource;
  * corant-config
  *
  * @author bingo 下午5:19:11
- *
  */
 public class PropertiesConfigSource extends AbstractCorantConfigSource {
 

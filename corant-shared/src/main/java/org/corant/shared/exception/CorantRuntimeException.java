@@ -17,7 +17,6 @@ package org.corant.shared.exception;
  * corant-shared
  *
  * @author bingo 上午10:14:58
- *
  */
 public class CorantRuntimeException extends RuntimeException {
 

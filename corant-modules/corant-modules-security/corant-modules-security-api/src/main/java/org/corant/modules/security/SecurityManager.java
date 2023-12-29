@@ -17,7 +17,6 @@ package org.corant.modules.security;
  * corant-modules-security-api
  *
  * @author bingo 下午7:35:16
- *
  */
 public interface SecurityManager extends Authenticator, Authorizer {
 

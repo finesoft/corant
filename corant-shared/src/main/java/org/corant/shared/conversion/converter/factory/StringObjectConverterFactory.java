@@ -46,7 +46,6 @@ import org.corant.shared.util.Objects;
  *
  *
  * @author bingo 上午11:38:58
- *
  */
 public class StringObjectConverterFactory implements ConverterFactory<String, Object> {
 

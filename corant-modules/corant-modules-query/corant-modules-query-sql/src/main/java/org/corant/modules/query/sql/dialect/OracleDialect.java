@@ -22,7 +22,6 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:45:24
- *
  */
 public class OracleDialect implements Dialect {
 

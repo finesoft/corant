@@ -43,7 +43,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午2:23:54
- *
  */
 public class JDBCTransactionIntegration implements TransactionIntegration {
 

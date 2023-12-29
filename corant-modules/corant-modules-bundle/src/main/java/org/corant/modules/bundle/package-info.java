@@ -15,6 +15,5 @@
  * corant-modules-bundle
  *
  * @author bingo 下午3:43:26
- *
  */
 package org.corant.modules.bundle;

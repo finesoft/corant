@@ -15,6 +15,5 @@
  * corant-modules-query-shared
  *
  * @author bingo 下午2:54:19
- *
  */
 package org.corant.modules.query.shared.dynamic.kotlin;

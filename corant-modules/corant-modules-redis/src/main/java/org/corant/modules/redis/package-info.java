@@ -17,6 +17,5 @@
  * // TODO Hasn't started yet
  *
  * @author bingo 下午2:47:45
- *
  */
 package org.corant.modules.redis;

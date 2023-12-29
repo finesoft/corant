@@ -35,7 +35,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-query-shared
  *
  * @author bingo 下午2:13:08
- *
  */
 public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedHandler {
 

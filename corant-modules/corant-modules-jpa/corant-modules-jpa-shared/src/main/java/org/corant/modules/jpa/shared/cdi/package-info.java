@@ -15,6 +15,5 @@
  * corant-modules-jpa-shared
  *
  * @author bingo 上午10:34:14
- *
  */
 package org.corant.modules.jpa.shared.cdi;

@@ -36,7 +36,6 @@ import java.util.concurrent.Executor;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午5:10:14
- *
  */
 public class WrappedConnection implements Connection {
 

@@ -35,7 +35,6 @@ import org.corant.modules.query.sql.dialect.Dialect;
  * corant-modules-query-sql
  *
  * @author bingo 下午5:33:21
- *
  */
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
 

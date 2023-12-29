@@ -23,7 +23,6 @@ import org.jboss.tm.XAResourceWrapper;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午10:17:57
- *
  */
 public class NarayanaXAResourceWrapper implements XAResourceWrapper {
 

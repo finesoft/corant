@@ -20,7 +20,6 @@ import org.corant.modules.query.mapping.Query;
  * corant-modules-query-api
  *
  * @author bingo 下午1:37:48
- *
  */
 public interface QueryProvider {
 

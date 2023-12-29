@@ -21,7 +21,6 @@ import jakarta.servlet.annotation.MultipartConfig;
  * corant-modules-servlet
  *
  * @author bingo 下午4:19:48
- *
  */
 public class MultipartConfigMetaData {
 

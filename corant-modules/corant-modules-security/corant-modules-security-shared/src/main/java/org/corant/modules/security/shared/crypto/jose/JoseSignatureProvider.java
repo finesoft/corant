@@ -20,7 +20,6 @@ import java.util.Map;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:38:16
- *
  */
 public interface JoseSignatureProvider {
 

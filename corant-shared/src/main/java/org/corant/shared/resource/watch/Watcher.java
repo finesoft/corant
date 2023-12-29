@@ -19,7 +19,6 @@ import java.io.Closeable;
  * corant-shared
  *
  * @author bingo 下午9:42:03
- *
  */
 public interface Watcher extends Runnable, Closeable {
 

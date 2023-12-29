@@ -20,7 +20,6 @@ import org.corant.modules.security.Subject;
  * corant-modules-security-shared
  *
  * @author bingo 下午4:22:33
- *
  */
 public interface IdentifiableSubject extends Subject {
 

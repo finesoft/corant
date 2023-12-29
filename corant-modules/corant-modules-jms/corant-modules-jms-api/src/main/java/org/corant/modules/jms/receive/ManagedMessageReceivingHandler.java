@@ -20,7 +20,6 @@ import jakarta.jms.Session;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:58:35
- *
  */
 public interface ManagedMessageReceivingHandler {
 

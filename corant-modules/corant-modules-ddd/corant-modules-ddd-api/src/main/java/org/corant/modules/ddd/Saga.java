@@ -20,7 +20,6 @@ import org.corant.modules.ddd.Message.MessageIdentifier;
  * corant-modules-ddd-api
  *
  * @author bingo 下午3:48:37
- *
  */
 public interface Saga extends Entity {
 

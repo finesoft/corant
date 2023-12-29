@@ -24,7 +24,6 @@ import org.corant.shared.ubiquity.AttributeSet;
  * corant-modules-security-shared
  *
  * @author bingo 下午4:22:17
- *
  */
 public class SimplePrincipal implements Principal, AttributeSet, Serializable {
 

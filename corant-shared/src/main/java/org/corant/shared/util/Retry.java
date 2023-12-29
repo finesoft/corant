@@ -30,7 +30,6 @@ import org.corant.shared.retry.SynchronousRetryer;
  * corant-shared
  *
  * @author bingo 10:02:42
- *
  */
 public class Retry {
 

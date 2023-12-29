@@ -15,6 +15,5 @@
  * corant-modules-cloud-tencent
  * 
  * @author bingo 上午9:58:08
- *
  */
 package org.corant.modules.cloud.tencent.wechat.oauth;

@@ -23,7 +23,6 @@ package org.corant.modules.security.shared.crypto.jose.algorithm;
  * to determine who created the JWT.
  *
  * @author bingo 下午3:09:01
- *
  */
 public enum SignatureAlgorithm {
 

@@ -22,7 +22,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午8:03:08
- *
  */
 public class IterablesTest extends TestCase {
 

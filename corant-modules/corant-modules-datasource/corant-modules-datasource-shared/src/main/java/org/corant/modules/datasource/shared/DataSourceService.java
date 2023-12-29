@@ -23,7 +23,6 @@ import javax.sql.DataSource;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午2:43:11
- *
  */
 public interface DataSourceService {
 

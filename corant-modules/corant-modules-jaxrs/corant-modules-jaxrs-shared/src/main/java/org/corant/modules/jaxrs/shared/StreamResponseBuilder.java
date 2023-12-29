@@ -38,7 +38,6 @@ import org.corant.shared.util.FileUtils;
  * corant-modules-jaxrs-shared
  *
  * @author bingo 上午11:44:46
- *
  */
 public class StreamResponseBuilder {
 

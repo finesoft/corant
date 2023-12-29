@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 上午11:53:55
- *
  */
 package org.corant.context.qualifier;

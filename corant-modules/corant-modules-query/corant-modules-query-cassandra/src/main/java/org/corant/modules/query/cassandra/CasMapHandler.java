@@ -32,7 +32,6 @@ import com.google.common.reflect.TypeToken;
  * corant-modules-query-cassandra
  *
  * @author bingo 上午11:40:06
- *
  */
 public class CasMapHandler {
 

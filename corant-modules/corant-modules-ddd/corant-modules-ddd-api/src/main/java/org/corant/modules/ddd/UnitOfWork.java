@@ -27,7 +27,6 @@ package org.corant.modules.ddd;
  * @see Message
  *
  * @author bingo 下午3:02:04
- *
  */
 public interface UnitOfWork {
 

@@ -22,7 +22,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午5:23:17
- *
  */
 public class StringBooleanConverter extends AbstractConverter<String, Boolean> {
 

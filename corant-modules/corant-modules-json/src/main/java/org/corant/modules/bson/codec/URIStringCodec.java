@@ -26,7 +26,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午10:59:01
- *
  */
 public class URIStringCodec implements Codec<URI> {
   @Override

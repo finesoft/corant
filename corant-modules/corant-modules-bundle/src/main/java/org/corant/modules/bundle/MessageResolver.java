@@ -25,7 +25,6 @@ import org.corant.shared.normal.Names;
  * of such messages.
  *
  * @author bingo 下午9:28:49
- *
  */
 public interface MessageResolver extends AutoCloseable {
 

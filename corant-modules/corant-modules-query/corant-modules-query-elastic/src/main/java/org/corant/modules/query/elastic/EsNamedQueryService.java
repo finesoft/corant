@@ -26,7 +26,6 @@ import org.elasticsearch.common.unit.TimeValue;
  * set returned by select exceeds the limit, no throws' exception.
  *
  * @author bingo 下午3:07:55
- *
  */
 public interface EsNamedQueryService extends FetchableNamedQueryService {
 

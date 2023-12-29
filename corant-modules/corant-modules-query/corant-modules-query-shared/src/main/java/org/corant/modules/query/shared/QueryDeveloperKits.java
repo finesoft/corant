@@ -44,7 +44,6 @@ import freemarker.template.TemplateException;
  * corant-modules-query-shared
  *
  * @author bingo 下午3:16:46
- *
  */
 public class QueryDeveloperKits {
 

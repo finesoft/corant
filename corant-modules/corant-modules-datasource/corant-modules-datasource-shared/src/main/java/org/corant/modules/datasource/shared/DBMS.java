@@ -17,7 +17,6 @@ package org.corant.modules.datasource.shared;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午11:28:20
- *
  */
 public enum DBMS {
 

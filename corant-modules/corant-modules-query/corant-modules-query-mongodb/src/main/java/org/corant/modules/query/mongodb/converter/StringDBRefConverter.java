@@ -28,7 +28,6 @@ import com.mongodb.DBRef;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午3:56:35
- *
  */
 public class StringDBRefConverter extends AbstractConverter<String, DBRef> {
 

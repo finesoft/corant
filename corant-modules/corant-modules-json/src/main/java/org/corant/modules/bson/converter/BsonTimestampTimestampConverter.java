@@ -27,7 +27,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * corant-modules-json
  *
  * @author bingo 上午10:14:32
- *
  */
 public class BsonTimestampTimestampConverter extends AbstractConverter<BsonTimestamp, Timestamp>
     implements Codec<Timestamp> {

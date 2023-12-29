@@ -21,7 +21,6 @@ import java.util.Map;
  * corant-config
  *
  * @author bingo 下午3:33:36
- *
  */
 public interface JsonConfigSourceResolver {
 

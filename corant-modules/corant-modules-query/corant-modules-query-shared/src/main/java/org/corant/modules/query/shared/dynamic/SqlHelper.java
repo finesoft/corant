@@ -36,7 +36,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * me(finesoft@gmail.com).
  *
  * @author bingo 上午11:04:34
- *
  */
 public class SqlHelper {
 

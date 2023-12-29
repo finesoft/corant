@@ -28,7 +28,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-servlet
  *
  * @author bingo 上午10:31:24
- *
  */
 public class WebFilterMetaData {
 

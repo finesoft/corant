@@ -25,7 +25,6 @@ import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午2:05:36
- *
  */
 public class HibernateMySQLDialect extends MySQLDialect {
 

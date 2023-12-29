@@ -85,7 +85,6 @@ import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
  *
  *
  * @author bingo 下午4:12:15
- *
  */
 public class ArtemisJMSExtension extends AbstractJMSExtension {
 

@@ -28,7 +28,6 @@ import java.util.function.Supplier;
  * corant-shared
  *
  * @author bingo 下午2:51:22
- *
  */
 public class Functions {
 

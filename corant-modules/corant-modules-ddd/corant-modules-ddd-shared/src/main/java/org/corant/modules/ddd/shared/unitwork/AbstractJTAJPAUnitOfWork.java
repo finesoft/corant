@@ -42,7 +42,6 @@ import org.corant.shared.ubiquity.Mutable.MutableBoolean;
  * </p>
  *
  * @author bingo 上午11:38:39
- *
  */
 public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     implements Synchronization {

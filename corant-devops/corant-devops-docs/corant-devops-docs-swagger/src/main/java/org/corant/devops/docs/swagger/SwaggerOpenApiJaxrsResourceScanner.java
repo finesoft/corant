@@ -23,7 +23,6 @@ import io.swagger.v3.jaxrs2.integration.JaxrsApplicationAndAnnotationScanner;
  * corant-devops-docs-swagger
  *
  * @author bingo 下午4:48:20
- *
  */
 public class SwaggerOpenApiJaxrsResourceScanner extends JaxrsApplicationAndAnnotationScanner {
 

@@ -26,7 +26,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午10:51:39
- *
  */
 public class BigDecimalDocumentCodec implements Codec<BigDecimal> {
 

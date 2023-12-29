@@ -34,7 +34,6 @@ import org.corant.shared.util.Services;
  * corant-modules-jaxrs-shared
  *
  * @author bingo 下午4:25:16
- *
  */
 public class JaxrsExtension implements Extension {
 

@@ -44,7 +44,6 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
  * corant-modules-mongodb
  *
  * @author bingo 下午7:18:23
- *
  */
 public class Mongos {
 

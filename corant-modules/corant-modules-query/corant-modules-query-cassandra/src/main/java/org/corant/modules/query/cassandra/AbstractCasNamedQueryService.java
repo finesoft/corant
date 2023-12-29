@@ -30,7 +30,6 @@ import org.corant.modules.query.shared.AbstractNamedQueryService;
  * corant-modules-query-cassandra
  *
  * @author bingo 下午5:33:21
- *
  */
 public abstract class AbstractCasNamedQueryService extends AbstractNamedQueryService {
 

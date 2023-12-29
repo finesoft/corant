@@ -21,7 +21,6 @@ import java.util.logging.Logger;
  * corant-shared
  *
  * @author bingo 14:59:57
- *
  */
 public class Chars {
 

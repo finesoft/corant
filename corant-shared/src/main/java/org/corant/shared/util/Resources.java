@@ -38,7 +38,6 @@ import org.corant.shared.resource.URLResource;
  * corant-shared
  *
  * @author bingo 下午1:16:04
- *
  */
 public class Resources {
 

@@ -28,7 +28,6 @@ import org.corant.modules.datasource.shared.util.DbUtilQueryRunner;
  * corant-modules-query-sql
  *
  * @author bingo 下午1:21:08
- *
  */
 public class DefaultQueryRunner extends DbUtilQueryRunner {
 

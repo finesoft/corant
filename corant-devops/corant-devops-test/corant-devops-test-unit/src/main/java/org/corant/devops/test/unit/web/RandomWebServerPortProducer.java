@@ -22,7 +22,6 @@ import org.corant.shared.util.Randoms;
  * corant-devops-test-unit
  *
  * @author bingo 下午7:13:27
- *
  */
 public class RandomWebServerPortProducer {
 

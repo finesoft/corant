@@ -36,7 +36,6 @@ import org.corant.modules.jta.shared.TransactionService;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午5:45:13
- *
  */
 public class ExtendedEntityManager implements EntityManager {
 

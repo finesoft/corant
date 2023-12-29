@@ -30,7 +30,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * </p>
  *
  * @author bingo 上午11:38:39
- *
  */
 public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
 

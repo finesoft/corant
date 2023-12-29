@@ -19,7 +19,6 @@ import java.time.Duration;
  * corant-modules-query-api
  *
  * @author bingo 下午4:06:43
- *
  */
 public interface QuerierConfig {
 

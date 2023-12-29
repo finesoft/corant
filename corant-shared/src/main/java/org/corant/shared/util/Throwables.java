@@ -32,7 +32,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午6:01:18
- *
  */
 public class Throwables {
 

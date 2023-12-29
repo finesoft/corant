@@ -15,6 +15,5 @@
  * corant-modules-mvc
  *
  * @author bingo 下午1:57:42
- *
  */
 package org.corant.modules.mvc;

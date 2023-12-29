@@ -25,7 +25,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-shared
  *
  * @author bingo 下午10:26:47
- *
  */
 public interface Futures {
 

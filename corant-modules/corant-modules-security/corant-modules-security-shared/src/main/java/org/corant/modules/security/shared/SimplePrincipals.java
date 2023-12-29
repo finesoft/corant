@@ -27,7 +27,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-security-shared
  *
  * @author bingo 下午4:22:22
- *
  */
 public class SimplePrincipals implements Iterable<SimplePrincipal>, Serializable {
 

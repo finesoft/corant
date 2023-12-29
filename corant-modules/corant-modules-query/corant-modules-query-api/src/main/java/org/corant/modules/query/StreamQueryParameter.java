@@ -33,7 +33,6 @@ import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
  * mechanism for batch query.
  *
  * @author bingo 下午3:14:48
- *
  */
 public class StreamQueryParameter extends DefaultQueryParameter {
 

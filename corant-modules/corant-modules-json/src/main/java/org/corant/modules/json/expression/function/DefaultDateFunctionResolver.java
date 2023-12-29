@@ -28,7 +28,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-modules-json
  *
  * @author bingo 下午3:29:37
- *
  */
 public class DefaultDateFunctionResolver implements FunctionResolver {
 

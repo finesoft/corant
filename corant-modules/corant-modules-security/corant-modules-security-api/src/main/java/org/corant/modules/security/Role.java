@@ -19,7 +19,6 @@ import java.io.Serializable;
  * corant-modules-security-api
  *
  * @author bingo 下午7:24:11
- *
  */
 public interface Role extends Serializable {
 

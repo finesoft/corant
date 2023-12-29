@@ -27,7 +27,6 @@ import org.corant.shared.util.Services;
  * corant-modules-websocket
  *
  * @author bingo 下午3:01:58
- *
  */
 public class WebSocketExtension implements Extension {
 

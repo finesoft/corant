@@ -23,7 +23,6 @@ import jakarta.servlet.annotation.ServletSecurity;
  * corant-modules-servlet
  *
  * @author bingo 上午10:58:19
- *
  */
 public class ServletSecurityMetaData {
 

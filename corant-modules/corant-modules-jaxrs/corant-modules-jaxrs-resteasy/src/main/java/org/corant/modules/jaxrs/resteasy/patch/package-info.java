@@ -15,6 +15,5 @@
  * corant-modules-jaxrs-resteasy
  * 
  * @author bingo 上午11:06:50
- *
  */
 package org.corant.modules.jaxrs.resteasy.patch;

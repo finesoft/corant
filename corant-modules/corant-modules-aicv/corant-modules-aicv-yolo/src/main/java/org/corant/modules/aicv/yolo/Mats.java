@@ -32,7 +32,6 @@ import com.carrotsearch.hppc.FloatArrayList;
  * corant-modules-aicv-yolo
  *
  * @author bingo 下午2:25:44
- *
  */
 public class Mats {
 

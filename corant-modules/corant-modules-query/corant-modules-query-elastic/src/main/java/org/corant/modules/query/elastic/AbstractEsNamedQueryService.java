@@ -33,7 +33,6 @@ import org.elasticsearch.common.unit.TimeValue;
  * corant-modules-query-elastic
  *
  * @author bingo 下午8:20:43
- *
  */
 public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryService
     implements EsNamedQueryService {

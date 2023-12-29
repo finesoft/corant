@@ -42,7 +42,6 @@ import nu.pattern.OpenCV;
  * corant-modules-aicv-yolo
  *
  * @author bingo 下午12:04:28
- *
  */
 public class TestSwing {
   static {

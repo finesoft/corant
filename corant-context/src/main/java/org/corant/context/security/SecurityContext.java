@@ -24,7 +24,6 @@ import java.util.Set;
  * Implementers are recommended to implement this interface as immutable objects.
  *
  * @author bingo 下午5:20:40
- *
  */
 public interface SecurityContext extends Serializable {
 

@@ -17,6 +17,5 @@
  * // TODO Hasn't started yet
  *
  * @author bingo 下午2:46:59
- *
  */
 package org.corant.modules.query.jpql;

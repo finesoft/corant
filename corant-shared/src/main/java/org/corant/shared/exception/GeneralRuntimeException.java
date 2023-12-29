@@ -42,7 +42,6 @@ import org.corant.shared.util.Objects;
  * @see GeneralRuntimeExceptionWrapper
  *
  * @author bingo 下午6:19:52
- *
  */
 public class GeneralRuntimeException extends CorantRuntimeException {
 

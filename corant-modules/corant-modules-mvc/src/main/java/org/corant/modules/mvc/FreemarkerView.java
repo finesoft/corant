@@ -19,7 +19,6 @@ import org.jboss.resteasy.plugins.providers.html.View;
  * corant-modules-mvc
  *
  * @author bingo 下午2:36:53
- *
  */
 public class FreemarkerView extends View {
 

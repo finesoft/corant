@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 上午11:49:51
- *
  */
 package org.corant.context.naming;

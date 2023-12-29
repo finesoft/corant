@@ -23,7 +23,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-ddd-api
  *
  * @author bingo 上午11:58:12
- *
  */
 public final class DefaultAggregateIdentifier implements AggregateIdentifier {
 

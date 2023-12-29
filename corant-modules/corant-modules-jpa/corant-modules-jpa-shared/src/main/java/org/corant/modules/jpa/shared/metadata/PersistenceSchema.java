@@ -30,7 +30,6 @@ import org.xml.sax.SAXException;
  * corant-modules-jpa-shared
  *
  * @author bingo 上午11:48:32
- *
  */
 public enum PersistenceSchema {
 

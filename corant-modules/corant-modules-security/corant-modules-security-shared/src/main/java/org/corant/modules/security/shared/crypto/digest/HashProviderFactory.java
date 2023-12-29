@@ -19,7 +19,6 @@ import org.corant.modules.security.shared.crypto.Providers;
  * corant-modules-security-shared
  *
  * @author bingo 下午9:38:26
- *
  */
 public enum HashProviderFactory {
 

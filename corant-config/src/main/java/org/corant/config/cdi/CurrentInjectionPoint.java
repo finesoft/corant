@@ -23,6 +23,11 @@ import jakarta.enterprise.inject.spi.Annotated;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 
+/**
+ * corant-config
+ *
+ * @author bingo 10:42:05
+ */
 public class CurrentInjectionPoint implements InjectionPoint {
 
   static final Set<Annotation> qualifiers = Collections.singleton(Default.Literal.INSTANCE);

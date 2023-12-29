@@ -22,7 +22,6 @@ import java.util.Optional;
  * corant-shared
  *
  * @author bingo 下午5:40:35
- *
  */
 public class StringLocalTimeConverter extends AbstractTemporalConverter<String, LocalTime> {
 

@@ -26,7 +26,6 @@ import org.corant.modules.query.spi.ResultHintHandler;
  * provide processing of the query result set.
  *
  * @author bingo 下午4:56:52
- *
  */
 public interface QueryHandler {
 

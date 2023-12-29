@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.Tuple;
  * corant-shared
  *
  * @author bingo 上午12:30:19
- *
  */
 public class Empties {
 

@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
  * corant-config
  *
  * @author bingo 11:32:23
- *
  */
 public class ConfigMetaField {
 

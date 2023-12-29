@@ -15,6 +15,5 @@
  * corant-kernel
  *
  * @author bingo 下午4:42:05
- *
  */
 package org.corant.kernel.event;

@@ -36,7 +36,6 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午6:37:17
- *
  */
 public class ExtendedHibernateOgmPersistenceProvider extends HibernateOgmPersistence {
 

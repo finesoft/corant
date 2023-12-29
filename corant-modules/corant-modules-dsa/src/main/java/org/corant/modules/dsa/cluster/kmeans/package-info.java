@@ -15,6 +15,5 @@
  * corant-modules-dsa
  *
  * @author bingo 下午1:29:09
- *
  */
 package org.corant.modules.dsa.cluster.kmeans;

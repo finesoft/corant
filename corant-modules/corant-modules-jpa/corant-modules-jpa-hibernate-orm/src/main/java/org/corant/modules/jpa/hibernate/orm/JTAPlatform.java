@@ -22,7 +22,6 @@ import jakarta.transaction.UserTransaction;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午6:49:00
- *
  */
 public class JTAPlatform extends AbstractJtaPlatform {
 

@@ -44,7 +44,6 @@ import org.corant.shared.util.Streams;
  * INFORM ME(finesoft@gmail.com). </b>
  *
  * @author bingo 下午5:24:41
- *
  */
 public abstract class ThresholdingOutputStream extends OutputStream {
 

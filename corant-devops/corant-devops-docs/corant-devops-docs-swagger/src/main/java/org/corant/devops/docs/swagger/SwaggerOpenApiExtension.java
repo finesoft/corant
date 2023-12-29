@@ -36,7 +36,6 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
  * corant-devops-docs-swagger
  *
  * @author bingo 下午3:18:03
- *
  */
 public class SwaggerOpenApiExtension implements Extension {
 

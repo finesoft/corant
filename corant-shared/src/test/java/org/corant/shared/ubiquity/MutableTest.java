@@ -36,7 +36,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午11:47:34
- *
  */
 public class MutableTest extends TestCase {
 

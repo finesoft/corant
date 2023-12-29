@@ -20,7 +20,6 @@ import org.elasticsearch.common.settings.Settings.Builder;
  * corant-modules-elastic-data
  *
  * @author bingo 上午10:32:22
- *
  */
 public interface ElasticConfigurator extends Sortable {
 

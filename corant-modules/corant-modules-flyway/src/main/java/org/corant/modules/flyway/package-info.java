@@ -15,6 +15,5 @@
  * corant-modules-flyway
  *
  * @author bingo 下午7:49:21
- *
  */
 package org.corant.modules.flyway;

@@ -19,7 +19,6 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * corant-modules-query-cassandra
  *
  * @author bingo 下午11:00:41
- *
  */
 public interface CasNamedQuerier extends DynamicQuerier<Object[], String> {
 }

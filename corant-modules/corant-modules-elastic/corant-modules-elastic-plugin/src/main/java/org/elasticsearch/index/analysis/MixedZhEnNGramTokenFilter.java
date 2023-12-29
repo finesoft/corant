@@ -30,7 +30,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
  * Adjust NGram algorithm and add parameters of mixed Chinese and English slices
  *
  * @author bingo 下午11:17:24
- *
  */
 public class MixedZhEnNGramTokenFilter extends TokenFilter {
 

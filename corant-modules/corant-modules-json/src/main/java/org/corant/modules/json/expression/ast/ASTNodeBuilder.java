@@ -19,7 +19,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-json
  *
  * @author bingo 上午10:13:20
- *
  */
 public interface ASTNodeBuilder extends Sortable {
 

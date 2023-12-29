@@ -25,7 +25,6 @@ import java.util.Map;
  * corant-modules-query-api
  *
  * @author bingo 下午9:16:07
- *
  */
 public interface QueryParameter extends Serializable {
 

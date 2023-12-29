@@ -15,6 +15,5 @@
  * corant-modules-datasource-hikari
  *
  * @author bingo 下午7:07:28
- *
  */
 package org.corant.modules.datasource.hikari;

@@ -15,6 +15,5 @@
  * corant-modules-ddd-api
  *
  * @author bingo 下午3:38:59
- *
  */
 package org.corant.modules.ddd.annotation;

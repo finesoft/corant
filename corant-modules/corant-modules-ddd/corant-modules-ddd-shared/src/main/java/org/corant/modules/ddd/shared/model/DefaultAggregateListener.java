@@ -39,7 +39,6 @@ import org.corant.modules.jta.shared.TransactionService;
  * <p>
  *
  * @author bingo 下午3:35:44
- *
  */
 public class DefaultAggregateListener {
 

@@ -21,7 +21,6 @@ import org.corant.modules.security.Role;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:41:08
- *
  */
 public interface IdentifiableRole extends Role {
 

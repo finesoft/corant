@@ -17,7 +17,6 @@ package org.corant.modules.elastic.data;
  * corant-modules-elastic-data
  *
  * @author bingo 下午3:22:56
- *
  */
 public interface Elastic6Constants {
 

@@ -15,6 +15,5 @@
  * corant-shared
  *
  * @author bingo 上午11:48:16
- *
  */
 package org.corant.shared.util;

@@ -40,7 +40,6 @@ import com.arjuna.ats.jta.common.JTAEnvironmentBean;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午7:47:50
- *
  */
 public class NarayanaTransactionServices implements TransactionServices {
 

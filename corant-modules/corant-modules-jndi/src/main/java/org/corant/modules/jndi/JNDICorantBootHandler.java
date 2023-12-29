@@ -20,7 +20,6 @@ import org.corant.kernel.spi.CorantBootHandler;
  * corant-modules-jndi
  *
  * @author bingo 下午2:35:41
- *
  */
 public class JNDICorantBootHandler implements CorantBootHandler {
   @Override

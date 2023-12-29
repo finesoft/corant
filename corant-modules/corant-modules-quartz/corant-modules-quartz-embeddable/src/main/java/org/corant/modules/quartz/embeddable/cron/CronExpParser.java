@@ -19,7 +19,6 @@ import org.corant.modules.quartz.embeddable.Schedule;
  * corant-modules-quartz-embeddable
  *
  * @author bingo 下午2:37:14
- *
  */
 public class CronExpParser {
 

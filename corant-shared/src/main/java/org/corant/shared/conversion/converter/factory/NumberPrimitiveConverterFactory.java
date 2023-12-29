@@ -23,7 +23,6 @@ import org.corant.shared.conversion.ConverterFactory;
  * corant-shared
  *
  * @author bingo 下午8:01:05
- *
  */
 public class NumberPrimitiveConverterFactory implements ConverterFactory<Number, Object> {
 

@@ -43,7 +43,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午4:06:33
- *
  */
 public class PersistencePropertiesParser {
 

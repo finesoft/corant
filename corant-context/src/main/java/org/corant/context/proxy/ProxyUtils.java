@@ -42,7 +42,6 @@ import org.corant.shared.util.Classes;
  * corant-context
  *
  * @author bingo 下午10:09:48
- *
  */
 public class ProxyUtils {
 

@@ -21,7 +21,6 @@ import org.jboss.weld.environment.se.Weld;
  * corant-context
  *
  * @author bingo 下午12:05:31
- *
  */
 public class ContainerConfigurator implements Configurator {
 

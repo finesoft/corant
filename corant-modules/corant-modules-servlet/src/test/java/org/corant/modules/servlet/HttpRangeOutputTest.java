@@ -33,7 +33,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 上午11:13:03
- *
  */
 public class HttpRangeOutputTest extends TestCase {
 

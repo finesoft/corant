@@ -43,7 +43,6 @@ import org.corant.shared.ubiquity.TypeLiteral;
  * Extracted from google gson.
  *
  * Static methods for working with types.
- *
  */
 public class Types {
 

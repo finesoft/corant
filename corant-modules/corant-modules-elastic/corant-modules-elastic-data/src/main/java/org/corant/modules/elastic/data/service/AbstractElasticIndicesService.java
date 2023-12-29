@@ -28,7 +28,6 @@ import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
  * corant-modules-elastic-data
  *
  * @author bingo 下午6:36:42
- *
  */
 public abstract class AbstractElasticIndicesService implements ElasticIndicesService {
 

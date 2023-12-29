@@ -25,7 +25,6 @@ import org.bson.types.Decimal128;
  * corant-modules-json
  *
  * @author bingo 下午12:10:28
- *
  */
 public class BigIntegerCodec implements Codec<BigInteger> {
 

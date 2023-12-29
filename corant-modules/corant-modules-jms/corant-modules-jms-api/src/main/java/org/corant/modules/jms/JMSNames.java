@@ -17,7 +17,6 @@ package org.corant.modules.jms;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:28:21
- *
  */
 public interface JMSNames {
   String SECURITY_CONTEXT_PROPERTY_NAME = "__CORANT_SECURITY_CONTEXT__";

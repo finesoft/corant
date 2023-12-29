@@ -39,7 +39,6 @@ import com.arjuna.ats.internal.arjuna.common.UidHelper;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午11:00:15
- *
  */
 public abstract class AbstractDomainJDBCDriver
     extends com.arjuna.ats.internal.arjuna.objectstore.jdbc.JDBCImple_driver {

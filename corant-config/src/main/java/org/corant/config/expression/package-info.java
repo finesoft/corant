@@ -15,6 +15,5 @@
  * corant-config
  *
  * @author bingo 下午6:07:56
- *
  */
 package org.corant.config.expression;

@@ -27,7 +27,6 @@ import org.corant.modules.query.shared.DefaultQuerierConfig;
  * corant-modules-query-shared
  *
  * @author bingo 下午4:37:30
- *
  */
 public interface DynamicQuerier<P, S> extends NamedQuerier {
 

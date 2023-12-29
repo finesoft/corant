@@ -19,7 +19,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-api
  *
  * @author bingo 下午11:58:04
- *
  */
 public interface AuthorizerCallback extends Sortable {
   /**

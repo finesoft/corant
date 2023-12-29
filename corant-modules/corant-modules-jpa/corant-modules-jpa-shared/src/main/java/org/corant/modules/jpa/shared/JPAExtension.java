@@ -65,7 +65,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * TODO: Check persistence unit data source availability AfterDeploymentValidation.
  *
  * @author bingo 上午11:32:56
- *
  */
 public class JPAExtension implements Extension {
 

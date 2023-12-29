@@ -17,7 +17,6 @@ package org.corant.devops.maven.plugin;
  * corant-devops-maven-plugin
  *
  * @author bingo 上午11:23:48
- *
  */
 public class BuildStageException extends RuntimeException {
 

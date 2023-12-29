@@ -33,7 +33,6 @@ import org.jose4j.lang.JoseException;
  * corant-modules-security-shared
  *
  * @author bingo 下午2:47:00
- *
  */
 public class DefaultJoseSignatureProvider implements JoseSignatureProvider {
 

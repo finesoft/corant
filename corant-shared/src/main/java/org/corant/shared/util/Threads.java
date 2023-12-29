@@ -38,7 +38,6 @@ import org.corant.shared.ubiquity.Throwing.ThrowingRunnable;
  * corant-shared
  *
  * @author bingo 下午2:55:59
- *
  */
 public class Threads {
 

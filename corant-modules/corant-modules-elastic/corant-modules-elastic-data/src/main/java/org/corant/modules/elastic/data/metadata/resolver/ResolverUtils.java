@@ -54,7 +54,6 @@ import org.corant.shared.util.Types;
  * corant-modules-elastic-data
  *
  * @author bingo 下午2:19:52
- *
  */
 public class ResolverUtils {
 

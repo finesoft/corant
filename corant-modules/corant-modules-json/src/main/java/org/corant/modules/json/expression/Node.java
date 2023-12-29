@@ -19,7 +19,6 @@ import java.util.List;
  * corant-modules-json
  *
  * @author bingo 下午2:23:27
- *
  */
 public interface Node<T> {
 

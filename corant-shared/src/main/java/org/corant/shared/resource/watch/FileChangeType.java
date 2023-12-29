@@ -17,7 +17,6 @@ package org.corant.shared.resource.watch;
  * corant-shared
  *
  * @author bingo 下午10:34:11
- *
  */
 public enum FileChangeType {
   CREATE, MODIFY, DELETE, UNKNOWN

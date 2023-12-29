@@ -42,7 +42,6 @@ import org.corant.shared.util.PathMatcher.GlobPatterns;
  * corant-shared
  *
  * @author bingo 上午12:31:35
- *
  */
 public class Strings {
 

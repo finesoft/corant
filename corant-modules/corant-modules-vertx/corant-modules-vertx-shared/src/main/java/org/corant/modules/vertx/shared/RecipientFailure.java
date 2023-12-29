@@ -17,7 +17,6 @@ package org.corant.modules.vertx.shared;
  * corant-modules-vertx-shared
  *
  * @author bingo 上午12:03:11
- *
  */
 public class RecipientFailure extends RuntimeException {
 

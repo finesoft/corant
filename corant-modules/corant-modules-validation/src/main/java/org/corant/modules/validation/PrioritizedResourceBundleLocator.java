@@ -31,7 +31,6 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
  * @see PropertyResourceBundle
  *
  * @author bingo 上午11:23:30
- *
  */
 public class PrioritizedResourceBundleLocator implements ResourceBundleLocator {
 

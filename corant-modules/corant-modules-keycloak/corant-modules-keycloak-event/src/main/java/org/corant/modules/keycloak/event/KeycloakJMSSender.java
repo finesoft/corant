@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午11:34:49
- *
  */
 public class KeycloakJMSSender {
 

@@ -19,7 +19,6 @@ import java.io.Serializable;
  * corant-modules-security-api
  *
  * @author bingo 下午7:24:54
- *
  */
 public interface Permission extends Serializable {
 

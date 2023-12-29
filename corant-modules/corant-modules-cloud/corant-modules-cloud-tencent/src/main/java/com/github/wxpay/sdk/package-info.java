@@ -15,6 +15,5 @@
  *
  *
  * @author bingo 上午10:58:54
- *
  */
 package com.github.wxpay.sdk;

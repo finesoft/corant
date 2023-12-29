@@ -28,7 +28,6 @@ import org.corant.shared.util.Systems;
  * Describe class path resource include class resource.
  *
  * @author bingo 下午2:04:58
- *
  */
 public class ClassPathResource extends URLResource {
 

@@ -24,7 +24,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:15:00
- *
  */
 public class OffsetTimeStringCodec implements Codec<OffsetTime> {
 

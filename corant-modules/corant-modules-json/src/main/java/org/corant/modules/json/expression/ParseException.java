@@ -19,7 +19,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-json
  *
  * @author bingo 下午3:17:54
- *
  */
 public class ParseException extends CorantRuntimeException {
 

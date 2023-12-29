@@ -37,7 +37,6 @@ import org.jboss.weld.environment.se.contexts.ThreadScoped;
  * supported.
  *
  * @author bingo 下午5:29:56
- *
  */
 public interface ComponentManager<N, C> extends Serializable {
 

@@ -19,7 +19,6 @@ import jakarta.jms.JMSException;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:56:21
- *
  */
 public interface ManagedMessageReceiver {
 

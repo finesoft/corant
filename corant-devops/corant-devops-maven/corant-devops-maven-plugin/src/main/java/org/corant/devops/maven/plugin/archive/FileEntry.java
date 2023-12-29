@@ -27,7 +27,6 @@ import org.corant.devops.maven.plugin.archive.Archive.Entry;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午3:43:43
- *
  */
 public class FileEntry implements Entry {
 

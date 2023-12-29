@@ -20,7 +20,6 @@ import org.jboss.weld.security.spi.SecurityServices;
  * corant-context
  *
  * @author bingo 下午3:24:05
- *
  */
 public class WeldSecurityServices implements SecurityServices {
 

@@ -15,6 +15,5 @@
  * corant-modules-query-shared
  *
  * @author bingo 下午2:40:26
- *
  */
 package org.corant.modules.query.shared.cdi;

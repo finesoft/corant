@@ -22,7 +22,6 @@ package org.corant.context.command;
  * {@code JSR 303}.
  *
  * @author bingo 下午9:54:06
- *
  */
 public interface CommandValidator {
 

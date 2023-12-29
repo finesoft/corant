@@ -25,7 +25,6 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
  * corant-devops-test-unit
  *
  * @author bingo 上午11:32:33
- *
  */
 public class AddiConfigPropertyProvider implements ConfigSourceProvider {
 

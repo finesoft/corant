@@ -26,7 +26,6 @@ import org.corant.shared.util.Bytes;
  * corant-shared
  *
  * @author bingo 下午2:51:15
- *
  */
 public class PrimitiveByteArrayConverterFactory implements ConverterFactory<Object, byte[]> {
 

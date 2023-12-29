@@ -22,7 +22,6 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
  * corant-context
  *
  * @author bingo 下午7:15:41
- *
  */
 public class ResourceReferences {
 

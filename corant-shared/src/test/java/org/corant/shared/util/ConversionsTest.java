@@ -72,7 +72,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午8:17:00
- *
  */
 public class ConversionsTest extends TestCase {
 

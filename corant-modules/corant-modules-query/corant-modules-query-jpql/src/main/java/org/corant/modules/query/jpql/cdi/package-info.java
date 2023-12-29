@@ -15,6 +15,5 @@
  * corant-modules-query-jpql
  *
  * @author bingo 上午11:58:54
- *
  */
 package org.corant.modules.query.jpql.cdi;

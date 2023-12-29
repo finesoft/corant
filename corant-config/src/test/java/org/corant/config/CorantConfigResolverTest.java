@@ -24,7 +24,6 @@ import junit.framework.TestCase;
  * Use Microprofile-config TCK testing
  *
  * @author bingo 下午5:43:22
- *
  */
 public class CorantConfigResolverTest extends TestCase {
 

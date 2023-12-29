@@ -25,7 +25,6 @@ import com.arjuna.ats.arjuna.logging.tsLogger;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午4:52:52
- *
  */
 public class DomainDataSourceStore extends AbstractDomainObjectStore {
 

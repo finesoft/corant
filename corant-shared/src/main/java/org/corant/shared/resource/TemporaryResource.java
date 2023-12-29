@@ -38,7 +38,6 @@ import org.corant.shared.util.Systems;
  * Note: Some codes come from GIXON.COM
  *
  * @author bingo 下午5:27:33
- *
  */
 public class TemporaryResource implements WritableResource {
 

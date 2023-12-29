@@ -36,7 +36,6 @@ import org.corant.shared.util.PathMatcher.RegexMatcher;
  * corant-shared
  *
  * @author bingo 下午4:24:14
- *
  */
 public class FileSystemResourceLoader implements ResourceLoader {
 

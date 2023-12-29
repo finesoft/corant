@@ -33,7 +33,6 @@ import org.corant.shared.conversion.converter.AbstractTemporalConverter;
  * corant-shared
  *
  * @author bingo 上午10:59:48
- *
  */
 public class DateTemporalConverterFactory implements ConverterFactory<Date, Temporal> {
 

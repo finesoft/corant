@@ -15,6 +15,5 @@
  * corant-modules-query-sql
  *
  * @author bingo 下午6:04:11
- *
  */
 package org.corant.modules.query.sql.cdi;

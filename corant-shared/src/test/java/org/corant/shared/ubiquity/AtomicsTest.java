@@ -25,7 +25,6 @@ import org.junit.Test;
  * corant-shared
  *
  * @author bingo 下午8:37:11
- *
  */
 public class AtomicsTest {
 

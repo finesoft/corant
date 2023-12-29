@@ -28,7 +28,6 @@ import org.elasticsearch.common.unit.TimeValue;
  * corant-modules-query-elastic
  *
  * @author bingo 下午7:58:37
- *
  */
 public class DefaultEsQueryExecutor implements EsQueryExecutor {
 

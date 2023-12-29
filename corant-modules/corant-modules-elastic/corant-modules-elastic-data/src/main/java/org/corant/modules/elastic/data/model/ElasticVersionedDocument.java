@@ -17,7 +17,6 @@ package org.corant.modules.elastic.data.model;
  * corant-modules-elastic-data
  *
  * @author bingo 下午2:52:28
- *
  */
 public interface ElasticVersionedDocument extends ElasticDocument {
 

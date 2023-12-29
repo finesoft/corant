@@ -23,7 +23,6 @@ import org.junit.runners.model.Statement;
  * corant-devops-test-unit
  *
  * @author bingo 下午5:42:55
- *
  */
 public class CorantJUnit4ClassRunner extends BlockJUnit4ClassRunner implements CorantJunit4Runner {
 

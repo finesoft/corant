@@ -25,7 +25,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
  * corant-modules-query-jpql
  *
  * @author bingo 下午4:35:55
- *
  */
 public class DefaultJpqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
     implements JpqlNamedQuerier {

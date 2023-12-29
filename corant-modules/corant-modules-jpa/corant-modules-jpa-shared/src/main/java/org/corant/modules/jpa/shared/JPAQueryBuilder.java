@@ -27,7 +27,6 @@ import jakarta.persistence.Query;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午9:43:04
- *
  */
 public abstract class JPAQueryBuilder {
 

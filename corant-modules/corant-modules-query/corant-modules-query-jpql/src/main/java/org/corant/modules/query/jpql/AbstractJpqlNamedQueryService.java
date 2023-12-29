@@ -40,7 +40,6 @@ import jakarta.persistence.SynchronizationType;
  * corant-modules-query-jpql
  *
  * @author bingo 下午5:33:21
- *
  */
 public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQueryService {
 

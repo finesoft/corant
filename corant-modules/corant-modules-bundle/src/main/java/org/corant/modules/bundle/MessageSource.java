@@ -26,7 +26,6 @@ import org.corant.shared.ubiquity.Sortable;
  * Interface used to retrieve messages, support for the internationalization of such messages.
  *
  * @author bingo 下午3:45:34
- *
  */
 public interface MessageSource extends Sortable, AutoCloseable {
 

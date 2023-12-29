@@ -52,7 +52,6 @@ import org.corant.shared.retry.BackoffStrategy;
  * @see <a href="https://developer.jboss.org/thread/274469">Narayana Commit Order</a>
  *
  * @author bingo 上午11:33:15
- *
  */
 public class DefaultMessageReceivingTask
     implements ManagedMessageReceivingTask, MessageReceivingMediator {

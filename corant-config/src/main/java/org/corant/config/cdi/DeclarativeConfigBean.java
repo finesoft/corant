@@ -17,14 +17,19 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
+import org.corant.config.declarative.DeclarativeConfigKey;
+import org.corant.config.declarative.DeclarativeConfigKey.DeclarativeConfigKeyLiteral;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.declarative.DeclarativeConfigKey;
-import org.corant.config.declarative.DeclarativeConfigKey.DeclarativeConfigKeyLiteral;
 
+/**
+ * corant-config
+ *
+ * @author bingo 10:44:55
+ */
 public class DeclarativeConfigBean<T> implements Bean<T> {
   static final Set<Annotation> qualifiers =
       Collections.singleton(DeclarativeConfigKeyLiteral.UNCONFIGURED);
@@ -33,9 +38,9 @@ public class DeclarativeConfigBean<T> implements Bean<T> {
   final Set<Type> types;
 
   public DeclarativeConfigBean(BeanManager bm, final Class<T> type) {
-    this.beanManager = bm;
-    this.clazz = type;
-    this.types = Collections.singleton(clazz);
+    beanManager = bm;
+    clazz = type;
+    types = Collections.singleton(clazz);
   }
 
   @Override
@@ -90,7 +95,7 @@ public class DeclarativeConfigBean<T> implements Bean<T> {
     return false;
   }
 
-  //@Override since jakartaEE10
+  // @Override since jakartaEE10
   public boolean isNullable() {
     return false;
   }

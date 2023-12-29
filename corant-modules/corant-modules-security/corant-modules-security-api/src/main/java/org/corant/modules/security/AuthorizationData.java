@@ -21,7 +21,6 @@ import java.util.Collections;
  * corant-modules-security-api
  *
  * @author bingo 上午10:19:23
- *
  */
 public interface AuthorizationData extends Serializable {
 

@@ -17,6 +17,5 @@
  * //TODO Have not finished yet
  *
  * @author bingo 上午12:59:31
- *
  */
 package org.corant.modules.jta.xadisk;

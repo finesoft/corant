@@ -42,7 +42,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
  * </p>
  *
  * @author bingo 上午10:31:55
- *
  */
 public class ElasticObjectMapper {
   static final Map<Class<?>, Class<?>> SIMPLE_TYPE_WRAPPER_MAP = new HashMap<>();

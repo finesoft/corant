@@ -30,7 +30,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-shared
  *
  * @author bingo 下午5:40:35
- *
  */
 public class StringDateConverter extends AbstractConverter<String, Date> {
 

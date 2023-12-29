@@ -45,7 +45,6 @@ import freemarker.template.TemplateModelException;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午2:00:47
- *
  */
 public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 

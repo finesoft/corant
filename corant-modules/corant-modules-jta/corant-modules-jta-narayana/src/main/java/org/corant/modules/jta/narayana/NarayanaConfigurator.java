@@ -24,7 +24,6 @@ import com.arjuna.ats.jta.common.JTAEnvironmentBean;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午10:46:42
- *
  */
 public interface NarayanaConfigurator extends Sortable {
 

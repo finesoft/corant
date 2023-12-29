@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * me(finesoft@gmail.com).
  *
  * @author bingo 上午11:03:33
- *
  */
 public class SQLServer2005Dialect extends SQLServerDialect {
 

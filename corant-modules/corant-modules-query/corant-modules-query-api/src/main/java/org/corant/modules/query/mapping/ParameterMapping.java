@@ -21,7 +21,6 @@ import java.io.Serializable;
  * Class use to define the type of a query parameter.
  *
  * @author bingo 上午10:36:16
- *
  */
 public class ParameterMapping implements Serializable {
 

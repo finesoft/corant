@@ -24,7 +24,6 @@ import org.apache.maven.plugin.logging.Log;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午1:11:45
- *
  */
 public class AttachPackager implements Packager {
 

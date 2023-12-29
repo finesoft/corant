@@ -35,7 +35,6 @@ import org.corant.shared.util.Bytes;
  * corant-modules-security-shared
  *
  * @author bingo 上午11:17:28
- *
  */
 public abstract class SymmetricCipherProvider extends JCACipherProvider {
 

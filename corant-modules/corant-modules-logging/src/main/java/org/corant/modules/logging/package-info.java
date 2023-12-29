@@ -15,6 +15,5 @@
  * corant-modules-logging
  *
  * @author bingo 上午10:34:39
- *
  */
 package org.corant.modules.logging;

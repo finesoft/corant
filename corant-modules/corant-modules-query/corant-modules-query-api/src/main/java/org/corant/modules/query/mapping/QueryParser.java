@@ -41,7 +41,6 @@ import org.xml.sax.XMLReader;
  * corant-modules-query-api
  *
  * @author bingo 上午10:56:43
- *
  */
 public class QueryParser {
 

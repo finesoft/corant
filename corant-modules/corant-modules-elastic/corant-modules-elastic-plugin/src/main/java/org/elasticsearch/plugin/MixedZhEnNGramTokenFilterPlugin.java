@@ -30,7 +30,6 @@ import org.elasticsearch.plugins.Plugin;
  * corant-modules-elastic-plugin
  *
  * @author bingo 下午11:21:10
- *
  */
 public class MixedZhEnNGramTokenFilterPlugin extends Plugin implements AnalysisPlugin {
 

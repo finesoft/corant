@@ -32,7 +32,6 @@ import java.util.stream.IntStream;
  * corant-shared
  *
  * @author bingo 下午7:52:34
- *
  */
 public class Atomics {
 

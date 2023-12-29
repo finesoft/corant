@@ -17,7 +17,6 @@ package org.corant.modules.security;
  * corant-modules-security-api
  *
  * @author bingo 下午2:43:20
- *
  */
 public interface SecurityMessageCodes {
   String UNAUTHC_ACCESS = "security.unauthenticated.access";

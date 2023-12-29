@@ -15,6 +15,5 @@
  * corant-modules-vertx-shared
  *
  * @author bingo 下午11:41:27
- *
  */
 package org.corant.modules.vertx.shared;

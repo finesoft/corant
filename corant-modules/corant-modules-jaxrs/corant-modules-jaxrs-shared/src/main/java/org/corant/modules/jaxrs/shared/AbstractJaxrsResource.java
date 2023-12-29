@@ -26,7 +26,6 @@ import jakarta.ws.rs.core.Response;
  * corant-modules-jaxrs-shared
  *
  * @author bingo 上午11:00:31
- *
  */
 public abstract class AbstractJaxrsResource {
 

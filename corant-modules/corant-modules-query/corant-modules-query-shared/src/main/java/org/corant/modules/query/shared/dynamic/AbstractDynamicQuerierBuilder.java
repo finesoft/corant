@@ -24,7 +24,6 @@ import org.corant.modules.query.mapping.Query;
  * corant-modules-query-shared
  *
  * @author bingo 上午9:54:00
- *
  */
 public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     implements DynamicQuerierBuilder<P, S, Q> {

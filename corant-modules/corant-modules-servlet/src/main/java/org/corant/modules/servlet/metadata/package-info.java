@@ -15,6 +15,5 @@
  * corant-modules-servlet
  *
  * @author bingo 下午7:09:47
- *
  */
 package org.corant.modules.servlet.metadata;

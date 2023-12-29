@@ -15,6 +15,5 @@
  * corant-modules-json
  *
  * @author bingo 下午8:21:04
- *
  */
 package org.corant.modules.json.expression;

@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * Use for testing
  *
  * @author bingo 上午11:04:13
- *
  */
 public class ChaosXATester {
 

@@ -15,6 +15,5 @@
  * corant-devops-maven-jandex
  * 
  * @author bingo 下午3:48:18
- *
  */
 package org.corant.devops.maven.jandex;

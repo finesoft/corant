@@ -29,7 +29,6 @@ import org.junit.runners.model.Statement;
  * corant-devops-test-unit
  *
  * @author bingo 上午11:24:23
- *
  */
 public class CorantJunit4Suite extends Suite implements CorantJunit4Runner {
 

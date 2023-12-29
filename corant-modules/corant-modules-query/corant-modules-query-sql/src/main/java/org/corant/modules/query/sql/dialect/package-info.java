@@ -15,6 +15,5 @@
  * corant-modules-query-sql
  *
  * @author bingo 下午8:37:43
- *
  */
 package org.corant.modules.query.sql.dialect;

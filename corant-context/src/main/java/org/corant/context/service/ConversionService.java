@@ -27,7 +27,6 @@ import org.corant.shared.conversion.Converters;
  * corant-context
  *
  * @author bingo 上午12:16:42
- *
  */
 public interface ConversionService {
 

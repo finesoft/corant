@@ -32,7 +32,6 @@ import org.corant.shared.util.Annotations;
  * corant-context
  *
  * @author bingo 下午2:10:11
- *
  */
 public class Qualifiers {
 

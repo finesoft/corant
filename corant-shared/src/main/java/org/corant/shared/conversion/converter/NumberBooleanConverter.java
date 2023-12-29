@@ -20,7 +20,6 @@ import org.corant.shared.conversion.ConversionException;
  * corant-shared
  *
  * @author bingo 下午5:33:03
- *
  */
 public class NumberBooleanConverter extends AbstractConverter<Number, Boolean> {
 

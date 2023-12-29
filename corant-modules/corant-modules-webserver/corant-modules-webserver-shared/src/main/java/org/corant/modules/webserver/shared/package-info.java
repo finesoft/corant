@@ -15,6 +15,5 @@
  * corant-modules-webserver-shared
  *
  * @author bingo 下午7:34:30
- *
  */
 package org.corant.modules.webserver.shared;

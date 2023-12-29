@@ -27,7 +27,6 @@ import org.corant.shared.util.Classes;
  * corant-modules-json
  *
  * @author bingo 下午3:43:07
- *
  */
 public class FullClassNameEnumCodec implements Codec<Enum<?>> {
 

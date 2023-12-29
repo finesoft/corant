@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * corant-config
  *
  * @author bingo 上午10:49:14
- *
  */
 public class ApplicationProfileConfigSourceProvider extends ApplicationConfigSourceProvider {
 

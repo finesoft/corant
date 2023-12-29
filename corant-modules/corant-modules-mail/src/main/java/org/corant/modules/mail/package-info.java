@@ -15,6 +15,5 @@
  * corant-modules-mail
  *
  * @author bingo 下午12:01:26
- *
  */
 package org.corant.modules.mail;

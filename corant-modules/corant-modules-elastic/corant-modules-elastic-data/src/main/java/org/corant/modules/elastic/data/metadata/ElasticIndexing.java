@@ -26,7 +26,6 @@ import java.util.Map;
  * <p>
  *
  * @author bingo 下午4:13:06
- *
  */
 public class ElasticIndexing {
 

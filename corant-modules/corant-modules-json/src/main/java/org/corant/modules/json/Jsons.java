@@ -63,7 +63,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
  * corant-modules-json
  *
  * @author bingo 下午2:40:27
- *
  */
 public class Jsons {
 

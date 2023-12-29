@@ -19,7 +19,6 @@ import org.corant.modules.json.expression.EvaluationContext;
  * corant-modules-json
  *
  * @author bingo 下午5:04:44
- *
  */
 public class ASTValueNode implements ASTNode<Object> {
 

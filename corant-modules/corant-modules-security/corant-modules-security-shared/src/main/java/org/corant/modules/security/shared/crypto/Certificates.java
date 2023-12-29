@@ -65,7 +65,6 @@ import org.jose4j.lang.HashUtil;
  * me(finesoft@gmail.com).
  *
  * @author bingo 11:04:00
- *
  */
 public class Certificates {
 

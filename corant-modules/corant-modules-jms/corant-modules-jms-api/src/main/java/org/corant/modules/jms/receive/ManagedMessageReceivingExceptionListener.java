@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jms-shared
  *
  * @author bingo 下午3:47:27
- *
  */
 public interface ManagedMessageReceivingExceptionListener extends ExceptionListener, Sortable {
 

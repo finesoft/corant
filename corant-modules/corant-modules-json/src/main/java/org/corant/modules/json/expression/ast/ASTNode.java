@@ -24,7 +24,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-modules-json
  *
  * @author bingo 下午5:04:44
- *
  */
 public interface ASTNode<T> extends Node<T> {
 

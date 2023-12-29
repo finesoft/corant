@@ -25,7 +25,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
  * corant-modules-query-cassandra
  *
  * @author bingo 下午4:35:55
- *
  */
 public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], String>
     implements CasNamedQuerier {

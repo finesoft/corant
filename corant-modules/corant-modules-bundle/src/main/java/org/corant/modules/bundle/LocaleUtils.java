@@ -20,7 +20,6 @@ import java.util.Locale;
  * corant-modules-bundle
  *
  * @author bingo 下午10:26:42
- *
  */
 public class LocaleUtils {
 

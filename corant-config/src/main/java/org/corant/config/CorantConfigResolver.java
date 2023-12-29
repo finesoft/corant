@@ -38,7 +38,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-config
  *
  * @author bingo 下午3:23:28
- *
  */
 public class CorantConfigResolver {
 

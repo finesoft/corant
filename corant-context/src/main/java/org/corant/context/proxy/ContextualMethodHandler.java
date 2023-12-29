@@ -38,7 +38,6 @@ import org.corant.shared.util.Methods.MethodSignature;
  * object.
  *
  * @author bingo 下午2:26:15
- *
  */
 public class ContextualMethodHandler implements Serializable {
 

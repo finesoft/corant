@@ -28,7 +28,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
  * corant-config
  *
  * @author bingo 上午10:10:30
- *
  */
 public class YamlConfigSource extends AbstractCorantConfigSource {
 

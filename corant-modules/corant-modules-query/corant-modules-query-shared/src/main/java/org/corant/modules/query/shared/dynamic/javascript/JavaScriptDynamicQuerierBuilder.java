@@ -27,7 +27,6 @@ import org.corant.shared.util.Services;
  * corant-modules-query-shared
  *
  * @author bingo 上午11:18:32
- *
  */
 public abstract class JavaScriptDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {

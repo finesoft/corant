@@ -25,7 +25,6 @@ import org.eclipse.microprofile.config.spi.ConfigSourceProvider;
  * corant-devops-test-unit
  *
  * @author bingo 下午7:13:27
- *
  */
 public class RandomWebServerPortSourceProvider implements ConfigSourceProvider {
 

@@ -25,7 +25,6 @@ import org.corant.shared.ubiquity.Tuple.Triple;
  * corant-modules-query-sql
  *
  * @author bingo 下午7:46:22
- *
  */
 public class FreemarkerSqlQuerierBuilder
     extends FreemarkerDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {

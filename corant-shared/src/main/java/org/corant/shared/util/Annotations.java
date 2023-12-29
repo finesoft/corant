@@ -31,7 +31,6 @@ import java.util.Set;
  * NOTE: Starting with Java8 we recommend using AnnotatedElement
  *
  * @author bingo 下午10:06:13
- *
  */
 public class Annotations {
 

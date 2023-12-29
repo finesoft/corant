@@ -37,7 +37,6 @@ import javax.naming.NamingException;
  * corant-modules-jndi
  *
  * @author bingo 下午1:40:11
- *
  */
 public class JNDIBean<T> implements Bean<T>, PassivationCapable {
 

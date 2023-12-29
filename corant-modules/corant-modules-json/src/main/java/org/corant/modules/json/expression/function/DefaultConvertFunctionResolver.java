@@ -26,7 +26,6 @@ import org.corant.modules.json.expression.FunctionResolver;
  * corant-modules-json
  *
  * @author bingo 下午3:29:41
- *
  */
 public class DefaultConvertFunctionResolver implements FunctionResolver {
 

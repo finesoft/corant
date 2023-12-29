@@ -20,7 +20,6 @@ import java.util.function.Predicate;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午10:18:01
- *
  */
 public interface KeycloakEventSelector<E> extends Predicate<E> {
 

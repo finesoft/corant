@@ -46,7 +46,6 @@ import org.corant.devops.maven.plugin.archive.FileEntry;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午4:33:08
- *
  */
 public class DistPackager implements Packager {
 

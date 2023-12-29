@@ -23,7 +23,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * corant-modules-json
  *
  * @author bingo 上午10:04:31
- *
  */
 public class StringBsonObjectIdConverter extends AbstractConverter<String, BsonObjectId> {
 

@@ -34,7 +34,6 @@ import jakarta.enterprise.event.Observes;
  * corant-modules-vertx-shared
  *
  * @author bingo 下午2:31:19
- *
  */
 public class PortableVertxExtension extends VertxExtension {
 

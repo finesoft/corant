@@ -20,7 +20,6 @@ import org.corant.shared.conversion.ConversionException;
  * corant-shared
  *
  * @author bingo 下午5:35:33
- *
  */
 public class NumberByteConverter extends AbstractConverter<Number, Byte> {
 

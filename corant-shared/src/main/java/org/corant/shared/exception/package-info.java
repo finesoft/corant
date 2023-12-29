@@ -15,6 +15,5 @@
  * corant-shared
  *
  * @author bingo 下午12:02:44
- *
  */
 package org.corant.shared.exception;

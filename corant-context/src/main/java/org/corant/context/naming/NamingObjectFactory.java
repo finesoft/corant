@@ -30,7 +30,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * When InitialContext.lookup(...), will invoke CDI.select() to retrieve the object instance.
  *
  * @author bingo 下午7:42:18
- *
  */
 public class NamingObjectFactory implements ObjectFactory {
   @Override

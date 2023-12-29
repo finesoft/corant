@@ -26,7 +26,6 @@ import io.agroal.api.transaction.TransactionAware;
  * the local transaction cannot be rolled back.
  *
  * @author bingo 下午4:33:01
- *
  */
 public class MyConnectableLocalXAResource extends MyLocalXAResource
     implements ConnectableResource, LastResource {

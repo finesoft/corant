@@ -20,7 +20,6 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * corant-modules-query-elastic
  *
  * @author bingo 下午10:54:47
- *
  */
 public interface EsNamedQuerier extends DynamicQuerier<Map<String, Object>, Map<Object, Object>> {
 

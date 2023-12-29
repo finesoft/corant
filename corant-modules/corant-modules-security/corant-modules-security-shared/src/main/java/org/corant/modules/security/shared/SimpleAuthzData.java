@@ -30,7 +30,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:17:41
- *
  */
 public class SimpleAuthzData implements AuthorizationData, AttributeSet {
 

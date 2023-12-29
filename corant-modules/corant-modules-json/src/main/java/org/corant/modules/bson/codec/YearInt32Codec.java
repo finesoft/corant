@@ -24,7 +24,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:15:16
- *
  */
 public class YearInt32Codec implements Codec<Year> {
 

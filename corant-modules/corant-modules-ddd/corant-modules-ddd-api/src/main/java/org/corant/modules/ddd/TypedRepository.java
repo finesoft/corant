@@ -20,7 +20,6 @@ import java.util.List;
  * corant-modules-ddd-api
  *
  * @author bingo 下午6:25:50
- *
  */
 public interface TypedRepository<T, Q> {
 

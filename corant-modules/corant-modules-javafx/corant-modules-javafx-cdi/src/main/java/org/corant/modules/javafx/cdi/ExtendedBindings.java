@@ -23,7 +23,6 @@ import javafx.collections.ObservableSet;
  * corant-modules-javafx-cdi
  *
  * @author bingo 上午10:33:24
- *
  */
 public class ExtendedBindings {
 

@@ -20,7 +20,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午6:21:39
- *
  */
 public class StringDurationConverter extends AbstractConverter<String, Duration> {
 

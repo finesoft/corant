@@ -29,7 +29,6 @@ import java.util.logging.Logger;
  * corant-shared
  *
  * @author bingo 下午7:33:33
- *
  */
 public class StopWatch {
 

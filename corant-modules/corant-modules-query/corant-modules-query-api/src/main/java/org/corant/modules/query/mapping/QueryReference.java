@@ -24,7 +24,6 @@ import org.corant.modules.query.mapping.Query.QueryType;
  * corant-modules-query-api
  *
  * @author bingo 下午7:29:52
- *
  */
 public class QueryReference implements Serializable {
 

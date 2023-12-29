@@ -23,7 +23,6 @@ import java.util.stream.Stream;
  * corant-modules-query-api
  *
  * @author bingo 下午10:33:30
- *
  */
 public interface QueryService<Q, P> {
 

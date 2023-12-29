@@ -43,7 +43,6 @@ import java.util.zip.CRC32;
  * corant-devops-maven-plugin
  *
  * @author bingo 上午11:33:04
- *
  */
 public class JarLauncher {
 

@@ -28,7 +28,6 @@ import org.corant.shared.util.Services;
  * @see Services#selectRequired(Class)
  * @see Sortable
  * @author bingo 下午3:29:32
- *
  */
 public interface FunctionResolver extends Sortable {
 

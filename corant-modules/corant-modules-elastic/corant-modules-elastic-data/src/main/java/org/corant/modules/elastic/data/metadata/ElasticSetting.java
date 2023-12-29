@@ -25,7 +25,6 @@ import org.elasticsearch.common.xcontent.XContentHelper;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:15:36
- *
  */
 public class ElasticSetting {
 

@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午4:56:55
- *
  */
 public final class IdentityConverter<T> extends AbstractConverter<T, T> {
 

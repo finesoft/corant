@@ -34,7 +34,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-config
  *
  * @author bingo 下午7:00:42
- *
  */
 public class ConfigClasses {
 

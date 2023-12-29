@@ -57,7 +57,6 @@ import org.corant.shared.util.Systems;
  * @see Services
  *
  * @author bingo 上午11:48:24
- *
  */
 public interface ExceptionMessageResolver extends Sortable {
 

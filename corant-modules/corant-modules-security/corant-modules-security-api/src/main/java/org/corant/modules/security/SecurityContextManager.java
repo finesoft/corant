@@ -17,7 +17,6 @@ package org.corant.modules.security;
  * corant-modules-security-api
  *
  * @author bingo 下午2:28:25
- *
  */
 public interface SecurityContextManager<C> {
 

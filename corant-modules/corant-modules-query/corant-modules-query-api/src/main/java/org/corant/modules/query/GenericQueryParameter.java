@@ -24,7 +24,6 @@ import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
  * corant-modules-query-api
  *
  * @author bingo 下午6:56:58
- *
  */
 public class GenericQueryParameter<T> extends DefaultQueryParameter {
 

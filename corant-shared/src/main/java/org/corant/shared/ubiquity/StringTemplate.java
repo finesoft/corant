@@ -35,7 +35,6 @@ import org.corant.shared.util.Strings;
  * corant-shared
  *
  * @author bingo 下午7:37:15
- *
  */
 public class StringTemplate {
 

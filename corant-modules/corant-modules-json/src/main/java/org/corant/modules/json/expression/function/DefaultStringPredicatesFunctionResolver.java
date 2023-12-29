@@ -24,7 +24,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-json
  *
  * @author bingo 下午3:29:41
- *
  */
 public class DefaultStringPredicatesFunctionResolver implements FunctionResolver {
 

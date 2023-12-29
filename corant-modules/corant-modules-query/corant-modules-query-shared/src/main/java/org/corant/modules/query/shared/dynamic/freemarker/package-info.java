@@ -15,6 +15,5 @@
  * corant-modules-query-shared
  *
  * @author bingo 下午8:30:52
- *
  */
 package org.corant.modules.query.shared.dynamic.freemarker;

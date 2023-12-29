@@ -22,7 +22,6 @@ import org.corant.modules.security.Principal;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:56:13
- *
  */
 public class UserAuthcData extends SimpleAuthcData {
 

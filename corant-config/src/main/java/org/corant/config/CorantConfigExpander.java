@@ -33,7 +33,6 @@ import org.corant.shared.util.Strings;
  * corant-config
  *
  * @author bingo 下午12:57:49
- *
  */
 public class CorantConfigExpander {
   public static final String ESCAPE = "\\";

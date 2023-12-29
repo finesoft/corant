@@ -30,7 +30,6 @@ import io.vertx.core.eventbus.Message;
  *
  * @author Martin Kouba
  * @see VertxConsumer
- *
  */
 public interface VertxEvent {
 

@@ -31,7 +31,6 @@ import org.corant.shared.util.Systems;
  * corant-shared
  *
  * @author bingo 上午10:25:36
- *
  */
 public interface Defaults {
 

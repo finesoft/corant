@@ -36,7 +36,6 @@ import org.corant.modules.query.shared.ScriptProcessor.AbstractScriptProcessor;
  * corant-modules-query-shared
  *
  * @author bingo 下午2:34:03
- *
  */
 public abstract class AbstractCompilableScriptProcessor extends AbstractScriptProcessor {
 

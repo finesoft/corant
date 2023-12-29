@@ -23,7 +23,6 @@ import org.corant.shared.util.Serializations;
  * corant-context
  *
  * @author bingo 下午3:29:59
- *
  */
 public interface SecurityContextSerializer {
 

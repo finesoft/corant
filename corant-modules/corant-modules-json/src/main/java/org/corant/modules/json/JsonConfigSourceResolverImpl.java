@@ -23,7 +23,6 @@ import org.corant.shared.util.Texts;
  * corant-modules-json
  *
  * @author bingo 下午4:19:30
- *
  */
 public class JsonConfigSourceResolverImpl implements JsonConfigSourceResolver {
 

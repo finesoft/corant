@@ -33,7 +33,6 @@ import org.corant.shared.normal.Names.JndiNames;
  * corant-modules-jndi
  *
  * @author bingo 下午7:19:21
- *
  */
 public class InitialContextExtension implements Extension {
 

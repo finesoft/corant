@@ -35,7 +35,6 @@ import org.corant.shared.util.FileUtils;
  * A representation of a resource that load from URL
  *
  * @author bingo 下午4:06:15
- *
  */
 public class URLResource implements Resource {
   protected final SourceType sourceType;

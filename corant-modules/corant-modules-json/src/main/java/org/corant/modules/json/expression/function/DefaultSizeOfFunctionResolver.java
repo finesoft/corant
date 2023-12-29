@@ -29,7 +29,6 @@ import org.corant.shared.util.Methods;
  * corant-modules-json
  *
  * @author bingo 下午3:29:41
- *
  */
 public class DefaultSizeOfFunctionResolver implements FunctionResolver {
 

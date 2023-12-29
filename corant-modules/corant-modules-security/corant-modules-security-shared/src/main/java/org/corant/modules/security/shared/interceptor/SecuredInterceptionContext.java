@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.AttributeSet;
  * corant-modules-security-shared
  *
  * @author bingo 上午11:05:42
- *
  */
 public interface SecuredInterceptionContext extends Serializable, AttributeSet {
 

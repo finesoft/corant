@@ -20,7 +20,6 @@ import java.util.logging.LogRecord;
  * corant-kernel
  *
  * @author bingo 下午8:16:18
- *
  */
 public class LoggingHandlerAdapter extends Handler {
 

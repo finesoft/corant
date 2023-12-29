@@ -30,7 +30,6 @@ import jakarta.enterprise.inject.spi.PassivationCapable;
  * corant-context
  *
  * @author bingo 下午3:45:22
- *
  */
 public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
 

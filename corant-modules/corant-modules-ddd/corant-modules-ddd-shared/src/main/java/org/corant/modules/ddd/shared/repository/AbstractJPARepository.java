@@ -27,7 +27,6 @@ import org.corant.modules.jpa.shared.PersistenceService.PersistenceContextLitera
  * corant-modules-ddd-shared
  *
  * @author bingo 下午9:54:26
- *
  */
 public abstract class AbstractJPARepository implements JPARepository {
 

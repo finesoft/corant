@@ -15,6 +15,5 @@
  * corant-modules-security-shared
  *
  * @author bingo 下午3:52:40
- *
  */
 package org.corant.modules.security.shared.interceptor;

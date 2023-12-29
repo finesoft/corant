@@ -21,7 +21,6 @@ import org.corant.shared.util.Chars;
  * corant-shared
  *
  * @author bingo 上午11:03:47
- *
  */
 public abstract class AbstractNumberConverter<S, T extends Number> extends AbstractConverter<S, T> {
 

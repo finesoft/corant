@@ -24,7 +24,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:14:52
- *
  */
 public class MonthInt32Codec implements Codec<Month> {
 

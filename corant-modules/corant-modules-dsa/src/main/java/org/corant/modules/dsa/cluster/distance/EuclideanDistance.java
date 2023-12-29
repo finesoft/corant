@@ -20,7 +20,6 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
  * corant-modules-dsa
  *
  * @author bingo 下午1:30:50
- *
  */
 public class EuclideanDistance extends SquaredEuclideanDistance {
 

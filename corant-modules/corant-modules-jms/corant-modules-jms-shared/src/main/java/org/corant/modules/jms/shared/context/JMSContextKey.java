@@ -43,7 +43,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:15:57
- *
  */
 public class JMSContextKey implements Serializable {
 

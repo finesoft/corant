@@ -23,7 +23,6 @@ import io.agroal.api.AgroalDataSourceMetrics;
  * corant-modules-datasource-agroal
  *
  * @author bingo 下午4:57:26
- *
  */
 public class AgroalCPDataSourceMetrics implements AgroalCPDataSourceMetricsMBean {
 

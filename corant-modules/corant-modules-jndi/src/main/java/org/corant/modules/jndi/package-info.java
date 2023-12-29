@@ -17,6 +17,5 @@
  * This package code was extracted from apache.
  *
  * @author bingo 下午7:18:49
- *
  */
 package org.corant.modules.jndi;

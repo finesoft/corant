@@ -35,7 +35,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-shared
  *
  * @author bingo 下午8:48:45
- *
  */
 public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
 

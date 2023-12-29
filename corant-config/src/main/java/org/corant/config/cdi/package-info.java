@@ -15,6 +15,5 @@
  * corant-config
  *
  * @author bingo 下午4:14:47
- *
  */
 package org.corant.config.cdi;

@@ -22,7 +22,6 @@ import java.util.logging.Logger;
  * corant-context
  *
  * @author bingo 下午8:27:44
- *
  */
 public class AbortHandler implements RejectedExecutionHandler {
 

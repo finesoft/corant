@@ -24,7 +24,6 @@ import org.corant.shared.conversion.ConversionException;
  * corant-shared
  *
  * @author bingo 上午11:09:37
- *
  */
 public class SqlDateInstantConverter extends AbstractTemporalConverter<Date, Instant> {
 

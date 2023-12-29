@@ -28,7 +28,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * INFORM ME(finesoft@gmail.com). </b>
  *
  * @author bingo 上午12:14:53
- *
  */
 public class RandomAccessFileInputStream extends InputStream implements CountingStream {
 

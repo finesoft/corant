@@ -31,7 +31,6 @@ import org.jboss.weld.injection.ParameterInjectionPoint;
  * corant-context
  *
  * @author bingo 下午6:29:46
- *
  */
 public abstract class CDIs {
 

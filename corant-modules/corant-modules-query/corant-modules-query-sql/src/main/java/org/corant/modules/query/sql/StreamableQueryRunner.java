@@ -35,7 +35,6 @@ import org.corant.shared.ubiquity.Mutable.MutableInteger;
  * corant-modules-query-sql
  *
  * @author bingo 上午10:00:38
- *
  */
 public class StreamableQueryRunner extends DefaultQueryRunner {
 

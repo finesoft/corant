@@ -28,7 +28,6 @@ import java.util.regex.PatternSyntaxException;
  * corant-shared
  *
  * @author bingo 下午8:25:03
- *
  */
 public interface PathMatcher extends Predicate<String> {
 

@@ -19,7 +19,6 @@ import org.corant.modules.security.Token.JsonWebToken;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午11:53:40
- *
  */
 public class MpJWTJsonWebToken extends JsonWebToken {
 

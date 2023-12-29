@@ -21,7 +21,6 @@ import java.util.Map;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:55:37
- *
  */
 public class GroupMessageSender implements MessageSender {
 

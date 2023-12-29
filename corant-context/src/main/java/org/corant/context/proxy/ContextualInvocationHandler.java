@@ -28,7 +28,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
  * A simple CDI base invocation handler implementation, supports method interceptor.
  *
  * @author bingo 下午2:12:51
- *
  */
 public class ContextualInvocationHandler extends ProxyInvocationHandler {
 

@@ -34,7 +34,6 @@ import org.corant.shared.util.Services;
  * is infringement, please inform me(finesoft@gmail.com).
  *
  * @author bingo 上午12:24:17
- *
  */
 public class DbUtilBasicRowProcessor extends BasicRowProcessor {
 

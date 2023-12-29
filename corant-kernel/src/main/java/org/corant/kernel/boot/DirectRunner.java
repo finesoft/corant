@@ -97,7 +97,6 @@ import org.corant.shared.util.UnsafeAccessors;
  * </p>
  *
  * @author bingo 下午3:32:02
- *
  */
 public class DirectRunner {
   static final Path MMF_DIR = Defaults.corantUserDir("-runner");

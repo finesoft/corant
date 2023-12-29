@@ -23,7 +23,6 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  * When OFFSET is 0, then no rows are skipped.
  *
  * @author bingo 上午11:03:33
- *
  */
 public class SQLServer2012Dialect extends SQLServer2005Dialect {
 

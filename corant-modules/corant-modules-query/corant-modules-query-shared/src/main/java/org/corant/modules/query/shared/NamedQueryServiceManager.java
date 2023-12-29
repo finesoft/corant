@@ -24,7 +24,6 @@ import org.corant.modules.query.mapping.Query.QueryType;
  * corant-modules-query-shared
  *
  * @author bingo 下午6:46:14
- *
  */
 public interface NamedQueryServiceManager {
 

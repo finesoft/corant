@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * corant-modules-json
  *
  * @author bingo 下午6:59:38
- *
  */
 public interface GlobalObjectMapperConfigurator extends Sortable {
   void configure(ObjectMapper objectMapper);

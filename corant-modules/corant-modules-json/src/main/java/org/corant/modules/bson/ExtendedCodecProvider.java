@@ -46,7 +46,6 @@ import org.corant.modules.bson.converter.BsonTimestampTimestampConverter;
  * corant-modules-json
  *
  * @author bingo 下午6:27:57
- *
  */
 public class ExtendedCodecProvider implements CodecProvider {
 

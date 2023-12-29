@@ -52,7 +52,6 @@ import org.xml.sax.helpers.DefaultHandler;
  * corant-modules-query-api
  *
  * @author bingo 下午4:24:51
- *
  */
 public class QueryParseHandler extends DefaultHandler {
 

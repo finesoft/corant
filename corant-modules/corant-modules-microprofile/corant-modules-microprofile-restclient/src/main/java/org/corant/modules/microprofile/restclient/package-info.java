@@ -15,6 +15,5 @@
  * corant-modules-microprofile-restclient
  *
  * @author bingo 下午2:16:08
- *
  */
 package org.corant.modules.microprofile.restclient;

@@ -15,7 +15,6 @@ package org.corant.modules.bundle;
 
 /**
  * @author bingo 下午2:29:36
- *
  */
 public interface GlobalMessageCodes {
 

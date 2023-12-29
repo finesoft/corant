@@ -39,7 +39,6 @@ import java.util.UUID;
  * implementation, the implementation will be invoked in query execution.
  *
  * @author bingo 下午7:35:54
- *
  */
 public class QueryHint implements Serializable {
 

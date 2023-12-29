@@ -17,6 +17,5 @@
  * TODO restart processing
  *
  * @author bingo 下午12:14:46
- *
  */
 package org.corant.config;

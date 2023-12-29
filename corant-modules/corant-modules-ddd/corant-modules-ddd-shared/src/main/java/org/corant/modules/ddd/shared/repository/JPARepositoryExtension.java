@@ -45,7 +45,6 @@ import org.corant.modules.jpa.shared.PersistenceService.PersistenceContextLitera
  * corant-modules-ddd-shared
  *
  * @author bingo 下午7:09:18
- *
  */
 public class JPARepositoryExtension implements Extension {
 

@@ -21,7 +21,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 上午11:09:37
- *
  */
 public class SqlDateLocalDateConverter extends AbstractConverter<Date, LocalDate> {
 

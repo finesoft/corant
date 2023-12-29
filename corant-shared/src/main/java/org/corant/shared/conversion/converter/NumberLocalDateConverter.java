@@ -25,7 +25,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 下午5:35:33
- *
  */
 public class NumberLocalDateConverter extends AbstractTemporalConverter<Number, LocalDate> {
 

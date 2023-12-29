@@ -15,6 +15,5 @@
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:42:39
- *
  */
 package org.corant.modules.elastic.data.model;

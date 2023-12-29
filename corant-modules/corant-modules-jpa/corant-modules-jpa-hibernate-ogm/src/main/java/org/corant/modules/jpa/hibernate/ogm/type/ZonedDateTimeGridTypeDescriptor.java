@@ -14,7 +14,6 @@ import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 下午12:52:50
- *
  */
 public class ZonedDateTimeGridTypeDescriptor implements GridTypeDescriptor {
 

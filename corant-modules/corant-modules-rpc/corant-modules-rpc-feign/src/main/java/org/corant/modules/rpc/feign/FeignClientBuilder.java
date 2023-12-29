@@ -17,7 +17,6 @@ package org.corant.modules.rpc.feign;
  * corant-modules-rpc-feign
  *
  * @author bingo 10:17:28
- *
  */
 public class FeignClientBuilder {
 

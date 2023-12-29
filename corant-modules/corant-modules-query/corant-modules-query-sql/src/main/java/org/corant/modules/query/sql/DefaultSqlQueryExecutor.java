@@ -35,7 +35,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-query-sql
  *
  * @author bingo 下午5:31:55
- *
  */
 public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
 

@@ -17,7 +17,6 @@ package org.corant.shared.exception;
  * corant-shared
  *
  * @author bingo 下午6:02:36
- *
  */
 public enum GeneralExceptionSeverity {
   ERROR(2), WARN(1), CRITICAL(0);

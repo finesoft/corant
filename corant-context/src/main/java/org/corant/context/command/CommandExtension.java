@@ -44,7 +44,6 @@ import org.corant.shared.util.Services;
  * corant-context
  *
  * @author bingo 下午10:08:26
- *
  */
 public class CommandExtension implements Extension {
 

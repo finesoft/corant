@@ -19,7 +19,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 上午11:43:14
- *
  */
 public class ConversionException extends CorantRuntimeException {
 

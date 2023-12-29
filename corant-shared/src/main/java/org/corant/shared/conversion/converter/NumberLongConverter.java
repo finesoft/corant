@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午5:35:33
- *
  */
 public class NumberLongConverter extends AbstractConverter<Number, Long> {
 

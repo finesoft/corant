@@ -38,7 +38,6 @@ import org.keycloak.representations.adapters.config.AdapterConfig;
  * corant-modules-keycloak-client
  *
  * @author bingo 下午5:12:10
- *
  */
 public class KeycloakTestUtils {
 

@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * corant-modules-security-api
  *
  * @author bingo 下午7:19:52
- *
  */
 public interface Subject extends Serializable {
 

@@ -42,7 +42,6 @@ import org.corant.shared.util.Compressors;
  * corant-modules-jms-shared
  *
  * @author bingo 下午8:18:33
- *
  */
 public class MessageSenderTemplate extends DefaultMessageSender {
 

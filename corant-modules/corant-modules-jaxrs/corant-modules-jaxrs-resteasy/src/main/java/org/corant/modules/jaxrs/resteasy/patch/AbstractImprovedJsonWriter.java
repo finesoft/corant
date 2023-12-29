@@ -30,7 +30,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 上午11:10:48
- *
  */
 public abstract class AbstractImprovedJsonWriter<T> implements AsyncMessageBodyWriter<T> {
 

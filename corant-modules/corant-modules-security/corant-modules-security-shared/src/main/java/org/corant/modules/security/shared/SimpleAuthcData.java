@@ -27,7 +27,6 @@ import org.corant.shared.ubiquity.AttributeSet;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:14:35
- *
  */
 public class SimpleAuthcData implements AuthenticationData, AttributeSet {
 

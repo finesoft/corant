@@ -48,7 +48,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperties;
  * declarative configuration.
  *
  * @author bingo 下午4:52:17
- *
  */
 public class Configs {
 

@@ -36,7 +36,6 @@ import org.corant.shared.util.FileUtils;
  * Describe system file
  *
  * @author bingo 下午6:53:19
- *
  */
 public class FileSystemResource extends URLResource implements WritableResource {
 

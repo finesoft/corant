@@ -15,6 +15,5 @@
  * corant-modules-jta-narayana
  *
  * @author bingo 下午3:56:09
- *
  */
 package org.corant.modules.jta.narayana.objectstore;

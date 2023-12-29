@@ -24,7 +24,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-config
  *
  * @author bingo 上午11:14:06
- *
  */
 public interface ConfigInjector {
 

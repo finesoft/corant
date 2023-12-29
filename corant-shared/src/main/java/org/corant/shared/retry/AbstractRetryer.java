@@ -25,7 +25,6 @@ import java.util.logging.Logger;
  * corant-shared
  *
  * @author bingo 下午10:46:11
- *
  */
 public abstract class AbstractRetryer<R extends AbstractRetryer<R>> implements Retryer {
 

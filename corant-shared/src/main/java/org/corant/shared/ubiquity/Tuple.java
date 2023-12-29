@@ -28,7 +28,6 @@ import org.corant.shared.util.Objects;
  * corant-shared
  *
  * @author bingo 上午10:29:13
- *
  */
 public interface Tuple {
 

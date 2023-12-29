@@ -17,6 +17,5 @@
  * Use apache calcite
  *
  * @author bingo 下午6:55:46
- *
  */
 package org.corant.modules.query.shared.dynamic.calcite;

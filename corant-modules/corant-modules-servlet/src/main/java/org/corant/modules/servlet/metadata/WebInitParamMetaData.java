@@ -22,7 +22,6 @@ import org.corant.config.Configs;
  * corant-modules-servlet
  *
  * @author bingo 上午10:14:43
- *
  */
 public class WebInitParamMetaData {
 

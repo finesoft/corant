@@ -15,6 +15,5 @@
  * corant-modules-vertx-serviceproxy
  * 
  * @author bingo 上午11:59:56
- *
  */
 package org.corant.modules.vertx.serviceproxy;

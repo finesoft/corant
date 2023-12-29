@@ -44,7 +44,6 @@ import org.junit.runners.model.Statement;
  * corant-devops-test-unit
  *
  * @author bingo 上午11:26:46
- *
  */
 public interface CorantJunit4Runner {
 

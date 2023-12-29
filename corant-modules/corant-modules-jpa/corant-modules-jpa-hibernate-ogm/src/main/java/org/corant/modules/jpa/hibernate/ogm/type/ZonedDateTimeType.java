@@ -10,7 +10,6 @@ import org.hibernate.type.descriptor.java.ZonedDateTimeJavaDescriptor;
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 下午12:52:35
- *
  */
 public class ZonedDateTimeType extends AbstractGenericBasicType<ZonedDateTime> {
 

@@ -25,7 +25,6 @@ import org.corant.shared.util.Threads;
  * corant-context
  *
  * @author bingo 上午11:00:38
- *
  */
 public class RetryAbortHandler implements RejectedExecutionHandler {
 

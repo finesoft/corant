@@ -23,7 +23,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-query-api
  *
  * @author bingo 上午10:51:35
- *
  */
 public interface QueryParameterReviser extends UnaryOperator<QueryParameter>, Sortable {
 

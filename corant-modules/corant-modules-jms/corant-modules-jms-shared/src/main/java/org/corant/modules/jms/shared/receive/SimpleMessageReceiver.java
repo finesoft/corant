@@ -59,7 +59,6 @@ import org.corant.shared.ubiquity.Sortable;
  * cache JMS connections and JMS sessions</a>
  *
  * @author bingo 上午11:33:15
- *
  */
 public class SimpleMessageReceiver implements ManagedMessageReceiver {
 

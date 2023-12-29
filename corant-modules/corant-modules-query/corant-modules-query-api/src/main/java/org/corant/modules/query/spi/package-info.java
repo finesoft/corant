@@ -15,6 +15,5 @@
  * corant-modules-query-api
  *
  * @author bingo 下午4:05:07
- *
  */
 package org.corant.modules.query.spi;

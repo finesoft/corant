@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午3:10:46
- *
  */
 public class DefaultArchive implements Archive {
 

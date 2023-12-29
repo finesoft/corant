@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-api
  *
  * @author bingo 12:24:41
- *
  */
 public interface Authorizer extends Sortable {
 

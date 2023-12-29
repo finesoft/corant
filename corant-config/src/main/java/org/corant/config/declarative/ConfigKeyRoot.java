@@ -57,7 +57,6 @@ import jakarta.enterprise.util.AnnotationLiteral;
  * "datasource.blog.driver" will be mapped to the DatasourceConfig object named blog
  *
  * @author bingo 下午7:39:01
- *
  */
 @Documented
 @Retention(RUNTIME)

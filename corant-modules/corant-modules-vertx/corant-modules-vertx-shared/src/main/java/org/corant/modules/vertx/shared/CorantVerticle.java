@@ -17,18 +17,17 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import jakarta.enterprise.inject.Vetoed;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
 import org.corant.Corant;
 import org.corant.shared.util.Functions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 
 /**
  * corant-modules-vertx-shared
  *
  * @author bingo 上午11:01:22
- *
  */
 @Vetoed
 public class CorantVerticle extends AbstractVerticle {

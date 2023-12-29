@@ -19,7 +19,6 @@ import java.time.Duration;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:09:48
- *
  */
 public interface ManagedMessageReceivingExecutorConfig {
 

@@ -23,7 +23,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-websocket
  *
  * @author bingo 下午10:10:38
- *
  */
 public class DefaultServerEndpointConfigurator extends Configurator {
 

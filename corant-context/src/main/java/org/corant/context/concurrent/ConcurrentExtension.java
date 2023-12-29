@@ -75,7 +75,6 @@ import org.glassfish.enterprise.concurrent.ManagedScheduledExecutorServiceAdapte
  * corant-context
  *
  * @author bingo 下午2:51:48
- *
  */
 public class ConcurrentExtension implements Extension {
 

@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-flyway
  *
  * @author bingo 上午9:56:54
- *
  */
 public class FlywayExtension implements Extension {
 

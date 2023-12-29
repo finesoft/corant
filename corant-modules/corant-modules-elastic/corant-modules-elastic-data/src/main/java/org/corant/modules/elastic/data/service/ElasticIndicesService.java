@@ -23,7 +23,6 @@ import org.elasticsearch.common.settings.Settings;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:08:34
- *
  */
 public interface ElasticIndicesService {
 

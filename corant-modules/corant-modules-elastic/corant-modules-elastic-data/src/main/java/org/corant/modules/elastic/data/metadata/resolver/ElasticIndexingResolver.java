@@ -26,7 +26,6 @@ import org.corant.modules.elastic.data.metadata.ElasticMapping;
  * </p>
  *
  * @author bingo 下午2:55:11
- *
  */
 public interface ElasticIndexingResolver {
 

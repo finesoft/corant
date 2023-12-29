@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 上午11:02:31
- *
  */
 package org.corant.context.concurrent.provider;

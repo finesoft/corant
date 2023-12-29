@@ -17,7 +17,6 @@ package org.corant.modules.jms.receive;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:57:40
- *
  */
 public interface ManagedMessageReceivingTask extends Runnable {
 

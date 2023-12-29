@@ -26,7 +26,6 @@ import org.corant.modules.security.Role;
  * corant-modules-security-shared
  *
  * @author bingo 下午4:11:00
- *
  */
 public class UserAuthzData extends SimpleAuthzData {
 

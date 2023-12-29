@@ -19,7 +19,6 @@ import java.io.Serializable;
  * corant-modules-security-api
  *
  * @author bingo 下午7:20:37
- *
  */
 public interface Principal extends java.security.Principal, Serializable {
 

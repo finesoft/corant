@@ -31,7 +31,6 @@ import com.aliyun.oss.OSSClientBuilder;
  * corant-modules-cloud-alibaba
  *
  * @author bingo 上午11:29:13
- *
  */
 public class OSSClientExtension implements Extension {
 

@@ -15,6 +15,5 @@
  * corant-modules-query-cassandra
  *
  * @author bingo 下午1:57:50
- *
  */
 package org.corant.modules.query.cassandra;

@@ -24,7 +24,6 @@ import org.corant.shared.ubiquity.Sortable;
  * An Authenticator is responsible for authenticating accounts in an application.
  *
  * @author bingo 12:25:41
- *
  */
 public interface Authenticator extends Sortable {
 

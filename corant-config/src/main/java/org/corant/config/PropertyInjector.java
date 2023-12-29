@@ -28,7 +28,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-config
  *
  * @author bingo 下午2:53:54
- *
  */
 public class PropertyInjector {
 

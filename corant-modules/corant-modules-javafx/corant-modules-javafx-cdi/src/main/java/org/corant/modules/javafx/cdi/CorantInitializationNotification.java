@@ -21,7 +21,6 @@ import javafx.application.Preloader.PreloaderNotification;
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午7:18:33
- *
  */
 public class CorantInitializationNotification implements PreloaderNotification {
 

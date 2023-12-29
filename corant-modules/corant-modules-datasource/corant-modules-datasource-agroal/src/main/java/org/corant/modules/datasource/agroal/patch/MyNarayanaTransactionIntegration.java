@@ -44,7 +44,6 @@ import io.agroal.narayana.RecoveryXAResource;
  * the local transaction cannot be rolled back.
  *
  * @author bingo 下午4:09:30
- *
  */
 public class MyNarayanaTransactionIntegration implements TransactionIntegration {
 

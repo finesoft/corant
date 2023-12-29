@@ -22,7 +22,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:38:38
- *
  */
 public interface JoseEncryptionProvider {
 

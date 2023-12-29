@@ -42,7 +42,6 @@ import org.corant.shared.util.Resources;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午6:27:53
- *
  */
 public class JPAUtils {
 

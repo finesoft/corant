@@ -23,7 +23,6 @@ import org.corant.context.CDIs;
  * corant-modules-jta-shared
  *
  * @author bingo 下午2:47:59
- *
  */
 public interface TransactionIntegration {
 

@@ -42,7 +42,6 @@ import org.corant.shared.util.Systems;
  * corant-modules-ddd-shared
  *
  * @author bingo 上午10:31:41
- *
  */
 public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {
 

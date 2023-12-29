@@ -29,7 +29,6 @@ import org.corant.shared.conversion.converter.AbstractTemporalConverter;
  * corant-modules-json
  *
  * @author bingo 上午10:47:31
- *
  */
 public class TemporalBsonDateTimeConverter extends AbstractConverter<Temporal, BsonDateTime> {
 

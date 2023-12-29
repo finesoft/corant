@@ -15,6 +15,5 @@
  * corant-modules-query-shared
  *
  * @author bingo 下午1:18:52
- *
  */
 package org.corant.modules.query.shared.dynamic.jsonexpression;

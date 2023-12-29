@@ -17,7 +17,6 @@ package org.corant.modules.query.sql.dialect;
  * corant-modules-query-sql
  *
  * @author bingo 下午7:09:20
- *
  */
 public abstract class SQLServerDialect implements Dialect {
 

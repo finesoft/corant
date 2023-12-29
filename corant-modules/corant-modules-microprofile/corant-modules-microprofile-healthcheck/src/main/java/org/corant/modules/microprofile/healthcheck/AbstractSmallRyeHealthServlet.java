@@ -27,7 +27,6 @@ import io.smallrye.health.SmallRyeHealthReporter;
  * corant-modules-microprofile-healthcheck
  *
  * @author bingo 下午6:39:12
- *
  */
 public abstract class AbstractSmallRyeHealthServlet extends HttpServlet {
 

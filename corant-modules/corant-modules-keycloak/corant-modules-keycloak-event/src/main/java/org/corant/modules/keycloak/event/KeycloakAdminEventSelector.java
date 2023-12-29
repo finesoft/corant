@@ -24,7 +24,6 @@ import org.keycloak.events.admin.ResourceType;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午10:43:33
- *
  */
 public class KeycloakAdminEventSelector implements KeycloakEventSelector<AdminEvent> {
 

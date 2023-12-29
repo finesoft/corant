@@ -20,7 +20,6 @@ import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
  * corant-modules-jms-shared
  *
  * @author bingo 下午6:19:43
- *
  */
 public class MessageReceivingTaskExecution {
 

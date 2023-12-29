@@ -42,7 +42,6 @@ import org.corant.shared.retry.BackoffStrategy.BackoffStrategyBuilder;
  * corant-modules-jms-shared
  *
  * @author bingo 下午3:33:51
- *
  */
 public class MessageReceivingMetaData {
 

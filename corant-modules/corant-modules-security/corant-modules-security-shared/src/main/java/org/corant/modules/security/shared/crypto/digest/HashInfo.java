@@ -21,7 +21,6 @@ import org.corant.shared.util.Bytes;
  * corant-modules-security-shared
  *
  * @author bingo 下午2:07:59
- *
  */
 public class HashInfo {
 

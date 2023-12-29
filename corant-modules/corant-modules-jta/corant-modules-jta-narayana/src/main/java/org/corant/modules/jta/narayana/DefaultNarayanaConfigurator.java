@@ -32,7 +32,6 @@ import com.arjuna.ats.jta.common.JTAEnvironmentBean;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午9:53:18
- *
  */
 public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
 

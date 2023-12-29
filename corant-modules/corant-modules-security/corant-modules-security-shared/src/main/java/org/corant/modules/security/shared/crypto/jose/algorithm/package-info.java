@@ -15,6 +15,5 @@
  * corant-modules-security-shared
  *
  * @author bingo 下午8:15:57
- *
  */
 package org.corant.modules.security.shared.crypto.jose.algorithm;

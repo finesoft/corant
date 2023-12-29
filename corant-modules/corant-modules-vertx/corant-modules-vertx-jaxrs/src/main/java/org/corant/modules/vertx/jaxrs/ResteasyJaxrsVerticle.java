@@ -36,7 +36,6 @@ import io.vertx.core.http.HttpServerOptions;
  * corant-modules-vertx-jaxrs
  *
  * @author bingo 上午10:51:39
- *
  */
 public class ResteasyJaxrsVerticle extends AbstractVerticle {
 

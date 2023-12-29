@@ -28,7 +28,6 @@ import org.corant.shared.resource.Resource;
  * corant-modules-security-shared
  *
  * @author bingo 下午7:45:01
- *
  */
 public interface JoseProvider {
 

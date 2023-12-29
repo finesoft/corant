@@ -22,7 +22,6 @@ import java.util.UUID;
  * corant-modules-query-api
  *
  * @author bingo 上午10:14:58
- *
  */
 public class Script implements Serializable {
 

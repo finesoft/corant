@@ -20,7 +20,6 @@ import org.glassfish.enterprise.concurrent.spi.TransactionHandle;
  * corant-context
  *
  * @author bingo 下午7:52:27
- *
  */
 public class TransactionHandleImpl implements TransactionHandle {
   private final Transaction transaction;

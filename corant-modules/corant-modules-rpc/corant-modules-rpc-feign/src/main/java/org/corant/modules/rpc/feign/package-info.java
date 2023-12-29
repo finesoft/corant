@@ -15,6 +15,5 @@
  * corant-modules-rpc-feign
  *
  * @author bingo 9:53:44
- *
  */
 package org.corant.modules.rpc.feign;

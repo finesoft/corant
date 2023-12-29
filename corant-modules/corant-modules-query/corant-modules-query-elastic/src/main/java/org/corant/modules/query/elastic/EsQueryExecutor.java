@@ -38,7 +38,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * corant-modules-query-elastic
  *
  * @author bingo 下午8:18:15
- *
  */
 public interface EsQueryExecutor {
 

@@ -38,7 +38,6 @@ import java.util.function.Function;
  * @see <a href="http://openjdk.java.net/jeps/169">JEP169</a>
  * @see <a href="http://c2.com/cgi/wiki?ValueObject">ValueObject</a>
  * @author bingo 上午12:36:15
- *
  */
 public interface Value extends Serializable {
 

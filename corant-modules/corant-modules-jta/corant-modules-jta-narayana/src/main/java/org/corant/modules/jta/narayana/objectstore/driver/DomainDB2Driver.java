@@ -20,7 +20,6 @@ import java.sql.SQLException;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午11:00:15
- *
  */
 public class DomainDB2Driver extends AbstractDomainJDBCDriver {
 

@@ -23,7 +23,6 @@ import java.beans.Transient;
  * not raise property changed message, this is experimental.
  *
  * @author bingo 下午3:37:07
- *
  */
 public interface MergableMessage extends Message {
 

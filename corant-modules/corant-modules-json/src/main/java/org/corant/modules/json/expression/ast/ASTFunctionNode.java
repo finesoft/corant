@@ -24,7 +24,6 @@ import org.corant.modules.json.expression.Node;
  * corant-modules-json
  *
  * @author bingo 下午10:24:55
- *
  */
 public interface ASTFunctionNode extends ASTNode<Object> {
 

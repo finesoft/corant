@@ -15,6 +15,5 @@
  * corant-modules-elastic-plugin
  *
  * @author bingo 下午4:13:33
- *
  */
 package org.elasticsearch.index;

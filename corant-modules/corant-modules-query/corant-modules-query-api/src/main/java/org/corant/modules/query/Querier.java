@@ -24,7 +24,6 @@ import org.corant.modules.query.mapping.Query;
  * This interface will be refactored in the future to add more capabilities
  *
  * @author bingo 上午9:41:03
- *
  */
 public interface Querier {
 

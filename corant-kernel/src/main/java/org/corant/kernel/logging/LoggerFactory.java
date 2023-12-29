@@ -35,7 +35,6 @@ import org.corant.shared.util.UnsafeAccessors;
 
 /**
  * @author bingo 下午7:37:00
- *
  */
 public class LoggerFactory {
 

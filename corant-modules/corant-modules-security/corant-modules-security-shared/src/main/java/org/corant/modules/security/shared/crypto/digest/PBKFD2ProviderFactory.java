@@ -17,7 +17,6 @@ package org.corant.modules.security.shared.crypto.digest;
  * corant-modules-security-shared
  *
  * @author bingo 下午9:38:26
- *
  */
 public enum PBKFD2ProviderFactory {
 

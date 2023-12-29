@@ -28,7 +28,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午5:10:41
- *
  */
 public class ListsTest extends TestCase {
 

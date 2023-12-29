@@ -55,7 +55,6 @@ import org.corant.shared.util.Services;
  * corant-modules-jms-shared
  *
  * @author bingo 下午3:53:23
- *
  */
 public abstract class AbstractJMSExtension implements Extension {
 

@@ -26,7 +26,6 @@ import bin.JarLauncher;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午12:00:22
- *
  */
 public interface Packager {
   Charset CHARSET = StandardCharsets.UTF_8;

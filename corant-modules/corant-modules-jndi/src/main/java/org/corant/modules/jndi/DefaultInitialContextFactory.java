@@ -22,7 +22,6 @@ import javax.naming.spi.InitialContextFactory;
  * corant-modules-jndi
  *
  * @author bingo 下午2:13:28
- *
  */
 public class DefaultInitialContextFactory implements InitialContextFactory {
 

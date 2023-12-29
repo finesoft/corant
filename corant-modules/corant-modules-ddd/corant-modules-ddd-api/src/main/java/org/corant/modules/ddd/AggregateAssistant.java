@@ -27,7 +27,6 @@ import java.util.concurrent.CompletionStage;
  * </p>
  *
  * @author bingo 下午3:11:06
- *
  */
 public interface AggregateAssistant {
 

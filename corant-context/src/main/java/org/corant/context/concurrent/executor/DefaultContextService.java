@@ -25,7 +25,6 @@ import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
  * corant-context
  *
  * @author bingo 上午10:18:55
- *
  */
 public class DefaultContextService extends ContextServiceImpl {
 

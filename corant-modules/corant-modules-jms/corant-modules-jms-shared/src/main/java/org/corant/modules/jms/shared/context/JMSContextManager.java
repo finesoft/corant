@@ -23,7 +23,6 @@ import org.corant.context.ComponentManager.AbstractComponentManager;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:15:28
- *
  */
 public abstract class JMSContextManager
     extends AbstractComponentManager<JMSContextKey, JMSContext> {

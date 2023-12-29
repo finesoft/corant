@@ -24,7 +24,6 @@ import freemarker.template.TemplateModelException;
  * corant-modules-query-jpql
  *
  * @author bingo 下午7:56:57
- *
  */
 public class JpqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Object[]> {
 

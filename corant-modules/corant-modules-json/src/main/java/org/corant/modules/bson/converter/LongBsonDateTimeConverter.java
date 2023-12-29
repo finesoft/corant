@@ -21,7 +21,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * corant-modules-json
  *
  * @author bingo 上午10:43:57
- *
  */
 public class LongBsonDateTimeConverter extends AbstractConverter<Long, BsonDateTime> {
 

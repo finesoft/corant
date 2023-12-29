@@ -54,7 +54,6 @@ import jakarta.jms.JMSContext;
  *      changes to JMSContext to support injection (Option 4)-4</a>
  *
  * @author bingo 上午11:21:30
- *
  */
 public interface JMSContextService {
 

@@ -46,7 +46,6 @@ import org.corant.shared.util.Classes;
  * Thanks for the narayana team!
  *
  * @author bingo 上午9:45:50
- *
  */
 public abstract class TransactionalAction {
 

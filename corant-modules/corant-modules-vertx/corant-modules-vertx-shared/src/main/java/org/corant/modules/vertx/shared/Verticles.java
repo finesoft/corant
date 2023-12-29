@@ -22,7 +22,6 @@ import io.vertx.core.Vertx;
  * corant-modules-vertx-shared
  *
  * @author bingo 下午3:46:50
- *
  */
 public class Verticles {
 

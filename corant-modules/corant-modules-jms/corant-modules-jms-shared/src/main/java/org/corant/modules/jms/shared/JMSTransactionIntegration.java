@@ -43,7 +43,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:12:28
- *
  */
 public class JMSTransactionIntegration implements TransactionIntegration {
 

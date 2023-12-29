@@ -20,7 +20,6 @@ import java.util.Map;
  * corant-modules-dsa
  *
  * @author bingo 下午1:45:22
- *
  */
 public class MinkowskiDistance extends CustomizedDistance {
 

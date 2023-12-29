@@ -46,7 +46,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * A simple tool class use for register, de-register or invoke MBean operations.
  *
  * @author bingo 12:00:58
- *
  */
 public class MBeans {
 

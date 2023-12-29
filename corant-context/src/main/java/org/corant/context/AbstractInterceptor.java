@@ -35,7 +35,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-context
  *
  * @author bingo 上午9:41:39
- *
  */
 public abstract class AbstractInterceptor {
 

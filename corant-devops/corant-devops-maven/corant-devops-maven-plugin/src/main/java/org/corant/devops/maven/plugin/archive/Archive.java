@@ -25,7 +25,6 @@ import java.util.function.Predicate;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午2:48:41
- *
  */
 public interface Archive extends Iterable<Archive.Entry> {
 

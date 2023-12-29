@@ -15,6 +15,5 @@
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:43:00
- *
  */
 package org.corant.modules.elastic.data.service;

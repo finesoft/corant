@@ -41,7 +41,6 @@ import com.sun.management.HotSpotDiagnosticMXBean;
  * corant-shared
  *
  * @author bingo 下午6:31:17
- *
  */
 public class Systems {
 

@@ -22,7 +22,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 上午12:37:24
- *
  */
 public class ClobStringConverter extends AbstractConverter<Clob, String> {
 

@@ -15,6 +15,5 @@
  * corant-modules-aicv-yolo
  *
  * @author bingo 上午11:25:08
- *
  */
 package org.corant.modules.aicv.yolo;

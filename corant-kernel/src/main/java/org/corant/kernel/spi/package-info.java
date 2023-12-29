@@ -15,6 +15,5 @@
  * corant-kernel
  *
  * @author bingo 下午2:33:05
- *
  */
 package org.corant.kernel.spi;

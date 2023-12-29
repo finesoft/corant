@@ -15,6 +15,5 @@
  * corant-modules-jcache-shared
  *
  * @author bingo 17:20:47
- *
  */
 package org.corant.modules.jcache.shared;

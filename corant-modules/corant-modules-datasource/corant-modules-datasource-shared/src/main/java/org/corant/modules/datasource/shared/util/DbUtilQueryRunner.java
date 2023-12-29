@@ -28,7 +28,6 @@ import org.apache.commons.dbutils.StatementConfiguration;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午2:34:58
- *
  */
 public class DbUtilQueryRunner extends QueryRunner {
 

@@ -41,7 +41,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午3:05:58
- *
  */
 public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 

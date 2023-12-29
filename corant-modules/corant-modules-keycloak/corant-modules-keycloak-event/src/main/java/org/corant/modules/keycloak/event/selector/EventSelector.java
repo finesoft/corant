@@ -28,7 +28,6 @@ import com.google.common.base.Objects;
  * corant-modules-keycloak-event
  *
  * @author bingo 下午10:06:29
- *
  */
 public class EventSelector implements Predicate<Event> {
 

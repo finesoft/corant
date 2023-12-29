@@ -20,7 +20,6 @@ import java.nio.file.WatchEvent.Kind;
  * corant-shared
  *
  * @author bingo 下午5:26:19
- *
  */
 public class PathUpdateEvent extends FileChangeEvent {
 

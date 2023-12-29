@@ -31,7 +31,6 @@ import org.glassfish.enterprise.concurrent.spi.TransactionSetupProvider;
  * corant-context
  *
  * @author bingo 下午7:49:26
- *
  */
 public class TransactionSetupProviderImpl implements TransactionSetupProvider {
   static final Logger logger = Logger.getLogger(TransactionSetupProviderImpl.class.getName());

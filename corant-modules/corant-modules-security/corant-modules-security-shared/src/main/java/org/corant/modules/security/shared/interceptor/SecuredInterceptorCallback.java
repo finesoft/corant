@@ -19,7 +19,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-shared
  *
  * @author bingo 下午7:42:06
- *
  */
 public interface SecuredInterceptorCallback extends Sortable {
 

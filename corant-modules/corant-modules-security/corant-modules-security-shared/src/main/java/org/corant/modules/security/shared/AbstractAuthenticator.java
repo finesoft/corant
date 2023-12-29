@@ -25,7 +25,6 @@ import org.corant.shared.ubiquity.Mutable.MutableObject;
  * corant-modules-security-shared
  *
  * @author bingo 下午9:15:09
- *
  */
 public abstract class AbstractAuthenticator implements Authenticator {
 

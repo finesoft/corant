@@ -42,7 +42,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * </p>
  *
  * @author bingo 上午10:57:03
- *
  */
 public class DefaultAggregateAssistant implements AggregateAssistant {
 

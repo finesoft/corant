@@ -27,7 +27,6 @@ import java.util.logging.Logger;
  * corant-context
  *
  * @author bingo 下午8:25:51
- *
  */
 public class ScheduledThreadPoolExecutorx extends ScheduledThreadPoolExecutor {
 

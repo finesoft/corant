@@ -15,6 +15,5 @@
  * corant-modules-mongodb
  *
  * @author bingo 上午11:39:45
- *
  */
 package org.corant.modules.mongodb;

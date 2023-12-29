@@ -36,7 +36,6 @@ import org.corant.shared.util.Strings;
  * method of injecting into the parent query result, etc.
  *
  * @author bingo 上午10:26:45
- *
  */
 public class FetchQuery implements Serializable {
 

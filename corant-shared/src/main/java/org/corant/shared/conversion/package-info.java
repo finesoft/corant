@@ -15,7 +15,6 @@
  * corant-shared
  *
  * @author bingo 下午12:44:50
- *
  */
 package org.corant.shared.conversion;
 

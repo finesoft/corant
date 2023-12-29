@@ -27,7 +27,6 @@ import org.corant.shared.util.Systems;
  * corant-config
  *
  * @author bingo 下午8:23:22
- *
  */
 public class Desensitizer {
 

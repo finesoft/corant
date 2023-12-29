@@ -51,7 +51,6 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * microprofile specification and provide a unified interface to caller.
  *
  * @author bingo 下午6:04:42
- *
  */
 public class CorantConfigSources {
 

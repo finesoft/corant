@@ -25,7 +25,6 @@ import jakarta.persistence.PersistenceContext;
  * An object fundamentally defined not by its attributes, but by a thread of continuity and identity
  *
  * @author bingo 下午12:01:50
- *
  */
 public interface Entity extends Serializable {
 

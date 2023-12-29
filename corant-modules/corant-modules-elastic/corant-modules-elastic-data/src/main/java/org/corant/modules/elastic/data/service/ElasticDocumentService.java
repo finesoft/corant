@@ -40,7 +40,6 @@ import org.elasticsearch.search.sort.SortBuilder;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:10:36
- *
  */
 public interface ElasticDocumentService {
 

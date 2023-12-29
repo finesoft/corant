@@ -37,7 +37,6 @@ import io.smallrye.jwt.config.JWTAuthContextInfoProvider;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午6:00:57
- *
  */
 public class MpSmallRyeJWTAuthCDIExtension implements Extension {
 

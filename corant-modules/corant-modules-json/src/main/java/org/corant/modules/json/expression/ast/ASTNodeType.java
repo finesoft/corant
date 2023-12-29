@@ -38,7 +38,6 @@ import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariable
  * corant-modules-json
  *
  * @author bingo 下午5:13:27
- *
  */
 public enum ASTNodeType {
 

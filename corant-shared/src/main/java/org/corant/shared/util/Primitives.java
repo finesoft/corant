@@ -35,7 +35,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午2:52:21
- *
  */
 public class Primitives {
 

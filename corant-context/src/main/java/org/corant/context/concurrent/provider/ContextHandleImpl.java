@@ -23,7 +23,6 @@ import org.glassfish.enterprise.concurrent.spi.ContextHandle;
  * corant-context
  *
  * @author bingo 下午9:25:41
- *
  */
 public class ContextHandleImpl implements ContextHandle {
 

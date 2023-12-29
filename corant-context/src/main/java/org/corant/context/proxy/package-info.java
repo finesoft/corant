@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 下午3:19:55
- *
  */
 package org.corant.context.proxy;

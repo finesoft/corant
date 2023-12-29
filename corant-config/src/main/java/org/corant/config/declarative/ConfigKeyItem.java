@@ -19,14 +19,13 @@ import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import jakarta.enterprise.util.AnnotationLiteral;
 import org.corant.shared.util.Strings;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
  * corant-config
  *
  * @author bingo 下午7:39:01
- *
  */
 @Documented
 @Retention(RUNTIME)

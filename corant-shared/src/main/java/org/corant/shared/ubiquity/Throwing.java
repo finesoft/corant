@@ -26,7 +26,6 @@ import java.util.function.Supplier;
  * corant-shared
  *
  * @author bingo 下午12:17:37
- *
  */
 public class Throwing {
 

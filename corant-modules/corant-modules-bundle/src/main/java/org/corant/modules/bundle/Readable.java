@@ -19,7 +19,6 @@ import java.util.Locale;
  * corant-modules-bundle
  *
  * @author bingo 下午8:16:35
- *
  */
 public interface Readable<T> {
 

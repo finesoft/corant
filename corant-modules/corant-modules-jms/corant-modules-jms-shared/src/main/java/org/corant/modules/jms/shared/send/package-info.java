@@ -15,6 +15,5 @@
  * corant-modules-jms-shared
  *
  * @author bingo 下午12:01:41
- *
  */
 package org.corant.modules.jms.shared.send;

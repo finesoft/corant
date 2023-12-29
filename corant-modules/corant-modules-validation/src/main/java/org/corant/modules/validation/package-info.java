@@ -15,6 +15,5 @@
  * corant-modules-validation
  * 
  * @author bingo 上午11:22:46
- *
  */
 package org.corant.modules.validation;

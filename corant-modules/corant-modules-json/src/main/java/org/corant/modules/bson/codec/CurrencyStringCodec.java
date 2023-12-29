@@ -24,7 +24,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午10:56:42
- *
  */
 public class CurrencyStringCodec implements Codec<Currency> {
   @Override

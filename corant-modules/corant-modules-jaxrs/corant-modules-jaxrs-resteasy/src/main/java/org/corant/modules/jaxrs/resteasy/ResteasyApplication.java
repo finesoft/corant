@@ -27,7 +27,6 @@ import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 下午2:54:49
- *
  */
 public @interface ResteasyApplication {
 

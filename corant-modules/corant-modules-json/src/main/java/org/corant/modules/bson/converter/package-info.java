@@ -15,6 +15,5 @@
  * corant-modules-json
  * 
  * @author bingo 上午10:47:09
- *
  */
 package org.corant.modules.bson.converter;

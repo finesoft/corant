@@ -25,7 +25,6 @@ import com.mongodb.MongoClientSettings.Builder;
  * corant-modules-mongodb
  *
  * @author bingo 下午5:04:39
- *
  */
 public interface MongoClientConfigurator extends Sortable {
 

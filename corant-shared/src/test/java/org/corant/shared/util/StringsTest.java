@@ -44,7 +44,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 上午9:40:02
- *
  */
 public class StringsTest extends TestCase {
 

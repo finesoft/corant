@@ -33,7 +33,6 @@ import org.corant.shared.util.Services;
  * corant-context
  *
  * @author bingo 上午11:59:35
- *
  */
 public class StartupExtension implements Extension {
 

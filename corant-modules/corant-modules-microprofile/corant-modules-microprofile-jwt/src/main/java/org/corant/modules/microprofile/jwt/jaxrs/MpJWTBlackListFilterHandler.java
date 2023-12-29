@@ -19,7 +19,6 @@ import jakarta.ws.rs.container.ContainerRequestContext;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午7:49:14
- *
  */
 public interface MpJWTBlackListFilterHandler {
 

@@ -25,7 +25,6 @@ import org.corant.shared.ubiquity.Tuple.Triple;
  * corant-modules-query-jpql
  *
  * @author bingo 下午7:46:22
- *
  */
 public class FreemarkerJpqlQuerierBuilder
     extends FreemarkerDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {

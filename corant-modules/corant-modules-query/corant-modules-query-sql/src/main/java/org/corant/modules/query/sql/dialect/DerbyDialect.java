@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:42:27
- *
  */
 public class DerbyDialect implements Dialect {
 

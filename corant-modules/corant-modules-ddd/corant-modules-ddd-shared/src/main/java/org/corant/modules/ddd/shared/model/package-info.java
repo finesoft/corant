@@ -15,7 +15,6 @@
  * corant-modules-ddd-shared
  *
  * @author bingo 下午3:49:10
- *
  */
 package org.corant.modules.ddd.shared.model;
 

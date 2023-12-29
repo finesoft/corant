@@ -15,6 +15,5 @@
  * corant-modules-query-mongodb
  *
  * @author bingo 上午10:04:01
- *
  */
 package org.corant.modules.query.mongodb.converter;

@@ -22,7 +22,6 @@ import org.corant.devops.maven.plugin.archive.Archive.Entry;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午3:47:04
- *
  */
 public class ClassPathEntry implements Entry {
 

@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午11:26:00
- *
  */
 public class Objects {
 

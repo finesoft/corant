@@ -31,7 +31,6 @@ import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
  * corant-modules-query-elastic
  *
  * @author bingo 下午4:35:55
- *
  */
 public class DefaultEsNamedQuerier extends
     AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsNamedQuerier {

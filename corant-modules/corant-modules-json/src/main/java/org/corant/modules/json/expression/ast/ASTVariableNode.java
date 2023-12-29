@@ -21,7 +21,6 @@ import org.corant.modules.json.expression.EvaluationContext;
  * corant-modules-json
  *
  * @author bingo 下午10:24:55
- *
  */
 public interface ASTVariableNode extends ASTNode<Object> {
 

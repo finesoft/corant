@@ -15,6 +15,5 @@
  * corant-modules-lang-javascript
  *
  * @author bingo 下午2:55:03
- *
  */
 package org.corant.modules.lang.javascript;

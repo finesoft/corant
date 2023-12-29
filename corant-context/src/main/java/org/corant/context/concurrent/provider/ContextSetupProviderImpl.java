@@ -37,7 +37,6 @@ import org.jboss.weld.manager.api.WeldManager;
  * corant-context
  *
  * @author bingo 下午8:44:55
- *
  */
 public class ContextSetupProviderImpl implements ContextSetupProvider {
 

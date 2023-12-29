@@ -31,7 +31,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-config
  *
  * @author bingo 上午11:27:11
- *
  */
 public class ConfigMetaResolver {
 

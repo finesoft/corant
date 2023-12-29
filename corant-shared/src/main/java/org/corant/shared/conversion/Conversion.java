@@ -52,7 +52,6 @@ import org.corant.shared.util.Objects;
  * corant-shared
  *
  * @author bingo 上午11:32:01
- *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Conversion {

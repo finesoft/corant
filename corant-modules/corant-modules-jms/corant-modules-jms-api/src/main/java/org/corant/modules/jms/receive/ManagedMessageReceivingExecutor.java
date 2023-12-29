@@ -17,7 +17,6 @@ package org.corant.modules.jms.receive;
  * corant-modules-jms-api
  *
  * @author bingo 下午12:01:54
- *
  */
 public interface ManagedMessageReceivingExecutor {
 

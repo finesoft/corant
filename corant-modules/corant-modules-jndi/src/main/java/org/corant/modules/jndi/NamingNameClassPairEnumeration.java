@@ -22,7 +22,6 @@ import javax.naming.NamingException;
  * corant-modules-jndi
  *
  * @author bingo 下午3:13:20
- *
  */
 public class NamingNameClassPairEnumeration implements NamingEnumeration<NameClassPair> {
 

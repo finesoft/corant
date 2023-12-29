@@ -30,7 +30,6 @@ import java.nio.file.StandardOpenOption;
  * corant-shared
  *
  * @author bingo 上午11:20:32
- *
  */
 public class PathResource implements WritableResource {
 

@@ -19,7 +19,6 @@ import org.corant.modules.json.expression.EvaluationContext;
  * corant-modules-json
  *
  * @author bingo 下午9:25:56
- *
  */
 public interface ASTPredicateNode extends ASTNode<Boolean> {
 

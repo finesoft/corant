@@ -15,6 +15,5 @@
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 上午11:19:58
- *
  */
 package org.corant.modules.jpa.hibernate.ogm.type;

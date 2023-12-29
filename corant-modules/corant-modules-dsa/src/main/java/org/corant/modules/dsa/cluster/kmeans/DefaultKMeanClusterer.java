@@ -28,7 +28,6 @@ import org.corant.modules.dsa.cluster.distance.Distance;
  * Code base from https://github.com/eugenp/tutorials/blob/master/algorithms-miscellaneous-3
  *
  * @author bingo 下午2:14:34
- *
  */
 public class DefaultKMeanClusterer {
   /**

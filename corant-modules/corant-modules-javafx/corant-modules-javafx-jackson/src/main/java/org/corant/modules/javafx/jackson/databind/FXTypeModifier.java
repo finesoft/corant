@@ -25,7 +25,6 @@ import javafx.beans.property.ObjectProperty;
  * corant-modules-javafx-jackson
  *
  * @author bingo 上午11:13:48
- *
  */
 public class FXTypeModifier extends TypeModifier {
 

@@ -30,7 +30,6 @@ import java.util.Random;
  * corant-shared
  *
  * @author bingo 下午8:39:13
- *
  */
 public class Randoms {
 

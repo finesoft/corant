@@ -15,6 +15,5 @@
  * corant-modules-webserver-jetty
  * 
  * @author bingo 下午2:23:53
- *
  */
 package org.corant.modules.webserver.jetty;

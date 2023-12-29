@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-query-sql
  *
  * @author bingo 下午1:59:06
- *
  */
 public class CalciteDialect implements Dialect {
 

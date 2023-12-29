@@ -23,7 +23,6 @@ import org.corant.context.qualifier.Bundle;
  * corant-context
  *
  * @author bingo 下午10:14:42
- *
  */
 public class ResourceBundleProvider {
 

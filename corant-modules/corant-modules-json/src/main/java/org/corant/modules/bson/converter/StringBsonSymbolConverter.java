@@ -22,7 +22,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * corant-modules-json
  *
  * @author bingo 下午4:02:44
- *
  */
 public class StringBsonSymbolConverter extends AbstractConverter<String, BsonSymbol> {
 

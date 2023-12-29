@@ -34,7 +34,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午9:32:18
- *
  */
 public abstract class AbstractJWTSecurityContextManager<C> implements SecurityContextManager<C> {
 

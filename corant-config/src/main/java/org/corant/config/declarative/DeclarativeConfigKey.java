@@ -20,16 +20,15 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.corant.shared.util.Strings;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-config
  *
  * @author bingo 下午12:24:47
- *
  */
 @Qualifier
 @Retention(RUNTIME)

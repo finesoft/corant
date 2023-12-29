@@ -25,7 +25,6 @@ import org.corant.modules.query.shared.dynamic.javascript.JavaScriptDynamicQueri
  * corant-modules-query-jpql
  *
  * @author bingo 下午7:46:22
- *
  */
 public class JavascriptJpqlQuerierBuilder
     extends JavaScriptDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {

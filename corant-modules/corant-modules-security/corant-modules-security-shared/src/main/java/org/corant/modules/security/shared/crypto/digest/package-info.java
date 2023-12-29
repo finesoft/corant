@@ -15,6 +15,5 @@
  * corant-modules-security-shared
  *
  * @author bingo 下午4:48:43
- *
  */
 package org.corant.modules.security.shared.crypto.digest;

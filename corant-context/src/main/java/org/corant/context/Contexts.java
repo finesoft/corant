@@ -47,7 +47,6 @@ import org.jboss.weld.manager.api.WeldManager;
  * corant-context
  *
  * @author bingo 下午2:16:28
- *
  */
 public class Contexts {
 

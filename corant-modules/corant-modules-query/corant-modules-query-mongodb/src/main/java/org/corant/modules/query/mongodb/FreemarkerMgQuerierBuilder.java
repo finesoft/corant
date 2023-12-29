@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.Tuple.Triple;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午8:25:44
- *
  */
 public class FreemarkerMgQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Object>, MgNamedQuerier> {

@@ -19,7 +19,6 @@ import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
  * corant-modules-jms-shared
  *
  * @author bingo 14:59:51
- *
  */
 public interface MessageReceivingTaskFactory {
 

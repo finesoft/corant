@@ -17,7 +17,6 @@ package org.corant.modules.webserver.shared;
  * corant-modules-webserver-shared
  *
  * @author bingo 下午3:30:43
- *
  */
 public interface WebServerHandlers {
 

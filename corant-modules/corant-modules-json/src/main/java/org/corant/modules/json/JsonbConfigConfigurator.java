@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-json
  *
  * @author bingo 下午2:34:03
- *
  */
 public interface JsonbConfigConfigurator extends Sortable {
 

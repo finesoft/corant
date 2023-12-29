@@ -32,7 +32,6 @@ import junit.framework.TestCase;
  * corant-modules-json
  *
  * @author bingo 下午4:24:48
- *
  */
 public class JsonExpressionTest extends TestCase {
 

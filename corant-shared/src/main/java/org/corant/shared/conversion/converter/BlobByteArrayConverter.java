@@ -21,7 +21,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 下午11:58:07
- *
  */
 public class BlobByteArrayConverter extends AbstractConverter<Blob, byte[]> {
 

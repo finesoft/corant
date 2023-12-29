@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午5:40:35
- *
  */
 public class StringIntegerConverter extends AbstractNumberConverter<String, Integer> {
 

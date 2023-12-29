@@ -25,7 +25,6 @@ import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午10:40:19
- *
  */
 public class HibernateSQLServer2012Dialect extends SQLServerDialect {
 

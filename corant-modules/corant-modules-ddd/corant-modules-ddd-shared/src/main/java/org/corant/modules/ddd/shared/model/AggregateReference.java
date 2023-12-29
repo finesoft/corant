@@ -37,7 +37,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午5:53:48
- *
  */
 public interface AggregateReference<T extends Aggregate> extends EntityReference<T> {
 

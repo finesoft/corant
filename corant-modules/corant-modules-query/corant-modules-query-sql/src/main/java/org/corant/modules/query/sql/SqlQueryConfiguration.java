@@ -21,7 +21,6 @@ import org.corant.modules.query.sql.dialect.Dialect;
  * corant-modules-query-sql
  *
  * @author bingo 下午5:56:03
- *
  */
 public interface SqlQueryConfiguration {
 

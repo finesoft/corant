@@ -34,7 +34,6 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
  *
  * @see JPAProvider
  * @author bingo 下午4:18:45
- *
  */
 public class JPAInjectionServices implements JpaInjectionServices {
 

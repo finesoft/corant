@@ -23,7 +23,6 @@ import org.corant.shared.exception.GeneralRuntimeException;
  * corant-modules-security-api
  *
  * @author bingo 9:55:50
- *
  */
 public class AuthenticationException extends GeneralRuntimeException {
 

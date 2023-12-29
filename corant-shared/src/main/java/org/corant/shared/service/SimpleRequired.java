@@ -45,7 +45,6 @@ import org.corant.shared.util.Systems;
  * corant-shared
  *
  * @author bingo 下午9:24:34
- *
  */
 public class SimpleRequired implements Required {
 

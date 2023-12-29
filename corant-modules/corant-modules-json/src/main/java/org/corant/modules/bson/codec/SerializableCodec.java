@@ -35,7 +35,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:28:02
- *
  */
 public class SerializableCodec implements Codec<Serializable> {
   private final boolean compress;

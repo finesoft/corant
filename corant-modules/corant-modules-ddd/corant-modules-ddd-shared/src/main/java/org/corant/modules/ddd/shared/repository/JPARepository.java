@@ -44,7 +44,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午9:39:59
- *
  */
 public interface JPARepository extends Repository<Query> {
 

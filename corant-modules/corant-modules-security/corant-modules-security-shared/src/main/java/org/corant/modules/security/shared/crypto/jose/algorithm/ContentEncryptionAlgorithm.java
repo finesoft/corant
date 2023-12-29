@@ -17,7 +17,6 @@ package org.corant.modules.security.shared.crypto.jose.algorithm;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:12:13
- *
  */
 public enum ContentEncryptionAlgorithm {
 

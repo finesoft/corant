@@ -77,7 +77,6 @@ import org.corant.modules.jta.shared.TransactionService;
  *      changes to JMSContext to support injection (Option 4)-4</a>
  *
  * @author bingo 下午5:24:17
- *
  */
 public class ExtendedJMSContext implements JMSContext, Serializable {
 

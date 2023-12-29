@@ -15,6 +15,5 @@
  * corant-devops-docs-swagger
  * 
  * @author bingo 下午3:02:44
- *
  */
 package org.corant.devops.docs.swagger;

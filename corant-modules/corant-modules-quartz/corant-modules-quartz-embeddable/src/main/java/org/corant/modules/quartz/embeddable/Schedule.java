@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
  * corant-modules-quartz-embeddable
  *
  * @author bingo 下午2:29:05
- *
  */
 public class Schedule {
 

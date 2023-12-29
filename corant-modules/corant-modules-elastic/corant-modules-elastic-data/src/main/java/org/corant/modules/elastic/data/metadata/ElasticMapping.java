@@ -34,7 +34,6 @@ import org.elasticsearch.index.VersionType;
  * </p>
  *
  * @author bingo 下午2:47:08
- *
  */
 public class ElasticMapping implements Iterable<ElasticMapping> {
 

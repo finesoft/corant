@@ -21,7 +21,6 @@ import org.opencv.dnn.Net;
  * corant-modules-aicv-yolo
  *
  * @author bingo 下午2:24:52
- *
  */
 public class Nets {
 

@@ -31,7 +31,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午8:10:18
- *
  */
 public class Fields {
 

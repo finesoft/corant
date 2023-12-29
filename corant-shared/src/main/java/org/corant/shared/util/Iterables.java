@@ -40,7 +40,6 @@ import java.util.stream.StreamSupport;
  * corant-shared
  *
  * @author bingo 上午12:19:13
- *
  */
 public class Iterables {
 

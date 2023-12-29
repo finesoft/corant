@@ -45,7 +45,6 @@ import org.corant.shared.util.Texts;
  * corant-config
  *
  * @author bingo 下午4:02:23
- *
  */
 public class ConfigELProcessor {
 

@@ -32,7 +32,6 @@ import org.jboss.logging.Logger;
  * me(finesoft@gmail.com).
  *
  * @author bingo 下午2:38:48
- *
  */
 public class MpJWTHttpAuthenticationMechanism extends AbstractMPJWTHttpServletAuthentication
     implements HttpAuthenticationMechanism {

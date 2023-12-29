@@ -22,7 +22,6 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * corant-config
  *
  * @author bingo 下午5:18:52
- *
  */
 public class CorantConfigSource implements ConfigSource, AutoCloseable {
 

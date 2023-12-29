@@ -10,7 +10,6 @@ import org.hibernate.type.descriptor.java.LocalDateTimeJavaDescriptor;
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 下午12:52:35
- *
  */
 public class LocalDateTimeType extends AbstractGenericBasicType<LocalDateTime> {
 

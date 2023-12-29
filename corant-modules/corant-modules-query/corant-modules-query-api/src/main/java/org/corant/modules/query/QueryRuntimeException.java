@@ -19,7 +19,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-query-api
  *
  * @author bingo 下午5:47:42
- *
  */
 public class QueryRuntimeException extends CorantRuntimeException {
 

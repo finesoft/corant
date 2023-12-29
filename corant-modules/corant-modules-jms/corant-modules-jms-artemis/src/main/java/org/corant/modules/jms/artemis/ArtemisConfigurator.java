@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jms-artemis
  *
  * @author bingo 下午7:15:14
- *
  */
 public interface ArtemisConfigurator extends Sortable {
 

@@ -41,7 +41,6 @@ import jakarta.enterprise.inject.spi.WithAnnotations;
  * Unfinish yet
  *
  * @author bingo 下午2:39:57
- *
  */
 public class QueryExtension implements Extension {
 

@@ -22,7 +22,6 @@ import org.elasticsearch.index.IndexSettings;
  * corant-modules-elastic-plugin
  *
  * @author bingo 下午11:18:51
- *
  */
 public class MixedZhEnNGramTokenFilterFactory extends AbstractTokenFilterFactory {
 

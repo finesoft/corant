@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
  * corant-modules-logging
  *
  * @author bingo 下午5:07:19
- *
  */
 public class Log4jLoggerFactory {
 

@@ -29,7 +29,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jta-shared
  *
  * @author bingo 下午6:18:58
- *
  */
 public interface TransactionService {
 

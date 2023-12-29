@@ -24,7 +24,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:24:08
- *
  */
 public abstract class AbstractPBKDF2Provider extends AbstractHashProvider {
 

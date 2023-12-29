@@ -43,7 +43,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 下午9:21:10
- *
  */
 public abstract class AbstractTemporalConverter<S, T extends Temporal>
     extends AbstractConverter<S, T> {

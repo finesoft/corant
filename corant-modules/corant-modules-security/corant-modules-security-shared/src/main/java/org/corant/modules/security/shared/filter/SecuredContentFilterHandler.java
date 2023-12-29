@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:07:55
- *
  */
 public interface SecuredContentFilterHandler extends Sortable, Function<String, String> {
 

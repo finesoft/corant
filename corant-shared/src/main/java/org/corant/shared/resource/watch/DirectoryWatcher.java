@@ -44,7 +44,6 @@ import java.util.logging.Level;
  * corant-shared
  *
  * @author bingo 下午6:08:44
- *
  */
 public class DirectoryWatcher extends AbstractWatcher {
 

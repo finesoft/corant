@@ -24,7 +24,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:13:03
- *
  */
 public class DayOfWeekInt32Codec implements Codec<DayOfWeek> {
 

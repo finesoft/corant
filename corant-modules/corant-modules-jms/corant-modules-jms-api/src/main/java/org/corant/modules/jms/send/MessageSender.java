@@ -24,7 +24,6 @@ import java.util.Map;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:52:26
- *
  */
 public interface MessageSender {
 

@@ -24,7 +24,6 @@ import org.corant.shared.util.PathMatcher.RegexMatcher;
  * corant-modules-json
  *
  * @author bingo 上午10:04:31
- *
  */
 public class StringBsonRegexConverter extends AbstractConverter<String, BsonRegularExpression> {
 

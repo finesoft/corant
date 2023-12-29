@@ -25,7 +25,6 @@ import jakarta.servlet.http.HttpServletResponse;
  * preprocessing behavior without needing to modify each handler implementation.
  *
  * @author bingo 下午4:12:53
- *
  */
 public interface ResteasyHandlerInterceptor {
 

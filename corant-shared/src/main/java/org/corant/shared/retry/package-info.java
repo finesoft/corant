@@ -15,6 +15,5 @@
  * corant-shared
  *
  * @author bingo 下午1:04:30
- *
  */
 package org.corant.shared.retry;

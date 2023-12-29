@@ -33,7 +33,6 @@ import org.jetbrains.kotlin.config.Services;
  * corant-modules-lang-kotlin
  *
  * @author bingo 下午2:33:02
- *
  */
 public class KotlinCompilationService implements CompilationService {
 

@@ -32,7 +32,6 @@ import javafx.collections.ObservableSet;
  * corant-modules-javafx-jackson
  *
  * @author bingo 下午9:36:44
- *
  */
 public class FXObservableDeserializers extends Deserializers.Base {
 

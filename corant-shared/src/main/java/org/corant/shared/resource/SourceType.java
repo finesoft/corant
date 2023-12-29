@@ -28,7 +28,6 @@ import java.util.Optional;
  * </p>
  *
  * @author bingo 下午3:31:29
- *
  */
 public enum SourceType {
 

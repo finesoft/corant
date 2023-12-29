@@ -37,7 +37,6 @@ import org.eclipse.microprofile.config.spi.Converter;
  * corant-config
  *
  * @author bingo 下午5:47:24
- *
  */
 public class CorantConfig implements Config, Serializable {
 

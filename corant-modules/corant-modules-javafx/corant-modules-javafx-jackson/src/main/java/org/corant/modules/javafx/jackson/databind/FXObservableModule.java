@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.Module;
  * <a href="mailto:finesoft@gmail.com">finesoft@gmail.com</a>
  *
  * @author bingo 下午9:38:42
- *
  */
 public class FXObservableModule extends Module {
 

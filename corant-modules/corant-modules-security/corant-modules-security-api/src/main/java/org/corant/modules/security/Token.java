@@ -22,7 +22,6 @@ import java.util.Objects;
  * corant-modules-security-api
  *
  * @author bingo 下午8:20:38
- *
  */
 public interface Token extends Serializable {
 

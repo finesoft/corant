@@ -15,6 +15,5 @@
  * corant-modules-query-api
  *
  * @author bingo 下午3:54:29
- *
  */
 package org.corant.modules.query.mapping;

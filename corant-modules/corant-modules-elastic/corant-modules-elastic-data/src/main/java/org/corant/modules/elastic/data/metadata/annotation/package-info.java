@@ -15,6 +15,5 @@
  * corant-modules-elastic-data
  *
  * @author bingo 上午11:41:11
- *
  */
 package org.corant.modules.elastic.data.metadata.annotation;

@@ -24,7 +24,6 @@ import java.util.Set;
  * Unfinish yet
  *
  * @author bingo 上午11:34:26
- *
  */
 public class TrieMap<V> extends AbstractMap<CharSequence, V>
     implements Serializable, Map<CharSequence, V> {

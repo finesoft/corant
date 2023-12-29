@@ -71,7 +71,6 @@ import org.corant.shared.ubiquity.TypeLiteral;
  * corant-shared
  *
  * @author bingo 下午4:21:10
- *
  */
 public class Maps {
 

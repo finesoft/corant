@@ -41,7 +41,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:52:36
- *
  */
 public class DefaultMessageSender implements MessageSender {
   protected boolean multicast;

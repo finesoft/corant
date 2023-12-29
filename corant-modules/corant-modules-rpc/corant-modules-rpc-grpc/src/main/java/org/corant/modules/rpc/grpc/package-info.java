@@ -15,6 +15,5 @@
  * corant-modules-rpc-grpc
  *
  * @author bingo 下午11:06:13
- *
  */
 package org.corant.modules.rpc.grpc;

@@ -15,6 +15,5 @@
  * corant-modules-jms-api
  *
  * @author bingo 下午4:05:13
- *
  */
 package org.corant.modules.jms.metadata;

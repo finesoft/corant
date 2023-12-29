@@ -27,7 +27,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 上午10:25:38
- *
  */
 public class ClassesTest extends TestCase {
 

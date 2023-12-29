@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * </p>
  *
  * @author bingo 2015年3月23日
- *
  */
 public class Bytes {
 

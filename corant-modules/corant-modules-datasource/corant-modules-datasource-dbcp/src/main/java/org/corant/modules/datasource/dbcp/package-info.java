@@ -15,6 +15,5 @@
  * corant-modules-datasource-dbcp
  *
  * @author bingo 下午12:46:08
- *
  */
 package org.corant.modules.datasource.dbcp;

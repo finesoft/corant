@@ -43,7 +43,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午6:06:58
- *
  */
 public class MpJWTAuthorizationFilterRegistrar implements DynamicFeature {
 

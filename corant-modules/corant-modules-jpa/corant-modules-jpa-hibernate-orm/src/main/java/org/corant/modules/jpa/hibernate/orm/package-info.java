@@ -15,6 +15,5 @@
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 上午11:27:06
- *
  */
 package org.corant.modules.jpa.hibernate.orm;

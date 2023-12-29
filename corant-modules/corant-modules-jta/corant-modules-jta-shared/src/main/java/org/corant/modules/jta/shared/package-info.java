@@ -15,6 +15,5 @@
  * corant-modules-jta-shared
  *
  * @author bingo 下午2:47:48
- *
  */
 package org.corant.modules.jta.shared;

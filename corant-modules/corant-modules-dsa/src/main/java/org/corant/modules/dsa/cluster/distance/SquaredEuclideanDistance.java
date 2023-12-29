@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-dsa
  *
  * @author bingo 下午1:33:20
- *
  */
 public class SquaredEuclideanDistance implements Distance, DistanceMeasure {
 

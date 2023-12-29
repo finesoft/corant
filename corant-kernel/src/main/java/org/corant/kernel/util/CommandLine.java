@@ -26,7 +26,6 @@ import org.corant.shared.util.Strings;
  * corant-kernel
  *
  * @author bingo 下午2:34:19
- *
  */
 public class CommandLine {
 

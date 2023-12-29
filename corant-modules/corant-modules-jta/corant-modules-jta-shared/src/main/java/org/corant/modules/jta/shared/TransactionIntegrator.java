@@ -34,7 +34,6 @@ import javax.transaction.xa.Xid;
  * corant-modules-jta-shared
  *
  * @author bingo 下午2:26:37
- *
  */
 public interface TransactionIntegrator {
 

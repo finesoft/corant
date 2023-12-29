@@ -17,7 +17,6 @@ package org.corant.kernel.event;
  * corant-kernel
  *
  * @author bingo 下午12:02:58
- *
  */
 public interface CorantLifecycleEvent {
 

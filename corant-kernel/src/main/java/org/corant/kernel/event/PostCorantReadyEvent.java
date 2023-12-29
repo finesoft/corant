@@ -26,7 +26,6 @@ import java.util.Arrays;
  * be able to continue processing.
  *
  * @author bingo 上午10:59:20
- *
  */
 public class PostCorantReadyEvent implements CorantLifecycleEvent {
   private final String[] args;

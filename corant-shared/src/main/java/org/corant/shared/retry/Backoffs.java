@@ -20,7 +20,6 @@ import org.corant.shared.util.Randoms;
  * corant-shared
  *
  * @author bingo 上午11:20:04
- *
  */
 public class Backoffs {
 

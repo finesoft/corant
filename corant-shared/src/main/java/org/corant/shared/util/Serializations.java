@@ -26,7 +26,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午4:26:15
- *
  */
 public class Serializations {
 

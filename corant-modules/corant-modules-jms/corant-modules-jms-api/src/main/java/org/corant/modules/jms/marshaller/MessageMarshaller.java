@@ -25,7 +25,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:26:42
- *
  */
 public interface MessageMarshaller {
 

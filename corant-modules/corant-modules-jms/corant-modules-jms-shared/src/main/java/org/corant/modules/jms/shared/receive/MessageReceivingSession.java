@@ -39,7 +39,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-modules-jms-shared
  *
  * @author bingo 下午12:23:02
- *
  */
 public class MessageReceivingSession implements Session {
 

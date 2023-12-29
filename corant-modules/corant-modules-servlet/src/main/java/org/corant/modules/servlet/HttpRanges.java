@@ -37,7 +37,6 @@ import org.corant.shared.ubiquity.Tuple.Range;
  * corant-modules-servlet
  *
  * @author bingo 下午6:35:22
- *
  */
 public class HttpRanges {
 

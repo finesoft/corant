@@ -20,7 +20,6 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:46:20
- *
  */
 public class PostgreSQLDialect implements Dialect {
 

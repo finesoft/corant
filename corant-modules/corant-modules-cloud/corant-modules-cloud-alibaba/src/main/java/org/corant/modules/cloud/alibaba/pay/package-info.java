@@ -15,6 +15,5 @@
  * corant-modules-cloud-alibaba
  *
  * @author bingo 下午2:26:12
- *
  */
 package org.corant.modules.cloud.alibaba.pay;

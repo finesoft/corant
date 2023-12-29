@@ -21,7 +21,6 @@ import org.corant.modules.query.mapping.Query;
  * corant-modules-query-shared
  *
  * @author bingo 上午9:52:43
- *
  */
 public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 

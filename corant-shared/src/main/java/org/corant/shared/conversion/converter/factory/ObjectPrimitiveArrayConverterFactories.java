@@ -33,7 +33,6 @@ import org.corant.shared.conversion.ConverterFactory;
  * {@link Conversion}, and recursive loops should be avoided.
  *
  * @author bingo 上午11:59:51
- *
  */
 public class ObjectPrimitiveArrayConverterFactories {
 

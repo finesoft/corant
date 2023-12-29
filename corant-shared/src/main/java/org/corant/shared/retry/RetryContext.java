@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * corant-shared
  *
  * @author bingo 下午11:38:14
- *
  */
 public interface RetryContext {
 

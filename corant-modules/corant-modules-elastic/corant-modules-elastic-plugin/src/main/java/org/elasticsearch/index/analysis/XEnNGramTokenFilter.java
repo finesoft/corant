@@ -30,7 +30,6 @@ import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
  * specified minimum
  *
  * @author bingo 下午11:19:27
- *
  */
 public class XEnNGramTokenFilter extends TokenFilter {
 

@@ -17,7 +17,6 @@ package org.corant.shared.retry;
  * corant-shared
  *
  * @author bingo 上午12:04:03
- *
  */
 public interface RecoveryCallback {
 

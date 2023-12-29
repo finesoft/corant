@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 下午3:29:18
- *
  */
 package org.corant.context;

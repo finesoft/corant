@@ -32,7 +32,6 @@ import org.corant.shared.exception.GeneralRuntimeException;
  * message.
  *
  * @author bingo 下午12:07:35
- *
  */
 public class DefaultExceptionMessageResolver implements ExceptionMessageResolver {
 

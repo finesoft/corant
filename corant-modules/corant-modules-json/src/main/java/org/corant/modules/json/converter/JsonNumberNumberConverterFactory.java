@@ -28,7 +28,6 @@ import org.corant.shared.conversion.ConverterFactory;
  * corant-modules-json
  *
  * @author bingo 下午6:37:13
- *
  */
 public class JsonNumberNumberConverterFactory implements ConverterFactory<JsonNumber, Object> {
 

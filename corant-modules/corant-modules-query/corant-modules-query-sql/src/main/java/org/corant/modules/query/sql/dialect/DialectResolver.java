@@ -20,7 +20,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:51:33
- *
  */
 public interface DialectResolver extends Sortable {
 

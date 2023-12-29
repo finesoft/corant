@@ -24,7 +24,6 @@ import org.corant.modules.security.shared.crypto.Keys;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:52:56
- *
  */
 public enum SymmetricCipherProviderFactory {
 

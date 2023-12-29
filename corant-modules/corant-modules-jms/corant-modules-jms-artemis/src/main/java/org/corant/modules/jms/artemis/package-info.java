@@ -15,6 +15,5 @@
  * corant-modules-jms-artemis
  *
  * @author bingo 下午4:34:24
- *
  */
 package org.corant.modules.jms.artemis;

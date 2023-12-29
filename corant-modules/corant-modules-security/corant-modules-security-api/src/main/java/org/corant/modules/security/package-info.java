@@ -15,6 +15,5 @@
  * corant-modules-security-api
  *
  * @author bingo 下午6:13:04
- *
  */
 package org.corant.modules.security;

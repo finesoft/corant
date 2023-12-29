@@ -15,6 +15,5 @@
  * corant-modules-lang-kotlin
  *
  * @author bingo 下午12:17:51
- *
  */
 package org.corant.modules.lang.kotlin;

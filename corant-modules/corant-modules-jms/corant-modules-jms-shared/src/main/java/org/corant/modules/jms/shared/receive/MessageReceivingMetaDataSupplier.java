@@ -20,7 +20,6 @@ import java.util.function.Supplier;
  * corant-modules-jms-shared
  *
  * @author bingo 上午10:36:03
- *
  */
 public interface MessageReceivingMetaDataSupplier extends Supplier<List<MessageReceivingMetaData>> {
 

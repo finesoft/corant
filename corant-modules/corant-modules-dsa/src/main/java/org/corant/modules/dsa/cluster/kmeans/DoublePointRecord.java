@@ -28,7 +28,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-dsa
  *
  * @author bingo 上午9:58:33
- *
  */
 public class DoublePointRecord implements Clusterable {
 

@@ -17,7 +17,6 @@ package org.corant.modules.query;
  * corant-modules-query-api
  *
  * @author bingo 上午9:54:08
- *
  */
 public interface NamedQueryService extends QueryService<String, Object> {
 }

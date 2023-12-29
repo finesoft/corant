@@ -19,7 +19,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:51:14
- *
  */
 public class Providers {
 

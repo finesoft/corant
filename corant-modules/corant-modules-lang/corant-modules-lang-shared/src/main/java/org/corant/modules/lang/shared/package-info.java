@@ -15,6 +15,5 @@
  * corant-modules-lang-shared
  * 
  * @author bingo 上午10:04:11
- *
  */
 package org.corant.modules.lang.shared;

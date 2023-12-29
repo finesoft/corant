@@ -25,7 +25,6 @@ import org.corant.modules.ddd.Message.MessageMetadata;
  * corant-modules-ddd-api
  *
  * @author bingo 上午10:08:17
- *
  */
 public class AggregateMessageMetadata implements MessageMetadata {
   private static final long serialVersionUID = -3045014218500057397L;

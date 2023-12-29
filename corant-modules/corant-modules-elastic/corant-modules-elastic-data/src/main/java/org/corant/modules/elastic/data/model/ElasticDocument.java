@@ -19,7 +19,6 @@ import java.io.Serializable;
  * corant-modules-elastic-data
  *
  * @author bingo 下午2:16:59
- *
  */
 public interface ElasticDocument extends Serializable {
 

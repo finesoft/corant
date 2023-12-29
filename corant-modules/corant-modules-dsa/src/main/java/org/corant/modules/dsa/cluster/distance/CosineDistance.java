@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-dsa
  *
  * @author bingo 下午1:55:18
- *
  */
 public class CosineDistance implements Distance, DistanceMeasure {
 

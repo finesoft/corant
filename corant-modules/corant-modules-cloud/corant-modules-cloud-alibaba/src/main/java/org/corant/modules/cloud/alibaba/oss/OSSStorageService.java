@@ -46,7 +46,6 @@ import com.aliyun.oss.model.StorageClass;
  * corant-modules-cloud-alibaba
  *
  * @author bingo 上午11:31:54
- *
  */
 public class OSSStorageService {
   protected final Logger logger = Logger.getLogger(getClass().getName());

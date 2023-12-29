@@ -31,7 +31,6 @@ import org.corant.modules.jms.annotation.MessageProperty;
  * corant-modules-jms-api
  *
  * @author bingo 下午4:08:29
- *
  */
 public class MessageDestinationMetaData {
 

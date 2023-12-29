@@ -26,7 +26,6 @@ import junit.framework.TestCase;
  * corant-shared
  *
  * @author bingo 下午2:32:08
- *
  */
 public class TupleTest extends TestCase {
 

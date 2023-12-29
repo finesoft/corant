@@ -22,7 +22,6 @@ import junit.framework.TestCase;
  * corant-modules-security-shared
  *
  * @author bingo 上午10:40:54
- *
  */
 public class HMACProviderTest extends TestCase {
 

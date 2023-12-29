@@ -20,7 +20,6 @@ import org.corant.shared.conversion.ConversionException;
  * corant-shared
  *
  * @author bingo 下午6:21:39
- *
  */
 public class StringCharacterConverter extends AbstractConverter<String, Character> {
 

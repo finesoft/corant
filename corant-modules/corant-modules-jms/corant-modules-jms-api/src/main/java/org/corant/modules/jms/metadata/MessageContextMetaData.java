@@ -21,7 +21,6 @@ import org.corant.modules.jms.annotation.MessageContext;
  * corant-modules-jms-api
  *
  * @author bingo 下午4:05:29
- *
  */
 public class MessageContextMetaData {
 

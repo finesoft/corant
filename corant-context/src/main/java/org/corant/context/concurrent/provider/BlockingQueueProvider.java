@@ -20,7 +20,6 @@ import org.corant.context.concurrent.ManagedExecutorConfig;
  * corant-context
  *
  * @author bingo 下午2:55:50
- *
  */
 public interface BlockingQueueProvider {
 

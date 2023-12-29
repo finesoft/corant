@@ -25,7 +25,6 @@ import javax.sql.DataSource;
  * Simple base flyway config provider include datasource and locations
  *
  * @author bingo 下午10:17:16
- *
  */
 public interface FlywayConfigProvider {
 

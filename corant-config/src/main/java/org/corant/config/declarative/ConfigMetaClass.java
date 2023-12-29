@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
  * corant-config
  *
  * @author bingo 11:32:11
- *
  */
 public class ConfigMetaClass {
 

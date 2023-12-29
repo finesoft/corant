@@ -15,6 +15,5 @@
  * corant-modules-dsa
  *
  * @author bingo 下午5:43:48
- *
  */
 package org.corant.modules.dsa.structure;

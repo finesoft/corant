@@ -22,7 +22,6 @@ import io.undertow.servlet.api.DeploymentInfo;
  * corant-modules-webserver-undertow
  *
  * @author bingo 上午10:32:02
- *
  */
 public interface UndertowWebServerConfigurator extends Sortable {
 

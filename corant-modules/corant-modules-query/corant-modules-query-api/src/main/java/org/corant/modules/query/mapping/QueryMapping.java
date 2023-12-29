@@ -37,7 +37,6 @@ import org.corant.modules.query.mapping.Script.ScriptType;
  * contains some queries.
  *
  * @author bingo 下午3:41:30
- *
  */
 public class QueryMapping {
 

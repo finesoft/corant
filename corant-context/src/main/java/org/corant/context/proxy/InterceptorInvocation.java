@@ -28,7 +28,6 @@ import jakarta.interceptor.InvocationContext;
  * Note: Only supports {@code InterceptionType.AROUND_INVOKE}
  *
  * @author bingo 上午10:41:54
- *
  */
 public class InterceptorInvocation {
 

@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-modules-query-sql
  *
  * @author bingo 下午7:46:22
- *
  */
 public class JavaBeanSqlQuerierBuilder
     extends JavaBeanDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {

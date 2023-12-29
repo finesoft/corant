@@ -22,7 +22,6 @@ import org.corant.shared.util.Classes;
  * Describe class resource, but doesn't load it right away.
  *
  * @author bingo 下午2:04:09
- *
  */
 public class ClassResource extends ClassPathResource {
 

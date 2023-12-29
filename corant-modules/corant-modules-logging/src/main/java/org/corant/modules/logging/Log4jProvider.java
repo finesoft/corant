@@ -29,7 +29,6 @@ import org.corant.shared.util.Systems;
  * corant-modules-logging
  *
  * @author bingo 上午10:38:40
- *
  */
 public class Log4jProvider implements CorantBootHandler {
 

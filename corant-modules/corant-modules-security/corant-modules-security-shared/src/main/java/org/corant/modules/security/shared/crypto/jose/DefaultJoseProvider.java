@@ -46,7 +46,6 @@ import org.jose4j.lang.JoseException;
  * corant-modules-security-shared
  *
  * @author bingo 下午7:51:27
- *
  */
 public class DefaultJoseProvider implements JoseProvider {
 

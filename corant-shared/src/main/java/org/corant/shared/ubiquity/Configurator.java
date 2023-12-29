@@ -19,7 +19,6 @@ import java.util.function.Consumer;
  * corant-shared
  *
  * @author bingo 下午12:00:21
- *
  */
 public interface Configurator extends Sortable, Consumer<Object> {
   boolean supports(Object object);

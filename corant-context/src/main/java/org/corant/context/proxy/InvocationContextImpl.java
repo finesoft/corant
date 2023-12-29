@@ -29,7 +29,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * A simple interceptor call context implementation that works with {@link InterceptorInvocation}.
  *
  * @author bingo 上午11:10:02
- *
  */
 public class InvocationContextImpl implements InvocationContext {
 

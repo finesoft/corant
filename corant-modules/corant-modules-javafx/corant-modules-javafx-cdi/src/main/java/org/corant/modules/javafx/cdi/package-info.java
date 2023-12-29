@@ -15,6 +15,5 @@
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午11:06:37
- *
  */
 package org.corant.modules.javafx.cdi;

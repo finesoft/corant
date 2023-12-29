@@ -44,7 +44,6 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  * corant-config
  *
  * @author bingo 下午4:34:28
- *
  */
 public class ConfigExtension20 implements Extension {
 

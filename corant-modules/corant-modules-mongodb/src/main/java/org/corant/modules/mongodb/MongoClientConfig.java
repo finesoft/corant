@@ -60,7 +60,6 @@ import com.mongodb.MongoCredential;
  * corant-modules-mongodb
  *
  * @author bingo 下午12:10:04
- *
  */
 public class MongoClientConfig implements NamedObject {
 

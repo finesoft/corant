@@ -33,7 +33,6 @@ import io.agroal.pool.ConnectionHandler;
  * the local transaction cannot be rolled back.
  *
  * @author bingo 下午4:13:35
- *
  */
 public class MyLocalXAResource implements XAResourceWrapper {
 

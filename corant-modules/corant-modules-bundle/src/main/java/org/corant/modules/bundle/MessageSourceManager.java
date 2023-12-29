@@ -22,7 +22,6 @@ import java.util.stream.Stream;
  * reloading) or release all the message sources.
  *
  * @author bingo 上午10:12:28
- *
  */
 public interface MessageSourceManager {
 

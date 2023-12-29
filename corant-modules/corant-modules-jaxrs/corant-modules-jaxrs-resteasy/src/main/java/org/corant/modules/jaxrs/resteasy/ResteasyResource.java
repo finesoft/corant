@@ -50,7 +50,6 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 上午11:02:48
- *
  */
 public class ResteasyResource extends AbstractJaxrsResource {
 

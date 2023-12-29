@@ -19,6 +19,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.corant.config.Configs;
+import org.corant.shared.util.Strings;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.Default;
@@ -27,10 +30,12 @@ import jakarta.enterprise.inject.spi.AnnotatedType;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.Configs;
-import org.corant.shared.util.Strings;
-import org.eclipse.microprofile.config.inject.ConfigProperties;
 
+/**
+ * corant-config
+ *
+ * @author bingo 10:41:49
+ */
 public class ConfigPropertiesBean<T> implements Bean<T> {
   final Set<Annotation> qualifiers;
   final BeanManager beanManager;
@@ -39,9 +44,9 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
   final Set<Type> types;
 
   public ConfigPropertiesBean(BeanManager bm, final AnnotatedType<T> type) {
-    this.beanManager = bm;
-    this.clazz = type.getJavaClass();
-    this.prefix = defaultString(extractPrefix(type), Strings.EMPTY);
+    beanManager = bm;
+    clazz = type.getJavaClass();
+    prefix = defaultString(extractPrefix(type), Strings.EMPTY);
     Set<Annotation> qs = new HashSet<>();
     if (type.isAnnotationPresent(ConfigProperties.class)) {
       qs.add(ConfigProperties.Literal.of(prefix));
@@ -49,7 +54,7 @@ public class ConfigPropertiesBean<T> implements Bean<T> {
       qs.add(Default.Literal.INSTANCE);
     }
     qualifiers = Collections.unmodifiableSet(qs);
-    this.types = Collections.singleton(clazz);
+    types = Collections.singleton(clazz);
   }
 
   @Override

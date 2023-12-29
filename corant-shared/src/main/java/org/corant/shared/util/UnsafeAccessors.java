@@ -25,7 +25,6 @@ import sun.misc.Unsafe;
  * corant-shared
  *
  * @author bingo 下午7:00:37
- *
  */
 public class UnsafeAccessors {
 

@@ -15,6 +15,5 @@
  * corant-modules-keycloak-event
  *
  * @author bingo 下午12:01:24
- *
  */
 package org.corant.modules.keycloak.event.selector;

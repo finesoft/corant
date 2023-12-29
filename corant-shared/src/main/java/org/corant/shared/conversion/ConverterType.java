@@ -21,7 +21,6 @@ import org.corant.shared.util.Objects;
  * corant-shared
  *
  * @author bingo 下午3:25:39
- *
  */
 public class ConverterType<S, T> implements Serializable {
 

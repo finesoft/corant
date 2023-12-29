@@ -32,7 +32,6 @@ import freemarker.template.TemplateModelException;
  * corant-modules-query-elastic
  *
  * @author bingo 下午7:56:57
- *
  */
 public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 

@@ -57,7 +57,6 @@ import org.corant.shared.util.Strings;
  * @see Sortable
  *
  * @author bingo 下午3:47:37
- *
  */
 public class PropertyResourceBundle extends ResourceBundle implements Sortable {
 

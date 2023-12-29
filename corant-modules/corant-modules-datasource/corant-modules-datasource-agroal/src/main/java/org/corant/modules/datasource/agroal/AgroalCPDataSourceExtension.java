@@ -56,7 +56,6 @@ import jakarta.transaction.TransactionSynchronizationRegistry;
  * corant-modules-datasource.agroal
  *
  * @author bingo 下午7:32:17
- *
  */
 public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 

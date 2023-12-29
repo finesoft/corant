@@ -70,7 +70,6 @@ import org.corant.shared.resource.Resource;
  * Some code from : org.apache.commons.io.FileUtils
  *
  * @author bingo 下午3:54:56
- *
  */
 public class FileUtils {
 

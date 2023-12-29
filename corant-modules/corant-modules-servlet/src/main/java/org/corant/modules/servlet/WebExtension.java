@@ -44,7 +44,6 @@ import org.corant.shared.util.Services;
  * corant-modules-servlet
  *
  * @author bingo 下午1:21:00
- *
  */
 public class WebExtension implements Extension, WebMetaDataProvider {
 

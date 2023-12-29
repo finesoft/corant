@@ -23,7 +23,6 @@ import com.google.common.base.Objects;
  * corant-modules-keycloak-event
  *
  * @author bingo 上午10:15:18
- *
  */
 public class KeycloakEventTypeSelector implements KeycloakEventSelector<Event> {
 

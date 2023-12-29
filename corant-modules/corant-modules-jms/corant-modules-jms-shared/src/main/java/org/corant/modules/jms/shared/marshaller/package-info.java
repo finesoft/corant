@@ -15,6 +15,5 @@
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:48:21
- *
  */
 package org.corant.modules.jms.shared.marshaller;

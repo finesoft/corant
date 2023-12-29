@@ -46,7 +46,6 @@ import org.eclipse.microprofile.config.spi.Converter;
  * corant-config
  *
  * @author bingo 下午4:04:49
- *
  */
 public class CorantConfigBuilder implements ConfigBuilder {
 

@@ -19,7 +19,6 @@ import org.corant.shared.util.Launches;
  * corant-kernel
  *
  * @author bingo 下午3:33:04
- *
  */
 public class DebugRunner {
 

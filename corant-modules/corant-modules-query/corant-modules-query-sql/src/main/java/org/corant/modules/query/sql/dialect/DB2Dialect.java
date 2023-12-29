@@ -20,7 +20,6 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:02:47
- *
  */
 public class DB2Dialect implements Dialect {
 

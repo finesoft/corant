@@ -15,6 +15,5 @@
  * corant-modules-dsa
  *
  * @author bingo 下午1:30:35
- *
  */
 package org.corant.modules.dsa.cluster.distance;

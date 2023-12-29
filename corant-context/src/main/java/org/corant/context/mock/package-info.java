@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 14:28:56
- *
  */
 package org.corant.context.mock;

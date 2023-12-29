@@ -36,7 +36,6 @@ import io.smallrye.jwt.auth.principal.JWTParser;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午11:23:46
- *
  */
 public abstract class AbstractMPJWTHttpServletAuthentication {
 

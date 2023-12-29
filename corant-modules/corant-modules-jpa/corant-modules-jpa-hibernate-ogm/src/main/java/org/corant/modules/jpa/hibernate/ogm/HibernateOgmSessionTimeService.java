@@ -25,7 +25,6 @@ import org.hibernate.ogm.datastore.mongodb.impl.MongoDBDatastoreProvider;
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 上午11:09:24
- *
  */
 public class HibernateOgmSessionTimeService extends HibernateOrmSessionTimeService {
 

@@ -43,7 +43,6 @@ import org.corant.shared.util.Systems;
  * corant-shared
  *
  * @author bingo 下午3:38:29
- *
  */
 public class ClassPathResourceLoader implements ResourceLoader {
 

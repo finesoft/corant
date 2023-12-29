@@ -22,7 +22,6 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午10:44:40
- *
  */
 public interface MgNamedQuerier
     extends DynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Object>> {

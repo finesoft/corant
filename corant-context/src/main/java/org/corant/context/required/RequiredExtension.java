@@ -43,7 +43,6 @@ import jakarta.enterprise.inject.spi.WithAnnotations;
  * corant-context
  *
  * @author bingo 下午5:08:08
- *
  */
 public class RequiredExtension implements Extension {
 

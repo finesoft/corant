@@ -34,7 +34,6 @@ import javafx.beans.property.SimpleObjectProperty;
  * implementation, please contact me <a href="mailto:finesoft@gmail.com">finesoft@gmail.com</a>.
  *
  * @author bingo 上午10:11:02
- *
  */
 public class FXObjectPropertyDeserializer
     extends ReferenceTypeDeserializer<ObjectProperty<Object>> {

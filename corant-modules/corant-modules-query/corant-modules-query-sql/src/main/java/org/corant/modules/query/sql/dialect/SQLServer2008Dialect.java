@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:03:33
- *
  */
 public class SQLServer2008Dialect extends SQLServer2005Dialect {
 

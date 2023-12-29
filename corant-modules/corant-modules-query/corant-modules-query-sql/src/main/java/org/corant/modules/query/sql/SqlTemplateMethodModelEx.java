@@ -31,7 +31,6 @@ import freemarker.template.TemplateModelException;
  * corant-modules-query-sql
  *
  * @author bingo 下午7:56:57
- *
  */
 public class SqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Object[]> {
 

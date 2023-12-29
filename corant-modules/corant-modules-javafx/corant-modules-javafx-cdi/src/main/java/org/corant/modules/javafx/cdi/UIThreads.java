@@ -27,7 +27,6 @@ import javafx.application.Platform;
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午11:41:07
- *
  */
 public class UIThreads {
 

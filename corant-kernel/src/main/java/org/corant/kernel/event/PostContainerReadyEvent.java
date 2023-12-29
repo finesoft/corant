@@ -28,7 +28,6 @@ import org.corant.kernel.spi.CorantBootHandler;
  * continue processing.
  *
  * @author bingo 上午10:59:20
- *
  */
 public class PostContainerReadyEvent implements CorantLifecycleEvent {
   private final String[] args;

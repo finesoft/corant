@@ -21,7 +21,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-datasource-agroal
  *
  * @author bingo 下午8:10:27
- *
  */
 public interface DBCPDataSourceConfigurator extends Sortable {
 

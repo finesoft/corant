@@ -21,7 +21,6 @@ import java.util.Base64;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:33:40
- *
  */
 public interface CipherProvider {
 

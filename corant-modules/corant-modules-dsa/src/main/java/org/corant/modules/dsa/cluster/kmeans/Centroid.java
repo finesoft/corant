@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-dsa
  *
  * @author bingo 下午2:10:43
- *
  */
 public class Centroid {
 

@@ -25,7 +25,6 @@ import org.bson.codecs.EncoderContext;
  * corant-modules-json
  *
  * @author bingo 上午11:14:43
- *
  */
 public class MonthDayDocumentCodec implements Codec<MonthDay> {
 

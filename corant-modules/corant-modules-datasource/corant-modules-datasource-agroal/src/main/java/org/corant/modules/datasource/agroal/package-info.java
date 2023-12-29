@@ -15,6 +15,5 @@
  * corant-modules-datasource-agroal
  *
  * @author bingo 下午6:40:48
- *
  */
 package org.corant.modules.datasource.agroal;

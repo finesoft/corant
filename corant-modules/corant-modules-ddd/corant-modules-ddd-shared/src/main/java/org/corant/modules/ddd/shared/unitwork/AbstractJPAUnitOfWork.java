@@ -65,7 +65,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * </p>
  *
  * @author bingo 下午7:13:58
- *
  */
 public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
 

@@ -24,7 +24,6 @@ import java.util.EventObject;
  * corant-shared
  *
  * @author bingo 下午5:26:19
- *
  */
 public class FileChangeEvent extends EventObject {
 

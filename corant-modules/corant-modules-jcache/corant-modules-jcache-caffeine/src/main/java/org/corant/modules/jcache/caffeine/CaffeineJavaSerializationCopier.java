@@ -38,7 +38,6 @@ import com.github.benmanes.caffeine.jcache.copy.JavaSerializationCopier;
  *
  *
  * @author bingo 下午6:15:34
- *
  */
 public class CaffeineJavaSerializationCopier extends JavaSerializationCopier {
 

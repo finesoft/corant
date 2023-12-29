@@ -15,6 +15,5 @@
  * corant-modules-jms-api
  *
  * @author bingo 上午11:04:36
- *
  */
 package org.corant.modules.jms.annotation;

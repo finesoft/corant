@@ -25,7 +25,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 上午10:47:31
- *
  */
 public class TemporalInstantConverter extends AbstractTemporalConverter<Temporal, Instant> {
 

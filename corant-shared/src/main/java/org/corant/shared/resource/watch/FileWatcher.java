@@ -25,7 +25,6 @@ import org.corant.shared.util.Threads;
  * corant-shared
  *
  * @author bingo 下午9:43:59
- *
  */
 public class FileWatcher extends AbstractWatcher {
 

@@ -17,7 +17,6 @@ package org.corant.shared.normal;
  * corant-shared
  *
  * @author bingo 上午10:20:20
- *
  */
 public interface Priorities {
 

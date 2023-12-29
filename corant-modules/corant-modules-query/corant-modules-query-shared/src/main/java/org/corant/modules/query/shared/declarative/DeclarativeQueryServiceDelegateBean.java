@@ -46,7 +46,6 @@ import jakarta.enterprise.inject.spi.InjectionPoint;
  * Unfinish yet
  *
  * @author bingo 下午2:03:58
- *
  */
 public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 

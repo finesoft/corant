@@ -31,7 +31,6 @@ import javafx.collections.ObservableArray;
  * Uncompleted yet!!!!
  *
  * @author bingo 下午8:21:34
- *
  */
 public class FXObservableArrayDeserializer<T extends ObservableArray<T>> extends StdDeserializer<T>
     implements ContextualDeserializer {

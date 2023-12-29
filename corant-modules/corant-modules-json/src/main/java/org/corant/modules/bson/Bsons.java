@@ -85,7 +85,6 @@ import org.corant.shared.util.Primitives;
  * corant-modules-json
  *
  * @author bingo 下午2:41:42
- *
  */
 public class Bsons {
 

@@ -23,7 +23,6 @@ import org.corant.shared.util.Systems;
  * corant-modules-jms-api
  *
  * @author bingo 下午4:35:09
- *
  */
 public interface MetaDataPropertyResolver extends Sortable {
 

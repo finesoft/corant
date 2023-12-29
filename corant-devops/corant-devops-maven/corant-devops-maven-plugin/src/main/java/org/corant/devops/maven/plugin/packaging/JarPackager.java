@@ -43,7 +43,6 @@ import bin.JarLauncherForkJoinWorkerThreadFactory;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午4:33:08
- *
  */
 public class JarPackager implements Packager {
 

@@ -24,7 +24,6 @@ import java.io.OutputStream;
  * corant-shared
  *
  * @author bingo 上午10:00:10
- *
  */
 public interface CountingStream {
 

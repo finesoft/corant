@@ -34,7 +34,6 @@ import org.corant.shared.util.Services;
  * corant-modules-json
  *
  * @author bingo 下午2:44:37
- *
  */
 public class SimpleParser {
 

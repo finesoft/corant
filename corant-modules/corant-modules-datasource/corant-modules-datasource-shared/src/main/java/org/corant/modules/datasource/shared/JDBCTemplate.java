@@ -54,7 +54,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午6:52:27
- *
  */
 public class JDBCTemplate {
 

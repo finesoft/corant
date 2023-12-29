@@ -28,7 +28,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * </p>
  *
  * @author bingo 下午11:26:29
- *
  */
 public class Assertions {
 

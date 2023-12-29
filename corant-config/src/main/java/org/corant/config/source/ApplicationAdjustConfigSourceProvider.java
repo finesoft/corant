@@ -30,7 +30,6 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * corant-config
  *
  * @author bingo 上午10:49:14
- *
  */
 public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSourceProvider {
 
@@ -57,7 +56,6 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
    * corant-kernel
    *
    * @author bingo 下午8:56:38
-   *
    */
   private static final class AdjustConfigSource implements ConfigSource {
     private final Properties props;

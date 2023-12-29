@@ -21,7 +21,6 @@ import java.util.concurrent.Callable;
  * corant-modules-jta-shared
  *
  * @author bingo 下午4:48:08
- *
  */
 public interface TransactionAwareness {
 

@@ -24,7 +24,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 下午4:49:49
- *
  */
 public class ByteArrayResource implements Resource {
 

@@ -19,7 +19,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-bundle
  *
  * @author bingo 下午3:46:25
- *
  */
 public class NoSuchMessageException extends CorantRuntimeException {
 

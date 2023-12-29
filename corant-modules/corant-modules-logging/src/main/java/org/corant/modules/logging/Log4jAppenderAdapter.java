@@ -27,7 +27,6 @@ import org.apache.logging.log4j.core.layout.SyslogLayout;
  * corant-modules-logging
  *
  * @author bingo 下午8:12:28
- *
  */
 public class Log4jAppenderAdapter extends AbstractAppender {
 

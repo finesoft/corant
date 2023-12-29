@@ -62,7 +62,6 @@ import org.eclipse.microprofile.config.Config;
  * one without a name.
  *
  * @author bingo 下午7:39:01
- *
  */
 public interface DeclarativeConfig extends Serializable {
 

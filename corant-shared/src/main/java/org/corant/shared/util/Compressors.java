@@ -57,7 +57,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * </p>
  *
  * @author bingo 下午12:59:23
- *
  */
 public class Compressors {
 

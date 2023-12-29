@@ -26,7 +26,6 @@ import org.corant.shared.util.Annotations;
  * </p>
  *
  * @author bingo 下午7:42:38
- *
  */
 public class NamingReference extends Reference {
 

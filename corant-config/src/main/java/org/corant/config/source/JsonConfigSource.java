@@ -28,7 +28,6 @@ import org.corant.shared.util.Services;
  * corant-config
  *
  * @author bingo 上午10:10:55
- *
  */
 public class JsonConfigSource extends AbstractCorantConfigSource {
 

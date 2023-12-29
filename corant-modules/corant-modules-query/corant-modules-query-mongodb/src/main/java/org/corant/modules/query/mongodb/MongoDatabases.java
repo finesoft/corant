@@ -25,7 +25,6 @@ import com.mongodb.client.MongoDatabase;
  * corant-modules-query-mongodb
  *
  * @author bingo 上午11:22:24
- *
  */
 public class MongoDatabases {
 

@@ -26,7 +26,6 @@ import org.corant.shared.util.Services;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:52:00
- *
  */
 public class Dialects {
 

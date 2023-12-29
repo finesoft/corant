@@ -34,7 +34,6 @@ import org.corant.shared.util.Streams;
  * </p>
  *
  * @author bingo 下午3:19:30
- *
  */
 public interface Resource {
 

@@ -33,7 +33,6 @@ import org.elasticsearch.search.sort.SortOrder;
  * corant-modules-query-elastic
  *
  * @author bingo 上午10:22:11
- *
  */
 public class EsScrollableSpliterator extends AbstractBatchHandlerSpliterator<Map<String, Object>> {
 

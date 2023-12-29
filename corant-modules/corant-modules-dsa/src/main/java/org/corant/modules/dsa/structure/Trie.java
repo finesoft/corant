@@ -24,7 +24,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * Unfinish yet
  *
  * @author bingo 20:03:54
- *
  */
 public class Trie<T> implements Comparable<Trie<T>>, Serializable {
 

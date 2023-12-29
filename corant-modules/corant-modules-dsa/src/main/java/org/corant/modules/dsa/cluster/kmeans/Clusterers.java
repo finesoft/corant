@@ -32,7 +32,6 @@ import org.corant.modules.dsa.cluster.distance.Distance;
  * corant-modules-dsa
  *
  * @author bingo 上午10:07:45
- *
  */
 public class Clusterers {
 

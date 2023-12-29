@@ -45,7 +45,6 @@ import freemarker.template.TemplateSequenceModel;
  * corant-modules-query-shared
  *
  * @author bingo 上午10:35:11
- *
  */
 public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplateMethodModelEx<P> {
 

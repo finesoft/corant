@@ -23,7 +23,6 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
  * corant-modules-query-cassandra
  *
  * @author bingo 下午5:20:01
- *
  */
 public interface CasQueryExecutor {
 

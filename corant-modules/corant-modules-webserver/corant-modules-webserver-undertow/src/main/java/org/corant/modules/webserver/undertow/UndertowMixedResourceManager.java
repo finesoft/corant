@@ -27,7 +27,6 @@ import io.undertow.server.handlers.resource.ResourceManager;
  * corant-modules-webserver-undertow
  *
  * @author bingo 下午2:55:38
- *
  */
 public class UndertowMixedResourceManager implements ResourceManager {
 

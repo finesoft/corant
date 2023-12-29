@@ -27,7 +27,6 @@ import org.corant.modules.jms.annotation.MessageReply;
  * corant-modules-jms-api
  *
  * @author bingo 下午4:14:39
- *
  */
 public class MessageReplyMetaData {
 

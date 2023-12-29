@@ -23,7 +23,6 @@ import java.util.List;
  * Unfinish yet!
  *
  * @author bingo 下午7:28:59
- *
  */
 public class UnionQuery implements Serializable {
 

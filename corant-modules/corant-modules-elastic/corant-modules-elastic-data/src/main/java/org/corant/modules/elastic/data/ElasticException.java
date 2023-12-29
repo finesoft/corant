@@ -22,7 +22,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * injection while the configurations do not assign a name.
  *
  * @author bingo 下午4:45:54
- *
  */
 public class ElasticException extends CorantRuntimeException {
 

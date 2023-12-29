@@ -82,7 +82,6 @@ import jakarta.enterprise.inject.spi.InjectionPoint;
  * qualifier for injection while the configurations do not assign a name.
  *
  * @author bingo 下午4:55:16
- *
  */
 public class MongoClientExtension implements Extension {
 

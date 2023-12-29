@@ -21,7 +21,6 @@ import javax.cache.annotation.GeneratedCacheKey;
  * corant-modules-jcache-shared
  *
  * @author bingo 下午8:32:24
- *
  */
 public class CorantGeneratedCacheKey implements GeneratedCacheKey {
 

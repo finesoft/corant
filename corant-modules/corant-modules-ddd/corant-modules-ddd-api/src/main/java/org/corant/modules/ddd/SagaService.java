@@ -23,7 +23,6 @@ import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
  * corant-modules-ddd-api
  *
  * @author bingo 下午3:48:30
- *
  */
 public interface SagaService {
 

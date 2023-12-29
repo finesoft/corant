@@ -23,7 +23,6 @@ import org.keycloak.events.Event;
  * corant-modules-keycloak-event
  *
  * @author bingo 下午8:12:00
- *
  */
 public class CompositionEventSelector extends AbstactSelector implements Predicate<Event> {
 

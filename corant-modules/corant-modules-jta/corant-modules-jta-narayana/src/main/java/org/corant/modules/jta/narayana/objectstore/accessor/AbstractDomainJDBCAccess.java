@@ -24,7 +24,6 @@ import com.arjuna.ats.arjuna.objectstore.jdbc.JDBCAccess;
  * corant-modules-jta-narayana
  *
  * @author bingo 15:30:49
- *
  */
 public abstract class AbstractDomainJDBCAccess implements JDBCAccess {
 

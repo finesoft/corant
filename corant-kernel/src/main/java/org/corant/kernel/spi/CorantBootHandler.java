@@ -31,7 +31,6 @@ import org.corant.shared.util.Services;
  * does not rely on other mechanisms.
  *
  * @author bingo 下午2:30:23
- *
  */
 public interface CorantBootHandler extends Sortable {
 

@@ -23,7 +23,6 @@ import org.quartz.utils.PoolingConnectionProvider;
  * corant-modules-quartz-embeddable
  *
  * @author bingo 上午11:12:03
- *
  */
 public class CorantConnectionProvider implements PoolingConnectionProvider {
 

@@ -20,7 +20,6 @@ import java.util.TimeZone;
  * corant-shared
  *
  * @author bingo 下午5:40:35
- *
  */
 public class StringTimeZoneConverter extends AbstractConverter<String, TimeZone> {
 

@@ -26,7 +26,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-security-shared
  *
  * @author bingo 下午3:52:56
- *
  */
 public enum AsymmetricCipherProviderFactory {
 

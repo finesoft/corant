@@ -34,7 +34,6 @@ import org.corant.shared.util.Objects;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午7:45:22
- *
  */
 public class DriverManagerDataSource implements DataSource {
 

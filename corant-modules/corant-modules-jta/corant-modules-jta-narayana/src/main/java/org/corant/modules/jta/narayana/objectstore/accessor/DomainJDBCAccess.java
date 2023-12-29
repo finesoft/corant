@@ -52,7 +52,6 @@ import com.arjuna.ats.arjuna.exceptions.FatalError;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午3:30:52
- *
  */
 public class DomainJDBCAccess extends AbstractDomainJDBCAccess {
 

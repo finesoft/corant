@@ -24,7 +24,6 @@ import org.corant.shared.ubiquity.Mutable.MutableBoolean;
  * corant-modules-security-shared
  *
  * @author bingo 下午9:18:16
- *
  */
 public abstract class AbstractAuthorizer implements Authorizer {
 

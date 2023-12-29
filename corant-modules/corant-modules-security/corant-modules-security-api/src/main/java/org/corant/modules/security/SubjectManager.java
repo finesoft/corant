@@ -19,7 +19,6 @@ import org.corant.context.security.SecurityContext;
  * corant-modules-security-api
  *
  * @author bingo 下午11:45:42
- *
  */
 public interface SubjectManager {
 

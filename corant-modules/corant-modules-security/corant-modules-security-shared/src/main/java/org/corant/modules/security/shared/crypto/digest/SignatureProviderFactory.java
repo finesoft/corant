@@ -23,7 +23,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-security-shared
  *
  * @author bingo 上午11:42:14
- *
  */
 public enum SignatureProviderFactory {
 

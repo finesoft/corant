@@ -20,7 +20,6 @@ import org.corant.kernel.event.CorantLifecycleEvent;
  * corant-modules-jndi
  *
  * @author bingo 上午11:30:35
- *
  */
 public class PostCorantJNDIReadyEvent implements CorantLifecycleEvent {
 

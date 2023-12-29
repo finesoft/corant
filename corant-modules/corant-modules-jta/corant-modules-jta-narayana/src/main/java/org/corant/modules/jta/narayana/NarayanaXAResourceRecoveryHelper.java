@@ -21,7 +21,6 @@ import com.arjuna.ats.jta.recovery.XAResourceRecoveryHelper;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午2:37:43
- *
  */
 public class NarayanaXAResourceRecoveryHelper implements XAResourceRecoveryHelper {
 

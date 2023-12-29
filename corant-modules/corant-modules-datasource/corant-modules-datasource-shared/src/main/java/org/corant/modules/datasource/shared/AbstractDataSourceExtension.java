@@ -44,7 +44,6 @@ import org.corant.shared.normal.Priorities;
  * injection while the configurations do not assign a name.
  *
  * @author bingo 上午12:18:32
- *
  */
 public abstract class AbstractDataSourceExtension implements Extension {
 

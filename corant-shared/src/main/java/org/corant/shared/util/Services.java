@@ -56,7 +56,6 @@ import org.corant.shared.ubiquity.Sortable;
  * @see Comparable#compareTo(Object)
  *
  * @author bingo 下午10:48:27
- *
  */
 public class Services {
 

@@ -21,7 +21,6 @@ import org.corant.context.AbstractBean;
  * corant-modules-rpc-feign
  *
  * @author bingo 10:05:01
- *
  */
 public class FeignClientBean extends AbstractBean<Object> {
 

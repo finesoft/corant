@@ -35,7 +35,6 @@ import org.corant.shared.normal.Defaults;
  * corant-shared
  *
  * @author bingo 上午10:37:10
- *
  */
 public class Launches {
 

@@ -17,7 +17,6 @@ package org.corant.modules.query;
  * corant-modules-query-api
  *
  * @author bingo 上午9:59:24
- *
  */
 public interface NamedQuerier extends Querier {
   String getName();

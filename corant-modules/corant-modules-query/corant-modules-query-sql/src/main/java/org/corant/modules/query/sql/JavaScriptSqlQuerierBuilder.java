@@ -25,7 +25,6 @@ import org.corant.modules.query.shared.dynamic.javascript.JavaScriptDynamicQueri
  * corant-modules-query-sql
  *
  * @author bingo 下午7:46:22
- *
  */
 public class JavaScriptSqlQuerierBuilder
     extends JavaScriptDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {

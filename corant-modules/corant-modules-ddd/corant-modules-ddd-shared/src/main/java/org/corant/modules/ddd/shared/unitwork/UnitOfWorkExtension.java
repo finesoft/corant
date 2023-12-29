@@ -31,7 +31,6 @@ import org.corant.modules.ddd.shared.event.AggregatePersistedEvent;
  * corant-modules-ddd-shared
  *
  * @author bingo 上午12:37:58
- *
  */
 public class UnitOfWorkExtension implements Extension {
 

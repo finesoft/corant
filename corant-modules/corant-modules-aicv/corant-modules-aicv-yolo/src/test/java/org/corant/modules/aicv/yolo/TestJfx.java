@@ -51,7 +51,6 @@ import nu.pattern.OpenCV;
  * corant-modules-aicv-yolo
  *
  * @author bingo 下午4:28:09
- *
  */
 public class TestJfx extends Application {
 

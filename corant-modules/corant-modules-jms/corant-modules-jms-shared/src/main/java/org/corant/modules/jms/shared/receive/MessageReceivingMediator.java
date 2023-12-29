@@ -22,7 +22,6 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
  * corant-modules-jms-shared
  *
  * @author bingo 下午5:23:31
- *
  */
 public interface MessageReceivingMediator {
 

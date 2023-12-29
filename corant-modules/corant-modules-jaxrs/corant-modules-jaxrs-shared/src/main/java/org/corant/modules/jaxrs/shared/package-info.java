@@ -15,6 +15,5 @@
  * corant-modules-jaxrs-shared
  *
  * @author bingo 下午2:16:22
- *
  */
 package org.corant.modules.jaxrs.shared;

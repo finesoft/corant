@@ -32,7 +32,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 上午10:15:06
- *
  */
 public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum<?>> {
 

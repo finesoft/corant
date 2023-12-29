@@ -58,7 +58,6 @@ import org.corant.shared.util.PathMatcher;
  * corant-shared
  *
  * @author bingo 下午3:59:11
- *
  */
 public class ClassPathResourceScanner {
 

@@ -21,7 +21,6 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
  * corant-config
  *
  * @author bingo 下午5:18:28
- *
  */
 public abstract class AbstractCorantConfigSource implements ConfigSource, Serializable {
 

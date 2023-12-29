@@ -27,7 +27,6 @@ import java.util.function.Supplier;
  * retrieved from the persistence layer by holding the id.
  *
  * @author bingo 上午10:31:05
- *
  */
 public interface Reference<T> extends Supplier<T>, Serializable {
 

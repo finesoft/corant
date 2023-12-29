@@ -42,7 +42,6 @@ import org.corant.shared.exception.GeneralRuntimeException;
  * A convenient context aggregate instance retrieval class for retrieving aggregate instances
  *
  * @author bingo 下午8:39:07
- *
  */
 public class Aggregates {
 

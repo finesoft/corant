@@ -23,7 +23,6 @@ import org.keycloak.events.admin.AdminEvent;
  * corant-modules-keycloak-event
  *
  * @author bingo 下午8:12:00
- *
  */
 public class CompositionAdminEventSelector extends AbstactSelector
     implements Predicate<AdminEvent> {

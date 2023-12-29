@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.AttributeSet;
  * corant-modules-security-shared
  *
  * @author bingo 下午4:33:46
- *
  */
 public class SimplePermission extends Predication implements Permission, AttributeSet {
 

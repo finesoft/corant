@@ -17,7 +17,6 @@ package org.corant.modules.elastic.data.metadata.annotation;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:04:35
- *
  */
 public enum EsIndexOption {
   DOCS("docs"), FREQS("freqs"), POSITIONS("positions"), OFFECTS("offsets");

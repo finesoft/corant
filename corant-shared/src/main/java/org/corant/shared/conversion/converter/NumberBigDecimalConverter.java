@@ -21,7 +21,6 @@ import java.util.Map;
  * corant-shared
  *
  * @author bingo 下午5:35:33
- *
  */
 public class NumberBigDecimalConverter extends AbstractConverter<Number, BigDecimal> {
 

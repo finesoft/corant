@@ -29,7 +29,6 @@ import org.corant.shared.resource.Resource;
  * Use http://java.sun.com/dtd/properties.dtd
  *
  * @author bingo 上午10:11:23
- *
  */
 public class XmlConfigSource extends AbstractCorantConfigSource {
 

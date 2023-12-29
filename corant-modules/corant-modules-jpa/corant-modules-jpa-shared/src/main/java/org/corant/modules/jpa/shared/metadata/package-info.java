@@ -15,6 +15,5 @@
  * corant-modules-jpa-shared
  *
  * @author bingo 上午11:03:11
- *
  */
 package org.corant.modules.jpa.shared.metadata;

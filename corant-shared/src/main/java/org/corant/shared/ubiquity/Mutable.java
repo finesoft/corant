@@ -33,7 +33,6 @@ import org.corant.shared.exception.NotSupportedException;
  * corant-shared
  *
  * @author bingo 下午4:10:40
- *
  */
 public interface Mutable<T> extends Supplier<T> {
 

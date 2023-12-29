@@ -42,7 +42,6 @@ import javax.naming.spi.NamingManager;
  * corant-modules-jndi
  *
  * @author bingo 下午7:21:23
- *
  */
 public class NamingContext implements Context {
 

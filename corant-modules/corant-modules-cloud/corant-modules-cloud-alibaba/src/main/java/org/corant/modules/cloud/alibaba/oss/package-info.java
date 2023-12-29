@@ -15,6 +15,5 @@
  * corant-modules-cloud-alibaba
  *
  * @author bingo 21:37:29
- *
  */
 package org.corant.modules.cloud.alibaba.oss;

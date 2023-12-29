@@ -19,7 +19,6 @@ import org.apache.maven.plugin.logging.Log;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午3:04:36
- *
  */
 public class WarPackager implements Packager {
 

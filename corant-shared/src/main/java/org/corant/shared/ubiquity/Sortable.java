@@ -26,7 +26,6 @@ import org.corant.shared.util.Classes;
  * name of instance class will be used for sorting according to string sorting criteria.
  *
  * @author bingo 上午10:44:33
- *
  */
 public interface Sortable {
 

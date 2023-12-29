@@ -34,7 +34,6 @@ import org.corant.context.qualifier.Qualifiers;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午2:08:53
- *
  */
 public interface PersistenceService {
 

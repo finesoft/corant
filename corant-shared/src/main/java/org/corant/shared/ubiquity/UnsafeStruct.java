@@ -21,7 +21,6 @@ import sun.misc.Unsafe;
  * corant-shared
  *
  * @author bingo 下午8:13:44
- *
  */
 public abstract class UnsafeStruct {
   protected static final Unsafe unsafe = UnsafeAccessors.get();

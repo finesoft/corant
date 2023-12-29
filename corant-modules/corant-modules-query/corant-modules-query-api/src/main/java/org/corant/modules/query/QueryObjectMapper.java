@@ -28,7 +28,6 @@ import org.corant.shared.ubiquity.TypeLiteral;
  * extraction, etc.
  *
  * @author bingo 11:39:34
- *
  */
 public interface QueryObjectMapper {
 

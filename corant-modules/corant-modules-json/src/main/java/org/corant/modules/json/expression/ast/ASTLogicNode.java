@@ -24,7 +24,6 @@ import org.corant.modules.json.expression.Node;
  * corant-modules-json
  *
  * @author bingo 下午9:27:26
- *
  */
 public interface ASTLogicNode extends ASTPredicateNode {
 

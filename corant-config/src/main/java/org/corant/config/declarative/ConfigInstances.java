@@ -33,7 +33,6 @@ import org.eclipse.microprofile.config.Config;
  * A convenient configuration instance resolver.
  *
  * @author bingo 下午7:42:56
- *
  */
 public class ConfigInstances {
 

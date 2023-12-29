@@ -24,7 +24,6 @@ import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
  * corant-modules-query-api
  *
  * @author bingo 上午10:27:41
- *
  */
 public interface QueryStatistics {
 

@@ -30,7 +30,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:52:35
- *
  */
 public abstract class JCACipherProvider implements CipherProvider {
 

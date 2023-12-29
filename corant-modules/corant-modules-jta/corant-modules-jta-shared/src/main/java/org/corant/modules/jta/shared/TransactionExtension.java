@@ -19,7 +19,6 @@ import jakarta.enterprise.inject.spi.Extension;
  * corant-modules-jta-shared
  *
  * @author bingo 下午9:20:02
- *
  */
 public interface TransactionExtension extends Extension {
 

@@ -34,7 +34,6 @@ import org.corant.shared.util.Strings;
  * internationalization for some message parameters.
  *
  * @author bingo 下午1:14:50
- *
  */
 public interface MessageParameterResolver extends Sortable {
 

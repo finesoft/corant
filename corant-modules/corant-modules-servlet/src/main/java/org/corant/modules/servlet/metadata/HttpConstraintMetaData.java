@@ -25,7 +25,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-servlet
  *
  * @author bingo 上午10:59:16
- *
  */
 public class HttpConstraintMetaData {
 

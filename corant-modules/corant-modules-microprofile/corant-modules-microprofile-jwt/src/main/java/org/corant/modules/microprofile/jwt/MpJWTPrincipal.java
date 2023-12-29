@@ -21,7 +21,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午11:22:36
- *
  */
 public class MpJWTPrincipal implements JsonWebToken, Principal {
 

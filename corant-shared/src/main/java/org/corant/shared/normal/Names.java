@@ -26,7 +26,6 @@ import org.corant.shared.util.Systems;
  * corant-shared
  *
  * @author bingo 下午11:41:22
- *
  */
 public interface Names {
 

@@ -20,7 +20,6 @@ import org.glassfish.enterprise.concurrent.ManagedThreadFactoryImpl;
  * corant-context
  *
  * @author bingo 上午10:24:41
- *
  */
 public class DefaultManagedThreadFactory extends ManagedThreadFactoryImpl {
 

@@ -35,7 +35,6 @@ import com.datastax.driver.core.Statement;
  * Unfinish yet!
  *
  * @author bingo 上午10:52:01
- *
  */
 public class DefaultCasQueryExecutor implements CasQueryExecutor {
 

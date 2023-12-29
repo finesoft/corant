@@ -54,7 +54,6 @@ import org.corant.shared.util.Streams;
  * corant-modules-servlet
  *
  * @author bingo 下午4:01:33
- *
  */
 public class HttpStreamOutput {
 

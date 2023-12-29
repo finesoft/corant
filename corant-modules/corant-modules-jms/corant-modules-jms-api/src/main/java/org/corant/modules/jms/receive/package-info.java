@@ -15,6 +15,5 @@
  * corant-modules-jms-api
  *
  * @author bingo 下午12:00:38
- *
  */
 package org.corant.modules.jms.receive;

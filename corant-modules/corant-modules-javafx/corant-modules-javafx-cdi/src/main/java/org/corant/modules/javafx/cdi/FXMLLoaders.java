@@ -44,7 +44,6 @@ import javafx.util.Callback;
  * A CDI related FXMLLoader utility class.
  *
  * @author bingo 下午4:30:32
- *
  */
 public class FXMLLoaders {
 

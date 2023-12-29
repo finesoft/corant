@@ -53,7 +53,6 @@ import org.hibernate.tool.schema.UniqueConstraintSchemaUpdateStrategy;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午2:15:40
- *
  */
 public class HibernateOrmDeveloperKits {
 

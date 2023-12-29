@@ -38,7 +38,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-modules-jpa-shared
  *
  * @author bingo 上午10:32:07
- *
  */
 public class JPAConfig {
 

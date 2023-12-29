@@ -15,6 +15,5 @@
  * corant-modules-datasource-shared
  *
  * @author bingo 下午3:45:27
- *
  */
 package org.corant.modules.datasource.shared;

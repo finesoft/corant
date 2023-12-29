@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-query-sql
  *
  * @author bingo 上午11:47:15
- *
  */
 public class SybaseDialect implements Dialect {
 

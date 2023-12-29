@@ -15,6 +15,5 @@
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午2:08:24
- *
  */
 package org.corant.modules.microprofile.jwt.jaxrs;

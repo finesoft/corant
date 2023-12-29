@@ -15,6 +15,5 @@
  * corant-modules-websocket
  *
  * @author bingo 下午11:15:13
- *
  */
 package org.corant.modules.websocket;

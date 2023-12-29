@@ -27,7 +27,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-shared
  *
  * @author bingo 上午10:02:03
- *
  */
 public interface LimitedStream {
 

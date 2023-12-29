@@ -58,7 +58,6 @@ import jakarta.annotation.PreDestroy;
  * corant-modules-query-shared
  *
  * @author bingo 下午4:08:58
- *
  */
 public abstract class AbstractNamedQueryService implements FetchableNamedQueryService {
 

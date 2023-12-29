@@ -15,6 +15,5 @@
  * corant-modules-query-mongodb
  *
  * @author bingo 下午6:15:34
- *
  */
 package org.corant.modules.query.mongodb.cdi;

@@ -15,6 +15,5 @@
  * corant-config
  *
  * @author bingo 下午4:06:33
- *
  */
 package org.corant.config.spi;

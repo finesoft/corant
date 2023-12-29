@@ -21,7 +21,6 @@ import org.corant.modules.ddd.Message;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午2:05:56
- *
  */
 public abstract class AbstractAuditableAggregate extends AbstractAggregate {
 

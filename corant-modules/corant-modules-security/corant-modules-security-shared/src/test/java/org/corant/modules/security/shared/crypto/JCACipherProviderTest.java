@@ -39,7 +39,6 @@ import junit.framework.TestCase;
  * corant-modules-security-shared
  *
  * @author bingo 下午5:17:43
- *
  */
 public class JCACipherProviderTest extends TestCase {
 

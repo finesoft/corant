@@ -15,6 +15,5 @@
  * corant-context
  *
  * @author bingo 上午11:03:00
- *
  */
 package org.corant.context.concurrent.interceptor;

@@ -37,7 +37,6 @@ import javafx.application.Application.Parameters;
  * times, the command line arguments only passed to it only first startup.
  *
  * @author bingo 下午5:40:17
- *
  */
 public class CorantJavaFX {
 

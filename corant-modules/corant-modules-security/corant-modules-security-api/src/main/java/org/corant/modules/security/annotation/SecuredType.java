@@ -17,7 +17,6 @@ package org.corant.modules.security.annotation;
  * corant-modules-security-api
  *
  * @author bingo 上午11:47:49
- *
  */
 public enum SecuredType {
   ROLE, PERMIT

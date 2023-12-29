@@ -69,7 +69,6 @@ import jakarta.inject.Singleton;
  * TODO Support unnamed elastic configuration
  *
  * @author bingo 上午11:56:19
- *
  */
 public class ElasticExtension implements Extension, Function<String, TransportClient> {
 

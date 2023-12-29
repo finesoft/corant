@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-dsa
  *
  * @author bingo 下午1:45:22
- *
  */
 public class BlockDistance implements Distance, DistanceMeasure {
 

@@ -29,7 +29,6 @@ import org.corant.modules.jms.receive.ManagedMessageReceiveReplier;
  * corant-modules-jms-shared
  *
  * @author bingo 下午11:57:15
- *
  */
 public class DefaultMessageReplier implements ManagedMessageReceiveReplier {
 

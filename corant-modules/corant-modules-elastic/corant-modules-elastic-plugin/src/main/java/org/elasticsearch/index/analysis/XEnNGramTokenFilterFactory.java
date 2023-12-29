@@ -22,7 +22,6 @@ import org.elasticsearch.index.IndexSettings;
  * corant-modules-elastic-plugin
  *
  * @author bingo 下午11:20:02
- *
  */
 public class XEnNGramTokenFilterFactory extends AbstractTokenFilterFactory {
 

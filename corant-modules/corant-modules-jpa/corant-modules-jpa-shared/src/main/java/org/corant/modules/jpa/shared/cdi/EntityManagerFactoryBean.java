@@ -32,7 +32,6 @@ import org.corant.shared.normal.Names;
  * corant-modules-jpa-shared
  *
  * @author bingo 上午10:34:41
- *
  */
 public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory> {
 

@@ -69,7 +69,6 @@ import org.corant.shared.ubiquity.Experimental;
  * corant-shared
  *
  * @author bingo 上午10:21:10
- *
  */
 public class Texts {
 

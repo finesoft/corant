@@ -18,6 +18,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.corant.context.qualifier.Bundle;
+import org.corant.shared.util.Configurations;
 
 /**
  * corant-context
@@ -31,6 +32,6 @@ public class ResourceBundleProvider {
   @Bundle("")
   ResourceBundle produce(final InjectionPoint injectionPoint) {
     final String bundleName = injectionPoint.getAnnotated().getAnnotation(Bundle.class).value();
-    return ResourceBundle.getBundle(bundleName);
+    return ResourceBundle.getBundle(Configurations.getAssembledConfigValue(bundleName));
   }
 }

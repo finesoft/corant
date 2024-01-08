@@ -85,8 +85,7 @@ public enum DeclarativePattern implements ConfigInjector {
         Map valueMap;
         Type keyType = Object.class;
         Type valueType = Object.class;
-        if (fieldType instanceof ParameterizedType) {
-          ParameterizedType parameterizedFieldType = (ParameterizedType) fieldType;
+        if (fieldType instanceof ParameterizedType parameterizedFieldType) {
           if (!(parameterizedFieldType.getActualTypeArguments()[0] instanceof WildcardType)) {
             keyType = parameterizedFieldType.getActualTypeArguments()[0];
           }

@@ -13,7 +13,10 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Classes.defaultClassLoader;
+import java.util.List;
 import org.corant.shared.ubiquity.Configuration;
+import org.corant.shared.ubiquity.Configuration.SystemConfiguration;
 import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
@@ -23,27 +26,34 @@ import org.corant.shared.ubiquity.TypeLiteral;
  */
 public class Configurations {
 
+  public static final Configuration INSTANCE = Services
+      .findRequired(Configuration.class, defaultClassLoader()).orElseGet(SystemConfiguration::new);
+
   public static String getAssembledConfigValue(String value) {
     return getConfig().getAssembledValue(value);
   }
 
   public static Configuration getConfig() {
-    return Configuration.INSTANCE;
+    return INSTANCE;
   }
 
-  public static <T> T getConfigValue(String name, Class<T> valueType) {
-    return getConfig().getValue(name, valueType);
+  public static <T> T getConfigValue(String key, Class<T> valueType) {
+    return getConfig().getValue(key, valueType);
   }
 
-  public static <T> T getConfigValue(String name, Class<T> valueType, T nvl) {
-    return getConfig().getValue(name, valueType, nvl);
+  public static <T> T getConfigValue(String key, Class<T> valueType, T nvl) {
+    return getConfig().getValue(key, valueType, nvl);
   }
 
-  public static <T> T getConfigValue(String name, TypeLiteral<T> valueTypeLiteral) {
-    return getConfig().getValue(name, valueTypeLiteral);
+  public static <T> T getConfigValue(String key, TypeLiteral<T> valueTypeLiteral) {
+    return getConfig().getValue(key, valueTypeLiteral);
   }
 
-  public static <T> T getConfigValue(String name, TypeLiteral<T> valueTypeLiteral, T nvl) {
-    return getConfig().getValue(name, valueTypeLiteral, nvl);
+  public static <T> T getConfigValue(String key, TypeLiteral<T> valueTypeLiteral, T nvl) {
+    return getConfig().getValue(key, valueTypeLiteral, nvl);
+  }
+
+  public static <T> List<T> getConfigValues(String key, Class<T> valueType) {
+    return getConfig().getValues(key, valueType);
   }
 }

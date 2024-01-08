@@ -25,8 +25,8 @@ import org.corant.shared.resource.Resource;
 
 /**
  * corant-config
- *
- * Use http://java.sun.com/dtd/properties.dtd
+ * <p>
+ * Use <a href="http://java.sun.com/dtd/properties.dtd">pr</a>
  *
  * @author bingo 上午10:11:23
  */

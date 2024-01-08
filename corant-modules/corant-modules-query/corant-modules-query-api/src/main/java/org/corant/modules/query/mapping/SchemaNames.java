@@ -35,6 +35,7 @@ public class SchemaNames {
   public static final String X_PROS = "properties";
   public static final String X_PRO = "property";
   public static final String X_DISTINCT = "distinct";
+  public static final String X_FLATTEN = "flatten";
   public static final String X_SINGLE_AS_LIST = "single-as-list";
   public static final String X_GROUP = "group";
 

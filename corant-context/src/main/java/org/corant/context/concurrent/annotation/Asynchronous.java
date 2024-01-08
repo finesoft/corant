@@ -32,7 +32,6 @@ import org.corant.context.qualifier.Qualifiers;
  * can't handle contextual parameters such as CDI event .etc.
  *
  * @author bingo 上午9:49:43
- *
  */
 @InterceptorBinding
 @Target({TYPE, METHOD})

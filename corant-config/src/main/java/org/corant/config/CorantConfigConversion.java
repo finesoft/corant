@@ -68,7 +68,7 @@ public class CorantConfigConversion implements Serializable {
   public static final String EMPTY_ARRAY_VALUE = "None";
   public static final int BUILT_IN_CONVERTER_ORDINAL = 1;
   public static final int CUSTOMER_CONVERTER_ORDINAL = 100;
-  public static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
+  protected static final List<OrdinalConverter> BUILT_IN_CONVERTERS; // static?
   private static final long serialVersionUID = -2708805756022227289L;
   private static final Type[] objectClasses = {Object.class};
   static {
@@ -118,8 +118,7 @@ public class CorantConfigConversion implements Serializable {
     }
     Type[] genericInterfaces = clazz.getGenericInterfaces();
     for (Type genericInterface : genericInterfaces) {
-      if (genericInterface instanceof ParameterizedType) {
-        ParameterizedType pt = (ParameterizedType) genericInterface;
+      if (genericInterface instanceof ParameterizedType pt) {
         if (pt.getRawType().equals(Converter.class)) {
           Type[] typeArguments = pt.getActualTypeArguments();
           if (typeArguments.length != 1) {
@@ -240,8 +239,7 @@ public class CorantConfigConversion implements Serializable {
       return object;
     }
     Object result = null;
-    if (type instanceof Class) {
-      Class<?> typeClass = (Class<?>) type;
+    if (type instanceof Class<?> typeClass) {
       if (typeClass.isAssignableFrom(OptionalInt.class)) {
         result = typeClass.cast(OptionalInt.empty());
       } else if (typeClass.isAssignableFrom(OptionalLong.class)) {
@@ -556,7 +554,7 @@ public class CorantConfigConversion implements Serializable {
    * @author bingo 上午11:25:40
    *
    */
-  static class OrdinalConverter implements Sortable {
+  protected static class OrdinalConverter implements Sortable {
     final Class<?> type;
     final Converter<?> converter;
     final int ordinal;

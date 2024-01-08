@@ -63,7 +63,7 @@ public class CorantConfigSources {
 
   protected final List<CorantConfigSource> sources;
   protected final String[] profiles;
-  protected final String[] profilePrefixs;
+  protected final String[] profilePrefixes;
   protected final ConfigELProcessor elProcessor;
   protected final boolean expressionsEnabled;
 
@@ -82,9 +82,9 @@ public class CorantConfigSources {
     if (isNotEmpty(profiles)) {
       String[] cps = new String[profiles.length];
       Arrays.setAll(cps, i -> PROFILE_SPECIFIC_PREFIX + profiles[i] + Names.NAME_SPACE_SEPARATOR);
-      profilePrefixs = cps;
+      profilePrefixes = cps;
     } else {
-      profilePrefixs = Strings.EMPTY_ARRAY;
+      profilePrefixes = Strings.EMPTY_ARRAY;
     }
     elProcessor = new ConfigELProcessor(this::retrieveValue);
   }
@@ -216,16 +216,16 @@ public class CorantConfigSources {
    * Note: The search order complies with the microprofile sorting rule. First search the highest
    * priority config source system.profile etc., and then search the profiled sources according to
    * the profile names order if not found, and then search the profiled source items with the
-   * profile prefix key if not found, finally search source items diectly.
+   * profile prefix key if not found, finally search source items directly.
    *
    * @param propertyName the property name to find
    * @return config source and value
    */
   protected Pair<ConfigSource, String> getSourceAndValue(String propertyName) {
-    int i = profilePrefixs.length;
+    int i = profilePrefixes.length;
     while (--i >= 0) {
       String value;
-      String key = profilePrefixs[i] + propertyName;
+      String key = profilePrefixes[i] + propertyName;
       for (CorantConfigSource cs : sources) {
         if (areEqual(cs.getSourceProfile(), profiles[i])) {
           value = cs.getValue(propertyName);
@@ -247,10 +247,10 @@ public class CorantConfigSources {
   }
 
   protected String normalizeName(final String name) {
-    int i = profilePrefixs.length;
+    int i = profilePrefixes.length;
     while (--i >= 0) {
-      if (profilePrefixs[i] != null && name.startsWith(profilePrefixs[i])) {
-        return name.substring(profilePrefixs[i].length());
+      if (profilePrefixes[i] != null && name.startsWith(profilePrefixes[i])) {
+        return name.substring(profilePrefixes[i].length());
       }
     }
     return name;

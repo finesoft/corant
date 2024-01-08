@@ -64,7 +64,6 @@ import org.corant.shared.util.Strings.WildcardMatcher;
  * corant-modules-query-shared
  *
  * @author bingo 上午10:05:02
- *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ApplicationScoped
@@ -164,12 +163,22 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     return resolved.get();
   }
 
-  protected Object convertCriteriaValue(Object obj, Class<?> type) {
-    if (type == null || obj == null) {
-      return obj;
-    } else {
-      return obj instanceof Collection ? toList(obj, type) : toObject(obj, type);
+  protected Object convertCriteriaValue(Object obj, Class<?> type, boolean flatten) {
+    if (obj == null) {
+      return null;
     }
+    Object value = obj instanceof Object[] ? listOf((Object[]) obj) : obj;
+    if (flatten) {
+      value = flatten(value);
+    }
+    if (type != null) {
+      if (value instanceof Collection) {
+        value = toList(value, type);
+      } else {
+        value = toObject(value, type);
+      }
+    }
+    return value;
   }
 
   protected Map<String, Object> extractCriteria(QueryParameter parameter) {
@@ -200,6 +209,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       final Class<?> type = parameter.getType();
       final boolean distinct = parameter.isDistinct();
       final boolean singleAsList = parameter.isSingleAsList();
+      final boolean flatten = parameter.isFlatten();
       final String name = parameter.getName();
       final FetchQueryParameterSource source = parameter.getSource();
       final String group = parameter.getGroup();
@@ -208,17 +218,18 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
 
       if (source == FetchQueryParameterSource.C) {
         // Handle values from a specified constant
-        value = resolveFetchQueryCriteriaValue(parameter.getValue(), type, distinct, singleAsList);
+        value = resolveFetchQueryCriteriaValue(parameter.getValue(), type, distinct, singleAsList,
+            flatten);
       } else if (source == FetchQueryParameterSource.P) {
         // Handle values from parent query parameters
         value = resolveFetchQueryCriteriaValue(criteria.get(parameter.getSourceName()), type,
-            distinct, singleAsList);
+            distinct, singleAsList, flatten);
       } else if (source == FetchQueryParameterSource.S) {
         // handle values from a specified script
         Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchParameter(parameter);
         List<Object> parentResults = result instanceof List ? (List) result : listOf(result);
         Object funValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
-        value = resolveFetchQueryCriteriaValue(funValue, type, distinct, singleAsList);
+        value = resolveFetchQueryCriteriaValue(funValue, type, distinct, singleAsList, flatten);
       } else if (result != null) {
         String[] namePath = parameter.getSourceNamePath();
         try {
@@ -228,7 +239,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
             if (useGroup) {
               for (Object resultItem : (List<?>) result) {
                 Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
-                resultValues.add(convertCriteriaValue(resultItemValue, type));
+                resultValues.add(convertCriteriaValue(resultItemValue, type, flatten));
               }
               value = resultValues;
             } else {
@@ -240,15 +251,17 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
                   resultValues.add(resultItemValue);
                 }
               }
-              value = resolveFetchQueryCriteriaValue(resultValues, type, distinct, singleAsList);
+              value = resolveFetchQueryCriteriaValue(resultValues, type, distinct, singleAsList,
+                  flatten);
             }
           } else {
             // handle values from parent single result
             Object resultValue = objectMapper.getMappedValue(result, namePath);
             if (useGroup) {
-              value = listOf(convertCriteriaValue(resultValue, type));
+              value = listOf(convertCriteriaValue(resultValue, type, flatten));
             } else {
-              value = resolveFetchQueryCriteriaValue(resultValue, type, distinct, singleAsList);
+              value = resolveFetchQueryCriteriaValue(resultValue, type, distinct, singleAsList,
+                  flatten);
             }
           }
         } catch (Exception e) {
@@ -304,8 +317,11 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   }
 
   protected Object resolveFetchQueryCriteriaValue(Object value, Class<?> type, boolean distinct,
-      boolean singleAsList) {
-    Object theValue = value;
+      boolean singleAsList, boolean flatten) {
+    Object theValue = value instanceof Object[] ? listOf((Object[]) value) : value;
+    if (flatten) {
+      theValue = flatten(theValue);
+    }
     if (theValue instanceof Collection) {
       if (distinct) {
         if (type != null) {
@@ -327,4 +343,20 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     return theValue;
   }
 
+  Object flatten(Object value) {
+    if (value instanceof Iterable iterableValue) {
+      List<Object> flattened = new ArrayList<>();
+      for (Object element : iterableValue) {
+        if (element instanceof Iterable iterableElement) {
+          for (Object flattenedElement : iterableElement) {
+            flattened.add(flattenedElement);
+          }
+        } else {
+          flattened.add(element);
+        }
+      }
+      return flattened;
+    }
+    return value;
+  }
 }

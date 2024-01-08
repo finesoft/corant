@@ -34,6 +34,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
 import org.corant.modules.query.mapping.Query;
@@ -44,9 +47,6 @@ import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-shared
@@ -199,8 +199,9 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
             if (retainFields) {
               for (Triple<String, String[], Class<?>> rfn : reduceFields) {
                 obj.put(rfn.getLeft(),
-                    rfn.right() != null ? getMapKeyPathValue(map, rfn.getMiddle(), rfn.right())
-                        : getMapKeyPathValue(map, rfn.getMiddle()));
+                    rfn.right() != null
+                        ? getMapKeyPathValue(map, rfn.getMiddle(), false, rfn.right())
+                        : getMapKeyPathValue(map, rfn.getMiddle(), false));
               }
             } else {
               for (Triple<String, String[], Class<?>> rfn : reduceFields) {

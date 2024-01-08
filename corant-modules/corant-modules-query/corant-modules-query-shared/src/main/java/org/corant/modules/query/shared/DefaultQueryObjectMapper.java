@@ -88,7 +88,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     String[] keyPath = (String[]) key;
     if (object instanceof Map) {
       if (keyPath.length > 1) {
-        List<Object> values = getMapKeyPathValues(object, keyPath);
+        List<Object> values = getMapKeyPathValues(object, keyPath, false);
         return values.isEmpty() ? null : values.size() == 1 ? values.get(0) : values;
       } else {
         return ((Map) object).get(keyPath[0]);
@@ -161,8 +161,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   public <T> T toObject(Object from, Type type) {
     if (from == null) {
       return null;
-    } else if (type instanceof Class) {
-      Class<?> clazz = (Class<?>) type;
+    } else if (type instanceof Class<?> clazz) {
       if (clazz.isInstance(from)) {
         return (T) from;
       } else if (isSimpleClass(clazz)) {
@@ -171,7 +170,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
         return (T) objectMapper.convertValue(from, clazz);
       }
     } else {
-      return (T) objectMapper.convertValue(from, objectMapper.constructType(type));
+      return objectMapper.convertValue(from, objectMapper.constructType(type));
     }
   }
 

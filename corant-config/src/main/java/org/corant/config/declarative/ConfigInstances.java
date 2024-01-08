@@ -52,8 +52,7 @@ public class ConfigInstances {
         for (ConfigMetaField cf : configClass.getFields()) {
           cf.getInjector().inject(config, key, configObject, cf);
         }
-        if (configObject instanceof DeclarativeConfig) {
-          DeclarativeConfig declarativeConfigObject = (DeclarativeConfig) configObject;
+        if (configObject instanceof DeclarativeConfig declarativeConfigObject) {
           declarativeConfigObject.onPostConstruct(config, key);
           if (declarativeConfigObject.isValid()) {
             configMaps.put(key, (T) declarativeConfigObject);

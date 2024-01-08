@@ -138,10 +138,11 @@ public interface EsQueryExecutor {
       if (total > 0) {
         Map<String, Object> result = XContentUtils.searchResponseToMap(searchResponse, hintKeys);
         if (hintKeys.length == 1) {
-          List<Object> extracted = getMapKeyPathValues(result, split(hintKeys[0], ".", true, true));
+          List<Object> extracted =
+              getMapKeyPathValues(result, split(hintKeys[0], ".", true, true), true);
           extracted.forEach(obj -> list.add(forceCast(obj)));
         } else {
-          List<Object> extracted = getMapKeyPathValues(result, HIT_KEYS);
+          List<Object> extracted = getMapKeyPathValues(result, HIT_KEYS, true);
           extracted.forEach(obj -> list.add(forceCast(obj)));
         }
       }

@@ -300,7 +300,7 @@ public class Corant implements AutoCloseable {
    * Run a runnable program in the CDI environment. This method will try to start the Corant
    * application and automatically close it after the runnable is executed.
    *
-   * @param runnable the runnable program to be ran in CDI environment
+   * @param runnable the runnable program to be run in CDI environment
    * @param arguments the application arguments use for boot handler
    */
   public static synchronized void run(Runnable runnable, String... arguments) {
@@ -554,7 +554,7 @@ public class Corant implements AutoCloseable {
 
   /**
    * Returns a new {@link Event} object whose event type is <tt>Object</tt> and qualifier
-   * <tt>@Default</tt>, or throws exception if the current CDIcontainer is not started. This method
+   * <tt>@Default</tt>, or throws exception if the current CDI container is not started. This method
    * is not normally used, and should be use <tt> CDI.current().getBeanManager().getEvent()</tt>.
    */
   public synchronized Event<Object> getEvent() {
@@ -563,7 +563,7 @@ public class Corant implements AutoCloseable {
   }
 
   /**
-   * Returns current CDI container, or throws exception if the current CDIcontainer is not started.
+   * Returns current CDI container, or throws exception if the current CDI container is not started.
    */
   public synchronized Instance<Object> getInstance() {
     shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);

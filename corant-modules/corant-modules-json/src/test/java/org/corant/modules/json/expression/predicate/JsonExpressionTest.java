@@ -13,11 +13,13 @@
  */
 package org.corant.modules.json.expression.predicate;
 
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.modules.json.expression.Node;
@@ -25,6 +27,7 @@ import org.corant.modules.json.expression.SimpleParser;
 import org.corant.modules.json.expression.ast.ASTFunctionNode;
 import org.corant.modules.json.expression.ast.ASTVariableNode;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.util.Maps;
 import org.junit.Test;
 import junit.framework.TestCase;
 
@@ -34,6 +37,17 @@ import junit.framework.TestCase;
  * @author bingo 下午4:24:48
  */
 public class JsonExpressionTest extends TestCase {
+
+  public static void main(String[] args) {
+    Map<String, Object> map =
+        mapOf("a", 1, "b", listOf(mapOf("b1", mapOf("b2", "b2")), mapOf("b1", mapOf("b2", "b2"))));
+    String[] path = {"b"};
+    Object val = Maps.getMapKeyPathValues(map, path, false);
+    System.out.println(Jsons.toString(val, true));
+    System.out.println("=".repeat(80));
+    val = Maps.getMapKeyPathValues(map, path, true);
+    System.out.println(Jsons.toString(val, true));
+  }
 
   @Test
   public void testFunc() {

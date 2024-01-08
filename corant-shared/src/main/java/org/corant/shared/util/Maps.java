@@ -162,7 +162,7 @@ public class Maps {
 
   /**
    * Flatten a map, where the key consists of the key of the given original map and the given
-   * splitor, and the flattening is performed in a depth-first manner.
+   * separator, and the flattening is performed in a depth-first manner.
    *
    * <p>
    * Note that: The flattening process only applies to values of type Collection or Map or Array, so
@@ -206,14 +206,14 @@ public class Maps {
    *</pre>
    *
    * @param map the map to be flattened
-   * @param splitor the string key splitor, use to splite key levels.
+   * @param separator the string key separator, use to split key levels.
    * @param maxDepth Maximum leveling depth
    * @return a map, where the key consists of the key of the given map and the given delimiter
    */
-  public static Map<String, Object> flatMap(Map<String, ?> map, String splitor, int maxDepth) {
+  public static Map<String, Object> flatMap(Map<String, ?> map, String separator, int maxDepth) {
     Map<FlatMapKey, Object> flatMap = new HashMap<>();
     Map<String, Object> stringKeyMap = new TreeMap<>((k1, k2) -> {
-      int s = Integer.compare(split(k1, splitor).length, split(k2, splitor).length);
+      int s = Integer.compare(split(k1, separator).length, split(k2, separator).length);
       if (s == 0) {
         return k1.compareTo(k2);
       }
@@ -224,7 +224,7 @@ public class Maps {
         doFlatMap(flatMap, FlatMapKey.of(entry.getKey()), entry.getValue(), maxDepth);
       }
     }
-    flatMap.forEach((k, v) -> stringKeyMap.put(k.asStringKeys(splitor), v));
+    flatMap.forEach((k, v) -> stringKeyMap.put(k.asStringKeys(separator), v));
     return stringKeyMap;
   }
 
@@ -232,13 +232,13 @@ public class Maps {
    * @see #flatMap(Map, String, int)
    *
    * @param map the map to be flattened
-   * @param splitor the string key splitor, use to split key levels.
+   * @param separator the string key separator, use to split key levels.
    * @param maxDepth Maximum leveling depth
    * @return a map, where the key consists of the key of the original map and the given delimiter
    */
-  public static Map<String, String> flatStringMap(Map<String, ?> map, String splitor,
+  public static Map<String, String> flatStringMap(Map<String, ?> map, String separator,
       int maxDepth) {
-    Map<String, Object> stringKeyMap = flatMap(map, splitor, maxDepth);
+    Map<String, Object> stringKeyMap = flatMap(map, separator, maxDepth);
     Map<String, String> stringMap = new HashMap<>(stringKeyMap.size());
     stringKeyMap.forEach((k, v) -> stringMap.put(k, asString(v, null)));
     return stringMap;
@@ -577,10 +577,13 @@ public class Maps {
 
   /**
    * Returns the value corresponding to the given key path in the given object. The given object can
-   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is a collection
-   * or array, it will be merged into a single list and use the first element of the list as the
-   * result and then force type casting the result according to the expected return type.
-   *
+   * be a map, a collection of maps, or an array of maps. If the value corresponding to the key path
+   * is a collection or an array, the elements of the value are extracted and added one by one to an
+   * intermediate temporary list if the given {@code flatten} is true, otherwise the value is added
+   * as a whole to the intermediate temporary list.
+   * <p>
+   * <b>The first element of the intermediate temporary list is taken as the result, and the result
+   * is forced to be type-converted according to the expected return type.</b>
    * <p>
    * Note: If the value returned by this method is changed by another processing, it is not
    * guaranteed that it will affect the given object.
@@ -588,8 +591,9 @@ public class Maps {
    * @param <T> the expected return type
    * @param object the object to be lookup from
    * @param keyPath the key path
+   * @param flatten flatten the value if value is an iterable or an array
    */
-  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath) {
+  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, boolean flatten) {
     List<Object> holder = new ArrayList<>();
     iterateMapValue(object, keyPath, 0, true, false, holder);
     if (holder.isEmpty()) {
@@ -603,11 +607,13 @@ public class Maps {
 
   /**
    * Returns the value corresponding to the given key path in the given object. The given object can
-   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is a collection
-   * or array, it will be merged into a single list and use the first element of the list as the
-   * result and then use {@link Conversions#toObject(Object, Class)} to cast the result according to
-   * the expected return type.
-   *
+   * be a map, a collection of maps, or an array of maps. If the value corresponding to the key path
+   * is a collection or an array, the elements of the value are extracted and added one by one to an
+   * intermediate temporary list if the given {@code flatten} is true, otherwise the value is added
+   * as a whole to the intermediate temporary list.
+   * <p>
+   * <b>The first element of the intermediate temporary list is taken as the result, and the result
+   * is forced to be type-converted according to the expected return type.</b>
    * <p>
    * Note: If the value returned by this method is changed by another processing, it is not
    * guaranteed that it will affect the given object.
@@ -615,34 +621,40 @@ public class Maps {
    * @param <T> the expected return type
    * @param object the object to be lookup from
    * @param keyPath the key path
+   * @param flatten flatten the value if value is an iterable or an array
    * @param expectedType the expected class
    */
-  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, Class<T> expectedType) {
-    return toObject(getMapKeyPathValue(object, keyPath), expectedType);
+  public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, boolean flatten,
+      Class<T> expectedType) {
+    return toObject(getMapKeyPathValue(object, keyPath, flatten), expectedType);
   }
 
   /**
-   * Return the value corresponding to the given key path in the given object. The given object can
-   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is not a
-   * collection and array, it will be added into a list and return.
-   *
+   * Returns the value corresponding to the given key path in the given object. The given object can
+   * be a map, a collection of maps, or an array of maps. If the value corresponding to the key path
+   * is a collection or an array, the elements of the value are extracted and added one by one to
+   * the return list if the given {@code flatten} is true, otherwise the value is added as a whole
+   * to the return list.
    * <p>
    * Note: If the value returned by this method is changed by another processing, it is not
    * guaranteed that it will affect the given object.
    *
    * @param object the object to be lookup from
    * @param keyPath the key path
+   * @param flatten flatten the value if value is an iterable or an array
    */
-  public static List<Object> getMapKeyPathValues(Object object, Object[] keyPath) {
+  public static List<Object> getMapKeyPathValues(Object object, Object[] keyPath, boolean flatten) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(object, keyPath, 0, true, false, holder);
+    iterateMapValue(object, keyPath, 0, flatten, false, holder);
     return holder;
   }
 
   /**
-   * Return the value corresponding to the given key path in the given object. The given object can
-   * be a Map, or a collection of Maps or an array of Maps. If the value retrieved is not a
-   * collection and array, it will be added into a list and return.
+   * Returns the value corresponding to the given key path in the given object. The given object can
+   * be a map, a collection of maps, or an array of maps. If the value corresponding to the key path
+   * is a collection or an array, the elements of the value are extracted and added one by one to
+   * the value list if the given {@code flatten} is true, otherwise the value is added as a whole to
+   * the value list. convert the element of the value list to the given expected type and return.
    *
    * <p>
    * Note: If the value returned by this method is changed by another processing, it is not
@@ -650,11 +662,13 @@ public class Maps {
    *
    * @param object the object to be lookup from
    * @param keyPath the key path
+   * @param flatten flatten the value if value is an iterable or an array
    * @param expectedElementType the expected element type
    */
-  public static <T> List<T> getMapKeyPathValues(Object object, Object[] keyPath,
+  public static <T> List<T> getMapKeyPathValues(Object object, Object[] keyPath, boolean flatten,
       Class<T> expectedElementType) {
-    return toList(getMapKeyPathValues(object, keyPath), t -> toObject(t, expectedElementType));
+    return toList(getMapKeyPathValues(object, keyPath, flatten),
+        t -> toObject(t, expectedElementType));
   }
 
   /**
@@ -1557,9 +1571,9 @@ public class Maps {
       return key;
     }
 
-    public String asStringKeys(String splitor) {
+    public String asStringKeys(String separator) {
       String[] stringKeys = keys.stream().map(Objects::asString).toArray(String[]::new);
-      return String.join(splitor, stringKeys);
+      return String.join(separator, stringKeys);
     }
 
     @Override

@@ -400,6 +400,16 @@ In the default implementation, all injections may be only reference injections, 
                  </xsd:documentation>
              </xsd:annotation>           
         </xsd:attribute>
+        <xsd:attribute name="flatten" type="xsd:boolean" use="optional" default="true">
+            <xsd:annotation>
+                 <xsd:documentation>
+                 <![CDATA[
+                    When the parameter value is multiple collections, 
+                    whether to extract the values in the collection to form a new collection
+                    ]]>
+                 </xsd:documentation>
+             </xsd:annotation>           
+        </xsd:attribute>        
     </xsd:complexType>
     
     <xsd:simpleType name="fetch-query-parameter-source">

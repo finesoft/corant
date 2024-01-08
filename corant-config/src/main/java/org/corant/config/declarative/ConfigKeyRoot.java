@@ -23,7 +23,7 @@ import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
  * corant-config
- *
+ * <p>
  * Use to indicate the beginning of the namespace of the configuration item.
  * <p>
  * For example:
@@ -46,11 +46,11 @@ import jakarta.enterprise.util.AnnotationLiteral;
  * datasource.blog.driver = com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
  *
  * </pre>
- *
+ * <p>
  * All configuration item information whose key starts with "datasource" will be mapped to the
  * properties of the declarative configuration object DatasourceConfig, where the name between the
  * property name and "datasource" can be used as the name of the declarative configuration object.
- *
+ * <p>
  * Assuming that the DataSource configuration object has two properties, the names are called "url"
  * and "driver", and the configuration items are named "datasource.blog.url" and
  * "datasource.blog.driver". In this case, the configuration item values of "datasource.blog.url"and

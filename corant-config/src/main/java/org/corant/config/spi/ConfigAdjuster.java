@@ -15,13 +15,13 @@ package org.corant.config.spi;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Services;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 /**
  * corant-config
+ *
  * <p>
  * A config-source adjuster, use to adjust the config-source, for example: the adjuster can be used
  * to do some configuration value decryption works.
@@ -34,8 +34,8 @@ public interface ConfigAdjuster extends Sortable {
   static ConfigAdjuster resolve(ClassLoader classLoader) {
     ConfigAdjuster adjuster = a -> a;
     List<ConfigAdjuster> discoveredAdjusters =
-        Services.selectRequired(ConfigAdjuster.class, classLoader).collect(Collectors.toList());
-    discoveredAdjusters.sort(Sortable::reverseCompare);
+        Services.selectRequired(ConfigAdjuster.class, classLoader).sorted(Sortable::reverseCompare)
+            .toList();
     for (ConfigAdjuster discoveredAdjuster : discoveredAdjusters) {
       adjuster = adjuster.compose(discoveredAdjuster);
     }
@@ -53,5 +53,4 @@ public interface ConfigAdjuster extends Sortable {
     Objects.requireNonNull(before);
     return a -> apply(before.apply(a));
   }
-
 }

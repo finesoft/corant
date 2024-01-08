@@ -13,9 +13,8 @@
  */
 package org.corant.config;
 
-import static java.util.Collections.unmodifiableSet;
-import static org.corant.shared.util.Sets.setOf;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import org.corant.shared.ubiquity.Configuration;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -43,18 +42,23 @@ public class MicroprofileConfiguration implements Configuration {
   }
 
   @Override
-  public Set<String> getKeys() {
-    return unmodifiableSet(setOf(getConfig().getPropertyNames()));
+  public Iterable<String> getKeys() {
+    return getConfig().getPropertyNames();
   }
 
   @Override
-  public <T> T getValue(String name, Class<T> valueType) {
-    return getConfig().getOptionalValue(name, valueType).orElse(null);
+  public <T> T getValue(String key, Class<T> valueType) {
+    return getConfig().getOptionalValue(key, valueType).orElse(null);
   }
 
   @Override
-  public <T> T getValue(String name, TypeLiteral<T> valueTypeLiteral) {
-    return getConfig().getOptionalValue(name, valueTypeLiteral).orElse(null);
+  public <T> T getValue(String key, TypeLiteral<T> valueTypeLiteral) {
+    return getConfig().getOptionalValue(key, valueTypeLiteral).orElse(null);
+  }
+
+  @Override
+  public <T> List<T> getValues(String key, Class<T> valueType) {
+    return getConfig().getOptionalValues(key, valueType).orElse(Collections.emptyList());
   }
 
   protected CorantConfig getConfig() {

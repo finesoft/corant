@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
+import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
 import jakarta.enterprise.inject.spi.BeanManager;
@@ -35,7 +35,6 @@ import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.WithAnnotations;
-import jakarta.annotation.Priority;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Services;
@@ -141,12 +140,10 @@ public class CommandExtension implements Extension {
       } else {
         Type[] genericInterfaces = clazz.getGenericInterfaces();
         for (Type type : genericInterfaces) {
-          if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            if (parameterizedType.getRawType() instanceof Class) {
-              resolvedClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-              break;
-            }
+          if (type instanceof ParameterizedType parameterizedType
+              && parameterizedType.getRawType() instanceof Class) {
+            resolvedClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+            break;
           }
         }
       }

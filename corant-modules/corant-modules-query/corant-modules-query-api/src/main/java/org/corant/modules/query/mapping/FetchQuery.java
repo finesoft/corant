@@ -276,6 +276,7 @@ public class FetchQuery implements Serializable {
     private Class<?> type;
     private boolean distinct = true;
     private boolean singleAsList = false;
+    private boolean flatten = true;
     private Script script;
     private String group;
 
@@ -295,10 +296,12 @@ public class FetchQuery implements Serializable {
      *        fetch query parameter value
      * @param distinct whether to de-duplicate when there are multiple parameter values
      * @param singleAsList when the value is a single value, whether to convert it to a list
+     * @param flatten When the parameter value is multiple collections, whether to extract the
+     *        values in the collection to form a new collection
      */
     public FetchQueryParameter(String group, String name, String sourceName,
         FetchQueryParameterSource source, String value, Class<?> type, Script script,
-        boolean distinct, boolean singleAsList) {
+        boolean distinct, boolean singleAsList, boolean flatten) {
       setGroup(group);
       setName(name);
       setSourceName(sourceName);
@@ -308,6 +311,7 @@ public class FetchQuery implements Serializable {
       setScript(script);
       setDistinct(distinct);
       setSingleAsList(singleAsList);
+      setFlatten(flatten);
     }
 
     public String getGroup() {
@@ -372,6 +376,10 @@ public class FetchQuery implements Serializable {
       return distinct;
     }
 
+    public boolean isFlatten() {
+      return flatten;
+    }
+
     /**
      * Returns whether to convert the value to a list when the value is a single value.
      */
@@ -381,6 +389,10 @@ public class FetchQuery implements Serializable {
 
     protected void setDistinct(boolean distinct) {
       this.distinct = distinct;
+    }
+
+    protected void setFlatten(boolean flatten) {
+      this.flatten = flatten;
     }
 
     protected void setGroup(String group) {

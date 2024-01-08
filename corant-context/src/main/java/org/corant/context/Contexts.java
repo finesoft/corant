@@ -25,12 +25,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ConversationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.TypeLiteral;
-import jakarta.annotation.PreDestroy;
 import org.corant.config.Configs;
 import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.WeldAlterableContext;
@@ -58,11 +58,11 @@ public class Contexts {
   /**
    * Returns whether there is an active context for all given scope types.
    *
-   * @param scopeTypes
+   * @param scopeTypes the given scope types to check
    * @return areContextsActive
    */
-  public static boolean areContextsActive(
-      @SuppressWarnings("unchecked") Class<? extends Annotation>... scopeTypes) {
+  @SafeVarargs
+  public static boolean areContextsActive(Class<? extends Annotation>... scopeTypes) {
     final WeldManager wm;
     return isNotEmpty(scopeTypes) && (wm = tryResolve(WeldManager.class)) != null
         && Arrays.stream(scopeTypes).allMatch(wm::isContextActive);
@@ -82,7 +82,7 @@ public class Contexts {
    * Captures a snapshot of the set of contextual instances for the currently active
    * WeldAlterableContexts for the Request, Session, and Conversation scope.
    *
-   * @param weldManager
+   * @param weldManager the CDI bean manager implemented by WELD
    * @return capture
    */
   public static ContextSnapshot capture(WeldManager weldManager) {
@@ -109,7 +109,7 @@ public class Contexts {
   /**
    * Returns whether there is an active context for a given scope type.
    *
-   * @param scopeType
+   * @param scopeType the given scope type to check
    * @return isContextActive
    */
   public static boolean isContextActive(Class<? extends Annotation> scopeType) {
@@ -130,15 +130,14 @@ public class Contexts {
    *
    * <p>
    * <b>Note</b>: This is only suitable for Weld and cannot be used for other CDI implementations.
-   * {@link PreDestroy} / {@link jakarta.enterprise.inject.Disposes} on your beans
-   * could cause inconsistent state based on how you perform the propagation. Since the same bean is
-   * now used in several threads, all of them can, in invalidating and deactivating contexts,
-   * trigger these methods but the bean will still exist in yet another thread. In current
-   * implemention, we avoid calling context.invalidate() and only performs context.deactivate() -
-   * this avoids invoking {@link PreDestroy} /
-   * {@link jakarta.enterprise.inject.Disposes} methods but could possibly lead to never invoking them
-   * if no thread does it. Note that this problem only concerns request, session and conversation
-   * beans.
+   * {@link PreDestroy} / {@link jakarta.enterprise.inject.Disposes} on your beans could cause
+   * inconsistent state based on how you perform the propagation. Since the same bean is now used in
+   * several threads, all of them can, in invalidating and deactivating contexts, trigger these
+   * methods but the bean will still exist in yet another thread. In current implementation, we
+   * avoid calling context.invalidate() and only performs context.deactivate() - this avoids
+   * invoking {@link PreDestroy} / {@link jakarta.enterprise.inject.Disposes} methods but could
+   * possibly lead to never invoking them if no thread does it. Note that this problem only concerns
+   * request, session and conversation beans.
    *
    * @see <a href=
    *      "https://docs.jboss.org/weld/reference/latest-3.1/en-US/html_single/#contexts">Weld

@@ -29,7 +29,7 @@ import org.corant.shared.util.Strings;
  */
 public class CommandLine {
 
-  final static String ESCAPEDS = Strings.BACK_SLASH + Strings.COMMA;
+  final static String ESCAPED = Strings.BACK_SLASH + Strings.COMMA;
 
   final String command;
   final String[] arguments;
@@ -86,7 +86,7 @@ public class CommandLine {
   public String toString() {
     return arguments.length > 0
         ? command.concat(Strings.EQUALS).concat(String.join(Strings.COMMA, listOf(arguments)
-            .stream().map(a -> replace(a, Strings.COMMA, ESCAPEDS)).toArray(String[]::new)))
+            .stream().map(a -> replace(a, Strings.COMMA, ESCAPED)).toArray(String[]::new)))
         : command;
   }
 

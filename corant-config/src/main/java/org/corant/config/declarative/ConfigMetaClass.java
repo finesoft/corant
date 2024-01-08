@@ -37,7 +37,7 @@ public class ConfigMetaClass {
    * @param keyRoot the configuration key prefix
    * @param keyIndex the configuration property index
    * @param clazz the declarative configuration class
-   * @param ignoreNoAnnotatedItem whether to ignore the field that does not have annotaion.
+   * @param ignoreNoAnnotatedItem whether to ignore the field that does not have annotation.
    */
   protected ConfigMetaClass(String keyRoot, int keyIndex, Class<?> clazz,
       boolean ignoreNoAnnotatedItem) {

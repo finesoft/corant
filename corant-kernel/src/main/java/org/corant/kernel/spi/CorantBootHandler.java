@@ -76,7 +76,7 @@ public interface CorantBootHandler extends Sortable {
    *
    * <p>
    * Note: If this method throws an exception, and if there are multiple Handlers, this method of
-   * the lower priority Handler will not be invoked. In some cases if use daemon thread to shutdown
+   * the lower priority Handler will not be invoked. In some cases if one use daemon thread to shut down
    * Corant this method may not be invoked.
    *
    * @param classLoader the class loader use for this application
@@ -92,7 +92,7 @@ public interface CorantBootHandler extends Sortable {
    * <p>
    * Note: If the application startup with {@link Corant#DISABLE_BEFORE_START_HANDLER_CMD} argument,
    * this method will not be invoked. If this method throws an exception, the container may not
-   * startup, and if there are multiple Handlers, this method of the lower priority Handler will not
+   * start up, and if there are multiple Handlers, this method of the lower priority Handler will not
    * be invoked.
    *
    * @param classLoader the class loader use for this application

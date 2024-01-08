@@ -13,7 +13,9 @@
  */
 package org.corant.modules.query.shared.dynamic.jsonexpression;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableCollection;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -71,7 +73,6 @@ import net.jcip.annotations.GuardedBy;
  * execute fetch query condition judgment and injection processing.
  *
  * @author bingo 下午3:00:31
- *
  */
 @Singleton
 public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
@@ -111,9 +112,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     injFuns.clear();
     preFuns.clear();
     if (QueryExtension.verifyDeployment) {
-      logger.info("Start json expression query scripts precompiling.");
+      logger.info("Start json expression query scripts pre-compiling.");
       int cs = resolveAll(queries, initializedVersion);
-      logger.info("Complete " + cs + " json expression query scripts precompiling.");
+      logger.info("Complete " + cs + " json expression query scripts pre-compiling.");
     }
   }
 
@@ -210,39 +211,38 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
 
   protected Projector resolveInjectProjector(Map<String, Object> projectionMap, boolean single) {
     Set<Mapping> mappings = new LinkedHashSet<>();
-    projectionMap.forEach((k, v) -> {
-      if (k != null && v != null) {
-        // String[] keyPath = split(k, Names.NAME_SPACE_SEPARATORS, true, true);
-        String[] keyPath = Names.splitNameSpace(k, true, false);
-        if (keyPath.length > 0) {
-          if (v instanceof Map) {
-            Map<?, ?> vm = (Map<?, ?>) v;
-            String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
-            Class<?> type = typeName != null ? asClass(typeName) : null;
-            Object robj = defaultObject(vm.get(PROJECTION_RENAME_KEY), k);
-            if (robj instanceof String) {
-              // for single injection
-              // String[] rename = split(robj.toString(), Names.NAME_SPACE_SEPARATORS, true, true);
-              String[] rename = Names.splitNameSpace(robj.toString(), true, false);
-              mappings.add(new Mapping(keyPath, singletonList(rename), type));
-            } else if (robj instanceof Collection) {
-              // for multiple injections
-              List<String[]> renames = new ArrayList<>(((Collection<?>) robj).size());
-              for (Object ro : (Collection<?>) robj) {
-                if (ro != null) {
-                  // renames.add(split(ro.toString(), Names.NAME_SPACE_SEPARATORS, true, true));
-                  renames.add(Names.splitNameSpace(ro.toString(), true, false));
+    if (projectionMap != null) {
+      projectionMap.forEach((k, v) -> {
+        if (k != null && v != null) {
+          // String[] keyPath = split(k, Names.NAME_SPACE_SEPARATORS, true, true);
+          String[] keyPath = Names.splitNameSpace(k, true, false);
+          if (keyPath.length > 0) {
+            if (v instanceof Map<?, ?> vm) {
+              String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
+              Class<?> type = typeName != null ? asClass(typeName) : null;
+              Object robj = defaultObject(vm.get(PROJECTION_RENAME_KEY), k);
+              if (robj instanceof String) {
+                // for single injection
+                String[] rename = Names.splitNameSpace(robj.toString(), true, false);
+                mappings.add(new Mapping(keyPath, singletonList(rename), type));
+              } else if (robj instanceof Collection) {
+                // for multiple injections
+                List<String[]> renames = new ArrayList<>(((Collection<?>) robj).size());
+                for (Object ro : (Collection<?>) robj) {
+                  if (ro != null) {
+                    renames.add(Names.splitNameSpace(ro.toString(), true, false));
+                  }
                 }
+                mappings.add(new Mapping(keyPath, renames, type));
               }
-              mappings.add(new Mapping(keyPath, renames, type));
+            } else if (toBoolean(v)) {
+              mappings.add(new Mapping(keyPath, singletonList(keyPath), null));
             }
-          } else if (toBoolean(v)) {
-            mappings.add(new Mapping(keyPath, singletonList(keyPath), null));
           }
         }
-      }
-    });
-    if (isEmpty(mappings)) {
+      });
+    }
+    if (isEmpty(mappings) && !single) {
       throw new QueryRuntimeException("The projection can't empty!");
     } else if (single && (mappings.size() > 1
         || (mappings.size() == 1 && mappings.iterator().next().injectPaths.size() > 1))) {
@@ -262,13 +262,66 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     if (filterMap != null) {
       filter = forceCast(SimpleParser.parse(filterMap, MyASTNodeBuilder.INST));
     }
-    if (projectionMap != null) {
+    if (projectionMap != null || single) {
       projector = resolveInjectProjector(projectionMap, single);
     }
     if (filter == null && projector == null) {
       filter = forceCast(SimpleParser.parse(root, MyASTNodeBuilder.INST));
     }
     return Pair.of(filter, projector);
+  }
+
+  /**
+   * corant-modules-query-shared
+   *
+   * @author bingo 下午3:17:15
+   *
+   */
+  protected static class Projector
+      implements BiFunction<List<Object>, QueryObjectMapper, List<Object>> {
+
+    final Collection<Mapping> mappings;
+    final boolean single;
+
+    Projector(Collection<Mapping> mappings, boolean single) {
+      this.mappings = mappings == null ? emptyList() : unmodifiableCollection(mappings);
+      this.single = single;
+    }
+
+    @Override
+    public List<Object> apply(List<Object> fetchResults, QueryObjectMapper objectMapper) {
+      List<Object> results = new ArrayList<>();
+      if (single) {
+        if (mappings.isEmpty()) {
+          results.addAll(fetchResults);
+        } else {
+          final Mapping mapping = mappings.iterator().next();
+          for (Object fetchResult : fetchResults) {
+            Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
+            if (mapping.type != null) {
+              extracted = toObject(extracted, mapping.type);
+            }
+            results.add(extracted);
+          }
+        }
+      } else {
+        for (Object fetchResult : fetchResults) {
+          Map<Object, Object> result = new LinkedHashMap<>();
+          for (Mapping mapping : mappings) {
+            Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
+            if (mapping.type != null) {
+              extracted = toObject(extracted, mapping.type);
+            }
+            for (String[] injectPath : mapping.injectPaths) {
+              objectMapper.putMappedValue(result, injectPath, extracted);
+            }
+          }
+          results.add(result);
+        }
+      }
+      return results;
+    }
+
   }
 
   /**
@@ -343,15 +396,10 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     MyASTVariableNode(String name) {
       super(name);
       if (name.startsWith(PARENT_RESULT_VAR_PREFIX)) {
-        // namePath = split(name.substring(PARENT_RESULT_VAR_PREFIX_LEN),
-        // Names.NAME_SPACE_SEPARATORS);
         namePath = Names.splitNameSpace(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), true, false);
       } else if (name.startsWith(FETCH_RESULT_VAR_PREFIX)) {
-        // namePath = split(name.substring(FETCH_RESULT_VAR_PREFIX_LEN),
-        // Names.NAME_SPACE_SEPARATORS);
         namePath = Names.splitNameSpace(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), true, false);
       } else if (name.startsWith(PARAMETER_VAR_PREFIX)) {
-        // namePath = split(name.substring(PARAMETER_VAR_PREFIX_LEN), Names.NAME_SPACE_SEPARATORS);
         namePath = Names.splitNameSpace(name.substring(PARAMETER_VAR_PREFIX_LEN), true, false);
       } else {
         throw new NotSupportedException(
@@ -415,54 +463,6 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       this.parentResult = parentResult;
       this.fetchResult = fetchResult;
       return this;
-    }
-
-  }
-
-  /**
-   * corant-modules-query-shared
-   *
-   * @author bingo 下午3:17:15
-   *
-   */
-  static class Projector implements BiFunction<List<Object>, QueryObjectMapper, List<Object>> {
-
-    final Collection<Mapping> mappings;
-    final boolean single;
-
-    Projector(Collection<Mapping> mappings, boolean single) {
-      this.mappings = mappings;
-      this.single = single;
-    }
-
-    @Override
-    public List<Object> apply(List<Object> fetchResults, QueryObjectMapper objectMapper) {
-      List<Object> results = new ArrayList<>();
-      if (single) {
-        final Mapping mapping = mappings.iterator().next();
-        for (Object fetchResult : fetchResults) {
-          Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
-          if (mapping.type != null) {
-            extracted = toObject(extracted, mapping.type);
-          }
-          results.add(extracted);
-        }
-      } else {
-        for (Object fetchResult : fetchResults) {
-          Map<Object, Object> result = new LinkedHashMap<>();
-          for (Mapping mapping : mappings) {
-            Object extracted = objectMapper.getMappedValue(fetchResult, mapping.extractPath);
-            if (mapping.type != null) {
-              extracted = toObject(extracted, mapping.type);
-            }
-            for (String[] injectPath : mapping.injectPaths) {
-              objectMapper.putMappedValue(result, injectPath, extracted);
-            }
-          }
-          results.add(result);
-        }
-      }
-      return results;
     }
 
   }

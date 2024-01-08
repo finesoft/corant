@@ -43,7 +43,7 @@ public abstract class AbstractBean<T> implements Bean<T>, PassivationCapable {
   /**
    * The CDI bean manager
    *
-   * @param beanManager
+   * @param beanManager the CDI bean manager
    */
   protected AbstractBean(BeanManager beanManager) {
     this.beanManager = beanManager;

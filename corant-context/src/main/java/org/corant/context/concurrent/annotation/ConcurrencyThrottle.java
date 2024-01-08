@@ -26,7 +26,6 @@ import jakarta.interceptor.InterceptorBinding;
  * corant-context
  *
  * @author bingo 上午9:50:15
- *
  */
 @InterceptorBinding
 @Inherited

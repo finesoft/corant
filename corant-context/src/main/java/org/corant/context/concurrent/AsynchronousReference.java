@@ -49,7 +49,7 @@ public interface AsynchronousReference<T> extends CompletionStage<T> {
   /**
    * Gets the cause in case of a failure occurs during processing.
    *
-   * @return the cause or {@code null} if processed sucessfully
+   * @return the cause or {@code null} if processed successfully
    */
   Throwable cause();
 
@@ -62,9 +62,9 @@ public interface AsynchronousReference<T> extends CompletionStage<T> {
 
   /**
    * If {@link #isDone()} returns <code>true</code>, invoke the specified consumer with the
-   * reference (may be {@code null}) and the exception (or {@code null} if processed successfully).
+   * reference (maybe {@code null}) and the exception (or {@code null} if processed successfully).
    *
-   * @param consumer
+   * @param consumer the given consumer that can be invoked when the process done
    */
   default void ifDone(BiConsumer<? super T, ? super Throwable> consumer) {
     if (isDone()) {
@@ -81,7 +81,7 @@ public interface AsynchronousReference<T> extends CompletionStage<T> {
   /**
    * Gets the reference or the default value.
    *
-   * @param defaultValue
+   * @param defaultValue the default value
    * @return the reference or the default value if the reference is {@code null}
    */
   default T orElse(T defaultValue) {

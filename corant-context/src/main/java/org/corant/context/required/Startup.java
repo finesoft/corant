@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
  * corant-context
  *
  * @author bingo 下午2:49:49
- *
  */
 @Target(TYPE)
 @Retention(RUNTIME)

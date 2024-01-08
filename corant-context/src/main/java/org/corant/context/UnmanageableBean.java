@@ -24,7 +24,7 @@ import org.jboss.weld.manager.api.WeldManager;
 
 /**
  * corant-context
- *
+ * <p>
  * Handle CDI unmanageable bean class or object
  *
  * @author bingo 下午11:02:59

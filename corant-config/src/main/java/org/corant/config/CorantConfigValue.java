@@ -56,7 +56,7 @@ public class CorantConfigValue implements ConfigValue {
   }
 
   /**
-   * The value of the property lookup without any transformation (expanded , etc).
+   * The value of the property lookup without any transformation (expanded , etc.).
    *
    * @return the raw value of the property lookup or {@code null} if the property could not be
    *         found.
@@ -94,7 +94,7 @@ public class CorantConfigValue implements ConfigValue {
   }
 
   /**
-   * The value of the property lookup with transformations (expanded, etc).
+   * The value of the property lookup with transformations (expanded, etc.).
    *
    * @return the value of the property lookup or {@code null} if the property could not be found
    */

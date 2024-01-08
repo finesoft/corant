@@ -101,9 +101,8 @@ public class ProxyUtils {
           getInterceptorBindings(method.getAnnotations(), beanManager);
       if (!classLevelBindings.isEmpty() || !methodLevelBindings.isEmpty()) {
         List<Annotation> interceptorBindings = merge(methodLevelBindings, classLevelBindings);
-        List<Interceptor<?>> interceptors =
-            beanManager.resolveInterceptors(InterceptionType.AROUND_INVOKE,
-                interceptorBindings.toArray(new Annotation[interceptorBindings.size()]));
+        List<Interceptor<?>> interceptors = beanManager.resolveInterceptors(
+            InterceptionType.AROUND_INVOKE, interceptorBindings.toArray(new Annotation[0]));
         if (!interceptors.isEmpty()) {
           List<InterceptorInvocation> chain = new ArrayList<>();
           for (Interceptor<?> interceptor : interceptors) {
@@ -145,9 +144,8 @@ public class ProxyUtils {
           getInterceptorBindings(method.getAnnotations(), beanManager);
       if (!classLevelBindings.isEmpty() || !methodLevelBindings.isEmpty()) {
         List<Annotation> interceptorBindings = merge(methodLevelBindings, classLevelBindings);
-        List<Interceptor<?>> interceptors =
-            beanManager.resolveInterceptors(InterceptionType.AROUND_INVOKE,
-                interceptorBindings.toArray(new Annotation[interceptorBindings.size()]));
+        List<Interceptor<?>> interceptors = beanManager.resolveInterceptors(
+            InterceptionType.AROUND_INVOKE, interceptorBindings.toArray(new Annotation[0]));
         if (!interceptors.isEmpty()) {
           List<InterceptorInvocation> chain = new ArrayList<>();
           for (Interceptor<?> interceptor : interceptors) {

@@ -15,18 +15,18 @@ package org.corant.context.naming;
 
 import static org.corant.shared.util.Classes.asClass;
 import java.util.Hashtable;
-import jakarta.enterprise.inject.spi.CDI;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
+import jakarta.enterprise.inject.spi.CDI;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
  * corant-context
- *
+ * <p>
  * Naming reference for CDI managed bean that may have some qualifiers, all bean must be
  * ApplicationScoped.
- *
+ * <p>
  * When InitialContext.lookup(...), will invoke CDI.select() to retrieve the object instance.
  *
  * @author bingo 下午7:42:18
@@ -35,8 +35,7 @@ public class NamingObjectFactory implements ObjectFactory {
   @Override
   public Object getObjectInstance(Object obj, Name name, Context nameCtx,
       Hashtable<?, ?> environment) {
-    if (obj instanceof NamingReference) {
-      NamingReference reference = (NamingReference) obj;
+    if (obj instanceof NamingReference reference) {
       Class<?> theClass = asClass(reference.getClassName());
       if (reference.qualifiers.length > 0) {
         return CDI.current().select(theClass).select(reference.qualifiers).get();

@@ -34,7 +34,6 @@ import net.jcip.annotations.GuardedBy;
  * corant-modules-query-shared
  *
  * @author bingo 下午2:11:37
- *
  */
 @Singleton
 public class KotlinScriptProcessor extends AbstractCompilableScriptProcessor {

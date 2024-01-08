@@ -40,7 +40,6 @@ import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
  * corant-modules-lang-javascript
  *
  * @author bingo 上午10:31:12
- *
  */
 @RequiredClassPresent("com.oracle.truffle.js.scriptengine.GraalJSScriptEngine")
 public class GraalJSScriptEngineService implements ScriptEngineService {

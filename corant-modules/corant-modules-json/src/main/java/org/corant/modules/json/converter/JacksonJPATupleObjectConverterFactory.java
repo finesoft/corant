@@ -27,7 +27,6 @@ import org.corant.shared.service.RequiredClassPresent;
  * corant-modules-json
  *
  * @author bingo 上午12:06:55
- *
  */
 @RequiredClassPresent("jakarta.persistence.Tuple")
 public class JacksonJPATupleObjectConverterFactory implements ConverterFactory<Tuple, Object> {

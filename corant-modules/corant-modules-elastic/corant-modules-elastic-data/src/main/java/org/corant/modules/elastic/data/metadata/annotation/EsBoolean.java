@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
  * "false" for the key_as_string. Boolean fields when used in scripts, return 1 and 0
  *
  * @author bingo 上午11:42:28
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

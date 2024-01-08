@@ -22,7 +22,6 @@ import org.flywaydb.core.api.configuration.ClassicConfiguration;
  * corant-modules-flyway
  *
  * @author bingo 下午12:48:02
- *
  */
 @ConfigKeyRoot(value = "corant.flyway.migrate", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class FlywayConfig extends ClassicConfiguration implements DeclarativeConfig {

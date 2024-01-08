@@ -25,7 +25,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-modules-query-shared
  *
  * @author bingo 上午9:31:30
- *
  */
 @ConfigKeyRoot(value = "corant.query.querier", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class DefaultQuerierConfig implements QuerierConfig, DeclarativeConfig {

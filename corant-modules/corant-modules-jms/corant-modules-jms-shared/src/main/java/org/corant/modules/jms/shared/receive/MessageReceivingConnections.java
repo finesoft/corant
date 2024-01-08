@@ -34,7 +34,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jms-shared
  *
  * @author bingo 上午11:48:50
- *
  */
 @ApplicationScoped
 public class MessageReceivingConnections {

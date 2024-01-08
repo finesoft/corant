@@ -38,7 +38,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-shared
  *
  * @author bingo 下午12:35:07
- *
  */
 @Interceptor
 @Secured

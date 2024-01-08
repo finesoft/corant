@@ -20,7 +20,6 @@ import org.corant.modules.elastic.data.metadata.annotation.EsEmbeddable;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:07:01
- *
  */
 @EsEmbeddable
 public class SimpleDateRange {

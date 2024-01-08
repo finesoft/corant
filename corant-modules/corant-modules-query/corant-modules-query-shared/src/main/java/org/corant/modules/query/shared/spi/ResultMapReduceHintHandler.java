@@ -124,7 +124,6 @@ import org.corant.shared.util.Objects;
  * </pre>
  *
  * @author bingo 下午7:53:36
- *
  */
 @ApplicationScoped
 @SuppressWarnings({"unchecked", "rawtypes"})

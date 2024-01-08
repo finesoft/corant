@@ -30,7 +30,6 @@ import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
  * corant-modules-ddd-api
  *
  * @author bingo 下午2:39:22
- *
  */
 @Documented
 @Retention(RUNTIME)

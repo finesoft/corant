@@ -39,7 +39,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午12:29:58
- *
  */
 @Priority(Priorities.AUTHORIZATION)
 public class MpJWTAuthorizationFilter implements ContainerRequestFilter, ContainerResponseFilter {

@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-webserver-shared
  *
  * @author bingo 下午3:13:36
- *
  */
 @Singleton
 public class WebServerBootstrapper {

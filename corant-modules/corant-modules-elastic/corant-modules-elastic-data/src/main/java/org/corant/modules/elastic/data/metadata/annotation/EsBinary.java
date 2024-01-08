@@ -26,7 +26,6 @@ import java.lang.annotation.Target;
  * default and is not searchable
  *
  * @author bingo 上午11:41:48
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

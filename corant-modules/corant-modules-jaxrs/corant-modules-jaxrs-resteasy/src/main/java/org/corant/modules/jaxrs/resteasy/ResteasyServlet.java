@@ -29,7 +29,6 @@ import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 下午4:02:25
- *
  */
 @WebServlet(asyncSupported = true, value = "/RESTEASY_HttpServlet30Dispatcher")
 public class ResteasyServlet extends HttpServlet30Dispatcher {

@@ -45,7 +45,6 @@ import org.corant.shared.util.Types;
  * corant-shared
  *
  * @author bingo 上午9:12:49
- *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ConverterRegistry {

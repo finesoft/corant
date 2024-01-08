@@ -35,7 +35,6 @@ import com.arjuna.ats.jbossatx.jta.RecoveryManagerService;
  * corant-modules-jta-narayana
  *
  * @author bingo 上午12:02:18
- *
  */
 @ApplicationScoped
 public class NarayanaRecoveryManagerService extends RecoveryManagerService {

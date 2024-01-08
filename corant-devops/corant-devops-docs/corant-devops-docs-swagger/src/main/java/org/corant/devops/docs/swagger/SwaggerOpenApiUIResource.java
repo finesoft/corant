@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-devops-docs-swagger
  *
  * @author bingo 下午3:03:08
- *
  */
 @ApplicationScoped
 @Path("/openapi-ui")

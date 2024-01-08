@@ -17,7 +17,6 @@ package org.corant.context.command;
  * corant-context
  *
  * @author bingo 下午9:04:41
- *
  */
 @FunctionalInterface
 public interface CommandHandler<C> {

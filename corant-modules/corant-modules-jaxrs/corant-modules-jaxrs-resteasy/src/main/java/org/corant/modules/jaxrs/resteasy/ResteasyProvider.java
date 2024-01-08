@@ -52,7 +52,6 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 下午3:42:37
- *
  */
 @ApplicationScoped
 public class ResteasyProvider implements WebMetaDataProvider {

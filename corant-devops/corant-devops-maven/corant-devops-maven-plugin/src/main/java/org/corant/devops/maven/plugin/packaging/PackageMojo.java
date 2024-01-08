@@ -28,7 +28,6 @@ import org.apache.maven.project.MavenProjectHelper;
  * corant-devops-maven-plugin
  *
  * @author bingo 下午2:36:26
- *
  */
 @Mojo(name = "package", defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,

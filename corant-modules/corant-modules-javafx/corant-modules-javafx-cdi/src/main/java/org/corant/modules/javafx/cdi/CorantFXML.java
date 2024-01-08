@@ -29,7 +29,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-javafx-cdi
  *
  * @author bingo 下午11:26:29
- *
  */
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)

@@ -38,7 +38,6 @@ import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
  * corant-context
  *
  * @author bingo 上午9:50:43
- *
  */
 @Interceptor
 @Asynchronous

@@ -64,7 +64,6 @@ import jakarta.inject.Inject;
  * corant-modules-query-shared
  *
  * @author bingo 下午6:50:41
- *
  */
 @ApplicationScoped
 // @Alternative

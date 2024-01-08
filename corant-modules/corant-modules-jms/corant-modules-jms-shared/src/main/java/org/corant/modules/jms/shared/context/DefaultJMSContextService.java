@@ -30,7 +30,6 @@ import org.corant.modules.jms.shared.context.JMSContextManager.TsJMSContextManag
  * TODO: Use pooled connection
  *
  * @author bingo 下午5:36:38
- *
  */
 @ApplicationScoped
 public class DefaultJMSContextService implements JMSContextService {

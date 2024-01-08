@@ -27,7 +27,6 @@ import net.jcip.annotations.GuardedBy;
  * corant-modules-query-shared
  *
  * @author bingo 下午4:44:33
- *
  */
 @ApplicationScoped
 public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?>>

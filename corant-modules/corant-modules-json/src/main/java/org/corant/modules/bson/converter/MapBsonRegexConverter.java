@@ -25,7 +25,6 @@ import org.corant.shared.conversion.converter.AbstractConverter;
  * corant-modules-json
  *
  * @author bingo 上午10:04:31
- *
  */
 @SuppressWarnings("rawtypes")
 public class MapBsonRegexConverter extends AbstractConverter<Map, BsonRegularExpression> {

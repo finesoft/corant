@@ -27,7 +27,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-servlet
  *
  * @author bingo 下午7:01:09
- *
  */
 @ApplicationScoped
 public abstract class AbstractCorsFilter implements Filter {

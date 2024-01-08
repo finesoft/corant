@@ -81,7 +81,6 @@ import org.corant.shared.util.Objects;
  * @see ConversionService
  * @see org.corant.shared.conversion.Conversion
  * @author bingo 下午12:02:08
- *
  */
 @ApplicationScoped
 public class ResultFieldConvertHintHandler implements ResultHintHandler {

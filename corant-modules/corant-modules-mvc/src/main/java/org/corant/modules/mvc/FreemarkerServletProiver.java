@@ -27,7 +27,6 @@ import freemarker.ext.servlet.FreemarkerServlet;
  * corant-modules-mvc
  *
  * @author bingo 下午9:10:22
- *
  */
 @ApplicationScoped
 public class FreemarkerServletProiver implements WebMetaDataProvider {

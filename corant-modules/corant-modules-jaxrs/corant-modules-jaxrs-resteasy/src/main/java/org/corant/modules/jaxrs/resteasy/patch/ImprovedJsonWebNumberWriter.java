@@ -39,7 +39,6 @@ import org.jboss.resteasy.spi.AsyncOutputStream;
  * priority(3000)
  *
  * @author bingo 上午11:07:19
- *
  */
 @Experimental
 @Provider

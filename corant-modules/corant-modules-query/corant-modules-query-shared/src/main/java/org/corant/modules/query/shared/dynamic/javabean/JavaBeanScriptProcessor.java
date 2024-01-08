@@ -37,7 +37,6 @@ import org.corant.modules.query.spi.ResultHintResolver;
  * corant-modules-query-shared
  *
  * @author bingo 下午2:55:59
- *
  */
 @Singleton
 public class JavaBeanScriptProcessor implements ScriptProcessor {

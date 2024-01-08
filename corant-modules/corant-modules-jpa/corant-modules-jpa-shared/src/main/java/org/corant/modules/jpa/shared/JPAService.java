@@ -58,7 +58,6 @@ import org.corant.shared.ubiquity.Sortable;
  * the application.
  *
  * @author bingo 下午2:10:42
- *
  */
 @ApplicationScoped
 public class JPAService implements PersistenceService {

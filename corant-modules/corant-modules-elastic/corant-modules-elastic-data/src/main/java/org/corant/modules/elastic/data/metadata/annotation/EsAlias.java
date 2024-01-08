@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
  * skipped entirely. An empty array [] is treated as a missing field — a field with no values
  *
  * @author bingo 下午5:41:20
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

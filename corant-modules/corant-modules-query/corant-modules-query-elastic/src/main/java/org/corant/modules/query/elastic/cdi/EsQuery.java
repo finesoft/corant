@@ -38,7 +38,6 @@ import jakarta.inject.Qualifier;
  * </pre>
  *
  * @author bingo 下午6:05:00
- *
  */
 @Documented
 @Retention(RUNTIME)

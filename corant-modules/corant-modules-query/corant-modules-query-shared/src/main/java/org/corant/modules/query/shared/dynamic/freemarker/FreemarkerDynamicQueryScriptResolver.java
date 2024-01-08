@@ -22,7 +22,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-query-shared
  *
  * @author bingo 上午11:30:20
- *
  */
 @FunctionalInterface
 public interface FreemarkerDynamicQueryScriptResolver extends Sortable {

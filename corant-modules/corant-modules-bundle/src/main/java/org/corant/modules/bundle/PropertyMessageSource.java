@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-bundle
  *
  * @author bingo 上午12:26:12
- *
  */
 @ApplicationScoped
 public class PropertyMessageSource implements MessageSource {

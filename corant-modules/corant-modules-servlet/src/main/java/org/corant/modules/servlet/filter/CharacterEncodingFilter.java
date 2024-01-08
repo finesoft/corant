@@ -29,7 +29,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-servlet
  *
  * @author bingo 下午10:05:46
- *
  */
 @ApplicationScoped
 @WebFilter(filterName = "CharacterEncodingFilter", urlPatterns = {"/*"})

@@ -31,7 +31,6 @@ import org.corant.shared.util.Identifiers.SnowflakeW10S12UUIDGenerator;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午7:59:56
- *
  */
 @ApplicationScoped
 public class SnowflakeIdentifierGenerator {

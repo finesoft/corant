@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
  * For Object DataType in elastic
  *
  * @author bingo 上午11:44:44
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

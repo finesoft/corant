@@ -27,7 +27,6 @@ import jakarta.jms.JMSContext;
  * corant-modules-jms-api
  *
  * @author bingo 下午3:43:58
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

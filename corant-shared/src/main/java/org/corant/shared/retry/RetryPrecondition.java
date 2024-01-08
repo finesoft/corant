@@ -20,7 +20,6 @@ import java.util.function.Predicate;
  * corant-shared
  *
  * @author bingo 上午10:57:55
- *
  */
 @FunctionalInterface
 public interface RetryPrecondition {

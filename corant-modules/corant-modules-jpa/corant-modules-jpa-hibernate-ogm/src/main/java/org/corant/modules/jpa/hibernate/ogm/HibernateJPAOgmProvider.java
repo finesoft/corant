@@ -34,7 +34,6 @@ import org.hibernate.ogm.jpa.HibernateOgmPersistence;
  * corant-modules-jpa-hibernate-ogm
  *
  * @author bingo 上午11:44:00
- *
  */
 @ApplicationScoped
 @Named("org.hibernate.ogm.jpa.HibernateOgmPersistence")

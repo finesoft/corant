@@ -30,7 +30,6 @@ import org.xadisk.bridge.proxies.interfaces.XASession;
  * Unfinished yet
  *
  * @author bingo 上午1:00:55
- *
  */
 @ApplicationScoped
 public class XADiskSessionProducer {

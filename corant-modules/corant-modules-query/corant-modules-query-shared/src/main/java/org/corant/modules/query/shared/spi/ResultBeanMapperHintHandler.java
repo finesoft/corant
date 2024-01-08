@@ -85,7 +85,6 @@ import org.corant.shared.ubiquity.Sortable;
  * @see ResultScriptMapperHintHandler
  *
  * @author bingo 下午12:02:08
- *
  */
 @ApplicationScoped
 public class ResultBeanMapperHintHandler implements ResultHintHandler {

@@ -23,7 +23,6 @@ import org.corant.modules.ddd.Evolvable;
  *
  *
  * @author bingo 下午7:42:44
- *
  */
 @MappedSuperclass
 public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefaultAggregate>

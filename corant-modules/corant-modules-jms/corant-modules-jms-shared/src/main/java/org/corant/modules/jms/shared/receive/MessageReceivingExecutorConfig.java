@@ -32,7 +32,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-modules-jms-shared
  *
  * @author bingo 下午7:17:04
- *
  */
 @ConfigKeyRoot(value = "corant.jms", keyIndex = 2)
 public class MessageReceivingExecutorConfig

@@ -20,7 +20,6 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 上午11:03:15
- *
  */
 @FunctionalInterface
 public interface HibernateSnowflakeIdTimeService extends Sortable {

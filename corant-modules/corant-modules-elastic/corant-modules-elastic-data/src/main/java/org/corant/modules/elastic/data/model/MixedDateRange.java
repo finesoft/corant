@@ -24,7 +24,6 @@ import org.corant.modules.elastic.data.metadata.annotation.EsRange.RangeType;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:06:37
- *
  */
 @EsEmbeddable
 public class MixedDateRange {

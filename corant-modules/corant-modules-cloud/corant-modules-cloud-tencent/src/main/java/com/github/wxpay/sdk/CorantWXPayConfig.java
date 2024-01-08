@@ -27,7 +27,6 @@ import org.corant.shared.util.Resources;
  * corant-modules-cloud-tencent
  *
  * @author bingo 上午10:00:26
- *
  */
 @ConfigKeyRoot(value = "corant.cloud.tencent.wechat.pay", keyIndex = 5,
     ignoreNoAnnotatedItem = false)

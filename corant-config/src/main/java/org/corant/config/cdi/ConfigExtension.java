@@ -42,7 +42,6 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
  * @deprecated Since microprifle-config 2.0
  *
  * @author bingo 下午4:34:28
- *
  */
 @Deprecated
 public class ConfigExtension implements Extension {

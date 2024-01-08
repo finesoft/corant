@@ -24,7 +24,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-webserver-undertow
  *
  * @author bingo 下午3:08:00
- *
  */
 @ApplicationScoped
 public class UndertowWebServerConfig {

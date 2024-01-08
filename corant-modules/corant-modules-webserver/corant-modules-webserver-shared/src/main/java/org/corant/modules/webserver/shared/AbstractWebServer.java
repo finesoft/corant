@@ -51,7 +51,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-webserver-shared
  *
  * @author bingo 下午7:41:18
- *
  */
 @ApplicationScoped
 public abstract class AbstractWebServer implements WebServer {

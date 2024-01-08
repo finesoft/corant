@@ -23,7 +23,6 @@ package org.corant.context.command;
  * be automatically processed when the CDI container starts.
  *
  * @author bingo 下午1:13:52
- *
  */
 @Commands
 public abstract class AbstractCommandHandler<C> implements CommandHandler<C> {

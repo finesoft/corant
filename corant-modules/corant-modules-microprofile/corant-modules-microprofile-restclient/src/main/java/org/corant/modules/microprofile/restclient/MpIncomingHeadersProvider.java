@@ -26,7 +26,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
  * @deprecated from resteasy_4_5_3
  *             META-INF/services/org.jboss.resteasy.microprofile.client.header.IncomingHeadersProvider
  * @author bingo 下午1:26:52
- *
  */
 @Deprecated
 public class MpIncomingHeadersProvider /* implements IncomingHeadersProvider */ {

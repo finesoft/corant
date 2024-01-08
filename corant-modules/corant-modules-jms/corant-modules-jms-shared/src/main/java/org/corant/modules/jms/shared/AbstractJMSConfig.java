@@ -24,7 +24,6 @@ import org.corant.modules.jms.JMSConfig;
  * corant-modules-jms-shared
  *
  * @author bingo 上午10:30:53
- *
  */
 @ConfigKeyRoot(value = "corant.jms", keyIndex = 2)
 public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, DeclarativeConfig {

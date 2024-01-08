@@ -27,7 +27,6 @@ import jakarta.inject.Qualifier;
  * corant-context
  *
  * @author bingo 上午11:29:39
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

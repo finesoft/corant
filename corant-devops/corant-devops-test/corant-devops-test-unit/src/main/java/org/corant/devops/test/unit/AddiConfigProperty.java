@@ -21,7 +21,6 @@ import java.lang.annotation.Target;
  * corant-devops-test-unit
  *
  * @author bingo 上午11:25:10
- *
  */
 @Target({})
 @Retention(RUNTIME)

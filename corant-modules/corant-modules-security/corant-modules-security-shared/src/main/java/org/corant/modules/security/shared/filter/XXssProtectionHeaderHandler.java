@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *      "https://scotthelme.co.uk/hardening-your-http-response-headers/#x-content-type-options"/>x-content-type-options</a>
  *
  * @author bingo 上午11:47:29
- *
  */
 @ApplicationScoped
 public class XXssProtectionHeaderHandler implements SecuredHeaderFilterHandler {

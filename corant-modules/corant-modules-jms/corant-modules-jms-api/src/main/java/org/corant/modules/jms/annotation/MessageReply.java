@@ -26,7 +26,6 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
  * corant-modules-jms-shared
  *
  * @author bingo 下午3:49:53
- *
  */
 @Retention(RUNTIME)
 @Target(TYPE)

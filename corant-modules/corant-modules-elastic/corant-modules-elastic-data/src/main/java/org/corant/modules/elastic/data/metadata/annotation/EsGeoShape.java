@@ -27,7 +27,6 @@ import java.lang.annotation.Target;
  * being executed contain shapes other than just points.
  *
  * @author bingo 上午11:46:30
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

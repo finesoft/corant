@@ -22,7 +22,6 @@ import com.zaxxer.hikari.HikariConfig;
  * corant-modules-datasource-hikari
  *
  * @author bingo 下午12:43:35
- *
  */
 @Experimental
 public interface HikariCPDataSourceConfigurator extends Sortable {

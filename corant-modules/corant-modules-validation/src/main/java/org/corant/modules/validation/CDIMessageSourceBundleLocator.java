@@ -36,7 +36,6 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
  * corant-modules-validation
  *
  * @author bingo 上午11:54:07
- *
  */
 @Experimental
 public class CDIMessageSourceBundleLocator implements ResourceBundleLocator {

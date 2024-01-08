@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
  * For nested type in elastic
  *
  * @author bingo 下午5:44:26
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

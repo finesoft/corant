@@ -29,7 +29,6 @@ import java.lang.annotation.Target;
  * system property or system environment variable not meet the condition.
  *
  * @author bingo 下午3:08:47
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

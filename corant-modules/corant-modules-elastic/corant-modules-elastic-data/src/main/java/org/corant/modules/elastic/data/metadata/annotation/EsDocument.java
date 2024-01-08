@@ -24,7 +24,6 @@ import org.elasticsearch.index.VersionType;
  * corant-modules-elastic-data
  *
  * @author bingo 上午11:45:06
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})

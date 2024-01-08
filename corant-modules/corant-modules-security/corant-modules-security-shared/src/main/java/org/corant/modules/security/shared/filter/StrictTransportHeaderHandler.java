@@ -36,7 +36,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @see <a href=
  *      "https://scotthelme.co.uk/hsts-the-missing-link-in-tls/">hsts-the-missing-link-in-tls</a>
  * @author bingo 上午11:31:17
- *
  */
 @ApplicationScoped
 public class StrictTransportHeaderHandler implements SecuredHeaderFilterHandler {

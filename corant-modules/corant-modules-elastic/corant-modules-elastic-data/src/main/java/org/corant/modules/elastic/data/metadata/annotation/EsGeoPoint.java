@@ -42,7 +42,6 @@ import java.lang.annotation.Target;
  * A geo-bounding box query which finds all geo-points that fall inside the box.
  *
  * @author bingo 上午11:45:56
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -17,7 +17,6 @@ package org.corant.modules.security;
  * corant-modules-security-api
  *
  * @author bingo 上午10:17:44
- *
  */
 @FunctionalInterface
 public interface CredentialValidator {

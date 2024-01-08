@@ -22,7 +22,6 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午4:49:16
- *
  */
 @RequestScoped
 public class MpJWTHAMSecurityContextManager

@@ -25,7 +25,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-context
  *
  * @author bingo 下午3:53:53
- *
  */
 @ConfigKeyRoot(value = "corant.concurrent.context.service", ignoreNoAnnotatedItem = false,
     keyIndex = 4)

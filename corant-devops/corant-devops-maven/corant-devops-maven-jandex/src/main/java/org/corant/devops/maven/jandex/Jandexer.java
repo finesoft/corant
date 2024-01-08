@@ -32,7 +32,6 @@ import org.jboss.jandex.Indexer;
  * corant-devops-maven-jandex
  *
  * @author bingo 下午3:55:35
- *
  */
 @Mojo(name = "jandex", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, threadSafe = true)
 public class Jandexer extends AbstractMojo {

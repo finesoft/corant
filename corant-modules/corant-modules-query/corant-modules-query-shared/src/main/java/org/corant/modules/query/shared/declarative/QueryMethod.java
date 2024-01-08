@@ -27,7 +27,6 @@ import org.corant.modules.query.QueryService.QueryWay;
  * corant-modules-query-shared
  *
  * @author bingo 下午2:41:19
- *
  */
 @Documented
 @Retention(RUNTIME)

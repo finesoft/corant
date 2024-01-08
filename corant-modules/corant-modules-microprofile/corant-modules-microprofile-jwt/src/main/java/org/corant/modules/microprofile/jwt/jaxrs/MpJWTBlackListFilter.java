@@ -24,7 +24,6 @@ import org.jboss.logging.Logger;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 上午11:33:50
- *
  */
 @Priority(Priorities.AUTHENTICATION + 1)
 public class MpJWTBlackListFilter implements ContainerRequestFilter {

@@ -30,7 +30,6 @@ import org.jboss.resteasy.spi.HttpRequest;
  * corant-modules-jaxrs-resteasy
  *
  * @author bingo 下午5:49:01
- *
  */
 @ApplicationScoped
 @Provider

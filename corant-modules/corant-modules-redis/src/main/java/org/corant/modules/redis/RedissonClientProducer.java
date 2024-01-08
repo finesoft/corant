@@ -16,7 +16,6 @@ import org.redisson.config.SingleServerConfig;
  * corant-modules-redis
  *
  * @author don
- *
  */
 @Dependent
 public class RedissonClientProducer {

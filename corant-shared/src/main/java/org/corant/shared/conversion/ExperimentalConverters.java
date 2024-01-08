@@ -38,7 +38,6 @@ import org.corant.shared.conversion.converter.IdentityConverter;
  * corant-shared
  *
  * @author bingo 15:14:49
- *
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class ExperimentalConverters {

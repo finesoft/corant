@@ -21,7 +21,6 @@ import org.corant.modules.elastic.data.metadata.annotation.EsEmbeddable;
  * corant-modules-elastic-data
  *
  * @author bingo 下午4:07:06
- *
  */
 @EsEmbeddable
 public class SimpleFloatRange {

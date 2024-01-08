@@ -23,7 +23,6 @@ import jakarta.enterprise.context.ApplicationScoped;
  * corant-modules-jcache-shared
  *
  * @author bingo 下午8:34:12
- *
  */
 @ApplicationScoped
 public class CorantCacheKeyGenerator implements CacheKeyGenerator {

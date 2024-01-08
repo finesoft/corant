@@ -21,7 +21,6 @@ import org.corant.modules.ddd.annotation.InfrastructureServices;
  * corant-modules-ddd-api
  *
  * @author bingo 下午6:19:12
- *
  */
 @InfrastructureServices
 public interface MessageStorage extends UnaryOperator<Message> {

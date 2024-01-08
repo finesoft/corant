@@ -40,7 +40,6 @@ import org.corant.shared.util.Classes;
  * command class {@link GroupSequence} annotation.
  *
  * @author bingo 下午9:59:38
- *
  */
 @Experimental
 @ApplicationScoped

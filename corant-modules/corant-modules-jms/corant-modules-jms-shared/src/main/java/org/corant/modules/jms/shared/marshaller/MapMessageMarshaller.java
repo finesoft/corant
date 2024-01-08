@@ -33,7 +33,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-shared
  *
  * @author bingo 上午11:34:02
- *
  */
 @ApplicationScoped
 @Named("MAP")

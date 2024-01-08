@@ -30,7 +30,6 @@ import net.jcip.annotations.GuardedBy;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午3:16:56
- *
  */
 @ApplicationScoped
 public class DefaultMgNamedQuerierResolver extends AbstractNamedQuerierResolver<MgNamedQuerier> {

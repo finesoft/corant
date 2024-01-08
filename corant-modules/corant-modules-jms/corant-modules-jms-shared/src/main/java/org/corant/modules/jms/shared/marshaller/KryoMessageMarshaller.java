@@ -37,7 +37,6 @@ import com.esotericsoftware.kryo.io.Output;
  * corant-modules-jms-shared
  *
  * @author bingo 上午11:34:02
- *
  */
 @ApplicationScoped
 @Named("KRYO")

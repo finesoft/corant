@@ -21,7 +21,6 @@ import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
  * corant-modules-jpa-shared
  *
  * @author bingo 上午11:08:47
- *
  */
 @FunctionalInterface
 public interface JPAProvider {

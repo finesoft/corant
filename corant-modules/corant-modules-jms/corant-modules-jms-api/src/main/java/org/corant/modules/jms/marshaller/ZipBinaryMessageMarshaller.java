@@ -41,7 +41,6 @@ import org.corant.shared.resource.InputStreamResource;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:36:52
- *
  */
 @ApplicationScoped
 @Named(MSG_MARSHAL_SCHEMA_ZIP_BINARY)

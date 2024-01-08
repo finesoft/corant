@@ -17,7 +17,6 @@ package org.corant.modules.query.spi;
  * corant-modules-query-api
  *
  * @author bingo 上午10:12:25
- *
  */
 @FunctionalInterface
 public interface ResultHintResolver {

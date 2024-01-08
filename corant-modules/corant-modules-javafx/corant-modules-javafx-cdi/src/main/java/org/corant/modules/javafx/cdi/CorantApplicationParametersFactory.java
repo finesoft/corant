@@ -24,7 +24,6 @@ import javafx.application.Application.Parameters;
  * A application parameters producer, use to make application parameters injectable.
  *
  * @author bingo 上午12:21:56
- *
  */
 @Singleton
 public class CorantApplicationParametersFactory {

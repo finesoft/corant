@@ -21,7 +21,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-shared
  *
  * @author bingo 上午11:04:22
- *
  */
 @FunctionalInterface
 public interface SecuredHeaderFilterHandler extends Sortable, Consumer<BiConsumer<String, String>> {

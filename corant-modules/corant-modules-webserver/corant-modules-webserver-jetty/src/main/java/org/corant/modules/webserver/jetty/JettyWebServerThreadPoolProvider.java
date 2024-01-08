@@ -26,7 +26,6 @@ import org.eclipse.jetty.util.thread.ThreadPool;
  * corant-modules-webserver-jetty
  *
  * @author bingo 下午2:31:33
- *
  */
 @FunctionalInterface
 public interface JettyWebServerThreadPoolProvider extends Function<WebServerConfig, ThreadPool> {

@@ -32,7 +32,6 @@ import org.corant.shared.util.Systems;
  * corant-modules-lang-kotlin
  *
  * @author bingo 上午10:42:22
- *
  */
 @RequiredClassPresent("org.jetbrains.kotlin.cli.jvm.K2JVMCompiler")
 public class KotlinScriptEngineService implements ScriptEngineService {

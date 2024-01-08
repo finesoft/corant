@@ -23,7 +23,6 @@ import jakarta.enterprise.util.AnnotationLiteral;
  * corant-modules-jms-shared
  *
  * @author bingo 下午3:46:33
- *
  */
 @Target({})
 @Retention(RUNTIME)

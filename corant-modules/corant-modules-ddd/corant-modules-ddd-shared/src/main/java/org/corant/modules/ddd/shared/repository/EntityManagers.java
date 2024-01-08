@@ -40,7 +40,6 @@ import org.corant.shared.normal.Names.PersistenceNames;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午8:56:24
- *
  */
 @ApplicationScoped
 public class EntityManagers {

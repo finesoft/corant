@@ -25,7 +25,6 @@ import org.corant.config.declarative.DeclarativePattern;
  * corant-modules-mvc
  *
  * @author bingo 下午9:18:05
- *
  */
 @ConfigKeyRoot(value = "corant.mvc", keyIndex = 2)
 public class FreemarkerServletConfig implements DeclarativeConfig {

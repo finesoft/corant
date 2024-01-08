@@ -47,7 +47,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * </p>
  *
  * @author bingo 下午2:14:21
- *
  */
 @JTARL
 @ApplicationScoped

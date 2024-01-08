@@ -36,7 +36,6 @@ import com.zaxxer.hikari.HikariDataSource;
  * corant-modules-datasource-hikari
  *
  * @author bingo 下午2:07:19
- *
  */
 @Experimental
 public class ExtendedDataSource implements DataSource, Closeable {

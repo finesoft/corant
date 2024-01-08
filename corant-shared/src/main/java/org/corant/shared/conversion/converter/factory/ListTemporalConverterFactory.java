@@ -27,7 +27,6 @@ import org.corant.shared.conversion.ConverterFactory;
  * corant-shared
  *
  * @author bingo 下午8:01:05
- *
  */
 @SuppressWarnings("rawtypes")
 public class ListTemporalConverterFactory implements ConverterFactory<List, Temporal> {

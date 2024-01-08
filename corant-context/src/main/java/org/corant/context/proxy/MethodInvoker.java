@@ -20,7 +20,6 @@ package org.corant.context.proxy;
  * A simple implementation interface, use for proxy invoking.
  *
  * @author bingo 上午10:38:27
- *
  */
 @FunctionalInterface
 public interface MethodInvoker {

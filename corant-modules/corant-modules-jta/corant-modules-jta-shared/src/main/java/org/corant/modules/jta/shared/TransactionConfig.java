@@ -23,7 +23,6 @@ import org.corant.config.declarative.DeclarativeConfig;
  * corant-modules-jta-shared
  *
  * @author bingo 下午9:11:21
- *
  */
 @ConfigKeyRoot(value = "corant.jta.transaction", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class TransactionConfig implements DeclarativeConfig {

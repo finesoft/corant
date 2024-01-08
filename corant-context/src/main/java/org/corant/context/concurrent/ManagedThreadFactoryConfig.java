@@ -23,7 +23,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-context
  *
  * @author bingo 下午3:48:41
- *
  */
 @ConfigKeyRoot(value = "corant.concurrent.thread.factory", ignoreNoAnnotatedItem = false,
     keyIndex = 4)

@@ -81,7 +81,6 @@ import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
  * corant-modules-webserver-undertow
  *
  * @author bingo 下午3:00:15
- *
  */
 @ApplicationScoped
 public class UndertowWebServer extends AbstractWebServer {

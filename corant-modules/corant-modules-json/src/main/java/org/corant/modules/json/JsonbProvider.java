@@ -26,7 +26,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-json
  *
  * @author bingo 下午2:36:42
- *
  */
 @ApplicationScoped
 public class JsonbProvider {

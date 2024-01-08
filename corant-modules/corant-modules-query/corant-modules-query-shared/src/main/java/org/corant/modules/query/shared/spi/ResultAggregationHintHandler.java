@@ -93,7 +93,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * </p>
  *
  * @author bingo 下午12:02:08
- *
  */
 @ApplicationScoped
 public class ResultAggregationHintHandler implements ResultHintHandler {

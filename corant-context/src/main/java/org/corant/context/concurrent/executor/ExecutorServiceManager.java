@@ -39,7 +39,6 @@ import org.glassfish.enterprise.concurrent.AbstractManagedThread;
  * corant-context
  *
  * @author bingo 下午8:33:48
- *
  */
 @ApplicationScoped
 public class ExecutorServiceManager {

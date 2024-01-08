@@ -25,7 +25,6 @@ import jakarta.persistence.Query;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 下午3:55:53
- *
  */
 @Singleton
 public class JPAQueryHelper implements JPQLResolver {

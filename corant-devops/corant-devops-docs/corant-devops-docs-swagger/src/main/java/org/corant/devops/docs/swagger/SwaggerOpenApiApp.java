@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
  * corant-devops-docs-swagger
  *
  * @author bingo 下午3:18:07
- *
  */
 @ApplicationPath("/devops/docs")
 @LoginConfig(authMethod = "MP-JWT")

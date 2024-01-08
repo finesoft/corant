@@ -26,7 +26,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午2:44:36
- *
  */
 @ApplicationScoped
 public class DefaultDataSourceService implements DataSourceService {

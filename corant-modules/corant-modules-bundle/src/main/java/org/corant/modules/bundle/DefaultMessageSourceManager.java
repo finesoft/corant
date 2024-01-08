@@ -31,7 +31,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-bundle
  *
  * @author bingo 上午10:16:05
- *
  */
 @ApplicationScoped
 public class DefaultMessageSourceManager implements MessageSourceManager {

@@ -52,7 +52,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午12:01:54
- *
  */
 @ApplicationScoped
 @Transactional

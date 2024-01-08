@@ -24,7 +24,6 @@ import org.corant.modules.jms.annotation.MessageDestination;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午5:48:49
- *
  */
 @MessageDestination(connectionFactoryId = "${corant.ddd.aggregate-lifecycle-message.broker:}",
     name = "${corant.ddd.aggregate-lifecycle-message.destination:}",

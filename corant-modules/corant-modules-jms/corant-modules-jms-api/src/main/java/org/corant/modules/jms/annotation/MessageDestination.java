@@ -27,7 +27,6 @@ import java.lang.annotation.Target;
  * corant-modules-jms-api
  *
  * @author bingo 下午2:13:25
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

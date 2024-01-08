@@ -25,7 +25,6 @@ import io.smallrye.health.SmallRyeHealth;
  * corant-modules-microprofile-healthcheck
  *
  * @author bingo 下午6:47:21
- *
  */
 @ApplicationScoped
 @WebServlet(name = "SmallRyeLivenessServlet",

@@ -30,7 +30,6 @@ import org.corant.shared.util.Functions;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:09:10
- *
  */
 @ApplicationScoped
 public class SecuredHeaderFilter implements Consumer<BiConsumer<String, String>> {

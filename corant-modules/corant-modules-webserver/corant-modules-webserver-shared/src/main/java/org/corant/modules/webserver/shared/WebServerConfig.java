@@ -28,7 +28,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-webserver-shared
  *
  * @author bingo 下午7:58:27
- *
  */
 @ApplicationScoped
 public class WebServerConfig {

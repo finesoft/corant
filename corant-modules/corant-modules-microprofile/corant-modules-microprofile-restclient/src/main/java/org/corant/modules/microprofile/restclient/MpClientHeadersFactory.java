@@ -23,7 +23,6 @@ import org.jboss.resteasy.specimpl.UnmodifiableMultivaluedMap;
  * corant-modules-microprofile-restclient
  *
  * @author bingo 下午7:14:19
- *
  */
 @ApplicationScoped
 public class MpClientHeadersFactory implements ClientHeadersFactory {

@@ -38,7 +38,6 @@ import javafx.collections.ObservableMap;
  * implementation, please contact me <a href="mailto:finesoft@gmail.com">finesoft@gmail.com</a>.
  *
  * @author bingo 下午9:39:20
- *
  */
 @SuppressWarnings("unchecked")
 public class FXObservableMapDeserializer<T extends ObservableMap<Object, Object>>

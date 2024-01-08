@@ -53,7 +53,6 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * corant-modules-jms-shared
  *
  * @author bingo 下午2:37:45
- *
  */
 @ApplicationScoped
 public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor {

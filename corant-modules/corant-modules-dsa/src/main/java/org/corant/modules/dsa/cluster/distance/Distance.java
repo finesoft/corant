@@ -19,7 +19,6 @@ import java.util.Map;
  * corant-modules-dsa
  *
  * @author bingo 下午1:29:34
- *
  */
 @FunctionalInterface
 public interface Distance {

@@ -23,7 +23,6 @@ import org.corant.shared.ubiquity.Experimental;
  * corant-modules-datasource-shared
  *
  * @author bingo 下午10:59:56
- *
  */
 @Experimental
 @ApplicationScoped

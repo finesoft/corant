@@ -21,7 +21,6 @@ import org.corant.modules.ddd.Entity;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午12:05:38
- *
  */
 @MappedSuperclass
 public abstract class AbstractEntity implements Entity {

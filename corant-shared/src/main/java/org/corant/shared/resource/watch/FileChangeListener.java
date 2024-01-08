@@ -19,7 +19,6 @@ import java.util.EventListener;
  * corant-shared
  *
  * @author bingo 下午3:43:04
- *
  */
 @FunctionalInterface
 public interface FileChangeListener extends EventListener {

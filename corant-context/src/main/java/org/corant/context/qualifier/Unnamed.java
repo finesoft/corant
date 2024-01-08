@@ -32,7 +32,6 @@ import jakarta.inject.Qualifier;
  * change in the future.
  *
  * @author bingo 上午11:29:39
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

@@ -25,7 +25,6 @@ import jakarta.enterprise.inject.Stereotype;
  * corant-modules-security-api
  *
  * @author bingo 下午1:45:08
- *
  */
 @Documented
 @Retention(RUNTIME)

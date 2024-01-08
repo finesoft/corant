@@ -23,7 +23,6 @@ import org.corant.modules.query.mapping.Query;
  * Deprecated since 1.6.2, replace with {@link QueryParameterReviser}
  *
  * @author bingo 上午10:51:35
- *
  */
 @Deprecated
 public interface ParameterReviser extends Supplier<Map<String, Object>> {

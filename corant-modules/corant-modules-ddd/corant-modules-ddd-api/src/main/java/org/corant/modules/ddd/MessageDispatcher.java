@@ -20,7 +20,6 @@ import java.util.logging.Logger;
  * corant-modules-ddd-api
  *
  * @author bingo 下午6:17:36
- *
  */
 @FunctionalInterface
 public interface MessageDispatcher extends Consumer<Message[]> {

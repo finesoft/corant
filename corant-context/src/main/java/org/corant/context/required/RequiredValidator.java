@@ -20,7 +20,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
  * corant-context
  *
  * @author bingo 下午3:36:50
- *
  */
 @FunctionalInterface
 public interface RequiredValidator {

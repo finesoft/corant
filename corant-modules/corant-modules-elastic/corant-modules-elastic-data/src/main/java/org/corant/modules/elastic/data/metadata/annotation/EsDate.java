@@ -41,7 +41,6 @@ import java.lang.annotation.Target;
  * JSON document.
  *
  * @author bingo 上午11:42:57
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -27,7 +27,6 @@ import org.corant.modules.ddd.shared.annotation.JTAXA;
  * </p>
  *
  * @author bingo 下午2:14:21
- *
  */
 @JTAXA
 @ApplicationScoped

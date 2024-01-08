@@ -66,7 +66,6 @@ import org.corant.shared.util.Strings;
  * </pre>
  *
  * @author bingo 下午3:29:41
- *
  */
 @Experimental
 public class DefaultObjectFunctionResolver implements FunctionResolver {

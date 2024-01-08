@@ -31,7 +31,6 @@ import org.corant.shared.ubiquity.Sortable;
  * META-INF/service.
  *
  * @author bingo 上午9:49:44
- *
  */
 @FunctionalInterface
 public interface Converter<S, T> extends Sortable {

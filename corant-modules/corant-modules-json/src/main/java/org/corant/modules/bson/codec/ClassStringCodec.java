@@ -24,7 +24,6 @@ import org.corant.shared.util.Classes;
  * corant-modules-json
  *
  * @author bingo 上午10:48:21
- *
  */
 @SuppressWarnings("rawtypes")
 public class ClassStringCodec implements Codec<Class> {

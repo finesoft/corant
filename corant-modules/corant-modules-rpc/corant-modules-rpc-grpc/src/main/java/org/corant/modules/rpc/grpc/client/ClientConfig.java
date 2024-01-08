@@ -23,7 +23,6 @@ import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager.Abstr
  * corant-modules-rpc-grpc
  *
  * @author bingo 下午5:20:08
- *
  */
 @ConfigKeyRoot(value = "corant.rpc.grpc", keyIndex = 3, ignoreNoAnnotatedItem = false)
 public class ClientConfig extends AbstractNamedObject implements DeclarativeConfig {

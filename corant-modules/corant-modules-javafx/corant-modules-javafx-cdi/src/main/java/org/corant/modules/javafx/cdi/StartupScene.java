@@ -24,7 +24,6 @@ import jakarta.inject.Qualifier;
  * corant-modules-javafx-cdi
  *
  * @author bingo 上午12:41:32
- *
  */
 @Qualifier
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})

@@ -23,7 +23,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-bundle
  *
  * @author bingo 下午3:44:33
- *
  */
 @SuppressWarnings("rawtypes")
 public interface EnumerationSource extends Sortable {

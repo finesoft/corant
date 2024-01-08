@@ -36,7 +36,6 @@ import jakarta.persistence.EntityManagerFactory;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 上午11:44:00
- *
  */
 @ApplicationScoped
 @Named("org.hibernate.jpa.HibernatePersistenceProvider")

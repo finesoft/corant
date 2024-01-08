@@ -51,7 +51,6 @@ import org.eclipse.microprofile.config.Config;
  * traffic endpoints.
  *
  * @author bingo 下午12:44:57
- *
  */
 @ApplicationScoped
 public class ContentSecurityPolicyHeaderHandler implements SecuredHeaderFilterHandler {

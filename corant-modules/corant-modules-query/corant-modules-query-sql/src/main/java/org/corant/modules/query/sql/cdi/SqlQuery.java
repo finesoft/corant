@@ -40,7 +40,6 @@ import org.corant.modules.datasource.shared.DBMS;
  * </pre>
  *
  * @author bingo 下午6:05:00
- *
  */
 @Documented
 @Retention(RUNTIME)

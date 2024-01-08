@@ -35,7 +35,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-bundle
  *
  * @author bingo 上午10:30:07
- *
  */
 @ApplicationScoped
 @SuppressWarnings("rawtypes")

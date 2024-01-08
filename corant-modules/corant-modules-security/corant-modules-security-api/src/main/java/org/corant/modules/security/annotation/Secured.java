@@ -39,7 +39,6 @@ import org.corant.shared.util.Strings;
  * corant-modules-security-api
  *
  * @author bingo 下午1:49:51
- *
  */
 @Documented
 @Retention(RUNTIME)

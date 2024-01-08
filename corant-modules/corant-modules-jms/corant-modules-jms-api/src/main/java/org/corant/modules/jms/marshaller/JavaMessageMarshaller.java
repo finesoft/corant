@@ -29,7 +29,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-jms-api
  *
  * @author bingo 上午11:41:39
- *
  */
 @ApplicationScoped
 @Named(MSG_MARSHAL_SCHEMA_STD_JAVA)

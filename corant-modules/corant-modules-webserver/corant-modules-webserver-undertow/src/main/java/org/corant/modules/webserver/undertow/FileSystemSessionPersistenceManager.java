@@ -39,7 +39,6 @@ import io.undertow.servlet.api.SessionPersistenceManager;
  * corant-modules-webserver-undertow
  *
  * @author bingo 下午3:51:19
- *
  */
 @Singleton
 public class FileSystemSessionPersistenceManager implements SessionPersistenceManager {

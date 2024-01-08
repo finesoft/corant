@@ -21,7 +21,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-query-mongodb
  *
  * @author bingo 下午7:44:08
- *
  */
 @FunctionalInterface
 public interface DocumentConverter extends Sortable {

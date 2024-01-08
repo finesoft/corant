@@ -13,7 +13,6 @@ import org.quartz.Trigger;
  * corant-modules-quartz-embeddable
  *
  * @author bingo 下午8:09:45
- *
  */
 @Target({METHOD})
 @Retention(RUNTIME)

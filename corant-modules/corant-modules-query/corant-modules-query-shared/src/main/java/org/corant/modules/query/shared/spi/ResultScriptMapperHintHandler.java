@@ -78,7 +78,6 @@ import org.corant.modules.query.spi.ResultHintHandler;
  * @see ResultBeanMapperHintHandler
  *
  * @author bingo 下午12:02:08
- *
  */
 @ApplicationScoped
 public class ResultScriptMapperHintHandler implements ResultHintHandler {

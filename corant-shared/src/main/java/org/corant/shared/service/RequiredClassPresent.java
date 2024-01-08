@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
  * semantics.
  *
  * @author bingo 下午3:08:47
- *
  */
 @Retention(RUNTIME)
 @Target({TYPE, FIELD, METHOD, PARAMETER})

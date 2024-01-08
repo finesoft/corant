@@ -39,7 +39,6 @@ import javafx.collections.ObservableSet;
  * implementation, please contact me <a href="mailto:finesoft@gmail.com">finesoft@gmail.com</a>.
  *
  * @author bingo 下午9:39:30
- *
  */
 @SuppressWarnings("unchecked")
 public class FXObservableSetDeserializer<T extends ObservableSet<Object>> extends StdDeserializer<T>

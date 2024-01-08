@@ -23,7 +23,6 @@ import org.corant.shared.ubiquity.Sortable;
  * {@link MessageSource}
  *
  * @author bingo 上午11:39:28
- *
  */
 @FunctionalInterface
 public interface MessageSourceFilter extends BiPredicate<String, String>, Sortable {

@@ -55,7 +55,6 @@ import org.flywaydb.core.api.resolver.MigrationResolver;
  * FIXME
  *
  * @author bingo 下午7:51:13
- *
  */
 @ApplicationScoped
 public class FlywayMigrator {

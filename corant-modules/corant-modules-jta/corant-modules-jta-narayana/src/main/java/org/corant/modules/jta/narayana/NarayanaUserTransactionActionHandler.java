@@ -28,7 +28,6 @@ import com.arjuna.ats.jta.common.jtaPropertyManager;
  * me(finesoft@gmail.com).
  *
  * @author bingo 下午7:25:07
- *
  */
 @ApplicationScoped
 public class NarayanaUserTransactionActionHandler implements UserTransactionActionHandler {

@@ -41,7 +41,6 @@ import org.elasticsearch.common.xcontent.XContentType;
  * corant-modules-elastic-data
  *
  * @author bingo 上午11:54:10
- *
  */
 @ConfigKeyRoot(value = "corant.elastic", keyIndex = 2)
 public class ElasticConfig extends AbstractNamedObject implements DeclarativeConfig {

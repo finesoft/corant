@@ -20,7 +20,6 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
  * corant-modules-jpa-hibernate-orm
  *
  * @author bingo 上午10:55:11
- *
  */
 @FunctionalInterface
 public interface HibernateSessionTimeService extends Sortable {

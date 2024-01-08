@@ -23,7 +23,6 @@ import java.lang.annotation.Target;
  * corant-modules-elastic-data
  *
  * @author bingo 下午6:12:49
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

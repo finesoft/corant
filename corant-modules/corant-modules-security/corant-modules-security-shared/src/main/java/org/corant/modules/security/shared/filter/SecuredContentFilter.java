@@ -29,7 +29,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-security-shared
  *
  * @author bingo 下午8:09:10
- *
  */
 @ApplicationScoped
 public class SecuredContentFilter implements Function<String, String> {

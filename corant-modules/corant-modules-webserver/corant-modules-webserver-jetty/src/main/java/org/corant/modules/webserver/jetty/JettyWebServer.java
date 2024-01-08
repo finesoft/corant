@@ -33,7 +33,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
  * corant-modules-webserver-jetty
  *
  * @author bingo 下午2:24:42
- *
  */
 @ApplicationScoped
 public class JettyWebServer extends AbstractWebServer {

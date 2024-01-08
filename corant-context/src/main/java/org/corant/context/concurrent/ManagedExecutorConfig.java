@@ -32,7 +32,6 @@ import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService.Reject
  * corant-context
  *
  * @author bingo 下午7:56:44
- *
  */
 @ConfigKeyRoot(value = "corant.concurrent.executor", ignoreNoAnnotatedItem = false, keyIndex = 3)
 public class ManagedExecutorConfig extends AbstractNamedObject implements DeclarativeConfig {

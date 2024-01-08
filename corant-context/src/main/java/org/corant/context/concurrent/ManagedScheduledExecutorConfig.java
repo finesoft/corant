@@ -22,7 +22,6 @@ import org.corant.shared.normal.Names;
  * corant-context
  *
  * @author bingo 下午7:57:40
- *
  */
 @ConfigKeyRoot(value = "corant.concurrent.scheduled.executor", ignoreNoAnnotatedItem = false,
     keyIndex = 4)

@@ -56,7 +56,6 @@ import jakarta.enterprise.inject.Stereotype;
  * </pre>
  *
  * @author bingo 下午6:30:18
- *
  */
 @Documented
 @Retention(RUNTIME)

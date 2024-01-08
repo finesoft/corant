@@ -22,7 +22,6 @@ import org.corant.shared.conversion.ConverterHints;
  * corant-shared
  *
  * @author bingo 上午11:48:25
- *
  */
 @SuppressWarnings("rawtypes")
 public class ObjectClassConverter extends AbstractConverter<Object, Class> {

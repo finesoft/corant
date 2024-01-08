@@ -34,7 +34,6 @@ import org.eclipse.microprofile.config.Config;
  *
  * @see Unnamed
  * @author bingo 下午3:45:45
- *
  */
 @ConfigKeyRoot(value = "corant.datasource", keyIndex = 2)
 public class DataSourceConfig extends AbstractNamedObject implements DeclarativeConfig {

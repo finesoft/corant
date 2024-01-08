@@ -26,7 +26,6 @@ import org.corant.shared.ubiquity.Sortable;
  * consumer to select messages.
  *
  * @author bingo 下午5:57:40
- *
  */
 @FunctionalInterface
 public interface JMSMessageDestinationResolver

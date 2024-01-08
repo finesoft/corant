@@ -39,7 +39,6 @@ import javafx.collections.ObservableList;
  * implementation, please contact me <a href="mailto:finesoft@gmail.com">finesoft@gmail.com</a>.
  *
  * @author bingo 下午9:38:35
- *
  */
 @SuppressWarnings("unchecked")
 public class FXObservableListDeserializer<T extends ObservableList<Object>>

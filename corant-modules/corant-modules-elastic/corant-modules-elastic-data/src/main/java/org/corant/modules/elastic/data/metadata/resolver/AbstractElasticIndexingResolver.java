@@ -85,7 +85,6 @@ import org.elasticsearch.index.VersionType;
  * </p>
  *
  * @author bingo 下午2:58:30
- *
  */
 @ApplicationScoped
 public abstract class AbstractElasticIndexingResolver implements ElasticIndexingResolver {

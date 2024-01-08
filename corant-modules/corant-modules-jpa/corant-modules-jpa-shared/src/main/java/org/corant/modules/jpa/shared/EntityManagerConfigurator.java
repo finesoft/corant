@@ -21,7 +21,6 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jpa-shared
  *
  * @author bingo 下午8:56:48
- *
  */
 @FunctionalInterface
 public interface EntityManagerConfigurator extends Sortable, UnaryOperator<EntityManager> {

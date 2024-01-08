@@ -54,7 +54,6 @@ import org.xml.sax.SAXException;
  * Note: Standard persistence unit XML dosen't support enable property.
  *
  * @author bingo 上午10:43:11
- *
  */
 @ApplicationScoped
 public class PersistenceXmlParser {

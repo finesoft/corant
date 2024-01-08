@@ -47,7 +47,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  *      "https://scotthelme.co.uk/a-new-security-header-referrer-policy"/>a-new-security-header-referrer-policy</a>
  *
  * @author bingo 上午11:47:29
- *
  */
 @ApplicationScoped
 public class ReferrerPolicyHeaderHandler implements SecuredHeaderFilterHandler {

@@ -47,7 +47,6 @@ import org.eclipse.microprofile.config.Config;
  * corant-modules-jms-artemis
  *
  * @author bingo 上午10:08:11
- *
  */
 @ConfigKeyRoot(value = "corant.jms.artemis", keyIndex = 3)
 public class ArtemisConfig extends AbstractJMSConfig {

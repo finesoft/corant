@@ -20,7 +20,6 @@ import org.corant.modules.jta.narayana.objectstore.accessor.DomainJDBCAccess;
  * corant-modules-jta-narayana
  *
  * @author bingo 下午3:20:05
- *
  */
 @ApplicationScoped
 public class DomainStoreManager {

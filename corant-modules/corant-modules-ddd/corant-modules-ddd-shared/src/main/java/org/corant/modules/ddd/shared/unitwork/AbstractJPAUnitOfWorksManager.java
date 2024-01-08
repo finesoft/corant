@@ -37,7 +37,6 @@ import org.corant.shared.ubiquity.Sortable;
  *
  *
  * @author bingo 上午11:39:15
- *
  */
 @ApplicationScoped
 @InfrastructureServices

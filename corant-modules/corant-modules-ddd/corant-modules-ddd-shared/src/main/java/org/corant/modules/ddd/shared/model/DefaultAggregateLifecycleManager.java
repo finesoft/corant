@@ -37,7 +37,6 @@ import org.corant.shared.normal.Priorities;
  * The default aggregate life cycle manager, use EDA mechanism.
  *
  * @author bingo 上午10:44:19
- *
  */
 @ApplicationScoped
 @InfrastructureServices

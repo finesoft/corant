@@ -30,7 +30,6 @@ import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
  * Unfinished yet
  *
  * @author bingo 上午1:08:34
- *
  */
 @ApplicationScoped
 public class XAFileSystemProducer {

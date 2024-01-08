@@ -31,7 +31,6 @@ import org.corant.shared.util.Objects;
  * corant-shared
  *
  * @author bingo 下午9:00:30
- *
  */
 @FunctionalInterface
 public interface RetryStrategy {

@@ -55,7 +55,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-config
  *
  * @author bingo 下午4:34:28
- *
  */
 @Deprecated
 public class ConfigExtensionx implements Extension {

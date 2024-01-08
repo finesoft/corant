@@ -54,7 +54,6 @@ import org.elasticsearch.search.sort.SortBuilder;
  * corant-modules-elastic-data
  *
  * @author bingo 下午6:37:55
- *
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractElasticDocumentService implements ElasticDocumentService {

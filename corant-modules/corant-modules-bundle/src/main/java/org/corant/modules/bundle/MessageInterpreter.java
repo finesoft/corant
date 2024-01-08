@@ -24,7 +24,6 @@ import java.util.function.BiFunction;
  * final message. It is recommended that all implementations be thread-safe.
  *
  * @author bingo 上午11:52:30
- *
  */
 @FunctionalInterface
 public interface MessageInterpreter extends BiFunction<Object[], Locale, String> {

@@ -45,7 +45,6 @@ import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午2:37:35
- *
  */
 @PreMatching
 @Priority(Priorities.AUTHENTICATION)

@@ -27,7 +27,6 @@ import org.jboss.logging.Logger;
  * corant-modules-microprofile-jwt
  *
  * @author bingo 下午6:40:31
- *
  */
 @Provider
 public class MpJWTAuthJaxRsFeature implements Feature {

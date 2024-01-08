@@ -47,7 +47,6 @@ import com.zaxxer.hikari.HikariDataSource;
  * corant-modules-datasource-hikari
  *
  * @author bingo 下午7:56:58
- *
  */
 @Experimental
 public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {

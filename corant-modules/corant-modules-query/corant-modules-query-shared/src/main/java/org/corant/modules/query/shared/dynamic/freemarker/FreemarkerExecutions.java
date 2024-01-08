@@ -61,7 +61,6 @@ import net.jcip.annotations.GuardedBy;
  * </pre>
  *
  * @author bingo 下午5:20:19
- *
  */
 @Singleton
 public class FreemarkerExecutions

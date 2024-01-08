@@ -23,7 +23,6 @@ import org.corant.shared.util.Randoms;
  * corant-shared
  *
  * @author bingo 上午10:29:44
- *
  */
 @FunctionalInterface
 public interface BackoffStrategy {

@@ -32,7 +32,6 @@ import net.jcip.annotations.GuardedBy;
  * corant-modules-query-jpql
  *
  * @author bingo 下午3:16:56
- *
  */
 @SuppressWarnings("rawtypes")
 @ApplicationScoped

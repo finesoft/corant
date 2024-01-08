@@ -28,7 +28,6 @@ import jakarta.inject.Qualifier;
  * meant to use an instance of a Type-Safe Feign Client.
  *
  * @author bingo 10:12:50
- *
  */
 @Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
 @Qualifier

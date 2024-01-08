@@ -41,7 +41,6 @@ import feign.codec.ErrorDecoder;
  * methods on this interface as if it were running in the same VM as the remote service.
  *
  * @author bingo 10:00:31
- *
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

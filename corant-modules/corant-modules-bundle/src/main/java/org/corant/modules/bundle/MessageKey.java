@@ -28,7 +28,6 @@ import jakarta.inject.Qualifier;
  * corant-modules-bundle
  *
  * @author bingo 下午8:44:38
- *
  */
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)

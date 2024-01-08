@@ -28,7 +28,6 @@ import jakarta.enterprise.util.AnnotationLiteral;
  * corant-modules-ddd-api
  *
  * @author bingo 下午6:29:22
- *
  */
 @Documented
 @Retention(RUNTIME)

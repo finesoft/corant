@@ -28,7 +28,6 @@ import org.corant.modules.ddd.Message.MessageHandling;
  * corant-modules-ddd-api
  *
  * @author bingo 下午6:51:41
- *
  */
 @Documented
 @Retention(RUNTIME)

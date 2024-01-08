@@ -25,7 +25,6 @@ import org.corant.shared.exception.CorantRuntimeException;
  * corant-modules-cloud-tencent
  *
  * @author bingo 上午11:40:28
- *
  */
 @ApplicationScoped
 public class CorantWXPayProvider {

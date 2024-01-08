@@ -42,7 +42,6 @@ import jakarta.inject.Inject;
  * corant-modules-keycloak-client
  *
  * @author bingo 下午3:10:47
- *
  */
 @ApplicationScoped
 public class KeycloakAuthzClient {

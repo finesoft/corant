@@ -45,7 +45,6 @@ import jakarta.inject.Singleton;
  * @see CommandExtension#arrange(jakarta.enterprise.inject.spi.ProcessAnnotatedType)
  *
  * @author bingo 下午10:01:33
- *
  */
 @Singleton
 public class CommandHandlerResolver {

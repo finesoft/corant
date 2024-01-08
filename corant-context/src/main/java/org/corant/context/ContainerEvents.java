@@ -25,7 +25,6 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
  * corant-context
  *
  * @author bingo 下午2:00:05
- *
  */
 @ApplicationScoped
 public class ContainerEvents {

@@ -45,7 +45,6 @@ import org.corant.modules.ddd.shared.message.AggregateLifecycleMessage;
  * corant-modules-ddd-shared
  *
  * @author bingo 下午3:25:51
- *
  */
 @MappedSuperclass
 @EntityListeners(value = {DefaultAggregateListener.class})

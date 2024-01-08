@@ -22,7 +22,6 @@ import org.corant.modules.jms.metadata.MetaDataPropertyResolver;
  * corant-modules-jms-shared
  *
  * @author bingo 下午8:52:09
- *
  */
 @ApplicationScoped
 public class JMSMetaDataPropertyResolver implements MetaDataPropertyResolver {

@@ -30,7 +30,6 @@ import org.corant.modules.jms.send.MessageSender;
  * corant-modules-jms-shared
  *
  * @author bingo 下午12:12:26
- *
  */
 @ApplicationScoped
 public class MessageSenderProducer {

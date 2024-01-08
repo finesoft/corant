@@ -30,7 +30,6 @@ import jakarta.inject.Singleton;
  * @see Singleton
  *
  * @author bingo 上午11:49:53
- *
  */
 @Documented
 @Retention(RUNTIME)

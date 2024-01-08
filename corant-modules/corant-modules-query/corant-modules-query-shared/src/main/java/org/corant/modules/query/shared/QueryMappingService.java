@@ -62,7 +62,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-query-shared
  *
  * @author bingo 下午12:59:22
- *
  */
 @ApplicationScoped
 public class QueryMappingService {

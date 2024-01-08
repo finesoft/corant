@@ -20,7 +20,6 @@ import org.corant.modules.query.mapping.QueryHint;
  * corant-modules-query-api
  *
  * @author bingo 上午11:09:08
- *
  */
 @FunctionalInterface
 public interface ResultHintHandler extends AutoCloseable {

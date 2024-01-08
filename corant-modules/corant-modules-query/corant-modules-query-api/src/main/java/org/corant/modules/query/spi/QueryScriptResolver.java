@@ -24,7 +24,6 @@ package org.corant.modules.query.spi;
  *
  *
  * @author bingo 上午10:12:25
- *
  */
 @FunctionalInterface
 public interface QueryScriptResolver {

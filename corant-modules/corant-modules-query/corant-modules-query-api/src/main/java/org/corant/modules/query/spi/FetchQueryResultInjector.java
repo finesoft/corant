@@ -17,7 +17,6 @@ package org.corant.modules.query.spi;
  * corant-modules-query-api
  *
  * @author bingo 下午5:32:44
- *
  */
 @FunctionalInterface
 public interface FetchQueryResultInjector {

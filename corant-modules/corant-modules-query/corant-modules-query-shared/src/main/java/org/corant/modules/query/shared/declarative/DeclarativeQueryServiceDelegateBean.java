@@ -21,6 +21,12 @@ import static org.corant.shared.util.Strings.defaultBlank;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.corant.config.Configs;
 import org.corant.config.cdi.CurrentInjectionPoint;
 import org.corant.context.AbstractBean;
@@ -33,12 +39,6 @@ import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Configurations;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.spi.CreationalContext;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Default;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.InjectionPoint;
 
 /**
  * corant-modules-query-shared
@@ -68,8 +68,8 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   public Object create(CreationalContext<Object> creationalContext) {
     InjectionPoint ip = (InjectionPoint) beanManager
         .getInjectableReference(new CurrentInjectionPoint(), creationalContext);
-    QueryTypeQualifier queryTypeQualifier =
-        ip.getQualifiers().stream().filter(QueryTypeQualifier.class::isInstance)
+    QueryTypeQualifier queryTypeQualifier = ip == null ? null
+        : ip.getQualifiers().stream().filter(QueryTypeQualifier.class::isInstance)
             .map(QueryTypeQualifier.class::cast).findAny().orElse(null);
     return ProxyBuilder.buildContextual(beanManager, proxyType,
         m -> getExecution(m, queryTypeQualifier));

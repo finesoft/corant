@@ -25,9 +25,9 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfRect;
+import org.opencv.core.MatOfRect2d;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
+import org.opencv.core.Rect2d;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
@@ -49,7 +49,7 @@ public class TestSwing {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    OpenCV.loadShared();
+    OpenCV.loadLocally();
     String modelWeights = args[0];
     String modelConfiguration = args[1];
     String filePath = args[2];
@@ -88,7 +88,7 @@ public class TestSwing {
           float confThreshold = 0.6f;
           IntArrayList clsIds = new IntArrayList();
           FloatArrayList confs = new FloatArrayList();
-          List<Rect> rects = new ArrayList<>();
+          List<Rect2d> rects = new ArrayList<>();
           for (int i = 0; i < result.size(); ++i) {
             Mat level = result.get(i);
             for (int j = 0; j < level.rows(); ++j) {
@@ -109,20 +109,20 @@ public class TestSwing {
                 int top = centerY - height / 2;
                 clsIds.add((int) classIdPoint.x);
                 confs.add(confidence);
-                rects.add(new Rect(left, top, width, height));
+                rects.add(new Rect2d(left, top, width, height));
               }
             }
           }
           if (isNotEmpty(confs)) {
             float nmsThresh = 0.5f;
             MatOfFloat confidences = new MatOfFloat(Mats.from(confs));
-            Rect[] boxesArray = rects.toArray(new Rect[0]);
-            MatOfRect boxes = new MatOfRect(boxesArray);
+            Rect2d[] boxesArray = rects.toArray(new Rect2d[0]);
+            MatOfRect2d boxes = new MatOfRect2d(boxesArray);
             MatOfInt indices = new MatOfInt();
             Dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThresh, indices);
             int[] ind = indices.toArray();
             for (int idx : ind) {
-              Rect box = boxesArray[idx];
+              Rect2d box = boxesArray[idx];
               Imgproc.rectangle(frame, box.tl(), box.br(), new Scalar(0, 0, 255), 2);
             }
           }

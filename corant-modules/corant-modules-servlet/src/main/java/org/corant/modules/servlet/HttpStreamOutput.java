@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import org.corant.modules.servlet.ContentDispositions.ContentDisposition;
 import org.corant.modules.servlet.HttpRanges.HttpRange;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.resource.LimitedStream.RangedInputStream;
@@ -49,6 +48,7 @@ import org.corant.shared.resource.Resource;
 import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.Randoms;
 import org.corant.shared.util.Streams;
+import org.corant.shared.util.ContentDispositions.ContentDisposition;
 
 /**
  * corant-modules-servlet

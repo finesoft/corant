@@ -66,7 +66,7 @@ import net.jcip.annotations.GuardedBy;
 public class FreemarkerExecutions
     implements BeforeQueryMappingInitializeHandler, AfterQueryMappingInitializedHandler {
 
-  public static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_31);
+  public static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_32);
 
   protected static final Logger logger =
       Logger.getLogger(FreemarkerExecutions.class.getCanonicalName());
@@ -79,6 +79,8 @@ public class FreemarkerExecutions
 
   static {
     FM_CFG.setNumberFormat("computer");
+    /* See https://freemarker.apache.org/docs/dgui_misc_computer_vs_human_format.html */
+    // FM_CFG.setCFormat(JSONCFormat.INSTANCE); TODO FIXME use c_format explicitly
     FM_CFG.setDefaultEncoding("UTF-8");
     FM_CFG.setLogTemplateExceptions(false);
     FM_CFG.setFallbackOnNullLoopVariable(false);

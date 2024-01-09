@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.servlet;
+package org.corant.shared.util;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -31,7 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * corant-modules-servlet
+ * corant-shared
  *
  * Code base from springframework, if there is infringement, please inform me(finesoft@gmail.com).
  *
@@ -226,7 +226,7 @@ public class ContentDispositions {
   }
 
   /**
-   * corant-modules-servlet
+   * corant-shared
    *
    * @author bingo 上午9:32:46
    *

@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  */
 public class Query implements Serializable {
 
-  protected static final long serialVersionUID = -2142303696673387541L;
+  private static final long serialVersionUID = -2142303696673387541L;
 
   private String name;
   private Class<?> resultClass = Map.class;
@@ -119,7 +119,7 @@ public class Query implements Serializable {
     if (this == obj) {
       return true;
     }
-    if ((obj == null) || (getClass() != obj.getClass())) {
+    if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
     Query other = (Query) obj;

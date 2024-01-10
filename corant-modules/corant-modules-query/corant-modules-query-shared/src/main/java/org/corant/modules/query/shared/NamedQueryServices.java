@@ -43,8 +43,8 @@ public class NamedQueryServices {
   private DefaultQueryParameter parameter = new DefaultQueryParameter();
 
   /**
-   * @param queryName
-   * @param qualifier
+   * @param queryName the query name
+   * @param qualifier the named query service qualifier
    */
   protected NamedQueryServices(String queryName, Annotation qualifier) {
     this.queryName = shouldNotBlank(queryName);
@@ -52,8 +52,8 @@ public class NamedQueryServices {
   }
 
   /**
-   * @param queryName
-   * @param namedQueryService
+   * @param queryName the query name
+   * @param namedQueryService the named query service
    */
   protected NamedQueryServices(String queryName, NamedQueryService namedQueryService) {
     this.queryName = shouldNotBlank(queryName);
@@ -100,7 +100,7 @@ public class NamedQueryServices {
   /**
    * Key and value pairs
    *
-   * @param objects
+   * @param objects the context of query parameter
    */
   public NamedQueryServices context(Object... objects) {
     parameter.context(objects);
@@ -110,7 +110,7 @@ public class NamedQueryServices {
   /**
    * Criteria map
    *
-   * @param criteria
+   * @param criteria the criteria of query parameter
    * @return criteria
    */
   public NamedQueryServices criteria(Map<String, Object> criteria) {
@@ -121,7 +121,7 @@ public class NamedQueryServices {
   /**
    * Key and value pairs
    *
-   * @param objects
+   * @param objects the criteria of query parameter, use 'key,value' pairs
    */
   public NamedQueryServices criteria(Object... objects) {
     parameter.criteria(mapOf(objects));

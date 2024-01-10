@@ -19,13 +19,13 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.modules.query.QueryService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Stereotype;
+import org.corant.modules.query.QueryService;
 
 /**
  * corant-modules-query-shared
- *
+ * <p>
  * The declarative query service interface use for a particular query service interface. An
  * interface specifying this annotation represents a particular query service, the query processor
  * will generate an application scope bean object with @AutoCreated qualifier implements the

@@ -41,9 +41,9 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    * Returns the processed query script with the underlying database dialect., implementation can
    * use the pass in additional parameter to compute the script.
    *
-   * @param additionals the additional adjustment parameter
+   * @param additional the additional adjustment parameter
    */
-  S getScript(Map<?, ?> additionals);
+  S getScript(Map<?, ?> additional);
 
   /**
    * Returns the query script parameter
@@ -54,7 +54,7 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
    * Check the size of the result set, trim according to the appropriate
    * size({@link #resolveSelectSize()}) if necessary, and return the size of the final result set.
    *
-   * @param results
+   * @param results the results
    */
   int handleResultSize(List<?> results);
 
@@ -72,8 +72,8 @@ public interface DynamicQuerier<P, S> extends NamedQuerier {
   /**
    * Returns the max fetch size
    *
-   * @param parentResult
-   * @param fetchQuery
+   * @param parentResult the parent results
+   * @param fetchQuery the fetch query
    */
   int resolveMaxFetchSize(Object parentResult, FetchQuery fetchQuery);
 

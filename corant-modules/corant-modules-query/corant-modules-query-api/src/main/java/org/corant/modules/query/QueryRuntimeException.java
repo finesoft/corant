@@ -24,43 +24,21 @@ public class QueryRuntimeException extends CorantRuntimeException {
 
   private static final long serialVersionUID = 5993406707944953781L;
 
-  /**
-   *
-   */
   public QueryRuntimeException() {}
 
-  /**
-   * @param msgOrFormat
-   * @param args
-   */
   public QueryRuntimeException(String msgOrFormat, Object... args) {
     super(msgOrFormat, args);
   }
 
-  /**
-   * @param cause
-   */
   public QueryRuntimeException(Throwable cause) {
     super(cause);
   }
 
-  /**
-   * @param cause
-   * @param enableSuppression
-   * @param writableStackTrace
-   * @param msgOrFormat
-   * @param args
-   */
   public QueryRuntimeException(Throwable cause, boolean enableSuppression,
       boolean writableStackTrace, String msgOrFormat, Object... args) {
     super(cause, enableSuppression, writableStackTrace, msgOrFormat, args);
   }
 
-  /**
-   * @param cause
-   * @param msgOrFormat
-   * @param args
-   */
   public QueryRuntimeException(Throwable cause, String msgOrFormat, Object... args) {
     super(cause, msgOrFormat, args);
   }

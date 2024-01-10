@@ -20,7 +20,7 @@ import org.corant.modules.query.mapping.Query;
 
 /**
  * corant-modules-query-api
- *
+ * <p>
  * This interface will be refactored in the future to add more capabilities
  *
  * @author bingo 上午9:41:03
@@ -106,7 +106,7 @@ public interface Querier {
 
   /**
    * Returns a resolved fetch query parameter, merge parent querier criteria.
-   *
+   * <p>
    * Note: The implementer must completely copy all contexts in the parent query parameter object.
    *
    * @param result the parent result use to extract the child query parameter

@@ -21,6 +21,6 @@ package org.corant.modules.query.spi;
 @FunctionalInterface
 public interface FetchQueryResultInjector {
 
-  void inject(Object parameter, Object parentResults, Object fetchdResults);
+  void inject(Object parameter, Object parentResults, Object fetchedResults);
 
 }

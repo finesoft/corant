@@ -14,6 +14,7 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import org.corant.context.Beans;
 import org.corant.modules.query.NamedQueryService;
 import org.corant.modules.query.QueryRuntimeException;
@@ -27,6 +28,9 @@ import org.corant.modules.query.mapping.Query.QueryType;
  */
 public interface NamedQueryServiceManager {
 
+  QueryType DEFAULT_QUERY_TYPE = getConfigValue("corant.query.default.query-type", QueryType.class);
+  String DEFAULT_QUALIFIER = getConfigValue("corant.query.default.qualifier", String.class);
+
   /**
    * Resolves the named query service by query type and qualifier
    *
@@ -34,9 +38,11 @@ public interface NamedQueryServiceManager {
    * @param qualifier the query qualifier
    */
   static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
+    final QueryType usedQueryType = queryType == null ? DEFAULT_QUERY_TYPE : queryType;
+    final String usedQualifier = qualifier == null ? DEFAULT_QUALIFIER : qualifier;
     for (NamedQueryServiceManager nqsm : Beans.select(NamedQueryServiceManager.class)) {
-      if (nqsm.getType() == queryType) {
-        NamedQueryService nqs = nqsm.get(qualifier);
+      if (nqsm.getType() == usedQueryType) {
+        NamedQueryService nqs = nqsm.get(usedQualifier);
         if (nqs != null) {
           return nqs;
         }
@@ -62,8 +68,8 @@ public interface NamedQueryServiceManager {
    * Obtain a named query service, the parameter can be a MgQuery/SqlQuery/EsQuery/JpqlQuery or a
    * string
    *
-   * @param qualifier
-   * @return get
+   * @param qualifier the query service qualifier
+   * @return a named query service
    */
   NamedQueryService get(Object qualifier);
 

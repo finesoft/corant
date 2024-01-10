@@ -139,7 +139,7 @@ public class FreemarkerExecutions
   public void afterQueryMappingInitialized(Collection<Query> queries, long initializedVersion) {
     executions.clear();
     if (QueryExtension.verifyDeployment) {
-      logger.info("Start freemark query scripts precompiling.");
+      logger.info("Start freemarker query scripts pre-compiling.");
       int cs = 0;
       for (Query query : queries) {
         if (query.getScript().getType() == ScriptType.FM) {
@@ -147,7 +147,7 @@ public class FreemarkerExecutions
           cs++;
         }
       }
-      logger.info("Complete " + cs + " freemarker query scripts precompiling.");
+      logger.info("Complete " + cs + " freemarker query scripts pre-compiling.");
     }
   }
 

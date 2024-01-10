@@ -97,11 +97,10 @@ public interface QueryService<Q, P> {
 
   /**
    * corant-modules-query-api
-   *
+   * <p>
    * Forward query result list, Consists of the result list and has next result mark.
    *
    * @author bingo 下午5:51:56
-   *
    */
   class Forwarding<T> {
 
@@ -174,11 +173,10 @@ public interface QueryService<Q, P> {
 
   /**
    * corant-modules-query-api
-   *
+   * <p>
    * Paging query result list.
    *
    * @author bingo 下午6:11:55
-   *
    */
   class Paging<T> {
 

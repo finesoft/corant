@@ -22,10 +22,10 @@ import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.modules.query.mapping.Query.QueryType;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
+import org.corant.modules.query.mapping.Query.QueryType;
 
 /**
  * corant-modules-query-sql

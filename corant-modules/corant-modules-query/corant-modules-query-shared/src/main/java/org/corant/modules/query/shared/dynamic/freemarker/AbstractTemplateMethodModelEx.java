@@ -52,9 +52,9 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    * Convert parameter values using parameter types and hints. If the expected parameter type passed
    * in is null then use {@link #defaultConvertParamValue(Object)} to convert.
    *
-   * @param value
-   * @param expectedType
-   * @param convertHints
+   * @param value the parameter value to be converted
+   * @param expectedType the expected type
+   * @param convertHints the conversion hints
    * @return convertParamValue
    *
    * @see ConverterHints
@@ -76,7 +76,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   /**
    * Converts parameters that do not specify the expected type.
    *
-   * @param value
+   * @param value the parameter value
    * @return defaultConvertParamValue
    */
   protected Object defaultConvertParamValue(Object value) {
@@ -86,8 +86,8 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   /**
    * Extract single template method parameter value.
    *
-   * @param arg
-   * @return
+   * @param arg the parameter value to be extracted
+   * @return a normal java type parameter value
    * @throws TemplateModelException extractTplModValue
    */
   protected Object extractParamValue(Object arg) throws TemplateModelException {
@@ -120,7 +120,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       return list;
     } else {
       // FIXME Resolve TemplateHashModel
-      throw new QueryRuntimeException("Unknow arguement,the class is %s.",
+      throw new QueryRuntimeException("Unknown argument,the class is %s.",
           arg == null ? NULL : arg.getClass());
     }
   }
@@ -130,10 +130,10 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    *
    * <p>
    * The args passed in is a List, the first element (args.get(0)) is the actual parameter value;
-   *
+   * <p>
    * If args has more than one elements then the second element (args.get(1)) must be a string that
    * represent the expected type (java class name);
-   *
+   * <p>
    * If args has more than three elements then starting with the third element, each of the
    * following two elements represents a key-value pair that use for converter as hints.
    *
@@ -145,9 +145,9 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
    *    hints = {"converter.zone-id","UTC"}
    * </pre>
    *
-   * @param args
+   * @param args the template model parameters
    * @see ConverterHints
-   * @return
+   * @return a parameter value
    * @throws TemplateModelException getParamValue
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -174,7 +174,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   /**
    * check if is simple cls
    *
-   * @param cls
+   * @param cls the parameter value class to be checked
    * @return isSimpleType
    */
   protected boolean isSimpleType(Class<?> cls) {
@@ -183,10 +183,10 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
 
   /**
    * Return whether the passed object is simple type or simple type collection or simple type array.
+   * <p>
+   * Unfinished yet
    *
-   * Unfinish yet
-   *
-   * @param obj
+   * @param obj the object to be checked
    * @return isSimpleTypeObject
    */
   protected byte isSimpleTypeObject(Object obj) {

@@ -22,7 +22,7 @@ import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-modules-query-api
- *
+ * <p>
  * This interface is used for processing such as object conversion and extraction in the query, and
  * is suitable for object conversion in the query result set, query parameter conversion and
  * extraction, etc.

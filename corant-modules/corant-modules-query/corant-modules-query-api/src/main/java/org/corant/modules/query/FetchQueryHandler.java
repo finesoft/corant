@@ -85,12 +85,12 @@ public interface FetchQueryHandler {
    *
    * @param result the parent query result, may be single or multiple
    * @param fetchQuery the fetch query
-   * @param parentQueryparam the parent query parameter
+   * @param parentQueryParam the parent query parameter
    * @return fetch query parameter
    *
    * @see FetchQuery
    */
   QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery,
-      QueryParameter parentQueryparam);
+      QueryParameter parentQueryParam);
 
 }

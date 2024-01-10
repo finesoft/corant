@@ -55,7 +55,7 @@
 		<version.exec-maven-plugin>3.1.0</version.exec-maven-plugin>
 		<version.feign>12.3</version.feign>
 		<version.flatten-maven-plugin>1.4.1</version.flatten-maven-plugin>
-		<version.flyway>9.21.1</version.flyway>
+		<version.flyway>7.15.0</version.flyway>
 		<version.freemarker>2.3.32</version.freemarker>
 		<version.graalvm>22.3.2</version.graalvm>
 		<version.groovy>4.0.11</version.groovy>

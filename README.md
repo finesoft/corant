@@ -55,7 +55,7 @@ and also provide some common development practices such as DDD, Dynamic SQL/NoSQ
 Learn how to create a Hello World app quickly and efficiently.
 ## 1. Prerequisites
 * maven 2.2.1 (or newer)
-* JDK 8 or 11+
+* JDK 17 or above
 ## 2. Create the project
 * Define the version of corant in `pom.xml`.Use the latest version(required jdk 11+).Jdk 8 for the version: [1.3](https://github.com/finesoft/corant/tree/1.3)
 ```

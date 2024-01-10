@@ -16,6 +16,12 @@
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>jcache</artifactId>
+      <exclusions>
+				<exclusion>
+					<groupId>javax.cache</groupId>
+      	  <artifactId>cache-api</artifactId>
+				</exclusion>
+			</exclusions>
     </dependency>
     <dependency>
       <groupId>org.corant</groupId>

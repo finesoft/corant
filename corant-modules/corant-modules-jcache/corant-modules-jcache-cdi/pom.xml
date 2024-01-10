@@ -5,20 +5,26 @@
     <artifactId>corant-modules-jcache</artifactId>
     <version>${revision}</version>
   </parent>
-  <artifactId>corant-modules-jcache-annotations</artifactId>
-    <dependencies>
+  <artifactId>corant-modules-jcache-cdi</artifactId>
+  <dependencies>
     <dependency>
       <groupId>org.jsr107.ri</groupId>
       <artifactId>cache-ri-impl</artifactId>
+      <exclusions>
+				<exclusion>
+					<groupId>javax.cache</groupId>
+      	  <artifactId>cache-api</artifactId>
+				</exclusion>
+			</exclusions>      
     </dependency>
 		<dependency>
       <groupId>javax.cache</groupId>
       <artifactId>cache-api</artifactId>
-      <version>1.1.1</version><!-- FIXME  -->
+      <version>1.1.1.payara-p1</version><!-- FIXME  -->
     </dependency>           
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
-    </dependency>    
-  </dependencies>
+    </dependency>  
+  </dependencies>  
 </project>

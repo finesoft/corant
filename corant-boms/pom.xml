@@ -32,7 +32,7 @@
 		<version.bouncycastle>1.70</version.bouncycastle>
 		<version.bson.mongodb>3.12.0</version.bson.mongodb>
 		<version.cache-annotations-ri>1.1.1</version.cache-annotations-ri>
-		<version.caffeine>3.0.5</version.caffeine>
+		<version.caffeine>3.1.8</version.caffeine>
 		<version.calcite>1.34.0</version.calcite>
 		<version.commons-beanutils>1.9.4</version.commons-beanutils>
 		<version.commons-cli>1.5.0</version.commons-cli>
@@ -307,9 +307,9 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-modules-jcache-annotations</artifactId>
+				<artifactId>corant-modules-jcache-cdi</artifactId>
 				<version>${revision}</version>
-			</dependency>			
+			</dependency>				
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-jcache-shared</artifactId>

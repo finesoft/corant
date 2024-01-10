@@ -11,7 +11,7 @@
   <dependencies>
     <dependency>
       <groupId>org.corant</groupId>
-      <artifactId>corant-modules-jcache-annotations</artifactId>
+      <artifactId>corant-modules-jcache-cdi</artifactId>
     </dependency>		
     <dependency>
       <groupId>org.corant</groupId>

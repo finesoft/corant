@@ -14,13 +14,14 @@
 package org.corant.modules.ddd.shared.model;
 
 import static java.util.Collections.singletonMap;
-import static org.corant.modules.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
 import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_AGG_RESOLVE_MULTI;
+import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_ENT_NON_FUD_ID;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.List;
@@ -105,10 +106,10 @@ public class Aggregates {
     if (id != null && cls != null) {
       if (properties.length > 0) {
         return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType, mapOf(properties)),
-            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
       } else {
         return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType),
-            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
       }
     }
     throw new GeneralRuntimeException(ERR_PARAM);
@@ -119,10 +120,10 @@ public class Aggregates {
     if (id != null && cls != null) {
       if (properties.length > 0) {
         return shouldNotNull(resolveRepository(cls).get(cls, id, mapOf(properties)),
-            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
       } else {
         return shouldNotNull(resolveRepository(cls).get(cls, id),
-            () -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
       }
     }
     throw new GeneralRuntimeException(ERR_PARAM);

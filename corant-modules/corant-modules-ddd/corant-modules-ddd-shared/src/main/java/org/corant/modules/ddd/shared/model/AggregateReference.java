@@ -15,9 +15,11 @@ package org.corant.modules.ddd.shared.model;
 
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_OBJ_NON_FUD;
 import static org.corant.modules.bundle.GlobalMessageCodes.ERR_PARAM;
+import static org.corant.modules.ddd.shared.model.PkgMsgCds.ERR_ENT_NON_FUD_ID;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
+import static org.corant.shared.util.Strings.asDefaultString;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -84,7 +86,7 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
 
   static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
     return Aggregates.tryResolve(cls, id)
-        .orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD, id));
+        .orElseThrow(() -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
   }
 
   @SuppressWarnings("unchecked")
@@ -118,7 +120,7 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
 
   static <X extends Aggregate, I extends Serializable> I shouldExists(Class<X> cls, I id) {
     if (!exists(cls, id)) {
-      throw new GeneralRuntimeException(ERR_OBJ_NON_FUD, id);
+      throw new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id));
     }
     return id;
   }

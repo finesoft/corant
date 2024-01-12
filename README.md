@@ -5,8 +5,8 @@
 
 Microservice stack with CDI MicroProfile.
 
-Corant is a microservice development stack. Use Maven for builds, base on JDK 11 or above
-(JDK 8 will no longer be supported, only supported for versions before [1.3](https://github.com/finesoft/corant/tree/1.3)), use CDI as container.
+Corant is a microservice development stack. Use Maven for builds, base on JDK 17 or above
+(JDK 11 will no longer be supported, only supported for versions before [1.x.x](https://github.com/finesoft/corant/tags)), use CDI as container.
 The following projects are under the corant project.
 # Corant projects
 ### 1. corant-boms

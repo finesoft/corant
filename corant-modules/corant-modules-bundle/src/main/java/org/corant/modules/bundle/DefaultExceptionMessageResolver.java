@@ -23,6 +23,7 @@ import jakarta.enterprise.inject.spi.CDI;
 import org.corant.modules.bundle.MessageResolver.MessageCategory;
 import org.corant.shared.exception.ExceptionMessageResolver;
 import org.corant.shared.exception.GeneralRuntimeException;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-bundle
@@ -43,8 +44,13 @@ public class DefaultExceptionMessageResolver implements ExceptionMessageResolver
         return gre.getOriginalMessage();
       }
       Instance<MessageResolver> inst = CDI.current().select(MessageResolver.class);
-      if (inst.isResolvable()) {
-        final MessageResolver resolver = inst.get();
+      if (!inst.isUnsatisfied()) {
+        final MessageResolver resolver;
+        if (inst.isResolvable()) {
+          resolver = inst.get();
+        } else {
+          resolver = inst.stream().sorted(Sortable::compare).findFirst().get();
+        }
         // FIXME Do we need to append category prefix to message keys?
         final Object key = MessageCategory.ERR.genMessageKey(gre.getMessageKey());
         final Object[] parameters = gre.getMessageParameters();

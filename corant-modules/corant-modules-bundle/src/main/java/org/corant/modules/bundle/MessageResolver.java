@@ -16,6 +16,7 @@ package org.corant.modules.bundle;
 import java.util.Locale;
 import java.util.function.Function;
 import org.corant.shared.normal.Names;
+import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-bundle
@@ -26,7 +27,7 @@ import org.corant.shared.normal.Names;
  *
  * @author bingo 下午9:28:49
  */
-public interface MessageResolver extends AutoCloseable {
+public interface MessageResolver extends Sortable, AutoCloseable {
 
   String UNKNOWN_INF_KEY = "INF.message.unknown";
   String UNKNOWN_ERR_KEY = "ERR.message.unknown";

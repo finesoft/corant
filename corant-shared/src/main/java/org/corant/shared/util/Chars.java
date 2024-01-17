@@ -2031,6 +2031,26 @@ public class Chars {
   }
 
   /**
+   * Returns true if given char is ASCII table char otherwise false.
+   *
+   * @param c the given char to check
+   * @return the given char is ASCII table char or not
+   */
+  public static boolean isAscii(final char c) {
+    return c <= 127;
+  }
+
+  /**
+   * Returns true if given integer is ASCII table char otherwise false.
+   *
+   * @param c the given char to check
+   * @return the given char is ASCII table char or not
+   */
+  public static boolean isAscii(final int c) {
+    return c >= 0 && c <= 127;
+  }
+
+  /**
    * 'a'~'Z'
    *
    * @param c the char to check

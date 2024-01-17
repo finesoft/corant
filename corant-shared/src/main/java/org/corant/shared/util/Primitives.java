@@ -122,6 +122,19 @@ public class Primitives {
     return result;
   }
 
+  public static char[] unwrap(final Character[] array) {
+    if (array == null) {
+      return null;
+    } else if (array.length == 0) {
+      return EMPTY_CHAR_ARRAY;
+    }
+    final char[] result = new char[array.length];
+    for (int i = 0; i < array.length; i++) {
+      result[i] = array[i];
+    }
+    return result;
+  }
+
   @SuppressWarnings("unchecked")
   public static <T> Class<T> unwrap(final Class<T> clazz) {
     if (clazz != null && !clazz.isPrimitive()) {
@@ -227,6 +240,19 @@ public class Primitives {
       return EMPTY_WRAP_BYTE_ARRAY;
     }
     final Byte[] result = new Byte[array.length];
+    for (int i = 0; i < array.length; i++) {
+      result[i] = array[i];
+    }
+    return result;
+  }
+
+  public static Character[] wrap(final char[] array) {
+    if (array == null) {
+      return null;
+    } else if (array.length == 0) {
+      return EMPTY_WRAP_CHAR_ARRAY;
+    }
+    final Character[] result = new Character[array.length];
     for (int i = 0; i < array.length; i++) {
       result[i] = array[i];
     }

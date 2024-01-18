@@ -2043,7 +2043,7 @@ public class Chars {
   /**
    * Returns true if given integer is ASCII table char otherwise false.
    *
-   * @param c the given char to check
+   * @param c the given integer to check
    * @return the given char is ASCII table char or not
    */
   public static boolean isAscii(final int c) {

@@ -45,6 +45,11 @@ public class MongoIterableWrapper {
     }
 
     @Override
+    public int available() {
+      return 0;
+    }
+
+    @Override
     public void close() {}
 
     @Override
@@ -99,7 +104,6 @@ public class MongoIterableWrapper {
       return cursor.next();
     }
 
-    @Override
     public void forEach(Block<? super T> block) {
       streamOf(cursor).forEach(block::apply);
     }

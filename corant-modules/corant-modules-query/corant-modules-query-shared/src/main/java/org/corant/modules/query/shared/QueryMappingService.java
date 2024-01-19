@@ -109,8 +109,8 @@ public class QueryMappingService {
 
   public Collection<Query> getQueries() {
     Lock l = rwl.readLock();
+    l.lock();
     try {
-      l.lock();
       return unmodifiableCollection(queries.values());
     } finally {
       l.unlock();
@@ -119,8 +119,8 @@ public class QueryMappingService {
 
   public Query getQuery(String name) {
     Lock l = rwl.readLock();
+    l.lock();
     try {
-      l.lock();
       return queries.get(name);
     } finally {
       l.unlock();
@@ -134,9 +134,9 @@ public class QueryMappingService {
   @Experimental // NOTE since the query scripts may be cached in thread local
   public void reinitialize() {
     Lock l = rwl.writeLock();
+    l.lock();
     Throwable throwable = null;
     try {
-      l.lock();
       logger.info("Start query mapping re-initialization.");
       doInitialize();
       logger.info("Completed query mapping re-initialization.");
@@ -264,8 +264,8 @@ public class QueryMappingService {
   protected void initialize() {
     Lock l = rwl.writeLock();
     Throwable throwable = null;
+    l.lock();
     try {
-      l.lock();
       logger.info("Start query mapping initialization.");
       doInitialize();
       logger.info("Complete query mapping initialization.");
@@ -321,8 +321,8 @@ public class QueryMappingService {
 
   protected void uninitialize() {
     Lock l = rwl.writeLock();
+    l.lock();
     try {
-      l.lock();
       logger.info("Start query mapping un-initialization.");
       queries.clear();
       initialized = false;

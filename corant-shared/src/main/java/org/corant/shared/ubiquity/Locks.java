@@ -57,15 +57,11 @@ public class Locks {
     public <T> T withLock(K key, Supplier<T> supply) {
       shouldNoneNull(key, supply);
       final Lock lock = get(key);
-      boolean acquire = false;
+      lock.lock();
       try {
-        lock.lock();
-        acquire = true;
         return supply.get();
       } finally {
-        if (acquire) {
-          lock.unlock();
-        }
+        lock.unlock();
       }
     }
 

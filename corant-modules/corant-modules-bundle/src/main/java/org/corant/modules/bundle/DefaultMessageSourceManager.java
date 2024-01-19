@@ -48,8 +48,8 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
   public void refresh() {
     logger.fine("Refresh the message sources");
     Lock writeLock = rwl.writeLock();
+    writeLock.lock();
     try {
-      writeLock.lock();
       if (!messageSources.isUnsatisfied()) {
         messageSources.stream().sorted(Sortable::compare).forEach(MessageSource::refresh);
       }
@@ -62,8 +62,8 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
   public void release() {
     logger.fine("Release the message sources");
     Lock writeLock = rwl.writeLock();
+    writeLock.lock();
     try {
-      writeLock.lock();
       if (!messageSources.isUnsatisfied()) {
         messageSources.stream().sorted(Sortable::compare).forEach(t -> {
           try {
@@ -81,8 +81,8 @@ public class DefaultMessageSourceManager implements MessageSourceManager {
   @Override
   public Stream<MessageSource> stream() {
     Lock readLock = rwl.readLock();
+    readLock.lock();
     try {
-      readLock.lock();
       if (!messageSources.isUnsatisfied()) {
         return messageSources.stream().sorted(Sortable::compare);
       }

@@ -12,7 +12,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Systems;
 
 /**
@@ -22,17 +24,33 @@ import org.corant.shared.util.Systems;
  */
 public class Locks {
 
-  public static <T> T withLock(Lock lock, Supplier<T> supplier) {
+  public static <T> Pair<Boolean, T> tryWithLock(Lock lock, Supplier<T> supplier,
+      long acquireLockTimeout, TimeUnit acquireLockTimeUnit) {
     shouldNoneNull(lock, supplier);
-    boolean acquire = false;
+    boolean acquired = false;
+    T t = null;
     try {
-      lock.lock();
-      acquire = true;
-      return supplier.get();
+      if (lock.tryLock(acquireLockTimeout, acquireLockTimeUnit)) {
+        acquired = true;
+        t = supplier.get();
+      }
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
     } finally {
-      if (acquire) {
+      if (acquired) {
         lock.unlock();
       }
+    }
+    return Pair.of(acquired, t);
+  }
+
+  public static <T> T withLock(Lock lock, Supplier<T> supplier) {
+    shouldNoneNull(lock, supplier);
+    lock.lock();
+    try {
+      return supplier.get();
+    } finally {
+      lock.unlock();
     }
   }
 
@@ -77,15 +95,11 @@ public class Locks {
     public <T> T withLock(K key, Supplier<T> supplier) {
       shouldNoneNull(key, supplier);
       final Lock lock = get(key);
-      boolean acquire = false;
+      lock.lock();
       try {
-        lock.lock();
-        acquire = true;
         return supplier.get();
       } finally {
-        if (acquire) {
-          lock.unlock();
-        }
+        lock.unlock();
       }
     }
 

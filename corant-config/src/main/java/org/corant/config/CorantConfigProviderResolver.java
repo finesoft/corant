@@ -40,8 +40,8 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
 
   public void clear() {
     Lock lock = rwl.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       configs.clear();
     } finally {
       lock.unlock();
@@ -62,8 +62,8 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
   public Config getConfig(ClassLoader classLoader) {
     final ClassLoader useClassLoader = defaultObject(classLoader, defaultClassLoader());
     Lock lock = rwl.readLock();
+    lock.lock();
     try {
-      lock.lock();
       Config config = configs.get(useClassLoader);
       if (null == config) {
         lock.unlock();
@@ -81,8 +81,8 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
   @Override
   public void registerConfig(Config config, ClassLoader classLoader) {
     Lock lock = rwl.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       cacheConfig(defaultObject(classLoader, Classes::defaultClassLoader), config);
     } finally {
       lock.unlock();
@@ -92,8 +92,8 @@ public class CorantConfigProviderResolver extends ConfigProviderResolver {
   @Override
   public void releaseConfig(final Config config) {
     Lock lock = rwl.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       Iterator<Map.Entry<ClassLoader, Config>> iterator = configs.entrySet().iterator();
       while (iterator.hasNext()) {
         Map.Entry<ClassLoader, Config> entry = iterator.next();

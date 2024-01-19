@@ -54,8 +54,8 @@ public class SimpleRequired implements Required {
   @Override
   public boolean addVeto(Class<?> type) {
     Lock lock = rwl.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       return vetoes.add(type);
     } finally {
       lock.unlock();
@@ -65,8 +65,8 @@ public class SimpleRequired implements Required {
   @Override
   public boolean removeVeto(Class<?> type) {
     Lock lock = rwl.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       return vetoes.remove(type);
     } finally {
       lock.unlock();
@@ -76,8 +76,8 @@ public class SimpleRequired implements Required {
   @Override
   public boolean shouldVeto(Class<?> type) {
     Lock lock = rwl.readLock();
+    lock.lock();
     try {
-      lock.lock();
       if (vetoes.contains(type)) {
         return true;
       } else if (shouldVeto(type.getClassLoader(),

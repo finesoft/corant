@@ -44,6 +44,16 @@ public class Locks {
     return Pair.of(acquired, t);
   }
 
+  public static void withLock(Lock lock, Runnable runnable) {
+    shouldNoneNull(lock, runnable);
+    lock.lock();
+    try {
+      runnable.run();
+    } finally {
+      lock.unlock();
+    }
+  }
+
   public static <T> T withLock(Lock lock, Supplier<T> supplier) {
     shouldNoneNull(lock, supplier);
     lock.lock();

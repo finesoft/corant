@@ -28,6 +28,12 @@ jobs:
                 "username": "${{ secrets.MVN_USERNAME }}",
                 "password": "${{ secrets.MVN_PASSWORD }}"
             }]
+          mirrors: >
+            [{
+                "id": "payara-artifacts",
+                "mirrorOf": "external:*",
+                "url": "https://nexus.payara.fish/repository/payara-artifacts"
+            }]
           profiles: >
             [{
                 "id": "rdc",

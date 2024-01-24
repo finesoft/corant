@@ -62,13 +62,13 @@
 		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
 		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-		<version.hibernate-orm-core>6.4.1.Final</version.hibernate-orm-core>
+		<version.hibernate-orm-core>6.4.2.Final</version.hibernate-orm-core>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.1</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
-		<version.jackson>2.15.2</version.jackson>
+		<version.jackson>2.16.1</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.7</version.javafx>
@@ -158,8 +158,8 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.17.6</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
-		<version.resteasy>6.2.6.Final</version.resteasy>
-		<version.resteasy-microprofile>2.1.1.Final</version.resteasy-microprofile>
+		<version.resteasy>6.2.7.Final</version.resteasy>
+		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro-all>1.7.1</version.shiro-all>
 		<version.slf4j>1.7.36</version.slf4j>

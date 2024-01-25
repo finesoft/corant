@@ -31,7 +31,6 @@ jobs:
           repositories: >
             [{
                 "id": "payara-artifacts",
-                "name": "payara-artifacts",
                 "url": "https://nexus.payara.fish/repository/payara-artifacts",
                 "releases": {
                   "enabled": "true"
@@ -46,7 +45,7 @@ jobs:
                 }
             }]
           active_profiles: >
-            ["rdc"]
+            ["rdc","github"]
           output_file: /home/runner/.m2/settings.xml
       - name: Build Release
         run: |

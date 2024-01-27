@@ -41,7 +41,8 @@ public class ProxyInvocationHandler implements InvocationHandler {
     this.clazz = shouldNotNull(clazz);
     Map<Method, MethodInvoker> methodInvokers = new HashMap<>();
     for (Method method : clazz.getMethods()) {
-      if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
+      if (method.isDefault() || method.isBridge() || Modifier.isStatic(method.getModifiers())) {
+        // TODO consider the bridge method "change" visibility of base class's methods ??
         continue;
       }
       methodInvokers.put(method, invokerBuilder.apply(method));

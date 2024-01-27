@@ -42,6 +42,10 @@ public class PropertyInjector {
     this.nameUpperCase = nameUpperCase;
     Map<String, Method> setters = new HashMap<>();
     for (Method method : instanceClass.getMethods()) {
+      if (method.isBridge()) {
+        // TODO consider the bridge method "change" visibility of base class's methods ??
+        continue;
+      }
       String name = method.getName();
       if (method.getParameterCount() == 1 && name.startsWith("set")) {
         setters.put(name.substring(3), method);

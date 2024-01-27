@@ -38,15 +38,9 @@ public interface NamedQueryServiceManager {
    * @param qualifier the query qualifier
    */
   static NamedQueryService resolveQueryService(QueryType queryType, String qualifier) {
-    final QueryType usedQueryType = queryType == null ? DEFAULT_QUERY_TYPE : queryType;
-    final String usedQualifier = qualifier == null ? DEFAULT_QUALIFIER : qualifier;
-    for (NamedQueryServiceManager nqsm : Beans.select(NamedQueryServiceManager.class)) {
-      if (nqsm.getType() == usedQueryType) {
-        NamedQueryService nqs = nqsm.get(usedQualifier);
-        if (nqs != null) {
-          return nqs;
-        }
-      }
+    NamedQueryService nqs = tryResolveQueryService(queryType, qualifier);
+    if (nqs != null) {
+      return nqs;
     }
     throw new QueryRuntimeException(
         "Can't find any query service with query type: %s, qualifier: %s", queryType, qualifier);
@@ -62,6 +56,42 @@ public interface NamedQueryServiceManager {
     Query query = shouldNotNull(Beans.resolve(QueryMappingService.class).getQuery(queryName),
         () -> new QueryRuntimeException("Can't find any named '%s' query", queryName));
     return resolveQueryService(query.getType(), query.getQualifier());
+  }
+
+  /**
+   * Try to resolve the named query service by query type and qualifier, returns null if can't be
+   * resolved.
+   *
+   * @param queryType the query type
+   * @param qualifier the query qualifier
+   * @since 2024-01-26
+   */
+  static NamedQueryService tryResolveQueryService(QueryType queryType, String qualifier) {
+    final QueryType usedQueryType = queryType == null ? DEFAULT_QUERY_TYPE : queryType;
+    final String usedQualifier = qualifier == null ? DEFAULT_QUALIFIER : qualifier;
+    for (NamedQueryServiceManager nqsm : Beans.select(NamedQueryServiceManager.class)) {
+      if (nqsm.getType() == usedQueryType) {
+        NamedQueryService nqs = nqsm.get(usedQualifier);
+        if (nqs != null) {
+          return nqs;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Try to resolve the named query service by query name, returns null if can't be resolved.
+   *
+   * @param queryName the query name
+   * @since 2024-01-26
+   */
+  static NamedQueryService tryResolveQueryService(String queryName) {
+    Query query = Beans.resolve(QueryMappingService.class).getQuery(queryName);
+    if (query != null) {
+      return tryResolveQueryService(query.getType(), query.getQualifier());
+    }
+    return null;
   }
 
   /**

@@ -95,7 +95,9 @@ public class ProxyUtils {
         getInterceptorBindings(beanType.getAnnotations(), beanManager);
 
     for (Method method : beanType.getMethods()) {
-      if ( /* method.isDefault() || */ Modifier.isStatic(method.getModifiers())) {
+      if ( /* method.isDefault() || */method.isBridge()
+          || Modifier.isStatic(method.getModifiers())) {
+        // TODO consider the bridge method "change" visibility of base class's methods ??
         continue;
       }
       List<Annotation> methodLevelBindings =

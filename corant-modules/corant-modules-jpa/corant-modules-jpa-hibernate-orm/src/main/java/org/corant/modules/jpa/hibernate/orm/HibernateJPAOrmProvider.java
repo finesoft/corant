@@ -31,6 +31,7 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.type.SqlTypes;
 
 /**
  * corant-modules-jpa-hibernate-orm
@@ -50,6 +51,7 @@ public class HibernateJPAOrmProvider implements JPAProvider {
     tmp.put(AvailableSettings.AUTOCOMMIT, false);
     tmp.put(AvailableSettings.SCANNER_DISCOVERY, "class, hbm");
     tmp.put(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, Action.NONE);
+    tmp.put(AvailableSettings.PREFERRED_INSTANT_JDBC_TYPE, SqlTypes.TIMESTAMP);
     tmp.put(SpecHints.HINT_SPEC_QUERY_TIMEOUT, 100000);
     DEFAULT_PROPERTIES = Collections.unmodifiableMap(tmp);
   }

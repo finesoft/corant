@@ -899,7 +899,7 @@ public class MongoTemplate {
     }
 
     public MongoAggregator hint(Bson hint) {
-      this.hint = shouldNotNull(hint);
+      this.hint = hint;
       return this;
     }
 
@@ -1041,7 +1041,7 @@ public class MongoTemplate {
     }
 
     public MongoQuery filter(Bson filter) {
-      this.filter = shouldNotNull(filter);
+      this.filter = filter;
       return this;
     }
 
@@ -1184,7 +1184,7 @@ public class MongoTemplate {
     }
 
     public MongoQuery sort(Bson sort) {
-      this.sort = shouldNotNull(sort);
+      this.sort = sort;
       return this;
     }
 

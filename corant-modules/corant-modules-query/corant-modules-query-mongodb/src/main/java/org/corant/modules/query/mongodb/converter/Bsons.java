@@ -47,7 +47,6 @@ import org.bson.BsonTimestamp;
 import org.bson.conversions.Bson;
 import org.bson.types.Decimal128;
 import org.bson.types.ObjectId;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Experimental;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -198,78 +197,71 @@ public class Bsons {
   }
 
   /**
-   * Convert the given object directly to a BSON type object, assuming that the given Java type
-   * object has been converted according to "Extended JSON" before conversion.
+   * Convert the given object to a BSON type object directly.
    * <p>
-   * <b>"Extended JSON"</b> conversion examples:
-   * <ul>
-   * <li>Long -> {"$numberLong","3259"}</li>
-   * <li>Integer -> {"$numberInt","3259"}</li>
-   * </ul>
+   * NOTE: If the given object is {@link Bson} instance, the method returns the object directly.
    *
-   * @param x the object to be converted, assuming that the object has been converted according to
-   *        "Extended JSON" before conversion.
+   * @param object the object to be converted, assuming that the object has been converted according
+   *        to "Extended JSON" before conversion.
+   * @param extended whether convert the given object to "Extended JSON" before conversion
    * @return a BSON object
    * @throws JsonProcessingException if error occurred.
    */
-  public static Bson toBson(Object x) throws JsonProcessingException {
-    return x == null || x instanceof Bson ? (Bson) x
-        : BasicDBObject.parse(EOW.writeValueAsString(x));
+  public static Bson toBson(final Object object, final boolean extended)
+      throws JsonProcessingException {
+    return object == null || object instanceof Bson ? (Bson) object
+        : BasicDBObject.parse(EOW.writeValueAsString((extended ? extended(object) : object)));
   }
 
   /**
-   * Convert the given collection directly to a BSON type object list.
+   * Convert the given collection to a BSON type object list directly.
+   * <p>
+   * NOTE: If the element of the given collection is {@link Bson} instance, the method returns the
+   * object directly.
    *
-   * @param x the collection to be converted.
+   * @param collection the collection to be converted.
+   * @param extended whether convert the given object to "Extended JSON" before conversion
    * @return a BSON object list
    * @throws JsonProcessingException if error occurred.
    *
-   * @see #toBson(Object)
+   * @see #toBson(Object,boolean)
    */
-  public static List<Bson> toBsons(Collection<?> x) throws JsonProcessingException {
-    if (x == null) {
+  public static List<Bson> toBsons(final Collection<?> collection, final boolean extended)
+      throws JsonProcessingException {
+    if (collection == null) {
       return null;
     } else {
-      List<Bson> list = new ArrayList<>(x.size());
-      for (Object o : x) {
-        list.add(toBson(o));
+      List<Bson> list = new ArrayList<>(collection.size());
+      for (Object o : collection) {
+        list.add(toBson(o, extended));
       }
       return list;
     }
   }
 
   /**
-   * Convert the given object array directly to a BSON type object list.
+   * Convert the given object array to a BSON type object list directly.
+   * <p>
+   * NOTE: If the element of the given array is {@link Bson} instance, the method returns the object
+   * directly.
    *
-   * @param x the object array to be converted.
+   * @param array the object array to be converted.
+   * @param extended whether convert the given object to "Extended JSON" before conversion
    * @return a BSON object list
    * @throws JsonProcessingException if error occurred.
    *
-   * @see #toBson(Object)
+   * @see #toBson(Object,boolean)
    */
-  public static List<Bson> toBsons(Object[] x) throws JsonProcessingException {
-    if (x == null) {
+  public static List<Bson> toBsons(final Object[] array, final boolean extended)
+      throws JsonProcessingException {
+    if (array == null) {
       return null;
     } else {
-      List<Bson> list = new ArrayList<>(x.length);
-      for (Object o : x) {
-        list.add(toBson(o));
+      List<Bson> list = new ArrayList<>(array.length);
+      for (Object o : array) {
+        list.add(toBson(o, extended));
       }
       return list;
-    }
-  }
-
-  /**
-   * Convert the given map object to extended JSON string.
-   *
-   * @param map the map to be convert
-   * @return the extended JSON string
-   */
-  public static String toExtendedJson(Map<?, ?> map) {
-    try {
-      return map == null ? null : EOW.writeValueAsString(map);
-    } catch (JsonProcessingException e) {
-      throw new CorantRuntimeException(e);
     }
   }
 }

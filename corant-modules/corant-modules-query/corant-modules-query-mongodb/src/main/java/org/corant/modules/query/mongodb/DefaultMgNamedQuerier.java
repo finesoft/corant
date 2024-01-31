@@ -116,12 +116,13 @@ public class DefaultMgNamedQuerier
             }
           }
           try {
+            // We assume that all extended JSON have been processed in the given script
             if (x instanceof Collection) {
-              script.put(mgo, Bsons.toBsons((Collection<?>) x));
+              script.put(mgo, Bsons.toBsons((Collection<?>) x, false));
             } else if (x != null && x.getClass().isArray()) {
-              script.put(mgo, Bsons.toBsons(wrapArray(x)));
+              script.put(mgo, Bsons.toBsons(wrapArray(x), false));
             } else {
-              script.put(mgo, Bsons.toBson(x));
+              script.put(mgo, Bsons.toBson(x, false));
             }
           } catch (Exception e) {
             throw new QueryRuntimeException(e);

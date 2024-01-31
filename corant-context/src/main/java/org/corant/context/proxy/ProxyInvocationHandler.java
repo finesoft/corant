@@ -16,7 +16,6 @@ package org.corant.context.proxy;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,16 +35,22 @@ public class ProxyInvocationHandler implements InvocationHandler {
   protected final Class<?> clazz;
   protected final Map<Method, MethodInvoker> invokers;
 
+  /**
+   * Construct a proxy invocation handler by given class and method invoker builder
+   *
+   * @param clazz the proxy class
+   * @param invokerBuilder the proxy method invoker builder, used to build proxy method invoker, if
+   *        the method doesn't need a proxy or can't be proxied, then return null.
+   */
   public ProxyInvocationHandler(final Class<?> clazz,
       final Function<Method, MethodInvoker> invokerBuilder) {
     this.clazz = shouldNotNull(clazz);
     Map<Method, MethodInvoker> methodInvokers = new HashMap<>();
     for (Method method : clazz.getMethods()) {
-      if (method.isDefault() || method.isBridge() || Modifier.isStatic(method.getModifiers())) {
-        // TODO consider the bridge method "change" visibility of base class's methods ??
-        continue;
+      MethodInvoker methodInvoker = invokerBuilder.apply(method);
+      if (methodInvoker != null) {
+        methodInvokers.put(method, methodInvoker);
       }
-      methodInvokers.put(method, invokerBuilder.apply(method));
     }
     invokers = Collections.unmodifiableMap(methodInvokers);
   }

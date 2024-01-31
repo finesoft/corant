@@ -21,13 +21,13 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.corant.modules.mongodb.MongoExtendedJsons;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mongodb.MgNamedQuerier.MgOperator;
-import org.corant.modules.query.mongodb.converter.Bsons;
 import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
 
 /**
@@ -44,14 +44,6 @@ public class DefaultMgNamedQuerier
   protected final String originalScript;
   protected MgOperator rootOperator;
 
-  /**
-   * @param query
-   * @param queryParameter
-   * @param queryResolver
-   * @param fetchQueryResolver
-   * @param mgQuery
-   * @param originalScript
-   */
   protected DefaultMgNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Map<?, ?> mgQuery,
       String originalScript) {
@@ -115,12 +107,13 @@ public class DefaultMgNamedQuerier
             }
           }
           try {
+            // We assume that all extended JSON have been processed in the given script
             if (x instanceof Collection) {
-              script.put(mgo, Bsons.toBsons((Collection<?>) x));
+              script.put(mgo, MongoExtendedJsons.toBsons((Collection<?>) x, false));
             } else if (x != null && x.getClass().isArray()) {
-              script.put(mgo, Bsons.toBsons(wrapArray(x)));
+              script.put(mgo, MongoExtendedJsons.toBsons(wrapArray(x), false));
             } else {
-              script.put(mgo, Bsons.toBson(x));
+              script.put(mgo, MongoExtendedJsons.toBson(x, false));
             }
           } catch (Exception e) {
             throw new QueryRuntimeException(e);

@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.mongodb;
 
-import static org.corant.modules.query.mongodb.converter.Bsons.EXTJSON_CONVERTERS;
+import static org.corant.modules.mongodb.MongoExtendedJsons.EXTJSON_CONVERTERS;
 import static org.corant.shared.util.Classes.getComponentClass;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Empties.isEmpty;

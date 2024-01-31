@@ -19,8 +19,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultBlank;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Modifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.Any;
@@ -39,17 +38,19 @@ import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Configurations;
+import org.corant.shared.util.Iterables;
 
 /**
  * corant-modules-query-shared
- *
- * Unfinish yet
+ * <p>
+ * Unfinished yet
  *
  * @author bingo 下午2:03:58
  */
 public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 
-  static final Map<Method, MethodInvoker> methodInvokers = new ConcurrentHashMap<>();
+  static final boolean useDeclaredMethod =
+      Configs.getValue("corant.query.declarative.use-declared-method", Boolean.TYPE, false);
 
   final Class<?> proxyType;
 
@@ -73,11 +74,6 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
             .map(QueryTypeQualifier.class::cast).findAny().orElse(null);
     return ProxyBuilder.buildContextual(beanManager, proxyType,
         m -> getExecution(m, queryTypeQualifier));
-  }
-
-  @Override
-  public void destroy(Object instance, CreationalContext<Object> creationalContext) {
-    methodInvokers.clear();
   }
 
   @Override
@@ -123,11 +119,17 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
   }
 
   MethodInvoker getExecution(Method method, QueryTypeQualifier queryTypeQualifier) {
-    if (queryTypeQualifier != null) {
-      // don't cache
-      return createExecution(method, queryTypeQualifier);
+    // TODO consider the bridge method "change" visibility of base class's methods ??
+    if (!method.isDefault() && !method.isBridge() && !Modifier.isStatic(method.getModifiers())) {
+      if (useDeclaredMethod) {
+        if (Iterables.search(proxyType.getDeclaredMethods(), method) >= 0) {
+          return createExecution(method, queryTypeQualifier);
+        }
+      } else {
+        return createExecution(method, queryTypeQualifier);
+      }
     }
-    return methodInvokers.computeIfAbsent(method, m -> createExecution(m, null));
+    return null;
   }
 
   @SuppressWarnings("rawtypes")

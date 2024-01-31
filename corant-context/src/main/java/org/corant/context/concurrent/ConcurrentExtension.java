@@ -30,6 +30,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.concurrent.ContextService;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
@@ -47,9 +49,6 @@ import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.WithAnnotations;
 import jakarta.interceptor.Interceptor;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.corant.config.Configs;
 import org.corant.context.concurrent.ContextServiceConfig.ContextInfo;
 import org.corant.context.concurrent.annotation.Asynchronous;
@@ -343,7 +342,7 @@ public class ConcurrentExtension implements Extension {
       for (Class<?> clazz : asyncBeanClass) {
         Asynchronous clazzAsync = clazz.getAnnotation(Asynchronous.class);
         for (Method m : clazz.getMethods()) {
-          if (Modifier.isPublic(m.getModifiers())) {
+          if (Modifier.isPublic(m.getModifiers()) && !m.isBridge()) {
             Asynchronous methodAsync =
                 defaultObject(m.getAnnotation(Asynchronous.class), clazzAsync);
             if (methodAsync != null) {

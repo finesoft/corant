@@ -143,6 +143,15 @@ public class Mongos {
         destGridFSBucketName, null, batchSize);
   }
 
+  public static MongoClient resolveClient(String uri) {
+    if (isNotBlank(uri) && (uri.startsWith("mongodb+srv://") || uri.startsWith("mongodb://"))) {
+      ConnectionString cs = new ConnectionString(uri);
+      return MongoClients.create(cs);
+    } else {
+      return null;
+    }
+  }
+
   public static MongoDatabase resolveDatabase(String database) {
     if (isNotBlank(database)
         && (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://"))) {

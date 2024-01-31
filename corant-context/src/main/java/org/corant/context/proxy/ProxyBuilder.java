@@ -31,11 +31,11 @@ public class ProxyBuilder {
   /**
    * Build normal Interface-based dynamic proxy instance.
    *
-   *
    * @param <T> interface type
    * @param interfaceType interface for the proxy class to implement
-   * @param invokerHandler the invocation handler creator, used to create concrete implementation
-   *        from a method.
+   * @param invokerBuilder the invocation handler builder, used to create concrete implementation
+   *        from a method, if builder return null means that the method doesn't need a proxy or can't
+   *        be proxied.
    * @return a dynamic proxy instance for the specified interface that dispatches method invocations
    *         to the specified invocation handler.
    *
@@ -43,9 +43,9 @@ public class ProxyBuilder {
    */
   @SuppressWarnings("unchecked")
   public static <T> T build(final Class<?> interfaceType,
-      final Function<Method, MethodInvoker> invokerHandler) {
+      final Function<Method, MethodInvoker> invokerBuilder) {
     return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] {interfaceType},
-        new ProxyInvocationHandler(interfaceType, invokerHandler));
+        new ProxyInvocationHandler(interfaceType, invokerBuilder));
   }
 
   /**
@@ -54,8 +54,9 @@ public class ProxyBuilder {
    * @param <T> interface type
    * @param beanManager bean manager for contextual bean handling
    * @param interfaceType interface for the proxy class to implement
-   * @param invokerHandler the invocation handler creator, used to create concrete implementation
-   *        from a method.
+   * @param invokerBuilder the invocation handler builder, used to create concrete implementation
+   *        from a method, if builder return null means that the method doesn't need a proxy or can't
+   *        be proxied.
    * @return a dynamic proxy contextual instance for the specified interface that dispatches method
    *         invocations to the specified invocation handler.
    *
@@ -63,9 +64,9 @@ public class ProxyBuilder {
    */
   @SuppressWarnings("unchecked")
   public static <T> T buildContextual(final BeanManager beanManager, final Class<?> interfaceType,
-      final Function<Method, MethodInvoker> invokerHandler) {
+      final Function<Method, MethodInvoker> invokerBuilder) {
     return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[] {interfaceType},
-        new ContextualInvocationHandler(beanManager, interfaceType, invokerHandler));
+        new ContextualInvocationHandler(beanManager, interfaceType, invokerBuilder));
   }
 
   /**

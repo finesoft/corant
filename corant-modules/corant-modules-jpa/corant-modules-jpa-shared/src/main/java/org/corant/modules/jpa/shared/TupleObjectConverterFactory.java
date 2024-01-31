@@ -157,6 +157,9 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
         constructor.setAccessible(true);
         List<Field> fields = Fields.getAllFields(pojoClass);
         for (Method method : pojoClass.getMethods()) {
+          if (method.isBridge()) {
+            continue;
+          }
           method.setAccessible(true);
           String name = method.getName();
           Class<?>[] parameterTypes = method.getParameterTypes();

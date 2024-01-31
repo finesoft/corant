@@ -23,35 +23,38 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Lists.listOf;
-import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.time.Duration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.corant.modules.mongodb.MongoExtendedJsons;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryService.Forwarding;
 import org.corant.modules.query.QueryService.Paging;
-import org.corant.modules.query.mongodb.converter.Bsons;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.BasicDBObject;
+import com.mongodb.CursorType;
+import com.mongodb.ExplainVerbosity;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Collation;
 import net.jcip.annotations.NotThreadSafe;
 
 /**
@@ -70,10 +73,26 @@ public class MgQueryTemplate {
   protected Bson max;
   protected Bson min;
   protected Bson hint;
-  protected List<Bson> aggregate;
+  protected List<Bson> aggregatePipeline;
   protected int limit = 1;
   protected int offset = 0;
   protected boolean autoSetIdField = true;
+
+  protected Boolean bypassDocumentValidation;
+  protected Collation collation;
+  protected Duration maxTime;
+  protected Duration maxAwaitTime;
+  protected Boolean partial;
+  protected CursorType cursorType;
+  protected Integer batchSize;
+  protected BsonValue comment;
+  protected Bson variables;
+  protected Boolean returnKey;
+  protected Boolean showRecordId;
+  protected Boolean allowDiskUse;
+  protected Boolean noCursorTimeout;
+  protected ExplainVerbosity explainVerbosity;
+  protected Class<?> explainResultClass;
 
   private MgQueryTemplate(MongoDatabase database) {
     this.database = shouldNotNull(database);
@@ -97,23 +116,65 @@ public class MgQueryTemplate {
   }
 
   public List<Map<?, ?>> aggregate() {
-    AggregateIterable<Document> ai = database.getCollection(collection).aggregate(aggregate);
-    return streamOf(ai).map(this::convert).collect(Collectors.toList());
+    AggregateIterable<Document> ai =
+        database.getCollection(collection).aggregate(aggregatePipeline);
+    if (collation != null) {
+      ai.collation(collation);
+    }
+    if (maxTime != null) {
+      ai.maxTime(maxTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (maxAwaitTime != null) {
+      ai.maxAwaitTime(maxAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (batchSize != null) {
+      ai.batchSize(batchSize);
+    }
+    if (comment != null) {
+      ai.comment(comment);
+    }
+    if (variables != null) {
+      ai.let(variables);
+    }
+    if (hint != null) {
+      ai.hint(hint);
+    }
+    if (bypassDocumentValidation != null) {
+      ai.bypassDocumentValidation(bypassDocumentValidation);
+    }
+    if (allowDiskUse != null) {
+      ai.allowDiskUse(allowDiskUse);
+    }
+    if (explainVerbosity != null) {
+      ai.explain(explainVerbosity);
+    }
+    if (explainResultClass != null) {
+      ai.explain(explainResultClass);
+    }
+    try (MongoCursor<Document> cursor = ai.iterator()) {
+      return streamOf(cursor).onClose(cursor::close).map(this::convert)
+          .collect(Collectors.toList());
+    }
   }
 
-  public MgQueryTemplate aggregate(Bson... pipeline) {
-    aggregate = shouldNotEmpty(listOf(pipeline));
+  public MgQueryTemplate aggregatePipeline(Bson... pipeline) {
+    aggregatePipeline = shouldNotEmpty(listOf(pipeline));
     return this;
   }
 
-  public MgQueryTemplate aggregate(List<Map<?, ?>> aggregate) {
-    this.aggregate = shouldNotEmpty(aggregate).stream().map(a -> {
+  public MgQueryTemplate aggregatePipeline(List<Map<?, ?>> pipeline) {
+    aggregatePipeline = shouldNotEmpty(pipeline).stream().map(a -> {
       try {
-        return Bsons.toBson(a);
+        return MongoExtendedJsons.toBson(a, true);
       } catch (JsonProcessingException e) {
         throw new QueryRuntimeException(e);
       }
     }).collect(Collectors.toList());
+    return this;
+  }
+
+  public MgQueryTemplate allowDiskUse(Boolean allowDiskUse) {
+    this.allowDiskUse = allowDiskUse;
     return this;
   }
 
@@ -122,8 +183,31 @@ public class MgQueryTemplate {
     return this;
   }
 
+  public MgQueryTemplate batchSize(Integer batchSize) {
+    this.batchSize = batchSize;
+    return this;
+  }
+
+  /**
+   * @see AggregateIterable#bypassDocumentValidation(Boolean)
+   */
+  public MgQueryTemplate bypassDocumentValidation(Boolean bypassDocumentValidation) {
+    this.bypassDocumentValidation = bypassDocumentValidation;
+    return this;
+  }
+
+  public MgQueryTemplate collation(Collation collation) {
+    this.collation = collation;
+    return this;
+  }
+
   public MgQueryTemplate collection(String collection) {
     this.collection = shouldNotNull(collection);
+    return this;
+  }
+
+  public MgQueryTemplate comment(BsonValue comment) {
+    this.comment = comment;
     return this;
   }
 
@@ -135,21 +219,29 @@ public class MgQueryTemplate {
     return mc.countDocuments();
   }
 
+  public MgQueryTemplate cursorType(CursorType cursorType) {
+    this.cursorType = cursorType;
+    return this;
+  }
+
+  public MgQueryTemplate explainResultClass(Class<?> explainResultClass) {
+    this.explainResultClass = explainResultClass;
+    return this;
+  }
+
+  public MgQueryTemplate explainVerbosity(ExplainVerbosity explainVerbosity) {
+    this.explainVerbosity = explainVerbosity;
+    return this;
+  }
+
   public MgQueryTemplate filter(Bson filter) {
     this.filter = shouldNotNull(filter);
     return this;
   }
 
-  public MgQueryTemplate filter(Map<?, ?> filter) {
-    return filter(parse(defaultObject(filter, HashMap::new)));
-  }
-
   @Experimental
-  public MgQueryTemplate filterx(Map<?, ?> filter) {
-    if (filter != null) {
-      this.filter = BasicDBObject.parse(Bsons.toExtendedJson(defaultObject(filter, HashMap::new)));
-    }
-    return this;
+  public MgQueryTemplate filter(Map<?, ?> filter) {
+    return filter(parse(filter, true));
   }
 
   public Forwarding<Map<?, ?>> forward() {
@@ -183,8 +275,9 @@ public class MgQueryTemplate {
   }
 
   public Map<?, ?> get() {
-    Iterator<Document> it = query().limit(1).iterator();
-    return it.hasNext() ? convert(it.next()) : null;
+    try (MongoCursor<Document> it = query().limit(1).iterator()) {
+      return it.hasNext() ? convert(it.next()) : null;
+    }
   }
 
   public <T> T getAs(final Class<T> clazz) {
@@ -197,12 +290,12 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate hint(Bson hint) {
-    this.hint = shouldNotNull(hint);
+    this.hint = hint;
     return this;
   }
 
   public MgQueryTemplate hint(Map<?, ?> hint) {
-    return hint(parse(defaultObject(hint, HashMap::new)));
+    return hint(parse(hint, false));
   }
 
   /**
@@ -210,9 +303,6 @@ public class MgQueryTemplate {
    * iteration of the streaming query
    *
    * @see QueryParameter#getLimit()
-   *
-   * @param limit
-   * @return limit
    */
   public MgQueryTemplate limit(int limit) {
     this.limit = Objects.max(limit, 1);
@@ -220,21 +310,31 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate max(Bson max) {
-    this.max = shouldNotNull(max);
+    this.max = max;
     return this;
   }
 
   public MgQueryTemplate max(Map<?, ?> max) {
-    return max(parse(defaultObject(max, HashMap::new)));
+    return max(parse(max, false));
+  }
+
+  public MgQueryTemplate maxAwaitTime(Duration maxAwaitTime) {
+    this.maxAwaitTime = maxAwaitTime;
+    return this;
+  }
+
+  public MgQueryTemplate maxTime(Duration maxTime) {
+    this.maxTime = maxTime;
+    return this;
   }
 
   public MgQueryTemplate min(Bson min) {
-    this.min = shouldNotNull(min);
+    this.min = min;
     return this;
   }
 
   public MgQueryTemplate min(Map<?, ?> min) {
-    return min(parse(defaultObject(min, HashMap::new)));
+    return min(parse(min, false));
   }
 
   public MgQueryTemplate offset(int offset) {
@@ -280,6 +380,11 @@ public class MgQueryTemplate {
     }
   }
 
+  public MgQueryTemplate partial(Boolean partial) {
+    this.partial = partial;
+    return this;
+  }
+
   public MgQueryTemplate projection(boolean include, String... propertyNames) {
     if (include) {
       return projection(propertyNames, Strings.EMPTY_ARRAY);
@@ -289,12 +394,12 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate projection(Bson projection) {
-    this.projection = shouldNotNull(projection);
+    this.projection = projection;
     return this;
   }
 
   public MgQueryTemplate projection(Map<?, ?> projection) {
-    return projection(parse(defaultObject(projection, HashMap::new)));
+    return projection(parse(projection, false));
   }
 
   public MgQueryTemplate projection(String[] includePropertyNames, String[] excludePropertyNames) {
@@ -319,8 +424,15 @@ public class MgQueryTemplate {
     return this;
   }
 
+  public MgQueryTemplate returnKey(Boolean returnKey) {
+    this.returnKey = returnKey;
+    return this;
+  }
+
   public List<Map<?, ?>> select() {
-    return streamOf(query()).map(this::convert).collect(Collectors.toList());
+    try (MongoCursor<Document> it = query().iterator()) {
+      return streamOf(it).map(this::convert).collect(Collectors.toList());
+    }
   }
 
   public <T> List<T> selectAs(final Class<T> clazz) {
@@ -328,7 +440,14 @@ public class MgQueryTemplate {
   }
 
   public <T> List<T> selectAs(final Function<Object, T> converter) {
-    return streamOf(query()).map(this::convert).map(converter).collect(Collectors.toList());
+    try (MongoCursor<Document> it = query().iterator()) {
+      return streamOf(it).map(this::convert).map(converter).collect(Collectors.toList());
+    }
+  }
+
+  public MgQueryTemplate showRecordId(Boolean showRecordId) {
+    this.showRecordId = showRecordId;
+    return this;
   }
 
   public <T> T single(final Class<T> clazz) {
@@ -343,19 +462,30 @@ public class MgQueryTemplate {
     }
   }
 
+  public <T> List<T> singles(final Class<T> clazz) {
+    List<Map<?, ?>> result = select();
+    if (isEmpty(result)) {
+      return null;
+    } else {
+      return result.stream().map(m -> m.entrySet().iterator().next().getValue())
+          .map(r -> toObject(r, clazz)).toList();
+    }
+  }
+
   public MgQueryTemplate sort(Bson sort) {
-    this.sort = shouldNotNull(sort);
+    this.sort = sort;
     return this;
   }
 
   public MgQueryTemplate sort(Map<?, ?> sort) {
-    return sort(parse(defaultObject(sort, HashMap::new)));
+    return sort(parse(sort, false));
   }
 
   @SuppressWarnings("rawtypes")
   public Stream<Map<?, ?>> stream() {
-    limit = 0;// NO LIMIT
-    return streamOf(query()).map(this::convert).map(r -> (Map) r);
+    limit = 0; // NO LIMIT
+    final MongoCursor<Document> it = query().iterator();
+    return streamOf(it).onClose(it::close).map(this::convert).map(r -> (Map) r);
   }
 
   public <T> Stream<T> streamAs(final Class<T> clazz) {
@@ -363,8 +493,18 @@ public class MgQueryTemplate {
   }
 
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
-    limit = 0;// NO LIMIT
-    return streamOf(query()).map(this::convert).map(converter);
+    limit = 0; // NO LIMIT
+    final MongoCursor<Document> it = query().iterator();
+    return streamOf(it).onClose(it::close).map(this::convert).map(converter);
+  }
+
+  public MgQueryTemplate variables(Bson variables) {
+    this.variables = variables;
+    return this;
+  }
+
+  public MgQueryTemplate variables(Map<?, ?> variables) {
+    return variables(parse(variables, false));
   }
 
   protected Map<?, ?> convert(Document doc) {
@@ -374,9 +514,9 @@ public class MgQueryTemplate {
     return doc;
   }
 
-  protected Bson parse(Object object) {
+  protected Bson parse(Object object, boolean extended) {
     try {
-      return Bsons.toBson(object);
+      return MongoExtendedJsons.toBson(object, extended);
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);
     }
@@ -385,22 +525,22 @@ public class MgQueryTemplate {
   protected FindIterable<Document> query() {
     MongoCollection<Document> mc = database.getCollection(collection);
     FindIterable<Document> fi = mc.find();
-    if (isNotEmpty(filter)) {
+    if (filter != null) {
       fi.filter(filter);
     }
-    if (isNotEmpty(min)) {
+    if (min != null) {
       fi.min(min);
     }
-    if (isNotEmpty(max)) {
+    if (max != null) {
       fi.max(max);
     }
-    if (isNotEmpty(hint)) {
+    if (hint != null) {
       fi.hint(hint);
     }
-    if (isNotEmpty(sort)) {
+    if (sort != null) {
       fi.sort(sort);
     }
-    if (isNotEmpty(projection)) {
+    if (projection != null) {
       fi.projection(projection);
     }
     if (limit > 0) {
@@ -408,6 +548,48 @@ public class MgQueryTemplate {
     }
     if (offset > 0) {
       fi.skip(offset);
+    }
+    if (collation != null) {
+      fi.collation(collation);
+    }
+    if (maxTime != null) {
+      fi.maxTime(maxTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (maxAwaitTime != null) {
+      fi.maxAwaitTime(maxAwaitTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (partial != null) {
+      fi.partial(partial);
+    }
+    if (cursorType != null) {
+      fi.cursorType(cursorType);
+    }
+    if (batchSize != null) {
+      fi.batchSize(batchSize);
+    }
+    if (comment != null) {
+      fi.comment(comment);
+    }
+    if (variables != null) {
+      fi.let(variables);
+    }
+    if (returnKey != null) {
+      fi.returnKey(returnKey);
+    }
+    if (showRecordId != null) {
+      fi.showRecordId(showRecordId);
+    }
+    if (allowDiskUse != null) {
+      fi.allowDiskUse(allowDiskUse);
+    }
+    if (noCursorTimeout != null) {
+      fi.noCursorTimeout(noCursorTimeout);
+    }
+    if (explainVerbosity != null) {
+      fi.explain(explainVerbosity);
+    }
+    if (explainResultClass != null) {
+      fi.explain(explainResultClass);
     }
     return fi;
   }

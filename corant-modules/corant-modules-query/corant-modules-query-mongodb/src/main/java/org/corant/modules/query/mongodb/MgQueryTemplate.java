@@ -202,7 +202,7 @@ public class MgQueryTemplate {
   }
 
   public MgQueryTemplate filter(Bson filter) {
-    this.filter = shouldNotNull(filter);
+    this.filter = filter;
     return this;
   }
 

@@ -15,7 +15,7 @@
 		<version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
 		<version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
 		<version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
-		<version.aliyun-sdk-oss>3.9.1</version.aliyun-sdk-oss>
+		<version.aliyun-sdk-oss>3.17.4</version.aliyun-sdk-oss>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
 		<version.apache-poi>5.2.3</version.apache-poi>
 		<version.apache-bcel>6.7.0</version.apache-bcel>

@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,11 +42,15 @@ import org.corant.modules.json.Jsons;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Objects;
+import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
+import com.mongodb.ServerCursor;
 import com.mongodb.WriteConcern;
 import com.mongodb.annotations.NotThreadSafe;
 import com.mongodb.client.AggregateIterable;
@@ -816,7 +822,11 @@ public class MongoTemplate {
       this.tpl = tpl;
     }
 
-    public List<Map<?, ?>> aggregate() {
+    /**
+     * Aggregates documents according to the specified aggregation pipeline and the specified
+     * {@link AggregateIterable} arguments
+     */
+    public List<Map<String, Object>> aggregate() {
       ClientSession session = obtainSession();
       AggregateIterable<Document> ai = session == null ? obtainCollection().aggregate(pipeline)
           : obtainCollection().aggregate(session, pipeline);
@@ -858,70 +868,116 @@ public class MongoTemplate {
       }
     }
 
+    /**
+     * @see AggregateIterable#allowDiskUse(Boolean)
+     */
     public MongoAggregator allowDiskUse(Boolean allowDiskUse) {
       this.allowDiskUse = allowDiskUse;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#batchSize(int)
+     */
     public MongoAggregator batchSize(Integer batchSize) {
       this.batchSize = batchSize;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#bypassDocumentValidation(Boolean)
+     */
     public MongoAggregator bypassDocumentValidation(Boolean bypassDocumentValidation) {
       this.bypassDocumentValidation = bypassDocumentValidation;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#collation(Collation)
+     */
     public MongoAggregator collation(Collation collation) {
       this.collation = collation;
       return this;
     }
 
+    /**
+     * Set the collection name
+     *
+     * @param collectionName the collection name
+     */
     public MongoAggregator collectionName(String collectionName) {
       this.collectionName = shouldNotNull(collectionName);
       return this;
     }
 
+    /**
+     * @see AggregateIterable#comment(BsonValue)
+     */
     public MongoAggregator comment(BsonValue comment) {
       this.comment = comment;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#explain(Class)
+     */
     public MongoAggregator explainResultClass(Class<?> explainResultClass) {
       this.explainResultClass = explainResultClass;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#explain(Class, ExplainVerbosity)
+     */
     public MongoAggregator explainVerbosity(ExplainVerbosity explainVerbosity) {
       this.explainVerbosity = explainVerbosity;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#hint(Bson)
+     */
     public MongoAggregator hint(Bson hint) {
       this.hint = hint;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#hint(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoAggregator hint(Map<?, ?> hint) {
       return hint(parse(hint, false));
     }
 
+    /**
+     * @see AggregateIterable#maxAwaitTime(long, TimeUnit)
+     */
     public MongoAggregator maxAwaitTime(Duration maxAwaitTime) {
       this.maxAwaitTime = maxAwaitTime;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#maxTime(long, TimeUnit)
+     */
     public MongoAggregator maxTime(Duration maxTime) {
       this.maxTime = maxTime;
       return this;
     }
 
+    /**
+     * @see MongoCollection#aggregate(List)
+     */
     public MongoAggregator pipeline(Bson... pipeline) {
       this.pipeline = shouldNotEmpty(listOf(pipeline));
       return this;
     }
 
+    /**
+     * @see MongoCollection#aggregate(List)
+     * @see MongoExtendedJsons#toBsons(java.util.Collection, boolean)
+     */
     public MongoAggregator pipeline(List<Map<?, ?>> pipeline) {
       this.pipeline = shouldNotEmpty(pipeline).stream().map(a -> {
         try {
@@ -933,11 +989,18 @@ public class MongoTemplate {
       return this;
     }
 
+    /**
+     * @see AggregateIterable#let(Bson)
+     */
     public MongoAggregator variables(Bson variables) {
       this.variables = variables;
       return this;
     }
 
+    /**
+     * @see AggregateIterable#let(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoAggregator variables(Map<?, ?> variables) {
       return variables(parse(variables, false));
     }
@@ -966,7 +1029,7 @@ public class MongoTemplate {
     protected Bson min;
     protected Bson hint;
     protected int limit = 1;
-    protected int offset = 0;
+    protected int skip = 0;
     protected boolean autoSetIdField = true;
     protected Collation collation;
     protected Duration maxTime;
@@ -987,36 +1050,64 @@ public class MongoTemplate {
       this.tpl = tpl;
     }
 
+    /**
+     * @see FindIterable#allowDiskUse(Boolean)
+     */
     public MongoQuery allowDiskUse(Boolean allowDiskUse) {
       this.allowDiskUse = allowDiskUse;
       return this;
     }
 
+    /**
+     * Whether to append 'id' property whose value is derived from the existing "_id" property.
+     *
+     * @param autoSetIdField whether to append
+     */
     public MongoQuery autoSetIdField(boolean autoSetIdField) {
       this.autoSetIdField = autoSetIdField;
       return this;
     }
 
+    /**
+     * @see FindIterable#batchSize(int)
+     */
     public MongoQuery batchSize(Integer batchSize) {
       this.batchSize = batchSize;
+      if (this.batchSize != null && this.batchSize < 1) {
+        this.batchSize = 1;
+      }
       return this;
     }
 
+    /**
+     * @see FindIterable#collation(Collation)
+     */
     public MongoQuery collation(Collation collation) {
       this.collation = collation;
       return this;
     }
 
+    /**
+     * Set the name of the collection which will be queried.
+     *
+     * @param collectionName the collection name
+     */
     public MongoQuery collectionName(String collectionName) {
       this.collectionName = shouldNotNull(collectionName);
       return this;
     }
 
+    /**
+     * @see FindIterable#comment(BsonValue)
+     */
     public MongoQuery comment(BsonValue comment) {
       this.comment = comment;
       return this;
     }
 
+    /**
+     * Counts the number of documents in the collection according to the given options.
+     */
     public long countDocuments() {
       MongoCollection<Document> mc = obtainCollection();
       if (isNotEmpty(filter)) {
@@ -1025,26 +1116,43 @@ public class MongoTemplate {
       return mc.countDocuments();
     }
 
+    /**
+     * @see FindIterable#cursorType(CursorType)
+     */
     public MongoQuery cursorType(CursorType cursorType) {
       this.cursorType = cursorType;
       return this;
     }
 
+    /**
+     * @see FindIterable#explain(Class)
+     */
     public MongoQuery explainResultClass(Class<?> explainResultClass) {
       this.explainResultClass = explainResultClass;
       return this;
     }
 
+    /**
+     * @see FindIterable#explain(ExplainVerbosity)
+     */
     public MongoQuery explainVerbosity(ExplainVerbosity explainVerbosity) {
       this.explainVerbosity = explainVerbosity;
       return this;
     }
 
+    /**
+     * @see FindIterable#filter(Bson)
+     */
     public MongoQuery filter(Bson filter) {
       this.filter = filter;
       return this;
     }
 
+    /**
+     * @see FindIterable#filter(Bson)
+     * @see MongoExtendedJsons#extended(Object)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery filter(Map<?, ?> filter) {
       if (filter != null) {
         this.filter = parse(filter, true);
@@ -1052,100 +1160,186 @@ public class MongoTemplate {
       return this;
     }
 
-    public List<Map<?, ?>> find() {
+    /**
+     * Return a list of documents in the collection according to the given options.
+     */
+    public List<Map<String, Object>> find() {
       try (MongoCursor<Document> it = query().iterator()) {
         return streamOf(it).map(this::convert).collect(Collectors.toList());
       }
     }
 
+    /**
+     * Return a list of objects in the collection according to the given options.
+     *
+     * @param <T> the type to which the document is to be converted
+     * @param clazz the class to which the document is to be converted
+     */
     public <T> List<T> findAs(final Class<T> clazz) {
       return findAs(t -> Jsons.convert(t, clazz));
     }
 
+    /**
+     * Return a list of objects in the collection according to the given options.
+     *
+     * @param <T> the object type
+     * @param converter the converter use for document conversion
+     */
     public <T> List<T> findAs(final Function<Object, T> converter) {
       try (MongoCursor<Document> it = query().iterator()) {
         return streamOf(it).map(this::convert).map(converter).collect(Collectors.toList());
       }
     }
 
+    /**
+     * Return the document in the collection according to the given options.
+     */
     public Map<String, Object> findOne() {
       try (MongoCursor<Document> it = query().limit(1).iterator()) {
         return it.hasNext() ? it.next() : null;
       }
     }
 
+    /**
+     * Return the object in the collection according to the given options.
+     *
+     * @param <T> the type to which the document is to be converted
+     * @param type the class to which the document is to be converted
+     */
     public <T> T findOne(Class<T> type) {
       try (MongoCursor<Document> it = query().limit(1).iterator()) {
         return it.hasNext() ? Jsons.convert(it.next(), type) : null;
       }
     }
 
+    /**
+     * @see FindIterable#hint(Bson)
+     */
     public MongoQuery hint(Bson hint) {
       this.hint = hint;
       return this;
     }
 
+    /**
+     * @see FindIterable#hint(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery hint(Map<?, ?> hint) {
       return hint(parse(hint, false));
     }
 
+    /**
+     * Limit the result size, default is 1. If the given limit <= 0 means don't limit the result
+     * size.
+     *
+     * @param limit the result size.
+     */
     public MongoQuery limit(int limit) {
-      this.limit = Objects.max(limit, 1);
+      this.limit = limit;
       return this;
     }
 
+    /**
+     * @see FindIterable#max(Bson)
+     */
     public MongoQuery max(Bson max) {
       this.max = max;
       return this;
     }
 
+    /**
+     * @see FindIterable#max(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery max(Map<?, ?> max) {
       return max(parse(max, false));
     }
 
+    /**
+     * @see FindIterable#maxAwaitTime(long, TimeUnit)
+     */
     public MongoQuery maxAwaitTime(Duration maxAwaitTime) {
       this.maxAwaitTime = maxAwaitTime;
       return this;
     }
 
+    /**
+     * @see FindIterable#maxTime(long, TimeUnit)
+     */
     public MongoQuery maxTime(Duration maxTime) {
       this.maxTime = maxTime;
       return this;
     }
 
+    /**
+     * @see FindIterable#min(Bson)
+     */
     public MongoQuery min(Bson min) {
       this.min = min;
       return this;
     }
 
+    /**
+     * @see FindIterable#min(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery min(Map<?, ?> min) {
       return min(parse(min, false));
     }
 
+    /**
+     * @see FindIterable#noCursorTimeout(boolean)
+     */
     public MongoQuery noCursorTimeout(Boolean noCursorTimeout) {
       this.noCursorTimeout = noCursorTimeout;
       return this;
     }
 
-    public MongoQuery offset(int offset) {
-      this.offset = Objects.max(offset, 0);
-      return this;
-    }
-
+    /**
+     * @see FindIterable#partial(boolean)
+     */
     public MongoQuery partial(Boolean partial) {
       this.partial = partial;
       return this;
     }
 
+    /**
+     * Set the projection
+     *
+     * @param include whether to project or not
+     * @param propertyNames the property names
+     * @see FindIterable#projection(Bson)
+     */
+    public MongoQuery projection(boolean include, String... propertyNames) {
+      if (include) {
+        return projection(propertyNames, Strings.EMPTY_ARRAY);
+      } else {
+        return projection(Strings.EMPTY_ARRAY, propertyNames);
+      }
+    }
+
+    /**
+     * @see FindIterable#projection(Bson)
+     */
     public MongoQuery projection(Bson projection) {
       this.projection = projection;
       return this;
     }
 
+    /**
+     * @see FindIterable#projection(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery projection(Map<?, ?> projection) {
       return projection(parse(projection, false));
     }
 
+    /**
+     * Set the projections
+     *
+     * @param includePropertyNames the include property names
+     * @param excludePropertyNames the exclude property names
+     */
     public MongoQuery projection(String[] includePropertyNames, String[] excludePropertyNames) {
       Map<String, Boolean> projections = new HashMap<>();
       if (includePropertyNames != null) {
@@ -1168,52 +1362,167 @@ public class MongoTemplate {
       return this;
     }
 
+    /**
+     * @see FindIterable#returnKey(boolean)
+     */
     public MongoQuery returnKey(Boolean returnKey) {
       this.returnKey = returnKey;
       return this;
     }
 
+    /**
+     * @see FindIterable#showRecordId(boolean)
+     */
     public MongoQuery showRecordId(Boolean showRecordId) {
       this.showRecordId = showRecordId;
       return this;
     }
 
+    /**
+     * @see FindIterable#comment(BsonValue)
+     */
     public MongoQuery simpleComment(Object comment) {
       this.comment = Bsons.toSimpleBsonValue(comment);
       return this;
     }
 
+    /**
+     * @see FindIterable#skip(int)
+     */
+    public MongoQuery skip(int skip) {
+      this.skip = Objects.max(skip, 0);
+      return this;
+    }
+
+    /**
+     * @see FindIterable#sort(Bson)
+     */
     public MongoQuery sort(Bson sort) {
       this.sort = sort;
       return this;
     }
 
+    /**
+     * @see FindIterable#sort(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery sort(Map<?, ?> sort) {
       return sort(parse(sort, false));
     }
 
-    @SuppressWarnings("rawtypes")
-    public Stream<Map<?, ?>> stream() {
-      limit = 0; // NO LIMIT
+    /**
+     * Return a stream of documents in the collection according to the given options.
+     * <p>
+     * Note: the result set size is limited by {@link #limit(int)}
+     */
+    public Stream<Map<String, Object>> stream() {
       MongoCursor<Document> it = query().iterator();
-      return streamOf(it).onClose(it::close).map(this::convert).map(r -> (Map) r);
+      return streamOf(it).onClose(it::close).map(this::convert);
     }
 
+    /**
+     * Return a stream of documents in the collection according to the given options, the stream may
+     * be terminated by the given terminator when met the conditions.
+     * <p>
+     * Note: <b> The size of the result set is not limited by {@link #limit(int)} but by the given
+     * {@code terminator}. </b>
+     *
+     * @param terminator the terminator use to terminate the stream when meet the conditions.
+     */
+    public Stream<Map<String, Object>> stream(
+        final BiFunction<Integer, Map<String, Object>, Boolean> terminator) {
+      limit = -1; // NO LIMIT
+      if (terminator == null) {
+        return stream();
+      }
+      final MongoCursor<Document> it = new MongoCursor<>() {
+
+        final MongoCursor<Document> delegate = query().iterator();
+        final AtomicInteger counter = new AtomicInteger(0);
+        volatile Document lastDoc;
+
+        @Override
+        public int available() {
+          return delegate.available();
+        }
+
+        @Override
+        public void close() {
+          delegate.close();
+        }
+
+        @Override
+        public ServerAddress getServerAddress() {
+          return delegate.getServerAddress();
+        }
+
+        @Override
+        public ServerCursor getServerCursor() {
+          return delegate.getServerCursor();
+        }
+
+        @Override
+        public boolean hasNext() {
+          return delegate.hasNext() && !terminator.apply(counter.get(), lastDoc);
+        }
+
+        @Override
+        public Document next() {
+          lastDoc = delegate.next();
+          counter.incrementAndGet();
+          return lastDoc;
+        }
+
+        @Override
+        public Document tryNext() {
+          lastDoc = delegate.tryNext();
+          counter.incrementAndGet();
+          return lastDoc;
+        }
+
+      };
+      return streamOf(it).onClose(it::close).map(this::convert);
+    }
+
+    /**
+     * Converts and returns a collection of documents that satisfy the conditions based on the given
+     * options and the given class.
+     * <p>
+     * Note: the result set size is limited by {@link #limit(int)}
+     *
+     * @param <T> the type to which the document is to be converted
+     * @param clazz the class to which the document is to be converted
+     */
     public <T> Stream<T> streamAs(final Class<T> clazz) {
       return streamAs(r -> Jsons.convert(r, clazz));
     }
 
+    /**
+     * Converts and returns a collection of documents that satisfy the conditions based on the given
+     * options and the given converter.
+     * <p>
+     * Note: the result set size is limited by {@link #limit(int)}
+     *
+     * @param <T> the type to which the document is to be converted
+     * @param converter the converter use for document conversion
+     */
     public <T> Stream<T> streamAs(final Function<Object, T> converter) {
-      limit = 0; // NO LIMIT
       MongoCursor<Document> it = query().iterator();
       return streamOf(it).onClose(it::close).map(this::convert).map(converter);
     }
 
+    /**
+     * @see FindIterable#let(Bson)
+     */
     public MongoQuery variables(Bson variables) {
       this.variables = variables;
       return this;
     }
 
+    /**
+     * @see FindIterable#let(Bson)
+     * @see BasicDBObject#parse(String)
+     */
     public MongoQuery variables(Map<?, ?> variables) {
       return variables(parse(variables, false));
     }
@@ -1226,7 +1535,7 @@ public class MongoTemplate {
       return tpl.getSession();
     }
 
-    Map<?, ?> convert(Document doc) {
+    Map<String, Object> convert(Document doc) {
       if (doc != null && autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
         doc.put("id", doc.get("_id"));
       }
@@ -1255,11 +1564,11 @@ public class MongoTemplate {
       if (projection != null) {
         fi.projection(projection);
       }
-      if (limit > 0) {
+      if (limit >= 0) {
         fi.limit(limit);
       }
-      if (offset > 0) {
-        fi.skip(offset);
+      if (skip > 0) {
+        fi.skip(skip);
       }
       if (collation != null) {
         fi.collation(collation);

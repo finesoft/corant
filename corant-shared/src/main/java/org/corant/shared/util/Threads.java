@@ -138,6 +138,16 @@ public class Threads {
   }
 
   /**
+   * Delay running a runnable in a daemon thread with the given delay duration.
+   *
+   * @param delay the delay duration, null means don't delay
+   * @param runner the runner
+   */
+  public static void delayRunInDaemon(Duration delay, Runnable runner) {
+    delayRunInDaemon(DAEMON_THREAD_NAME_PREFIX, delay, runner);
+  }
+
+  /**
    * Delay running a runnable in a daemon thread with the given thread name and delay duration.
    *
    * @param threadName the thread name use in daemon thread

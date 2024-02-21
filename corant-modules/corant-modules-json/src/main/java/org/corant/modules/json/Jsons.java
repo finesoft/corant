@@ -69,14 +69,7 @@ public class Jsons {
   static final Logger logger = Logger.getLogger(Jsons.class.getName());
   static final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
   static {
-    SimpleModule simpleModule = new SimpleModule().addSerializer(new SqlDateSerializer())
-        .addDeserializer(Pair.class, new PairDeserializer())
-        .addSerializer(Pair.class, new PairSerializer())
-        .addDeserializer(Range.class, new RangeDeserializer())
-        .addSerializer(Range.class, new RangeSerializer())
-        .addDeserializer(Triple.class, new TripleDeserializer())
-        .addSerializer(Triple.class, new TripleSerializer());
-    objectMapper.registerModules(simpleModule);
+    objectMapper.registerModules(new SimpleModule().addSerializer(new SqlDateSerializer()));
     objectMapper.registerModules(new JavaTimeModule());
     objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     objectMapper.enable(Feature.ALLOW_COMMENTS);
@@ -469,22 +462,19 @@ public class Jsons {
    * @return java object
    */
   public static Object fromJsonValue(JsonValue jsonValue) {
-    if (jsonValue instanceof JsonNumber) {
-      JsonNumber jcv = (JsonNumber) jsonValue;
+    if (jsonValue instanceof JsonNumber jcv) {
       if (jcv.isIntegral()) {
         return jcv.longValue();
       } else {
         return jcv.doubleValue();
       }
-    } else if (jsonValue instanceof JsonArray) {
-      JsonArray ja = (JsonArray) jsonValue;
+    } else if (jsonValue instanceof JsonArray ja) {
       ArrayList<Object> list = new ArrayList<>(ja.size());
       for (JsonValue jv : ja) {
         list.add(fromJsonValue(jv));
       }
       return list;
-    } else if (jsonValue instanceof JsonObject) {
-      JsonObject jo = (JsonObject) jsonValue;
+    } else if (jsonValue instanceof JsonObject jo) {
       Map<String, Object> map = new LinkedHashMap<>(jo.size());
       jo.forEach((k, v) -> map.put(k, fromJsonValue(v)));
       return map;
@@ -675,8 +665,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:10
-   *
+   * @deprecated use JACKSON built-in deserializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class PairDeserializer extends JsonDeserializer<Pair> {
     @Override
@@ -691,8 +682,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:14
-   *
+   * @deprecated use JACKSON built-in serializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class PairSerializer extends JsonSerializer<Pair> {
     @Override
@@ -709,8 +701,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:10
-   *
+   * @deprecated use JACKSON built-in deserializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class RangeDeserializer extends JsonDeserializer<Range> {
     @SuppressWarnings("unchecked")
@@ -726,8 +719,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:14
-   *
+   * @deprecated use JACKSON built-in serializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class RangeSerializer extends JsonSerializer<Range> {
     @Override
@@ -760,8 +754,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:10
-   *
+   * @deprecated use JACKSON built-in deserializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class TripleDeserializer extends JsonDeserializer<Triple> {
     @Override
@@ -776,8 +771,9 @@ public class Jsons {
    * corant-modules-json
    *
    * @author bingo 下午12:10:14
-   *
+   * @deprecated use JACKSON built-in serializer, since 2024-02-21
    */
+  @Deprecated
   @SuppressWarnings("rawtypes")
   static class TripleSerializer extends JsonSerializer<Triple> {
     @Override

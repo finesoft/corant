@@ -22,7 +22,7 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
 import org.corant.config.Configs;
-import org.corant.context.qualifier.Naming;
+import org.corant.context.qualifier.Preference;
 import org.corant.context.qualifier.Qualifiers;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
@@ -50,19 +50,19 @@ public class OSSClientProducer {
   }
 
   @Produces
-  @Naming
+  @Preference
   @Dependent
   protected OSS produce(InjectionPoint ip) {
-    Naming naming = null;
+    Preference preference = null;
     for (Annotation a : ip.getQualifiers()) {
-      if (a.annotationType().equals(Naming.class)) {
-        naming = (Naming) a;
+      if (a.annotationType().equals(Preference.class)) {
+        preference = (Preference) a;
         break;
       }
     }
     String name = Qualifiers.EMPTY_NAME;
-    if (naming != null) {
-      name = strip(naming.value());
+    if (preference != null) {
+      name = strip(preference.value());
     }
     OSSClientConfiguration config =
         extension.getConfigs().get(Configs.assemblyStringConfigProperty(name));

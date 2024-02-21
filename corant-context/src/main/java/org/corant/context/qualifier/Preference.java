@@ -30,25 +30,25 @@ import jakarta.inject.Qualifier;
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE})
-public @interface Naming {
+public @interface Preference {
 
-  NamingLiteral INSTANCE = new NamingLiteral(EMPTY);
+  PreferenceLiteral INSTANCE = new PreferenceLiteral(EMPTY);
 
   @Nonbinding
   String value() default EMPTY;
 
-  class NamingLiteral extends AnnotationLiteral<Naming> implements Naming {
+  class PreferenceLiteral extends AnnotationLiteral<Preference> implements Preference {
 
     private static final long serialVersionUID = 2627528079165566439L;
 
     private final String value;
 
-    private NamingLiteral(String value) {
+    private PreferenceLiteral(String value) {
       this.value = value;
     }
 
-    public static NamingLiteral of(String value) {
-      return new NamingLiteral(value);
+    public static PreferenceLiteral of(String value) {
+      return new PreferenceLiteral(value);
     }
 
     @Override

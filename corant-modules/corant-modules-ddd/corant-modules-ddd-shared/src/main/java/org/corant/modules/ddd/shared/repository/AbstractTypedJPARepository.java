@@ -20,14 +20,14 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Cache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.annotation.PostConstruct;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
+import org.corant.modules.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
 /**
  * corant-modules-ddd-shared
@@ -38,11 +38,13 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
     implements TypedJPARepository<T> {
 
   protected volatile Class<T> entityClass;
+  protected volatile String persistenceUnitName;
 
   protected AbstractTypedJPARepository() {}
 
-  protected AbstractTypedJPARepository(Class<T> entityClass) {
+  protected AbstractTypedJPARepository(Class<T> entityClass, String persistenceUnitName) {
     this.entityClass = requireNotNull(entityClass, ERR_OBJ_CONSTRUCT);
+    this.persistenceUnitName = persistenceUnitName;
   }
 
   @Override
@@ -83,6 +85,10 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
 
   @Override
   public EntityManager getEntityManager() {
+    if (persistenceUnitName != null) {
+      return resolve(EntityManagers.class)
+          .getEntityManager(PersistenceContextLiteral.of(persistenceUnitName));
+    }
     return resolve(EntityManagers.class).getEntityManager(entityClass);
   }
 
@@ -124,9 +130,9 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
   @SuppressWarnings("unchecked")
   @PostConstruct
   protected void onPostConstruct() {
-    if (this.entityClass == null) {
+    if (entityClass == null) {
       synchronized (this) {
-        if (this.entityClass == null) {
+        if (entityClass == null) {
           Class<T> resolvedClass = null;
           Class<?> repoClass = this.getClass();
           do {
@@ -148,7 +154,7 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
               }
             }
           } while (resolvedClass == null && (repoClass = repoClass.getSuperclass()) != null);
-          this.entityClass = requireNotNull(resolvedClass, ERR_OBJ_CONSTRUCT);
+          entityClass = requireNotNull(resolvedClass, ERR_OBJ_CONSTRUCT);
         }
       }
     }
@@ -163,8 +169,8 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
   public static class TypedJPARepositoryTemplate<T extends Entity>
       extends AbstractTypedJPARepository<T> {
 
-    public TypedJPARepositoryTemplate(Class<T> entityClass) {
-      super(entityClass);
+    public TypedJPARepositoryTemplate(Class<T> entityClass, String persistenceUnitName) {
+      super(entityClass, persistenceUnitName);
     }
 
   }

@@ -17,13 +17,13 @@ import static org.corant.context.Beans.findAnyway;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.annotation.PostConstruct;
 import org.corant.context.qualifier.AutoCreated;
+import org.corant.context.qualifier.Preference;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.shared.repository.AbstractTypedJPARepository.TypedJPARepositoryTemplate;
 import org.corant.shared.ubiquity.Sortable;
@@ -50,7 +50,21 @@ public class TypedJPARepositoryProducer {
     final ParameterizedType parameterizedType = (ParameterizedType) type;
     final Type argType = parameterizedType.getActualTypeArguments()[0];
     final Class<T> entityClass = (Class<T>) argType;
-    return factory.create(entityClass);
+    return factory.create(entityClass, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Produces
+  @Dependent
+  @Preference
+  <T extends Entity> TypedJPARepository<T> produceTypedJPARepositoryx(InjectionPoint ip) {
+    final Type type = ip.getType();
+    final Preference named = (Preference) ip.getQualifiers().stream()
+        .filter(p -> p.annotationType().equals(Preference.class)).findFirst().orElse(null);
+    final ParameterizedType parameterizedType = (ParameterizedType) type;
+    final Type argType = parameterizedType.getActualTypeArguments()[0];
+    final Class<T> entityClass = (Class<T>) argType;
+    return factory.create(entityClass, named == null ? null : named.value());
   }
 
   /**
@@ -67,6 +81,7 @@ public class TypedJPARepositoryProducer {
 
     TypedJPARepositoryFactory DEFAULT = TypedJPARepositoryTemplate::new;
 
-    <T extends Entity> TypedJPARepository<T> create(Class<T> entityClass);
+    <T extends Entity> TypedJPARepository<T> create(Class<T> entityClass,
+        String persistenceUnitName);
   }
 }

@@ -38,12 +38,15 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.modules.bson.Bsons;
+import org.corant.modules.json.ForwardingObjectMappers;
 import org.corant.modules.json.Jsons;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
@@ -82,9 +85,14 @@ import com.mongodb.client.result.UpdateResult;
 @NotThreadSafe
 public class MongoTemplate {
 
+  protected static final ObjectMapper objectMapper = ForwardingObjectMappers.objectMapper();
+  protected static final JavaType mapType =
+      objectMapper.constructType(new TypeReference<Map<String, Object>>() {});
+
   protected final MongoDatabase database;
   protected final WriteConcern writeConcern;
   protected final ReadPreference readPreference;
+
   protected final ReadConcern readConcern;
   protected final ClientSession session;
 
@@ -774,7 +782,7 @@ public class MongoTemplate {
       if (object instanceof Map m) {
         map = forceCast(m); // FIXME force cast
       } else {
-        map = Jsons.convert(object, new TypeLiteral<Map<String, Object>>() {});
+        map = object == null ? null : objectMapper.convertValue(object, mapType);
       }
       if (map.containsKey("id") && !map.containsKey("_id")) {
         map.put("_id", map.remove("id"));

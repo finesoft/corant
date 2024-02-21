@@ -21,7 +21,6 @@ import java.beans.Transient;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Objects;
 
 /**
@@ -104,6 +103,7 @@ public interface Tuple {
    *
    * @return isEmpty
    */
+  @Transient
   boolean isEmpty();
 
   /**
@@ -289,7 +289,7 @@ public interface Tuple {
    * @author bingo 上午10:37:41
    *
    */
-  class Pair<L, R> implements Tuple, Map.Entry<L, R>, Serializable {
+  class Pair<L, R> implements Tuple, Serializable {
 
     private static final long serialVersionUID = -474294448204498274L;
 
@@ -331,21 +331,24 @@ public interface Tuple {
     }
 
     @Override
-    public boolean equals(final Object obj) {
-      if (obj == this) {
+    public boolean equals(Object obj) {
+      if (this == obj) {
         return true;
       }
-      if (obj instanceof Map.Entry<?, ?> other) {
-        return Objects.areEqual(left, other.getKey()) && Objects.areEqual(right, other.getValue());
+      if (obj == null) {
+        return false;
       }
-      return false;
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      Pair<?, ?> other = (Pair<?, ?>) obj;
+      return areEqual(left, other.left) && areEqual(right, other.right);
     }
 
     public L first() {
       return left;
     }
 
-    @Override
     @Transient
     public L getKey() {
       return left;
@@ -359,7 +362,6 @@ public interface Tuple {
       return right;
     }
 
-    @Override
     @Transient
     public R getValue() {
       return right;
@@ -367,10 +369,7 @@ public interface Tuple {
 
     @Override
     public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (left == null ? 0 : left.hashCode());
-      return prime * result + (right == null ? 0 : right.hashCode());
+      return java.util.Objects.hash(left, right);
     }
 
     @Override
@@ -396,11 +395,6 @@ public interface Tuple {
 
     public R second() {
       return right;
-    }
-
-    @Override
-    public R setValue(R value) {
-      throw new NotSupportedException();
     }
 
     @Override

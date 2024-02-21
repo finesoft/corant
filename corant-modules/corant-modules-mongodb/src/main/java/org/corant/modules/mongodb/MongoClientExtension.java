@@ -44,7 +44,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.corant.config.Configs;
 import org.corant.context.naming.NamingReference;
-import org.corant.context.qualifier.Naming;
+import org.corant.context.qualifier.Preference;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
 import org.corant.modules.mongodb.MongoClientConfig.MongodbConfig;
@@ -256,22 +256,22 @@ public class MongoClientExtension implements Extension {
 
     @Produces
     @Dependent
-    @Naming
+    @Preference
     protected GridFSBucket produce(InjectionPoint ip) {
-      Naming naming = null;
+      Preference preference = null;
       if (ip.getAnnotated() != null) {
-        naming = ip.getAnnotated().getAnnotation(Naming.class);
+        preference = ip.getAnnotated().getAnnotation(Preference.class);
       }
-      if (naming == null) {
+      if (preference == null) {
         Optional<Annotation> annop = ip.getQualifiers().stream()
-            .filter(p -> p.annotationType().equals(Naming.class)).findFirst();
+            .filter(p -> p.annotationType().equals(Preference.class)).findFirst();
         if (annop.isPresent()) {
-          naming = (Naming) annop.get();
+          preference = (Preference) annop.get();
         }
       }
-      if (naming != null) {
+      if (preference != null) {
         return MongoClientExtension
-            .getGridFSBucket(Configs.assemblyStringConfigProperty(naming.value()));
+            .getGridFSBucket(Configs.assemblyStringConfigProperty(preference.value()));
       }
       return null;
     }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.beanutils.BeanUtils;
+import org.corant.modules.json.ForwardingObjectMappers;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 public class DefaultQueryObjectMapper implements QueryObjectMapper {
 
   protected ObjectMapper objectMapper = Jsons.copyMapper();
+  protected ObjectMapper mapConverter = ForwardingObjectMappers.objectMapper();
   protected ObjectWriter objectWriter = objectMapper.writer();
   protected ObjectWriter ppObjectWriter = objectMapper.writerWithDefaultPrettyPrinter();
   protected ObjectWriter escapeObjectWriter = objectWriter.with(JsonpCharacterEscapes.instance());
@@ -111,7 +113,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
       if (!convert) {
         return mapReader.readValue(object.toString());
       } else {
-        return objectMapper.convertValue(object, mapType);
+        return mapConverter.convertValue(object, mapType);
       }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);

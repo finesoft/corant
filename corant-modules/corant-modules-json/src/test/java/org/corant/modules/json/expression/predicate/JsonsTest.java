@@ -24,12 +24,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.corant.modules.json.ForwardingObjectMappers;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.junit.Test;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 
 /**
@@ -41,11 +39,10 @@ public class JsonsTest extends TestCase {
 
   @Test
   public void testPojoToMap() {
-    ObjectMapper om = ForwardingObjectMappers.objectMapper();
     MapPojo mp = new MapPojo();
-    Map<Object, Object> map = om.convertValue(mp, new TypeReference<Map<Object, Object>>() {});
+    Map<Object, Object> map = ObjectMappers.toMap(mp);
     map.forEach((k, v) -> System.out.println(k + "\t" + v.getClass()));
-    MapPojo dmp = om.convertValue(map, MapPojo.class);
+    MapPojo dmp = ObjectMappers.fromMap(map, MapPojo.class);
     assertEquals(mp, dmp);
   }
 

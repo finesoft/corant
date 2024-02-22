@@ -34,19 +34,16 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.modules.bson.Bsons;
-import org.corant.modules.json.ForwardingObjectMappers;
-import org.corant.modules.json.Jsons;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
@@ -58,6 +55,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.annotations.NotThreadSafe;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -84,10 +82,6 @@ import com.mongodb.client.result.UpdateResult;
  */
 @NotThreadSafe
 public class MongoTemplate {
-
-  protected static final ObjectMapper objectMapper = ForwardingObjectMappers.objectMapper();
-  protected static final JavaType mapType =
-      objectMapper.constructType(new TypeReference<Map<String, Object>>() {});
 
   protected final MongoDatabase database;
   protected final WriteConcern writeConcern;
@@ -238,6 +232,13 @@ public class MongoTemplate {
   }
 
   /**
+   * Returns a new {@link MongoDistinction} instance.
+   */
+  public MongoDistinction distinction() {
+    return new MongoDistinction(this);
+  }
+
+  /**
    * Drop the collection with the given name.
    *
    * @param collectionName name of the collection to drop/delete.
@@ -309,10 +310,11 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert the object into the specified collection. If the given object is not {@link Document}
-   * instance, it will be converted to Map and then constructed into a {@link Document}, if the
+   * Insert an object into the specified collection. If the given object is not a {@link Document}
+   * instance, it will be converted to a Map and then constructed into a {@link Document}. If the
    * given object has a property named 'id', the value of the property will be used as the primary
-   * key(named '_id') of the {@link Document}.
+   * key(named '_id') of the {@link Document} and the converted document doesn't retain the id
+   * property.
    *
    * @param collectionName name of the collection to store the object in. Must not be {@literal
    *     null}
@@ -324,10 +326,11 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert the object into the specified collection. If the given object is not {@link Document}
-   * instance, it will be converted to Map and then constructed into a {@link Document}, if the
-   * given object has a property named 'id', the value of the property will be used as the primary
-   * key(named '_id') of the {@link Document}.
+   * Insert an object into the specified collection according to the specified options. If the given
+   * object is not a {@link Document} instance, it will be converted to a Map and then constructed
+   * into a {@link Document}. If the given object has a property named 'id', the value of the
+   * property will be used as the primary key(named '_id') of the {@link Document} and the converted
+   * document doesn't retain the id property.
    *
    * @param collectionName name of the collection to store the object in. Must not be {@literal
    *     null}
@@ -340,19 +343,21 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert the object into the specified collection
+   * Insert an object into the specified collection according to the specified options and document
+   * handler.
+   * <p>
+   * If the given handler is null and the given object is not a {@link Document} instance, it will
+   * be converted to Map and then constructed into a {@link Document}. If the given object has a
+   * property named 'id', the value of the property will be used as the primary key(named '_id') of
+   * the {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName name of the collection to store the object in. Must not be {@literal
    *     null}.
    * @param object the object to store in the collection. Must not be {@literal null}.
    * @param options the options to apply to the operation
-   * @param handler the handler which use to convert the given object to {@link Document} and
-   *        process the primary key of the {@link Document}, can be null. If the given handler is
-   *        null, if the given object is not {@link Document} instance, it will be converted to Map
-   *        and then constructed into a {@link Document}, if the given object has a property named
-   *        'id', the value of the property will be used as the primary key(named '_id') of the
-   *        {@link Document}.
+   * @param handler the handler which use to convert the given object to a {@link Document} and
+   *        process the primary key of the {@link Document}, can be null.
    * @return the insert result
    */
   public <T> InsertOneResult insert(String collectionName, T object, InsertOneOptions options,
@@ -380,10 +385,12 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert a list of objects into a collection in a single batch write to the database. If the
-   * element of the given list is not {@link Document} instance, it will be converted to Map and
-   * then constructed into a {@link Document}, if the object has a property named 'id', the value of
-   * the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Insert a list of objects into a collection in a single batch write to the database.
+   * <p>
+   * If the given handler is null and the given object is not a {@link Document} instance, it will
+   * be converted to Map and then constructed into a {@link Document}. If the given object has a
+   * property named 'id', the value of the property will be used as the primary key(named '_id') of
+   * the {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName collectionName name of the collection to store the object in. Must not be
@@ -396,10 +403,13 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert a list of objects into a collection in a single batch write to the database. If the
-   * element of the given list is not {@link Document} instance, it will be converted to Map and
-   * then constructed into a {@link Document}, if the object has a property named 'id', the value of
-   * the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Insert a list of objects into a collection in a single batch write to the database according to
+   * the specified options.
+   * <p>
+   * If the given handler is null and the given object is not a {@link Document} instance, it will
+   * be converted to Map and then constructed into a {@link Document}. If the given object has a
+   * property named 'id', the value of the property will be used as the primary key(named '_id') of
+   * the {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName collectionName name of the collection to store the object in. Must not be
@@ -414,7 +424,13 @@ public class MongoTemplate {
   }
 
   /**
-   * Insert a list of objects into a collection in a single batch write to the database.
+   * Insert a list of objects into a collection in a single batch write to the database according to
+   * the specified options and document handler.
+   * <p>
+   * If the given handler is null and the given element of list is not a {@link Document} instance,
+   * it will be converted to Map and then constructed into a {@link Document}. If the element has a
+   * property named 'id', the value of the property will be used as the primary key(named '_id') of
+   * the {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName collectionName name of the collection to store the object in. Must not be
@@ -422,11 +438,7 @@ public class MongoTemplate {
    * @param objects the list of objects to store in the collection. Must not be {@literal null}.
    * @param options the options to apply to the operation
    * @param handler the handler which use to convert the element of the given list to
-   *        {@link Document} and process the primary key of the {@link Document}, can be null. If
-   *        the given handler is null, if the element of the given list is not {@link Document}
-   *        instance, it will be converted to Map and then constructed into a {@link Document}, if
-   *        the object has a property named 'id', the value of the property will be used as the
-   *        primary key(named '_id') of the {@link Document}.
+   *        {@link Document} and process the primary key of the {@link Document}, can be null.
    * @return the insert result
    */
   public <T> InsertManyResult insertMany(String collectionName, List<T> objects,
@@ -458,9 +470,10 @@ public class MongoTemplate {
 
   /**
    * Save or replace an object in the given collection according to the specified arguments. If the
-   * given object is not {@link Document} instance, it will be converted to Map and then constructed
-   * into a {@link Document}, if the given object has a property named 'id', the value of the
-   * property will be used as the primary key(named '_id') of the {@link Document}.
+   * given object is not a {@link Document} instance, it will be converted to Map and then
+   * constructed into a {@link Document}. If the given object has a property named 'id', the value
+   * of the property will be used as the primary key(named '_id') of the {@link Document} and the
+   * converted document doesn't retain the id property.
    *
    * @param collectionName the collection name
    * @param object the object to be saved or replaced
@@ -471,10 +484,11 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an object in the given collection according to the specified arguments. If the
-   * given object is not {@link Document} instance, it will be converted to Map and then constructed
-   * into a {@link Document}, if the given object has a property named 'id', the value of the
-   * property will be used as the primary key(named '_id') of the {@link Document}.
+   * Save or replace an object in the given collection according to the specified options. If the
+   * given object is not a {@link Document} instance, it will be converted to Map and then
+   * constructed into a {@link Document}. If the given object has a property named 'id', the value
+   * of the property will be used as the primary key(named '_id') of the {@link Document} and the
+   * converted document doesn't retain the id property.
    *
    * @param collectionName the collection name
    * @param object the object to be saved or replaced
@@ -486,18 +500,20 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an object in the given collection according to the specified arguments.
+   * Save or replace an object in the given collection according to the specified options and
+   * document handler.
+   * <p>
+   * If the given handler is null and the given object is not a {@link Document} instance, it will
+   * be converted to Map and then constructed into a {@link Document}. If the object has a property
+   * named 'id', the value of the property will be used as the primary key(named '_id') of the
+   * {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName the collection name
    * @param object the object to be saved or replaced
    * @param options the options to apply to the save operation
    * @param handler the handler which use to convert the given object to {@link Document} and
-   *        process the primary key of the {@link Document}, can be null. If the given handler is
-   *        null, if the given object is not {@link Document} instance, it will be converted to Map
-   *        and then constructed into a {@link Document}, if the given object has a property named
-   *        'id', the value of the property will be used as the primary key(named '_id') of the
-   *        {@link Document}.
+   *        process the primary key of the {@link Document}, can be null.
    * @return the save or replace result
    */
   public <T> UpdateResult save(String collectionName, T object, ReplaceOptions options,
@@ -522,10 +538,12 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace a list of objects in the given collection according to the specified arguments.
-   * If the element of the given list is not {@link Document} instance, it will be converted to Map
-   * and then constructed into a {@link Document}, if the object has a property named 'id', the
-   * value of the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Save or replace a list of objects in the given collection.
+   * <p>
+   * If the given element of list is not a {@link Document} instance, it will be converted to Map
+   * and then constructed into a {@link Document}. If the element has a property named 'id', the
+   * value of the property will be used as the primary key(named '_id') of the {@link Document} and
+   * the converted document doesn't retain the id property.
    *
    * @param collectionName the collection name
    * @param objects a list of object to be saved or replaced
@@ -536,10 +554,12 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace a list of objects in the given collection according to the specified arguments.
-   * If the element of the given list is not {@link Document} instance, it will be converted to Map
-   * and then constructed into a {@link Document}, if the object has a property named 'id', the
-   * value of the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Save or replace a list of objects in the given collection according to the specified options.
+   * <p>
+   * If the given element of list is not a {@link Document} instance, it will be converted to Map
+   * and then constructed into a {@link Document}. If the element has a property named 'id', the
+   * value of the property will be used as the primary key(named '_id') of the {@link Document} and
+   * the converted document doesn't retain the id property.
    *
    * @param collectionName the collection name
    * @param objects a list of object to be saved or replaced
@@ -552,18 +572,20 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace a list of objects in the given collection according to the specified arguments.
+   * Save or replace a list of objects in the given collection according to the specified options
+   * and document handler.
+   * <p>
+   * If the given element of list is not a {@link Document} instance, it will be converted to Map
+   * and then constructed into a {@link Document}. If the element has a property named 'id', the
+   * value of the property will be used as the primary key(named '_id') of the {@link Document} and
+   * the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName the collection name
    * @param objects a list of object to be saved or replaced
    * @param options the options to apply to the save operation
    * @param handler the handler which use to convert the given object to {@link Document} and
-   *        process the primary key of the {@link Document}, can be null. If the given handler is
-   *        null, if the given object is not {@link Document} instance, it will be converted to Map
-   *        and then constructed into a {@link Document}, if the given object has a property named
-   *        'id', the value of the property will be used as the primary key(named '_id') of the
-   *        {@link Document}.
+   *        process the primary key of the {@link Document}, can be null.
    * @return a list of save or replace result
    */
   public <T> List<UpdateResult> saveMany(String collectionName, List<T> objects,
@@ -587,10 +609,12 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an objects stream in the given collection according to the specified arguments.
-   * If the element of the given stream is not {@link Document} instance, it will be converted to
-   * Map and then constructed into a {@link Document}, if the object has a property named 'id', the
-   * value of the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Save or replace an objects stream in the given collection.
+   * <p>
+   * If the given element of list is not a {@link Document} instance, it will be converted to Map
+   * and then constructed into a {@link Document}. If the element has a property named 'id', the
+   * value of the property will be used as the primary key(named '_id') of the {@link Document} and
+   * the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName the collection name
@@ -602,10 +626,12 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an objects stream in the given collection according to the specified arguments.
-   * If the element of the given stream is not {@link Document} instance, it will be converted to
-   * Map and then constructed into a {@link Document}, if the object has a property named 'id', the
-   * value of the property will be used as the primary key(named '_id') of the {@link Document}.
+   * Save or replace an objects stream in the given collection according to the specified options.
+   * <p>
+   * If the given element of list is not a {@link Document} instance, it will be converted to Map
+   * and then constructed into a {@link Document}. If the element has a property named 'id', the
+   * value of the property will be used as the primary key(named '_id') of the {@link Document} and
+   * the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName the collection name
@@ -619,18 +645,20 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an objects stream in the given collection according to the specified arguments.
+   * Save or replace an objects stream in the given collection according to the specified options
+   * and document handler.
+   * <p>
+   * If the document handler the given element of list is not a {@link Document} instance, it will
+   * be converted to Map and then constructed into a {@link Document}. If the element has a property
+   * named 'id', the value of the property will be used as the primary key(named '_id') of the
+   * {@link Document} and the converted document doesn't retain the id property.
    *
    * @param <T> the object type
    * @param collectionName the collection name
    * @param stream the objects stream to be saved
    * @param options the options to apply to the save operation
    * @param handler the handler which use to convert the given object to {@link Document} and
-   *        process the primary key of the {@link Document}, can be null. If the given handler is
-   *        null, if the given object is not {@link Document} instance, it will be converted to Map
-   *        and then constructed into a {@link Document}, if the given object has a property named
-   *        'id', the value of the property will be used as the primary key(named '_id') of the
-   *        {@link Document}.
+   *        process the primary key of the {@link Document}, can be null.
    * @return the save result stream
    */
   public <T> Stream<UpdateResult> streamSave(String collectionName, Stream<T> stream,
@@ -679,7 +707,7 @@ public class MongoTemplate {
   }
 
   /**
-   * Update all documents in the given collection according to the specified arguments.
+   * Update all documents in the given collection according to the specified options.
    *
    * @param collectionName the collection name
    * @param filter a document describing the query filter, which may not be null.
@@ -777,17 +805,19 @@ public class MongoTemplate {
   protected <T> Document handle(T object) {
     if (object instanceof Document doc) {
       return doc;
-    } else {
+    } else if (object != null) {
       Map<String, Object> map;
       if (object instanceof Map m) {
         map = forceCast(m); // FIXME force cast
       } else {
-        map = object == null ? null : objectMapper.convertValue(object, mapType);
+        map = ObjectMappers.toDocMap(object);
       }
       if (map.containsKey("id") && !map.containsKey("_id")) {
         map.put("_id", map.remove("id"));
       }
       return new Document(map);
+    } else {
+      return null;
     }
   }
 
@@ -1025,6 +1055,140 @@ public class MongoTemplate {
   /**
    * corant-modules-mongodb
    *
+   * @author bingo 16:23:15
+   */
+  public static class MongoDistinction {
+    protected final MongoTemplate tpl;
+    protected String collectionName;
+    protected Bson filter;
+    protected Duration maxTime;
+    protected Collation collation;
+    protected BsonValue comment;
+    protected Integer batchSize;
+
+    protected MongoDistinction(MongoTemplate tpl) {
+      this.tpl = tpl;
+    }
+
+    /**
+     * @see DistinctIterable#batchSize(int)
+     */
+    public MongoDistinction batchSize(Integer batchSize) {
+      this.batchSize = batchSize;
+      if (this.batchSize != null && this.batchSize < 1) {
+        this.batchSize = 1;
+      }
+      return this;
+    }
+
+    /**
+     * @see DistinctIterable#collation(Collation)
+     */
+    public MongoDistinction collation(Collation collation) {
+      this.collation = collation;
+      return this;
+    }
+
+    /**
+     * Set the name of the collection which will be queried.
+     *
+     * @param collectionName the collection name
+     */
+    public MongoDistinction collectionName(String collectionName) {
+      this.collectionName = shouldNotNull(collectionName);
+      return this;
+    }
+
+    /**
+     * @see DistinctIterable#comment(BsonValue)
+     */
+    public MongoDistinction comment(BsonValue comment) {
+      this.comment = comment;
+      return this;
+    }
+
+    /**
+     * @see DistinctIterable#comment(String)
+     */
+    public MongoDistinction comment(String comment) {
+      this.comment = comment == null ? null : new BsonString(comment);
+      return this;
+    }
+
+    public <T> Stream<T> distinctSteam(String fieldName, Class<T> fieldType) {
+      MongoCursor<T> it = find(fieldName, fieldType).iterator();
+      return streamOf(it).onClose(it::close);
+    }
+
+    /**
+     * @see DistinctIterable#filter(Bson)
+     */
+    public MongoDistinction filter(Bson filter) {
+      this.filter = filter;
+      return this;
+    }
+
+    /**
+     * @see DistinctIterable#filter(Bson)
+     * @see MongoExtendedJsons#extended(Object)
+     * @see BasicDBObject#parse(String)
+     */
+    public MongoDistinction filter(Map<?, ?> filter) {
+      if (filter != null) {
+        this.filter = parse(filter, true);
+      }
+      return this;
+    }
+
+    public <T> List<T> findDistinct(String fieldName, Class<T> fieldType) {
+      try (MongoCursor<T> it = find(fieldName, fieldType).iterator()) {
+        return streamOf(it).collect(Collectors.toList());
+      }
+    }
+
+    /**
+     * @see DistinctIterable#maxTime(long, TimeUnit)
+     */
+    public MongoDistinction maxTime(Duration maxTime) {
+      this.maxTime = maxTime;
+      return this;
+    }
+
+    protected MongoCollection<Document> obtainCollection() {
+      return tpl.obtainCollection(collectionName);
+    }
+
+    protected ClientSession obtainSession() {
+      return tpl.getSession();
+    }
+
+    <T> DistinctIterable<T> find(String fieldName, Class<T> fieldType) {
+      MongoCollection<Document> mc = obtainCollection();
+      ClientSession session = obtainSession();
+      DistinctIterable<T> di = session != null ? mc.distinct(session, fieldName, fieldType)
+          : mc.distinct(fieldName, fieldType);
+      if (filter != null) {
+        di.filter(filter);
+      }
+      if (collation != null) {
+        di.collation(collation);
+      }
+      if (maxTime != null) {
+        di.maxTime(maxTime.toMillis(), TimeUnit.MILLISECONDS);
+      }
+      if (batchSize != null) {
+        di.batchSize(batchSize);
+      }
+      if (comment != null) {
+        di.comment(comment);
+      }
+      return di;
+    }
+  }
+
+  /**
+   * corant-modules-mongodb
+   *
    * @author bingo 18:34:06
    */
   public static class MongoQuery {
@@ -1114,6 +1278,14 @@ public class MongoTemplate {
     }
 
     /**
+     * @see FindIterable#comment(String)
+     */
+    public MongoQuery comment(String comment) {
+      this.comment = comment == null ? null : new BsonString(comment);
+      return this;
+    }
+
+    /**
      * Counts the number of documents in the collection according to the given options.
      */
     public long countDocuments() {
@@ -1184,7 +1356,7 @@ public class MongoTemplate {
      * @param clazz the class to which the document is to be converted
      */
     public <T> List<T> findAs(final Class<T> clazz) {
-      return findAs(t -> Jsons.convert(t, clazz));
+      return findAs(t -> ObjectMappers.fromMap(t, clazz));
     }
 
     /**
@@ -1193,7 +1365,7 @@ public class MongoTemplate {
      * @param <T> the object type
      * @param converter the converter use for document conversion
      */
-    public <T> List<T> findAs(final Function<Object, T> converter) {
+    public <T> List<T> findAs(final Function<Document, T> converter) {
       try (MongoCursor<Document> it = query().iterator()) {
         return streamOf(it).map(this::convert).map(converter).collect(Collectors.toList());
       }
@@ -1216,7 +1388,7 @@ public class MongoTemplate {
      */
     public <T> T findOne(Class<T> type) {
       try (MongoCursor<Document> it = query().limit(1).iterator()) {
-        return it.hasNext() ? Jsons.convert(it.next(), type) : null;
+        return it.hasNext() ? ObjectMappers.fromMap(convert(it.next()), type) : null;
       }
     }
 
@@ -1502,7 +1674,7 @@ public class MongoTemplate {
      * @param clazz the class to which the document is to be converted
      */
     public <T> Stream<T> streamAs(final Class<T> clazz) {
-      return streamAs(r -> Jsons.convert(r, clazz));
+      return streamAs(r -> ObjectMappers.fromMap(r, clazz));
     }
 
     /**
@@ -1514,7 +1686,7 @@ public class MongoTemplate {
      * @param <T> the type to which the document is to be converted
      * @param converter the converter use for document conversion
      */
-    public <T> Stream<T> streamAs(final Function<Object, T> converter) {
+    public <T> Stream<T> streamAs(final Function<Document, T> converter) {
       MongoCursor<Document> it = query().iterator();
       return streamOf(it).onClose(it::close).map(this::convert).map(converter);
     }
@@ -1543,7 +1715,7 @@ public class MongoTemplate {
       return tpl.getSession();
     }
 
-    Map<String, Object> convert(Document doc) {
+    Document convert(Document doc) {
       if (doc != null && autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
         doc.put("id", doc.get("_id"));
       }

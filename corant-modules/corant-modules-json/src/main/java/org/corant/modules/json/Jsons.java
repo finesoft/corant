@@ -31,16 +31,13 @@ import jakarta.json.JsonValue;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Experimental;
-import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Range;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Bytes;
-import org.corant.shared.util.Services;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -54,9 +51,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 /**
@@ -67,20 +62,12 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 public class Jsons {
 
   static final Logger logger = Logger.getLogger(Jsons.class.getName());
-  static final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+  static final ObjectMapper objectMapper = ObjectMappers.copyDefaultObjectMapper();
   static {
     objectMapper.registerModules(new SimpleModule().addSerializer(new SqlDateSerializer()));
-    objectMapper.registerModules(new JavaTimeModule());
-    objectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
-    objectMapper.enable(Feature.ALLOW_COMMENTS);
-    objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
     objectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     objectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
     objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-    objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    Services.selectRequired(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
-        .forEach(c -> c.configure(objectMapper));
   }
   static final JavaType mapType = objectMapper.constructType(Map.class);
   static final JavaType listType = objectMapper.constructType(List.class);

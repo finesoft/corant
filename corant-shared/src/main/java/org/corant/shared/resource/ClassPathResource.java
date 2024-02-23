@@ -14,6 +14,7 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import java.beans.Transient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -74,6 +75,7 @@ public class ClassPathResource extends URLResource {
     }
   }
 
+  @Transient
   public ClassLoader getClassLoader() {
     return classLoader;
   }

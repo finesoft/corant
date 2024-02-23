@@ -13,7 +13,6 @@
  */
 package org.corant.modules.mongodb;
 
-import static java.util.Collections.singletonMap;
 import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
@@ -29,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -82,7 +81,8 @@ import com.mongodb.client.result.UpdateResult;
  */
 @NotThreadSafe
 public class MongoTemplate {
-
+  public static final String DOC_ID_FIELD_NAME = "_id";
+  public static final String ENTITY_ID_FIELD_NAME = "id";
   protected final MongoDatabase database;
   protected final WriteConcern writeConcern;
   protected final ReadPreference readPreference;
@@ -530,10 +530,10 @@ public class MongoTemplate {
     ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
     if (session != null) {
       return collection.replaceOne(session,
-          new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro);
+          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro);
     } else {
-      return collection.replaceOne(
-          new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro);
+      return collection.replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc,
+          ro);
     }
   }
 
@@ -596,14 +596,12 @@ public class MongoTemplate {
     Function<T, Document> useHandler = defaultObject(handler, this::handle);
     ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
     if (session != null) {
-      return objects.stream().map(useHandler)
-          .map(doc -> collection.replaceOne(session,
-              new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro))
-          .toList();
+      return objects.stream().map(useHandler).map(doc -> collection.replaceOne(session,
+          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro)).toList();
     } else {
       return objects.stream().map(useHandler)
-          .map(doc -> collection.replaceOne(
-              new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro))
+          .map(doc -> collection
+              .replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro))
           .toList();
     }
   }
@@ -670,10 +668,10 @@ public class MongoTemplate {
     ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
     if (session != null) {
       return stream.map(useHandler).map(doc -> collection.replaceOne(session,
-          new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro));
+          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro));
     } else {
-      return stream.map(useHandler).map(doc -> collection.replaceOne(
-          new Document(singletonMap("_id", Bsons.toSimpleBsonValue(doc.get("_id")))), doc, ro));
+      return stream.map(useHandler).map(doc -> collection
+          .replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro));
     }
   }
 
@@ -812,8 +810,8 @@ public class MongoTemplate {
       } else {
         map = ObjectMappers.toDocMap(object);
       }
-      if (map.containsKey("id") && !map.containsKey("_id")) {
-        map.put("_id", map.remove("id"));
+      if (map.containsKey(ENTITY_ID_FIELD_NAME) && !map.containsKey(DOC_ID_FIELD_NAME)) {
+        map.put(DOC_ID_FIELD_NAME, map.remove(ENTITY_ID_FIELD_NAME));
       }
       return new Document(map);
     } else {
@@ -1115,8 +1113,30 @@ public class MongoTemplate {
       return this;
     }
 
+    /**
+     * Returns the distinct values stream of the specified field name and field type.
+     *
+     * @param <T> the type to cast any distinct items into.
+     * @param fieldName the field name
+     * @param fieldType the class to cast any distinct items into.
+     */
     public <T> Stream<T> distinctSteam(String fieldName, Class<T> fieldType) {
       MongoCursor<T> it = find(fieldName, fieldType).iterator();
+      return streamOf(it).onClose(it::close);
+    }
+
+    /**
+     * Returns the distinct values stream of the specified field name and field type.
+     *
+     * @param <T> the type to cast any distinct items into.
+     * @param fieldName the field name
+     * @param fieldType the class to cast any distinct items into.
+     * @param terminator the terminator use to terminate the stream when meet the conditions.
+     */
+    public <T> Stream<T> distinctSteam(String fieldName, Class<T> fieldType,
+        BiFunction<Long, T, Boolean> terminator) {
+      MongoCursor<T> it = terminator == null ? find(fieldName, fieldType).iterator()
+          : new TerminableMongoCursor<>(find(fieldName, fieldType).iterator(), terminator);
       return streamOf(it).onClose(it::close);
     }
 
@@ -1140,6 +1160,13 @@ public class MongoTemplate {
       return this;
     }
 
+    /**
+     * Returns the distinct values list of the specified field name and field type.
+     *
+     * @param <T> the type to cast any distinct items into.
+     * @param fieldName the field name
+     * @param fieldType the class to cast any distinct items into.
+     */
     public <T> List<T> findDistinct(String fieldName, Class<T> fieldType) {
       try (MongoCursor<T> it = find(fieldName, fieldType).iterator()) {
         return streamOf(it).collect(Collectors.toList());
@@ -1609,59 +1636,13 @@ public class MongoTemplate {
      *
      * @param terminator the terminator use to terminate the stream when meet the conditions.
      */
-    public Stream<Map<String, Object>> stream(
-        final BiFunction<Integer, Map<String, Object>, Boolean> terminator) {
+    public Stream<Map<String, Object>> stream(BiFunction<Long, Document, Boolean> terminator) {
       limit = -1; // NO LIMIT
       if (terminator == null) {
         return stream();
       }
-      final MongoCursor<Document> it = new MongoCursor<>() {
-
-        final MongoCursor<Document> delegate = query().iterator();
-        final AtomicInteger counter = new AtomicInteger(0);
-        volatile Document lastDoc;
-
-        @Override
-        public int available() {
-          return delegate.available();
-        }
-
-        @Override
-        public void close() {
-          delegate.close();
-        }
-
-        @Override
-        public ServerAddress getServerAddress() {
-          return delegate.getServerAddress();
-        }
-
-        @Override
-        public ServerCursor getServerCursor() {
-          return delegate.getServerCursor();
-        }
-
-        @Override
-        public boolean hasNext() {
-          return delegate.hasNext() && !terminator.apply(counter.get(), lastDoc);
-        }
-
-        @Override
-        public Document next() {
-          lastDoc = delegate.next();
-          counter.incrementAndGet();
-          return lastDoc;
-        }
-
-        @Override
-        public Document tryNext() {
-          lastDoc = delegate.tryNext();
-          counter.incrementAndGet();
-          return lastDoc;
-        }
-
-      };
-      return streamOf(it).onClose(it::close).map(this::convert);
+      MongoCursor<Document> tit = new TerminableMongoCursor<>(query().iterator(), terminator);
+      return streamOf(tit).onClose(tit::close).map(this::convert);
     }
 
     /**
@@ -1716,8 +1697,9 @@ public class MongoTemplate {
     }
 
     Document convert(Document doc) {
-      if (doc != null && autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
-        doc.put("id", doc.get("_id"));
+      if (doc != null && autoSetIdField && !doc.containsKey(ENTITY_ID_FIELD_NAME)
+          && doc.containsKey(DOC_ID_FIELD_NAME)) {
+        doc.put(ENTITY_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME));
       }
       return doc;
     }
@@ -1793,6 +1775,63 @@ public class MongoTemplate {
         fi.explain(explainResultClass);
       }
       return fi;
+    }
+  }
+
+  /**
+   * corant-modules-mongodb
+   *
+   * @author bingo 11:47:40
+   */
+  public static class TerminableMongoCursor<T> implements MongoCursor<T> {
+
+    final MongoCursor<T> delegate;
+    final AtomicLong counter = new AtomicLong(0);
+    final BiFunction<Long, T, Boolean> terminator;
+    volatile T lastDoc;
+
+    public TerminableMongoCursor(MongoCursor<T> delegate, BiFunction<Long, T, Boolean> terminator) {
+      this.delegate = delegate;
+      this.terminator = defaultObject(terminator, (i, t) -> false);
+    }
+
+    @Override
+    public int available() {
+      return delegate.available();
+    }
+
+    @Override
+    public void close() {
+      delegate.close();
+    }
+
+    @Override
+    public ServerAddress getServerAddress() {
+      return delegate.getServerAddress();
+    }
+
+    @Override
+    public ServerCursor getServerCursor() {
+      return delegate.getServerCursor();
+    }
+
+    @Override
+    public boolean hasNext() {
+      return delegate.hasNext() && !terminator.apply(counter.get(), lastDoc);
+    }
+
+    @Override
+    public T next() {
+      lastDoc = delegate.next();
+      counter.incrementAndGet();
+      return lastDoc;
+    }
+
+    @Override
+    public T tryNext() {
+      lastDoc = delegate.tryNext();
+      counter.incrementAndGet();
+      return lastDoc;
     }
   }
 }

@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +38,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.corant.modules.mongodb.MongoExtendedJsons;
+import org.corant.modules.mongodb.MongoTemplate.TerminableMongoCursor;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.QueryService.Forwarding;
@@ -50,9 +50,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
-import com.mongodb.ServerAddress;
-import com.mongodb.ServerCursor;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -639,6 +638,19 @@ public class MgQueryTemplate {
   }
 
   /**
+   * Returns the distinct values list of the specified field name and field type.
+   *
+   * @param <T> the type to cast any distinct items into.
+   * @param fieldName the field name
+   * @param fieldType the class to cast any distinct items into.
+   */
+  public <T> List<T> selectDistinctly(String fieldName, Class<T> fieldType) {
+    try (MongoCursor<T> it = queryDistinct(fieldName, fieldType).iterator()) {
+      return streamOf(it).collect(Collectors.toList());
+    }
+  }
+
+  /**
    * @see FindIterable#showRecordId(boolean)
    */
   public MgQueryTemplate showRecordId(Boolean showRecordId) {
@@ -716,59 +728,13 @@ public class MgQueryTemplate {
    * @param terminator the terminator use to terminate the stream when meet the conditions.
    */
   public Stream<Map<String, Object>> stream(
-      final BiFunction<Integer, Map<String, Object>, Boolean> terminator) {
+      final BiFunction<Long, Map<String, Object>, Boolean> terminator) {
     limit = -1; // NO LIMIT
     if (terminator == null) {
       return stream();
     }
-    final MongoCursor<Document> it = new MongoCursor<>() {
-
-      final MongoCursor<Document> delegate = query().iterator();
-      final AtomicInteger counter = new AtomicInteger(0);
-      volatile Document lastDoc;
-
-      @Override
-      public int available() {
-        return delegate.available();
-      }
-
-      @Override
-      public void close() {
-        delegate.close();
-      }
-
-      @Override
-      public ServerAddress getServerAddress() {
-        return delegate.getServerAddress();
-      }
-
-      @Override
-      public ServerCursor getServerCursor() {
-        return delegate.getServerCursor();
-      }
-
-      @Override
-      public boolean hasNext() {
-        return delegate.hasNext() && !terminator.apply(counter.get(), lastDoc);
-      }
-
-      @Override
-      public Document next() {
-        lastDoc = delegate.next();
-        counter.incrementAndGet();
-        return lastDoc;
-      }
-
-      @Override
-      public Document tryNext() {
-        lastDoc = delegate.tryNext();
-        if (lastDoc != null) {
-          counter.incrementAndGet();
-        }
-        return lastDoc;
-      }
-
-    };
+    final BiFunction<Long, Document, Boolean> ut = terminator::apply;
+    final MongoCursor<Document> it = new TerminableMongoCursor<>(query().iterator(), ut);
     return streamOf(it).onClose(it::close).map(this::convert);
   }
 
@@ -797,6 +763,36 @@ public class MgQueryTemplate {
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
     final MongoCursor<Document> it = query().iterator();
     return streamOf(it).onClose(it::close).map(this::convert).map(converter);
+  }
+
+  /**
+   * Returns the distinct values stream of the specified field name and field type.
+   *
+   * @param <T> the type to cast any distinct items into.
+   * @param fieldName the field name
+   * @param fieldType the class to cast any distinct items into.
+   */
+  public <T> Stream<T> streamDistinctly(String fieldName, Class<T> fieldType) {
+    MongoCursor<T> it = queryDistinct(fieldName, fieldType).iterator();
+    return streamOf(it).onClose(it::close);
+  }
+
+  /**
+   * Returns the distinct values stream of the specified field name and field type.
+   *
+   * @param <T> the type to cast any distinct items into.
+   * @param fieldName the field name
+   * @param fieldType the class to cast any distinct items into.
+   * @param terminator the terminator use to terminate the stream when meet the conditions.
+   */
+  public <T> Stream<T> streamDistinctly(String fieldName, Class<T> fieldType,
+      BiFunction<Long, T, Boolean> terminator) {
+    if (terminator == null) {
+      return streamDistinctly(fieldName, fieldType);
+    }
+    MongoCursor<T> it =
+        new TerminableMongoCursor<>(queryDistinct(fieldName, fieldType).iterator(), terminator);
+    return streamOf(it).onClose(it::close);
   }
 
   /**
@@ -902,5 +898,26 @@ public class MgQueryTemplate {
       fi.explain(explainResultClass);
     }
     return fi;
+  }
+
+  protected <T> DistinctIterable<T> queryDistinct(String fieldName, Class<T> fieldType) {
+    MongoCollection<Document> mc = database.getCollection(collection);
+    DistinctIterable<T> di = mc.distinct(fieldName, fieldType);
+    if (filter != null) {
+      di.filter(filter);
+    }
+    if (collation != null) {
+      di.collation(collation);
+    }
+    if (maxTime != null) {
+      di.maxTime(maxTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (batchSize != null) {
+      di.batchSize(batchSize);
+    }
+    if (comment != null) {
+      di.comment(comment);
+    }
+    return di;
   }
 }

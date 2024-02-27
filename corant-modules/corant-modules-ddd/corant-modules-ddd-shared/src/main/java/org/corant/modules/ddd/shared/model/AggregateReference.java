@@ -79,14 +79,15 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
       }
     } catch (Exception e) {
       throw new GeneralRuntimeException(e, ERR_OBJ_NON_FUD,
-          asString(cls).concat(":").concat(asString(param)));
+          asString(cls).concat("#").concat(asString(param)));
     }
     throw new GeneralRuntimeException(ERR_PARAM);
   }
 
   static <X extends Aggregate> X resolve(Class<X> cls, Serializable id) {
     return Aggregates.tryResolve(cls, id)
-        .orElseThrow(() -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
+        .orElseThrow(() -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+            asDefaultString(id)));
   }
 
   @SuppressWarnings("unchecked")
@@ -103,13 +104,10 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
         } else {
           Type[] genericInterfaces = referenceClass.getGenericInterfaces();
           for (Type type : genericInterfaces) {
-            if (type instanceof ParameterizedType) {
-              ParameterizedType parameterizedType = (ParameterizedType) type;
-              if (AggregateReference.class
-                  .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                resolvedClass = (Class<A>) parameterizedType.getActualTypeArguments()[0];
-                break;
-              }
+            if ((type instanceof ParameterizedType parameterizedType) && AggregateReference.class
+                .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+              resolvedClass = (Class<A>) parameterizedType.getActualTypeArguments()[0];
+              break;
             }
           }
         }
@@ -120,7 +118,8 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
 
   static <X extends Aggregate, I extends Serializable> I shouldExists(Class<X> cls, I id) {
     if (!exists(cls, id)) {
-      throw new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id));
+      throw new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+          asDefaultString(id));
     }
     return id;
   }
@@ -135,9 +134,11 @@ public interface AggregateReference<T extends Aggregate> extends EntityReference
     Aggregates.lock(retrieve(), lockModeType, properties);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   default T retrieve() {
-    return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_OBJ_NON_FUD));
+    return tryRetrieve().orElseThrow(() -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID,
+        resolveType(getClass()).getSimpleName(), asDefaultString(getId())));
   }
 
   default T retrieve(LockModeType lockModeType, Object... properties) {

@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.corant.modules.mongodb.MongoExtendedJsons;
 import org.corant.modules.mongodb.MongoTemplate.TerminableMongoCursor;
@@ -50,6 +51,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
@@ -96,6 +99,9 @@ public class MgQueryTemplate {
   protected Boolean noCursorTimeout;
   protected ExplainVerbosity explainVerbosity;
   protected Class<?> explainResultClass;
+  protected CodecRegistry codecRegistry;
+  protected ReadPreference readPreference;
+  protected ReadConcern readConcern;
 
   private MgQueryTemplate(MongoDatabase database) {
     this.database = shouldNotNull(database);
@@ -123,8 +129,17 @@ public class MgQueryTemplate {
    * {@link AggregateIterable} arguments
    */
   public List<Map<String, Object>> aggregate() {
-    AggregateIterable<Document> ai =
-        database.getCollection(collection).aggregate(aggregatePipeline);
+    MongoCollection<Document> mc = database.getCollection(collection);
+    if (codecRegistry != null) {
+      mc = mc.withCodecRegistry(codecRegistry);
+    }
+    if (readPreference != null) {
+      mc = mc.withReadPreference(readPreference);
+    }
+    if (readConcern != null) {
+      mc = mc.withReadConcern(readConcern);
+    }
+    AggregateIterable<Document> ai = mc.aggregate(aggregatePipeline);
     if (collation != null) {
       ai.collation(collation);
     }
@@ -224,6 +239,14 @@ public class MgQueryTemplate {
   }
 
   /**
+   * @see MongoCollection#withCodecRegistry(CodecRegistry)
+   */
+  public MgQueryTemplate codecRegistry(CodecRegistry codecRegistry) {
+    this.codecRegistry = codecRegistry;
+    return this;
+  }
+
+  /**
    * @see FindIterable#collation(Collation)
    * @see AggregateIterable#collation(Collation)
    */
@@ -301,7 +324,7 @@ public class MgQueryTemplate {
    * @see MongoExtendedJsons#toBson(Object, boolean)
    */
   @Experimental
-  public MgQueryTemplate filter(Map<?, ?> filter) {
+  public MgQueryTemplate filters(Map<?, ?> filter) {
     return filter(parse(filter, true));
   }
 
@@ -312,10 +335,28 @@ public class MgQueryTemplate {
    */
   public Forwarding<Map<String, Object>> forward() {
     Forwarding<Map<String, Object>> result = Forwarding.inst();
-    FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
+    FindIterable<Document> fi = query(Document.class).skip(offset).limit(limit + 1);
     try (MongoCursor<Document> cursor = fi.iterator()) {
       List<Map<String, Object>> list =
           streamOf(cursor).map(this::convert).collect(Collectors.toList());
+      if (sizeOf(list) > limit) {
+        list.remove(limit);
+        result.withHasNext(true);
+      }
+      return result.withResults(list);
+    }
+  }
+
+  /**
+   * Step forward query, do not pagination, do not calculate the total number of records, can be
+   * used for mass data streaming processing. Returns a list of typed object and a flag indicating
+   * whether there is more documents in the collection according to the given options.
+   */
+  public <T> Forwarding<T> forward(Class<T> clazz) {
+    Forwarding<T> result = Forwarding.inst();
+    FindIterable<T> fi = query(clazz).skip(offset).limit(limit + 1);
+    try (MongoCursor<T> cursor = fi.iterator()) {
+      List<T> list = streamOf(cursor).collect(Collectors.toList());
       if (sizeOf(list) > limit) {
         list.remove(limit);
         result.withHasNext(true);
@@ -346,7 +387,7 @@ public class MgQueryTemplate {
    */
   public <T> Forwarding<T> forwardAs(final Function<Object, T> converter) {
     Forwarding<T> result = Forwarding.inst();
-    FindIterable<Document> fi = query().skip(offset).limit(limit + 1);
+    FindIterable<Document> fi = query(Document.class).skip(offset).limit(limit + 1);
     try (MongoCursor<Document> cursor = fi.iterator()) {
       List<Map<String, Object>> list =
           streamOf(cursor).map(this::convert).collect(Collectors.toList());
@@ -362,8 +403,20 @@ public class MgQueryTemplate {
    * Return the document in the collection according to the given options.
    */
   public Map<String, Object> get() {
-    try (MongoCursor<Document> it = query().limit(1).iterator()) {
+    try (MongoCursor<Document> it = query(Document.class).limit(1).iterator()) {
       return it.hasNext() ? convert(it.next()) : null;
+    }
+  }
+
+  /**
+   * Return the typed object in the collection according to the given options.
+   *
+   * @param <T> the type to which the document is to be converted
+   * @param clazz the document class
+   */
+  public <T> T get(final Class<T> clazz) {
+    try (MongoCursor<T> it = query(clazz).limit(1).iterator()) {
+      return it.hasNext() ? it.next() : null;
     }
   }
 
@@ -402,7 +455,7 @@ public class MgQueryTemplate {
    * @see AggregateIterable#hint(Bson)
    * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate hint(Map<?, ?> hint) {
+  public MgQueryTemplate hints(Map<?, ?> hint) {
     return hint(parse(hint, false));
   }
 
@@ -425,20 +478,20 @@ public class MgQueryTemplate {
   }
 
   /**
-   * @see FindIterable#max(Bson)
-   * @see BasicDBObject#parse(String)
-   */
-  public MgQueryTemplate max(Map<?, ?> max) {
-    return max(parse(max, false));
-  }
-
-  /**
    * @see FindIterable#maxAwaitTime(long, TimeUnit)
    * @see AggregateIterable#maxAwaitTime(long, TimeUnit)
    */
   public MgQueryTemplate maxAwaitTime(Duration maxAwaitTime) {
     this.maxAwaitTime = maxAwaitTime;
     return this;
+  }
+
+  /**
+   * @see FindIterable#max(Bson)
+   * @see BasicDBObject#parse(String)
+   */
+  public MgQueryTemplate maxMap(Map<?, ?> max) {
+    return max(parse(max, false));
   }
 
   /**
@@ -462,7 +515,7 @@ public class MgQueryTemplate {
    * @see FindIterable#min(Bson)
    * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate min(Map<?, ?> min) {
+  public MgQueryTemplate minMap(Map<?, ?> min) {
     return min(parse(min, false));
   }
 
@@ -480,7 +533,7 @@ public class MgQueryTemplate {
    */
   public Paging<Map<String, Object>> page() {
     Paging<Map<String, Object>> result = Paging.of(offset, limit);
-    FindIterable<Document> fi = query();
+    FindIterable<Document> fi = query(Document.class);
     try (MongoCursor<Document> cursor = fi.iterator()) {
       List<Map<String, Object>> list =
           streamOf(cursor).map(this::convert).collect(Collectors.toList());
@@ -516,7 +569,7 @@ public class MgQueryTemplate {
    */
   public <T> Paging<T> pageAs(final Function<Object, T> converter) {
     Paging<T> result = Paging.of(offset, limit);
-    FindIterable<Document> fi = query();
+    FindIterable<Document> fi = query(Document.class);
     try (MongoCursor<Document> cursor = fi.iterator()) {
       List<Map<?, ?>> list = streamOf(cursor).map(this::convert).collect(Collectors.toList());
       int size = list.size();
@@ -563,14 +616,6 @@ public class MgQueryTemplate {
   }
 
   /**
-   * @see FindIterable#projection(Bson)
-   * @see BasicDBObject#parse(String)
-   */
-  public MgQueryTemplate projection(Map<?, ?> projection) {
-    return projection(parse(projection, false));
-  }
-
-  /**
    * Set the projections
    *
    * @param includePropertyNames the include property names
@@ -593,8 +638,32 @@ public class MgQueryTemplate {
       }
     }
     if (!projections.isEmpty()) {
-      return projection(projections);
+      return projections(projections);
     }
+    return this;
+  }
+
+  /**
+   * @see FindIterable#projection(Bson)
+   * @see BasicDBObject#parse(String)
+   */
+  public MgQueryTemplate projections(Map<?, ?> projection) {
+    return projection(parse(projection, false));
+  }
+
+  /**
+   * @see MongoCollection#withReadPreference(ReadPreference)
+   */
+  public MgQueryTemplate readConcern(ReadConcern readConcern) {
+    this.readConcern = readConcern;
+    return this;
+  }
+
+  /**
+   * @see MongoCollection#withReadPreference(ReadPreference)
+   */
+  public MgQueryTemplate readPreference(ReadPreference readPreference) {
+    this.readPreference = readPreference;
     return this;
   }
 
@@ -610,8 +679,20 @@ public class MgQueryTemplate {
    * Return a list of documents in the collection according to the given options.
    */
   public List<Map<String, Object>> select() {
-    try (MongoCursor<Document> it = query().iterator()) {
+    try (MongoCursor<Document> it = query(Document.class).iterator()) {
       return streamOf(it).map(this::convert).collect(Collectors.toList());
+    }
+  }
+
+  /**
+   * Return a list of objects in the collection according to the given options.
+   *
+   * @param <T> the type to which the document is to be converted
+   * @param clazz the document class
+   */
+  public <T> List<T> select(final Class<T> clazz) {
+    try (MongoCursor<T> it = query(clazz).iterator()) {
+      return streamOf(it).collect(Collectors.toList());
     }
   }
 
@@ -632,7 +713,7 @@ public class MgQueryTemplate {
    * @param converter the converter use for document conversion
    */
   public <T> List<T> selectAs(final Function<Object, T> converter) {
-    try (MongoCursor<Document> it = query().iterator()) {
+    try (MongoCursor<Document> it = query(Document.class).iterator()) {
       return streamOf(it).map(this::convert).map(converter).collect(Collectors.toList());
     }
   }
@@ -704,7 +785,7 @@ public class MgQueryTemplate {
    * @see FindIterable#sort(Bson)
    * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate sort(Map<?, ?> sort) {
+  public MgQueryTemplate sorts(Map<?, ?> sort) {
     return sort(parse(sort, false));
   }
 
@@ -714,7 +795,7 @@ public class MgQueryTemplate {
    * Note: the result set size is limited by {@link #limit(int)}
    */
   public Stream<Map<String, Object>> stream() {
-    final MongoCursor<Document> it = query().iterator();
+    final MongoCursor<Document> it = query(Document.class).iterator();
     return streamOf(it).onClose(it::close).map(this::convert);
   }
 
@@ -734,8 +815,42 @@ public class MgQueryTemplate {
       return stream();
     }
     final BiFunction<Long, Document, Boolean> ut = terminator::apply;
-    final MongoCursor<Document> it = new TerminableMongoCursor<>(query().iterator(), ut);
+    final MongoCursor<Document> it =
+        new TerminableMongoCursor<>(query(Document.class).iterator(), ut);
     return streamOf(it).onClose(it::close).map(this::convert);
+  }
+
+  /**
+   * Converts and returns a collection of documents that satisfy the conditions based on the given
+   * options and the given class.
+   * <p>
+   * Note: the result set size is limited by {@link #limit(int)}
+   *
+   * @param <T> the type to which the document is to be converted
+   * @param clazz the document class
+   */
+  public <T> Stream<T> stream(final Class<T> clazz) {
+    final MongoCursor<T> it = query(clazz).iterator();
+    return streamOf(it).onClose(it::close);
+  }
+
+  /**
+   * Return a stream of documents in the collection according to the given options, the stream may
+   * be terminated by the given terminator when met the conditions.
+   * <p>
+   * Note: <b> The size of the result set is not limited by {@link #limit(int)} but by the given
+   * {@code terminator}. </b>
+   *
+   * @param clazz the document class
+   * @param terminator the terminator use to terminate the stream when meet the conditions.
+   */
+  public <T> Stream<T> stream(final Class<T> clazz, final BiFunction<Long, T, Boolean> terminator) {
+    limit = -1; // NO LIMIT
+    if (terminator == null) {
+      return stream(clazz);
+    }
+    final MongoCursor<T> it = new TerminableMongoCursor<>(query(clazz).iterator(), terminator);
+    return streamOf(it).onClose(it::close);
   }
 
   /**
@@ -761,7 +876,7 @@ public class MgQueryTemplate {
    * @param converter the converter use for document conversion
    */
   public <T> Stream<T> streamAs(final Function<Object, T> converter) {
-    final MongoCursor<Document> it = query().iterator();
+    final MongoCursor<Document> it = query(Document.class).iterator();
     return streamOf(it).onClose(it::close).map(this::convert).map(converter);
   }
 
@@ -809,7 +924,7 @@ public class MgQueryTemplate {
    * @see FindIterable#let(Bson)
    * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate variables(Map<?, ?> variables) {
+  public MgQueryTemplate variablesMap(Map<?, ?> variables) {
     return variables(parse(variables, false));
   }
 
@@ -828,9 +943,18 @@ public class MgQueryTemplate {
     }
   }
 
-  protected FindIterable<Document> query() {
-    MongoCollection<Document> mc = database.getCollection(collection);
-    FindIterable<Document> fi = mc.find();
+  protected <T> FindIterable<T> query(Class<T> clazz) {
+    MongoCollection<T> mc = database.getCollection(collection, clazz);
+    if (codecRegistry != null) {
+      mc = mc.withCodecRegistry(codecRegistry);
+    }
+    if (readPreference != null) {
+      mc = mc.withReadPreference(readPreference);
+    }
+    if (readConcern != null) {
+      mc = mc.withReadConcern(readConcern);
+    }
+    FindIterable<T> fi = mc.find();
     if (filter != null) {
       fi.filter(filter);
     }
@@ -902,6 +1026,15 @@ public class MgQueryTemplate {
 
   protected <T> DistinctIterable<T> queryDistinct(String fieldName, Class<T> fieldType) {
     MongoCollection<Document> mc = database.getCollection(collection);
+    if (codecRegistry != null) {
+      mc = mc.withCodecRegistry(codecRegistry);
+    }
+    if (readPreference != null) {
+      mc = mc.withReadPreference(readPreference);
+    }
+    if (readConcern != null) {
+      mc = mc.withReadConcern(readConcern);
+    }
     DistinctIterable<T> di = mc.distinct(fieldName, fieldType);
     if (filter != null) {
       di.filter(filter);

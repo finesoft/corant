@@ -10,7 +10,7 @@
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<properties>
-		<version.agroal>2.2</version.agroal>
+		<version.agroal>2.3</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.13</version.aliyun-java-sdk-core>
 		<version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
 		<version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
@@ -83,7 +83,7 @@
 		<version.jakarta.interceptor-api>2.1.0</version.jakarta.interceptor-api>
 		<version.jakarta.jaxb-api>4.0.0</version.jakarta.jaxb-api><!--jakarta.xml.bind-api-->
 		<version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
-		<version.jakarta.jnosql>1.0.0-b3</version.jakarta.jnosql>
+		<version.jakarta.jnosql>1.1.0</version.jakarta.jnosql>
 		<version.jakarta.json-api>2.0.1</version.jakarta.json-api>
 		<version.jakarta.json.bind-api>3.0.0</version.jakarta.json.bind-api>
 		<version.jakarta.mail-api>2.0.1</version.jakarta.mail-api>
@@ -138,7 +138,7 @@
 		<version.mokito>4.0.0</version.mokito>
 		<version.mssql-jdbc>12.4.2.jre11</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
-		<version.narayana>7.0.0.Final</version.narayana>
+		<version.narayana>7.0.1.Final</version.narayana>
 		<version.ndarray>0.4.0</version.ndarray>
 		<version.netty>4.1.87.Final</version.netty>
 		<version.ognl>3.2.13</version.ognl>
@@ -1677,27 +1677,27 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jnosql.mapping</groupId>
-				<artifactId>mapping-document</artifactId>
+				<artifactId>jnosql-mapping-document</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jnosql.mapping</groupId>
-				<artifactId>mapping-key-value</artifactId>
+				<artifactId>jnosql-mapping-key-value</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jnosql.mapping</groupId>
-				<artifactId>mapping-column</artifactId>
+				<artifactId>jnosql-mapping-column</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jnosql.mapping</groupId>
-				<artifactId>mapping-graph</artifactId>
+				<artifactId>jnosql-mapping-graph</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jnosql.communication</groupId>
-				<artifactId>mongodb-driver</artifactId>
+				<groupId>org.eclipse.jnosql.databases</groupId>
+				<artifactId>jnosql-mongodb</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 				<exclusions>
 					<exclusion>
@@ -1707,13 +1707,13 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jnosql.communication</groupId>
-				<artifactId>redis-driver</artifactId>
+				<groupId>org.eclipse.jnosql.databases</groupId>
+				<artifactId>jnosql-redis</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jnosql.communication</groupId>
-				<artifactId>hbase-driver</artifactId>
+				<groupId>org.eclipse.jnosql.databases</groupId>
+				<artifactId>jnosql-hbase</artifactId>
 				<version>${version.jakarta.jnosql}</version>
 			</dependency>
 			<!-- Cache -->

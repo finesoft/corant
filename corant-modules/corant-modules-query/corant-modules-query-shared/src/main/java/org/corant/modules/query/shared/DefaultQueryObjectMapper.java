@@ -112,7 +112,7 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
         return mapReader.readValue(object.toString());
       } else {
         // Use forwarding object mappers
-        return ObjectMappers.toDocMap(object);
+        return ObjectMappers.toMap(object);
       }
     } catch (JsonProcessingException e) {
       throw new QueryRuntimeException(e);

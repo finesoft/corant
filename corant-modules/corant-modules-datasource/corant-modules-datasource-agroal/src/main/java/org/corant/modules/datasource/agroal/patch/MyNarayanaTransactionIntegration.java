@@ -21,12 +21,11 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
-import javax.transaction.xa.XAResource;
 import org.jboss.tm.XAResourceRecovery;
 import org.jboss.tm.XAResourceRecoveryRegistry;
 import io.agroal.api.transaction.TransactionAware;
@@ -188,12 +187,12 @@ public class MyNarayanaTransactionIntegration implements TransactionIntegration 
 
     @Override
     public XAResource[] getXAResources() {
-      XAConnection xaConnection = connectionFactory.getRecoveryConnection();
       try {
-        return xaConnection == null ? EMPTY_RESOURCES
-            : new XAResource[] {new RecoveryXAResource(xaConnection, name)};
+        return connectionFactory.isRecoverable()
+            ? new XAResource[] {new RecoveryXAResource(connectionFactory, name)}
+            : EMPTY_RESOURCES;
       } catch (SQLException e) {
-        return new XAResource[] {new ErrorConditionXAResource(xaConnection, e, name)};
+        return new XAResource[] {new ErrorConditionXAResource(e, name)};
       }
     }
   }

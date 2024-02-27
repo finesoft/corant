@@ -98,7 +98,7 @@ public class Aggregates {
   }
 
   public static <X extends Aggregate> X reference(Class<X> cls, Serializable id) {
-    return tryRefernce(cls, id).orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
+    return tryReference(cls, id).orElseThrow(() -> new GeneralRuntimeException(ERR_PARAM));
   }
 
   public static <X extends Aggregate> X resolve(Class<X> cls, Serializable id,
@@ -106,10 +106,12 @@ public class Aggregates {
     if (id != null && cls != null) {
       if (properties.length > 0) {
         return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType, mapOf(properties)),
-            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+                asDefaultString(id)));
       } else {
         return shouldNotNull(resolveRepository(cls).get(cls, id, lockModeType),
-            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+                asDefaultString(id)));
       }
     }
     throw new GeneralRuntimeException(ERR_PARAM);
@@ -120,10 +122,12 @@ public class Aggregates {
     if (id != null && cls != null) {
       if (properties.length > 0) {
         return shouldNotNull(resolveRepository(cls).get(cls, id, mapOf(properties)),
-            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+                asDefaultString(id)));
       } else {
         return shouldNotNull(resolveRepository(cls).get(cls, id),
-            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, asDefaultString(id)));
+            () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID, cls.getSimpleName(),
+                asDefaultString(id)));
       }
     }
     throw new GeneralRuntimeException(ERR_PARAM);
@@ -166,7 +170,7 @@ public class Aggregates {
     return resolveRepository(cls).namedQuery(namedQuery).parameters(params).select();
   }
 
-  public static <X extends Aggregate> Optional<X> tryRefernce(Class<X> cls, Serializable id) {
+  public static <X extends Aggregate> Optional<X> tryReference(Class<X> cls, Serializable id) {
     if (id != null && cls != null) {
       return Optional.ofNullable(resolveRepository(cls).getEntityManager().getReference(cls, id));
     }

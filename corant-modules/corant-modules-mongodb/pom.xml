@@ -30,5 +30,11 @@
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    <!-- Test -->
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-devops-test-unit</artifactId>
+      <scope>test</scope>
+    </dependency>    
   </dependencies>
 </project>

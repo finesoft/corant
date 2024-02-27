@@ -29,6 +29,13 @@ import java.util.logging.Level;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.datasource.agroal.patch.MyNarayanaTransactionIntegration;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -44,13 +51,6 @@ import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplie
 import io.agroal.api.security.NamePrincipal;
 import io.agroal.api.security.SimplePassword;
 import io.agroal.narayana.NarayanaTransactionIntegration;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
-import jakarta.transaction.TransactionManager;
-import jakarta.transaction.TransactionSynchronizationRegistry;
 
 /**
  * corant-modules-datasource.agroal
@@ -204,6 +204,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         cfgs.connectionPoolConfiguration().transactionIntegration(
             new MyNarayanaTransactionIntegration(tm, tsr, null, false, null));
       } else {
+        // FIXME recoveryRegistry is null, we use global recovery registry
         cfgs.connectionPoolConfiguration()
             .transactionIntegration(new NarayanaTransactionIntegration(tm, tsr, null, false, null));
       }

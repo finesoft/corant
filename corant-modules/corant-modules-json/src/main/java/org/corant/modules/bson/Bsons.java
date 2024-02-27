@@ -13,9 +13,9 @@
  */
 package org.corant.modules.bson;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import java.io.IOException;
@@ -67,10 +67,9 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
 import org.bson.codecs.DocumentCodecProvider;
 import org.bson.codecs.EncoderContext;
-import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.jsr310.Jsr310CodecProvider;
+import org.bson.conversions.Bson;
 import org.bson.io.BasicOutputBuffer;
 import org.bson.io.ByteBufferBsonInput;
 import org.bson.types.Binary;
@@ -96,8 +95,10 @@ public class Bsons {
       new DocumentCodecProvider(DEFAULT_BSON_TYPE_CLASS_MAP, SIMPLE_TYPE_DECODE_TRANSFORMER);
 
   public static final CodecRegistry DOCUMENT_CODEC_REGISTRY =
-      fromProviders(asList(new ValueCodecProvider(), new BsonValueCodecProvider(),
-          new Jsr310CodecProvider(), DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()));
+      fromRegistries(Bson.DEFAULT_CODEC_REGISTRY,
+          fromProviders(DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()));
+  // fromProviders(asList(new ValueCodecProvider(), new BsonValueCodecProvider(),
+  // new Jsr310CodecProvider(), DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()));
 
   public static final Codec<Document> DEFAULT_DOCUMENT_CODEC = new DocumentCodec(
       DOCUMENT_CODEC_REGISTRY, DEFAULT_BSON_TYPE_CLASS_MAP, SIMPLE_TYPE_DECODE_TRANSFORMER);
@@ -144,32 +145,20 @@ public class Bsons {
    * @return a java type object
    */
   public static Object fromSimpleBsonValue(BsonValue value) {
-    switch (shouldNotNull(value).getBsonType()) {
-      case INT32:
-        return value.asInt32().getValue();
-      case INT64:
-        return value.asInt64().getValue();
-      case STRING:
-        return value.asString().getValue();
-      case DECIMAL128:
-        return value.asDecimal128().decimal128Value().bigDecimalValue();
-      case DOUBLE:
-        return value.asDouble().getValue();
-      case BOOLEAN:
-        return value.asBoolean().getValue();
-      case OBJECT_ID:
-        return value.asObjectId().getValue();
-      case BINARY:
-        return value.asBinary().getData();
-      case DATE_TIME:
-        return new Date(value.asDateTime().getValue());
-      case SYMBOL:
-        return value.asSymbol().getSymbol();
-      case ARRAY:
-        return value.asArray().toArray();
-      default:
-        return value;
-    }
+    return switch (shouldNotNull(value).getBsonType()) {
+      case INT32 -> value.asInt32().getValue();
+      case INT64 -> value.asInt64().getValue();
+      case STRING -> value.asString().getValue();
+      case DECIMAL128 -> value.asDecimal128().decimal128Value().bigDecimalValue();
+      case DOUBLE -> value.asDouble().getValue();
+      case BOOLEAN -> value.asBoolean().getValue();
+      case OBJECT_ID -> value.asObjectId().getValue();
+      case BINARY -> value.asBinary().getData();
+      case DATE_TIME -> new Date(value.asDateTime().getValue());
+      case SYMBOL -> value.asSymbol().getSymbol();
+      case ARRAY -> value.asArray().toArray();
+      default -> value;
+    };
   }
 
   /**
@@ -287,6 +276,9 @@ public class Bsons {
     if (source instanceof BigDecimal) {
       return new BsonDecimal128(new Decimal128((BigDecimal) source));
     }
+    if (source instanceof Timestamp) {
+      return new BsonTimestamp(((Timestamp) source).toInstant().getEpochSecond());
+    }
     if (source instanceof Date) {
       return new BsonDateTime(((Date) source).getTime());
     }
@@ -295,10 +287,6 @@ public class Bsons {
     }
     if (source instanceof ZonedDateTime) {
       return new BsonDateTime(((ZonedDateTime) source).toInstant().toEpochMilli());
-    }
-    if (source instanceof Timestamp) {
-      Timestamp ts = (Timestamp) source;
-      return new BsonTimestamp(ts.toInstant().getEpochSecond());
     }
     if (source instanceof Resource) {
       try {
@@ -320,17 +308,15 @@ public class Bsons {
               : null);
       return writer.getValue();
     } catch (CodecConfigurationException e) {
-      throw new IllegalArgumentException(String.format("Unable to convert %s to BsonValue.",
-          source != null ? source.getClass().getName() : "null"));
+      throw new IllegalArgumentException(
+          String.format("Unable to convert %s to BsonValue.", source.getClass().getName()));
     }
   }
 
   static Object decodeTransformer(Object objectToTransform) {
-    if (objectToTransform instanceof Binary) {
-      Binary binary = (Binary) objectToTransform;
-      if (binary.getType() == BsonBinarySubType.BINARY.getValue()) {
-        return binary.getData();
-      }
+    if ((objectToTransform instanceof Binary binary)
+        && (binary.getType() == BsonBinarySubType.BINARY.getValue())) {
+      return binary.getData();
     }
     return objectToTransform;
   }

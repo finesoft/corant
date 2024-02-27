@@ -34,6 +34,13 @@ import org.corant.modules.bson.codec.OffsetDateTimeStringCodec;
 import org.corant.modules.bson.codec.OffsetTimeStringCodec;
 import org.corant.modules.bson.codec.PeriodDocumentCodec;
 import org.corant.modules.bson.codec.PeriodStringCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.BooleanArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.ByteArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.DoubleArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.FloatArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.IntArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.LongArrayCodec;
+import org.corant.modules.bson.codec.PrimitiveArrayCodecs.ShortArrayCodec;
 import org.corant.modules.bson.codec.SerializableCodec;
 import org.corant.modules.bson.codec.URIStringCodec;
 import org.corant.modules.bson.codec.URLStringCodec;
@@ -108,6 +115,14 @@ public class ExtendedCodecProvider implements CodecProvider {
     addCodec(new YearInt32Codec());
     addCodec(new ZonedDateTimeStringCodec());
     addCodec(FullClassNameEnumCodec.INSTANCE);
+    // primitives array
+    addCodec(new IntArrayCodec());
+    addCodec(new ShortArrayCodec());
+    addCodec(new LongArrayCodec());
+    addCodec(new FloatArrayCodec());
+    addCodec(new DoubleArrayCodec());
+    addCodec(new BooleanArrayCodec());
+    addCodec(new ByteArrayCodec());
   }
 
 }

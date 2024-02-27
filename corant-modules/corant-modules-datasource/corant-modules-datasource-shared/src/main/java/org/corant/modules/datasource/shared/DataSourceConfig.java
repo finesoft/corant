@@ -118,7 +118,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "true")
   protected boolean enable = true;
 
-  @ConfigKeyItem(defaultValue = "true")
+  @ConfigKeyItem(defaultValue = "false")
   protected boolean enableCustomTransactionIntegration;
 
   @ConfigKeyItem(defaultValue = "false")

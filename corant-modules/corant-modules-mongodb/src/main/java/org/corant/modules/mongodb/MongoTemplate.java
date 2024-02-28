@@ -19,7 +19,6 @@ import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Lists.transform;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -64,6 +63,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.DeleteOptions;
 import com.mongodb.client.model.DropCollectionOptions;
@@ -142,8 +142,8 @@ public class MongoTemplate {
     }
   }
 
-  public MongoAggregator aggregator() {
-    return new MongoAggregator(this);
+  public MongoAggregate aggregate() {
+    return new MongoAggregate(this);
   }
 
   /**
@@ -1002,7 +1002,7 @@ public class MongoTemplate {
    *
    * @author bingo 18:34:06
    */
-  public static class MongoAggregator {
+  public static class MongoAggregate {
     protected final MongoTemplate tpl;
     protected List<Bson> pipeline;
     protected String collectionName;
@@ -1019,7 +1019,7 @@ public class MongoTemplate {
     protected Class<?> explainResultClass;
     protected CodecRegistry codecRegistry;
 
-    MongoAggregator(MongoTemplate tpl) {
+    protected MongoAggregate(MongoTemplate tpl) {
       this.tpl = tpl;
     }
 
@@ -1027,7 +1027,185 @@ public class MongoTemplate {
      * Aggregates documents according to the specified aggregation pipeline and the specified
      * {@link AggregateIterable} arguments
      */
-    public List<Map<String, Object>> aggregate() {
+    public List<Document> aggregate() {
+      try (MongoCursor<Document> cursor = doAggregate().iterator()) {
+        return streamOf(cursor).onClose(cursor::close).collect(Collectors.toList());
+      }
+    }
+
+    /**
+     * Aggregates documents according to the specified aggregation pipeline and the specified
+     * {@link AggregateIterable} arguments
+     *
+     * @param <T> the result type
+     * @param klass the result class
+     */
+    public <T> List<T> aggregateAs(Class<T> klass) {
+      try (MongoCursor<Document> cursor = doAggregate().iterator()) {
+        return streamOf(cursor).map(a -> ObjectMappers.fromMap(a, klass)).onClose(cursor::close)
+            .toList();
+      }
+    }
+
+    /**
+     * Aggregates documents according to the specified aggregation pipeline and the specified
+     * {@link AggregateIterable} arguments
+     */
+    public Stream<Document> aggregateStream() {
+      MongoCursor<Document> cursor = doAggregate().iterator();
+      return streamOf(cursor).onClose(cursor::close);
+    }
+
+    /**
+     * Aggregates documents according to the specified aggregation pipeline and the specified
+     * {@link AggregateIterable} arguments
+     *
+     * @param <T> the result type
+     * @param klass the result class
+     */
+    public <T> Stream<T> aggregateStreamAs(Class<T> klass) {
+      MongoCursor<Document> cursor = doAggregate().iterator();
+      return streamOf(cursor).map(a -> ObjectMappers.fromMap(a, klass)).onClose(cursor::close);
+    }
+
+    /**
+     * @see AggregateIterable#allowDiskUse(Boolean)
+     */
+    public MongoAggregate allowDiskUse(Boolean allowDiskUse) {
+      this.allowDiskUse = allowDiskUse;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#batchSize(int)
+     */
+    public MongoAggregate batchSize(Integer batchSize) {
+      this.batchSize = batchSize;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#bypassDocumentValidation(Boolean)
+     */
+    public MongoAggregate bypassDocumentValidation(Boolean bypassDocumentValidation) {
+      this.bypassDocumentValidation = bypassDocumentValidation;
+      return this;
+    }
+
+    /**
+     * @see MongoCollection#withCodecRegistry(CodecRegistry)
+     */
+    public MongoAggregate codecRegistry(CodecRegistry codecRegistry) {
+      this.codecRegistry = codecRegistry;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#collation(Collation)
+     */
+    public MongoAggregate collation(Collation collation) {
+      this.collation = collation;
+      return this;
+    }
+
+    /**
+     * Set the collection name
+     *
+     * @param collectionName the collection name
+     */
+    public MongoAggregate collectionName(String collectionName) {
+      this.collectionName = shouldNotNull(collectionName);
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#comment(BsonValue)
+     */
+    public MongoAggregate comment(BsonValue comment) {
+      this.comment = comment;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#explain(Class)
+     */
+    public MongoAggregate explainResultClass(Class<?> explainResultClass) {
+      this.explainResultClass = explainResultClass;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#explain(Class, ExplainVerbosity)
+     */
+    public MongoAggregate explainVerbosity(ExplainVerbosity explainVerbosity) {
+      this.explainVerbosity = explainVerbosity;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#hint(Bson)
+     */
+    public MongoAggregate hint(Bson hint) {
+      this.hint = hint;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#hint(Bson)
+     */
+    public MongoAggregate hintMap(Map<String, ?> hint) {
+      return hint(tpl.parse(hint));
+    }
+
+    /**
+     * @see AggregateIterable#maxAwaitTime(long, TimeUnit)
+     */
+    public MongoAggregate maxAwaitTime(Duration maxAwaitTime) {
+      this.maxAwaitTime = maxAwaitTime;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#maxTime(long, TimeUnit)
+     */
+    public MongoAggregate maxTime(Duration maxTime) {
+      this.maxTime = maxTime;
+      return this;
+    }
+
+    /**
+     * @see MongoCollection#aggregate(List)
+     */
+    public MongoAggregate pipeline(Bson... pipeline) {
+      this.pipeline = shouldNotEmpty(listOf(pipeline));
+      return this;
+    }
+
+    /**
+     * @see MongoCollection#aggregate(List)
+     */
+    public MongoAggregate pipeline(List<Map<String, ?>> pipeline) {
+      this.pipeline =
+          shouldNotEmpty(pipeline).stream().map(tpl::parse).collect(Collectors.toList());
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#let(Bson)
+     */
+    public MongoAggregate variables(Bson variables) {
+      this.variables = variables;
+      return this;
+    }
+
+    /**
+     * @see AggregateIterable#let(Bson)
+     */
+    public MongoAggregate variablesMap(Map<String, ?> variables) {
+      return variables(tpl.parse(variables));
+    }
+
+    protected AggregateIterable<Document> doAggregate() {
       ClientSession session = obtainSession();
       MongoCollection<Document> mc = obtainCollection();
       if (codecRegistry != null) {
@@ -1068,146 +1246,7 @@ public class MongoTemplate {
       if (explainResultClass != null) {
         ai.explain(explainResultClass);
       }
-      try (MongoCursor<Document> cursor = ai.iterator()) {
-        return streamOf(cursor).onClose(cursor::close).collect(Collectors.toList());
-      }
-    }
-
-    /**
-     * @see AggregateIterable#allowDiskUse(Boolean)
-     */
-    public MongoAggregator allowDiskUse(Boolean allowDiskUse) {
-      this.allowDiskUse = allowDiskUse;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#batchSize(int)
-     */
-    public MongoAggregator batchSize(Integer batchSize) {
-      this.batchSize = batchSize;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#bypassDocumentValidation(Boolean)
-     */
-    public MongoAggregator bypassDocumentValidation(Boolean bypassDocumentValidation) {
-      this.bypassDocumentValidation = bypassDocumentValidation;
-      return this;
-    }
-
-    /**
-     * @see MongoCollection#withCodecRegistry(CodecRegistry)
-     */
-    public MongoAggregator codecRegistry(CodecRegistry codecRegistry) {
-      this.codecRegistry = codecRegistry;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#collation(Collation)
-     */
-    public MongoAggregator collation(Collation collation) {
-      this.collation = collation;
-      return this;
-    }
-
-    /**
-     * Set the collection name
-     *
-     * @param collectionName the collection name
-     */
-    public MongoAggregator collectionName(String collectionName) {
-      this.collectionName = shouldNotNull(collectionName);
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#comment(BsonValue)
-     */
-    public MongoAggregator comment(BsonValue comment) {
-      this.comment = comment;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#explain(Class)
-     */
-    public MongoAggregator explainResultClass(Class<?> explainResultClass) {
-      this.explainResultClass = explainResultClass;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#explain(Class, ExplainVerbosity)
-     */
-    public MongoAggregator explainVerbosity(ExplainVerbosity explainVerbosity) {
-      this.explainVerbosity = explainVerbosity;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#hint(Bson)
-     */
-    public MongoAggregator hint(Bson hint) {
-      this.hint = hint;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#hint(Bson)
-     */
-    public MongoAggregator hintMap(Map<String, ?> hint) {
-      return hint(tpl.parse(hint));
-    }
-
-    /**
-     * @see AggregateIterable#maxAwaitTime(long, TimeUnit)
-     */
-    public MongoAggregator maxAwaitTime(Duration maxAwaitTime) {
-      this.maxAwaitTime = maxAwaitTime;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#maxTime(long, TimeUnit)
-     */
-    public MongoAggregator maxTime(Duration maxTime) {
-      this.maxTime = maxTime;
-      return this;
-    }
-
-    /**
-     * @see MongoCollection#aggregate(List)
-     */
-    public MongoAggregator pipeline(Bson... pipeline) {
-      this.pipeline = shouldNotEmpty(listOf(pipeline));
-      return this;
-    }
-
-    /**
-     * @see MongoCollection#aggregate(List)
-     */
-    public MongoAggregator pipeline(List<Map<String, ?>> pipeline) {
-      this.pipeline =
-          shouldNotEmpty(pipeline).stream().map(tpl::parse).collect(Collectors.toList());
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#let(Bson)
-     */
-    public MongoAggregator variables(Bson variables) {
-      this.variables = variables;
-      return this;
-    }
-
-    /**
-     * @see AggregateIterable#let(Bson)
-     */
-    public MongoAggregator variablesMap(Map<String, ?> variables) {
-      return variables(tpl.parse(variables));
+      return ai;
     }
 
     protected MongoCollection<Document> obtainCollection() {
@@ -1504,11 +1543,13 @@ public class MongoTemplate {
      * Counts the number of documents in the collection according to the given options.
      */
     public long countDocuments() {
+      return countDocuments(null);
+    }
+
+    public long countDocuments(CountOptions options) {
       MongoCollection<Document> mc = obtainCollection();
-      if (isNotEmpty(filter)) {
-        return mc.countDocuments(filter);
-      }
-      return mc.countDocuments();
+      return mc.countDocuments(defaultObject(filter, Document::new),
+          defaultObject(options, CountOptions::new));
     }
 
     /**
@@ -2045,9 +2086,9 @@ public class MongoTemplate {
    */
   public static class TerminableMongoCursor<T> implements MongoCursor<T> {
 
-    final MongoCursor<T> delegate;
-    final AtomicLong counter = new AtomicLong(0);
-    final BiFunction<Long, T, Boolean> terminator;
+    protected final MongoCursor<T> delegate;
+    protected final AtomicLong counter = new AtomicLong(0);
+    protected final BiFunction<Long, T, Boolean> terminator;
     volatile T lastDoc;
 
     public TerminableMongoCursor(MongoCursor<T> delegate, BiFunction<Long, T, Boolean> terminator) {

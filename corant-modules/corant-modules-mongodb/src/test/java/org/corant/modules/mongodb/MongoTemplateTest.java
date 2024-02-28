@@ -21,14 +21,17 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.bson.BsonDocument;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
+import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -40,6 +43,7 @@ import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.junit.Test;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -54,6 +58,30 @@ import junit.framework.TestCase;
 public class MongoTemplateTest extends TestCase {
 
   @Test
+  public void testConvert() throws JsonProcessingException {
+    MapPojo pojo = new MapPojo();
+    Document doc = new Document(ObjectMappers.toDocMap(pojo));
+    doc.put("$gt", Arrays.asList(799123L, 123123L));
+    BsonDocument bsonDoc =
+        doc.toBsonDocument(BsonDocument.class, MongoTemplate.DEFAULT_CODEC_REGISTRY);
+    System.out.println(bsonDoc);
+    System.out.println(MongoExtendedJsons.toBson(pojo, true));
+  }
+
+  @Test
+  public void testFilter() {
+    MongoClient mc =
+        Mongos.resolveClient("mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1");
+    MongoDatabase md = mc.getDatabase("parts360-data");
+    Map<String, Object> filter = mapOf("$and", listOf(mapOf("type.id", 147169256310571008L),
+        mapOf("refreshedTime", mapOf("$gt", LocalDate.of(2023, 11, 27)))));
+    MongoTemplate mt = new MongoTemplate(md);
+    mt.query().collectionName("ct_part").filterMap(filter).limit(100).find()
+        .forEach(System.out::println);
+
+  }
+
+  @Test
   public void testPrimaryArray() {
     MongoClient mc =
         Mongos.resolveClient("mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1");
@@ -62,7 +90,7 @@ public class MongoTemplateTest extends TestCase {
     MapPojo pojo = new MapPojo();
     mt.save("bingo", pojo);
     MapPojo x = ObjectMappers.fromMap(
-        mt.query().collectionName("bingo").filters(mapOf("_id", pojo.getId())).findOne(),
+        mt.query().collectionName("bingo").filterMap(mapOf("_id", pojo.getId())).findOne(),
         MapPojo.class);
     assertEquals(pojo, x);
   }
@@ -80,7 +108,7 @@ public class MongoTemplateTest extends TestCase {
     Monolight myMonolight = new Monolight();
     myMonolight.setPowerStatus(PowerStatus.ON);
     myMonolight.setColorTemperature(5200);
-    InsertOneResult ir = mt.insert("typed", myMonolight, codecRegistry, null);
+    InsertOneResult ir = mt.doInsert("typed", myMonolight, codecRegistry, null);
     BsonDocument document = new BsonDocument();
     document.put("_id", ir.getInsertedId());
     Monolight reMonolight = mt.query().collectionName("typed").filter(document)

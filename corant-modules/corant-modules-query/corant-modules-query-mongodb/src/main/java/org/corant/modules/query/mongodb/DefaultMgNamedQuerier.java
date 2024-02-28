@@ -108,6 +108,7 @@ public class DefaultMgNamedQuerier
           }
           try {
             // We assume that all extended JSON have been processed in the given script
+            // FIXME use another way to convert value to BSON
             if (x instanceof Collection) {
               script.put(mgo, MongoExtendedJsons.toBsons((Collection<?>) x, false));
             } else if (x != null && x.getClass().isArray()) {

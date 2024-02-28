@@ -94,7 +94,6 @@ public class ObjectMappers {
         .forEach(c -> c.configure(defaultObjectMapper));
 
     forwardingObjectMapper.enable(Feature.ALLOW_COMMENTS);
-    forwardingObjectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
     forwardingObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     forwardingObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     forwardingObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

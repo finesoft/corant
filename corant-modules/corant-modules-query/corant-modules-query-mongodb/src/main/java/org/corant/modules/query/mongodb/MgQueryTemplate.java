@@ -38,7 +38,6 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
-import org.corant.modules.mongodb.MongoExtendedJsons;
 import org.corant.modules.mongodb.MongoTemplate.TerminableMongoCursor;
 import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
@@ -47,8 +46,6 @@ import org.corant.modules.query.QueryService.Paging;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
 import com.mongodb.ReadConcern;
@@ -189,16 +186,10 @@ public class MgQueryTemplate {
 
   /**
    * @see MongoCollection#aggregate(List)
-   * @see MongoExtendedJsons#toBsons(java.util.Collection, boolean)
    */
-  public MgQueryTemplate aggregatePipeline(List<Map<?, ?>> pipeline) {
-    aggregatePipeline = shouldNotEmpty(pipeline).stream().map(a -> {
-      try {
-        return MongoExtendedJsons.toBson(a, true);
-      } catch (JsonProcessingException e) {
-        throw new QueryRuntimeException(e);
-      }
-    }).collect(Collectors.toList());
+  public MgQueryTemplate aggregatePipeline(List<Map<String, ?>> pipeline) {
+    aggregatePipeline =
+        shouldNotEmpty(pipeline).stream().map(this::parse).collect(Collectors.toList());
     return this;
   }
 
@@ -321,11 +312,10 @@ public class MgQueryTemplate {
 
   /**
    * @see FindIterable#filter(Bson)
-   * @see MongoExtendedJsons#toBson(Object, boolean)
    */
   @Experimental
-  public MgQueryTemplate filters(Map<?, ?> filter) {
-    return filter(parse(filter, true));
+  public MgQueryTemplate filterMap(Map<String, ?> filter) {
+    return filter(parse(filter));
   }
 
   /**
@@ -453,10 +443,9 @@ public class MgQueryTemplate {
   /**
    * @see FindIterable#hint(Bson)
    * @see AggregateIterable#hint(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate hints(Map<?, ?> hint) {
-    return hint(parse(hint, false));
+  public MgQueryTemplate hintMap(Map<String, ?> hint) {
+    return hint(parse(hint));
   }
 
   /**
@@ -488,10 +477,9 @@ public class MgQueryTemplate {
 
   /**
    * @see FindIterable#max(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate maxMap(Map<?, ?> max) {
-    return max(parse(max, false));
+  public MgQueryTemplate maxMap(Map<String, ?> max) {
+    return max(parse(max));
   }
 
   /**
@@ -513,10 +501,9 @@ public class MgQueryTemplate {
 
   /**
    * @see FindIterable#min(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate minMap(Map<?, ?> min) {
-    return min(parse(min, false));
+  public MgQueryTemplate minMap(Map<String, ?> min) {
+    return min(parse(min));
   }
 
   /**
@@ -638,17 +625,16 @@ public class MgQueryTemplate {
       }
     }
     if (!projections.isEmpty()) {
-      return projections(projections);
+      return projectionMap(projections);
     }
     return this;
   }
 
   /**
    * @see FindIterable#projection(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate projections(Map<?, ?> projection) {
-    return projection(parse(projection, false));
+  public MgQueryTemplate projectionMap(Map<String, ?> projection) {
+    return projection(parse(projection));
   }
 
   /**
@@ -783,10 +769,9 @@ public class MgQueryTemplate {
 
   /**
    * @see FindIterable#sort(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate sorts(Map<?, ?> sort) {
-    return sort(parse(sort, false));
+  public MgQueryTemplate sortMap(Map<String, ?> sort) {
+    return sort(parse(sort));
   }
 
   /**
@@ -922,10 +907,9 @@ public class MgQueryTemplate {
   /**
    * @see AggregateIterable#let(Bson)
    * @see FindIterable#let(Bson)
-   * @see BasicDBObject#parse(String)
    */
-  public MgQueryTemplate variablesMap(Map<?, ?> variables) {
-    return variables(parse(variables, false));
+  public MgQueryTemplate variablesMap(Map<String, ?> variables) {
+    return variables(parse(variables));
   }
 
   protected Map<String, Object> convert(Document doc) {
@@ -935,12 +919,8 @@ public class MgQueryTemplate {
     return doc;
   }
 
-  protected Bson parse(Object object, boolean extended) {
-    try {
-      return MongoExtendedJsons.toBson(object, extended);
-    } catch (JsonProcessingException e) {
-      throw new QueryRuntimeException(e);
-    }
+  protected Bson parse(Map<String, ?> object) {
+    return object == null ? null : object instanceof Bson ? (Bson) object : new Document(object);
   }
 
   protected <T> FindIterable<T> query(Class<T> clazz) {

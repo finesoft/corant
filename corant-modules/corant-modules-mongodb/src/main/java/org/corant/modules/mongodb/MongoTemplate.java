@@ -21,6 +21,7 @@ import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Lists.transform;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
@@ -43,11 +44,8 @@ import org.bson.conversions.Bson;
 import org.corant.modules.bson.Bsons;
 import org.corant.modules.bson.ExtendedCodecProvider;
 import org.corant.modules.json.ObjectMappers;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
 import com.mongodb.MongoClientSettings;
@@ -92,6 +90,7 @@ public class MongoTemplate {
   public static final CodecRegistry DEFAULT_CODEC_REGISTRY =
       fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
           fromProviders(Bsons.DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()));
+  protected static final Function<Document, Object> DOC_ID_GETTER = d -> d.get(DOC_ID_FIELD_NAME);
 
   protected final MongoDatabase database;
   protected WriteConcern writeConcern;
@@ -143,14 +142,6 @@ public class MongoTemplate {
     }
   }
 
-  protected static Bson parse(Object object, boolean extended) {
-    try {
-      return MongoExtendedJsons.toBson(object, extended);
-    } catch (JsonProcessingException e) {
-      throw new CorantRuntimeException(e);
-    }
-  }
-
   public MongoAggregator aggregator() {
     return new MongoAggregator(this);
   }
@@ -197,10 +188,44 @@ public class MongoTemplate {
    * @param collectionName name of the collection to store the object in. Must not be
    *        {@literal null}.
    * @param filter the query filter to apply the delete operation
+   * @return the result of the remove operation
+   */
+  public DeleteResult delete(String collectionName, Map<String, ?> filter) {
+    return delete(collectionName, filter, null);
+  }
+
+  /**
+   * Removes all documents from the given collection that match the given query filter. If no
+   * documents match, the collection is not modified.
+   *
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param filter the query filter to apply the delete operation
    * @param options the options to apply to the delete operation
    * @return the result of the remove operation
    */
-  public DeleteResult delete(String collectionName, Bson filter, DeleteOptions options) {
+  public DeleteResult delete(String collectionName, Map<String, ?> filter, DeleteOptions options) {
+    return doDelete(collectionName, parse(shouldNotNull(filter, "Filter can't null")), options);
+  }
+
+  /**
+   * Returns a new {@link MongoDistinction} instance.
+   */
+  public MongoDistinction distinction() {
+    return new MongoDistinction(this);
+  }
+
+  /**
+   * Removes all documents from the given collection that match the given query filter. If no
+   * documents match, the collection is not modified.
+   *
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param filter the query filter to apply the delete operation
+   * @param options the options to apply to the delete operation
+   * @return the result of the remove operation
+   */
+  public DeleteResult doDelete(String collectionName, Bson filter, DeleteOptions options) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(filter, "Filter must not be null");
     MongoCollection<Document> collection = obtainCollection(collectionName);
@@ -218,37 +243,236 @@ public class MongoTemplate {
   }
 
   /**
-   * Removes all documents from the given collection that match the given query filter. If no
-   * documents match, the collection is not modified.
+   * Insert an object into the specified collection according to the specified codec-registry and
+   * options.
    *
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param filter the query filter to apply the delete operation, supports extended JSON
-   * @return the result of the remove operation
+   * @param <T> the type of the class to use instead of Document
+   * @param collectionName name of the collection to store the object in. Must not be {@literal
+   *     null}
+   * @param object the object to store in the collection. Must not be {@literal null}.
+   * @param codecRegistry the codec-registry apply to the operation
+   * @param options the options to apply to the operation
+   * @return the insert result
    */
-  public DeleteResult deletes(String collectionName, Map<?, ?> filter) {
-    return deletes(collectionName, filter, null);
+  public <T> InsertOneResult doInsert(String collectionName, T object, CodecRegistry codecRegistry,
+      InsertOneOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(object, "Object must not be null");
+    @SuppressWarnings("unchecked")
+    Class<T> klass = (Class<T>) object.getClass();
+    MongoCollection<T> collection = obtainCollection(collectionName, klass);
+    if (codecRegistry != null) {
+      collection = collection.withCodecRegistry(codecRegistry);
+    }
+    if (options != null) {
+      if (session != null) {
+        return collection.insertOne(session, object, options);
+      } else {
+        return collection.insertOne(object, options);
+      }
+    } else if (session != null) {
+      return collection.insertOne(session, object);
+    } else {
+      return collection.insertOne(object);
+    }
   }
 
   /**
-   * Removes all documents from the given collection that match the given query filter. If no
-   * documents match, the collection is not modified.
+   * Insert a list of objects into a collection in a single batch write to the database according to
+   * the specified codec-registry and options.
    *
+   * @param <T> the type of the class to use instead of Document
    * @param collectionName name of the collection to store the object in. Must not be
    *        {@literal null}.
-   * @param filter the query filter to apply the delete operation, supports extended JSON
-   * @param options the options to apply to the delete operation
-   * @return the result of the remove operation
+   * @param klass the object class
+   * @param objects the list of objects to store in the collection. Must not be {@literal null}.
+   * @param codecRegistry the codec-registry to apply to the operation
+   * @param options the options to apply to the operation
+   * @return the insert result
    */
-  public DeleteResult deletes(String collectionName, Map<?, ?> filter, DeleteOptions options) {
-    return delete(collectionName, parse(shouldNotNull(filter, "Filter can't null"), true), options);
+  public <T> InsertManyResult doInsertMany(String collectionName, Class<T> klass, List<T> objects,
+      CodecRegistry codecRegistry, InsertManyOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(klass, "Object class must not be null");
+    shouldNotNull(objects, "Objects list must not be null");
+    MongoCollection<T> collection = obtainCollection(collectionName, klass);
+    if (codecRegistry != null) {
+      collection = collection.withCodecRegistry(codecRegistry);
+    }
+    if (options != null) {
+      if (session != null) {
+        return collection.insertMany(session, objects, options);
+      } else {
+        return collection.insertMany(objects, options);
+      }
+    } else if (session != null) {
+      return collection.insertMany(session, objects);
+    } else {
+      return collection.insertMany(objects);
+    }
   }
 
   /**
-   * Returns a new {@link MongoDistinction} instance.
+   * Save or replace an object in the given collection according to the specified codec-registry and
+   * options.
+   *
+   * @param <T> the type of the class to use instead of Document
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param object the object to be saved or replaced
+   * @param codecRegistry the codec-registry to apply to the save operation
+   * @param idGetter the id extractor function
+   * @param options the options to apply to the save operation
+   * @return the save or replace result
    */
-  public MongoDistinction distinction() {
-    return new MongoDistinction(this);
+  public <T> UpdateResult doSave(String collectionName, T object, CodecRegistry codecRegistry,
+      Function<T, Object> idGetter, ReplaceOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(object, "Object must not be null");
+    shouldNotNull(idGetter, "The id getter must not be null");
+    @SuppressWarnings("unchecked")
+    Class<T> klass = (Class<T>) object.getClass();
+    MongoCollection<T> collection = obtainCollection(collectionName, klass);
+    if (codecRegistry != null) {
+      collection = collection.withCodecRegistry(codecRegistry);
+    }
+    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
+    if (session != null) {
+      return collection.replaceOne(session, new Document(DOC_ID_FIELD_NAME, idGetter.apply(object)),
+          object, ro);
+    } else {
+      return collection.replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter), object, ro);
+    }
+  }
+
+  /**
+   * Save or replace an object in the given collection according to the specified codec-registry and
+   * options.
+   *
+   * @param <T> the type of the class to use instead of Document
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param klass the class of list element
+   * @param objects a list of object to be saved or replaced
+   * @param codecRegistry the codec-registry to apply to the save operation
+   * @param idGetter the id extractor function
+   * @param options the options to apply to the save operation
+   * @return a list of save or replace result
+   */
+  public <T> List<UpdateResult> doSaveMany(String collectionName, Class<T> klass, List<T> objects,
+      CodecRegistry codecRegistry, Function<T, Object> idGetter, ReplaceOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(klass, "Object klass must not be null");
+    shouldNotNull(objects, "Objects list must not be null");
+    shouldNotNull(idGetter, "The Id getter must not be null");
+    MongoCollection<T> collection = obtainCollection(collectionName, klass);
+    if (codecRegistry != null) {
+      collection = collection.withCodecRegistry(codecRegistry);
+    }
+    final MongoCollection<T> useCollection = collection;
+    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
+    if (session != null) {
+      return objects.stream().map(doc -> useCollection.replaceOne(session,
+          new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro)).toList();
+    } else {
+      return objects.stream().map(doc -> useCollection
+          .replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro)).toList();
+    }
+  }
+
+  /**
+   * Save or replace an object in the given collection according to the specified codec-registry and
+   * options.
+   *
+   * @param <T> the type of the class to use instead of Document
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param klass the class of list element
+   * @param stream the objects stream to be saved or replaced
+   * @param codecRegistry the codec-registry to apply to the save operation
+   * @param idGetter the id extractor function
+   * @param options the options to apply to the save operation
+   * @return the save result stream
+   */
+  public <T> Stream<UpdateResult> doStreamSave(String collectionName, Class<T> klass,
+      Stream<T> stream, CodecRegistry codecRegistry, Function<T, Object> idGetter,
+      ReplaceOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(klass, "Object klass must not be null");
+    shouldNotNull(stream, "Stream must not be null");
+    shouldNotNull(idGetter, "The Id getter must not be null");
+    MongoCollection<T> collection = obtainCollection(collectionName, klass);
+    if (codecRegistry != null) {
+      collection = collection.withCodecRegistry(codecRegistry);
+    }
+    final MongoCollection<T> useCollection = collection;
+    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
+    if (session != null) {
+      return stream.map(doc -> useCollection.replaceOne(session,
+          new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro));
+    } else {
+      return stream.map(doc -> useCollection
+          .replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro));
+    }
+  }
+
+  /**
+   * Update all documents in the given collection according to the specified arguments.
+   *
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param filter a document describing the query filter, which may not be null.
+   * @param update a document describing the update, which may not be null. The update to apply must
+   *        include only update operators.
+   * @param options the options to apply to the update operation
+   * @return the result of the update many operation
+   */
+  public UpdateResult doUpdate(String collectionName, Bson filter, Bson update,
+      UpdateOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(filter, "Filter must not be null");
+    shouldNotNull(update, "Update must not be null");
+    MongoCollection<Document> collection = obtainCollection(collectionName);
+    if (options != null) {
+      if (session != null) {
+        return collection.updateMany(session, filter, update, options);
+      } else {
+        return collection.updateMany(filter, update, options);
+      }
+    } else if (session != null) {
+      return collection.updateMany(session, filter, update);
+    } else {
+      return collection.updateMany(filter, update);
+    }
+  }
+
+  /**
+   * Update all documents in the given collection according to the specified options.
+   *
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param filter a document describing the query filter, which may not be null.
+   * @param pipeline a pipeline describing the update, which may not be null.
+   * @param options the options to apply to the update operation
+   * @return the result of the update many operation
+   */
+  public UpdateResult doUpdateMany(String collectionName, Bson filter, List<Bson> pipeline,
+      UpdateOptions options) {
+    shouldNotNull(collectionName, "CollectionName must not be null");
+    shouldNotNull(filter, "Filter must not be null");
+    shouldNotNull(pipeline, "Update must not be null");
+    MongoCollection<Document> collection = obtainCollection(collectionName);
+    if (options != null) {
+      if (session != null) {
+        return collection.updateMany(session, filter, pipeline, options);
+      } else {
+        return collection.updateMany(filter, pipeline, options);
+      }
+    } else if (session != null) {
+      return collection.updateMany(session, filter, pipeline);
+    } else {
+      return collection.updateMany(filter, pipeline);
+    }
   }
 
   /**
@@ -339,7 +563,7 @@ public class MongoTemplate {
    * @return the insert result
    */
   public InsertOneResult insert(String collectionName, Object object) {
-    return insert(collectionName, object, (InsertOneOptions) null, null);
+    return insert(collectionName, object, null, null);
   }
 
   /**
@@ -357,41 +581,6 @@ public class MongoTemplate {
    */
   public InsertOneResult insert(String collectionName, Object object, InsertOneOptions options) {
     return insert(collectionName, object, options, null);
-  }
-
-  /**
-   * Insert an object into the specified collection according to the specified codec-registry and
-   * options.
-   *
-   * @param <T> the type of the class to use instead of Document
-   * @param collectionName name of the collection to store the object in. Must not be {@literal
-   *     null}
-   * @param object the object to store in the collection. Must not be {@literal null}.
-   * @param codecRegistry the codec-registry apply to the operation
-   * @param options the options to apply to the operation
-   * @return the insert result
-   */
-  public <T> InsertOneResult insert(String collectionName, T object, CodecRegistry codecRegistry,
-      InsertOneOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(object, "Object must not be null");
-    @SuppressWarnings("unchecked")
-    Class<T> klass = (Class<T>) object.getClass();
-    MongoCollection<T> collection = obtainCollection(collectionName, klass);
-    if (codecRegistry != null) {
-      collection = collection.withCodecRegistry(codecRegistry);
-    }
-    if (options != null) {
-      if (session != null) {
-        return collection.insertOne(session, object, options);
-      } else {
-        return collection.insertOne(object, options);
-      }
-    } else if (session != null) {
-      return collection.insertOne(session, object);
-    } else {
-      return collection.insertOne(object);
-    }
   }
 
   /**
@@ -416,59 +605,13 @@ public class MongoTemplate {
       Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(object, "Object must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
     Document doc;
     if (handler == null) {
-      doc = handle(object);
+      doc = resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
-    if (options != null) {
-      if (session != null) {
-        return collection.insertOne(session, doc, options);
-      } else {
-        return collection.insertOne(doc, options);
-      }
-    } else if (session != null) {
-      return collection.insertOne(session, doc);
-    } else {
-      return collection.insertOne(doc);
-    }
-  }
-
-  /**
-   * Insert a list of objects into a collection in a single batch write to the database according to
-   * the specified codec-registry and options.
-   *
-   * @param <T> the type of the class to use instead of Document
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param klass the object class
-   * @param objects the list of objects to store in the collection. Must not be {@literal null}.
-   * @param codecRegistry the codec-registry to apply to the operation
-   * @param options the options to apply to the operation
-   * @return the insert result
-   */
-  public <T> InsertManyResult insertMany(String collectionName, Class<T> klass, List<T> objects,
-      CodecRegistry codecRegistry, InsertManyOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(klass, "Object class must not be null");
-    shouldNotNull(objects, "Objects list must not be null");
-    MongoCollection<T> collection = obtainCollection(collectionName, klass);
-    if (codecRegistry != null) {
-      collection = collection.withCodecRegistry(codecRegistry);
-    }
-    if (options != null) {
-      if (session != null) {
-        return collection.insertMany(session, objects, options);
-      } else {
-        return collection.insertMany(objects, options);
-      }
-    } else if (session != null) {
-      return collection.insertMany(session, objects);
-    } else {
-      return collection.insertMany(objects);
-    }
+    return doInsert(collectionName, doc, null, options);
   }
 
   /**
@@ -532,20 +675,9 @@ public class MongoTemplate {
       InsertManyOptions options, Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
-    Function<T, Document> useHandler = defaultObject(handler, this::handle);
+    Function<T, Document> useHandler = defaultObject(handler, this::resolveDocument);
     List<Document> docs = objects.stream().map(useHandler).toList();
-    if (options != null) {
-      if (session != null) {
-        return collection.insertMany(session, docs, options);
-      } else {
-        return collection.insertMany(docs, options);
-      }
-    } else if (session != null) {
-      return collection.insertMany(session, docs);
-    } else {
-      return collection.insertMany(docs);
-    }
+    return doInsertMany(collectionName, Document.class, docs, null, options);
   }
 
   /**
@@ -589,39 +721,6 @@ public class MongoTemplate {
   }
 
   /**
-   * Save or replace an object in the given collection according to the specified codec-registry and
-   * options.
-   *
-   * @param <T> the type of the class to use instead of Document
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param object the object to be saved or replaced
-   * @param codecRegistry the codec-registry to apply to the save operation
-   * @param idGetter the id extractor function
-   * @param options the options to apply to the save operation
-   * @return the save or replace result
-   */
-  public <T> UpdateResult save(String collectionName, T object, CodecRegistry codecRegistry,
-      Function<T, Object> idGetter, ReplaceOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(object, "Object must not be null");
-    shouldNotNull(idGetter, "The id getter must not be null");
-    @SuppressWarnings("unchecked")
-    Class<T> klass = (Class<T>) object.getClass();
-    MongoCollection<T> collection = obtainCollection(collectionName, klass);
-    if (codecRegistry != null) {
-      collection = collection.withCodecRegistry(codecRegistry);
-    }
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return collection.replaceOne(session, new Document(DOC_ID_FIELD_NAME, idGetter.apply(object)),
-          object, ro);
-    } else {
-      return collection.replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter), object, ro);
-    }
-  }
-
-  /**
    * Save or replace an object in the given collection according to the specified options and
    * document handler.
    * <p>
@@ -643,56 +742,13 @@ public class MongoTemplate {
       Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(object, "Object must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
     Document doc;
     if (handler == null) {
-      doc = handle(object);
+      doc = resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return collection.replaceOne(session,
-          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro);
-    } else {
-      return collection.replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc,
-          ro);
-    }
-  }
-
-  /**
-   * Save or replace an object in the given collection according to the specified codec-registry and
-   * options.
-   *
-   * @param <T> the type of the class to use instead of Document
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param klass the class of list element
-   * @param objects a list of object to be saved or replaced
-   * @param codecRegistry the codec-registry to apply to the save operation
-   * @param idGetter the id extractor function
-   * @param options the options to apply to the save operation
-   * @return a list of save or replace result
-   */
-  public <T> List<UpdateResult> saveMany(String collectionName, Class<T> klass, List<T> objects,
-      CodecRegistry codecRegistry, Function<T, Object> idGetter, ReplaceOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(klass, "Object klass must not be null");
-    shouldNotNull(objects, "Objects list must not be null");
-    shouldNotNull(idGetter, "The Id getter must not be null");
-    MongoCollection<T> collection = obtainCollection(collectionName, klass);
-    if (codecRegistry != null) {
-      collection = collection.withCodecRegistry(codecRegistry);
-    }
-    final MongoCollection<T> useCollection = collection;
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return objects.stream().map(doc -> useCollection.replaceOne(session,
-          new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro)).toList();
-    } else {
-      return objects.stream().map(doc -> useCollection
-          .replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro)).toList();
-    }
+    return doSave(collectionName, doc, null, DOC_ID_GETTER, options);
   }
 
   /**
@@ -753,54 +809,9 @@ public class MongoTemplate {
       ReplaceOptions options, Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
-    Function<T, Document> useHandler = defaultObject(handler, this::handle);
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return objects.stream().map(useHandler).map(doc -> collection.replaceOne(session,
-          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro)).toList();
-    } else {
-      return objects.stream().map(useHandler)
-          .map(doc -> collection
-              .replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro))
-          .toList();
-    }
-  }
-
-  /**
-   * Save or replace an object in the given collection according to the specified codec-registry and
-   * options.
-   *
-   * @param <T> the type of the class to use instead of Document
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param klass the class of list element
-   * @param stream the objects stream to be saved or replaced
-   * @param codecRegistry the codec-registry to apply to the save operation
-   * @param idGetter the id extractor function
-   * @param options the options to apply to the save operation
-   * @return the save result stream
-   */
-  public <T> Stream<UpdateResult> streamSave(String collectionName, Class<T> klass,
-      Stream<T> stream, CodecRegistry codecRegistry, Function<T, Object> idGetter,
-      ReplaceOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(klass, "Object klass must not be null");
-    shouldNotNull(stream, "Stream must not be null");
-    shouldNotNull(idGetter, "The Id getter must not be null");
-    MongoCollection<T> collection = obtainCollection(collectionName, klass);
-    if (codecRegistry != null) {
-      collection = collection.withCodecRegistry(codecRegistry);
-    }
-    final MongoCollection<T> useCollection = collection;
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return stream.map(doc -> useCollection.replaceOne(session,
-          new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro));
-    } else {
-      return stream.map(doc -> useCollection
-          .replaceOne(new Document(DOC_ID_FIELD_NAME, idGetter.apply(doc)), doc, ro));
-    }
+    return doSaveMany(collectionName, Document.class,
+        transform(objects, defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER,
+        options);
   }
 
   /**
@@ -863,16 +874,8 @@ public class MongoTemplate {
       ReplaceOptions options, Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(stream, "Objects must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
-    Function<T, Document> useHandler = defaultObject(handler, this::handle);
-    ReplaceOptions ro = defaultObject(options, ReplaceOptions::new).upsert(true);
-    if (session != null) {
-      return stream.map(useHandler).map(doc -> collection.replaceOne(session,
-          new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro));
-    } else {
-      return stream.map(useHandler).map(doc -> collection
-          .replaceOne(new Document(DOC_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME)), doc, ro));
-    }
+    return doStreamSave(collectionName, Document.class,
+        stream.map(defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER, options);
   }
 
   /**
@@ -880,58 +883,13 @@ public class MongoTemplate {
    *
    * @param collectionName name of the collection to store the object in. Must not be
    *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null.
+   * @param filter a document describing the query filter, which may not be null
    * @param update a document describing the update, which may not be null. The update to apply must
-   *        include only update operators.
-   * @param options the options to apply to the update operation
+   *        include only update operators
    * @return the result of the update many operation
    */
-  public UpdateResult update(String collectionName, Bson filter, Bson update,
-      UpdateOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(filter, "Filter must not be null");
-    shouldNotNull(update, "Update must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
-    if (options != null) {
-      if (session != null) {
-        return collection.updateMany(session, filter, update, options);
-      } else {
-        return collection.updateMany(filter, update, options);
-      }
-    } else if (session != null) {
-      return collection.updateMany(session, filter, update);
-    } else {
-      return collection.updateMany(filter, update);
-    }
-  }
-
-  /**
-   * Update all documents in the given collection according to the specified options.
-   *
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null.
-   * @param pipeline a pipeline describing the update, which may not be null.
-   * @param options the options to apply to the update operation
-   * @return the result of the update many operation
-   */
-  public UpdateResult update(String collectionName, Bson filter, List<Bson> pipeline,
-      UpdateOptions options) {
-    shouldNotNull(collectionName, "CollectionName must not be null");
-    shouldNotNull(filter, "Filter must not be null");
-    shouldNotNull(pipeline, "Update must not be null");
-    MongoCollection<Document> collection = obtainCollection(collectionName);
-    if (options != null) {
-      if (session != null) {
-        return collection.updateMany(session, filter, pipeline, options);
-      } else {
-        return collection.updateMany(filter, pipeline, options);
-      }
-    } else if (session != null) {
-      return collection.updateMany(session, filter, pipeline);
-    } else {
-      return collection.updateMany(filter, pipeline);
-    }
+  public UpdateResult update(String collectionName, Map<String, ?> filter, Map<String, ?> update) {
+    return update(collectionName, filter, update, null);
   }
 
   /**
@@ -939,45 +897,15 @@ public class MongoTemplate {
    *
    * @param collectionName name of the collection to store the object in. Must not be
    *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null, supports extended
-   *        JSON
-   * @param pipeline a pipeline describing the update, which may not be null, supports extended JSON
-   * @return the result of the update many operation
-   */
-  public UpdateResult updates(String collectionName, Map<?, ?> filter, List<Map<?, ?>> pipeline) {
-    return updates(collectionName, filter, pipeline, null);
-  }
-
-  /**
-   * Update all documents in the given collection according to the specified arguments.
-   *
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null, supports extended
-   *        JSON
-   * @param pipeline a pipeline describing the update, which may not be null, supports extended JSON
-   * @param options the options to apply to the update operation
-   * @return the result of the update many operation
-   */
-  public UpdateResult updates(String collectionName, Map<?, ?> filter, List<Map<?, ?>> pipeline,
-      UpdateOptions options) {
-    return update(collectionName, parse(filter, true),
-        pipeline.stream().map(uncheckedFunction(u -> parse(u, true))).toList(), options);
-  }
-
-  /**
-   * Update all documents in the given collection according to the specified arguments.
-   *
-   * @param collectionName name of the collection to store the object in. Must not be
-   *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null, support extended
-   *        JSON
+   * @param filter a document describing the query filter, which may not be null
    * @param update a document describing the update, which may not be null. The update to apply must
-   *        include only update operators, support extended JSON
+   *        include only update operators
+   * @param options the options to apply to the update operation
    * @return the result of the update many operation
    */
-  public UpdateResult updates(String collectionName, Map<?, ?> filter, Map<?, ?> update) {
-    return updates(collectionName, filter, update, null);
+  public UpdateResult update(String collectionName, Map<String, ?> filter, Map<String, ?> update,
+      UpdateOptions options) {
+    return doUpdate(collectionName, parse(filter), parse(update), options);
   }
 
   /**
@@ -985,35 +913,29 @@ public class MongoTemplate {
    *
    * @param collectionName name of the collection to store the object in. Must not be
    *        {@literal null}.
-   * @param filter a document describing the query filter, which may not be null, support extended
-   *        JSON
-   * @param update a document describing the update, which may not be null. The update to apply must
-   *        include only update operators, support extended JSON
+   * @param filter a document describing the query filter, which may not be null
+   * @param pipeline a pipeline describing the update, which may not be null
+   * @return the result of the update many operation
+   */
+  public UpdateResult updateMany(String collectionName, Map<String, ?> filter,
+      List<Map<String, ?>> pipeline) {
+    return updateMany(collectionName, filter, pipeline, null);
+  }
+
+  /**
+   * Update all documents in the given collection according to the specified arguments.
+   *
+   * @param collectionName name of the collection to store the object in. Must not be
+   *        {@literal null}.
+   * @param filter a document describing the query filter, which may not be null
+   * @param pipeline a pipeline describing the update, which may not be null
    * @param options the options to apply to the update operation
    * @return the result of the update many operation
    */
-  public UpdateResult updates(String collectionName, Map<?, ?> filter, Map<?, ?> update,
-      UpdateOptions options) {
-    return update(collectionName, parse(filter, true), parse(update, true), options);
-  }
-
-  protected <T> Document handle(T object) {
-    if (object instanceof Document doc) {
-      return doc;
-    } else if (object != null) {
-      Map<String, Object> map;
-      if (object instanceof Map m) {
-        map = forceCast(m); // FIXME force cast
-      } else {
-        map = ObjectMappers.toDocMap(object);
-      }
-      if (map.containsKey(ENTITY_ID_FIELD_NAME) && !map.containsKey(DOC_ID_FIELD_NAME)) {
-        map.put(DOC_ID_FIELD_NAME, map.remove(ENTITY_ID_FIELD_NAME));
-      }
-      return new Document(map);
-    } else {
-      return null;
-    }
+  public UpdateResult updateMany(String collectionName, Map<String, ?> filter,
+      List<Map<String, ?>> pipeline, UpdateOptions options) {
+    return doUpdateMany(collectionName, parse(filter),
+        pipeline.stream().map(uncheckedFunction(this::parse)).toList(), options);
   }
 
   protected MongoCollection<Document> obtainCollection(String collectionName) {
@@ -1035,6 +957,44 @@ public class MongoTemplate {
       collection = collection.withCodecRegistry(codecRegistry);
     }
     return collection;
+  }
+
+  protected Bson parse(Map<String, ?> object) {
+    return object == null ? null : object instanceof Bson ? (Bson) object : new Document(object);
+  }
+
+  /**
+   * Returns a {@link Document} with primary key(named '_id') from the given object for persisting.
+   * <p>
+   * Note: If the given object is a Map instance, we assume it is a {@code Map<String, Object>}. If
+   * the given object has a property named 'id', the value of the property will be used as the
+   * primary key(named '_id') of the {@link Document} and the resolved document doesn't retain the
+   * id property.
+   *
+   * @param <T> the object type
+   * @param object the object to be resolved
+   * @return a document
+   */
+  protected <T> Document resolveDocument(T object) {
+    Document document = null;
+    if (object instanceof Document doc) {
+      document = doc;
+    } else if (object != null) {
+      Map<String, Object> map;
+      if (object instanceof Map m) {
+        // FIXME force cast, we assume the object is Map<String,Object>
+        map = forceCast(m);
+      } else {
+        // a common POJO
+        map = ObjectMappers.toDocMap(object);
+      }
+      document = new Document(map);
+    }
+    if ((document != null) && (document.containsKey(ENTITY_ID_FIELD_NAME)
+        && !document.containsKey(DOC_ID_FIELD_NAME))) {
+      document.put(DOC_ID_FIELD_NAME, document.remove(ENTITY_ID_FIELD_NAME));
+    }
+    return document;
   }
 
   /**
@@ -1197,10 +1157,9 @@ public class MongoTemplate {
 
     /**
      * @see AggregateIterable#hint(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoAggregator hints(Map<?, ?> hint) {
-      return hint(parse(hint, false));
+    public MongoAggregator hintMap(Map<String, ?> hint) {
+      return hint(tpl.parse(hint));
     }
 
     /**
@@ -1229,11 +1188,10 @@ public class MongoTemplate {
 
     /**
      * @see MongoCollection#aggregate(List)
-     * @see MongoExtendedJsons#toBsons(java.util.Collection, boolean)
      */
-    public MongoAggregator pipeline(List<Map<?, ?>> pipeline) {
+    public MongoAggregator pipeline(List<Map<String, ?>> pipeline) {
       this.pipeline =
-          shouldNotEmpty(pipeline).stream().map(a -> parse(a, true)).collect(Collectors.toList());
+          shouldNotEmpty(pipeline).stream().map(tpl::parse).collect(Collectors.toList());
       return this;
     }
 
@@ -1247,10 +1205,9 @@ public class MongoTemplate {
 
     /**
      * @see AggregateIterable#let(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoAggregator variablesMap(Map<?, ?> variables) {
-      return variables(parse(variables, false));
+    public MongoAggregator variablesMap(Map<String, ?> variables) {
+      return variables(tpl.parse(variables));
     }
 
     protected MongoCollection<Document> obtainCollection() {
@@ -1371,12 +1328,10 @@ public class MongoTemplate {
 
     /**
      * @see DistinctIterable#filter(Bson)
-     * @see MongoExtendedJsons#extended(Object)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoDistinction filters(Map<?, ?> filter) {
+    public MongoDistinction filterMap(Map<String, ?> filter) {
       if (filter != null) {
-        this.filter = parse(filter, true);
+        this.filter = tpl.parse(filter);
       }
       return this;
     }
@@ -1590,12 +1545,10 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#filter(Bson)
-     * @see MongoExtendedJsons#extended(Object)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery filters(Map<?, ?> filter) {
+    public MongoQuery filterMap(Map<String, ?> filter) {
       if (filter != null) {
-        this.filter = parse(filter, true);
+        this.filter = tpl.parse(filter);
       }
       return this;
     }
@@ -1695,10 +1648,9 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#hint(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery hints(Map<?, ?> hint) {
-      return hint(parse(hint, false));
+    public MongoQuery hintMap(Map<String, ?> hint) {
+      return hint(tpl.parse(hint));
     }
 
     /**
@@ -1730,10 +1682,9 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#max(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery maxMap(Map<?, ?> max) {
-      return max(parse(max, false));
+    public MongoQuery maxMap(Map<String, ?> max) {
+      return max(tpl.parse(max));
     }
 
     /**
@@ -1754,10 +1705,9 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#min(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery minMap(Map<?, ?> min) {
-      return min(parse(min, false));
+    public MongoQuery minMap(Map<String, ?> min) {
+      return min(tpl.parse(min));
     }
 
     /**
@@ -1822,17 +1772,16 @@ public class MongoTemplate {
         }
       }
       if (!projections.isEmpty()) {
-        return projections(projections);
+        return projectionMap(projections);
       }
       return this;
     }
 
     /**
      * @see FindIterable#projection(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery projections(Map<?, ?> projection) {
-      return projection(parse(projection, false));
+    public MongoQuery projectionMap(Map<String, ?> projection) {
+      return projection(tpl.parse(projection));
     }
 
     /**
@@ -1877,10 +1826,9 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#sort(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery sorts(Map<?, ?> sort) {
-      return sort(parse(sort, false));
+    public MongoQuery sortMap(Map<String, ?> sort) {
+      return sort(tpl.parse(sort));
     }
 
     /**
@@ -1988,10 +1936,9 @@ public class MongoTemplate {
 
     /**
      * @see FindIterable#let(Bson)
-     * @see BasicDBObject#parse(String)
      */
-    public MongoQuery variablesMap(Map<?, ?> variables) {
-      return variables(parse(variables, false));
+    public MongoQuery variablesMap(Map<String, ?> variables) {
+      return variables(tpl.parse(variables));
     }
 
     protected MongoCollection<Document> obtainCollection() {

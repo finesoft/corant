@@ -1540,12 +1540,15 @@ public class MongoTemplate {
     }
 
     /**
-     * Counts the number of documents in the collection according to the given options.
+     * Counts the number of documents in the collection.
      */
     public long countDocuments() {
       return countDocuments(null);
     }
 
+    /**
+     * Counts the number of documents in the collection according to the given options.
+     */
     public long countDocuments(CountOptions options) {
       MongoCollection<Document> mc = obtainCollection();
       return mc.countDocuments(defaultObject(filter, Document::new),

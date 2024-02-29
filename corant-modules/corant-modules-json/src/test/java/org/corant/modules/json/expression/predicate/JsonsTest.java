@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +45,12 @@ public class JsonsTest extends TestCase {
     map.forEach((k, v) -> System.out.println(k + "\t" + v.getClass()));
     MapPojo dmp = ObjectMappers.fromMap(map, MapPojo.class);
     assertEquals(mp, dmp);
+  }
+
+  @Test
+  public void testTimestamp() {
+    Timestamp ts = Timestamp.from(Instant.now());
+    System.out.println(ObjectMappers.copyDefaultObjectMapper().convertValue(ts, Instant.class));
   }
 
   static class MapEntry {

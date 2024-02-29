@@ -89,6 +89,9 @@ public class ObjectMappers {
     defaultObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     defaultObjectMapper.registerModules(new JavaTimeModule());
+    // disable nanoseconds
+    defaultObjectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    defaultObjectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
     defaultObjectMapper.findAndRegisterModules();
     Services.selectRequired(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
         .forEach(c -> c.configure(defaultObjectMapper));

@@ -147,7 +147,7 @@ public class DbUtilQueryRunner extends QueryRunner {
       }
 
       if (myStmtConfig.isQueryTimeoutSet()) {
-        stmt.setQueryTimeout(myStmtConfig.getQueryTimeout());
+        stmt.setQueryTimeout((int) myStmtConfig.getQueryTimeoutDuration().toSeconds());
       }
     }
   }

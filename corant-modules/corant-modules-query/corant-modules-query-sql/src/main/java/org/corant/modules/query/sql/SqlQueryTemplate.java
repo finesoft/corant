@@ -400,7 +400,7 @@ public class SqlQueryTemplate {
               : SqlStatements.normalize(sql, ordinaryParameters);
       try {
         final StatementConfiguration sf = config.statementConfig == null
-            ? new StatementConfiguration(null, limit, null, null, null)
+            ? new StatementConfiguration(null, limit, null, null, (Duration) null)
             : config.statementConfig;
         return new StreamableQueryRunner(sf, config.resultSetConfig).streamQuery(
             dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater,

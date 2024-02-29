@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -98,7 +99,7 @@ public class DistPackager implements Packager {
     Files.createDirectories(parentPath);
     log.info(String.format("(corant) building dist archive: %s.", destPath));
     try (FileOutputStream fos = new FileOutputStream(destPath.toFile());
-        ArchiveOutputStream aos = packArchiveOutput(fos)) {
+        ArchiveOutputStream<ArchiveEntry> aos = packArchiveOutput(fos)) {
       // handle entries
       if (!root.getEntries(null).isEmpty()) {
         for (Entry entry : root) {
@@ -253,7 +254,7 @@ public class DistPackager implements Packager {
     return new ScriptEntry(run_sh, usesh);
   }
 
-  private void packArchiveEntry(ArchiveOutputStream aos, Archive archive, Entry entry)
+  private void packArchiveEntry(ArchiveOutputStream<ArchiveEntry> aos, Archive archive, Entry entry)
       throws IOException {
     String entryName = resolveArchivePath(archive.getPath(), entry.getName());
     File file;
@@ -275,7 +276,8 @@ public class DistPackager implements Packager {
     log.debug(String.format("(corant) entry %s was packaged.", entryName));
   }
 
-  private ArchiveOutputStream packArchiveOutput(OutputStream os) throws ArchiveException {
+  private ArchiveOutputStream<ArchiveEntry> packArchiveOutput(OutputStream os)
+      throws ArchiveException {
     return new ArchiveStreamFactory().createArchiveOutputStream(mojo.getDistFormat(), os);
   }
 

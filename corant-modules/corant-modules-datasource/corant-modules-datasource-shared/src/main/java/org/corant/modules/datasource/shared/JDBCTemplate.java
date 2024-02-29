@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -98,8 +99,8 @@ public class JDBCTemplate {
   public JDBCTemplate(DataSource dataSource, boolean pmdKnownBroken, Integer fetchDirection,
       Integer fetchSize, Integer maxFieldSize, Integer maxRows, Integer queryTimeout) {
     this.dataSource = shouldNotNull(dataSource);
-    stmtConfig =
-        new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows, queryTimeout);
+    stmtConfig = new StatementConfiguration(fetchDirection, fetchSize, maxFieldSize, maxRows,
+        queryTimeout != null && queryTimeout > 0 ? Duration.ofSeconds(queryTimeout) : null);
     runner = new QueryRunner(dataSource, pmdKnownBroken, stmtConfig);
     streamRunner = new StreamableQueryRunner(stmtConfig);
   }
@@ -255,8 +256,9 @@ public class JDBCTemplate {
 
   public static <T> Stream<T> stream(Connection conn, String sql, Integer fetchSize,
       ResultSetHandler<T> rsh, Object... params) throws SQLException {
-    return new StreamableQueryRunner(new StatementConfiguration(null, fetchSize, null, null, null))
-        .streamQuery(conn, false, sql, rsh, params);
+    return new StreamableQueryRunner(
+        new StatementConfiguration(null, fetchSize, null, null, (Duration) null)).streamQuery(conn,
+            false, sql, rsh, params);
   }
 
   public static void tryBatch(Connection conn, String sql, int batchSubmitSize,
@@ -588,8 +590,9 @@ public class JDBCTemplate {
    */
   public <T> Stream<T> stream(String sql, Integer fetchSize, ResultSetHandler<T> rsh,
       Object... params) throws SQLException {
-    return new StreamableQueryRunner(new StatementConfiguration(null, fetchSize, null, null, null))
-        .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
+    return new StreamableQueryRunner(
+        new StatementConfiguration(null, fetchSize, null, null, (Duration) null))
+            .streamQuery(dataSource.getConnection(), true, sql, rsh, params);
   }
 
   public int[] tryBatch(String sql, Object[][] params) {

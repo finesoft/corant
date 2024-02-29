@@ -71,8 +71,7 @@ public class DefaultQueryRunner extends DbUtilQueryRunner {
   public DefaultQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
     this(confiuration.getDataSource(),
         new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
-            confiuration.getMaxFieldSize(), null,
-            timeout == null ? null : (int) timeout.toSeconds()),
+            confiuration.getMaxFieldSize(), null, timeout),
         containsNotNull(confiuration.getResultSetType(), confiuration.getResultSetConcurrency(),
             confiuration.getResultSetHoldability())
                 ? new ResultSetConfiguration(confiuration.getResultSetType(),

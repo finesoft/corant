@@ -38,10 +38,10 @@
 		<version.commons-cli>1.5.0</version.commons-cli>
 		<version.commons-codec>1.15</version.commons-codec>
 		<version.commons-collections4>4.4</version.commons-collections4>
-		<version.commons-compress>1.23.0</version.commons-compress>
+		<version.commons-compress>1.26.0</version.commons-compress>
 		<version.commons-dbcp2>2.11.0</version.commons-dbcp2>
-		<version.commons-dbutils>1.7</version.commons-dbutils>
-		<version.commons-io>2.11.0</version.commons-io>
+		<version.commons-dbutils>1.8.1</version.commons-dbutils>
+		<version.commons-io>2.15.1</version.commons-io>
 		<version.commons-lang3>3.12.0</version.commons-lang3>
 		<version.commons-math3>3.6.1</version.commons-math3>
 		<version.commons-net>3.9.0</version.commons-net>
@@ -107,7 +107,7 @@
 		<version.kotlin>1.8.20</version.kotlin>
 		<version.kryo>5.5.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>
-		<version.log4j2>2.20.0</version.log4j2>
+		<version.log4j2>2.23.0</version.log4j2>
 		<version.lombok>1.18.28</version.lombok>
 		<version.metadata-extractor>2.18.0</version.metadata-extractor>
 		<version.maven-bundle-plugin>5.1.8</version.maven-bundle-plugin>
@@ -178,7 +178,7 @@
 		<version.swagger>2.2.8</version.swagger>
 		<version.swagger-ui-webjars>4.18.2</version.swagger-ui-webjars>
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.3.11.Final</version.undertow>
+		<version.undertow>2.3.12.Final</version.undertow>
 		<version.vertx>4.3.8</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>

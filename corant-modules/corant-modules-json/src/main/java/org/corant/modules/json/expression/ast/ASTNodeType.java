@@ -106,9 +106,7 @@ public enum ASTNodeType {
     }
   },
 
-  /**
-   * Performs a lambda operation on an array. examples: {"λ(x,y)":...]
-   */
+  // Performs a lambda operation on an array. examples: {"λ(x,y)":...]
   // LAMBDA("λ", false) {
   // @Override
   // public ASTNode<?> buildNode(Object object) {
@@ -214,6 +212,16 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTRegexNode();
+    }
+  },
+
+  /**
+   * The return node.
+   */
+  RETURN("$return", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTReturnNode();
     }
   },
 

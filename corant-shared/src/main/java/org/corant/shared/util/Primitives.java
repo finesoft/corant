@@ -58,13 +58,13 @@ public class Primitives {
 
   public static final Map<String, Class<?>> NAME_PRIMITIVE_MAP =
       immutableMapOf("boolean", Boolean.TYPE, "byte", Byte.TYPE, "char", Character.TYPE, "short",
-          Short.TYPE, "int", Integer.TYPE, "long", Long.TYPE, "double", Double.TYPE, "float",
-          Float.TYPE, "void", Void.TYPE);
+          Short.TYPE, "int", Integer.TYPE, "long", Long.TYPE, "float", Float.TYPE, "double",
+          Double.TYPE, "void", Void.TYPE);
 
   public static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER_MAP =
       immutableMapOf(Boolean.TYPE, Boolean.class, Byte.TYPE, Byte.class, Character.TYPE,
           Character.class, Short.TYPE, Short.class, Integer.TYPE, Integer.class, Long.TYPE,
-          Long.class, Double.TYPE, Double.class, Float.TYPE, Float.class, Void.TYPE, Void.TYPE);
+          Long.class, Float.TYPE, Float.class, Double.TYPE, Double.class, Void.TYPE, Void.TYPE);
 
   public static final Map<Class<?>, Class<?>> WRAPPER_PRIMITIVE_MAP =
       Collections.unmodifiableMap(PRIMITIVE_WRAPPER_MAP.entrySet().stream()

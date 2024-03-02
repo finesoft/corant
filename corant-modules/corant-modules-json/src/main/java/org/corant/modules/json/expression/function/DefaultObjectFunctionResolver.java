@@ -56,7 +56,7 @@ import org.corant.shared.util.Strings;
  * <b>Examples:</b>
  *
  * <pre>
- * <b>Expression</b>                                                    <b>Evaluate result</b>
+ * <b>Expression</b>                                                    <b>Evaluated result</b>
  * {"#java.lang.String::trim":["abc "]}                                 abc
  * {"#java.lang.String::indexOf":["abc", "b"]}                          1
  * {"#java.lang.String::substring":["bingo.chen", 0, 7]}                bingo.c
@@ -168,7 +168,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     }
     if (method != null) {
       try {
-        return method.invoke(invokedObject, params);
+        return Methods.invokeMethod(invokedObject, method, params);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         throw new CorantRuntimeException(e);
       }

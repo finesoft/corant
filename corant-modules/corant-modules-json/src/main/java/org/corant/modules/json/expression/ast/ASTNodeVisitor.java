@@ -51,6 +51,7 @@ public interface ASTNodeVisitor extends Sortable {
       case LG_NOT:
       case LG_NOR:
       case LG_OR:
+      case RETURN:
         shouldBeTrue(node.getChildren().size() > 0);
         break;
       default:

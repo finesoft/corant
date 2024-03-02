@@ -13,22 +13,21 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * corant-shared
@@ -45,23 +44,56 @@ public class Methods {
 
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
       final Class<?>... parameterTypes) {
-    shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
-    List<Method> methods = getAllMethods(shouldNotNull(cls, "Null class not allowed."));
+    shouldNotNull(cls, "Null class not allowed.");
+    shouldBeTrue(isNotBlank(methodName), "Null or blank methodName not allowed.");
+    try {
+      return cls.getMethod(methodName, parameterTypes);
+    } catch (NoSuchMethodException e) {
+      // ignore no ops
+    }
+    List<Method> methods = getAllMethods(cls, methodName);
+    for (final Method method : methods) {
+      if (Arrays.deepEquals(method.getParameterTypes(), parameterTypes)) {
+        return method;
+      }
+    }
+
     Method inexactMatch = null;
     for (final Method method : methods) {
-      if (methodName.equals(method.getName())
-          && Objects.deepEquals(parameterTypes, method.getParameterTypes())) {
-        return method;
-      } else if (methodName.equals(method.getName())
-          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)
+      if (isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true,
+          method.isVarArgs())
           && (inexactMatch == null
-              || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
-                  inexactMatch.getParameterTypes()))) {
+              || distance(parameterTypes, method) < distance(parameterTypes, inexactMatch))) {
         inexactMatch = method;
       }
     }
     methods.clear();
     return inexactMatch;
+  }
+
+  public static Object invokeMethod(Object instance, Method method, Object[] params)
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    shouldNotNull(method, "The method to be invoked can't null");
+    shouldNotNull(params, "The params to be invoked can't null");
+    if (method.isVarArgs()) {
+      final Class<?>[] methodParamTypes = method.getParameterTypes();
+      final int normalMethodParamCount = methodParamTypes.length - 1;
+      final Class<?> varMethodParamType = methodParamTypes[normalMethodParamCount].componentType();
+      final Object[] newParam = new Object[methodParamTypes.length];
+      if (params.length < methodParamTypes.length) {
+        System.arraycopy(params, 0, newParam, 0, params.length);
+        newParam[normalMethodParamCount] = Array.newInstance(varMethodParamType, 0);
+      } else {
+        System.arraycopy(params, 0, newParam, 0, normalMethodParamCount);
+        int varParamsLen = params.length - normalMethodParamCount;
+        Object varParams = Array.newInstance(varMethodParamType, varParamsLen);
+        System.arraycopy(params, normalMethodParamCount, varParams, 0, varParamsLen);
+        newParam[normalMethodParamCount] = varParams;
+      }
+      return method.invoke(instance, newParam);
+    } else {
+      return method.invoke(instance, params);
+    }
   }
 
   public static InvokerBuilder invokerBuilder(Class<?> clazz) {
@@ -89,18 +121,26 @@ public class Methods {
   }
 
   public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
-      final boolean autoboxing) {
-    Class<?>[] useClsArr = classArray == null ? Classes.EMPTY_ARRAY : classArray;
-    Class<?>[] useToClsArr = toClassArray == null ? Classes.EMPTY_ARRAY : toClassArray;
-    if (useClsArr.length != useToClsArr.length) {
-      return false;
-    }
-    for (int i = 0; i < useClsArr.length; i++) {
-      if (!Classes.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+      boolean autoboxing, boolean varArgs) {
+    if (varArgs) {
+      int i;
+      if (classArray.length < toClassArray.length - 1) {
         return false;
       }
+      for (i = 0; i < toClassArray.length - 1 && i < classArray.length; i++) {
+        if (!Classes.isAssignable(classArray[i], toClassArray[i], true)) {
+          return false;
+        }
+      }
+      final Class<?> varArgParameterType = toClassArray[toClassArray.length - 1].getComponentType();
+      for (; i < classArray.length; i++) {
+        if (!Classes.isAssignable(classArray[i], varArgParameterType, true)) {
+          return false;
+        }
+      }
+      return true;
     }
-    return true;
+    return Classes.isAssignable(classArray, toClassArray, autoboxing);
   }
 
   public static boolean isSetter(Method method) {
@@ -152,30 +192,53 @@ public class Methods {
    */
   static int distance(final Class<?>[] classArray, final Class<?>[] toClassArray) {
     int answer = 0;
-    if (!isParameterTypesMatching(classArray, toClassArray, true)) {
+    if (!Classes.isAssignable(classArray, toClassArray, true)) {
       return -1;
     }
     for (int offset = 0; offset < classArray.length; offset++) {
-      if (classArray[offset].equals(toClassArray[offset])) {
+      final Class<?> aClass = classArray[offset];
+      final Class<?> toClass = toClassArray[offset];
+      if (aClass == null || aClass.equals(toClass)) {
         continue;
-      } else if (Classes.isAssignable(classArray[offset], toClassArray[offset], true)
-          && !Classes.isAssignable(classArray[offset], toClassArray[offset], false)) {
+      } else if (Classes.isAssignable(aClass, toClass, true)
+          && !Classes.isAssignable(aClass, toClass, false)) {
         answer++;
       } else {
         answer = answer + 2;
       }
     }
+
     return answer;
   }
 
-  static List<Method> getAllMethods(Class<?> cls) {
-    List<Method> methods = listOf(cls.getDeclaredMethods());
-    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
-        .forEach(ms -> Collections.addAll(methods, ms));
+  /**
+   * Returns the aggregate number of inheritance hops between assignable argument class types.
+   * Returns -1 if the arguments aren't assignable. Fills a specific purpose for getMatchingMethod
+   * and is not generalized.
+   *
+   * @param classArray the Class array to calculate the distance from.
+   * @param method the method to calculate the parameter types distance to.
+   * @return the aggregate number of inheritance hops between assignable argument class types.
+   */
+  static int distance(final Class<?>[] classArray, final Method method) {
+    Class<?>[] toClassArray = method.getParameterTypes();
+    if (method.isVarArgs()) {
+      toClassArray[toClassArray.length - 1] =
+          toClassArray[toClassArray.length - 1].getComponentType();
+    }
+    return distance(classArray, toClassArray);
+  }
+
+  static List<Method> getAllMethods(Class<?> cls, String name) {
+    List<Method> methods = Arrays.stream(cls.getDeclaredMethods())
+        .filter(m -> m.getName().equals(name)).collect(Collectors.toList());
+    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
+        .filter(m -> m.getName().equals(name)).forEach(methods::add);
     Classes.getAllInterfaces(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
-        .forEach(im -> {
-          if (im.isDefault() && methods.stream().noneMatch(m -> m.getName().equals(im.getName())
-              && isParameterTypesMatching(m.getParameterTypes(), im.getParameterTypes(), true))) {
+        .filter(m -> m.getName().equals(name)).forEach(im -> {
+          if (im.isDefault() && methods.stream()
+              .noneMatch(m -> m.getName().equals(im.getName()) && isParameterTypesMatching(
+                  m.getParameterTypes(), im.getParameterTypes(), true, false))) {
             methods.add(im);
           }
         });
@@ -223,7 +286,7 @@ public class Methods {
       if (forceAccess) {
         method.setAccessible(true);
       }
-      return (T) method.invoke(instance, parameters);
+      return (T) invokeMethod(instance, method, parameters);
     }
 
     public InvokerBuilder methodName(String methodName) {

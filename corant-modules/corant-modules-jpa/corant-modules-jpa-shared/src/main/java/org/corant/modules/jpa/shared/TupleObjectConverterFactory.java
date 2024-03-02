@@ -172,7 +172,8 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
               for (Field field : fields) {
                 if (field.getGenericType() instanceof Class && field.getName().equals(name)
                     && Methods.isParameterTypesMatching(
-                        new Class[] {(Class<?>) field.getGenericType()}, parameterTypes, true)) {
+                        new Class[] {(Class<?>) field.getGenericType()}, parameterTypes, true,
+                        method.isVarArgs())) {
                   propertySetters.put(name, Pair.of(method, parameterTypes));
                 }
               }

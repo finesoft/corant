@@ -205,9 +205,8 @@ public class Classes {
 
   /**
    * stupid method :) need to reconstruct
-   *
+   * <p>
    * TODO FIXME
-   *
    * Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if not
    * resolved
    *
@@ -432,6 +431,21 @@ public class Classes {
       return false;
     }
     return toClass.isAssignableFrom(useCls);
+  }
+
+  static boolean isAssignable(Class<?>[] classArray, Class<?>[] toClassArray,
+      final boolean autoboxing) {
+    Class<?>[] useClsArr = classArray == null ? Classes.EMPTY_ARRAY : classArray;
+    Class<?>[] useToClsArr = toClassArray == null ? Classes.EMPTY_ARRAY : toClassArray;
+    if (useClsArr.length != useToClsArr.length) {
+      return false;
+    }
+    for (int i = 0; i < useClsArr.length; i++) {
+      if (!Classes.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }

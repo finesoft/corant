@@ -123,16 +123,17 @@ public class Methods {
   public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
       boolean autoboxing, boolean varArgs) {
     if (varArgs) {
-      int i;
-      if (classArray.length < toClassArray.length - 1) {
+      int normalParamLength = toClassArray.length - 1;
+      if (classArray.length < normalParamLength) {
         return false;
       }
-      for (i = 0; i < toClassArray.length - 1 && i < classArray.length; i++) {
+      int i;
+      for (i = 0; i < normalParamLength && i < classArray.length; i++) {
         if (!Classes.isAssignable(classArray[i], toClassArray[i], true)) {
           return false;
         }
       }
-      final Class<?> varArgParameterType = toClassArray[toClassArray.length - 1].getComponentType();
+      final Class<?> varArgParameterType = toClassArray[normalParamLength].getComponentType();
       for (; i < classArray.length; i++) {
         if (!Classes.isAssignable(classArray[i], varArgParameterType, true)) {
           return false;
@@ -222,9 +223,22 @@ public class Methods {
    */
   static int distance(final Class<?>[] classArray, final Method method) {
     Class<?>[] toClassArray = method.getParameterTypes();
+    int normalMethodParamLength = toClassArray.length - 1;
     if (method.isVarArgs()) {
-      toClassArray[toClassArray.length - 1] =
-          toClassArray[toClassArray.length - 1].getComponentType();
+      if (classArray.length < normalMethodParamLength) {
+        return -1;
+      } else if (classArray.length == normalMethodParamLength) {
+        toClassArray = Arrays.copyOf(toClassArray, normalMethodParamLength);
+      } else {
+        Class<?> compoentType = toClassArray[normalMethodParamLength].getComponentType();
+        Class<?>[] temp = new Class<?>[classArray.length];
+        int i = normalMethodParamLength;
+        System.arraycopy(toClassArray, 0, temp, 0, i);
+        for (; i < classArray.length; i++) {
+          temp[i] = compoentType;
+        }
+        toClassArray = temp;
+      }
     }
     return distance(classArray, toClassArray);
   }

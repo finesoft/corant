@@ -275,7 +275,8 @@ public enum ASTNodeType {
           return ASTNodeType.FUN;
         } else {
           for (ASTNodeType t : ASTNodeType.values()) {
-            if (t.token().equalsIgnoreCase(useToken)) {
+            if (t != ASTNodeType.FUN && t != ASTNodeType.VAR
+                && t.token().equalsIgnoreCase(useToken)) {
               return t;
             }
           }

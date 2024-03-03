@@ -13,10 +13,9 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +44,7 @@ public class Methods {
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
       final Class<?>... parameterTypes) {
     shouldNotNull(cls, "Null class not allowed.");
-    shouldBeTrue(isNotBlank(methodName), "Null or blank methodName not allowed.");
+    shouldNotBlank(methodName, "Null or blank methodName not allowed.");
     try {
       return cls.getMethod(methodName, parameterTypes);
     } catch (NoSuchMethodException e) {
@@ -72,7 +71,7 @@ public class Methods {
     return inexactMatch;
   }
 
-  public static Object invokeMethod(Object instance, Method method, Object[] params)
+  public static Object invokeMethod(Object instance, Method method, Object... params)
       throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     shouldNotNull(method, "The method to be invoked can't null");
     shouldNotNull(params, "The params to be invoked can't null");
@@ -80,8 +79,7 @@ public class Methods {
       final Class<?>[] methodParamTypes = method.getParameterTypes();
       final int normalMethodParamCount = methodParamTypes.length - 1;
       if (params.length < normalMethodParamCount) {
-        throw new IllegalArgumentException(
-            "Invoke method error, the given method parameter is illegal!");
+        throw new IllegalArgumentException("Invoke method error, wrong number of arguments!");
       }
       final Class<?> varMethodParamType = methodParamTypes[normalMethodParamCount].componentType();
       final Object[] newParam = new Object[methodParamTypes.length];
@@ -89,11 +87,18 @@ public class Methods {
         System.arraycopy(params, 0, newParam, 0, params.length);
         newParam[normalMethodParamCount] = Array.newInstance(varMethodParamType, 0);
       } else {
-        System.arraycopy(params, 0, newParam, 0, normalMethodParamCount);
-        int varParamsLen = params.length - normalMethodParamCount;
-        Object varParams = Array.newInstance(varMethodParamType, varParamsLen);
-        System.arraycopy(params, normalMethodParamCount, varParams, 0, varParamsLen);
-        newParam[normalMethodParamCount] = varParams;
+        final Object lastParam = params[normalMethodParamCount];
+        if (params.length == methodParamTypes.length && lastParam != null
+            && lastParam.getClass().isArray() && Classes
+                .isAssignable(lastParam.getClass().getComponentType(), varMethodParamType, true)) {
+          System.arraycopy(params, 0, newParam, 0, params.length);
+        } else {
+          System.arraycopy(params, 0, newParam, 0, normalMethodParamCount);
+          int varParamsLen = params.length - normalMethodParamCount;
+          Object varParams = Array.newInstance(varMethodParamType, varParamsLen);
+          System.arraycopy(params, normalMethodParamCount, varParams, 0, varParamsLen);
+          newParam[normalMethodParamCount] = varParams;
+        }
       }
       return method.invoke(instance, newParam);
     } else {
@@ -133,7 +138,7 @@ public class Methods {
         return false;
       }
       int i;
-      for (i = 0; i < normalParamLength && i < classArray.length; i++) {
+      for (i = 0; i < normalParamLength; i++) {
         if (!Classes.isAssignable(classArray[i], toClassArray[i], true)) {
           return false;
         }

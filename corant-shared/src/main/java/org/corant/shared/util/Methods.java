@@ -259,12 +259,12 @@ public class Methods {
       } else if (classArray.length == normalMethodParamLength) {
         toClassArray = Arrays.copyOf(toClassArray, normalMethodParamLength);
       } else {
-        Class<?> compoentType = toClassArray[normalMethodParamLength].getComponentType();
+        Class<?> componentType = toClassArray[normalMethodParamLength].getComponentType();
         Class<?>[] temp = new Class<?>[classArray.length];
         int i = normalMethodParamLength;
         System.arraycopy(toClassArray, 0, temp, 0, i);
         for (; i < classArray.length; i++) {
-          temp[i] = compoentType;
+          temp[i] = componentType;
         }
         toClassArray = temp;
       }

@@ -79,6 +79,10 @@ public class Methods {
     if (method.isVarArgs()) {
       final Class<?>[] methodParamTypes = method.getParameterTypes();
       final int normalMethodParamCount = methodParamTypes.length - 1;
+      if (params.length < normalMethodParamCount) {
+        throw new IllegalArgumentException(
+            "Invoke method error, the given method parameter is llegal!");
+      }
       final Class<?> varMethodParamType = methodParamTypes[normalMethodParamCount].componentType();
       final Object[] newParam = new Object[methodParamTypes.length];
       if (params.length < methodParamTypes.length) {

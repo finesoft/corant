@@ -53,7 +53,8 @@ public class Methods {
     }
     List<Method> methods = getAllMethods(cls, methodName);
     for (final Method method : methods) {
-      if (Arrays.deepEquals(method.getParameterTypes(), parameterTypes)) {
+      Class<?>[] methodParamTypes = resolveVarArgTypes(parameterTypes, method);
+      if (methodParamTypes != null && Arrays.deepEquals(methodParamTypes, parameterTypes)) {
         return method;
       }
     }
@@ -222,23 +223,9 @@ public class Methods {
    * @return the aggregate number of inheritance hops between assignable argument class types.
    */
   static int distance(final Class<?>[] classArray, final Method method) {
-    Class<?>[] toClassArray = method.getParameterTypes();
-    int normalMethodParamLength = toClassArray.length - 1;
-    if (method.isVarArgs()) {
-      if (classArray.length < normalMethodParamLength) {
-        return -1;
-      } else if (classArray.length == normalMethodParamLength) {
-        toClassArray = Arrays.copyOf(toClassArray, normalMethodParamLength);
-      } else {
-        Class<?> compoentType = toClassArray[normalMethodParamLength].getComponentType();
-        Class<?>[] temp = new Class<?>[classArray.length];
-        int i = normalMethodParamLength;
-        System.arraycopy(toClassArray, 0, temp, 0, i);
-        for (; i < classArray.length; i++) {
-          temp[i] = compoentType;
-        }
-        toClassArray = temp;
-      }
+    Class<?>[] toClassArray = resolveVarArgTypes(classArray, method);
+    if (toClassArray == null) {
+      return -1;
     }
     return distance(classArray, toClassArray);
   }
@@ -257,6 +244,28 @@ public class Methods {
           }
         });
     return methods;
+  }
+
+  static Class<?>[] resolveVarArgTypes(final Class<?>[] classArray, final Method method) {
+    Class<?>[] toClassArray = method.getParameterTypes();
+    if (method.isVarArgs()) {
+      int normalMethodParamLength = toClassArray.length - 1;
+      if (classArray.length < normalMethodParamLength) {
+        return null;
+      } else if (classArray.length == normalMethodParamLength) {
+        toClassArray = Arrays.copyOf(toClassArray, normalMethodParamLength);
+      } else {
+        Class<?> compoentType = toClassArray[normalMethodParamLength].getComponentType();
+        Class<?>[] temp = new Class<?>[classArray.length];
+        int i = normalMethodParamLength;
+        System.arraycopy(toClassArray, 0, temp, 0, i);
+        for (; i < classArray.length; i++) {
+          temp[i] = compoentType;
+        }
+        toClassArray = temp;
+      }
+    }
+    return toClassArray;
   }
 
   /**

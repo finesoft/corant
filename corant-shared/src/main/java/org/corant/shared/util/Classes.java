@@ -206,9 +206,8 @@ public class Classes {
   /**
    * stupid method :) need to reconstruct
    * <p>
-   * TODO FIXME
-   * Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if not
-   * resolved
+   * TODO FIXME Get component class from Iterable/Array/Iterator/Enumeration, return Object.class if
+   * not resolved
    *
    * @param object the given object
    * @return getComponentClass
@@ -419,6 +418,10 @@ public class Classes {
         return Double.TYPE.equals(toClass);
       }
       if (Character.TYPE.equals(useCls) || Short.TYPE.equals(useCls)) {
+        return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
+            || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
+      }
+      if (Short.TYPE.equals(useCls)) {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }

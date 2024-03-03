@@ -81,7 +81,7 @@ public class Methods {
       final int normalMethodParamCount = methodParamTypes.length - 1;
       if (params.length < normalMethodParamCount) {
         throw new IllegalArgumentException(
-            "Invoke method error, the given method parameter is llegal!");
+            "Invoke method error, the given method parameter is illegal!");
       }
       final Class<?> varMethodParamType = methodParamTypes[normalMethodParamCount].componentType();
       final Object[] newParam = new Object[methodParamTypes.length];

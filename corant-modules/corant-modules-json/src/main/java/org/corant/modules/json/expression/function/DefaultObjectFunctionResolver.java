@@ -169,7 +169,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     }
     if (method != null) {
       try {
-        return method.invoke(invokedObject, params);
+        return Methods.invokeMethod(invokedObject, method, params);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         throw new CorantRuntimeException(e);
       }

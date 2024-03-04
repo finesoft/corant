@@ -13,24 +13,20 @@
  */
 package org.corant.shared.util;
 
-import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.tryAsClass;
-import static org.corant.shared.util.Empties.isEmpty;
-import static org.corant.shared.util.Lists.listOf;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * corant-shared
@@ -47,23 +43,68 @@ public class Methods {
 
   public static Method getMatchingMethod(final Class<?> cls, final String methodName,
       final Class<?>... parameterTypes) {
-    shouldBeFalse(isEmpty(methodName), "Null or blank methodName not allowed.");
-    List<Method> methods = getAllMethods(shouldNotNull(cls, "Null class not allowed."));
+    shouldNotNull(cls, "Null class not allowed.");
+    shouldNotBlank(methodName, "Null or blank methodName not allowed.");
+    try {
+      return cls.getMethod(methodName, parameterTypes);
+    } catch (NoSuchMethodException e) {
+      // ignore no ops
+    }
+    List<Method> methods = getAllMethods(cls, methodName);
+    for (final Method method : methods) {
+      Class<?>[] methodParamTypes = resolveVarArgTypes(parameterTypes, method);
+      if (methodParamTypes != null && Arrays.deepEquals(methodParamTypes, parameterTypes)) {
+        return method;
+      }
+    }
+
     Method inexactMatch = null;
     for (final Method method : methods) {
-      if (methodName.equals(method.getName())
-          && Objects.deepEquals(parameterTypes, method.getParameterTypes())) {
-        return method;
-      } else if (methodName.equals(method.getName())
-          && isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true)
+      if (isParameterTypesMatching(parameterTypes, method.getParameterTypes(), true,
+          method.isVarArgs())
           && (inexactMatch == null
-              || distance(parameterTypes, method.getParameterTypes()) < distance(parameterTypes,
-                  inexactMatch.getParameterTypes()))) {
+              || distance(parameterTypes, method) < distance(parameterTypes, inexactMatch))) {
         inexactMatch = method;
       }
     }
     methods.clear();
     return inexactMatch;
+  }
+
+  public static Object invokeMethod(Object instance, Method method, Object... params)
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    shouldNotNull(method, "The method to be invoked can't null");
+    shouldNotNull(params, "The params to be invoked can't null");
+    if (method.isVarArgs()) {
+      final Class<?>[] methodParamTypes = method.getParameterTypes();
+      final int normalMethodParamCount = methodParamTypes.length - 1;
+      if (params.length < normalMethodParamCount) {
+        throw new IllegalArgumentException("Invoke method error, wrong number of arguments!");
+      }
+      final Class<?> varMethodParamType =
+          methodParamTypes[normalMethodParamCount].getComponentType();
+      final Object[] newParam = new Object[methodParamTypes.length];
+      if (params.length < methodParamTypes.length) {
+        System.arraycopy(params, 0, newParam, 0, params.length);
+        newParam[normalMethodParamCount] = Array.newInstance(varMethodParamType, 0);
+      } else {
+        final Object lastParam = params[normalMethodParamCount];
+        if (params.length == methodParamTypes.length && lastParam != null
+            && lastParam.getClass().isArray() && Classes
+                .isAssignable(lastParam.getClass().getComponentType(), varMethodParamType, true)) {
+          System.arraycopy(params, 0, newParam, 0, params.length);
+        } else {
+          System.arraycopy(params, 0, newParam, 0, normalMethodParamCount);
+          int varParamsLen = params.length - normalMethodParamCount;
+          Object varParams = Array.newInstance(varMethodParamType, varParamsLen);
+          System.arraycopy(params, normalMethodParamCount, varParams, 0, varParamsLen);
+          newParam[normalMethodParamCount] = varParams;
+        }
+      }
+      return method.invoke(instance, newParam);
+    } else {
+      return method.invoke(instance, params);
+    }
   }
 
   public static InvokerBuilder invokerBuilder(Class<?> clazz) {
@@ -91,18 +132,27 @@ public class Methods {
   }
 
   public static boolean isParameterTypesMatching(Class<?>[] classArray, Class<?>[] toClassArray,
-      final boolean autoboxing) {
-    Class<?>[] useClsArr = classArray == null ? Classes.EMPTY_ARRAY : classArray;
-    Class<?>[] useToClsArr = toClassArray == null ? Classes.EMPTY_ARRAY : toClassArray;
-    if (useClsArr.length != useToClsArr.length) {
-      return false;
-    }
-    for (int i = 0; i < useClsArr.length; i++) {
-      if (!Classes.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+      boolean autoboxing, boolean varArgs) {
+    if (varArgs) {
+      int normalParamLength = toClassArray.length - 1;
+      if (classArray.length < normalParamLength) {
         return false;
       }
+      int i;
+      for (i = 0; i < normalParamLength; i++) {
+        if (!Classes.isAssignable(classArray[i], toClassArray[i], true)) {
+          return false;
+        }
+      }
+      final Class<?> varArgParameterType = toClassArray[normalParamLength].getComponentType();
+      for (; i < classArray.length; i++) {
+        if (!Classes.isAssignable(classArray[i], varArgParameterType, true)) {
+          return false;
+        }
+      }
+      return true;
     }
-    return true;
+    return Classes.isAssignable(classArray, toClassArray, autoboxing);
   }
 
   public static boolean isSetter(Method method) {
@@ -147,41 +197,85 @@ public class Methods {
    * and is not generalized.
    * </p>
    *
-   * @param classArray
-   * @param toClassArray
+   * @param classArray the Class array to calculate the distance from.
+   * @param toClassArray the Class array to calculate the distance to.
    * @return the aggregate number of inheritance hops between assignable argument class types.
    *
    */
   static int distance(final Class<?>[] classArray, final Class<?>[] toClassArray) {
     int answer = 0;
-    if (!isParameterTypesMatching(classArray, toClassArray, true)) {
+    if (!Classes.isAssignable(classArray, toClassArray, true)) {
       return -1;
     }
     for (int offset = 0; offset < classArray.length; offset++) {
-      if (classArray[offset].equals(toClassArray[offset])) {
+      final Class<?> aClass = classArray[offset];
+      final Class<?> toClass = toClassArray[offset];
+      if (aClass == null || aClass.equals(toClass)) {
         continue;
-      } else if (Classes.isAssignable(classArray[offset], toClassArray[offset], true)
-          && !Classes.isAssignable(classArray[offset], toClassArray[offset], false)) {
+      } else if (Classes.isAssignable(aClass, toClass, true)
+          && !Classes.isAssignable(aClass, toClass, false)) {
         answer++;
       } else {
         answer = answer + 2;
       }
     }
+
     return answer;
   }
 
-  static List<Method> getAllMethods(Class<?> cls) {
-    List<Method> methods = listOf(cls.getDeclaredMethods());
-    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods)
-        .forEach(ms -> Collections.addAll(methods, ms));
+  /**
+   * Returns the aggregate number of inheritance hops between assignable argument class types.
+   * Returns -1 if the arguments aren't assignable. Fills a specific purpose for getMatchingMethod
+   * and is not generalized.
+   *
+   * @param classArray the Class array to calculate the distance from.
+   * @param method the method to calculate the parameter types distance to.
+   * @return the aggregate number of inheritance hops between assignable argument class types.
+   */
+  static int distance(final Class<?>[] classArray, final Method method) {
+    Class<?>[] toClassArray = resolveVarArgTypes(classArray, method);
+    if (toClassArray == null) {
+      return -1;
+    }
+    return distance(classArray, toClassArray);
+  }
+
+  static List<Method> getAllMethods(Class<?> cls, String name) {
+    List<Method> methods = Arrays.stream(cls.getDeclaredMethods())
+        .filter(m -> m.getName().equals(name)).collect(Collectors.toList());
+    Classes.getAllSuperClasses(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
+        .filter(m -> m.getName().equals(name)).forEach(methods::add);
     Classes.getAllInterfaces(cls).stream().map(Class::getDeclaredMethods).flatMap(Arrays::stream)
-        .forEach(im -> {
-          if (im.isDefault() && methods.stream().noneMatch(m -> m.getName().equals(im.getName())
-              && isParameterTypesMatching(m.getParameterTypes(), im.getParameterTypes(), true))) {
+        .filter(m -> m.getName().equals(name)).forEach(im -> {
+          if (im.isDefault() && methods.stream()
+              .noneMatch(m -> m.getName().equals(im.getName()) && isParameterTypesMatching(
+                  m.getParameterTypes(), im.getParameterTypes(), true, false))) {
             methods.add(im);
           }
         });
     return methods;
+  }
+
+  static Class<?>[] resolveVarArgTypes(final Class<?>[] classArray, final Method method) {
+    Class<?>[] toClassArray = method.getParameterTypes();
+    if (method.isVarArgs()) {
+      int normalMethodParamLength = toClassArray.length - 1;
+      if (classArray.length < normalMethodParamLength) {
+        return null;
+      } else if (classArray.length == normalMethodParamLength) {
+        toClassArray = Arrays.copyOf(toClassArray, normalMethodParamLength);
+      } else {
+        Class<?> componentType = toClassArray[normalMethodParamLength].getComponentType();
+        Class<?>[] temp = new Class<?>[classArray.length];
+        int i = normalMethodParamLength;
+        System.arraycopy(toClassArray, 0, temp, 0, i);
+        for (; i < classArray.length; i++) {
+          temp[i] = componentType;
+        }
+        toClassArray = temp;
+      }
+    }
+    return toClassArray;
   }
 
   /**
@@ -223,12 +317,9 @@ public class Methods {
         throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
       resolveMethod();
       if (forceAccess) {
-        AccessController.doPrivileged((PrivilegedAction<Method>) () -> {
-          method.setAccessible(true);
-          return null;
-        });
+        method.setAccessible(true);
       }
-      return (T) method.invoke(instance, parameters);
+      return (T) invokeMethod(instance, method, parameters);
     }
 
     public InvokerBuilder methodName(String methodName) {
@@ -314,9 +405,6 @@ public class Methods {
       if (this == obj) {
         return true;
       }
-      if (obj == null) {
-        return false;
-      }
       if (!(obj instanceof MethodSignature)) {
         return false;
       }
@@ -328,7 +416,10 @@ public class Methods {
       } else if (!methodName.equals(other.methodName)) {
         return false;
       }
-      return Arrays.equals(parameterTypes, other.parameterTypes);
+      if (!Arrays.equals(parameterTypes, other.parameterTypes)) {
+        return false;
+      }
+      return true;
     }
 
     public String getMethodName() {
@@ -343,7 +434,7 @@ public class Methods {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + methodName.hashCode();
+      result = prime * result + ((methodName == null) ? 0 : methodName.hashCode());
       return prime * result + Arrays.hashCode(parameterTypes);
     }
 

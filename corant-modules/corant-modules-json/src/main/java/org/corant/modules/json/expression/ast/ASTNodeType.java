@@ -107,9 +107,7 @@ public enum ASTNodeType {
     }
   },
 
-  /**
-   * Performs a lambda operation on an array. examples: {"λ(x,y)":...]
-   */
+  // Performs a lambda operation on an array. examples: {"λ(x,y)":...]
   // LAMBDA("λ", false) {
   // @Override
   // public ASTNode<?> buildNode(Object object) {
@@ -219,6 +217,16 @@ public enum ASTNodeType {
   },
 
   /**
+   * The return node.
+   */
+  RETURN("$return", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTReturnNode();
+    }
+  },
+
+  /**
    * The variable node
    */
   VAR("@", true) {
@@ -268,7 +276,8 @@ public enum ASTNodeType {
           return ASTNodeType.FUN;
         } else {
           for (ASTNodeType t : ASTNodeType.values()) {
-            if (t.token().equalsIgnoreCase(useToken)) {
+            if (t != ASTNodeType.FUN && t != ASTNodeType.VAR
+                && t.token().equalsIgnoreCase(useToken)) {
               return t;
             }
           }

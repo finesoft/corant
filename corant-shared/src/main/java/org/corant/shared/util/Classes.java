@@ -485,6 +485,10 @@ public class Classes {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }
+      if (Short.TYPE.equals(useCls)) {
+        return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
+            || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
+      }
       if (Byte.TYPE.equals(useCls)) {
         return Short.TYPE.equals(toClass) || Integer.TYPE.equals(toClass)
             || Long.TYPE.equals(toClass) || Float.TYPE.equals(toClass)
@@ -496,4 +500,18 @@ public class Classes {
     return toClass.isAssignableFrom(useCls);
   }
 
+  static boolean isAssignable(Class<?>[] classArray, Class<?>[] toClassArray,
+      final boolean autoboxing) {
+    Class<?>[] useClsArr = classArray == null ? Classes.EMPTY_ARRAY : classArray;
+    Class<?>[] useToClsArr = toClassArray == null ? Classes.EMPTY_ARRAY : toClassArray;
+    if (useClsArr.length != useToClsArr.length) {
+      return false;
+    }
+    for (int i = 0; i < useClsArr.length; i++) {
+      if (!Classes.isAssignable(useClsArr[i], useToClsArr[i], autoboxing)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

@@ -14,7 +14,9 @@
 package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Strings.isNotBlank;
 import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTRegexNode;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -41,9 +43,9 @@ public interface ASTNodeVisitor extends Sortable {
         ((ASTRegexNode) node).initialize();
         break;
       case CP_BTW:
-      case TERNARY:
-        shouldBeTrue(node.getChildren().size() == 3
-            && node.getChildren().get(0) instanceof ASTPredicateNode);
+      case CONDITIONAL:
+        shouldBeTrue(node.getChildren().size() == 2 || node.getChildren().size() == 3
+        /* && node.getChildren().get(0) instanceof ASTPredicateNode */);
         break;
       case CP_IN:
       case CP_NIN:
@@ -52,7 +54,43 @@ public interface ASTNodeVisitor extends Sortable {
       case LG_NOR:
       case LG_OR:
       case RETURN:
-        shouldBeTrue(node.getChildren().size() > 0);
+      case SUBROUTINE:
+        shouldBeTrue(!node.getChildren().isEmpty());
+        break;
+      case FILTER:
+        shouldBeTrue(
+            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
+                && vn.value() instanceof String vns && isNotBlank(vns));
+        break;
+      case MAP:
+        shouldBeTrue(
+            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
+                && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 1);
+        break;
+      case REDUCE: {
+        if (node.getChildren().size() == 3) {
+          shouldBeTrue(node.getChildren().get(1) instanceof ASTValueNode vn
+              && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
+        } else if (node.getChildren().size() == 4) {
+          shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode vn
+              && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
+        } else if (node.getChildren().size() == 6) {
+          shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode avn
+              && avn.value() instanceof String avns && ASTNode.parseVariableNames(avns).length == 2
+              && node.getChildren().get(4) instanceof ASTValueNode cvn
+              && cvn.value() instanceof String cvns
+              && ASTNode.parseVariableNames(cvns).length == 2);
+        } else {
+          throw new CorantRuntimeException("Expression error!");
+        }
+        break;
+      }
+      case COLLECT:
+        shouldBeTrue(node.getChildren().size() == 6
+            && node.getChildren().get(2) instanceof ASTValueNode avn
+            && avn.value() instanceof String avns && ASTNode.parseVariableNames(avns).length == 2
+            && node.getChildren().get(4) instanceof ASTValueNode cvn
+            && cvn.value() instanceof String cvns && ASTNode.parseVariableNames(cvns).length == 2);
         break;
       default:
         break;

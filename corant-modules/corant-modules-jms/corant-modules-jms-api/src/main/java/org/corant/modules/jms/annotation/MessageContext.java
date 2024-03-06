@@ -25,6 +25,14 @@ import jakarta.jms.JMSContext;
 
 /**
  * corant-modules-jms-api
+ * <p>
+ * Annotation used for {@link JMSContext} injection. For examples:
+ *
+ * <pre>
+ * &#64;Inject
+ * &#64;MessageContext(connectionFactoryId = "my_config_connection_factory")
+ * JMSContext jmsContext;
+ * </pre>
  *
  * @author bingo 下午3:43:58
  */

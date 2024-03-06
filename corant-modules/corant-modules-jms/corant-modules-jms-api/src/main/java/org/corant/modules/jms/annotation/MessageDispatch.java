@@ -21,17 +21,17 @@ import java.lang.annotation.Target;
 import jakarta.jms.JMSProducer;
 import jakarta.jms.Message;
 import org.corant.modules.jms.JMSNames;
-import org.corant.modules.jms.send.MessageSender;
+import org.corant.modules.jms.send.MessageDispatcher;
 
 /**
  * corant-modules-jms-shared
  * <p>
- * Annotation used for {@link MessageSender} injection. For examples:
+ * Annotation used for {@link MessageDispatcher} injection. For examples:
  *
  * <pre>
  * &#64;Inject
- * &#64;MessageSend
- * MessageSender messageSender;
+ * &#64;MessageDispatch
+ * MessageDispatcher messageDispatcher;
  * </pre>
  *
  * @author bingo 下午3:49:53
@@ -39,7 +39,7 @@ import org.corant.modules.jms.send.MessageSender;
 @Documented
 @Retention(RUNTIME)
 @Target(FIELD)
-public @interface MessageSend {
+public @interface MessageDispatch {
 
   /**
    * Sets the minimum length of time in milliseconds that must elapse after a message is sent before
@@ -69,13 +69,6 @@ public @interface MessageSend {
    * @see JMSProducer#setDeliveryMode(int)
    */
   String deliveryMode() default "2";// DeliveryMode.PERSISTENT;
-
-  /**
-   * The message destination
-   *
-   * @return destination
-   */
-  MessageDestination destination();
 
   /**
    * In the Jakarta EE web or EJB container, when there is no active JTA transaction in progress:
@@ -108,20 +101,6 @@ public @interface MessageSend {
    * @return the marshaller name
    */
   String marshaller() default JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;
-
-  /**
-   * Specifies that messages sent using the JMSProducer will have the specified property set to the
-   * specified Java object value.
-   *
-   * <p>
-   * Note that this method works only for the objectified primitive object types (Integer, Double,
-   * Long ...) and String objects.
-   *
-   * @return properties
-   *
-   * @see JMSProducer#setProperty(String, Object)
-   */
-  MessageProperty[] properties() default {};
 
   /**
    * Specifies the time to live of messages that are sent using the JMSProducer. This is used to

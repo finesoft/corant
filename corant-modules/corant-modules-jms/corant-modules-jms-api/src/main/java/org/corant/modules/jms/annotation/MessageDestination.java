@@ -22,9 +22,37 @@ import static org.corant.shared.util.Strings.EMPTY;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import jakarta.jms.Destination;
 
 /**
  * corant-modules-jms-api
+ * <p>
+ * Annotation used to specify the {@link Destination} of the message sent.
+ * <p>
+ * The annotation can be used in a POJO message class, used to specify the destination of the
+ * message sent, the POJO can be sent directly by the MessageDispatcher or can be received directly
+ * by MessageDriven method, examples:
+ *
+ * <pre>
+ * &#64;MessageDestination(connectionFactoryId="myConnectionFactoryId",name="myQueue")
+ * Class MyMessage {
+ *   ...
+ * }
+ *
+ * &#64;Inject
+ * &#64;MessageDispatch
+ * MessageDispatcher dispatcher
+ *
+ * public void send(){
+ *   ...
+ *   dispatcher.dispatch(new MyMessage());
+ * }
+ *
+ * &#64;MessageDriven
+ * void receive(MyMessage message){
+ *   ...
+ * }
+ * </pre>
  *
  * @author bingo 下午2:13:25
  */
@@ -37,7 +65,7 @@ public @interface MessageDestination {
    * The connection factory id, used to represent a JMS service or cluster, usually set up through a
    * configuration file, if the value uses the <b>"${...}"</b> expression, the specific value can be
    * obtained from the system property or configuration.
-   *
+   * <p>
    * Default is empty that means unspecified. At the same time the connection factory id is used for
    * CDI qualifier.
    */

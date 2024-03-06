@@ -31,7 +31,6 @@ import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNorNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNotNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicOrNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicXorNode;
-import org.corant.modules.json.expression.ast.ASTNode.ASTTernaryNode;
 import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariableNode;
 
 /**
@@ -40,6 +39,36 @@ import org.corant.modules.json.expression.ast.ASTVariableNode.ASTDefaultVariable
  * @author bingo 下午5:13:27
  */
 public enum ASTNodeType {
+
+  /**
+   * The subroutine node.
+   */
+  SUBROUTINE("$$", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTSubroutineNode();
+    }
+  },
+
+  /**
+   * Performs a conditional expressions.
+   */
+  CONDITIONAL("$?", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTConditionalNode();
+    }
+  },
+
+  /**
+   * The return node.
+   */
+  RETURN("$#", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTReturnNode();
+    }
+  },
 
   /**
    * Performs an AND operation on an array with at least two expressions and returns the objects
@@ -93,16 +122,6 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTLogicXorNode();
-    }
-  },
-
-  /**
-   * Performs a ternary operation on an array with three expressions.
-   */
-  TERNARY("$?", false) {
-    @Override
-    public ASTNode<?> buildNode(Object object) {
-      return new ASTTernaryNode();
     }
   },
 
@@ -218,10 +237,50 @@ public enum ASTNodeType {
   /**
    * The return node.
    */
-  RETURN("$return", false) {
+  MAP("$map", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
-      return new ASTReturnNode();
+      return new ASTMapNode();
+    }
+  },
+
+  /**
+   * The return node.
+   */
+  REDUCE("$reduce", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTReduceNode();
+    }
+  },
+
+  /**
+   * The return node.
+   */
+  FILTER("$filter", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTFilterNode();
+    }
+  },
+
+  /**
+   * The collect node.
+   */
+  COLLECT("$collect", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTCollectNode();
+    }
+  },
+
+  /**
+   * The function node
+   */
+  FUN("#", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTDefaultFunctionNode(object.toString().substring(1));
     }
   },
 
@@ -242,16 +301,6 @@ public enum ASTNodeType {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTValueNode(object);
-    }
-  },
-
-  /**
-   * The function node
-   */
-  FUN("#", false) {
-    @Override
-    public ASTNode<?> buildNode(Object object) {
-      return new ASTDefaultFunctionNode(object.toString().substring(1));
     }
   };
 

@@ -14,13 +14,19 @@
 package org.corant.modules.json.expression.predicate;
 
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.linkedHashMapOf;
 import static org.corant.shared.util.Maps.mapOf;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.DefaultEvaluationContext;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.SimpleParser;
@@ -47,6 +53,47 @@ public class JsonExpressionTest extends TestCase {
     System.out.println("=".repeat(80));
     val = Maps.getMapKeyPathValues(map, path, true);
     System.out.println(Jsons.toString(val, true));
+  }
+
+  @Test
+  public void testCollect() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    System.out.println(list.stream().map(x -> getMapString(x, "name")).collect(ArrayList::new,
+        ArrayList::add, ArrayList::addAll));
+
+    Object mapper = linkedHashMapOf("$map",
+        mapOf("@list", mapOf("(e)", mapOf("#java.util.Map::get", new Object[] {"@e", "name"}))));
+    Map<String, Object> exp = linkedHashMapOf("$collect",
+        new Object[] {mapper, mapOf("#java.util.ArrayList::new", new Object[0]),
+            mapOf("(e,r)", mapOf("#java.util.ArrayList::add", new Object[] {"@e", "@r"})),
+            mapOf("(e,r)",
+                mapOf("$$",
+                    mapOf("(s)",
+                        listOf(mapOf("#java.util.ArrayList::remvoeAll", new Object[] {"@l", "@r"}),
+                            mapOf("$#", "@l")))))});
+
+    System.out.println(Jsons.toString(exp, true));
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+
+  }
+
+  @Test
+  public void testFilter() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "edf", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "hij", "now", Instant.now()));
+    Map<String, Object> exp = linkedHashMapOf("$filter",
+        mapOf("@list", mapOf("(e)", mapOf("$gt", new Object[] {"@e.id", 1}))));
+    System.out.println(Jsons.toString(exp, true));
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
   }
 
   @Test
@@ -86,6 +133,34 @@ public class JsonExpressionTest extends TestCase {
   }
 
   @Test
+  public void testMap() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "edf", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "hij", "now", Instant.now()));
+    Object mapper = mapOf("#java.util.Map::get", new Object[] {"@e", "id"});
+    mapper = mapOf("#org.corant.shared.util.Maps::linkedHashMapOf",
+        new Object[] {"id", "@e.id", "name", "@e.name"});
+    mapper = mapOf("$$", listOf(
+        mapOf("#java.util.Map::put", new Object[] {"@e", "xxx",
+            mapOf("$?", listOf(mapOf("$gt", listOf("@e.id", 1)), mapOf("$$",
+                mapOf("(k)", listOf(mapOf("#java.lang.String::concat", listOf("@e.name", "------")),
+                    mapOf("#org.corant.shared.util.Strings::substring", listOf("@k", -3)),
+                    mapOf("#java.lang.String::concat", listOf("@k", "+++")), mapOf("$#", "@k")))),
+                "9999"))}),
+        mapOf("#java.util.Map::put",
+            new Object[] {"@e", "put",
+                mapOf("#java.util.Map::containsKey", new Object[] {"@e", "xxx"})}),
+        mapOf("$#", "@e")));
+
+    Map<String, Object> exp = linkedHashMapOf("$map", mapOf("@list", mapOf("(e)", mapper)));
+    System.out.println(Jsons.toString(exp, true));
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+  }
+
+  @Test
   public void testMixed() {
     Map<String, Object> r = mapOf("r.id", 123, "r.name", "bingo.chen", "r.a", 100, "r.b", "10");
     String exp =
@@ -109,5 +184,28 @@ public class JsonExpressionTest extends TestCase {
         return r.get(((ASTVariableNode) node).getName());
       }
     }));
+  }
+
+  @Test
+  public void testReduce() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    System.out.println(list.stream().map(x -> getMapString(x, "name")).reduce(new StringBuffer(),
+        StringBuffer::append, StringBuffer::append));
+
+    Object mapper = linkedHashMapOf("$map",
+        mapOf("@list", mapOf("(e)", mapOf("#java.util.Map::get", new Object[] {"@e", "name"}))));
+    Map<String, Object> exp = linkedHashMapOf("$reduce",
+        new Object[] {mapper, mapOf("#java.lang.StringBuffer::new", new Object[0]),
+            mapOf("(e,r)", mapOf("#java.lang.StringBuffer::append", new Object[] {"@e", "@r"})),
+            mapOf("(e,r)", mapOf("#java.lang.StringBuffer::append", new Object[] {"@e", "@r"}))});
+
+    System.out.println(Jsons.toString(exp, true));
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+
   }
 }

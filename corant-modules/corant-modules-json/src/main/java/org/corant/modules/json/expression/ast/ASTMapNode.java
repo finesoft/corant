@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.corant.modules.json.expression.ast;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.Node;
+
+/**
+ * corant-modules-json
+ *
+ * @author bingo 17:37:19
+ */
+public class ASTMapNode implements ASTNode<Object> {
+
+  protected final List<ASTNode<?>> children = new ArrayList<>();
+
+  @Override
+  public boolean addChild(Node<?> child) {
+    return children.add((ASTNode<?>) child);
+  }
+
+  @Override
+  public List<? extends Node<?>> getChildren() {
+    return children;
+  }
+
+  @Override
+  public ASTNodeType getType() {
+    return ASTNodeType.MAP;
+  }
+
+  @Override
+  public Object getValue(EvaluationContext ctx) {
+    final Node<?> inputNode = children.get(0);
+    final Node<?> inputNameNode = children.get(1);
+    final Node<?> outputNode = children.get(2);
+
+    Object input = inputNode.getValue(ctx);
+    String inputName = ASTNode.variableNamesOf(inputNameNode, ctx)[0];
+
+    BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    if (input instanceof Object[] array) {
+      Object[] output =
+          (Object[]) Array.newInstance(input.getClass().componentType(), array.length);
+      for (int i = 0; i < array.length; i++) {
+        output[i] = outputNode.getValue(useCtx.bind(inputName, array[i]));
+      }
+      return output;
+    } else if (input instanceof Iterable<?> itr) {
+      List<Object> output = new ArrayList<>();
+      for (Object mo : itr) {
+        output.add(outputNode.getValue(useCtx.bind(inputName, mo)));
+      }
+      return output;
+    } else {
+      return outputNode.getValue(useCtx.bind(inputName, input));
+    }
+  }
+
+}

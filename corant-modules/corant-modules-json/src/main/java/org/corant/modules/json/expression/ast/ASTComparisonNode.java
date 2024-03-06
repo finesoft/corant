@@ -97,8 +97,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected int compare(Object left, Object right) {
-      if (left instanceof Number && right instanceof Number) {
-        Number numberLeft = (Number) left;
+      if (left instanceof Number numberLeft && right instanceof Number) {
         Number numberRight = (Number) right;
         if (numberLeft instanceof BigDecimal || numberRight instanceof BigDecimal) {
           return compare(numberLeft, numberRight, BigDecimal.class);
@@ -201,7 +200,6 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       if (left != null) {
         return left.equals(right);
       } else if (right != null) {
-        return false;
       }
       return false;
     }
@@ -244,7 +242,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       Object right = getRightValue(ctx);
       if (right instanceof Collection) {
         return ((Collection) right).contains(left);
-      } else if (right instanceof String && (left instanceof String)) {
+      } else if (right instanceof String && left instanceof String) {
         return ((String) right).contains((String) left);
       }
       return false;
@@ -305,7 +303,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       Object right = getRightValue(ctx);
       if (right instanceof Collection) {
         return !((Collection) right).contains(left);
-      } else if (right instanceof String && (left instanceof String)) {
+      } else if (right instanceof String && left instanceof String) {
         return !((String) right).contains((String) left);
       }
       return true;

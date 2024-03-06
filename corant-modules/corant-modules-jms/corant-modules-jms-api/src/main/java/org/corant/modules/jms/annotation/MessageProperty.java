@@ -18,9 +18,12 @@ import static org.corant.shared.util.Streams.streamOf;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.jms.Message;
 
 /**
  * corant-modules-jms-shared
+ * <p>
+ * Annotation used to specify the {@link Message} properties
  *
  * @author bingo 下午3:46:33
  */

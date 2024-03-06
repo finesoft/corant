@@ -14,6 +14,7 @@
 package org.corant.modules.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,9 +22,12 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.corant.context.CDIs;
+import org.corant.modules.jms.annotation.MessageDispatch;
 import org.corant.modules.jms.annotation.MessageSend;
+import org.corant.modules.jms.metadata.MessageDispatchMetaData;
 import org.corant.modules.jms.metadata.MessageSendMetaData;
 import org.corant.modules.jms.send.GroupMessageSender;
+import org.corant.modules.jms.send.MessageDispatcher;
 import org.corant.modules.jms.send.MessageSender;
 
 /**
@@ -36,7 +40,15 @@ public class MessageSenderProducer {
 
   @Produces
   @Dependent
-  protected MessageSender produce(final InjectionPoint ip) {
+  protected MessageDispatcher produceDispatcher(final InjectionPoint ip) {
+    final MessageDispatch at = CDIs.getAnnotation(ip, MessageDispatch.class);
+    shouldNotNull(at, "Message dispatcher must have a MessageDispatch annotation");
+    return new DefaultMessageDispatcher(MessageDispatchMetaData.of(at));
+  }
+
+  @Produces
+  @Dependent
+  protected MessageSender produceSender(final InjectionPoint ip) {
     List<MessageSender> senders = new ArrayList<>();
     final MessageSend at = CDIs.getAnnotation(ip, MessageSend.class);
     if (at != null) {

@@ -595,7 +595,7 @@ public class Maps {
    */
   public static <T> T getMapKeyPathValue(Object object, Object[] keyPath, boolean flatten) {
     List<Object> holder = new ArrayList<>();
-    iterateMapValue(object, keyPath, 0, true, false, holder);
+    iterateMapValue(object, keyPath, 0, flatten, false, holder);
     if (holder.isEmpty()) {
       return null;
     } else {

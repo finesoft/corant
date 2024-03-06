@@ -24,6 +24,9 @@ import org.corant.modules.jms.marshaller.MessageMarshaller;
 
 /**
  * corant-modules-jms-shared
+ * <p>
+ * Annotation is used to set up message replies, typically used in conjunction with
+ * {@link MessageDriven} to use the return value of the method as a reply message.
  *
  * @author bingo 下午3:49:53
  */
@@ -61,7 +64,7 @@ public @interface MessageReply {
    * Note: If the value of this property uses the <b>"${...}"</b> expression, the specific value can
    * be obtained from the system property or configuration.
    *
-   * @return the marshaler name
+   * @return the marshaller name
    * @see MessageMarshaller
    */
   String marshaller() default JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA;

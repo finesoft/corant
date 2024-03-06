@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableCollection;
 import static org.corant.shared.normal.Names.splitNameSpace;
+import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -65,6 +66,7 @@ import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Strings;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -83,7 +85,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
   public static final String PROJECTION_KEY = "projection";
   public static final String PROJECTION_RENAME_KEY = "rename";
   public static final String PROJECTION_TYPE_KEY = "type";
-  public static final String PROJECTION_EVAL_KEY = "eval";
+  public static final String EVAL_KEY = "eval";
 
   public static final String PARENT_RESULT_VAR_PREFIX =
       RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
@@ -125,7 +127,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     final Script script = fetchQuery.getInjectionScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return injFuns.computeIfAbsent(script.getId(), k -> createInjectFuns(fetchQuery, script));
+      return injFuns.computeIfAbsent(script.getId(), k -> createInjectionFuns(fetchQuery, script));
     }
     return null;
   }
@@ -151,13 +153,13 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @param fetchQuery a fetch query to build the injection function
    * @param script the injection DSL function script
    */
-  protected Function<ParameterAndResultPair, Object> createInjectFuns(FetchQuery fetchQuery,
+  protected Function<ParameterAndResultPair, Object> createInjectionFuns(FetchQuery fetchQuery,
       Script script) {
     final String code = script.getCode();
-    final Pair<Node<Boolean>, Projector> eval = resolveInjectScript(code);
-    final Node<Boolean> filter = eval.left();
-    final Projector projector = eval.right();
-    return p -> injectFetchResult(p, fetchQuery, filter, projector);
+    final Pair<Node<Boolean>, InjectionHandler> injectScripts = resolveInjectionScript(code);
+    final Node<Boolean> filter = injectScripts.left();
+    final InjectionHandler handler = injectScripts.right();
+    return p -> injectFetchResult(p, fetchQuery, filter, handler);
   }
 
   /**
@@ -185,13 +187,13 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @param fetchQuery a fetch query
    * @param filter an injection filter, used to determine which fetch results can be used for
    *        injection of the current parent result
-   * @param projector a projector used to handle injection
+   * @param handler a handler used to handle injection
    */
   protected Object injectFetchResult(ParameterAndResultPair p, FetchQuery fetchQuery,
-      final Node<Boolean> filter, final Projector projector) {
+      final Node<Boolean> filter, final InjectionHandler handler) {
     List<Map<Object, Object>> parentResults = forceCast(p.parentResult);
     List<Map<Object, Object>> fetchResults = forceCast(p.fetchedResult);
-    MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
+    MyEvaluationContext injectCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
     for (Map<Object, Object> r : parentResults) {
       // filter the fetched results which can be used for injecting
       List<Object> injectResults = new ArrayList<>();
@@ -203,7 +205,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         }
       } else {
         for (Map<Object, Object> fr : fetchResults) {
-          if (filter.getValue(evalCtx.linkResults(r, fr))) {
+          if (filter.getValue(injectCtx.linkParentAndFetchResult(r, fr))) {
             injectResults.add(fr);
             if (!fetchQuery.isMultiRecords()) {
               break;
@@ -212,8 +214,8 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         }
       }
       // process the filtered injection results: extract->DSL evaluation->type conversion->rename
-      if (projector != null && !injectResults.isEmpty()) {
-        injectResults = projector.apply(injectResults, evalCtx, mapper);
+      if (handler != null && !injectResults.isEmpty()) {
+        injectResults = handler.apply(injectResults, injectCtx, mapper);
       }
       // inject the processed and fetched results to parent result
       if (isNotEmpty(fetchQuery.getInjectPropertyNamePath())) {
@@ -240,16 +242,22 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     return null;
   }
 
+  protected InjectionHandler resolveInjectionHandler(Map<String, Object> projectionMap) {
+    Node<Object> evalNode = forceCast(SimpleParser.parse(projectionMap, MyASTNodeBuilder.INST));
+    return new Evaluator(evalNode);
+  }
+
   /**
-   * Resolves a {@link Projector} from given projection maps and options
+   * Resolves a {@link InjectionHandler} from given projection maps and options
    *
    * @param projectionMap a projection maps which is extracted from injection script.
    * @param single indicates whether is single value projection or not
-   * @see Projector
+   * @see InjectionHandler
    */
   @SuppressWarnings("unchecked")
-  protected Projector resolveInjectProjector(Map<String, Object> projectionMap, boolean single) {
-    Set<Mapping> mappings = new LinkedHashSet<>();
+  protected InjectionHandler resolveInjectionHandler(Map<String, Object> projectionMap,
+      boolean single) {
+    Set<ProjectionMapping> mappings = new LinkedHashSet<>();
     if (projectionMap != null) {
       projectionMap.forEach((k, v) -> {
         if (k != null && v != null) {
@@ -260,7 +268,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
               String typeName = getMapString(vm, PROJECTION_TYPE_KEY);
               Class<?> type = typeName != null ? asClass(typeName) : null;
               // parse evaluation DSL
-              Object evalScript = getMapObject(vm, PROJECTION_EVAL_KEY);
+              Object evalScript = getMapObject(vm, EVAL_KEY);
               Node<Object> evalNode = null;
               if (evalScript instanceof Map map) {
                 evalNode = forceCast(SimpleParser.parse(map, MyASTNodeBuilder.INST));
@@ -288,9 +296,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
                   }
                 }
               }
-              mappings.add(new Mapping(keyPath, renames, evalNode, type));
+              mappings.add(new ProjectionMapping(keyPath, renames, evalNode, type));
             } else if (toBoolean(v)) {
-              mappings.add(new Mapping(keyPath, singletonList(keyPath), null, null));
+              mappings.add(new ProjectionMapping(keyPath, singletonList(keyPath), null, null));
             }
           }
         }
@@ -310,143 +318,67 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * Resolves an injection processing by given script code
    * <p>
    * The returns injection processing is a pair, the left value of the pair is a script used for
-   * filtering and the right value of the pair is a projector used to process the filtered injection
-   * result.
+   * filtering and the right value of the pair is a {@link InjectionHandler} used to process the
+   * filtered injection result.
    *
    * @param code the script code to be resolved
    */
-  protected Pair<Node<Boolean>, Projector> resolveInjectScript(String code) {
+  protected Pair<Node<Boolean>, InjectionHandler> resolveInjectionScript(String code) {
     final Map<String, Object> root = Jsons.fromString(code);
     Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
     Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
     boolean single = getMapBoolean(root, SINGLE_KEY, Boolean.FALSE);
+    Map<String, Object> evalMap = getMapMap(root, EVAL_KEY);
+
     Node<Boolean> filter = null;
-    Projector projector = null;
+    InjectionHandler injectionHandler = null;
     if (filterMap != null) {
       filter = forceCast(SimpleParser.parse(filterMap, MyASTNodeBuilder.INST));
     }
     if (projectionMap != null || single) {
-      projector = resolveInjectProjector(projectionMap, single);
+      shouldBeNull(evalMap, "Injection script error! root 'eval' can only be used with 'filter'! ");
+      injectionHandler = resolveInjectionHandler(projectionMap, single);
+    } else if (evalMap != null) {
+      injectionHandler = resolveInjectionHandler(evalMap);
     }
-    if (filter == null && projector == null) {
+    if (filter == null && injectionHandler == null) {
       filter = forceCast(SimpleParser.parse(root, MyASTNodeBuilder.INST));
     }
-    return Pair.of(filter, projector);
+    return Pair.of(filter, injectionHandler);
   }
 
   /**
    * corant-modules-query-shared
-   * <p>
-   * A projection class for processing filtered results that match the injection criteria. It will
-   * do in order according to the projection configuration of each field: extraction and then
-   * complex evaluation(optional) and then type conversion(optional) and then rename the
-   * field(optional).
-   * <p>
-   * Note: Rename process and complex evaluation can't be used together.
    *
-   * @author bingo 下午3:17:15
+   * @author bingo 15:33:14
    */
-  protected static class Projector {
+  public static class Evaluator implements InjectionHandler {
 
-    final Collection<Mapping> mappings;
-    final boolean single;
+    protected final Node<?> eval;
 
-    Projector(Collection<Mapping> mappings, boolean single) {
-      this.mappings = mappings == null ? emptyList() : unmodifiableCollection(mappings);
-      this.single = single;
-    }
-
-    List<Object> apply(List<Object> fetchResults, MyEvaluationContext evalCtx,
-        QueryObjectMapper mapper) {
-      List<Object> results = new ArrayList<>();
-      if (single) {
-        if (mappings.isEmpty()) {
-          results.addAll(fetchResults);
-        } else {
-          final Mapping mapping = mappings.iterator().next();
-          for (Object fetchResult : fetchResults) {
-            Object extracted = process(fetchResult, mapping, evalCtx, mapper);
-            results.add(extracted);
-          }
-        }
-      } else {
-        for (Object fetchResult : fetchResults) {
-          Map<Object, Object> result = new LinkedHashMap<>();
-          for (Mapping mapping : mappings) {
-            Object extracted = process(fetchResult, mapping, evalCtx, mapper);
-            for (String[] injectPath : mapping.injectPaths) {
-              mapper.putMappedValue(result, injectPath, extracted);
-            }
-          }
-          results.add(result);
-        }
-      }
-      return results;
+    protected Evaluator(Node<?> eval) {
+      this.eval = eval;
     }
 
     @SuppressWarnings("unchecked")
-    Object process(Object fetchResult, Mapping mapping, MyEvaluationContext evalCtx,
+    @Override
+    public List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
         QueryObjectMapper mapper) {
-      Object extracted;
-      if (mapping.evalNode != null) {
-        // handle complex evaluation if necessary
-        extracted =
-            mapping.evalNode.getValue(evalCtx.linkFetchResult((Map<Object, Object>) fetchResult));
-      } else {
-        // extract the field value from fetched result
-        extracted = mapper.getMappedValue(fetchResult, mapping.extractPath);
-      }
-      // convert the field value to target type if necessary
-      if (mapping.type != null) {
-        extracted = toObject(extracted, mapping.type);
-      }
-      return extracted;
+      injectionCtx.linkFetchResults((List<Map<Object, Object>>) fetchResults);
+      Object result = eval.getValue(injectionCtx);
+      return (List<Object>) result;
     }
+
   }
 
   /**
    * corant-modules-query-shared
-   * <p>
-   * A single field(or property) projection configuration. Contains the field extract from and
-   * inject to paths, a target type used for value conversion, an evaluation script used for complex
-   * solution.
-   * <p>
-   * The evaluation script is used to solve a result according to the context
    *
-   * @author bingo 下午3:13:21
+   * @author bingo 15:15:18
    */
-  static class Mapping {
-    final String[] extractPath;
-    final List<String[]> injectPaths;
-    final Class<?> type;
-    final Node<Object> evalNode;
-
-    Mapping(String[] extractPath, List<String[]> injectPaths, Node<Object> evalNode,
-        Class<?> type) {
-      this.extractPath = extractPath;
-      this.injectPaths = injectPaths;
-      this.evalNode = evalNode;
-      this.type = type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if ((obj == null) || (getClass() != obj.getClass())) {
-        return false;
-      }
-      Mapping other = (Mapping) obj;
-      return Arrays.equals(extractPath, other.extractPath);
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      return prime * result + Arrays.hashCode(extractPath);
-    }
+  public interface InjectionHandler {
+    List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
+        QueryObjectMapper mapper);
   }
 
   /**
@@ -454,9 +386,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    *
    * @author bingo 下午3:19:53
    */
-  static class MyASTNodeBuilder implements ASTNodeBuilder {
+  public static class MyASTNodeBuilder implements ASTNodeBuilder {
 
-    static final MyASTNodeBuilder INST = new MyASTNodeBuilder();
+    public static final MyASTNodeBuilder INST = new MyASTNodeBuilder();
 
     @Override
     public ASTNode<?> build(Object token) {
@@ -477,9 +409,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    *
    * @author bingo 下午3:19:55
    */
-  static class MyASTVariableNode extends ASTDefaultVariableNode {
+  public static class MyASTVariableNode extends ASTDefaultVariableNode {
 
-    private final Object[] namePath;
+    protected final Object[] namePath;
 
     MyASTVariableNode(String name) {
       super(name);
@@ -490,8 +422,12 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       } else if (name.startsWith(PARAMETER_VAR_PREFIX)) {
         namePath = splitNameSpace(name.substring(PARAMETER_VAR_PREFIX_LEN), true, false);
       } else {
-        throw new NotSupportedException(
-            "Dynamic query json expression variable with name [%s] is not supported!", name);
+        String[] tmp = splitNameSpace(name, true, false);
+        if (tmp.length > 1) {
+          namePath = Arrays.copyOfRange(tmp, 1, tmp.length);
+        } else {
+          namePath = Strings.EMPTY_ARRAY;
+        }
       }
     }
 
@@ -511,17 +447,19 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    *
    * @author bingo 下午3:19:59
    */
-  static class MyEvaluationContext implements EvaluationContext {
+  public static class MyEvaluationContext implements EvaluationContext {
 
-    Map<Object, Object> parentResult;
-    Map<Object, Object> fetchResult;
-    Map<Object, Object> queryParameterMap;
-    boolean queryParamMapResolved;
-    final Object queryParameter;
-    final QueryObjectMapper objectMapper;
-    final List<FunctionResolver> functionResolvers;
+    protected final Object queryParameter;
+    protected final QueryObjectMapper objectMapper;
+    protected final List<FunctionResolver> functionResolvers;
 
-    MyEvaluationContext(QueryObjectMapper objectMapper, Object queryParameter,
+    protected Map<Object, Object> queryParameterMap;
+    protected boolean queryParamMapResolved;
+    protected Map<Object, Object> parentResult;
+    protected Map<Object, Object> fetchResult;
+    protected List<Map<Object, Object>> fetchResults;
+
+    public MyEvaluationContext(QueryObjectMapper objectMapper, Object queryParameter,
         List<FunctionResolver> functionResolvers) {
       this.objectMapper = objectMapper;
       this.queryParameter = queryParameter;
@@ -544,6 +482,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       } else if (myNode.getName().startsWith(FETCH_RESULT_VAR_PREFIX)) {
         // handle fetch result variable: @fr.[field name]
         return objectMapper.getMappedValue(fetchResult, myNode.getNamePath());
+      } else if (FETCHED_RESULTS_FUNC_PARAMETER_NAME.equals(myNode.getName())) {
+        // handle fetch results variable: @frs
+        return fetchResults;
       } else {
         // handle query parameter: @p.criteria.[criterion name] or @p.context.[context key]
         if (!queryParamMapResolved) {
@@ -554,21 +495,142 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       }
     }
 
-    MyEvaluationContext linkFetchResult(Map<Object, Object> fetchResult) {
+    protected MyEvaluationContext linkFetchResult(Map<Object, Object> fetchResult) {
       this.fetchResult = fetchResult;
       return this;
     }
 
-    MyEvaluationContext linkParentResult(Map<Object, Object> parentResult) {
-      this.parentResult = parentResult;
+    protected MyEvaluationContext linkFetchResults(List<Map<Object, Object>> fetchResults) {
+      this.fetchResults = fetchResults;
       return this;
     }
 
-    MyEvaluationContext linkResults(Map<Object, Object> parentResult,
+    protected MyEvaluationContext linkParentAndFetchResult(Map<Object, Object> parentResult,
         Map<Object, Object> fetchResult) {
       this.parentResult = parentResult;
       this.fetchResult = fetchResult;
       return this;
+    }
+
+    protected MyEvaluationContext linkParentResult(Map<Object, Object> parentResult) {
+      this.parentResult = parentResult;
+      return this;
+    }
+  }
+
+  /**
+   * corant-modules-query-shared
+   * <p>
+   * A single field(or property) projection configuration. Contains the field extract from and
+   * inject to paths, a target type used for value conversion, an evaluation script used for complex
+   * solution.
+   * <p>
+   * The evaluation script is used to solve a result according to the context
+   *
+   * @author bingo 下午3:13:21
+   */
+  public static class ProjectionMapping {
+    protected final String[] extractPath;
+    protected final List<String[]> injectPaths;
+    protected final Class<?> type;
+    protected final Node<Object> evalNode;
+
+    protected ProjectionMapping(String[] extractPath, List<String[]> injectPaths,
+        Node<Object> evalNode, Class<?> type) {
+      this.extractPath = extractPath;
+      this.injectPaths = injectPaths;
+      this.evalNode = evalNode;
+      this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if ((obj == null) || (getClass() != obj.getClass())) {
+        return false;
+      }
+      ProjectionMapping other = (ProjectionMapping) obj;
+      return Arrays.equals(extractPath, other.extractPath);
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      return prime * result + Arrays.hashCode(extractPath);
+    }
+  }
+
+  /**
+   * corant-modules-query-shared
+   * <p>
+   * A projection class for processing filtered results that match the injection criteria. It will
+   * do in order according to the projection configuration of each field: extraction and then
+   * complex evaluation(optional) and then type conversion(optional) and then rename the
+   * field(optional).
+   * <p>
+   * Note: Rename process and complex evaluation can't be used together.
+   *
+   * @author bingo 下午3:17:15
+   */
+  public static class Projector implements InjectionHandler {
+
+    protected final Collection<ProjectionMapping> mappings;
+    protected final boolean single;
+
+    public Projector(Collection<ProjectionMapping> mappings, boolean single) {
+      this.mappings = mappings == null ? emptyList() : unmodifiableCollection(mappings);
+      this.single = single;
+    }
+
+    @Override
+    public List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
+        QueryObjectMapper mapper) {
+      List<Object> results = new ArrayList<>();
+      if (single) {
+        if (mappings.isEmpty()) {
+          results.addAll(fetchResults);
+        } else {
+          final ProjectionMapping mapping = mappings.iterator().next();
+          for (Object fetchResult : fetchResults) {
+            Object extracted = process(fetchResult, mapping, injectionCtx, mapper);
+            results.add(extracted);
+          }
+        }
+      } else {
+        for (Object fetchResult : fetchResults) {
+          Map<Object, Object> result = new LinkedHashMap<>();
+          for (ProjectionMapping mapping : mappings) {
+            Object extracted = process(fetchResult, mapping, injectionCtx, mapper);
+            for (String[] injectPath : mapping.injectPaths) {
+              mapper.putMappedValue(result, injectPath, extracted);
+            }
+          }
+          results.add(result);
+        }
+      }
+      return results;
+    }
+
+    @SuppressWarnings("unchecked")
+    Object process(Object fetchResult, ProjectionMapping mapping, MyEvaluationContext evalCtx,
+        QueryObjectMapper mapper) {
+      Object extracted;
+      if (mapping.evalNode != null) {
+        // handle complex evaluation if necessary
+        extracted =
+            mapping.evalNode.getValue(evalCtx.linkFetchResult((Map<Object, Object>) fetchResult));
+      } else {
+        // extract the field value from fetched result
+        extracted = mapper.getMappedValue(fetchResult, mapping.extractPath);
+      }
+      // convert the field value to target type if necessary
+      if (mapping.type != null) {
+        extracted = toObject(extracted, mapping.type);
+      }
+      return extracted;
     }
   }
 }

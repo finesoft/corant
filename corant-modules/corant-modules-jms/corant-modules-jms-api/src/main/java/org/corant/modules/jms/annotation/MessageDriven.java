@@ -28,6 +28,34 @@ import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 
 /**
  * corant-modules-ddd-api
+ * <p>
+ * An annotation that specifies a method as a JMS message reception handler. The annotation provides
+ * an error retry mechanism, message filters, message reply etc. during reception.
+ * <p>
+ * Usually this annotation is used in conjunction with {@link MessageDestination} where the
+ * annotation provides the receive handling mechanism and {@link MessageDestination} provides the
+ * message receiving address and other information <br/>
+ * This annotation also be used independently, if the received method parameter is a POJO and the
+ * POJO class is specified {@link MessageDestination}
+ * <p>
+ * Examples:
+ *
+ * <pre>
+ * &#64;MessageDriven(tryThreshold = "16")
+ * &#64;MessageDestination(connectionFactoryId="myConnectionFactoryId",name="myQueue")
+ * void receiveCommon(Message message){
+ *   ...
+ * }
+ *
+ * &#64;MessageDestination(connectionFactoryId="myConnectionFactoryId",name="myQueue")
+ * class POJO {
+ *   ...
+ * }
+ * &#64;MessageDriven(tryThreshold = "16")
+ * void receiveCommon(POJO pojo){
+ *   ...
+ * }
+ * </pre>
  *
  * @author bingo 下午2:39:22
  */

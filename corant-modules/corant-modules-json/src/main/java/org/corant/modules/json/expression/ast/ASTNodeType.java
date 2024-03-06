@@ -43,7 +43,7 @@ public enum ASTNodeType {
   /**
    * The subroutine node.
    */
-  SUBROUTINE("$$", false) {
+  SUBROUTINE("$sub", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTSubroutineNode();
@@ -53,7 +53,7 @@ public enum ASTNodeType {
   /**
    * Performs a conditional expressions.
    */
-  CONDITIONAL("$?", false) {
+  CONDITIONAL("$if", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTConditionalNode();
@@ -63,7 +63,7 @@ public enum ASTNodeType {
   /**
    * The return node.
    */
-  RETURN("$#", false) {
+  RETURN("$ret", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTReturnNode();

@@ -70,10 +70,10 @@ public class JsonExpressionTest extends TestCase {
         new Object[] {mapper, mapOf("#java.util.ArrayList::new", new Object[0]),
             mapOf("(e,r)", mapOf("#java.util.ArrayList::add", new Object[] {"@e", "@r"})),
             mapOf("(e,r)",
-                mapOf("$$",
+                mapOf("$sub",
                     mapOf("(s)",
                         listOf(mapOf("#java.util.ArrayList::remvoeAll", new Object[] {"@l", "@r"}),
-                            mapOf("$#", "@l")))))});
+                            mapOf("$ret", "@l")))))});
 
     System.out.println(Jsons.toString(exp, true));
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
@@ -123,7 +123,7 @@ public class JsonExpressionTest extends TestCase {
         "{\"#java.lang.System::currentTimeMillis\":[]}", "{\"#java.util.Date::new\":[]}",
         "{\"#java.util.UUID::toString\":[{\"#java.util.UUID::randomUUID\":[]}]}",
         "{\"#sizeOf\":\"@r.name\"}", "{\"#sizeOf\":\"@r.size\"}",
-        "{\"$?\":[{\"$gt\":[{\"#sizeOf\":\"@r.name\"},9]},\"yes\",\"no\"]}"};
+        "{\"$if\":[{\"$gt\":[{\"#sizeOf\":\"@r.name\"},9]},\"yes\",\"no\"]}"};
     Node<?>[] nodes = Arrays.stream(exps).map(SimpleParser::parse).toArray(Node[]::new);
     for (Node<?> node : nodes) {
       Object val = node.getValue(ec);
@@ -141,17 +141,17 @@ public class JsonExpressionTest extends TestCase {
     Object mapper = mapOf("#java.util.Map::get", new Object[] {"@e", "id"});
     mapper = mapOf("#org.corant.shared.util.Maps::linkedHashMapOf",
         new Object[] {"id", "@e.id", "name", "@e.name"});
-    mapper = mapOf("$$", listOf(
+    mapper = mapOf("$sub", listOf(
         mapOf("#java.util.Map::put", new Object[] {"@e", "xxx",
-            mapOf("$?", listOf(mapOf("$gt", listOf("@e.id", 1)), mapOf("$$",
+            mapOf("$if", listOf(mapOf("$gt", listOf("@e.id", 1)), mapOf("$sub",
                 mapOf("(k)", listOf(mapOf("#java.lang.String::concat", listOf("@e.name", "------")),
                     mapOf("#org.corant.shared.util.Strings::substring", listOf("@k", -3)),
-                    mapOf("#java.lang.String::concat", listOf("@k", "+++")), mapOf("$#", "@k")))),
+                    mapOf("#java.lang.String::concat", listOf("@k", "+++")), mapOf("$ret", "@k")))),
                 "9999"))}),
         mapOf("#java.util.Map::put",
             new Object[] {"@e", "put",
                 mapOf("#java.util.Map::containsKey", new Object[] {"@e", "xxx"})}),
-        mapOf("$#", "@e")));
+        mapOf("$ret", "@e")));
 
     Map<String, Object> exp = linkedHashMapOf("$map", mapOf("@list", mapOf("(e)", mapper)));
     System.out.println(Jsons.toString(exp, true));

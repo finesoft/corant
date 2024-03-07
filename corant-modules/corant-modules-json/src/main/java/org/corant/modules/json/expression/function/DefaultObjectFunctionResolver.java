@@ -222,15 +222,17 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     if (length > 0) {
       // match non-static method
       invokedObject = fs[0];
-      params = new Object[length - 1];
-      paramTypes = new Class[length - 1];
-      for (int i = 1; i < length; i++) {
-        params[i - 1] = fs[i];
-        paramTypes[i - 1] = fs[i] == null ? Object.class : fs[i].getClass();
-      }
-      method = Methods.getMatchingMethod(cls, methodName, paramTypes);
-      if (method != null && Modifier.isStatic(method.getModifiers())) {
-        method = null;
+      if (invokedObject != null && cls.isAssignableFrom(Classes.getUserClass(invokedObject))) {
+        params = new Object[length - 1];
+        paramTypes = new Class[length - 1];
+        for (int i = 1; i < length; i++) {
+          params[i - 1] = fs[i];
+          paramTypes[i - 1] = fs[i] == null ? Object.class : fs[i].getClass();
+        }
+        method = Methods.getMatchingMethod(cls, methodName, paramTypes);
+        if (method != null && Modifier.isStatic(method.getModifiers())) {
+          method = null;
+        }
       }
     }
     if (method == null) {

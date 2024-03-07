@@ -13,8 +13,12 @@
  */
 package org.corant.modules.json.expression.function;
 
+import static org.corant.shared.normal.Names.DOMAIN_SPACE_SEPARATORS;
+import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
+import static org.corant.shared.util.Strings.trim;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -47,11 +51,12 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Experimental;
-import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Configurations;
 import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Empties;
+import org.corant.shared.util.Fields;
 import org.corant.shared.util.Iterables;
 import org.corant.shared.util.Lists;
 import org.corant.shared.util.Maps;
@@ -72,12 +77,13 @@ import org.corant.shared.util.Systems;
  * object constructors.
  *
  * <p>
- * The string formed by the complete object type name and method name with :: symbolic connection is
- * used as the key of the function, if the method name is {@code new} it means it is a constructor.
- * An array is used to represent the input parameters of the invocation. An empty array [] is used
- * to represent a method or constructor invocations without input parameters; if it is a non-static
- * method invocation, the first element of the input parameter array is the invoked object itself,
- * on the contrary, all arrays are input parameters.
+ * The string formed by the complete object type name and method name with {@code ::} or {@code :}
+ * symbolic connection is used as the key of the function, if the method name is {@code new} it
+ * means it is a constructor, {@code ::} means invoke static method {@code :} means invoke
+ * non-static method. An array is used to represent the input parameters of the invocation. An empty
+ * array [] is used to represent a method or constructor invocations without input parameters; if it
+ * is a non-static method invocation, the first element of the input parameter array is the invoked
+ * object itself, on the contrary, all arrays are input parameters.
  *
  * <p>
  * NOTE: Since the methods of java objects can be overloaded, for example, multiple method
@@ -89,13 +95,13 @@ import org.corant.shared.util.Systems;
  * <b>Examples:</b>
  *
  * <pre>
- * <b>Expression</b>                                                    <b>Evaluated result</b>
- * {"#java.lang.String::trim":["abc "]}                                 abc
- * {"#java.lang.String::indexOf":["abc", "b"]}                          1
- * {"#java.lang.String::substring":["bingo.chen", 0, 7]}                bingo.c
- * {"#java.lang.System::currentTimeMillis":[]}                          1667269845452
- * {"#java.util.Date::new":[]}                                          Tue Nov 01 10:30:45 CST 2021
- * {"#java.util.UUID::toString":[{"#java.util.UUID::randomUUID":[]}]}   2f6e8962-2f74-4e24-b039-e2b7c8523605
+ * <b>Expression</b>                                                   <b>Evaluated result</b>
+ * {"#java.lang.String:trim":["abc "]}                                 abc
+ * {"#java.lang.String:indexOf":["abc", "b"]}                          1
+ * {"#java.lang.String:substring":["bingo.chen", 0, 7]}                bingo.c
+ * {"#java.lang.System::currentTimeMillis":[]}                         1667269845452
+ * {"#java.util.Date::new":[]}                                         Tue Nov 01 10:30:45 CST 2021
+ * {"#java.util.UUID:toString":[{"#java.util.UUID::randomUUID":[]}]}   2f6e8962-2f74-4e24-b039-e2b7c8523605
  * </pre>
  *
  * @author bingo 下午3:29:41
@@ -103,13 +109,17 @@ import org.corant.shared.util.Systems;
 @Experimental
 public class DefaultObjectFunctionResolver implements FunctionResolver {
 
-  static final Map<String, Pair<Class<?>, String>> holder = new ConcurrentHashMap<>();
-  static final Object[] emptyParams = {};
-  static final Class<?>[] emptyParamTypes = new Class[0];
-  static final String NEW = "new";
-  static final String delimiter = "::";
+  // 0: constructor, 1: static method, 2: non-static method, 3: static field, 4:non-static field
+  protected static final Map<String, Triple<Class<?>, String, Integer>> holder =
+      new ConcurrentHashMap<>();
+  protected static final Object[] emptyParams = {};
+  protected static final Class<?>[] emptyParamTypes = new Class[0];
+  protected static final String NEW = "new";
+  protected static final String nonStaticDelimiter = DOMAIN_SPACE_SEPARATORS;
+  protected static final String staticDelimiter = nonStaticDelimiter + nonStaticDelimiter;
 
   protected static Map<String, Class<?>> builtinClassAlias = new ConcurrentHashMap<>();
+
   static {
     builtinClassAlias.put(Strings.class.getSimpleName(), Strings.class);
     builtinClassAlias.put(Maps.class.getSimpleName(), Maps.class);
@@ -159,34 +169,79 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
   @Override
   public Function<Object[], Object> resolve(String name) {
     return fs -> {
-      Pair<Class<?>, String> sign = holder.get(name);
+      Triple<Class<?>, String, Integer> sign = holder.get(name);
+      if (sign == null) {
+        throw new IllegalArgumentException(String.format("Unsupported function: %s", name));
+      }
       Class<?> cls = sign.first();
       String invokerName = sign.second();
+      Integer type = sign.third();
       //// FIXME Currently treated parameter type as java.lang.Object if parameter is null
-      if (NEW.equals(invokerName)) {
+      if (type == 0) {
         // constructor invoking
         return invokeConstructor(fs, cls);
+      } else if (type == 1) {
+        // static method invoking
+        return invokeStaticMethod(fs, cls, invokerName);
+      } else if (type == 2) {
+        // non-static method invoking
+        return invokeNonStaticMethod(fs, cls, invokerName);
+      } else if (type == 3) {
+        // static field invoking
+        return invokeStaticField(fs, cls, invokerName);
       } else {
-        // method invoking
-        return invokeMethod(fs, cls, invokerName);
+        // non-static field invoking
+        return invokeNonStaticField(fs, cls, invokerName);
       }
     };
   }
 
   @Override
   public boolean supports(String name) {
-    if (name != null) {
-      if (holder.containsKey(name)) {
+    String useName = trim(name);
+    if (useName != null) {
+      if (holder.containsKey(useName)) {
         return true;
       }
-      if (Strings.contains(name, delimiter)) {
-        String[] tmp = split(name, delimiter, true, true);
+      if (useName.contains(nonStaticDelimiter)) {
+        // method or constructor
+        String[] tmp = split(useName, nonStaticDelimiter, true, true);
+        boolean statics = useName.contains(staticDelimiter);
         if (tmp.length == 2) {
           Class<?> klass = builtinClassAlias.getOrDefault(tmp[0], Classes.tryAsClass(tmp[0]));
-          if (klass != null && (Arrays.stream(klass.getDeclaredMethods())
-              .anyMatch(m -> m.getName().equals(tmp[1])) || NEW.equals(tmp[1]))) {
-            holder.computeIfAbsent(name, x -> Pair.of(klass, tmp[1]));
-            return true;
+          if (klass != null) {
+            // constructor
+            if (NEW.equals(tmp[1]) && statics) {
+              holder.computeIfAbsent(useName, k1 -> Triple.of(klass, NEW, 0));
+              return true;
+            }
+            // method
+            if (Arrays.stream(klass.getDeclaredMethods())
+                .anyMatch(m -> m.getName().equals(tmp[1]))) {
+              holder.computeIfAbsent(useName, k1 -> Triple.of(klass, tmp[1], statics ? 1 : 2));
+              return true;
+            }
+          }
+        }
+      } else {
+        // field
+        int last = useName.lastIndexOf(".");
+        if (last > 0 && last < useName.length() - 1) {
+          String fieldName = useName.substring(last + 1);
+          if (isNotBlank(fieldName)) {
+            String className = useName.substring(0, last);
+            Class<?> klass =
+                builtinClassAlias.getOrDefault(className, Classes.tryAsClass(className));
+            try {
+              if (klass != null) {
+                Field field = klass.getDeclaredField(fieldName);
+                holder.computeIfAbsent(useName, k1 -> Triple.of(klass, fieldName,
+                    Modifier.isStatic(field.getModifiers()) ? 3 : 4));
+                return true;
+              }
+            } catch (NoSuchFieldException | SecurityException e) {
+              // No op
+            }
           }
         }
       }
@@ -213,41 +268,56 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     }
   }
 
-  protected Object invokeMethod(Object[] fs, Class<?> cls, String methodName) {
+  protected Object invokeNonStaticMethod(Object[] fs, Class<?> cls, String methodName) {
     int length = fs.length;
-    Object[] params = emptyParams;
     Class<?>[] paramTypes = emptyParamTypes;
-    Object invokedObject = null;
-    Method method = null;
     if (length > 0) {
       // match non-static method
-      invokedObject = fs[0];
+      Object invokedObject = fs[0];
       if (invokedObject != null && cls.isAssignableFrom(Classes.getUserClass(invokedObject))) {
-        params = new Object[length - 1];
+        Object[] params = new Object[length - 1];
         paramTypes = new Class[length - 1];
         for (int i = 1; i < length; i++) {
           params[i - 1] = fs[i];
           paramTypes[i - 1] = fs[i] == null ? Object.class : fs[i].getClass();
         }
-        method = Methods.getMatchingMethod(cls, methodName, paramTypes);
-        if (method != null && Modifier.isStatic(method.getModifiers())) {
-          method = null;
+        Method method = Methods.getMatchingMethod(cls, methodName, paramTypes);
+        if (method != null && !Modifier.isStatic(method.getModifiers())) {
+          try {
+            return Methods.invokeMethod(invokedObject, method, params);
+          } catch (IllegalAccessException | IllegalArgumentException
+              | InvocationTargetException e) {
+            throw new CorantRuntimeException(e);
+          }
         }
       }
     }
-    if (method == null) {
-      // match static method
-      invokedObject = null;
-      params = fs;
-      paramTypes = new Class[length];
-      for (int i = 0; i < length; i++) {
-        paramTypes[i] = fs[i] == null ? Object.class : fs[i].getClass();
-      }
-      method = Methods.getMatchingMethod(cls, methodName, paramTypes);
+    throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls,
+        methodName, Strings.join(",", (Object[]) paramTypes)));
+  }
+
+  protected Object invokeStaticField(Object[] fs, Class<?> cls, String invokerName) {
+    if (fs.length != 0) {
+      throw new IllegalArgumentException(String.format(
+          "Unsupported function: %s.%s can't accept any parameters", cls.getName(), invokerName));
     }
+    try {
+      return Fields.getStaticFieldValue(cls.getDeclaredField(invokerName));
+    } catch (NoSuchFieldException | SecurityException e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  protected Object invokeStaticMethod(Object[] fs, Class<?> cls, String methodName) {
+    int length = fs.length;
+    Class<?>[] paramTypes = new Class[length];
+    for (int i = 0; i < length; i++) {
+      paramTypes[i] = fs[i] == null ? Object.class : fs[i].getClass();
+    }
+    Method method = Methods.getMatchingMethod(cls, methodName, paramTypes);
     if (method != null) {
       try {
-        return Methods.invokeMethod(invokedObject, method, params);
+        return Methods.invokeMethod(null, method, fs);
       } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         throw new CorantRuntimeException(e);
       }
@@ -256,4 +326,12 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
         methodName, Strings.join(",", (Object[]) paramTypes)));
   }
 
+  private Object invokeNonStaticField(Object[] fs, Class<?> cls, String invokerName) {
+    if (fs.length == 1 && fs[0] != null && cls.isAssignableFrom(Classes.getUserClass(fs[0]))) {
+      return Fields.getFieldValue(invokerName, fs[0]);
+    }
+    throw new IllegalArgumentException(
+        String.format("Unsupported function: %s.%s must accept an instance as parameter",
+            cls.getName(), invokerName));
+  }
 }

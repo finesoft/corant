@@ -65,13 +65,13 @@ public class JsonExpressionTest extends TestCase {
         ArrayList::add, ArrayList::addAll));
 
     Object mapper = linkedHashMapOf("$map",
-        mapOf("@list", mapOf("(e)", mapOf("#Map::get", new Object[] {"@e", "name"}))));
+        mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));
     Map<String, Object> exp = linkedHashMapOf("$collect",
         new Object[] {mapper, mapOf("#ArrayList::new", new Object[0]),
-            mapOf("(e,r)", mapOf("#ArrayList::add", new Object[] {"@e", "@r"})),
+            mapOf("(e,r)", mapOf("#ArrayList:add", new Object[] {"@e", "@r"})),
             mapOf("(e,r)",
                 mapOf("$sub",
-                    mapOf("(s)", listOf(mapOf("#ArrayList::remvoeAll", new Object[] {"@l", "@r"}),
+                    mapOf("(s)", listOf(mapOf("#ArrayList:remvoeAll", new Object[] {"@l", "@r"}),
                         mapOf("$ret", "@l")))))});
 
     System.out.println(Jsons.toString(exp, true));
@@ -117,11 +117,10 @@ public class JsonExpressionTest extends TestCase {
       }
     };
 
-    String[] exps = {"{\"#String::substring\":[\"@r.name\",\"@r.s\",\"@r.e\"]}",
-        "{\"#String::indexOf\":[\"@r.name\",\"@r.indexof\"]}",
-        "{\"#System::currentTimeMillis\":[]}", "{\"#Date::new\":[]}",
-        "{\"#UUID::toString\":[{\"#UUID::randomUUID\":[]}]}", "{\"#sizeOf\":\"@r.name\"}",
-        "{\"#sizeOf\":\"@r.size\"}",
+    String[] exps = {"{\"#String:substring\":[\"@r.name\",\"@r.s\",\"@r.e\"]}",
+        "{\"#String:indexOf\":[\"@r.name\",\"@r.indexof\"]}", "{\"#System::currentTimeMillis\":[]}",
+        "{\"#Date::new\":[]}", "{\"#UUID:toString\":[{\"#UUID::randomUUID\":[]}]}",
+        "{\"#sizeOf\":\"@r.name\"}", "{\"#sizeOf\":\"@r.size\"}",
         "{\"$if\":[{\"$gt\":[{\"#sizeOf\":\"@r.name\"},9]},\"yes\",\"no\"]}"};
     Node<?>[] nodes = Arrays.stream(exps).map(SimpleParser::parse).toArray(Node[]::new);
     for (Node<?> node : nodes) {
@@ -137,22 +136,22 @@ public class JsonExpressionTest extends TestCase {
     list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
     list.add(linkedHashMapOf("id", 2, "name", "edf", "now", Instant.now()));
     list.add(linkedHashMapOf("id", 3, "name", "hij", "now", Instant.now()));
-    Object mapper = mapOf("#Map::get", new Object[] {"@e", "id"});
+    Object mapper = mapOf("#Map:get", new Object[] {"@e", "id"});
     mapper = mapOf("#Maps::linkedHashMapOf", new Object[] {"id", "@e.id", "name", "@e.name"});
     mapper = mapOf("$sub", listOf(
-        mapOf("#Map::put",
+        mapOf("#Map:put",
             new Object[] {"@e", "xxx",
                 mapOf("$if", listOf(mapOf("$gt", listOf("@e.id", 1)), mapOf("$sub",
-                    mapOf("(k)", listOf(mapOf("#String::concat", listOf("@e.name", "------")),
+                    mapOf("(k)", listOf(mapOf("#String:concat", listOf("@e.name", "------")),
                         // mapOf("#Strings::substring", listOf("@k", -3)),
-                        mapOf("#String::substring",
+                        mapOf("#String:substring",
                             listOf("@k", 0,
-                                mapOf("#sub", listOf(mapOf("#String::length", listOf("@k")), 3)))),
+                                mapOf("#sub", listOf(mapOf("#String:length", listOf("@k")), 3)))),
 
-                        mapOf("#String::concat", listOf("@k", "+++")), mapOf("$ret", "@k")))),
+                        mapOf("#String:concat", listOf("@k", "+++")), mapOf("$ret", "@k")))),
                     "9999"))}),
-        mapOf("#Map::put",
-            new Object[] {"@e", "put", mapOf("#Map::containsKey", new Object[] {"@e", "xxx"})}),
+        mapOf("#Map:put",
+            new Object[] {"@e", "put", mapOf("#Map:containsKey", new Object[] {"@e", "xxx"})}),
         mapOf("$ret", "@e")));
 
     Map<String, Object> exp = linkedHashMapOf("$map", mapOf("@list", mapOf("(e)", mapper)));
@@ -198,11 +197,11 @@ public class JsonExpressionTest extends TestCase {
         StringBuffer::append, StringBuffer::append));
 
     Object mapper = linkedHashMapOf("$map",
-        mapOf("@list", mapOf("(e)", mapOf("#Map::get", new Object[] {"@e", "name"}))));
+        mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));
     Map<String, Object> exp = linkedHashMapOf("$reduce",
         new Object[] {mapper, mapOf("#StringBuffer::new", new Object[0]),
-            mapOf("(e,r)", mapOf("#StringBuffer::append", new Object[] {"@e", "@r"})),
-            mapOf("(e,r)", mapOf("#StringBuffer::append", new Object[] {"@e", "@r"}))});
+            mapOf("(e,r)", mapOf("#StringBuffer:append", new Object[] {"@e", "@r"})),
+            mapOf("(e,r)", mapOf("#StringBuffer:append", new Object[] {"@e", "@r"}))});
 
     System.out.println(Jsons.toString(exp, true));
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());

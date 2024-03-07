@@ -219,7 +219,7 @@ public enum ASTNodeType {
   /**
    * The return node.
    */
-  RETURN("$return", false) {
+  RETURN("$ret", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTReturnNode();

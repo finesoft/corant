@@ -18,17 +18,50 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import org.corant.modules.json.Jsons;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Defaults;
+import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Classes;
+import org.corant.shared.util.Configurations;
+import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Empties;
+import org.corant.shared.util.Iterables;
+import org.corant.shared.util.Lists;
+import org.corant.shared.util.Maps;
 import org.corant.shared.util.Methods;
+import org.corant.shared.util.Primitives;
+import org.corant.shared.util.Randoms;
+import org.corant.shared.util.Sets;
+import org.corant.shared.util.Streams;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 
 /**
  * corant-modules-json
@@ -76,6 +109,53 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
   static final String NEW = "new";
   static final String delimiter = "::";
 
+  protected static Map<String, Class<?>> builtinClassAlias = new ConcurrentHashMap<>();
+  static {
+    builtinClassAlias.put(Strings.class.getSimpleName(), Strings.class);
+    builtinClassAlias.put(Maps.class.getSimpleName(), Maps.class);
+    builtinClassAlias.put(Lists.class.getSimpleName(), Lists.class);
+    builtinClassAlias.put(Sets.class.getSimpleName(), Sets.class);
+    builtinClassAlias.put(Streams.class.getSimpleName(), Streams.class);
+    builtinClassAlias.put(Classes.class.getSimpleName(), Classes.class);
+    builtinClassAlias.put(Conversions.class.getSimpleName(), Conversions.class);
+    builtinClassAlias.put(Objects.class.getSimpleName(), Objects.class);
+    builtinClassAlias.put(Systems.class.getSimpleName(), Systems.class);
+    builtinClassAlias.put(Randoms.class.getSimpleName(), Randoms.class);
+    builtinClassAlias.put(Iterables.class.getSimpleName(), Iterables.class);
+    builtinClassAlias.put(Names.class.getSimpleName(), Names.class);
+    builtinClassAlias.put(Defaults.class.getSimpleName(), Defaults.class);
+    builtinClassAlias.put(Configurations.class.getSimpleName(), Configurations.class);
+    builtinClassAlias.put(Empties.class.getSimpleName(), Empties.class);
+    builtinClassAlias.put(Jsons.class.getSimpleName(), Jsons.class);
+    // java SDK
+    Primitives.PRIMITIVE_WRAPPER_MAP.values()
+        .forEach(c -> builtinClassAlias.put(c.getSimpleName(), c));
+    builtinClassAlias.put(System.class.getSimpleName(), System.class);
+    builtinClassAlias.put(String.class.getSimpleName(), String.class);
+    builtinClassAlias.put(StringBuilder.class.getSimpleName(), StringBuilder.class);
+    builtinClassAlias.put(StringBuffer.class.getSimpleName(), StringBuffer.class);
+    builtinClassAlias.put(Instant.class.getSimpleName(), Instant.class);
+    builtinClassAlias.put(Date.class.getSimpleName(), Date.class);
+    builtinClassAlias.put(Duration.class.getSimpleName(), Duration.class);
+    builtinClassAlias.put(ZonedDateTime.class.getSimpleName(), ZonedDateTime.class);
+    builtinClassAlias.put(LocalDate.class.getSimpleName(), LocalDate.class);
+    builtinClassAlias.put(Arrays.class.getSimpleName(), Arrays.class);
+    builtinClassAlias.put(Base64.class.getSimpleName(), Base64.class);
+    builtinClassAlias.put(Collections.class.getSimpleName(), Collections.class);
+    builtinClassAlias.put(Map.class.getSimpleName(), Map.class);
+    builtinClassAlias.put(HashMap.class.getSimpleName(), HashMap.class);
+    builtinClassAlias.put(LinkedHashMap.class.getSimpleName(), LinkedHashMap.class);
+    builtinClassAlias.put(Collection.class.getSimpleName(), Collection.class);
+    builtinClassAlias.put(List.class.getSimpleName(), List.class);
+    builtinClassAlias.put(ArrayList.class.getSimpleName(), ArrayList.class);
+    builtinClassAlias.put(Set.class.getSimpleName(), Set.class);
+    builtinClassAlias.put(HashSet.class.getSimpleName(), HashSet.class);
+    builtinClassAlias.put(LinkedHashSet.class.getSimpleName(), LinkedHashSet.class);
+    builtinClassAlias.put(UUID.class.getSimpleName(), UUID.class);
+    builtinClassAlias.put(Optional.class.getSimpleName(), Optional.class);
+    builtinClassAlias.put(Currency.class.getSimpleName(), Currency.class);
+  }
+
   @Override
   public Function<Object[], Object> resolve(String name) {
     return fs -> {
@@ -102,7 +182,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
       if (Strings.contains(name, delimiter)) {
         String[] tmp = split(name, delimiter, true, true);
         if (tmp.length == 2) {
-          Class<?> klass = Classes.tryAsClass(tmp[0]);
+          Class<?> klass = builtinClassAlias.getOrDefault(tmp[0], Classes.tryAsClass(tmp[0]));
           if (klass != null && (Arrays.stream(klass.getDeclaredMethods())
               .anyMatch(m -> m.getName().equals(tmp[1])) || NEW.equals(tmp[1]))) {
             holder.computeIfAbsent(name, x -> Pair.of(klass, tmp[1]));
@@ -125,15 +205,12 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     }
     try {
       Constructor<?> constructor = Classes.getDeclaredConstructor(cls, paramTypes);
-      if (constructor != null) {
-        return constructor.newInstance(fs);
-      }
+      return constructor.newInstance(fs);
     } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException | NoSuchMethodException e) {
-      throw new CorantRuntimeException(e);
+      throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls, NEW,
+          Strings.join(",", (Object[]) paramTypes)));
     }
-    throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls, NEW,
-        Strings.join(",", (Object[]) paramTypes)));
   }
 
   protected Object invokeMethod(Object[] fs, Class<?> cls, String methodName) {

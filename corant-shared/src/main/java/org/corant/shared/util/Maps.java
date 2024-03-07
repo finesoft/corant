@@ -1274,6 +1274,25 @@ public class Maps {
     implantMapValue(target, paths, 0, value);
   }
 
+  @SuppressWarnings("unchecked")
+  public static <K, V> Map<K, V> putMapKeyValue(Map<K, V> target, Object... objects) {
+    int oLen = objects.length;
+    if (oLen == 2) {
+      target.put((K) objects[0], (V) objects[1]);
+    } else if (oLen == 1) {
+      target.put((K) objects[0], null);
+    } else if (oLen != 0) {
+      int rLen = (oLen & 1) == 0 ? oLen : oLen - 1;
+      for (int i = 0; i < rLen; i += 2) {
+        target.put((K) objects[i], (V) objects[i + 1]);
+      }
+      if (rLen < oLen) {
+        target.put((K) objects[rLen], null);
+      }
+    }
+    return target;
+  }
+
   public static <K, V> Map<K, V> removeIfKey(Predicate<K> predicate, Map<K, V> map) {
     Map<K, V> removed = new HashMap<>();
     if (predicate != null && map != null) {
@@ -1283,6 +1302,14 @@ public class Maps {
       }
     }
     return removed;
+  }
+
+  @SafeVarargs
+  public static <K, V> Map<K, V> removeMap(Map<K, V> target, K... keys) {
+    for (K key : keys) {
+      target.remove(key);
+    }
+    return target;
   }
 
   public static Map<String, String> toMap(final Properties properties) {

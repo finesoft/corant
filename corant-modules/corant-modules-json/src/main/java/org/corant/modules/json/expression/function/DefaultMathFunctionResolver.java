@@ -14,8 +14,6 @@
 package org.corant.modules.json.expression.function;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
-import static org.corant.shared.util.Conversions.toDouble;
-import static org.corant.shared.util.Conversions.toLong;
 import java.util.Arrays;
 import java.util.function.Function;
 import org.corant.modules.json.expression.FunctionResolver;
@@ -33,90 +31,13 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
   public static final String SIGN_DIV = "div";
   public static final String SIGN_MOD = "mod";
 
-  public double[] convertDouble(Object[] factors) {
-    double[] doubleFactors = new double[factors.length];
-    for (int i = 0; i < factors.length; i++) {
-      doubleFactors[i] = toDouble(factors[i]);
-    }
-    return doubleFactors;
-  }
-
-  public long[] convertLong(Object[] factors) {
-    long[] longFactors = new long[factors.length];
-    for (int i = 0; i < factors.length; i++) {
-      longFactors[i] = toLong(factors[i]);
-    }
-    return longFactors;
-  }
-
   @Override
   public Function<Object[], Object> resolve(String name) {
-    final String operator = name;
     return fs -> {
-      shouldBeTrue(fs.length > 1 && Arrays.stream(fs).allMatch(f -> f instanceof Number));
-      if (Arrays.stream(fs).anyMatch(p -> p instanceof Float || p instanceof Double)) {
-        double[] dfs = convertDouble(fs);
-        double result = dfs[0];
-        switch (operator) {
-          case SIGN_ADD:
-            for (int i = 1; i < dfs.length; i++) {
-              result += dfs[i];
-            }
-            break;
-          case SIGN_SUB:
-            for (int i = 1; i < dfs.length; i++) {
-              result -= dfs[i];
-            }
-            break;
-          case SIGN_MUL:
-            for (int i = 1; i < dfs.length; i++) {
-              result *= dfs[i];
-            }
-            break;
-          case SIGN_MOD:
-            for (int i = 1; i < dfs.length; i++) {
-              result %= dfs[i];
-            }
-            break;
-          default:
-            for (int i = 1; i < dfs.length; i++) {
-              result /= dfs[i];
-            }
-            break;
-        }
-        return result;
-      } else {
-        long[] lfs = convertLong(fs);
-        long result = lfs[0];
-        switch (operator) {
-          case SIGN_ADD:
-            for (int i = 1; i < lfs.length; i++) {
-              result += lfs[i];
-            }
-            break;
-          case SIGN_SUB:
-            for (int i = 1; i < lfs.length; i++) {
-              result -= lfs[i];
-            }
-            break;
-          case SIGN_MUL:
-            for (int i = 1; i < lfs.length; i++) {
-              result *= lfs[i];
-            }
-            break;
-          case SIGN_MOD:
-            for (int i = 1; i < lfs.length; i++) {
-              result %= lfs[i];
-            }
-            break;
-          default:
-            for (int i = 1; i < lfs.length; i++) {
-              result /= lfs[i];
-            }
-            break;
-        }
-        return result;
-      }
+      shouldBeTrue(fs.length > 1);
+      Number[] numbers = new Number[fs.length];
+      Arrays.setAll(numbers, i -> (Number) fs[i]);
+      return calculate(numbers, name);
     };
   }
 
@@ -124,5 +45,142 @@ public class DefaultMathFunctionResolver implements FunctionResolver {
   public boolean supports(String name) {
     return SIGN_ADD.equals(name) || SIGN_SUB.equals(name) || SIGN_MUL.equals(name)
         || SIGN_DIV.equals(name) || SIGN_MOD.equals(name);
+  }
+
+  protected Object calculate(Number[] factors, String operator) {
+    byte sign = 0; // 00000000
+    for (Number factor : factors) {
+      if (factor instanceof Float) {
+        sign |= 2;
+      } else if (factor instanceof Long) {
+        sign |= 4;
+      } else if (factor instanceof Integer || factor instanceof Short || factor instanceof Byte) {
+        sign |= 8;
+      } else {
+        sign |= 1;
+        break;
+      }
+    }
+    if ((sign & 1) != 0) {
+      double result = factors[0].doubleValue();
+      switch (operator) {
+        case SIGN_ADD:
+          for (int i = 1; i < factors.length; i++) {
+            result += factors[i].doubleValue();
+          }
+          break;
+        case SIGN_SUB:
+          for (int i = 1; i < factors.length; i++) {
+            result -= factors[i].doubleValue();
+          }
+          break;
+        case SIGN_MUL:
+          for (int i = 1; i < factors.length; i++) {
+            result *= factors[i].doubleValue();
+          }
+          break;
+        case SIGN_MOD:
+          for (int i = 1; i < factors.length; i++) {
+            result %= factors[i].doubleValue();
+          }
+          break;
+        default:
+          for (int i = 1; i < factors.length; i++) {
+            result /= factors[i].doubleValue();
+          }
+          break;
+      }
+      return result;
+    } else if ((sign & 2) != 0) {
+      float result = factors[0].floatValue();
+      switch (operator) {
+        case SIGN_ADD:
+          for (int i = 1; i < factors.length; i++) {
+            result += factors[i].floatValue();
+          }
+          break;
+        case SIGN_SUB:
+          for (int i = 1; i < factors.length; i++) {
+            result -= factors[i].floatValue();
+          }
+          break;
+        case SIGN_MUL:
+          for (int i = 1; i < factors.length; i++) {
+            result *= factors[i].floatValue();
+          }
+          break;
+        case SIGN_MOD:
+          for (int i = 1; i < factors.length; i++) {
+            result %= factors[i].floatValue();
+          }
+          break;
+        default:
+          for (int i = 1; i < factors.length; i++) {
+            result /= factors[i].floatValue();
+          }
+          break;
+      }
+      return result;
+    } else if ((sign & 4) != 0) {
+      long result = factors[0].longValue();
+      switch (operator) {
+        case SIGN_ADD:
+          for (int i = 1; i < factors.length; i++) {
+            result += factors[i].longValue();
+          }
+          break;
+        case SIGN_SUB:
+          for (int i = 1; i < factors.length; i++) {
+            result -= factors[i].longValue();
+          }
+          break;
+        case SIGN_MUL:
+          for (int i = 1; i < factors.length; i++) {
+            result *= factors[i].longValue();
+          }
+          break;
+        case SIGN_MOD:
+          for (int i = 1; i < factors.length; i++) {
+            result %= factors[i].longValue();
+          }
+          break;
+        default:
+          for (int i = 1; i < factors.length; i++) {
+            result /= factors[i].longValue();
+          }
+          break;
+      }
+      return result;
+    } else {
+      int result = factors[0].intValue();
+      switch (operator) {
+        case SIGN_ADD:
+          for (int i = 1; i < factors.length; i++) {
+            result += factors[i].intValue();
+          }
+          break;
+        case SIGN_SUB:
+          for (int i = 1; i < factors.length; i++) {
+            result -= factors[i].intValue();
+          }
+          break;
+        case SIGN_MUL:
+          for (int i = 1; i < factors.length; i++) {
+            result *= factors[i].intValue();
+          }
+          break;
+        case SIGN_MOD:
+          for (int i = 1; i < factors.length; i++) {
+            result %= factors[i].intValue();
+          }
+          break;
+        default:
+          for (int i = 1; i < factors.length; i++) {
+            result /= factors[i].intValue();
+          }
+          break;
+      }
+      return result;
+    }
   }
 }

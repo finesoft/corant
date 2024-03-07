@@ -91,7 +91,7 @@ public class Locks {
     }
 
     public Lock get(K key) {
-      return new LockInstance(shouldNotNull(key, "The key to be locked can't null"));
+      return new KeyLockInstance(shouldNotNull(key, "The key to be locked can't null"));
     }
 
     public Set<K> keySet() {
@@ -124,11 +124,11 @@ public class Locks {
      *
      * @author bingo 上午11:58:23
      */
-    protected class LockInstance implements Lock {
+    protected class KeyLockInstance implements Lock {
 
       protected final K key;
 
-      protected LockInstance(K key) {
+      protected KeyLockInstance(K key) {
         this.key = shouldNotNull(key, "The key to be locked can't null");
       }
 

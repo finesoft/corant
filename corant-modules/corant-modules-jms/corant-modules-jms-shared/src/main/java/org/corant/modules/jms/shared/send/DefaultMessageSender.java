@@ -67,9 +67,7 @@ public class DefaultMessageSender implements MessageSender {
     }
   }
 
-  protected DefaultMessageSender() {
-
-  }
+  protected DefaultMessageSender() {}
 
   @Override
   public void send(byte[] message) {
@@ -122,18 +120,18 @@ public class DefaultMessageSender implements MessageSender {
   protected void doSend(JMSContext jmsc, Destination d, JMSProducer p, MessageMarshaller marshaller,
       Object message) {
     try {
-      if (marshaller != null) {
+      if (message instanceof Message msg) {
+        p.send(d, msg);
+      } else if (marshaller != null) {
         p.send(d, marshaller.serialize(jmsc, message));
-      } else if (message instanceof String) {
-        p.send(d, (String) message);
-      } else if (message instanceof Message) {
-        p.send(d, (Message) message);
-      } else if (message instanceof Map) {
-        p.send(d, (Map<String, Object>) message);
-      } else if (message instanceof byte[]) {
-        p.send(d, (byte[]) message);
-      } else if (message instanceof Serializable) {
-        p.send(d, (Serializable) message);
+      } else if (message instanceof String strMsg) {
+        p.send(d, strMsg);
+      } else if (message instanceof Map mapMsg) {
+        p.send(d, mapMsg);
+      } else if (message instanceof byte[] bytesMsg) {
+        p.send(d, bytesMsg);
+      } else if (message instanceof Serializable serMsg) {
+        p.send(d, serMsg);
       }
     } catch (Exception e) {
       throw new CorantRuntimeException(e);

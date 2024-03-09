@@ -26,5 +26,9 @@ public interface Node<T> {
 
   List<? extends Node<?>> getChildren();
 
+  Node<?> getParent();
+
   T getValue(EvaluationContext ctx);
+
+  void setParent(Node<?> parent);
 }

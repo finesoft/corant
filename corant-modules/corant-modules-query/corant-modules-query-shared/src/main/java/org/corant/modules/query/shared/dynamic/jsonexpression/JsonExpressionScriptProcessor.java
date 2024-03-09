@@ -196,42 +196,39 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     MyEvaluationContext injectCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
     for (Map<Object, Object> r : parentResults) {
       // filter the fetched results which can be used for injecting
-      List<Object> injectResults = new ArrayList<>();
+      injectCtx.detachAllResults().linkParentResult(r);
+      List<Map<Object, Object>> injectResults;
       if (filter == null) {
-        if (!fetchQuery.isMultiRecords()) {
-          injectResults.add(fetchResults.get(0));
-        } else {
-          injectResults.addAll(fetchResults);
-        }
+        injectResults = fetchResults;
       } else {
+        injectResults = new ArrayList<>();
         for (Map<Object, Object> fr : fetchResults) {
-          if (filter.getValue(injectCtx.linkParentAndFetchResult(r, fr))) {
+          if (filter.getValue(injectCtx.linkFetchResult(fr))) {
             injectResults.add(fr);
-            if (!fetchQuery.isMultiRecords()) {
-              break;
-            }
           }
         }
       }
+      // since the handled may be a Single type list, we need to create a new list for them
+      List<?> handledResults = injectResults;
       // process the filtered injection results: extract->DSL evaluation->type conversion->rename
       if (handler != null && !injectResults.isEmpty()) {
-        injectResults = handler.apply(injectResults, injectCtx, mapper);
+        handledResults = handler.apply(injectResults, injectCtx, mapper);
       }
-      // inject the processed and fetched results to parent result
+      // inject the handled results to parent result
       if (isNotEmpty(fetchQuery.getInjectPropertyNamePath())) {
         // inject with the property name path
         if (fetchQuery.isMultiRecords()) {
-          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), injectResults);
+          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), handledResults);
         } else {
           mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(),
-              isNotEmpty(injectResults) ? injectResults.get(0) : null);
+              isNotEmpty(handledResults) ? handledResults.get(0) : null);
         }
       } else {
         // inject without the property name path
-        for (Object injectResult : injectResults) {
-          if (injectResult != null) {
-            Map<Object, Object> injectResultMap = forceCast(injectResult);
-            r.putAll(injectResultMap);
+        for (Object handledResult : handledResults) {
+          if (handledResult != null) {
+            Map<Object, Object> handledResultMap = forceCast(handledResult);
+            r.putAll(handledResultMap);
             if (!fetchQuery.isMultiRecords()) {
               break;
             }
@@ -362,10 +359,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
-        QueryObjectMapper mapper) {
-      injectionCtx.linkFetchResults((List<Map<Object, Object>>) fetchResults);
-      Object result = eval.getValue(injectionCtx);
+    public List<Object> apply(List<Map<Object, Object>> fetchResults,
+        MyEvaluationContext injectionCtx, QueryObjectMapper mapper) {
+      Object result = eval.getValue(injectionCtx.linkFetchResults(fetchResults));
       return (List<Object>) result;
     }
 
@@ -377,7 +373,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @author bingo 15:15:18
    */
   public interface InjectionHandler {
-    List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
+    List<Object> apply(List<Map<Object, Object>> fetchResults, MyEvaluationContext injectionCtx,
         QueryObjectMapper mapper);
   }
 
@@ -495,6 +491,13 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       }
     }
 
+    protected MyEvaluationContext detachAllResults() {
+      parentResult = null;
+      fetchResult = null;
+      fetchResults = null;
+      return this;
+    }
+
     protected MyEvaluationContext linkFetchResult(Map<Object, Object> fetchResult) {
       this.fetchResult = fetchResult;
       return this;
@@ -586,8 +589,8 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     }
 
     @Override
-    public List<Object> apply(List<?> fetchResults, MyEvaluationContext injectionCtx,
-        QueryObjectMapper mapper) {
+    public List<Object> apply(List<Map<Object, Object>> fetchResults,
+        MyEvaluationContext injectionCtx, QueryObjectMapper mapper) {
       List<Object> results = new ArrayList<>();
       if (single) {
         if (mappings.isEmpty()) {

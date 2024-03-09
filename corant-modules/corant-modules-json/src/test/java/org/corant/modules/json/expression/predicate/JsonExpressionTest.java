@@ -66,13 +66,8 @@ public class JsonExpressionTest extends TestCase {
 
     Object mapper = linkedHashMapOf("$map",
         mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));
-    Map<String, Object> exp = linkedHashMapOf("$collect",
-        new Object[] {mapper, mapOf("#ArrayList::new", new Object[0]),
-            mapOf("(e,r)", mapOf("#ArrayList:add", new Object[] {"@e", "@r"})),
-            mapOf("(e,r)",
-                mapOf("$sub",
-                    mapOf("(s)", listOf(mapOf("#ArrayList:remvoeAll", new Object[] {"@l", "@r"}),
-                        mapOf("$ret", "@l")))))});
+    Map<String, Object> exp = linkedHashMapOf("$collect", new Object[] {mapper, "#ArrayList::new",
+        mapOf("(e,r)", mapOf("#ArrayList:add", new Object[] {"@e", "@r"}))});
 
     System.out.println(Jsons.toString(exp, true));
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
@@ -198,9 +193,8 @@ public class JsonExpressionTest extends TestCase {
 
     Object mapper = linkedHashMapOf("$map",
         mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));
-    Map<String, Object> exp = linkedHashMapOf("$reduce",
-        new Object[] {mapper, mapOf("#StringBuffer::new", new Object[0]),
-            mapOf("(e,r)", mapOf("#StringBuffer:append", new Object[] {"@e", "@r"})),
+    Map<String, Object> exp =
+        linkedHashMapOf("$reduce", new Object[] {mapper, mapOf("#StringBuffer::new", new Object[0]),
             mapOf("(e,r)", mapOf("#StringBuffer:append", new Object[] {"@e", "@r"}))});
 
     System.out.println(Jsons.toString(exp, true));

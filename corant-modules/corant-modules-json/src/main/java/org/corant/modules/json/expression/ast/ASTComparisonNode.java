@@ -32,13 +32,10 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Pattern;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.Node;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
@@ -52,23 +49,13 @@ public interface ASTComparisonNode extends ASTPredicateNode {
 
   ASTNode<?> getRight();
 
-  abstract class AbstractASTComparisonNode implements ASTComparisonNode {
+  abstract class AbstractASTComparisonNode extends AbstractASTNode<Boolean>
+      implements ASTComparisonNode {
 
-    protected final List<ASTNode<?>> children = new ArrayList<>();
     protected final ASTNodeType type;
 
     protected AbstractASTComparisonNode(ASTNodeType type) {
       this.type = type;
-    }
-
-    @Override
-    public boolean addChild(Node<?> child) {
-      return children.add((ASTNode<?>) child);
-    }
-
-    @Override
-    public List<? extends Node<?>> getChildren() {
-      return children;
     }
 
     @Override

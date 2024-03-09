@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.corant</groupId>
       <artifactId>corant-modules-lang-shared</artifactId>
-    </dependency>    
+    </dependency>        
     <dependency>
       <groupId>jakarta.enterprise</groupId>
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -32,5 +32,10 @@
       <artifactId>js-scriptengine</artifactId>
       <optional>true</optional>
     </dependency>
+		<dependency>
+		  <groupId>org.openjdk.nashorn</groupId>
+		  <artifactId>nashorn-core</artifactId>
+		  <optional>true</optional>
+		</dependency>    
   </dependencies>
 </project>

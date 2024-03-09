@@ -19,25 +19,14 @@ import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
  * @author bingo 17:37:19
  */
-public class ASTMapNode implements ASTNode<Object> {
-
-  protected final List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTMapNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {

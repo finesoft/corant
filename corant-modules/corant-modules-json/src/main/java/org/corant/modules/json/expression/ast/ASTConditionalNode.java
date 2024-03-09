@@ -13,30 +13,16 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import static org.corant.shared.util.Conversions.toBoolean;
-import java.util.ArrayList;
-import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
  * @author bingo 下午2:22:18
  */
-public class ASTConditionalNode implements ASTNode<Object> {
-
-  protected List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTConditionalNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
@@ -47,9 +33,9 @@ public class ASTConditionalNode implements ASTNode<Object> {
   public Object getValue(EvaluationContext ctx) {
     Node<?> condition = children.get(0);
     if (children.size() == 2) {
-      return toBoolean(condition.getValue(ctx)) ? children.get(1).getValue(ctx) : null;
+      return ((Boolean) condition.getValue(ctx)) ? children.get(1).getValue(ctx) : null;
     } else {
-      return toBoolean(condition.getValue(ctx)) ? children.get(1).getValue(ctx)
+      return ((Boolean) condition.getValue(ctx)) ? children.get(1).getValue(ctx)
           : children.get(2).getValue(ctx);
     }
   }

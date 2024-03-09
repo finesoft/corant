@@ -13,7 +13,9 @@
  */
 package org.corant.modules.json.expression.ast;
 
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Strings.split;
+import java.util.ArrayList;
 import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
@@ -54,4 +56,36 @@ public interface ASTNode<T> extends Node<T> {
 
   ASTNodeType getType();
 
+  /**
+   * corant-modules-json
+   *
+   * @author bingo 18:17:14
+   */
+  abstract class AbstractASTNode<T> implements ASTNode<T> {
+    protected ASTNode<?> parent;
+    protected final List<ASTNode<?>> children = new ArrayList<>();
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean addChild(Node<?> child) {
+      shouldInstanceOf(child, ASTNode.class).setParent(this);
+      return children.add((ASTNode<?>) child);
+    }
+
+    @Override
+    public List<? extends Node<?>> getChildren() {
+      return children;
+    }
+
+    @Override
+    public ASTNode<?> getParent() {
+      return parent;
+    }
+
+    @Override
+    public void setParent(Node<?> parent) {
+      this.parent = (ASTNode<?>) parent;
+    }
+
+  }
 }

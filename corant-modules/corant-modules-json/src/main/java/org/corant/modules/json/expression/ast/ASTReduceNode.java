@@ -13,14 +13,12 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Streams;
 
@@ -29,19 +27,7 @@ import org.corant.shared.util.Streams;
  *
  * @author bingo 17:37:19
  */
-public class ASTReduceNode implements ASTNode<Object> {
-
-  protected final List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTReduceNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
@@ -85,31 +71,33 @@ public class ASTReduceNode implements ASTNode<Object> {
         return Arrays.stream(new Object[] {input}).reduce(identityNode.getValue(useCtx),
             accumulatorFunc);
       }
-    } else if (children.size() == 6) {
-      // identity & accumulator & combiner
-      Node<?> identityNode = children.get(1);
-      Node<?> accumulatorNamesNode = children.get(2);
-      Node<?> accumulatorNode = children.get(3);
-      Node<?> combinerNamesNode = children.get(4);
-      Node<?> combinerNode = children.get(5);
-      String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
-      final BiFunction<Object, Object, Object> accumulatorFunc = (u, t) -> accumulatorNode
-          .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
-      String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
-      final BinaryOperator<Object> combinerFunc = (u1, u2) -> combinerNode
-          .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
-
-      if (input instanceof Object[] array) {
-        return Arrays.stream(array).reduce(identityNode.getValue(useCtx), accumulatorFunc,
-            combinerFunc);
-      } else if (input instanceof Iterable itr) {
-        return Streams.streamOf(itr).reduce(identityNode.getValue(useCtx), accumulatorFunc,
-            combinerFunc);
-      } else {
-        return Arrays.stream(new Object[] {input}).reduce(identityNode.getValue(useCtx),
-            accumulatorFunc, combinerFunc);
-      }
     }
+    // the combiner is only used in parallel stream, so we use an empty bi-consumer
+    // else if (children.size() == 6) {
+    // // identity & accumulator & combiner
+    // Node<?> identityNode = children.get(1);
+    // Node<?> accumulatorNamesNode = children.get(2);
+    // Node<?> accumulatorNode = children.get(3);
+    // Node<?> combinerNamesNode = children.get(4);
+    // Node<?> combinerNode = children.get(5);
+    // String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
+    // final BiFunction<Object, Object, Object> accumulatorFunc = (u, t) -> accumulatorNode
+    // .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
+    // String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
+    // final BinaryOperator<Object> combinerFunc = (u1, u2) -> combinerNode
+    // .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
+    //
+    // if (input instanceof Object[] array) {
+    // return Arrays.asList(array).parallelStream().reduce(identityNode.getValue(useCtx),
+    // accumulatorFunc, combinerFunc);
+    // } else if (input instanceof Iterable itr) {
+    // return listOf(itr).parallelStream().reduce(identityNode.getValue(useCtx), accumulatorFunc,
+    // combinerFunc);
+    // } else {
+    // return Arrays.stream(new Object[] {input}).reduce(identityNode.getValue(useCtx),
+    // accumulatorFunc, combinerFunc);
+    // }
+    // }
     throw new NotSupportedException();
   }
 

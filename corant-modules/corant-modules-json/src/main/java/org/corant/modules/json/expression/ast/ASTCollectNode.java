@@ -13,13 +13,13 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.BiConsumer;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
+import org.corant.shared.util.Functions;
 import org.corant.shared.util.Streams;
 
 /**
@@ -27,19 +27,7 @@ import org.corant.shared.util.Streams;
  *
  * @author bingo 17:37:19
  */
-public class ASTCollectNode implements ASTNode<Object> {
-
-  protected final List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTCollectNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
@@ -53,20 +41,23 @@ public class ASTCollectNode implements ASTNode<Object> {
     final Object input = inputNode.getValue(ctx);
     final BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
 
-    // supplier & accumulator & combiner
+    // supplier & accumulator & combiner(fake)
     Node<?> supplierNode = children.get(1);
     Node<?> accumulatorNamesNode = children.get(2);
     Node<?> accumulatorNode = children.get(3);
-    Node<?> combinerNamesNode = children.get(4);
-    Node<?> combinerNode = children.get(5);
 
     String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
     final BiConsumer<Object, Object> accumulatorFunc = (u, t) -> accumulatorNode
         .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
 
-    String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
-    final BiConsumer<Object, Object> combinerFunc = (u1, u2) -> combinerNode
-        .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
+    // Node<?> combinerNamesNode = children.get(4);
+    // Node<?> combinerNode = children.get(5);
+    // String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
+    // final BiConsumer<Object, Object> combinerFunc = (u1, u2) -> combinerNode
+    // .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
+
+    // the combiner is only used in parallel stream, so we use an empty bi-consumer
+    final BiConsumer<Object, Object> combinerFunc = Functions.emptyBiConsumer();
 
     if (input instanceof Object[] array) {
       return Arrays.stream(array).collect(() -> supplierNode.getValue(useCtx), accumulatorFunc,

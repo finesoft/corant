@@ -14,30 +14,18 @@
 package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Lists.subList;
-import java.util.ArrayList;
 import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
  * @author bingo 17:37:19
  */
-public class ASTSubroutineNode implements ASTNode<Object> {
-
-  protected final List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTSubroutineNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {

@@ -15,10 +15,7 @@ package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.strip;
-import java.util.ArrayList;
-import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.Node;
 
 /**
  * corant-modules-json
@@ -34,24 +31,12 @@ public interface ASTFunctionNode extends ASTNode<Object> {
    *
    * @author bingo 下午2:48:46
    */
-  class ASTDefaultFunctionNode implements ASTFunctionNode {
+  class ASTDefaultFunctionNode extends AbstractASTNode<Object> implements ASTFunctionNode {
 
     protected final String name;
 
-    protected List<ASTNode<?>> children = new ArrayList<>();
-
     public ASTDefaultFunctionNode(String name) {
       this.name = shouldNotBlank(strip(name));
-    }
-
-    @Override
-    public boolean addChild(Node<?> child) {
-      return children.add((ASTNode<?>) child);
-    }
-
-    @Override
-    public List<? extends Node<?>> getChildren() {
-      return children;
     }
 
     @Override

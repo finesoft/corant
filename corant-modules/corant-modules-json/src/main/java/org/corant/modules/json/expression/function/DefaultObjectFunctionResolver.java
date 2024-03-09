@@ -78,7 +78,7 @@ import org.corant.shared.util.Systems;
  *
  * <p>
  * The string formed by the complete object type name and method name with {@code ::} or {@code :}
- * symbolic connection is used as the key of the function, if the method name is {@code new} it
+ * symbolic connection is used as the key of the function, if the method name is {@code ::new} it
  * means it is a constructor, {@code ::} means invoke static method {@code :} means invoke
  * non-static method. An array is used to represent the input parameters of the invocation. An empty
  * array [] is used to represent a method or constructor invocations without input parameters; if it
@@ -206,16 +206,16 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
       if (useName.contains(nonStaticDelimiter)) {
         // method or constructor
         String[] tmp = split(useName, nonStaticDelimiter, true, true);
-        boolean statics = useName.contains(staticDelimiter);
         if (tmp.length == 2) {
+          boolean statics = useName.contains(staticDelimiter);
           Class<?> klass = builtinClassAlias.getOrDefault(tmp[0], Classes.tryAsClass(tmp[0]));
           if (klass != null) {
-            // constructor
+            // constructor class name::new
             if (NEW.equals(tmp[1]) && statics) {
               holder.computeIfAbsent(useName, k1 -> Triple.of(klass, NEW, 0));
               return true;
             }
-            // method
+            // method class name:method name
             if (Arrays.stream(klass.getDeclaredMethods())
                 .anyMatch(m -> m.getName().equals(tmp[1]))) {
               holder.computeIfAbsent(useName, k1 -> Triple.of(klass, tmp[1], statics ? 1 : 2));

@@ -16,6 +16,7 @@ package org.corant.modules.json.expression.ast;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.strip;
 import org.corant.modules.json.expression.EvaluationContext;
+import org.corant.modules.json.expression.Node;
 
 /**
  * corant-modules-json
@@ -28,6 +29,7 @@ public interface ASTVariableNode extends ASTNode<Object> {
 
   class ASTDefaultVariableNode implements ASTVariableNode {
 
+    protected ASTNode<?> parent;
     protected final String name;
 
     public ASTDefaultVariableNode(String name) {
@@ -40,6 +42,11 @@ public interface ASTVariableNode extends ASTNode<Object> {
     }
 
     @Override
+    public ASTNode<?> getParent() {
+      return parent;
+    }
+
+    @Override
     public ASTNodeType getType() {
       return ASTNodeType.VAR;
     }
@@ -47,6 +54,11 @@ public interface ASTVariableNode extends ASTNode<Object> {
     @Override
     public Object getValue(EvaluationContext ctx) {
       return ctx.resolveVariableValue(this);
+    }
+
+    @Override
+    public void setParent(Node<?> parent) {
+      this.parent = (ASTNode<?>) parent;
     }
 
   }

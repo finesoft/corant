@@ -141,6 +141,7 @@
 		<version.narayana>7.0.1.Final</version.narayana>
 		<version.ndarray>0.4.0</version.ndarray>
 		<version.netty>4.1.87.Final</version.netty>
+		<version.nashorn-core>15.4</version.nashorn-core>
 		<version.ognl>3.2.13</version.ognl>
 		<version.ojdbc8>19.8.0.0</version.ojdbc8>
 		<version.opencv>4.9.0-0</version.opencv>
@@ -821,6 +822,12 @@
 				<version>${version.graalvm}</version>
 				<scope>runtime</scope>
 			</dependency>
+			<!-- nashorn -->
+			<dependency>
+			  <groupId>org.openjdk.nashorn</groupId>
+			  <artifactId>nashorn-core</artifactId>
+			  <version>${version.nashorn-core}</version>
+			</dependency>			
 
 			<!-- CDI -->
 			<dependency>

@@ -13,34 +13,20 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Streams.streamOf;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
  * @author bingo 17:37:19
  */
-public class ASTFilterNode implements ASTNode<Object> {
-
-  protected final List<ASTNode<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add((ASTNode<?>) child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTFilterNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
@@ -58,13 +44,13 @@ public class ASTFilterNode implements ASTNode<Object> {
     BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
     if (input instanceof Object[] array) {
       return Arrays.stream(array)
-          .filter(fo -> toBoolean(filterNode.getValue(useCtx.bind(varName, fo))))
+          .filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo)))
           .collect(Collectors.toList());
     } else if (input instanceof Iterable<?> itr) {
-      return streamOf(itr).filter(fo -> toBoolean(filterNode.getValue(useCtx.bind(varName, fo))))
+      return streamOf(itr).filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo)))
           .collect(Collectors.toList());
     } else if (input != null) {
-      return toBoolean(filterNode.getValue(useCtx.bind(varName, input))) ? input : null;
+      return (Boolean) filterNode.getValue(useCtx.bind(varName, input)) ? input : null;
     } else {
       return null;
     }

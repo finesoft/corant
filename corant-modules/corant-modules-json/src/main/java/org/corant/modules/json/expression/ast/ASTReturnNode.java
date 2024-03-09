@@ -13,30 +13,16 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
  * @author bingo 20:49:30
  */
-public class ASTReturnNode implements ASTNode<Object> {
-
-  List<Node<?>> children = new ArrayList<>();
-
-  @Override
-  public boolean addChild(Node<?> child) {
-    return children.add(child);
-  }
-
-  @Override
-  public List<? extends Node<?>> getChildren() {
-    return children;
-  }
+public class ASTReturnNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {

@@ -52,6 +52,7 @@ public interface ASTNodeVisitor extends Sortable {
       case LG_NOT:
       case LG_NOR:
       case LG_OR:
+      case DISTINCT:
       case RETURN:
       case SUBROUTINE:
         shouldBeTrue(!node.getChildren().isEmpty());
@@ -66,6 +67,12 @@ public interface ASTNodeVisitor extends Sortable {
             node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
                 && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 1);
         break;
+      case SORT:
+      case MAX:
+      case MIN:
+        shouldBeTrue(
+            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
+                && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
       case REDUCE: {
         if (node.getChildren().size() == 3) {
           shouldBeTrue(node.getChildren().get(1) instanceof ASTValueNode vn

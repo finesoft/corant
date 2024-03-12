@@ -265,12 +265,52 @@ public enum ASTNodeType {
   },
 
   /**
+   * Distinct
+   */
+  DISTINCT("$distinct", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTDistinctNode();
+    }
+  },
+
+  /**
    * The collect node.
    */
   COLLECT("$collect", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTCollectNode();
+    }
+  },
+
+  /**
+   * The sort node.
+   */
+  SORT("$sort", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTSortNode();
+    }
+  },
+
+  /**
+   * The max node.
+   */
+  MAX("$max", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTMaxNode();
+    }
+  },
+
+  /**
+   * The min node.
+   */
+  MIN("$min", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTMinNode();
     }
   },
 

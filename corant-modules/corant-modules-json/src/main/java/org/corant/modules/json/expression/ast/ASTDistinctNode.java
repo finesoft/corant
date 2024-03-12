@@ -13,45 +13,37 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
+import org.corant.shared.util.Streams;
 
 /**
  * corant-modules-json
  *
  * @author bingo 17:37:19
  */
-public class ASTFilterNode extends AbstractASTNode<Object> {
+public class ASTDistinctNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
-    return ASTNodeType.FILTER;
+    return ASTNodeType.DISTINCT;
   }
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    final Node<?> inputNode = children.get(0);
-    final Node<?> inputElementVarNameNode = children.get(1);
-    final Node<?> filterNode = children.get(2);
-    Object input = inputNode.getValue(ctx);
-    String varName = ASTNode.variableNamesOf(inputElementVarNameNode, ctx)[0];
 
-    BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    Node<?> inputNode = children.get(0);
+    final Object input = inputNode.getValue(ctx);
+
     if (input instanceof Object[] array) {
-      return Arrays.stream(array)
-          .filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo))).toArray();
+      return Arrays.stream(array).distinct().toArray();
     } else if (input instanceof Iterable<?> itr) {
-      return streamOf(itr).filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo)))
-          .collect(Collectors.toList());
-    } else if (input != null) {
-      return (Boolean) filterNode.getValue(useCtx.bind(varName, input)) ? input : null;
+      return Streams.streamOf(itr).distinct().collect(Collectors.toList());
     } else {
-      return null;
+      return input;
     }
   }
 

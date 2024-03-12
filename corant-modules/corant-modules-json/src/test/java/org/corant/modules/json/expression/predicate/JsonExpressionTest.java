@@ -77,6 +77,55 @@ public class JsonExpressionTest extends TestCase {
   }
 
   @Test
+  public void testCompare() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 12, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 23, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 34, "name", "ghi", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    Map<String, Object> max = mapOf("$max",
+        listOf("@list", "(t1,t2)",
+            mapOf("#Integer::compare", listOf(mapOf("#Maps::getMapInteger", listOf("@t1", "id")),
+                mapOf("#Maps::getMapInteger", listOf("@t2", "id"))))));
+    Map<String, Object> min = mapOf("$min",
+        listOf("@list", "(t1,t2)",
+            mapOf("#Integer::compare", listOf(mapOf("#Maps::getMapInteger", listOf("@t1", "id")),
+                mapOf("#Maps::getMapInteger", listOf("@t2", "id"))))));
+    Node<?> maxEval = SimpleParser.parse(max, SimpleParser.resolveBuilder());
+    System.out.println(Jsons.toString(max, true));
+    System.out.println("-".repeat(100));
+    Object result = maxEval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+    System.out.println("=".repeat(100));
+    Node<?> minEval = SimpleParser.parse(min, SimpleParser.resolveBuilder());
+    System.out.println(Jsons.toString(min, true));
+    System.out.println("-".repeat(100));
+    result = minEval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+  }
+
+  @Test
+  public void testDistinct() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    Map<String, Object> exp = mapOf("$distinct", "@list");
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+    result = eval.getValue(new DefaultEvaluationContext("list", list.get(0)));
+    System.out.println(Jsons.toString(result, true));
+    result = eval.getValue(new DefaultEvaluationContext("list", null));
+    System.out.println(Jsons.toString(result, true));
+  }
+
+  @Test
   public void testFilter() {
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
@@ -202,5 +251,29 @@ public class JsonExpressionTest extends TestCase {
     Object result = eval.getValue(new DefaultEvaluationContext("list", list));
     System.out.println(Jsons.toString(result, true));
 
+  }
+
+  @Test
+  public void testSort() {
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(linkedHashMapOf("id", 12, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 23, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 34, "name", "ghi", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
+    list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
+    Map<String, Object> exp = mapOf("$sort",
+        listOf("@list", "(t1,t2)",
+            mapOf("#Integer::compare", listOf(mapOf("#Maps::getMapInteger", listOf("@t1", "id")),
+                mapOf("#Maps::getMapInteger", listOf("@t2", "id"))))));
+    Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
+    System.out.println(Jsons.toString(exp, true));
+    System.out.println("=".repeat(100));
+    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    System.out.println(Jsons.toString(result, true));
+    result = eval.getValue(new DefaultEvaluationContext("list", list.get(0)));
+    System.out.println(Jsons.toString(result, true));
+    result = eval.getValue(new DefaultEvaluationContext("list", null));
+    System.out.println(Jsons.toString(result, true));
   }
 }

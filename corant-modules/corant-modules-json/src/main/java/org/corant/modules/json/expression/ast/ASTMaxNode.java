@@ -13,46 +13,46 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import static org.corant.shared.util.Streams.streamOf;
+import static org.corant.shared.util.Conversions.toInteger;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.Comparator;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
+import org.corant.shared.util.Streams;
 
 /**
  * corant-modules-json
  *
  * @author bingo 17:37:19
  */
-public class ASTFilterNode extends AbstractASTNode<Object> {
+public class ASTMaxNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
-    return ASTNodeType.FILTER;
+    return ASTNodeType.MAX;
   }
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    final Node<?> inputNode = children.get(0);
-    final Node<?> inputElementVarNameNode = children.get(1);
-    final Node<?> filterNode = children.get(2);
-    Object input = inputNode.getValue(ctx);
-    String varName = ASTNode.variableNamesOf(inputElementVarNameNode, ctx)[0];
+    Node<?> inputNode = children.get(0);
+    final Object input = inputNode.getValue(ctx);
+    final BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
 
-    BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    Node<?> sortableNamesNode = children.get(1);
+    Node<?> sorterNode = children.get(2);
+
+    String[] sortableNames = ASTNode.variableNamesOf(sortableNamesNode, useCtx);
+    final Comparator<Object> comparator = (t1, t2) -> toInteger(sorterNode
+        .getValue(useCtx.unbindAll().bind(sortableNames[0], t1).bind(sortableNames[1], t2)));
+
     if (input instanceof Object[] array) {
-      return Arrays.stream(array)
-          .filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo))).toArray();
+      return Arrays.stream(array).max(comparator).orElse(null);
     } else if (input instanceof Iterable<?> itr) {
-      return streamOf(itr).filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo)))
-          .collect(Collectors.toList());
-    } else if (input != null) {
-      return (Boolean) filterNode.getValue(useCtx.bind(varName, input)) ? input : null;
+      return Streams.streamOf(itr).max(comparator).orElse(null);
     } else {
-      return null;
+      return input;
     }
   }
-
 }

@@ -136,11 +136,11 @@ public class Identifiers {
       }
       workersBits = workers.stream().map(Pair::getLeft).reduce(Long::sum).get();
       this.sequenceBits = sequenceBits;
-      if (workersBits + sequenceBits > 62) {
+      timestampLeftShift = sequenceBits + workersBits;
+      if (timestampLeftShift > 62) {
         throw new IllegalArgumentException(
             "The workers bits and sequence bits can not greater then 62");
       }
-      timestampLeftShift = sequenceBits + workersBits;
       timestampBits = 64 - timestampLeftShift;
       sequenceMask = calMask(sequenceBits);
       workerSize = workers.size();

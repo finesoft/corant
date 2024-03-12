@@ -167,8 +167,7 @@ public class NashornScriptEngineService implements ScriptEngineService {
   @Override
   public ScriptEngine createEngine(String... args) {
     if (args.length == 0) {
-      return NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine",
-          "--no-deprecation-warning");
+      return NASHORN_ENGINE_FACTORY.getScriptEngine("-doe", "--global-per-engine");
     }
     return NASHORN_ENGINE_FACTORY.getScriptEngine(args);
   }

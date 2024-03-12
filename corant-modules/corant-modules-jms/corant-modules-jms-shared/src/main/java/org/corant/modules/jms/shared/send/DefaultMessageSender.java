@@ -18,6 +18,7 @@ import static org.corant.context.Beans.resolveApply;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.copy;
+import static org.corant.shared.util.Strings.defaultBlank;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +45,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public class DefaultMessageSender implements MessageSender {
   protected boolean multicast;
+  protected String marshaller;
   protected String destination;
   protected String connectionFactoryId;
   protected boolean dupsOkAck = false;
@@ -61,6 +63,7 @@ public class DefaultMessageSender implements MessageSender {
     deliveryMode = annotation.getDeliveryMode();
     deliveryDelay = annotation.getDeliveryDelay();
     timeToLive = annotation.getTimeToLive();
+    marshaller = annotation.getMarshaller();
     if (isNotEmpty(annotation.getProperties())) {
       annotation.getProperties()
           .forEach(p -> properties.put(p.getName(), toObject(p.getValue(), p.getType())));
@@ -70,37 +73,37 @@ public class DefaultMessageSender implements MessageSender {
   protected DefaultMessageSender() {}
 
   @Override
-  public void send(byte[] message) {
-    doSend(null, new Object[] {message});// FIXME
-  }
-
-  @Override
   public void send(InputStream message) throws IOException {
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
       copy(message, buffer);
       byte[] bytes = buffer.toByteArray();
-      send(bytes);
+      sendBytes(bytes);
     }
   }
 
   @Override
-  public void send(Map<String, Object> message) {
-    doSend(null, message);
-  }
-
-  @Override
   public void send(Serializable message) {
-    doSend(null, message);
-  }
-
-  @Override
-  public void send(String message) {
-    doSend((String) null, message);
+    doSend(marshaller, message);
   }
 
   @Override
   public void send(String serialSchema, Object... messages) {
-    doSend(serialSchema, messages);
+    doSend(defaultBlank(serialSchema, marshaller), messages);
+  }
+
+  @Override
+  public void sendBytes(byte[] message) {
+    doSend(null, new Object[] {message});
+  }
+
+  @Override
+  public void sendMap(Map<String, Object> message) {
+    doSend(null, message);
+  }
+
+  @Override
+  public void sendText(String message) {
+    doSend((String) null, message);
   }
 
   protected void configure(JMSContext jmsc, JMSProducer producer) {

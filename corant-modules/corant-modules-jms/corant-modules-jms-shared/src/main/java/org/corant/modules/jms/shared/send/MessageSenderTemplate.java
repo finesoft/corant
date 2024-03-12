@@ -198,7 +198,7 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
       Compressors.compress(message, buffer);
       byte[] bytes = buffer.toByteArray();
-      send(bytes);
+      sendBytes(bytes);
     }
   }
 

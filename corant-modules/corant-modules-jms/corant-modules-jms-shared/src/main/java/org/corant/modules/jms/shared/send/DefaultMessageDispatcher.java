@@ -16,6 +16,7 @@ package org.corant.modules.jms.shared.send;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolveApply;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.mapOf;
 import java.io.Serializable;
 import java.util.Map;
 import jakarta.jms.Destination;
@@ -57,20 +58,42 @@ public class DefaultMessageDispatcher implements MessageDispatcher {
 
   @Override
   public void dispatch(String connectionFactoryId, String destination, boolean multicast,
-      Serializable message, Map<String, Object> properties) {
+      Object message, Map<String, Object> properties) {
+    doDispatch(connectionFactoryId, destination, multicast, message, properties,
+        marshaller(marshaller));
+  }
 
+  @Override
+  public void dispatchBytes(String connectionFactoryId, String destination, boolean multicast,
+      byte[] message, Object... messageProperties) {
+    doDispatch(connectionFactoryId, destination, multicast, message, mapOf(messageProperties),
+        null);
+  }
+
+  @Override
+  public void dispatchMap(String connectionFactoryId, String destination, boolean multicast,
+      Map<String, Object> message, Object... messageProperties) {
+    doDispatch(connectionFactoryId, destination, multicast, message, mapOf(messageProperties),
+        null);
+  }
+
+  @Override
+  public void dispatchText(String connectionFactoryId, String destination, boolean multicast,
+      String message, Object... messageProperties) {
+    doDispatch(connectionFactoryId, destination, multicast, message, mapOf(messageProperties),
+        null);
   }
 
   @SuppressWarnings("unchecked")
   protected void doDispatch(JMSContext jmsc, Destination d, JMSProducer p,
       MessageMarshaller marshaller, Object message) {
     try {
-      if (marshaller != null) {
+      if (message instanceof Message) {
+        p.send(d, (Message) message);
+      } else if (marshaller != null) {
         p.send(d, marshaller.serialize(jmsc, message));
       } else if (message instanceof String) {
         p.send(d, (String) message);
-      } else if (message instanceof Message) {
-        p.send(d, (Message) message);
       } else if (message instanceof Map) {
         p.send(d, (Map<String, Object>) message);
       } else if (message instanceof byte[]) {
@@ -84,8 +107,7 @@ public class DefaultMessageDispatcher implements MessageDispatcher {
   }
 
   protected void doDispatch(String connectionFactoryId, String destination, boolean multicast,
-      Serializable message, Map<String, Object> properties) {
-    final MessageMarshaller serializer = marshaller(marshaller);
+      Object message, Map<String, Object> properties, MessageMarshaller serializer) {
     final JMSContext jmsc = resolveApply(DefaultJMSContextService.class,
         b -> b.getJMSContext(connectionFactoryId, dupsOkAck));
     Destination dest = multicast ? jmsc.createTopic(destination) : jmsc.createQueue(destination);

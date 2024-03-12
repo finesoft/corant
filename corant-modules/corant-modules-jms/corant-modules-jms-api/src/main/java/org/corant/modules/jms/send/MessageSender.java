@@ -27,21 +27,21 @@ import java.util.Map;
  */
 public interface MessageSender {
 
-  void send(byte[] message);
-
   default void send(InputStream message) throws IOException {
     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
       copy(message, buffer);
       byte[] bytes = buffer.toByteArray();
-      send(bytes);
+      sendBytes(bytes);
     }
   }
 
-  void send(Map<String, Object> message);
-
   void send(Serializable message);
 
-  void send(String message);
-
   void send(String marshallerName, Object... messages);
+
+  void sendBytes(byte[] message);
+
+  void sendMap(Map<String, Object> message);
+
+  void sendText(String message);
 }

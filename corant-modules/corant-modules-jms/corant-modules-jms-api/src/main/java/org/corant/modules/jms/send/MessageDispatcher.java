@@ -15,9 +15,9 @@ package org.corant.modules.jms.send;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import org.corant.modules.jms.annotation.MessageDestination;
 import org.corant.modules.jms.metadata.MessageDestinationMetaData;
 
 /**
@@ -27,7 +27,13 @@ import org.corant.modules.jms.metadata.MessageDestinationMetaData;
  */
 public interface MessageDispatcher {
 
-  default void dispatch(Serializable message) {
+  /**
+   * Dispatch a message object, the given message class must have a {@link MessageDestination}
+   * annotation.
+   *
+   * @param message the message to be dispatch
+   */
+  default void dispatch(Object message) {
     shouldNotNull(message, "Message to dispatch can't null");
     Set<MessageDestinationMetaData> metas = MessageDestinationMetaData.from(message.getClass());
     shouldNotEmpty(metas, "Message to dispatch must have a message destination annotation");
@@ -38,10 +44,19 @@ public interface MessageDispatcher {
   }
 
   default void dispatch(String connectionFactoryId, String destination, boolean multicast,
-      Serializable message) {
+      Object message) {
     dispatch(connectionFactoryId, destination, multicast, message, null);
   }
 
-  void dispatch(String connectionFactoryId, String destination, boolean multicast, Serializable message,
+  void dispatch(String connectionFactoryId, String destination, boolean multicast, Object message,
       Map<String, Object> properties);
+
+  void dispatchBytes(String connectionFactoryId, String destination, boolean multicast,
+      byte[] message, Object... messageProperties);
+
+  void dispatchMap(String connectionFactoryId, String destination, boolean multicast,
+      Map<String, Object> message, Object... messageProperties);
+
+  void dispatchText(String connectionFactoryId, String destination, boolean multicast,
+      String message, Object... messageProperties);
 }

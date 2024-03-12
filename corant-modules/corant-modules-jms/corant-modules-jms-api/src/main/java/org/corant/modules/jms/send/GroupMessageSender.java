@@ -24,44 +24,44 @@ import java.util.Map;
  */
 public class GroupMessageSender implements MessageSender {
 
-  final List<MessageSender> dispatchers;
+  final List<MessageSender> senders;
 
-  public GroupMessageSender(List<MessageSender> dispatchers) {
-    this.dispatchers = dispatchers;
+  public GroupMessageSender(List<MessageSender> senders) {
+    this.senders = senders;
   }
 
   @Override
-  public void send(byte[] message) {
-    for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(message);
+  public void sendBytes(byte[] message) {
+    for (MessageSender sender : senders) {
+      sender.sendBytes(message);
     }
   }
 
   @Override
-  public void send(Map<String, Object> message) {
-    for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(message);
+  public void sendMap(Map<String, Object> message) {
+    for (MessageSender sender : senders) {
+      sender.sendMap(message);
     }
   }
 
   @Override
   public void send(Serializable message) {
-    for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(message);
+    for (MessageSender sender : senders) {
+      sender.send(message);
     }
   }
 
   @Override
-  public void send(String message) {
-    for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(message);
+  public void sendText(String message) {
+    for (MessageSender sender : senders) {
+      sender.sendText(message);
     }
   }
 
   @Override
   public void send(String marshallerName, Object... messages) {
-    for (MessageSender dispatcher : dispatchers) {
-      dispatcher.send(marshallerName, messages);
+    for (MessageSender sender : senders) {
+      sender.send(marshallerName, messages);
     }
   }
 

@@ -186,7 +186,6 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       }
       if (left != null) {
         return left.equals(right);
-      } else if (right != null) {
       }
       return false;
     }

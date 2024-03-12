@@ -61,8 +61,8 @@ public class JsonExpressionTest extends TestCase {
     list.add(linkedHashMapOf("id", 1, "name", "abc", "now", Instant.now()));
     list.add(linkedHashMapOf("id", 2, "name", "def", "now", Instant.now()));
     list.add(linkedHashMapOf("id", 3, "name", "ghi", "now", Instant.now()));
-    System.out.println(list.stream().map(x -> getMapString(x, "name")).collect(ArrayList::new,
-        ArrayList::add, ArrayList::addAll));
+    System.out.println(list.stream().map(x -> getMapString(x, "name"))
+        .collect(ArrayList::new, ArrayList::add, ArrayList::addAll).toString());
 
     Object mapper = linkedHashMapOf("$map",
         mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));

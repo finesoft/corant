@@ -50,6 +50,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -60,6 +61,7 @@ import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 /**
  * corant-modules-json
@@ -85,10 +87,12 @@ public class ObjectMappers {
     // default object mapper setting
     defaultObjectMapper.enable(Feature.ALLOW_COMMENTS);
     defaultObjectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+    defaultObjectMapper.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     defaultObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     defaultObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    defaultObjectMapper.registerModules(new JavaTimeModule());
+    defaultObjectMapper.registerModules(new JavaTimeModule(),
+        new SimpleModule("SQLDateToLocalDate").addSerializer(new SqlDateSerializer()));
     // disable nanoseconds
     defaultObjectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
     defaultObjectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
@@ -96,52 +100,53 @@ public class ObjectMappers {
     Services.selectRequired(GlobalObjectMapperConfigurator.class).sorted(Sortable::compare)
         .forEach(c -> c.configure(defaultObjectMapper));
 
+    // forwarding object mapper setting
     forwardingObjectMapper.enable(Feature.ALLOW_COMMENTS);
     forwardingObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     forwardingObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     forwardingObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     forwardingObjectMapper.registerModules(new JavaTimeModule());
     // forwarding module
-    SimpleModule module = new SimpleModule();
+    SimpleModule fm = new SimpleModule("forwarding");
     // primitives and array
-    module.addSerializer(byte.class, new ForwardingSerializer<>(byte.class));
-    module.addSerializer(byte[].class, new ForwardingSerializer<>(byte[].class));
-    module.addDeserializer(byte[].class, new ForwardingDeserializer<>(byte[].class));
-    module.addSerializer(short[].class, new ForwardingSerializer<>(short[].class));
-    module.addDeserializer(short[].class, new ForwardingDeserializer<>(short[].class));
-    module.addSerializer(int[].class, new ForwardingSerializer<>(int[].class));
-    module.addDeserializer(int[].class, new ForwardingDeserializer<>(int[].class));
-    module.addSerializer(long[].class, new ForwardingSerializer<>(long[].class));
-    module.addDeserializer(long[].class, new ForwardingDeserializer<>(long[].class));
-    module.addSerializer(float[].class, new ForwardingSerializer<>(float[].class));
-    module.addDeserializer(float[].class, new ForwardingDeserializer<>(float[].class));
-    module.addSerializer(double[].class, new ForwardingSerializer<>(double[].class));
-    module.addDeserializer(double[].class, new ForwardingDeserializer<>(double[].class));
-    module.addSerializer(boolean[].class, new ForwardingSerializer<>(boolean[].class));
-    module.addDeserializer(boolean[].class, new ForwardingDeserializer<>(boolean[].class));
+    fm.addSerializer(byte.class, new ForwardingSerializer<>(byte.class));
+    fm.addSerializer(byte[].class, new ForwardingSerializer<>(byte[].class));
+    fm.addDeserializer(byte[].class, new ForwardingDeserializer<>(byte[].class));
+    fm.addSerializer(short[].class, new ForwardingSerializer<>(short[].class));
+    fm.addDeserializer(short[].class, new ForwardingDeserializer<>(short[].class));
+    fm.addSerializer(int[].class, new ForwardingSerializer<>(int[].class));
+    fm.addDeserializer(int[].class, new ForwardingDeserializer<>(int[].class));
+    fm.addSerializer(long[].class, new ForwardingSerializer<>(long[].class));
+    fm.addDeserializer(long[].class, new ForwardingDeserializer<>(long[].class));
+    fm.addSerializer(float[].class, new ForwardingSerializer<>(float[].class));
+    fm.addDeserializer(float[].class, new ForwardingDeserializer<>(float[].class));
+    fm.addSerializer(double[].class, new ForwardingSerializer<>(double[].class));
+    fm.addDeserializer(double[].class, new ForwardingDeserializer<>(double[].class));
+    fm.addSerializer(boolean[].class, new ForwardingSerializer<>(boolean[].class));
+    fm.addDeserializer(boolean[].class, new ForwardingDeserializer<>(boolean[].class));
     // simple type
-    module.addSerializer(URL.class, new ForwardingSerializer<>(URL.class));
-    module.addSerializer(URI.class, new ForwardingSerializer<>(URI.class));
-    module.addSerializer(Date.class, new ForwardingSerializer<>(Date.class));
-    module.addSerializer(Timestamp.class, new ForwardingSerializer<>(Timestamp.class));
-    module.addSerializer(Duration.class, new ForwardingSerializer<>(Duration.class));
-    module.addSerializer(Period.class, new ForwardingSerializer<>(Period.class));
-    module.addSerializer(Year.class, new ForwardingSerializer<>(Year.class));
-    module.addSerializer(YearMonth.class, new ForwardingSerializer<>(YearMonth.class));
-    module.addSerializer(MonthDay.class, new ForwardingSerializer<>(MonthDay.class));
-    module.addSerializer(LocalDate.class, new ForwardingSerializer<>(LocalDate.class));
-    module.addSerializer(LocalTime.class, new ForwardingSerializer<>(LocalTime.class));
-    module.addSerializer(LocalDateTime.class, new ForwardingSerializer<>(LocalDateTime.class));
-    module.addSerializer(ZonedDateTime.class, new ForwardingSerializer<>(ZonedDateTime.class));
-    module.addSerializer(Instant.class, new ForwardingSerializer<>(Instant.class));
-    module.addSerializer(OffsetTime.class, new ForwardingSerializer<>(OffsetTime.class));
-    module.addSerializer(OffsetDateTime.class, new ForwardingSerializer<>(OffsetDateTime.class));
-    module.addSerializer(Currency.class, new ForwardingSerializer<>(Currency.class));
-    module.addSerializer(Locale.class, new ForwardingSerializer<>(Locale.class));
-    module.addSerializer(UUID.class, new ForwardingSerializer<>(UUID.class));
-    module.addSerializer(Class.class, new ForwardingSerializer<>(Class.class));
-    module.addSerializer(File.class, new ForwardingSerializer<>(File.class));
-    forwardingObjectMapper.registerModule(module);
+    fm.addSerializer(URL.class, new ForwardingSerializer<>(URL.class));
+    fm.addSerializer(URI.class, new ForwardingSerializer<>(URI.class));
+    fm.addSerializer(Date.class, new ForwardingSerializer<>(Date.class));
+    fm.addSerializer(Timestamp.class, new ForwardingSerializer<>(Timestamp.class));
+    fm.addSerializer(Duration.class, new ForwardingSerializer<>(Duration.class));
+    fm.addSerializer(Period.class, new ForwardingSerializer<>(Period.class));
+    fm.addSerializer(Year.class, new ForwardingSerializer<>(Year.class));
+    fm.addSerializer(YearMonth.class, new ForwardingSerializer<>(YearMonth.class));
+    fm.addSerializer(MonthDay.class, new ForwardingSerializer<>(MonthDay.class));
+    fm.addSerializer(LocalDate.class, new ForwardingSerializer<>(LocalDate.class));
+    fm.addSerializer(LocalTime.class, new ForwardingSerializer<>(LocalTime.class));
+    fm.addSerializer(LocalDateTime.class, new ForwardingSerializer<>(LocalDateTime.class));
+    fm.addSerializer(ZonedDateTime.class, new ForwardingSerializer<>(ZonedDateTime.class));
+    fm.addSerializer(Instant.class, new ForwardingSerializer<>(Instant.class));
+    fm.addSerializer(OffsetTime.class, new ForwardingSerializer<>(OffsetTime.class));
+    fm.addSerializer(OffsetDateTime.class, new ForwardingSerializer<>(OffsetDateTime.class));
+    fm.addSerializer(Currency.class, new ForwardingSerializer<>(Currency.class));
+    fm.addSerializer(Locale.class, new ForwardingSerializer<>(Locale.class));
+    fm.addSerializer(UUID.class, new ForwardingSerializer<>(UUID.class));
+    fm.addSerializer(Class.class, new ForwardingSerializer<>(Class.class));
+    fm.addSerializer(File.class, new ForwardingSerializer<>(File.class));
+    forwardingObjectMapper.registerModule(fm);
 
   }
   // to map
@@ -243,4 +248,18 @@ public class ObjectMappers {
     }
   }
 
+  static class SqlDateSerializer extends JsonSerializer<java.sql.Date> {
+
+    @Override
+    public Class<java.sql.Date> handledType() {
+      return java.sql.Date.class;
+    }
+
+    @Override
+    public void serialize(java.sql.Date value, JsonGenerator gen, SerializerProvider provider)
+        throws IOException {
+      LocalDate date = value.toLocalDate();
+      LocalDateSerializer.INSTANCE.serialize(date, gen, provider);
+    }
+  }
 }

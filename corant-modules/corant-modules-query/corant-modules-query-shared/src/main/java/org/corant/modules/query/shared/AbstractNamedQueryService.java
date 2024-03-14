@@ -244,6 +244,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
 
   protected <T> void parallelFetch(List<T> results, Querier parentQuerier) {
     // parallel fetch, experimental features for proof of concept.
+    // FIXME consider the context propagate
     List<FetchQuery> fetchQueries = new ArrayList<>(parentQuerier.getQuery().getFetchQueries());
     final Collection<Triple<FetchedResult, Object, FetchableNamedQueryService>> workResults =
         new LinkedBlockingQueue<>();

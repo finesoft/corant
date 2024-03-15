@@ -34,6 +34,8 @@ public interface Archive extends Iterable<Archive.Entry> {
 
   List<Entry> getEntries(Predicate<Entry> filter) throws IOException;
 
+  String getName();
+
   Path getPath();
 
   void removeEntry(Entry entry);

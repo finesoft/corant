@@ -13,6 +13,7 @@
  */
 package org.corant.devops.maven.plugin.archive;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,40 +28,42 @@ import java.util.stream.Collectors;
  *
  * @author bingo 下午3:10:46
  */
-public class DefaultArchive implements Archive {
+public class FileDirectoryArchive implements Archive {
 
-  private final List<Entry> entries = new ArrayList<>();
-  private final List<Archive> children = new ArrayList<>();
   private final Path path;
-  private final String name;
+  private final File file;
+  private final List<Archive> children = new ArrayList<>();
+  private final List<Entry> entries = new ArrayList<>();
 
-  DefaultArchive(String name, Archive parent) {
+  FileDirectoryArchive(File file, Archive parent) {
+    this.file = file;
     if (parent != null) {
-      path = parent.getPath().resolve(name);
+      path = parent.getPath().resolve(file.getName());
       parent.getChildren().add(this);
     } else {
-      path = Paths.get(name);
+      path = Paths.get(file.getName());
     }
-    this.name = name;
-  }
-
-  public static DefaultArchive of(String name, Archive parent) {
-    return new DefaultArchive(name, parent);
-  }
-
-  public static DefaultArchive root() {
-    return new DefaultArchive("", null);
-  }
-
-  public void addEntries(List<Entry> entries) {
-    if (entries != null) {
-      this.entries.addAll(entries);
+    File[] subFiles = file.listFiles();
+    if (subFiles != null) {
+      for (File subFile : subFiles) {
+        if (subFile.exists() && subFile.canRead()) {
+          if (subFile.isDirectory()) {
+            new FileDirectoryArchive(subFile, this);
+          } else if (subFile.isFile()) {
+            entries.add(FileEntry.of(subFile));
+          }
+        }
+      }
     }
+  }
+
+  public static FileDirectoryArchive of(File file, Archive parent) {
+    return new FileDirectoryArchive(file, parent);
   }
 
   @Override
   public void addEntry(Entry entry) {
-    entries.add(entry);
+    throw new IllegalAccessError();
   }
 
   @Override
@@ -79,7 +82,7 @@ public class DefaultArchive implements Archive {
 
   @Override
   public String getName() {
-    return name;
+    return file.getName();
   }
 
   @Override
@@ -94,6 +97,7 @@ public class DefaultArchive implements Archive {
 
   @Override
   public void removeEntry(Entry entry) {
-    entries.remove(entry);
+    throw new IllegalAccessError();
   }
+
 }

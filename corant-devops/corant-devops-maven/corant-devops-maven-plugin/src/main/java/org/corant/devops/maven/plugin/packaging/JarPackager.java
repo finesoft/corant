@@ -68,6 +68,10 @@ public class JarPackager implements Packager {
   @Override
   public void pack() throws Exception {
     log.debug("(corant)----------------------------[pack jar]----------------------------");
+    if (getMojo().getAppendDistResourcePaths() != null
+        && !getMojo().getAppendDistResourcePaths().isBlank()) {
+      log.warn("(corant) NOTE: >>> THE APPEND DIST RESOURCE PATHS CANNOT BE PROCESSED!");
+    }
     log.debug("(corant) start packaging process...");
     doPack(buildArchive());
   }
@@ -120,7 +124,7 @@ public class JarPackager implements Packager {
         .addEntry(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
     for (Class<?> klass : JAR_LAU_CLASSES) {
       DefaultArchive.of(BIN_DIR, root).addEntry(ClassPathEntry
-          .of(klass.getName().replaceAll("\\.", "/") + ".class", klass.getSimpleName() + ".class"));
+          .of(klass.getName().replace('.', '/') + ".class", klass.getSimpleName() + ".class"));
     }
     DefaultArchive.of(META_INF_DIR, root).addEntry(ManifestEntry.of(attr -> {
       // The application main class and runner class

@@ -72,6 +72,25 @@ public class PackageMojo extends AbstractMojo {
   @Parameter(defaultValue = "false", property = "corant.maven-mojo.use-direct-runner")
   protected boolean useDirectRunner;
 
+  @Parameter(
+      defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,log4j.*,log4j2.*,"
+          + "META-INF/*.pem,META-INF/*.crt,META-INF/*.cer,META-INF/*.der",
+      property = "corant.maven-mojo.dist-config-paths")
+  protected String distConfigPaths;
+
+  @Parameter(defaultValue = "**README*,**LICENSE*,**NOTICE*",
+      property = "corant.maven-mojo.dist-resource-paths")
+  protected String distResourcePaths;
+
+  @Parameter(property = "corant.maven-mojo.append-dist-resource-paths")
+  protected String appendDistResourcePaths;
+
+  @Parameter(property = "corant.maven-mojo.used-config-location")
+  protected String usedConfigLocation;
+
+  @Parameter(property = "corant.maven-mojo.used-config-profile")
+  protected String usedConfigProfile;
+
   @Parameter(property = "corant.maven-mojo.main-class")
   protected String mainClass;
 
@@ -84,21 +103,9 @@ public class PackageMojo extends AbstractMojo {
   @Parameter
   protected String appArgs;
 
-  @Parameter(
-      defaultValue = "**META-INF/*application*.*,**META-INF/*config*.*,log4j.*,log4j2.*,"
-          + "META-INF/*.pem,META-INF/*.crt,META-INF/*.cer,META-INF/*.der",
-      property = "corant.maven-mojo.dist-config-paths")
-  protected String distConfigPaths;
-
-  @Parameter(defaultValue = "**README*,**LICENSE*,**NOTICE*",
-      property = "corant.maven-mojo.dist-resource-paths")
-  protected String distResourcePaths;
-
-  @Parameter(defaultValue = "", property = "corant.maven-mojo.used-config-location")
-  protected String usedConfigLocation;
-
-  @Parameter(defaultValue = "", property = "corant.maven-mojo.used-config-profile")
-  protected String usedConfigProfile;
+  public static String getDirectRunner() {
+    return DIRECT_RUNNER;
+  }
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -126,6 +133,10 @@ public class PackageMojo extends AbstractMojo {
 
   public String getAppArgs() {
     return appArgs != null && !appArgs.isEmpty() ? appArgs.trim() : "";
+  }
+
+  public String getAppendDistResourcePaths() {
+    return appendDistResourcePaths;
   }
 
   public String getClassifier() {
@@ -166,6 +177,10 @@ public class PackageMojo extends AbstractMojo {
 
   public MavenProject getProject() {
     return project;
+  }
+
+  public MavenProjectHelper getProjectHelper() {
+    return projectHelper;
   }
 
   public String getUsedConfigLocation() {

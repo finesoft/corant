@@ -23,8 +23,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -41,6 +44,7 @@ import org.corant.devops.maven.plugin.archive.Archive;
 import org.corant.devops.maven.plugin.archive.Archive.Entry;
 import org.corant.devops.maven.plugin.archive.ClassPathEntry;
 import org.corant.devops.maven.plugin.archive.DefaultArchive;
+import org.corant.devops.maven.plugin.archive.FileDirectoryArchive;
 import org.corant.devops.maven.plugin.archive.FileEntry;
 
 /**
@@ -129,7 +133,7 @@ public class DistPackager implements Packager {
       List<Entry> libs = new ArrayList<>();
       List<Entry> apps = new ArrayList<>();
       apps.add(FileEntry.of(getMojo().getProject().getArtifact().getFile()));
-      getMojo().getProject().getArtifacts().stream().forEach(a -> {
+      getMojo().getProject().getArtifacts().forEach(a -> {
         if (Objects.equals(a.getGroupId(), appGroupId)) {
           apps.add(FileEntry.of(a.getFile()));
         } else {
@@ -146,9 +150,51 @@ public class DistPackager implements Packager {
     }
     DefaultArchive.of(CFG_DIR, root).addEntries(resolveConfigFiles());
     DefaultArchive.of(BIN_DIR, root).addEntries(resolveBinFiles());
+    if (StringUtils.isNotBlank(getMojo().getAppendDistResourcePaths())) {
+      Map<String, List<File>> appendResources =
+          resolveAppendResources(getMojo().getAppendDistResourcePaths());
+      appendResources.forEach((name, files) -> {
+        Archive archive = DefaultArchive.of(name, root);
+        for (File file : files) {
+          if (file.isDirectory()) {
+            FileDirectoryArchive.of(file, archive);
+          } else {
+            archive.addEntry(FileEntry.of(file));
+          }
+        }
+      });
+    }
     log.debug(
         String.format("(corant) built archive %s for packaging.", root.getEntries(null).size()));
     return root;
+  }
+
+  Map<String, List<File>> resolveAppendResources(String resources) {
+    Map<String, List<File>> entries = new LinkedHashMap<>();
+    String[] nameAndPaths = StringUtils.split(resources.trim(), ";");
+    for (String nap : nameAndPaths) {
+      boolean found = false;
+      if (StringUtils.isNotBlank(nap)) {
+        String[] nameAndPath = StringUtils.split(nap.trim(), ",");
+        if (nameAndPath.length == 2 && StringUtils.isNotBlank(nameAndPath[0])
+            && StringUtils.isNotBlank(nameAndPath[1])) {
+          String name = nameAndPath[0].trim();
+          String path = nameAndPath[1].trim();
+          File file;
+          if (!APP_DIR.equals(name) && !LOG_DIR.equals(name) && !LIB_DIR.equals(name)
+              && !CFG_DIR.equals(name) && !BIN_DIR.equals(name)
+              && (file = new File(path)).exists()) {
+            entries.computeIfAbsent(name, k1 -> new ArrayList<>()).add(file);
+            log.debug(String.format("(corant) resolve append resource file %s: %s.", name, file));
+            found = true;
+          }
+        }
+      }
+      if (!found) {
+        log.warn(String.format("(corant) append resource %s for packaging is illegal", nap));
+      }
+    }
+    return entries;
   }
 
   List<Entry> resolveBinFiles() throws IOException {
@@ -298,9 +344,6 @@ public class DistPackager implements Packager {
     private final String script;
     private final String name;
 
-    /**
-     * @param script
-     */
     ScriptEntry(String name, String script) {
       this.name = name;
       this.script = script;

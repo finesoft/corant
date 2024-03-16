@@ -338,7 +338,6 @@ public class DistPackager implements Packager {
    * corant-devops-maven-plugin
    *
    * @author bingo 下午12:09:52
-   *
    */
   static final class ScriptEntry implements Entry {
     private final String script;

@@ -92,7 +92,7 @@ public class ObjectMappers {
     defaultObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     defaultObjectMapper.registerModules(new JavaTimeModule(),
-        new SimpleModule("SQLDateToLocalDate").addSerializer(new SqlDateSerializer()));
+        new SimpleModule("SQLDateToLocalDateModule").addSerializer(new SqlDateSerializer()));
     // disable nanoseconds
     defaultObjectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
     defaultObjectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
@@ -107,7 +107,7 @@ public class ObjectMappers {
     forwardingObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     forwardingObjectMapper.registerModules(new JavaTimeModule());
     // forwarding module
-    SimpleModule fm = new SimpleModule("forwarding");
+    SimpleModule fm = new SimpleModule("ForwardingModule");
     // primitives and array
     fm.addSerializer(byte.class, new ForwardingSerializer<>(byte.class));
     fm.addSerializer(byte[].class, new ForwardingSerializer<>(byte[].class));

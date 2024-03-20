@@ -104,6 +104,10 @@ public class MongoGridFSTemplate {
     this.session = session;
   }
 
+  public MongoGridFSTemplate(String mongoURL) {
+    this(Mongos.resolveDatabase(mongoURL));
+  }
+
   /**
    * Given an id, delete this stored file's files collection document and associated chunks from a
    * GridFS bucket.
@@ -206,8 +210,8 @@ public class MongoGridFSTemplate {
    * @param bucketName the bucket to be returned
    */
   public GridFSBucket getBucket(String bucketName) {
-    shouldNotNull(bucketName, "CollectionName must not be null");
-    GridFSBucket bucket = GridFSBuckets.create(database, bucketName);
+    GridFSBucket bucket = bucketName == null ? GridFSBuckets.create(database)
+        : GridFSBuckets.create(database, bucketName);
     if (writeConcern != null) {
       bucket = bucket.withWriteConcern(writeConcern);
     }
@@ -346,6 +350,22 @@ public class MongoGridFSTemplate {
   public UpdateResult updateMetadata(String bucketName, Object id,
       UnaryOperator<Map<String, Object>> updater) {
     return executeUpdateMetadata(bucketName, null, null, id, updater);
+  }
+
+  public MongoGridFSTemplate withReadConcern(ClientSession session) {
+    return new MongoGridFSTemplate(database, writeConcern, readPreference, readConcern, session);
+  }
+
+  public MongoGridFSTemplate withReadConcern(ReadConcern readConcern) {
+    return new MongoGridFSTemplate(database, writeConcern, readPreference, readConcern, session);
+  }
+
+  public MongoGridFSTemplate withReadPreference(ReadPreference readPreference) {
+    return new MongoGridFSTemplate(database, writeConcern, readPreference, readConcern, session);
+  }
+
+  public MongoGridFSTemplate withWriteConcern(WriteConcern writeConcern) {
+    return new MongoGridFSTemplate(database, writeConcern, readPreference, readConcern, session);
   }
 
   protected MongoCollection<Document> obtainCollection(String collectionName) {

@@ -668,6 +668,10 @@ public class MongoTemplate {
     return writeConcern;
   }
 
+  public MongoGridFSTemplate gridFSTemplate() {
+    return new MongoGridFSTemplate(database, writeConcern, readPreference, readConcern, session);
+  }
+
   /**
    * Insert an object into the specified collection. If the given object is not a {@link Document}
    * instance, it will be converted to a Map and then constructed into a {@link Document}. If the
@@ -1116,6 +1120,31 @@ public class MongoTemplate {
       Map<String, ?> update, UpdateOptions options) {
     return executeUpdates(collectionName, true, Mongos.parse(filter), Mongos.parse(update),
         options);
+  }
+
+  public MongoTemplate withCodecRegistry(CodecRegistry codecRegistry) {
+    return new MongoTemplate(database, writeConcern, readPreference, readConcern, codecRegistry,
+        session);
+  }
+
+  public MongoTemplate withReadConcern(ClientSession session) {
+    return new MongoTemplate(database, writeConcern, readPreference, readConcern, codecRegistry,
+        session);
+  }
+
+  public MongoTemplate withReadConcern(ReadConcern readConcern) {
+    return new MongoTemplate(database, writeConcern, readPreference, readConcern, codecRegistry,
+        session);
+  }
+
+  public MongoTemplate withReadPreference(ReadPreference readPreference) {
+    return new MongoTemplate(database, writeConcern, readPreference, readConcern, codecRegistry,
+        session);
+  }
+
+  public MongoTemplate withWriteConcern(WriteConcern writeConcern) {
+    return new MongoTemplate(database, writeConcern, readPreference, readConcern, codecRegistry,
+        session);
   }
 
   protected MongoCollection<Document> obtainCollection(String collectionName) {

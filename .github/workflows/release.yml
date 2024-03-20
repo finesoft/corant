@@ -40,8 +40,8 @@ jobs:
             [{
                 "id": "rdc",
                 "properties": {
-                  "altReleaseDeploymentRepository": "rdc-releases::default::https://packages.aliyun.com/maven/repository/2040008-release-fvpoDf/",
-                  "altSnapshotDeploymentRepository":"rdc-snapshots::default::https://packages.aliyun.com/maven/repository/2040008-snapshot-Ewki7J/"
+                  "altReleaseDeploymentRepository": "rdc-releases::https://packages.aliyun.com/maven/repository/2040008-release-fvpoDf/",
+                  "altSnapshotDeploymentRepository":"rdc-snapshots:https://packages.aliyun.com/maven/repository/2040008-snapshot-Ewki7J/"
                 }
             }]
           active_profiles: >

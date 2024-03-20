@@ -13,9 +13,10 @@
  */
 package org.corant.shared.resource;
 
+import static java.util.Collections.unmodifiableMap;
+import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Maps.getMapString;
-import static org.corant.shared.util.Maps.immutableMapOf;
-import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,48 +38,33 @@ public class InputStreamResource implements Resource {
   protected final InputStream inputStream;
   protected final Map<String, Object> metadata;
 
+  public InputStreamResource(InputStream inputStream) {
+    this(inputStream, null);
+  }
+
   public InputStreamResource(InputStream inputStream, String name) {
-    this.name = name;
-    this.inputStream = inputStream;
-    location = null;
-    metadata = resolveMetadata(name, null);
+    this(inputStream, null, name);
   }
 
   public InputStreamResource(InputStream inputStream, String location, String name) {
-    this.name = name;
-    this.location = location;
-    this.inputStream = inputStream;
-    metadata = resolveMetadata(name, null);
+    this(inputStream, location, name, null);
   }
 
   public InputStreamResource(InputStream inputStream, String location, String name,
       Map<String, Object> metadata) {
-    this.inputStream = inputStream;
+    this.inputStream = shouldNotNull(inputStream, "Input stream can't null");
     this.name = name;
     this.location = location;
-    this.metadata = resolveMetadata(name, metadata);
+    this.metadata = metadata == null ? null : unmodifiableMap(metadata);
   }
 
   public InputStreamResource(Map<String, Object> metadata, InputStream inputStream) {
-    name = getMapString(metadata, "name");
-    location = getMapString(metadata, "location");
-    this.metadata = resolveMetadata(name, metadata);
-    this.inputStream = inputStream;
+    this(inputStream, getMapString(metadata, "location"), getMapString(metadata, "name"), metadata);
   }
 
   public InputStreamResource(URL url) throws IOException {
-    location = url.toExternalForm();
-    inputStream = url.openStream();
-    name = url.getFile();
-    metadata = immutableMapOf(META_NAME, url.getFile());
-  }
-
-  protected static Map<String, Object> resolveMetadata(String name, Map<String, Object> metadata) {
-    Map<String, Object> temp = mapOf(META_NAME, name);
-    if (metadata != null) {
-      temp.putAll(metadata);
-    }
-    return Collections.unmodifiableMap(temp);
+    this(shouldNotNull(url, "URL can't null").openStream(), url.toExternalForm(), url.getFile(),
+        null);
   }
 
   @Override
@@ -88,7 +74,7 @@ public class InputStreamResource implements Resource {
 
   @Override
   public Map<String, Object> getMetadata() {
-    return metadata;
+    return defaultObject(metadata, Collections::emptyMap);
   }
 
   @Override

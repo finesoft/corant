@@ -36,7 +36,7 @@ public class ClassPathResource extends URLResource {
   protected final String classPath;
 
   public ClassPathResource(String classPath, ClassLoader classLoader, URL url) {
-    super(url, SourceType.CLASS_PATH);
+    super(url, SourceType.CLASS_PATH, null);
     this.classLoader = shouldNotNull(classLoader);
     this.classPath = shouldNotNull(classPath);
   }

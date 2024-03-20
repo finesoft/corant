@@ -21,12 +21,10 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Services.resolve;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.HashSet;
@@ -37,10 +35,19 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import org.bson.BsonInt32;
-import org.bson.BsonInt64;
-import org.bson.BsonString;
-import org.bson.BsonValue;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.bson.Document;
 import org.corant.config.Configs;
 import org.corant.context.naming.NamingReference;
@@ -61,19 +68,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.enterprise.inject.spi.InjectionPoint;
 
 /**
  * corant-modules-mongodb
@@ -91,19 +85,6 @@ public class MongoClientExtension implements Extension {
       NamedQualifierObjectManager.empty();
   volatile NamedQualifierObjectManager<MongodbConfig> databaseConfigManager =
       NamedQualifierObjectManager.empty();
-
-  public static BsonValue bsonId(Serializable id) {
-    if (id == null) {
-      return null;
-    }
-    if (id instanceof Long || Long.TYPE.equals(id.getClass())) {
-      return new BsonInt64((Long) id);
-    } else if (id instanceof Integer || Integer.TYPE.equals(id.getClass())) {
-      return new BsonInt32((Integer) id);
-    } else {
-      return new BsonString(asString(id));
-    }
-  }
 
   public static MongoClient getClient(String name) {
     if (isNotBlank(name) && name.startsWith(MongoClientConfig.JNDI_SUBCTX_NAME)) {

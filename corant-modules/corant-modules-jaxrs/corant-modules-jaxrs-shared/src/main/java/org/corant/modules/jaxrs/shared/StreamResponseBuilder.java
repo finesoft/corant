@@ -64,7 +64,7 @@ public class StreamResponseBuilder {
   }
 
   public static StreamResponseBuilder of(File file) {
-    return of(new FileSystemResource(file));
+    return of(new FileSystemResource(file, FileSystemResource.metadataOf(file)));
   }
 
   public static StreamResponseBuilder of(InputStream is) {

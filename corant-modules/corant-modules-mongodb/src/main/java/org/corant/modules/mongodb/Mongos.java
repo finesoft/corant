@@ -15,6 +15,7 @@ package org.corant.modules.mongodb;
 
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;
@@ -24,12 +25,19 @@ import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.ref.Cleaner;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import jakarta.enterprise.inject.literal.NamedLiteral;
+import org.bson.BsonInt32;
+import org.bson.BsonInt64;
+import org.bson.BsonObjectId;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -39,6 +47,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
+import com.mongodb.client.result.UpdateResult;
 
 /**
  * corant-modules-mongodb
@@ -46,6 +55,29 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
  * @author bingo 下午7:18:23
  */
 public class Mongos {
+
+  public static final String DOC_ID_FIELD_NAME = "_id";
+  public static final String ENTITY_ID_FIELD_NAME = "id";
+  public static final String GFS_DOC_COLLECTION_SUFFIX = ".files";
+  public static final String GFS_METADATA_PROPERTY_NAME = "metadata";
+  public static final UpdateResult EMPTY_UPDATE_RESULT = new EmptyUpdateResult();
+
+  public static BsonValue bsonId(Object id) {
+    if (id == null) {
+      return null;
+    }
+    if (id instanceof Long || Long.TYPE.equals(id.getClass())) {
+      return new BsonInt64((Long) id);
+    } else if (id instanceof Integer || Integer.TYPE.equals(id.getClass())) {
+      return new BsonInt32((Integer) id);
+    } else if (id instanceof BsonObjectId boid) {
+      return boid;
+    } else if (id instanceof ObjectId oid) {
+      return new BsonObjectId(oid);
+    } else {
+      return new BsonString(asString(id));
+    }
+  }
 
   public static void cloneCollection(String srcDatabaseNameSpace, String destDatabaseNameSpace,
       String collectionName) {
@@ -171,4 +203,31 @@ public class Mongos {
     }
   }
 
+  static Bson parse(Map<String, ?> object) {
+    return object == null ? null : object instanceof Bson ? (Bson) object : new Document(object);
+  }
+
+  public static class EmptyUpdateResult extends UpdateResult {
+
+    @Override
+    public long getMatchedCount() {
+      return 0;
+    }
+
+    @Override
+    public long getModifiedCount() {
+      return 0;
+    }
+
+    @Override
+    public BsonValue getUpsertedId() {
+      return null;
+    }
+
+    @Override
+    public boolean wasAcknowledged() {
+      return true;
+    }
+
+  }
 }

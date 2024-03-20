@@ -14,12 +14,12 @@
 package org.corant.shared.resource;
 
 import static org.corant.shared.util.Maps.getMapObject;
-import static org.corant.shared.util.Maps.immutableMapOf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,8 +85,7 @@ public interface Resource {
    * @return getMetadata
    */
   default Map<String, Object> getMetadata() {
-    return immutableMapOf(META_SOURCE_TYPE, getSourceType() == null ? null : getSourceType().name(),
-        META_NAME, getName());
+    return Collections.emptyMap();
   }
 
   /**

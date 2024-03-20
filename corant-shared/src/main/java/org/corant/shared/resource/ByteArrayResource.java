@@ -13,11 +13,16 @@
  */
 package org.corant.shared.resource;
 
+import static java.util.Collections.unmodifiableMap;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -31,13 +36,24 @@ public class ByteArrayResource implements Resource {
 
   protected final String location;
 
+  protected final String name;
+
+  protected final Map<String, Object> metadata;
+
   public ByteArrayResource(byte[] byteArray) {
     this(byteArray, null);
   }
 
   public ByteArrayResource(byte[] byteArray, String location) {
-    this.byteArray = byteArray; // non copy or clone
+    this(byteArray, location, null, null);
+  }
+
+  public ByteArrayResource(byte[] byteArray, String location, String name,
+      Map<String, Object> metadata) {
+    this.byteArray = shouldNotNull(byteArray, "Byte array can't null"); // non copy or clone
     this.location = location;
+    this.name = name;
+    this.metadata = metadata == null ? null : unmodifiableMap(metadata);
   }
 
   public ByteArrayResource(InputStream is) {
@@ -45,16 +61,25 @@ public class ByteArrayResource implements Resource {
   }
 
   public ByteArrayResource(InputStream is, String location) {
-    try (BufferedInputStream bis = new BufferedInputStream(is)) {
+    this(is, location, null, null);
+  }
+
+  public ByteArrayResource(InputStream is, String location, String name,
+      Map<String, Object> metadata) {
+    try (BufferedInputStream bis =
+        new BufferedInputStream(shouldNotNull(is, "Input stream can't null"))) {
       byteArray = bis.readAllBytes();
       this.location = location;
+      this.name = name;
+      this.metadata = metadata == null ? null : unmodifiableMap(metadata);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
   }
 
   public ByteArrayResource copy() {
-    return new ByteArrayResource(Arrays.copyOf(byteArray, byteArray.length), location);
+    return new ByteArrayResource(Arrays.copyOf(byteArray, byteArray.length), location, name,
+        metadata);
   }
 
   public final byte[] getByteArray() {
@@ -64,6 +89,16 @@ public class ByteArrayResource implements Resource {
   @Override
   public String getLocation() {
     return location;
+  }
+
+  @Override
+  public Map<String, Object> getMetadata() {
+    return defaultObject(metadata, Collections::emptyMap);
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -85,7 +120,7 @@ public class ByteArrayResource implements Resource {
   }
 
   public ByteArrayResource withLocation(String location) {
-    return new ByteArrayResource(byteArray, location);
+    return new ByteArrayResource(byteArray, location, name, metadata);
   }
 
 }

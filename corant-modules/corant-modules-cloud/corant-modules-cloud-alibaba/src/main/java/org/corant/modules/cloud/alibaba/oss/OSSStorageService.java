@@ -31,8 +31,8 @@ import java.util.logging.Logger;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.resource.SourceType;
-import org.corant.shared.util.FileUtils;
 import org.corant.shared.util.ContentDispositions.ContentDisposition;
+import org.corant.shared.util.FileUtils;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.internal.OSSHeaders;
@@ -114,15 +114,18 @@ public class OSSStorageService {
    * corant-modules-cloud-alibaba
    *
    * @author bingo 下午12:17:51
-   *
    */
   public static class OSSResource implements Resource {
 
     protected OSSObject object;
     protected String location;
 
+    public OSSResource(OSSObject object) {
+      this(shouldNotNull(object, "OSS object can't null"), object.getBucketName());
+    }
+
     public OSSResource(OSSObject object, String location) {
-      this.object = object;
+      this.object = shouldNotNull(object, "OSS object can't null");
       this.location = location;
     }
 

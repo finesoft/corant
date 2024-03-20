@@ -14,6 +14,9 @@
 package org.corant.modules.mongodb;
 
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.getMapInteger;
+import static org.corant.shared.util.Maps.getMapMap;
+import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Sets.setOf;
 import java.math.BigDecimal;
@@ -22,11 +25,14 @@ import java.net.URI;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.IntStream;
 import org.bson.BsonDocument;
 import org.bson.BsonReader;
 import org.bson.BsonType;
@@ -57,6 +63,8 @@ import junit.framework.TestCase;
  */
 public class MongoTemplateTest extends TestCase {
 
+  static String murl = "mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1";
+
   @Test
   public void testConvert() throws JsonProcessingException {
     MapPojo pojo = new MapPojo();
@@ -69,9 +77,15 @@ public class MongoTemplateTest extends TestCase {
   }
 
   @Test
+  public void testDelete() {
+    MongoTemplate mt = new MongoTemplate(Mongos.resolveClient(murl).getDatabase("anncy"));
+    mt.delete("save-many-test", 1);
+    mt.deleteMany("save-many-test", mapOf("_id", mapOf("$lt", 10)));
+  }
+
+  @Test
   public void testFilter() {
-    MongoClient mc =
-        Mongos.resolveClient("mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1");
+    MongoClient mc = Mongos.resolveClient(murl);
     MongoDatabase md = mc.getDatabase("parts360-data");
     Map<String, Object> filter = mapOf("$and", listOf(mapOf("type.id", 147169256310571008L),
         mapOf("refreshedTime", mapOf("$gt", LocalDate.of(2023, 11, 27)))));
@@ -82,9 +96,15 @@ public class MongoTemplateTest extends TestCase {
   }
 
   @Test
+  public void testInsert() {
+    MongoTemplate mt = new MongoTemplate(Mongos.resolveClient(murl).getDatabase("anncy"));
+    mt.insert("bingo", new MapPojo());
+    mt.insertMany("bingo", IntStream.range(1, 100).mapToObj(MapPojo::new).toList());
+  }
+
+  @Test
   public void testPrimaryArray() {
-    MongoClient mc =
-        Mongos.resolveClient("mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1");
+    MongoClient mc = Mongos.resolveClient(murl);
     MongoDatabase md = mc.getDatabase("anncy");
     MongoTemplate mt = new MongoTemplate(md);
     MapPojo pojo = new MapPojo();
@@ -96,9 +116,26 @@ public class MongoTemplateTest extends TestCase {
   }
 
   @Test
+  public void testSaveMany() {
+    List<Map<Object, Object>> list = new ArrayList<>();
+    IntStream.range(0, 100).mapToObj(i -> mapOf("id", i, "name", "name-" + i, "entry",
+        mapOf("key", "key-" + i, "value", "value-" + i))).forEach(list::add);
+    MongoClient mc = Mongos.resolveClient(murl);
+    MongoDatabase md = mc.getDatabase("anncy");
+    MongoTemplate mt = new MongoTemplate(md);
+    mt.saveMany("save-many-test", list);
+    list.forEach(e -> {
+      if (getMapInteger(e, "id") < 30) {
+        getMapMap(e, "entry").put("uuid",
+            getMapString(e, "id") + "-" + UUID.randomUUID().toString());
+      }
+    });
+    mt.saveMany("save-many-test", list);
+  }
+
+  @Test
   public void testTyped() {
-    MongoClient mc =
-        Mongos.resolveClient("mongodb://**:******@localhost:27017/?authMechanism=SCRAM-SHA-1");
+    MongoClient mc = Mongos.resolveClient(murl);
     MongoDatabase md = mc.getDatabase("anncy");
     MongoTemplate mt = new MongoTemplate(md);
     CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
@@ -108,12 +145,30 @@ public class MongoTemplateTest extends TestCase {
     Monolight myMonolight = new Monolight();
     myMonolight.setPowerStatus(PowerStatus.ON);
     myMonolight.setColorTemperature(5200);
-    InsertOneResult ir = mt.doInsert("typed", myMonolight, codecRegistry, null);
+    InsertOneResult ir = mt.executeInsert("typed", myMonolight, codecRegistry, null);
     BsonDocument document = new BsonDocument();
     document.put("_id", ir.getInsertedId());
     Monolight reMonolight = mt.query().collectionName("typed").filter(document)
         .codecRegistry(codecRegistry).findOne(Monolight.class);
     assertEquals(myMonolight, reMonolight);
+  }
+
+  @Test
+  public void testUpdate() {
+    MongoTemplate mt = new MongoTemplate(Mongos.resolveClient(murl).getDatabase("anncy"));
+    mt.update("save-many-test", mapOf("_id", 10),
+        mapOf("$set", mapOf("entry.bingo", "12312312321")));
+    mt.update("save-many-test", mapOf("_id", 10),
+        listOf(mapOf("$set", mapOf("entry.bingo0", "ewrwer")),
+            mapOf("$set", mapOf("entry.bingo1", "12312312321")),
+            mapOf("$set", mapOf("entry.bingo2", "12312312321"))));
+
+    mt.updateMany("save-many-test", mapOf("_id", mapOf("$gt", 80)),
+        mapOf("$set", mapOf("entry.bingom", "12312312321")));
+    mt.updateMany("save-many-test", mapOf("_id", mapOf("$lt", 15)),
+        listOf(mapOf("$set", mapOf("entry.bingom0", "ewrwer")),
+            mapOf("$set", mapOf("entry.bingom1", "12312312321")),
+            mapOf("$set", mapOf("entry.bingom2", "12312312321"))));
   }
 
   static class MapEntry {
@@ -218,6 +273,15 @@ public class MongoTemplateTest extends TestCase {
         Pair.of("hoho", Pair.of(new MapEntry(), new MapEntry()));
 
     MapPojo() {
+      try {
+        urlValue = new URL("http://www.corant.org");
+        uriValue = urlValue.toURI();
+      } catch (Exception e) {
+      }
+    }
+
+    MapPojo(long id) {
+      this.id = id;
       try {
         urlValue = new URL("http://www.corant.org");
         uriValue = urlValue.toURI();

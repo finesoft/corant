@@ -13,8 +13,9 @@
  */
 package org.corant.shared.resource;
 
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
@@ -37,20 +39,33 @@ import org.corant.shared.util.FileUtils;
  * @author bingo 下午4:06:15
  */
 public class URLResource implements Resource {
+
   protected final SourceType sourceType;
+
   protected final URL url;
 
+  protected final Map<String, Object> metadata;
+
   public URLResource(String url) throws MalformedURLException {
-    this(new URL(url), SourceType.URL);
+    this(url, null);
+  }
+
+  public URLResource(String url, Map<String, Object> metadata) throws MalformedURLException {
+    this(new URL(url), SourceType.URL, metadata);
   }
 
   public URLResource(URL url) {
-    this(url, SourceType.URL);
+    this(url, null);
   }
 
-  URLResource(URL url, SourceType sourceType) {
+  public URLResource(URL url, Map<String, Object> metadata) {
+    this(url, SourceType.URL, metadata);
+  }
+
+  protected URLResource(URL url, SourceType sourceType, Map<String, Object> metadata) {
     this.url = shouldNotNull(url);
     this.sourceType = shouldNotNull(sourceType);
+    this.metadata = metadata == null ? null : unmodifiableMap(metadata);
   }
 
   @Override
@@ -75,8 +90,7 @@ public class URLResource implements Resource {
 
   @Override
   public Map<String, Object> getMetadata() {
-    return immutableMapOf(META_NAME, getName(), META_SOURCE_TYPE,
-        sourceType == null ? null : sourceType.name());
+    return defaultObject(metadata, Collections::emptyMap);
   }
 
   @Override

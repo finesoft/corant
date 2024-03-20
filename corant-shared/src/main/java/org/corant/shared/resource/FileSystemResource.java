@@ -13,8 +13,9 @@
  */
 package org.corant.shared.resource;
 
+import static java.util.Collections.emptyMap;
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import static org.corant.shared.util.Maps.immutableMapOf;
+import static org.corant.shared.util.Maps.linkedHashMapOf;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +43,11 @@ public class FileSystemResource extends URLResource implements WritableResource 
   protected final File file;
 
   public FileSystemResource(File file) {
-    super(getFileUrl(file), SourceType.FILE_SYSTEM);
+    this(file, null);
+  }
+
+  public FileSystemResource(File file, Map<String, Object> metadata) {
+    super(getFileUrl(file), SourceType.FILE_SYSTEM, metadata);
     this.file = shouldNotNull(file);
   }
 
@@ -54,8 +59,18 @@ public class FileSystemResource extends URLResource implements WritableResource 
     this(new File(shouldNotNull(path)));
   }
 
+  public FileSystemResource(String path, Map<String, Object> metadata) {
+    this(new File(shouldNotNull(path)), metadata);
+  }
+
   public FileSystemResource(URL url) {
     this(shouldNotNull(url).getFile());
+  }
+
+  public static Map<String, Object> metadataOf(File file) {
+    return linkedHashMapOf(META_SOURCE_TYPE, SourceType.FILE_SYSTEM.name(), META_NAME,
+        file.getName(), META_LAST_MODIFIED, file.lastModified(), META_CONTENT_LENGTH, file.length(),
+        META_CONTENT_TYPE, FileUtils.getContentType(file.getAbsolutePath()));
   }
 
   private static URL getFileUrl(File file) {
@@ -94,21 +109,26 @@ public class FileSystemResource extends URLResource implements WritableResource 
     return file;
   }
 
+  public String getFileContentType() {
+    return FileUtils.getContentType(getLocation());
+  }
+
   @Override
   public String getLocation() {
     return file.getAbsolutePath();
   }
 
   @Override
-  public Map<String, Object> getMetadata() {
-    return immutableMapOf(META_SOURCE_TYPE, SourceType.FILE_SYSTEM.name(), META_NAME, getName(),
-        META_LAST_MODIFIED, file.lastModified(), META_CONTENT_LENGTH, file.length(),
-        META_CONTENT_TYPE, FileUtils.getContentType(getLocation()));
-  }
-
-  @Override
   public String getName() {
     return file.getName();
+  }
+
+  public Map<String, String> getUserDefinedAttributes() {
+    try {
+      return FileUtils.getUserDefinedAttributes(file.toPath());
+    } catch (IOException e) {
+      return emptyMap();
+    }
   }
 
   @Override

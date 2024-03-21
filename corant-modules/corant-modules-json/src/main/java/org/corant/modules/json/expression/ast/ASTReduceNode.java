@@ -16,7 +16,7 @@ package org.corant.modules.json.expression.ast;
 import java.util.Arrays;
 import java.util.function.BinaryOperator;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.SubEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 import org.corant.shared.exception.NotSupportedException;
@@ -39,7 +39,7 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
   public Object getValue(EvaluationContext ctx) {
     Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
-    final BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
 
     if (children.size() == 3) {
       // only accumulator;

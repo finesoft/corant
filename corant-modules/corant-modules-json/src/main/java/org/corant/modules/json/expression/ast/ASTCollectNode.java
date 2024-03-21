@@ -16,7 +16,7 @@ package org.corant.modules.json.expression.ast;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.SubEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 import org.corant.shared.util.Functions;
@@ -39,7 +39,7 @@ public class ASTCollectNode extends AbstractASTNode<Object> {
 
     Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
-    final BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
 
     // supplier & accumulator & combiner(fake)
     Node<?> supplierNode = children.get(1);

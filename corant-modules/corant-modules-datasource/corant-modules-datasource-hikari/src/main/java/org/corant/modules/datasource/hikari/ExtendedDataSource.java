@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.datasource.shared.WrappedConnection;
+import org.corant.modules.jta.narayana.NarayanaLocalXAResource;
 import org.corant.modules.jta.shared.TransactionAwareness;
 import org.corant.modules.jta.shared.TransactionAwareness.LocalXATransactionAwareness;
 import org.corant.modules.jta.shared.TransactionIntegrator;
@@ -64,7 +65,7 @@ public class ExtendedDataSource implements DataSource, Closeable {
     }
     Connection connection = wrapConnection(delegate.getConnection());
     awareness = new LocalXATransactionAwareness(connection, true);
-    transactionIntegrator.associate(awareness, null);
+    transactionIntegrator.associate(awareness, NarayanaLocalXAResource::new);
     return (Connection) awareness.getConnection();
   }
 
@@ -72,7 +73,7 @@ public class ExtendedDataSource implements DataSource, Closeable {
   public Connection getConnection(String username, String password) throws SQLException {
     Connection connection = wrapConnection(delegate.getConnection(username, password));
     TransactionAwareness awareness = new LocalXATransactionAwareness(connection, true);
-    transactionIntegrator.associate(awareness, null);
+    transactionIntegrator.associate(awareness, NarayanaLocalXAResource::new);
     return (Connection) awareness.getConnection();
   }
 

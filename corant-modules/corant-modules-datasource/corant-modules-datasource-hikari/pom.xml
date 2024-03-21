@@ -15,6 +15,10 @@
       <artifactId>corant-modules-datasource-shared</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-modules-jta-narayana</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
     </dependency>

@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.SubEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 import org.corant.shared.util.Streams;
@@ -39,7 +39,7 @@ public class ASTSortNode extends AbstractASTNode<Object> {
   public Object getValue(EvaluationContext ctx) {
     Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
-    final BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
 
     Node<?> sortableNamesNode = children.get(1);
     Node<?> sorterNode = children.get(2);

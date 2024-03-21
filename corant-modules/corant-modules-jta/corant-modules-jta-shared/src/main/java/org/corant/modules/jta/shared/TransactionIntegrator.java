@@ -23,12 +23,13 @@ import static javax.transaction.xa.XAException.XAER_RMERR;
 import static javax.transaction.xa.XAException.XA_RBROLLBACK;
 import java.sql.SQLException;
 import java.util.UUID;
-import jakarta.transaction.Transaction;
-import jakarta.transaction.TransactionManager;
-import jakarta.transaction.TransactionSynchronizationRegistry;
+import java.util.function.Function;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 
 /**
  * corant-modules-jta-shared
@@ -49,7 +50,8 @@ public interface TransactionIntegrator {
     return xaException;
   }
 
-  void associate(TransactionAwareness transactionAware, XAResource xaResource) throws SQLException;
+  void associate(TransactionAwareness transactionAware,
+      Function<TransactionAwareness, XAResource> xaResourceResolver) throws SQLException;
 
   boolean disassociate(TransactionAwareness transactionAware) throws SQLException;
 
@@ -183,8 +185,8 @@ public interface TransactionIntegrator {
     }
 
     @Override
-    public void associate(TransactionAwareness transactionAwareness, XAResource xaResource)
-        throws SQLException {
+    public void associate(TransactionAwareness transactionAwareness,
+        Function<TransactionAwareness, XAResource> xaResourceResolver) throws SQLException {
       try {
         if (isTransactionRunning()) {
           if (transactionSynchronizationRegistry.getResource(key) == null) {
@@ -197,7 +199,7 @@ public interface TransactionIntegrator {
                   }
                 }));
             transactionSynchronizationRegistry.putResource(key, transactionAwareness);
-            XAResource xaResourceToEnlist = resolveXAResource(transactionAwareness, xaResource);
+            XAResource xaResourceToEnlist = xaResourceResolver.apply(transactionAwareness);
             transactionManager.getTransaction().enlistResource(xaResourceToEnlist);
           } else {
             transactionAwareness.transactionStart();
@@ -237,11 +239,6 @@ public interface TransactionIntegrator {
       } catch (Exception e) {
         throw new SQLException("Exception in retrieving existing transaction", e);
       }
-    }
-
-    protected XAResource resolveXAResource(TransactionAwareness transactionAwareness,
-        XAResource xaResource) {
-      return xaResource == null ? new LocalXAResource(transactionAwareness) : xaResource;
     }
 
   }

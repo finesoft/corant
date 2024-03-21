@@ -17,7 +17,7 @@ import static org.corant.shared.util.Streams.streamOf;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.SubEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
@@ -41,7 +41,7 @@ public class ASTFilterNode extends AbstractASTNode<Object> {
     Object input = inputNode.getValue(ctx);
     String varName = ASTNode.variableNamesOf(inputElementVarNameNode, ctx)[0];
 
-    BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+    SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
     if (input instanceof Object[] array) {
       return Arrays.stream(array)
           .filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo))).toArray();

@@ -42,16 +42,16 @@ public interface EvaluationContext extends Sortable {
    *
    * @author bingo 16:40:44
    */
-  class BindableEvaluationContext implements EvaluationContext {
+  class SubEvaluationContext implements EvaluationContext {
 
     protected final EvaluationContext original;
     protected final Map<String, Object> bindings = new LinkedHashMap<>();
 
-    public BindableEvaluationContext(EvaluationContext original) {
+    public SubEvaluationContext(EvaluationContext original) {
       this.original = original;
     }
 
-    public BindableEvaluationContext bind(String name, Object value) {
+    public SubEvaluationContext bind(String name, Object value) {
       bindings.put(name, value);
       return this;
     }
@@ -83,12 +83,12 @@ public interface EvaluationContext extends Sortable {
       return original.resolveVariableValue(node);
     }
 
-    public BindableEvaluationContext unbind(String name) {
+    public SubEvaluationContext unbind(String name) {
       bindings.remove(name);
       return this;
     }
 
-    public BindableEvaluationContext unbindAll() {
+    public SubEvaluationContext unbindAll() {
       bindings.clear();
       return this;
     }
@@ -101,7 +101,14 @@ public interface EvaluationContext extends Sortable {
    */
   class DefaultEvaluationContext implements EvaluationContext {
 
-    final Map<String, Object> variables;
+    protected final Map<String, Object> variables;
+
+    public DefaultEvaluationContext(Map<String, Object> variables) {
+      this.variables = new LinkedHashMap<>();
+      if (variables != null) {
+        this.variables.putAll(variables);
+      }
+    }
 
     public DefaultEvaluationContext(Object... objects) {
       variables = mapOf(objects);

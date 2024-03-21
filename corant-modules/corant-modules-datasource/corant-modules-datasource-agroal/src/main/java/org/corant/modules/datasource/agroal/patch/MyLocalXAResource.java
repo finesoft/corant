@@ -20,6 +20,7 @@ import static javax.transaction.xa.XAException.XA_RBROLLBACK;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import org.jboss.tm.LastResource;
 import org.jboss.tm.XAResourceWrapper;
 import io.agroal.api.transaction.TransactionAware;
 import io.agroal.pool.ConnectionHandler;
@@ -34,7 +35,7 @@ import io.agroal.pool.ConnectionHandler;
  *
  * @author bingo 下午4:13:35
  */
-public class MyLocalXAResource implements XAResourceWrapper {
+public class MyLocalXAResource implements XAResourceWrapper, LastResource {
 
   private static final String PRODUCT_NAME =
       MyLocalXAResource.class.getPackage().getImplementationTitle();

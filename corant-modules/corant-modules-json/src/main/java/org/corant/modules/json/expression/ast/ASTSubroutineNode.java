@@ -16,7 +16,7 @@ package org.corant.modules.json.expression.ast;
 import static org.corant.shared.util.Lists.subList;
 import java.util.List;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.EvaluationContext.BindableEvaluationContext;
+import org.corant.modules.json.expression.EvaluationContext.SubEvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
@@ -44,7 +44,7 @@ public class ASTSubroutineNode extends AbstractASTNode<Object> {
     }
     if (varName != null) {
       final List<ASTNode<?>> outputNodes = subList(children, 1, children.size());
-      BindableEvaluationContext useCtx = new BindableEvaluationContext(ctx);
+      SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
       Object val = null;
       for (ASTNode<?> outputNode : outputNodes) {
         val = outputNode.getValue(useCtx.bind(varName, val));

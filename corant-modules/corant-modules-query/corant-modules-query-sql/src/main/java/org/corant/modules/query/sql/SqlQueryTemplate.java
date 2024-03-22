@@ -18,6 +18,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asStrings;
@@ -65,6 +66,7 @@ import org.corant.shared.conversion.Converters;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
+import org.corant.shared.retry.RetryListener;
 import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
 import org.corant.shared.retry.RetryStrategy.ThrowableClassifierRetryStrategy;
 import org.corant.shared.retry.Retryer;
@@ -403,7 +405,7 @@ public class SqlQueryTemplate {
             ? new StatementConfiguration(null, limit, null, null, (Duration) null)
             : config.statementConfig;
         return new StreamableQueryRunner(sf, config.resultSetConfig).streamQuery(
-            dataSource.getConnection(), true, ps.key(), mapHandler, config.terminater,
+            dataSource.getConnection(), true, ps.key(), mapHandler, config.terminator,
             config.autoClose, ps.value());
       } catch (SQLException e) {
         throw new CorantRuntimeException(e);
@@ -495,7 +497,7 @@ public class SqlQueryTemplate {
 
     protected BackoffStrategy retryBackoffStrategy = new FixedBackoffStrategy(one_second);
 
-    protected BiPredicate<Integer, Object> terminater;
+    protected BiPredicate<Integer, Object> terminator;
 
     protected BiFunction<Map<String, Object>, Object[], Integer> ordinaryParameterReviser;
 
@@ -509,9 +511,15 @@ public class SqlQueryTemplate {
 
     protected ResultSetConfiguration resultSetConfig;
 
+    protected List<RetryListener> retryListeners;
+
     public StreamConfig autoClose(boolean autoClose) {
       this.autoClose = autoClose;
       return this;
+    }
+
+    public List<RetryListener> getRetryListeners() {
+      return retryListeners;
     }
 
     public boolean isAutoClose() {
@@ -602,6 +610,23 @@ public class SqlQueryTemplate {
       return this;
     }
 
+    public StreamConfig retryListeners(List<RetryListener> retryListeners) {
+      if (this.retryListeners != null) {
+        this.retryListeners.clear();
+      } else {
+        this.retryListeners = new ArrayList<>();
+      }
+      if (retryListeners != null) {
+        this.retryListeners.addAll(retryListeners);
+      }
+      return this;
+    }
+
+    public StreamConfig retryListeners(RetryListener... retryListeners) {
+      this.retryListeners = listOf(retryListeners);
+      return this;
+    }
+
     /**
      * Set up a retry time for query retrying. If the given retry times <=0 means that don't retry
      * during the query exception occurred.
@@ -637,20 +662,20 @@ public class SqlQueryTemplate {
     }
 
     public boolean terminateIf(Integer counter, Map<String, Object> current) {
-      return terminater != null && !terminater.test(counter, current);
+      return terminator != null && !terminator.test(counter, current);
     }
 
     /**
      * Set the interruption condition of a streaming query. When the condition is met, the output
-     * will be interrupted. The first parameter of the given {@code terminater} is the number of
+     * will be interrupted. The first parameter of the given {@code terminator} is the number of
      * result set records that have been output, and the second parameter is the last record of the
      * result set of the current batch query, user can use those parameters to decide whether to
      * interrupt the stream.
      *
-     * @param terminater the termination predicate
+     * @param terminator the termination predicate
      */
-    public StreamConfig terminater(BiPredicate<Integer, Object> terminater) {
-      this.terminater = terminater;
+    public StreamConfig terminator(BiPredicate<Integer, Object> terminator) {
+      this.terminator = terminator;
       return this;
     }
   }
@@ -672,13 +697,12 @@ public class SqlQueryTemplate {
     ForwardIterator(SqlQueryTemplate tpl, StreamConfig config) {
       this.tpl = tpl;
       this.config = config;
-      retryer =
-          config.retryTimes > 0
-              ? Retry.synchronousRetryer()
-                  .retryStrategy(new MaxAttemptsRetryStrategy(config.retryTimes + 1)
-                      .and(new ThrowableClassifierRetryStrategy().abortOn(config.stopOn)))
-                  .backoffStrategy(config.retryBackoffStrategy)
-              : null;
+      retryer = config.retryTimes > 0
+          ? Retry.synchronousRetryer()
+              .retryStrategy(new MaxAttemptsRetryStrategy(config.retryTimes + 1)
+                  .and(new ThrowableClassifierRetryStrategy().abortOn(config.stopOn)))
+              .backoffStrategy(config.retryBackoffStrategy).retryListeners(config.retryListeners)
+          : null;
     }
 
     @Override

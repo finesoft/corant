@@ -210,6 +210,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
           return Retry.synchronousRetryer()
               .retryStrategy(new MaxAttemptsRetryStrategy(parameter.getRetryTimes() + 1))
               .backoffStrategy(parameter.getRetryBackoffStrategy())
+              .retryListeners(parameter.getRetryListeners())
               .retryPrecondition(c -> Corant.current() != null && Corant.current().isRunning())
               .execute(() -> forward(queryName, parameter));
         } else {

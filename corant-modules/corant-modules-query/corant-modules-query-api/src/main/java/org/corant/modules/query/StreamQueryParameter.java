@@ -13,15 +13,19 @@
  */
 package org.corant.modules.query;
 
+import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
+import org.corant.shared.retry.RetryListener;
 
 /**
  * corant-modules-query-api
@@ -50,6 +54,8 @@ public class StreamQueryParameter extends DefaultQueryParameter {
 
   protected boolean autoClose = false;
 
+  protected List<RetryListener> retryListeners;
+
   public StreamQueryParameter() {}
 
   public StreamQueryParameter(QueryParameter other) {
@@ -59,7 +65,8 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   public StreamQueryParameter(StreamQueryParameter other) {
     super(other);
     enhancer(other.enhancer).retryBackoffStrategy(other.retryBackoffStrategy)
-        .retryTimes(other.retryTimes).terminator(other.terminator).autoClose(other.autoClose);
+        .retryTimes(other.retryTimes).retryListeners(other.retryListeners)
+        .terminator(other.terminator).autoClose(other.autoClose);
   }
 
   public StreamQueryParameter autoClose(boolean autoClose) {
@@ -113,6 +120,10 @@ public class StreamQueryParameter extends DefaultQueryParameter {
    */
   public BackoffStrategy getRetryBackoffStrategy() {
     return retryBackoffStrategy;
+  }
+
+  public List<RetryListener> getRetryListeners() {
+    return retryListeners;
   }
 
   /**
@@ -175,6 +186,23 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   public StreamQueryParameter retryBackoffStrategy(BackoffStrategy retryBackoffStrategy) {
     this.retryBackoffStrategy =
         defaultObject(retryBackoffStrategy, () -> new FixedBackoffStrategy(Duration.ofSeconds(2L)));
+    return this;
+  }
+
+  public StreamQueryParameter retryListeners(List<RetryListener> retryListeners) {
+    if (this.retryListeners != null) {
+      this.retryListeners.clear();
+    } else {
+      this.retryListeners = new ArrayList<>();
+    }
+    if (retryListeners != null) {
+      this.retryListeners.addAll(retryListeners);
+    }
+    return this;
+  }
+
+  public StreamQueryParameter retryListeners(RetryListener... retryListeners) {
+    this.retryListeners = listOf(retryListeners);
     return this;
   }
 

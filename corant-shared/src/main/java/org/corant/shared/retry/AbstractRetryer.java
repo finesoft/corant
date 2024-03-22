@@ -92,6 +92,15 @@ public abstract class AbstractRetryer<R extends AbstractRetryer<R>> implements R
   }
 
   @SuppressWarnings("unchecked")
+  public R retryListeners(Collection<RetryListener> retryListeners) {
+    this.retryListeners.clear();
+    if (retryListeners != null) {
+      this.retryListeners.addAll(retryListeners);
+    }
+    return (R) this;
+  }
+
+  @SuppressWarnings("unchecked")
   public R retryPrecondition(RetryPrecondition retryPrecondition) {
     if (retryPrecondition != null) {
       this.retryPrecondition = retryPrecondition;

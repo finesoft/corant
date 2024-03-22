@@ -135,8 +135,18 @@ public class JsonExpressionTest extends TestCase {
         mapOf("@list", mapOf("(e)", mapOf("$gt", new Object[] {"@e.id", 1}))));
     System.out.println(Jsons.toString(exp, true));
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
-    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    Object result = null;
+    DefaultEvaluationContext ctx = new DefaultEvaluationContext("list", list);
+    for (int i = 0; i < 1000; i++) {
+      result = eval.getValue(ctx);
+    }
+    long t1 = System.currentTimeMillis();
+    ctx = new DefaultEvaluationContext("list", list);
+    for (int i = 0; i < 100000; i++) {
+      result = eval.getValue(ctx);
+    }
     System.out.println(Jsons.toString(result, true));
+    System.out.println(System.currentTimeMillis() - t1);
   }
 
   @Test
@@ -242,15 +252,36 @@ public class JsonExpressionTest extends TestCase {
 
     Object mapper = linkedHashMapOf("$map",
         mapOf("@list", mapOf("(e)", mapOf("#Map:get", new Object[] {"@e", "name"}))));
-    Map<String, Object> exp =
-        linkedHashMapOf("$reduce", new Object[] {mapper, mapOf("#StringBuffer::new", new Object[0]),
-            mapOf("(e,r)", mapOf("#StringBuffer:append", new Object[] {"@e", "@r"}))});
+    Map<String, Object> exp = linkedHashMapOf("$reduce",
+        new Object[] {mapper, mapOf("#StringBuilder::new", new Object[0]),
+            mapOf("(e,r)", mapOf("#StringBuilder:append", new Object[] {"@e", "@r"}))});
 
     System.out.println(Jsons.toString(exp, true));
+    System.out.println("=".repeat(100));
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
-    Object result = eval.getValue(new DefaultEvaluationContext("list", list));
+    Object result = null;
+    EvaluationContext ctx = new DefaultEvaluationContext("list", list);
+    for (int i = 0; i < 1000; i++) {
+      result = eval.getValue(ctx);
+    }
+    long t1 = System.currentTimeMillis();
+    for (int i = 0; i < 100000; i++) {
+      result = eval.getValue(ctx);
+    }
     System.out.println(Jsons.toString(result, true));
-
+    System.out.println(System.currentTimeMillis() - t1);
+    System.out.println("=".repeat(100));
+    for (int i = 0; i < 1000; i++) {
+      result = list.stream().map(e -> e.get("name").toString())
+          .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+    }
+    t1 = System.currentTimeMillis();
+    for (int i = 0; i < 100000; i++) {
+      result = list.stream().map(e -> e.get("name").toString())
+          .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+    }
+    System.out.println(Jsons.toString(result, true));
+    System.out.println(System.currentTimeMillis() - t1);
   }
 
   @Test

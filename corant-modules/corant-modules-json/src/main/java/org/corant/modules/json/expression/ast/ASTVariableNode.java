@@ -13,8 +13,11 @@
  */
 package org.corant.modules.json.expression.ast;
 
+import static org.corant.shared.normal.Names.splitNameSpace;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.strip;
+import java.util.Arrays;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
 
@@ -27,18 +30,31 @@ public interface ASTVariableNode extends ASTNode<Object> {
 
   String getName();
 
+  default String[] getNamespace() {
+    String[] array = splitNameSpace(getName(), true, false);
+    return Arrays.copyOf(array, array.length);
+  }
+
   class ASTDefaultVariableNode implements ASTVariableNode {
 
     protected ASTNode<?> parent;
     protected final String name;
+    protected final String[] namespace;
 
     public ASTDefaultVariableNode(String name) {
       this.name = shouldNotBlank(strip(name));
+      namespace = splitNameSpace(this.name, true, false);
+      shouldBeTrue(namespace.length > 0);
     }
 
     @Override
     public String getName() {
       return name;
+    }
+
+    @Override
+    public String[] getNamespace() {
+      return Arrays.copyOf(namespace, namespace.length);
     }
 
     @Override

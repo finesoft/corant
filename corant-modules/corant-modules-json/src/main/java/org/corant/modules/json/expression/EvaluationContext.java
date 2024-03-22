@@ -13,11 +13,11 @@
  */
 package org.corant.modules.json.expression;
 
-import static org.corant.shared.normal.Names.splitNameSpace;
 import static org.corant.shared.util.Maps.getMapKeyPathValue;
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.corant.modules.json.ObjectMappers;
@@ -36,6 +36,44 @@ public interface EvaluationContext extends Sortable {
   Function<Object[], Object> resolveFunction(Node<?> node);
 
   Object resolveVariableValue(Node<?> node);
+
+  /**
+   * corant-modules-json
+   *
+   * @author bingo 16:58:46
+   */
+  class DefaultEvaluationContext implements EvaluationContext {
+
+    protected final Map<String, Object> variables;
+    protected final List<FunctionResolver> functionResolvers;
+
+    public DefaultEvaluationContext(Map<String, Object> variables) {
+      this.variables = new LinkedHashMap<>();
+      if (variables != null) {
+        this.variables.putAll(variables);
+      }
+      functionResolvers = SimpleParser.resolveFunction().toList();
+    }
+
+    public DefaultEvaluationContext(Object... objects) {
+      this(mapOf(objects));
+    }
+
+    @Override
+    public Function<Object[], Object> resolveFunction(Node<?> node) {
+      ASTFunctionNode funcNode = (ASTFunctionNode) node;
+      return functionResolvers.stream().filter(fr -> fr.supports(funcNode.getName()))
+          .min(Sortable::compare).orElseThrow(NotSupportedException::new)
+          .resolve(funcNode.getName());
+    }
+
+    @Override
+    public Object resolveVariableValue(Node<?> node) {
+      ASTVariableNode varNode = (ASTVariableNode) node;
+      return variables.get(varNode.getName());
+    }
+
+  }
 
   /**
    * corant-modules-json
@@ -64,17 +102,17 @@ public interface EvaluationContext extends Sortable {
     @Override
     public Object resolveVariableValue(Node<?> node) {
       if (node instanceof ASTVariableNode varNode) {
-        String[] varNamePath = splitNameSpace(varNode.getName(), true, false);
-        if (bindings.containsKey(varNamePath[0])) {
-          Object boundValue = bindings.get(varNamePath[0]);
-          if (varNamePath.length == 1) {
+        String[] varNamespace = varNode.getNamespace();
+        if (bindings.containsKey(varNamespace[0])) {
+          Object boundValue = bindings.get(varNamespace[0]);
+          if (varNamespace.length == 1) {
             return boundValue;
-          } else if (boundValue instanceof Map boundMap) {
+          } else if (boundValue instanceof Map<?, ?> boundMap) {
             return getMapKeyPathValue(boundMap,
-                Arrays.copyOfRange(varNamePath, 1, varNamePath.length), false);
+                Arrays.copyOfRange(varNamespace, 1, varNamespace.length), false);
           } else if (boundValue != null) {
             return getMapKeyPathValue(ObjectMappers.toMap(boundValue),
-                Arrays.copyOfRange(varNamePath, 1, varNamePath.length), false);
+                Arrays.copyOfRange(varNamespace, 1, varNamespace.length), false);
           } else {
             return null;
           }
@@ -92,41 +130,5 @@ public interface EvaluationContext extends Sortable {
       bindings.clear();
       return this;
     }
-  }
-
-  /**
-   * corant-modules-json
-   *
-   * @author bingo 16:58:46
-   */
-  class DefaultEvaluationContext implements EvaluationContext {
-
-    protected final Map<String, Object> variables;
-
-    public DefaultEvaluationContext(Map<String, Object> variables) {
-      this.variables = new LinkedHashMap<>();
-      if (variables != null) {
-        this.variables.putAll(variables);
-      }
-    }
-
-    public DefaultEvaluationContext(Object... objects) {
-      variables = mapOf(objects);
-    }
-
-    @Override
-    public Function<Object[], Object> resolveFunction(Node<?> node) {
-      ASTFunctionNode funcNode = (ASTFunctionNode) node;
-      return SimpleParser.resolveFunction().filter(fr -> fr.supports(funcNode.getName()))
-          .min(Sortable::compare).orElseThrow(NotSupportedException::new)
-          .resolve(funcNode.getName());
-    }
-
-    @Override
-    public Object resolveVariableValue(Node<?> node) {
-      ASTVariableNode varNode = (ASTVariableNode) node;
-      return variables.get(varNode.getName());
-    }
-
   }
 }

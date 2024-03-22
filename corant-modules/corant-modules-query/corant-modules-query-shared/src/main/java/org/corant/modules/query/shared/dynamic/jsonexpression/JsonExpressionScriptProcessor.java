@@ -63,10 +63,8 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.ScriptProcessor.AbstractScriptProcessor;
 import org.corant.modules.query.shared.cdi.QueryExtension;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.corant.shared.util.Strings;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -86,16 +84,6 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
   public static final String PROJECTION_RENAME_KEY = "rename";
   public static final String PROJECTION_TYPE_KEY = "type";
   public static final String EVAL_KEY = "eval";
-
-  public static final String PARENT_RESULT_VAR_PREFIX =
-      RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
-  public static final int PARENT_RESULT_VAR_PREFIX_LEN = PARENT_RESULT_VAR_PREFIX.length();
-  public static final String FETCH_RESULT_VAR_PREFIX =
-      FETCHED_RESULT_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
-  public static final int FETCH_RESULT_VAR_PREFIX_LEN = FETCH_RESULT_VAR_PREFIX.length();
-  public static final String PARAMETER_VAR_PREFIX =
-      PARAMETER_FUNC_PARAMETER_NAME + Names.NAME_SPACE_SEPARATORS;
-  public static final int PARAMETER_VAR_PREFIX_LEN = PARAMETER_VAR_PREFIX.length();
 
   protected static final Logger logger =
       Logger.getLogger(JsonExpressionScriptProcessor.class.getCanonicalName());
@@ -176,7 +164,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     return p -> {
       Map<Object, Object> r = (Map<Object, Object>) p.result;
       MyEvaluationContext evalCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
-      return ast.getValue(evalCtx.linkParentResult(r));
+      return ast.getValue(evalCtx.bindParentResult(r));
     };
   }
 
@@ -196,14 +184,14 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     MyEvaluationContext injectCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
     for (Map<Object, Object> r : parentResults) {
       // filter the fetched results which can be used for injecting
-      injectCtx.detachAllResults().linkParentResult(r);
+      injectCtx.unbindAllResults().bindParentResult(r);
       List<Map<Object, Object>> injectResults;
       if (filter == null) {
         injectResults = fetchResults;
       } else {
         injectResults = new ArrayList<>();
         for (Map<Object, Object> fr : fetchResults) {
-          if (filter.getValue(injectCtx.linkFetchResult(fr))) {
+          if (filter.getValue(injectCtx.bindFetchResult(fr))) {
             injectResults.add(fr);
           }
         }
@@ -361,7 +349,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     @Override
     public List<Object> apply(List<Map<Object, Object>> fetchResults,
         MyEvaluationContext injectionCtx, QueryObjectMapper mapper) {
-      Object result = eval.getValue(injectionCtx.linkFetchResults(fetchResults));
+      Object result = eval.getValue(injectionCtx.bindFetchResults(fetchResults));
       return (List<Object>) result;
     }
 
@@ -390,7 +378,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     public ASTNode<?> build(Object token) {
       ASTNode<?> node = ASTNodeBuilder.DFLT.build(token);
       if (node instanceof ASTVariableNode) {
-        return new MyASTVariableNode(((ASTVariableNode) node).getName());
+        return new MyASTVariableNode(((ASTVariableNode) node).getName(), node.getParent());
       }
       return node;
     }
@@ -409,22 +397,10 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
 
     protected final Object[] namePath;
 
-    MyASTVariableNode(String name) {
+    MyASTVariableNode(String name, Node<?> parent) {
       super(name);
-      if (name.startsWith(PARENT_RESULT_VAR_PREFIX)) {
-        namePath = splitNameSpace(name.substring(PARENT_RESULT_VAR_PREFIX_LEN), true, false);
-      } else if (name.startsWith(FETCH_RESULT_VAR_PREFIX)) {
-        namePath = splitNameSpace(name.substring(FETCH_RESULT_VAR_PREFIX_LEN), true, false);
-      } else if (name.startsWith(PARAMETER_VAR_PREFIX)) {
-        namePath = splitNameSpace(name.substring(PARAMETER_VAR_PREFIX_LEN), true, false);
-      } else {
-        String[] tmp = splitNameSpace(name, true, false);
-        if (tmp.length > 1) {
-          namePath = Arrays.copyOfRange(tmp, 1, tmp.length);
-        } else {
-          namePath = Strings.EMPTY_ARRAY;
-        }
-      }
+      setParent(parent);
+      namePath = Arrays.copyOfRange(namespace, 1, namespace.length);
     }
 
     Object[] getNamePath() {
@@ -472,13 +448,15 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     @Override
     public Object resolveVariableValue(Node<?> node) {
       MyASTVariableNode myNode = (MyASTVariableNode) node;
-      if (myNode.getName().startsWith(PARENT_RESULT_VAR_PREFIX)) {
+      String rootName = myNode.getNamespace()[0];
+      Object[] namePath = myNode.getNamePath();
+      if (RESULT_FUNC_PARAMETER_NAME.equals(rootName)) {
         // handle parent result variable: @r.[field name]
-        return objectMapper.getMappedValue(parentResult, myNode.getNamePath());
-      } else if (myNode.getName().startsWith(FETCH_RESULT_VAR_PREFIX)) {
+        return objectMapper.getMappedValue(parentResult, namePath);
+      } else if (FETCHED_RESULT_FUNC_PARAMETER_NAME.equals(rootName)) {
         // handle fetch result variable: @fr.[field name]
-        return objectMapper.getMappedValue(fetchResult, myNode.getNamePath());
-      } else if (FETCHED_RESULTS_FUNC_PARAMETER_NAME.equals(myNode.getName())) {
+        return objectMapper.getMappedValue(fetchResult, namePath);
+      } else if (FETCHED_RESULTS_FUNC_PARAMETER_NAME.equals(rootName)) {
         // handle fetch results variable: @frs
         return fetchResults;
       } else {
@@ -487,36 +465,36 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
           queryParameterMap = objectMapper.toObject(queryParameter, Map.class);
           queryParamMapResolved = true;
         }
-        return objectMapper.getMappedValue(queryParameterMap, myNode.getNamePath());
+        return objectMapper.getMappedValue(queryParameterMap, namePath);
       }
     }
 
-    protected MyEvaluationContext detachAllResults() {
-      parentResult = null;
-      fetchResult = null;
-      fetchResults = null;
-      return this;
-    }
-
-    protected MyEvaluationContext linkFetchResult(Map<Object, Object> fetchResult) {
+    protected MyEvaluationContext bindFetchResult(Map<Object, Object> fetchResult) {
       this.fetchResult = fetchResult;
       return this;
     }
 
-    protected MyEvaluationContext linkFetchResults(List<Map<Object, Object>> fetchResults) {
+    protected MyEvaluationContext bindFetchResults(List<Map<Object, Object>> fetchResults) {
       this.fetchResults = fetchResults;
       return this;
     }
 
-    protected MyEvaluationContext linkParentAndFetchResult(Map<Object, Object> parentResult,
+    protected MyEvaluationContext bindParentAndFetchResult(Map<Object, Object> parentResult,
         Map<Object, Object> fetchResult) {
       this.parentResult = parentResult;
       this.fetchResult = fetchResult;
       return this;
     }
 
-    protected MyEvaluationContext linkParentResult(Map<Object, Object> parentResult) {
+    protected MyEvaluationContext bindParentResult(Map<Object, Object> parentResult) {
       this.parentResult = parentResult;
+      return this;
+    }
+
+    protected MyEvaluationContext unbindAllResults() {
+      parentResult = null;
+      fetchResult = null;
+      fetchResults = null;
       return this;
     }
   }
@@ -624,7 +602,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       if (mapping.evalNode != null) {
         // handle complex evaluation if necessary
         extracted =
-            mapping.evalNode.getValue(evalCtx.linkFetchResult((Map<Object, Object>) fetchResult));
+            mapping.evalNode.getValue(evalCtx.bindFetchResult((Map<Object, Object>) fetchResult));
       } else {
         // extract the field value from fetched result
         extracted = mapper.getMappedValue(fetchResult, mapping.extractPath);

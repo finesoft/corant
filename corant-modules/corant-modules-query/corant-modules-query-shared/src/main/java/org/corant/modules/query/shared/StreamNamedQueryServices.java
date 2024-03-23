@@ -218,11 +218,11 @@ public class StreamNamedQueryServices {
    * false, interrupt the current stream. The parameter accepted by Predicate.test is the number of
    * query records that have been output.
    *
-   * @param terminater
+   * @param terminator
    * @return terminateByCounter
    */
-  public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminater) {
-    return terminater((c, o) -> terminater.test(c));
+  public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminator) {
+    return terminator((c, o) -> terminator.test(c));
   }
 
   /**
@@ -230,11 +230,11 @@ public class StreamNamedQueryServices {
    * false, interrupt the current stream. The parameter accepted by Predicate.test is the last
    * record of the query records that have been output.
    *
-   * @param terminater
+   * @param terminator
    * @return terminateByLastRecord
    */
-  public StreamNamedQueryServices terminateByLastRecord(Predicate<Object> terminater) {
-    return terminater((c, o) -> terminater.test(o));
+  public StreamNamedQueryServices terminateByLastRecord(Predicate<Object> terminator) {
+    return terminator((c, o) -> terminator.test(o));
   }
 
   /**
@@ -243,11 +243,10 @@ public class StreamNamedQueryServices {
    * last record of the query records that have been output and he number of query records that have
    * been output.
    *
-   * @param terminater
-   * @return terminater
+   * @param terminator
    */
-  public StreamNamedQueryServices terminater(BiPredicate<Integer, Object> terminater) {
-    parameter.terminator(terminater);
+  public StreamNamedQueryServices terminator(BiPredicate<Integer, Object> terminator) {
+    parameter.terminator(terminator);
     return this;
   }
 

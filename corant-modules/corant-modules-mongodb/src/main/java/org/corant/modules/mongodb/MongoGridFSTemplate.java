@@ -198,8 +198,8 @@ public class MongoGridFSTemplate {
    * @param id the GridFS id
    */
   public boolean exists(String bucketName, Object id) {
-    try (MongoCursor<GridFSFile> it =
-        getBucket(bucketName).find(Filters.eq(DOC_ID_FIELD_NAME, Mongos.bsonId(id))).iterator()) {
+    try (MongoCursor<GridFSFile> it = getBucket(bucketName)
+        .find(Filters.eq(DOC_ID_FIELD_NAME, Mongos.bsonId(id))).limit(1).iterator()) {
       return it.hasNext();
     }
   }
@@ -334,7 +334,9 @@ public class MongoGridFSTemplate {
       Map<String, Object> newMetadata) {
     return updateMetadata(bucketName, id, md -> {
       md.clear();
-      md.putAll(newMetadata);
+      if (newMetadata != null) {
+        md.putAll(newMetadata);
+      }
       return md;
     });
   }

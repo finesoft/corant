@@ -623,7 +623,7 @@ public class MongoTemplate {
    */
   public boolean exists(String collectionName, Object id) {
     try (MongoCursor<Document> it = obtainCollection(collectionName)
-        .find(Filters.eq(DOC_ID_FIELD_NAME, Mongos.bsonId(id))).iterator()) {
+        .find(Filters.eq(DOC_ID_FIELD_NAME, Mongos.bsonId(id))).limit(1).iterator()) {
       return it.hasNext();
     }
   }

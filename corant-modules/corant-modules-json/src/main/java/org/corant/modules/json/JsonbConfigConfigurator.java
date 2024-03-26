@@ -23,6 +23,6 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface JsonbConfigConfigurator extends Sortable {
 
-  void config(JsonbConfig jsonConfig);
+  void configure(JsonbConfig jsonConfig);
 
 }

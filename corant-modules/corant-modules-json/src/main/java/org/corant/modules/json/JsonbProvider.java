@@ -40,7 +40,7 @@ public class JsonbProvider {
   @Dependent
   protected JsonbConfig jsonbConfig(Instance<JsonbConfigConfigurator> configurators) {
     final JsonbConfig jsonbConfig = new JsonbConfig();
-    configurators.stream().sorted(Sortable::reverseCompare).forEach(cfr -> cfr.config(jsonbConfig));
+    configurators.stream().sorted(Sortable::reverseCompare).forEach(cfr -> cfr.configure(jsonbConfig));
     return jsonbConfig;
   }
 

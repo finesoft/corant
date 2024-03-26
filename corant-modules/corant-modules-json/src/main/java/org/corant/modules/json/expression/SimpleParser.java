@@ -56,6 +56,7 @@ public class SimpleParser {
     if (visitor.supports(root.getType())) {
       visitor.visit(root);
     }
+    root.postConstruct();
     return root;
   }
 
@@ -111,6 +112,7 @@ public class SimpleParser {
             if (visitor.supports(subNode.getType())) {
               visitor.visit(subNode);
             }
+            subNode.postConstruct();
           }
         } else {
           throw new NotSupportedException();
@@ -131,6 +133,7 @@ public class SimpleParser {
     } else {
       parent.addChild(node);
     }
+    node.postConstruct();
   }
 
 }

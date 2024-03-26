@@ -15,7 +15,6 @@ package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Strings.isNotBlank;
-import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTRegexNode;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -40,7 +39,6 @@ public interface ASTNodeVisitor extends Sortable {
       case CP_REGEX:
         shouldBeTrue(node.getChildren().size() == 2
             && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VAL);
-        ((ASTRegexNode) node).initialize();
         break;
       case CP_BTW:
       case CONDITIONAL:

@@ -29,6 +29,11 @@ import org.corant.shared.util.Streams;
  */
 public class ASTMinNode extends AbstractASTNode<Object> {
 
+  protected Node<?> inputNode;
+  protected ASTValueNode sortableNamesNode;
+  protected Node<?> sorterNode;
+  protected String[] sortableNames;
+
   @Override
   public ASTNodeType getType() {
     return ASTNodeType.MIN;
@@ -36,17 +41,10 @@ public class ASTMinNode extends AbstractASTNode<Object> {
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
     final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
-
-    Node<?> sortableNamesNode = children.get(1);
-    Node<?> sorterNode = children.get(2);
-
-    String[] sortableNames = ASTNode.variableNamesOf(sortableNamesNode, useCtx);
     final Comparator<Object> comparator = (t1, t2) -> toInteger(sorterNode
         .getValue(useCtx.unbindAll().bind(sortableNames[0], t1).bind(sortableNames[1], t2)));
-
     if (input instanceof Object[] array) {
       return Arrays.stream(array).min(comparator).orElse(null);
     } else if (input instanceof Iterable<?> itr) {
@@ -54,5 +52,14 @@ public class ASTMinNode extends AbstractASTNode<Object> {
     } else {
       return input;
     }
+  }
+
+  @Override
+  public void postConstruct() {
+    super.postConstruct();
+    inputNode = children.get(0);
+    sortableNamesNode = (ASTValueNode) children.get(1);
+    sorterNode = children.get(2);
+    sortableNames = ASTNode.parseVariableNames(sortableNamesNode.value.toString());
   }
 }

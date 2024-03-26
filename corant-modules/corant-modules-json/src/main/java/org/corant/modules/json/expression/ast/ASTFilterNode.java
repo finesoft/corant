@@ -28,6 +28,11 @@ import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
  */
 public class ASTFilterNode extends AbstractASTNode<Object> {
 
+  protected Node<?> inputNode;
+  protected ASTValueNode inputElementVarNameNode;
+  protected Node<?> filterNode;
+  protected String varName;
+
   @Override
   public ASTNodeType getType() {
     return ASTNodeType.FILTER;
@@ -35,13 +40,8 @@ public class ASTFilterNode extends AbstractASTNode<Object> {
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    final Node<?> inputNode = children.get(0);
-    final Node<?> inputElementVarNameNode = children.get(1);
-    final Node<?> filterNode = children.get(2);
-    Object input = inputNode.getValue(ctx);
-    String varName = ASTNode.variableNamesOf(inputElementVarNameNode, ctx)[0];
-
-    SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
+    final Object input = inputNode.getValue(ctx);
+    final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
     if (input instanceof Object[] array) {
       return Arrays.stream(array)
           .filter(fo -> (Boolean) filterNode.getValue(useCtx.bind(varName, fo))).toArray();
@@ -53,6 +53,15 @@ public class ASTFilterNode extends AbstractASTNode<Object> {
     } else {
       return null;
     }
+  }
+
+  @Override
+  public void postConstruct() {
+    super.postConstruct();
+    inputNode = children.get(0);
+    inputElementVarNameNode = (ASTValueNode) children.get(1);
+    filterNode = children.get(2);
+    varName = ASTNode.parseVariableNames(inputElementVarNameNode.value.toString())[0];
   }
 
 }

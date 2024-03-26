@@ -13,17 +13,20 @@
  */
 package org.corant.modules.query.shared;
 
-import static org.corant.modules.query.shared.NamedQueryServiceManager.resolveQueryService;
+import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.util.List;
 import java.util.stream.Stream;
-import org.corant.config.Configs;
-import org.corant.modules.query.NamedQueryService;
-import org.corant.modules.query.QueryObjectMapper;
-import org.corant.shared.service.RequiredConfiguration;
-import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import org.corant.modules.query.NamedQueryService;
+import org.corant.modules.query.QueryObjectMapper;
+import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.mapping.Query.QueryType;
+import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.service.RequiredConfiguration.ValuePredicate;
 
 /**
  * corant-modules-query-shared
@@ -34,9 +37,6 @@ import jakarta.inject.Inject;
 @RequiredConfiguration(key = "corant.query.enable-forwarding-named-query-service",
     predicate = ValuePredicate.EQ, type = Boolean.class, value = "true")
 public class ForwardingNamedQueryService implements NamedQueryService {
-
-  public static final boolean ENABLE =
-      Configs.getValue("corant.query.enable-forwarding-named-query-service", Boolean.class, false);
 
   @Inject
   protected QueryMappingService mappingService;
@@ -49,12 +49,12 @@ public class ForwardingNamedQueryService implements NamedQueryService {
 
   @Override
   public <T> Forwarding<T> forward(String q, Object p) {
-    return resolveQueryService(q).forward(q, p);
+    return getQueryService(q).forward(q, p);
   }
 
   @Override
   public <T> T get(String q, Object p) {
-    return resolveQueryService(q).get(q, p);
+    return getQueryService(q).get(q, p);
   }
 
   @Override
@@ -64,17 +64,36 @@ public class ForwardingNamedQueryService implements NamedQueryService {
 
   @Override
   public <T> Paging<T> page(String q, Object p) {
-    return resolveQueryService(q).page(q, p);
+    return getQueryService(q).page(q, p);
   }
 
   @Override
   public <T> List<T> select(String q, Object p) {
-    return resolveQueryService(q).select(q, p);
+    return getQueryService(q).select(q, p);
   }
 
   @Override
   public <T> Stream<T> stream(String q, Object p) {
-    return resolveQueryService(q).stream(q, p);
+    return getQueryService(q).stream(q, p);
   }
 
+  protected NamedQueryService getQueryService(String queryName) {
+    Query query = shouldNotNull(mappingService.getQuery(queryName),
+        () -> new QueryRuntimeException("Can't find any named '%s' query", queryName));
+    final QueryType usedQueryType =
+        defaultObject(query.getType(), NamedQueryServiceManager.DEFAULT_QUERY_TYPE);
+    final String usedQualifier =
+        defaultObject(query.getQualifier(), NamedQueryServiceManager.DEFAULT_QUALIFIER);
+    for (NamedQueryServiceManager nqsm : queryServiceManagers) {
+      if (nqsm.getType() == usedQueryType) {
+        NamedQueryService nqs = nqsm.get(usedQualifier);
+        if (nqs != null) {
+          return nqs;
+        }
+      }
+    }
+    throw new QueryRuntimeException(
+        "Can't find any query service with query type: %s, qualifier: %s", usedQueryType,
+        usedQualifier);
+  }
 }

@@ -40,10 +40,6 @@ public interface ASTNode<T> extends Node<T> {
     return parseVariableNames(node.getValue(ctx).toString());
   }
 
-  default void accept(ASTNodeVisitor visitor) {
-    visitor.visit(this);
-  }
-
   @Override
   default boolean addChild(Node<?> child) {
     throw new NotSupportedException();
@@ -55,6 +51,10 @@ public interface ASTNode<T> extends Node<T> {
   }
 
   ASTNodeType getType();
+
+  default void postConstruct() {
+
+  }
 
   /**
    * corant-modules-json

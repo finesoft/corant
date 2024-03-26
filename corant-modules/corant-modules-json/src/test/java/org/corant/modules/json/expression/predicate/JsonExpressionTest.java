@@ -137,7 +137,7 @@ public class JsonExpressionTest extends TestCase {
     Node<?> eval = SimpleParser.parse(exp, SimpleParser.resolveBuilder());
     Object result = null;
     DefaultEvaluationContext ctx = new DefaultEvaluationContext("list", list);
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 10000; i++) {
       result = eval.getValue(ctx);
     }
     long t1 = System.currentTimeMillis();

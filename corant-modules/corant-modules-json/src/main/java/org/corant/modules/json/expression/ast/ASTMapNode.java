@@ -28,6 +28,11 @@ import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
  */
 public class ASTMapNode extends AbstractASTNode<Object> {
 
+  protected Node<?> inputNode;
+  protected ASTValueNode inputNameNode;
+  protected Node<?> outputNode;
+  protected String inputName;
+
   @Override
   public ASTNodeType getType() {
     return ASTNodeType.MAP;
@@ -35,14 +40,8 @@ public class ASTMapNode extends AbstractASTNode<Object> {
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    final Node<?> inputNode = children.get(0);
-    final Node<?> inputNameNode = children.get(1);
-    final Node<?> outputNode = children.get(2);
-
-    Object input = inputNode.getValue(ctx);
-    String inputName = ASTNode.variableNamesOf(inputNameNode, ctx)[0];
-
-    SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
+    final Object input = inputNode.getValue(ctx);
+    final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
     if (input instanceof Object[] array) {
       Object[] output =
           (Object[]) Array.newInstance(input.getClass().componentType(), array.length);
@@ -59,6 +58,15 @@ public class ASTMapNode extends AbstractASTNode<Object> {
     } else {
       return outputNode.getValue(useCtx.bind(inputName, input));
     }
+  }
+
+  @Override
+  public void postConstruct() {
+    super.postConstruct();
+    inputNode = children.get(0);
+    inputNameNode = (ASTValueNode) children.get(1);
+    outputNode = children.get(2);
+    inputName = ASTNode.parseVariableNames(inputNameNode.value.toString())[0];
   }
 
 }

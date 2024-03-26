@@ -29,6 +29,12 @@ import org.corant.shared.util.Streams;
  */
 public class ASTCollectNode extends AbstractASTNode<Object> {
 
+  protected Node<?> inputNode;
+  protected Node<?> supplierNode;
+  protected ASTValueNode accumulatorNamesNode;
+  protected Node<?> accumulatorNode;
+  protected String[] accumulatorNames;
+
   @Override
   public ASTNodeType getType() {
     return ASTNodeType.COLLECT;
@@ -36,29 +42,12 @@ public class ASTCollectNode extends AbstractASTNode<Object> {
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-
-    Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
     final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
-
-    // supplier & accumulator & combiner(fake)
-    Node<?> supplierNode = children.get(1);
-    Node<?> accumulatorNamesNode = children.get(2);
-    Node<?> accumulatorNode = children.get(3);
-
-    String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
     final BiConsumer<Object, Object> accumulatorFunc = (u, t) -> accumulatorNode
         .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
-
-    // Node<?> combinerNamesNode = children.get(4);
-    // Node<?> combinerNode = children.get(5);
-    // String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
-    // final BiConsumer<Object, Object> combinerFunc = (u1, u2) -> combinerNode
-    // .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
-
     // the combiner is only used in parallel stream, so we use an empty bi-consumer
     final BiConsumer<Object, Object> combinerFunc = Functions.emptyBiConsumer();
-
     if (input instanceof Object[] array) {
       return Arrays.stream(array).collect(() -> supplierNode.getValue(useCtx), accumulatorFunc,
           combinerFunc);
@@ -69,6 +58,17 @@ public class ASTCollectNode extends AbstractASTNode<Object> {
       return Arrays.stream(new Object[] {input}).collect(() -> supplierNode.getValue(useCtx),
           accumulatorFunc, combinerFunc);
     }
+  }
+
+  @Override
+  public void postConstruct() {
+    super.postConstruct();
+    inputNode = children.get(0);
+    // supplier & accumulator & combiner(fake)
+    supplierNode = children.get(1);
+    accumulatorNamesNode = (ASTValueNode) children.get(2);
+    accumulatorNode = children.get(3);
+    accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
   }
 
 }

@@ -72,32 +72,6 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
             accumulatorFunc);
       }
     }
-    // the combiner is only used in parallel stream, so we use an empty bi-consumer
-    // else if (children.size() == 6) {
-    // // identity & accumulator & combiner
-    // Node<?> identityNode = children.get(1);
-    // Node<?> accumulatorNamesNode = children.get(2);
-    // Node<?> accumulatorNode = children.get(3);
-    // Node<?> combinerNamesNode = children.get(4);
-    // Node<?> combinerNode = children.get(5);
-    // String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
-    // final BiFunction<Object, Object, Object> accumulatorFunc = (u, t) -> accumulatorNode
-    // .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
-    // String[] combinerNames = ASTNode.variableNamesOf(combinerNamesNode, useCtx);
-    // final BinaryOperator<Object> combinerFunc = (u1, u2) -> combinerNode
-    // .getValue(useCtx.unbindAll().bind(combinerNames[0], u1).bind(combinerNames[1], u2));
-    //
-    // if (input instanceof Object[] array) {
-    // return Arrays.asList(array).parallelStream().reduce(identityNode.getValue(useCtx),
-    // accumulatorFunc, combinerFunc);
-    // } else if (input instanceof Iterable itr) {
-    // return listOf(itr).parallelStream().reduce(identityNode.getValue(useCtx), accumulatorFunc,
-    // combinerFunc);
-    // } else {
-    // return Arrays.stream(new Object[] {input}).reduce(identityNode.getValue(useCtx),
-    // accumulatorFunc, combinerFunc);
-    // }
-    // }
     throw new NotSupportedException();
   }
 

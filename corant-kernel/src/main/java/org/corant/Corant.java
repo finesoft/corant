@@ -370,7 +370,7 @@ public class Corant implements AutoCloseable {
     }
 
     if (current() != null) {
-      log(Level.WARNING, throwable, "The %s shutdown occurred error!", APP_NAME);
+      log(Level.WARNING, throwable, "[%s] shutdown occurred error!", APP_NAME);
       if (current().isRunning()) {
         throw new CorantRuntimeException(throwable);
       } else {
@@ -510,7 +510,7 @@ public class Corant implements AutoCloseable {
 
   private static synchronized void setMe(Corant corant) {
     if (corant != null) {
-      shouldBeTrue(Corant.me == null, "We already have an instance of %s. Don't repeat it!",
+      shouldBeTrue(Corant.me == null, "We already have an instance of [%s]. Don't repeat it!",
           APP_NAME);
     }
     Corant.me = corant;
@@ -541,7 +541,7 @@ public class Corant implements AutoCloseable {
    * CDI.current().getBeanManager()
    */
   public synchronized BeanManager getBeanManager() {
-    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
     return container.getBeanManager();
   }
 
@@ -558,7 +558,7 @@ public class Corant implements AutoCloseable {
    * is not normally used, and should be use <tt> CDI.current().getBeanManager().getEvent()</tt>.
    */
   public synchronized Event<Object> getEvent() {
-    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
     return container.getBeanManager().getEvent();
   }
 
@@ -566,7 +566,7 @@ public class Corant implements AutoCloseable {
    * Returns current CDI container, or throws exception if the current CDI container is not started.
    */
   public synchronized Instance<Object> getInstance() {
-    shouldBeTrue(isRunning(), "The %s instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
     return container;
   }
 
@@ -611,7 +611,7 @@ public class Corant implements AutoCloseable {
       log(Level.WARNING, null, "The %s container is already shutdown, message:%s", APP_NAME,
           e.getMessage());
     } catch (Throwable e) {
-      log(Level.SEVERE, e, "Stop %s occurred error!", APP_NAME);
+      log(Level.SEVERE, e, "Stop [%s] occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
@@ -631,10 +631,10 @@ public class Corant implements AutoCloseable {
         logInfo("The post-started spi processing has completed, takes %s ms.", tk.getTimeMillis());
         double tt = sw.getTotalTimeSeconds();
         if (tt > 8) {
-          logInfo("The %s has been started, takes %ss. It's been a long way, but we're here.",
+          logInfo("[%s] has been started, takes %ss. It's been a long way, but we're here.",
               APP_NAME, tt);
         } else {
-          logInfo("The %s has started, takes %ss.", APP_NAME, tt);
+          logInfo("[%s] has started, takes %ss.", APP_NAME, tt);
         }
         logInfo("Application info: process-id: %s, java-version: %s, locale: %s, timezone: %s.",
             Launches.getPid(), Launches.getJavaVersion(), Locale.getDefault(),
@@ -650,7 +650,7 @@ public class Corant implements AutoCloseable {
       stopWatch.destroy(sw -> logInfo("All preparations have been triggered, takes %s ms.%s",
           sw.getLastTaskInfo().getTimeMillis(), boostLine(".")));
     } catch (Throwable e) {
-      log(Level.SEVERE, e, "The %s occurred error after container started!", APP_NAME);
+      log(Level.SEVERE, e, "[%s] occurred error after container started!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
@@ -664,12 +664,12 @@ public class Corant implements AutoCloseable {
       invokeBootHandlerBeforeStart();
       stopWatch.stop(t -> {
         Defaults.CORANT_VERSION.ifPresent(v -> logInfo("Corant Version: %s", v));
-        logInfo("Starting the %s ...", APP_NAME);
+        logInfo("Starting [%s] ...", APP_NAME);
         logInfo("The pre-start spi processing has completed, takes %s ms.", t.getTimeMillis());
       });
       registerMBean();
     } catch (Throwable e) {
-      log(Level.SEVERE, e, "Start %s occurred error!", APP_NAME);
+      log(Level.SEVERE, e, "Start [%s] occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
@@ -695,7 +695,7 @@ public class Corant implements AutoCloseable {
       stopWatch.stop(
           t -> logInfo("The container has been initialized, takes %s ms.", t.getTimeMillis()));
     } catch (Throwable e) {
-      log(Level.SEVERE, null, "Initialize the %s container occurred error!", APP_NAME);
+      log(Level.SEVERE, null, "Initialize [%s] container occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
     }
   }
@@ -712,7 +712,7 @@ public class Corant implements AutoCloseable {
             .addShutdownHook(new Thread(() -> deregisterFromMBean(POWER_MBEAN_NAME)));
       }
       logInfo(
-          "Registered %s to MBean server, one can use it for shutdown or re-startup the application.",
+          "Registered [%s] to MBean server, one can use it for shutdown or re-startup the application.",
           APP_NAME, Instant.now());
     }
   }
@@ -777,7 +777,7 @@ public class Corant implements AutoCloseable {
 
     void onBeforeShutdown(@Observes @Priority(Integer.MAX_VALUE) BeforeShutdown event) {
       invokeBootHandlerAfterStopped();
-      logInfo("The %s stops at %s.%s\n", APP_NAME, Instant.now(), boostLine("-"));
+      logInfo("[%s] stops at %s.%s\n", APP_NAME, Instant.now(), boostLine("-"));
     }
   }
 }

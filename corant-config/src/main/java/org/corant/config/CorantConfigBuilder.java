@@ -141,7 +141,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   void validate(CorantConfigSources sources, CorantConfig config) {
     if (isNotEmpty(sources.getProfiles())) {
-      logger.fine(() -> String.format("The activated config profile is %s.",
+      logger.fine(() -> String.format("The activated config profiles: [%s].",
           String.join(", ", sources.getProfiles())));
     }
     logger.fine(() -> String.format("The config property expressions is %s.",

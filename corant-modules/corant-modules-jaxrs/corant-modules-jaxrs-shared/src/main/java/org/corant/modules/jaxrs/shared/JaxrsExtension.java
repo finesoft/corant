@@ -67,12 +67,14 @@ public class JaxrsExtension implements Extension {
         && !ProxyUtils.isCDIUnproxyableClass(clazz)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         providers.add(clazz);
-        logger.fine(() -> String.format("Find a jaxrs provider %s", clazz));
+        logger.fine(() -> String.format("Find a jaxrs provider [%s]", clazz));
       } else {
-        logger.info(() -> String.format("Veto a jaxrs provider %s", clazz));
+        logger.info(() -> String
+            .format("Veto a jaxrs provider [%s] which don't meet the requirements", clazz));
       }
     } else {
-      logger.info(() -> String.format("Give up the jaxrs provider %s", clazz));
+      logger.info(() -> String.format(
+          "Veto a jaxrs provider [%s] which not interface and are not EJB session bean", clazz));
     }
   }
 
@@ -84,12 +86,14 @@ public class JaxrsExtension implements Extension {
     if (!clazz.isInterface() && !isSessionBean(annotatedType)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         resources.add(clazz);
-        logger.fine(() -> String.format("Find a jaxrs resource %s", clazz));
+        logger.fine(() -> String.format("Find a jaxrs resource [%s]", clazz));
       } else {
-        logger.info(() -> String.format("Veto a jaxrs resource %s", clazz));
+        logger.info(() -> String
+            .format("Veto a jaxrs resource [%s] which don't meet the requirements", clazz));
       }
     } else {
-      logger.info(() -> String.format("Give up the jaxrs resource %s", clazz));
+      logger.info(() -> String.format(
+          "Veto the jaxrs resource [%s] which not interface and are not EJB session bean", clazz));
     }
   }
 

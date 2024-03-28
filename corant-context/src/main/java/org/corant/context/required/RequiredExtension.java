@@ -19,11 +19,6 @@ import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.corant.shared.normal.Priorities;
-import org.corant.shared.service.RequiredClassNotPresent;
-import org.corant.shared.service.RequiredClassPresent;
-import org.corant.shared.service.RequiredConfiguration;
-import org.corant.shared.util.Services;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
@@ -38,6 +33,11 @@ import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
 import jakarta.enterprise.inject.spi.WithAnnotations;
+import org.corant.shared.normal.Priorities;
+import org.corant.shared.service.RequiredClassNotPresent;
+import org.corant.shared.service.RequiredClassPresent;
+import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.util.Services;
 
 /**
  * corant-context
@@ -70,7 +70,7 @@ public class RequiredExtension implements Extension {
     AnnotatedType<?> type = event.getAnnotatedType();
     if (Services.getRequired().shouldVeto(getUserClass(type.getJavaClass()))) {
       event.veto();
-      logger.info(() -> String.format("The bean type %s was ignored!",
+      logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
           event.getAnnotatedType().getJavaClass().getName()));
     }
   }
@@ -106,7 +106,7 @@ public class RequiredExtension implements Extension {
               requiredClassNotPresents.toArray(RequiredClassNotPresent[]::new),
               requiredConfigurations.toArray(RequiredConfiguration[]::new))) {
         event.veto();
-        logger.info(() -> String.format("The bean type %s was ignored!",
+        logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
             event.getAnnotated().getBaseType().getTypeName()));
       }
     }

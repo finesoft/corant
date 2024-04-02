@@ -115,7 +115,7 @@ public class FXObservableMapDeserializer<T extends ObservableMap<Object, Object>
 
     T map = createEmptyMap();
     for (; p.getCurrentToken() == JsonToken.FIELD_NAME; p.nextToken()) {
-      String fieldName = p.getCurrentName();
+      String fieldName = p.currentName();
       Object key = (keyDes == null) ? fieldName : keyDes.deserializeKey(fieldName, ctxt);
       JsonToken t = p.nextToken();
       Object value;

@@ -46,10 +46,9 @@ public class Fields {
     return allFields;
   }
 
-  public static Field getField(Object target, String fieldName) {
-    shouldBeTrue(target != null && fieldName != null,
-        "The field name and the target object can't null!");
-    final Class<?> targetClass = getUserClass(target);
+  public static Field getField(Class<?> targetClass, String fieldName) {
+    shouldBeTrue(targetClass != null && fieldName != null,
+        "The field name and the target class can't null!");
     for (Class<?> currentClass = targetClass; currentClass != null; currentClass =
         currentClass.getSuperclass()) {
       try {
@@ -74,6 +73,10 @@ public class Fields {
       }
     }
     return field;
+  }
+
+  public static Field getField(Object target, String fieldName) {
+    return getField(getUserClass(target), fieldName);
   }
 
   public static Object getFieldValue(Field field, Object target) {

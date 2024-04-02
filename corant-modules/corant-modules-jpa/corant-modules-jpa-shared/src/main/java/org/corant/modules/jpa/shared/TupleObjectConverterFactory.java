@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TupleElement;
 import org.corant.shared.conversion.Converter;
@@ -37,6 +36,8 @@ import org.corant.shared.util.Classes;
 import org.corant.shared.util.Fields;
 import org.corant.shared.util.Methods;
 import org.corant.shared.util.Systems;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * corant-modules-ddd-shared
@@ -49,7 +50,9 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
       Integer.class, Priorities.FRAMEWORK_LOWER + 1);
   static final int maxSize =
       Systems.getProperty("corant.jpa.tuple-object-converter.cache-type-size", Integer.class, 1024);
-  static final ConcurrentHashMap<Class<?>, Injector> map = new ConcurrentHashMap<>(512, 0.8f, 4);
+
+  // static final ConcurrentHashMap<Class<?>, Injector> map = new ConcurrentHashMap<>(512, 0.8f, 4);
+  static Cache<Class<?>, Injector> map = Caffeine.newBuilder().maximumSize(maxSize).build();
 
   @Override
   public Converter<Tuple, Object> create(Class<Object> targetClass, Object defaultValue,
@@ -78,18 +81,11 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
       if (Map.class.isAssignableFrom(key)) {
         return MapInjector.INSTANCE;
       }
-      if (map.size() >= maxSize) {
-        synchronized (this) {
-          if (map.size() >= maxSize) {
-            map.clear();
-          }
-        }
-      }
-      Injector injector = map.computeIfAbsent(key, PojoInjector::new);
+      Injector injector = map.get(key, PojoInjector::new);
       if (injector.isUsable()) {
         return injector;
       } else {
-        map.remove(key);
+        map.invalidate(key);
       }
     }
     return null;

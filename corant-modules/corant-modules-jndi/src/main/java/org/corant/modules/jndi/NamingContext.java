@@ -403,8 +403,8 @@ public class NamingContext implements Context {
       throw new NamingException("Name is not valid, can not be empty.");
     }
     Lock lock = RWL.writeLock();
+    lock.lock();
     try {
-      lock.lock();
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (useName.size() > 1) {
         if (entry == null) {
@@ -459,8 +459,8 @@ public class NamingContext implements Context {
   protected Object lookup(Name name, boolean resolveLinks) throws NamingException {
     Name useName = skipEmptyComponent(name);
     Lock lock = RWL.readLock();
+    lock.lock();
     try {
-      lock.lock();
       if (useName.isEmpty()) {
         return new NamingContext(this.name, getEnvironment(), bindings);
       }

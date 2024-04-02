@@ -68,7 +68,7 @@
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.1</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
-		<version.jackson>2.16.1</version.jackson>
+		<version.jackson>2.17.0</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.7</version.javafx>
@@ -107,7 +107,7 @@
 		<version.kotlin>1.8.20</version.kotlin>
 		<version.kryo>5.5.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>
-		<version.log4j2>2.23.0</version.log4j2>
+		<version.log4j2>2.23.1</version.log4j2>
 		<version.lombok>1.18.28</version.lombok>
 		<version.metadata-extractor>2.18.0</version.metadata-extractor>
 		<version.maven-bundle-plugin>5.1.8</version.maven-bundle-plugin>
@@ -159,7 +159,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.17.6</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
-		<version.resteasy>6.2.7.Final</version.resteasy>
+		<version.resteasy>6.2.8.Final</version.resteasy>
 		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro>1.7.1</version.shiro>

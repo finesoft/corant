@@ -67,6 +67,8 @@ import org.corant.shared.util.Sets;
 import org.corant.shared.util.Streams;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * corant-modules-json
@@ -109,16 +111,22 @@ import org.corant.shared.util.Systems;
 @Experimental
 public class DefaultObjectFunctionResolver implements FunctionResolver {
 
-  // 0: constructor, 1: static method, 2: non-static method, 3: static field, 4:non-static field
-  protected static final Map<String, Triple<Class<?>, String, Integer>> holder =
-      new ConcurrentHashMap<>();
   protected static final Object[] emptyParams = {};
   protected static final Class<?>[] emptyParamTypes = new Class[0];
   protected static final String NEW = "new";
   protected static final String nonStaticDelimiter = DOMAIN_SPACE_SEPARATORS;
   protected static final String staticDelimiter = nonStaticDelimiter + nonStaticDelimiter;
 
+  // 0: constructor, 1: static method, 2: non-static method, 3: static field, 4:non-static field
+  protected static final Cache<String, Triple<Class<?>, String, Integer>> holderCache =
+      Caffeine.newBuilder().maximumSize(2048).build();
+  protected static final Map<String, Triple<Class<?>, String, Integer>> holder =
+      holderCache.asMap();
   protected static Map<String, Class<?>> builtinClassAlias = new ConcurrentHashMap<>();
+  protected static Cache<MethodInvokeCacheKey, Method> methods =
+      Caffeine.newBuilder().maximumSize(2048).build();
+  protected static Cache<FieldInvokeCacheKey, Field> fields =
+      Caffeine.newBuilder().maximumSize(2048).build();
 
   static {
     builtinClassAlias.put(Strings.class.getSimpleName(), Strings.class);
@@ -249,6 +257,18 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     return false;
   }
 
+  protected Field getMatchingField(Class<?> clazz, String fieldName) {
+    // return Fields.getField(clazz, fieldName);
+    return fields.get(new FieldInvokeCacheKey(clazz, fieldName),
+        c -> Fields.getField(c.clazz, c.fieldName));
+  }
+
+  protected Method getMatchingMethod(Class<?> clazz, String methodName, Class<?>[] parameterTypes) {
+    // return Methods.getMatchingMethod(clazz, methodName, parameterTypes);
+    return methods.get(new MethodInvokeCacheKey(clazz, methodName, parameterTypes),
+        c -> Methods.getMatchingMethod(c.clazz, c.methodName, c.parameterTypes));
+  }
+
   protected Object invokeConstructor(Object[] fs, Class<?> cls) {
     Class<?>[] paramTypes = emptyParamTypes;
     int length = fs.length;
@@ -281,7 +301,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
           params[i - 1] = fs[i];
           paramTypes[i - 1] = fs[i] == null ? Object.class : fs[i].getClass();
         }
-        Method method = Methods.getMatchingMethod(cls, methodName, paramTypes);
+        Method method = getMatchingMethod(cls, methodName, paramTypes);
         if (method != null && !Modifier.isStatic(method.getModifiers())) {
           try {
             return Methods.invokeMethod(invokedObject, method, params);
@@ -302,8 +322,8 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
           "Unsupported function: %s.%s can't accept any parameters", cls.getName(), invokerName));
     }
     try {
-      return Fields.getStaticFieldValue(cls.getDeclaredField(invokerName));
-    } catch (NoSuchFieldException | SecurityException e) {
+      return Fields.getStaticFieldValue(getMatchingField(cls, invokerName));
+    } catch (SecurityException e) {
       throw new CorantRuntimeException(e);
     }
   }
@@ -314,7 +334,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     for (int i = 0; i < length; i++) {
       paramTypes[i] = fs[i] == null ? Object.class : fs[i].getClass();
     }
-    Method method = Methods.getMatchingMethod(cls, methodName, paramTypes);
+    Method method = getMatchingMethod(cls, methodName, paramTypes);
     if (method != null) {
       try {
         return Methods.invokeMethod(null, method, fs);
@@ -328,10 +348,86 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
 
   private Object invokeNonStaticField(Object[] fs, Class<?> cls, String invokerName) {
     if (fs.length == 1 && fs[0] != null && cls.isAssignableFrom(Classes.getUserClass(fs[0]))) {
-      return Fields.getFieldValue(invokerName, fs[0]);
+      return Fields.getFieldValue(getMatchingField(cls, invokerName), fs[0]);
     }
     throw new IllegalArgumentException(
         String.format("Unsupported function: %s.%s must accept an instance as parameter",
             cls.getName(), invokerName));
+  }
+
+  protected static class FieldInvokeCacheKey {
+    final Class<?> clazz;
+    final String fieldName;
+    final int hash;
+
+    FieldInvokeCacheKey(Class<?> clazz, String fieldName) {
+      this.clazz = clazz;
+      this.fieldName = fieldName;
+      hash = Objects.hash(this.clazz, this.fieldName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      FieldInvokeCacheKey other = (FieldInvokeCacheKey) obj;
+      return Objects.equals(clazz, other.clazz) && Objects.equals(fieldName, other.fieldName);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash;
+    }
+
+  }
+
+  protected static class MethodInvokeCacheKey {
+    final Class<?>[] parameterTypes;
+    final Class<?> clazz;
+    final String methodName;
+    final int hash;
+
+    MethodInvokeCacheKey(Class<?> clazz, String methodName, Class<?>[] parameterTypes) {
+      this.clazz = clazz;
+      this.methodName = methodName;
+      this.parameterTypes = Arrays.copyOf(parameterTypes, parameterTypes.length);
+      hash = calHash(this.clazz, this.methodName, this.parameterTypes);
+    }
+
+    static int calHash(Class<?> clazz, String methodName, Class<?>[] parameterTypes) {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + Arrays.hashCode(parameterTypes);
+      return prime * result + Objects.hash(clazz, methodName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      MethodInvokeCacheKey other = (MethodInvokeCacheKey) obj;
+      return Objects.equals(clazz, other.clazz) && Objects.equals(methodName, other.methodName)
+          && Arrays.equals(parameterTypes, other.parameterTypes);
+    }
+
+    @Override
+    public int hashCode() {
+      return hash;
+    }
+
   }
 }

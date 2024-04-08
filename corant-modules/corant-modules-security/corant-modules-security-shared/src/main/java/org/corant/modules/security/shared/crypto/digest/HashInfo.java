@@ -19,6 +19,25 @@ import org.corant.shared.util.Bytes;
 
 /**
  * corant-modules-security-shared
+ * <p>
+ * A POJO class used to represent hash metadata info and result. A HashInfo object contains
+ * algorithm name, iterations, salt bytes and digested bytes. This class provide a serialization and
+ * de-serialization layout by default.
+ *
+ * <pre>
+ * Default bytes array serialization layout:
+ *
+ * [<b>ANL</b>(int-4bytes), <b>ITE</b>(int-4bytes), <b>SAL</b>(int-4bytes), <b>DCL</b>(int-4bytes), <b>ANB</b>, <b>SAB</b>, <b>DCB</b>]
+ *
+ * <b>ANL</b>: algorithm name bytes (UTF-8) length integer 4 bytes
+ * <b>ITE</b>: iterations integer 4 bytes
+ * <b>SAL</b>: salt bytes length integer 4 bytes
+ * <b>DCL</b>: digested content bytes length integer 4 bytes
+ * <b>ANB</b>: algorithm name bytes (UTF-8)
+ * <b>SAB</b>: salt bytes
+ * <b>DCB</b>: digested content bytes
+ * </pre>
+ * </p>
  *
  * @author bingo 下午2:07:59
  */
@@ -85,6 +104,9 @@ public class HashInfo {
     return salt;
   }
 
+  /**
+   * Returns salt bits size
+   */
   public int getSaltSize() {
     return salt.length << 3;
   }

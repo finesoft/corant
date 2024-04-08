@@ -17,12 +17,12 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import jakarta.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 import org.corant.Corant;
 import org.corant.shared.util.Functions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import jakarta.enterprise.inject.Vetoed;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
 
 /**
  * corant-modules-vertx-shared
@@ -45,18 +45,18 @@ public class CorantVerticle extends AbstractVerticle {
   }
 
   @Override
-  public void start(Promise<Void> startPromise) throws Exception {
-    vertx.executeBlocking(promise -> {
+  public void start(Promise<Void> startPromise) {
+    vertx.executeBlocking(() -> {
       try {
         Corant.startup(sc -> {
           initializer.accept(sc);
           sc.addExtensions(new VertxExtension(vertx, context));
         }, arguments);
         postCorantStarted(null);
-        promise.complete();
+        return null;
       } catch (Exception e) {
         postCorantStarted(e);
-        promise.fail(e);
+        throw e;
       }
     }, result -> {
       if (result.succeeded()) {
@@ -68,15 +68,17 @@ public class CorantVerticle extends AbstractVerticle {
   }
 
   @Override
-  public void stop(Promise<Void> stopPromise) throws Exception {
+  public void stop(Promise<Void> stopPromise) {
     if (Corant.current() != null) {
-      vertx.executeBlocking(promise -> {
+      vertx.executeBlocking(() -> {
         try {
           preCorantStop();
           Corant.shutdown();
-          promise.complete();
+          postCorantStop(null);
+          return null;
         } catch (Exception e) {
-          promise.fail(e);
+          postCorantStop(e);
+          throw e;
         }
       }, result -> {
         if (result.succeeded()) {
@@ -90,11 +92,9 @@ public class CorantVerticle extends AbstractVerticle {
     }
   }
 
-  protected void postCorantStarted(Exception e) {
+  protected void postCorantStarted(Exception e) {}
 
-  }
+  protected void postCorantStop(Exception e) {}
 
-  protected void preCorantStop() {
-
-  }
+  protected void preCorantStop() {}
 }

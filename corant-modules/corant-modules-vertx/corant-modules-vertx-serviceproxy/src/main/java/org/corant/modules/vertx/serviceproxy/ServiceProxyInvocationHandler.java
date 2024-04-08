@@ -42,14 +42,11 @@ public class ServiceProxyInvocationHandler implements InvocationHandler {
   private static final Function<Method, Integer> HANDLER_POSITION_FUNCTION = m -> {
     for (int i = 0; i < m.getGenericParameterTypes().length; i++) {
       Type paramType = m.getGenericParameterTypes()[i];
-      if (paramType instanceof ParameterizedType) {
-        ParameterizedType handlerType = (ParameterizedType) paramType;
-        if (handlerType.getRawType().equals(Handler.class)
-            && handlerType.getActualTypeArguments()[0] instanceof ParameterizedType) {
-          ParameterizedType eventType = (ParameterizedType) handlerType.getActualTypeArguments()[0];
-          if (eventType.getRawType().equals(AsyncResult.class)) {
-            return i;
-          }
+      if ((paramType instanceof ParameterizedType handlerType)
+          && (handlerType.getRawType().equals(Handler.class)
+              && handlerType.getActualTypeArguments()[0] instanceof ParameterizedType eventType)) {
+        if (eventType.getRawType().equals(AsyncResult.class)) {
+          return i;
         }
       }
     }

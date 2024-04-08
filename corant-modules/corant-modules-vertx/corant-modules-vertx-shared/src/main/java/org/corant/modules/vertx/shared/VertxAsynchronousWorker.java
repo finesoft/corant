@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
@@ -91,17 +92,11 @@ public class VertxAsynchronousWorker {
    *
    * @param action the specified action
    * @return a completion stage with the result of the specified action
-   * @see Vertx#executeBlocking(io.vertx.core.Handler, io.vertx.core.Handler)
+   * @see Vertx#executeBlocking(Callable, boolean, Handler)
    */
   public <V> CompletionStage<V> performBlocking(Callable<V> action) {
     VertxCompletableFuture<V> future = new VertxCompletableFuture<>(vertx);
-    vertx.<V>executeBlocking((f -> {
-      try {
-        f.complete(action.call());
-      } catch (Exception e) {
-        f.fail(e);
-      }
-    }), false, r -> {
+    vertx.<V>executeBlocking(action, false, r -> {
       if (r.succeeded()) {
         future.complete(r.result());
       } else {

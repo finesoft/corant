@@ -18,6 +18,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.event.Observes;
 import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -27,8 +29,6 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.event.Observes;
 
 /**
  * corant-modules-vertx-shared

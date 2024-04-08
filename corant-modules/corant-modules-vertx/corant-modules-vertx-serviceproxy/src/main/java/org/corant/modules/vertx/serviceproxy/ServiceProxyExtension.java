@@ -126,10 +126,11 @@ public class ServiceProxyExtension implements Extension {
       return null;
     }
 
-    @SuppressWarnings("serial")
     @Override
     public Set<Annotation> getQualifiers() {
-      return Collections.<Annotation>singleton(new AnnotationLiteral<Default>() {});
+      return Collections.singleton(new AnnotationLiteral<Default>() {
+        private static final long serialVersionUID = -8665616511776537386L;
+      });
     }
 
     @Override

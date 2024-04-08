@@ -175,16 +175,14 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
   @SuppressWarnings("unchecked")
   private void initWithWorker(Type requiredType, Annotation[] qualifiers, Vertx vertx,
       BeanManager beanManager) {
-    vertx.executeBlocking((promise -> {
+    vertx.executeBlocking(() -> {
       WeldInstance<Object> asyncInstance = instance.select(requiredType, qualifiers);
       if (asyncInstance.isUnsatisfied()) {
-        promise.fail(BeanManagerLogger.LOG.injectionPointHasUnsatisfiedDependencies(
-            Arrays.toString(qualifiers), requiredType, ""));
-        return;
+        throw BeanManagerLogger.LOG.injectionPointHasUnsatisfiedDependencies(
+            Arrays.toString(qualifiers), requiredType, "");
       } else if (asyncInstance.isAmbiguous()) {
-        promise.fail(BeanManagerLogger.LOG
-            .injectionPointHasAmbiguousDependencies(Arrays.toString(qualifiers), requiredType, ""));
-        return;
+        throw BeanManagerLogger.LOG
+            .injectionPointHasAmbiguousDependencies(Arrays.toString(qualifiers), requiredType, "");
       }
       Handle<Object> handler = asyncInstance.getHandle();
       Object beanInstance = handler.get();
@@ -193,8 +191,8 @@ class VertxAsynchronousReference<T> extends ForwardingCompletionStage<T>
         // Initialize normal scoped bean instance eagerly
         ((TargetInstanceProxy<?>) beanInstance).weld_getTargetInstance();
       }
-      promise.complete(beanInstance);
-    }), r -> {
+      return beanInstance;
+    }, r -> {
       if (r.succeeded()) {
         success((T) r.result());
       } else {

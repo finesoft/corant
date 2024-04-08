@@ -50,23 +50,18 @@ public class VertxMessageHandler implements Handler<Message<Object>> {
   public void handle(Message<Object> message) {
     // Notification is potentially a blocking code
     // The execution of the blocking code is not ordered - see
-    // Vertx.executeBlocking(Handler<Promise<T>>, boolean, Handler<AsyncResult<T>>) javadoc
-    vertx.executeBlocking(promise -> {
+    // Vertx.executeBlocking(Callable<T>, boolean, Handler<AsyncResult<T>>) javadoc
+    vertx.executeBlocking(() -> {
       VertxEventImpl vertxEvent = new VertxEventImpl(message, vertx.eventBus());
-      try {
-        // Synchronously notify all the observer methods for a specific address
-        event.fire(vertxEvent);
-        promise.complete(vertxEvent.getReply());
-      } catch (Exception e) {
-        promise.fail(e);
-      }
+      // Synchronously notify all the observer methods for a specific address
+      event.fire(vertxEvent);
+      return vertxEvent.getReply();
     }, false, result -> {
       if (result.succeeded()) {
         message.reply(result.result());
       } else {
         Throwable cause = result.cause();
-        if (cause instanceof RecipientFailure) {
-          RecipientFailure recipientFailure = (RecipientFailure) cause;
+        if (cause instanceof RecipientFailure recipientFailure) {
           message.fail(recipientFailure.code, recipientFailure.getMessage());
         } else {
           message.fail(VertxEvent.OBSERVER_FAILURE_CODE, cause.getMessage());

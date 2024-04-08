@@ -12,9 +12,11 @@
  */
 package org.corant.modules.vertx.serviceproxy;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 
@@ -29,7 +31,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 public interface ServiceProxySupport {
 
   /**
-   * @param serviceInterface
+   * @param serviceInterface the service interface
    * @return the delivery options used for a particular service proxy bean instance or
    *         <code>null</code>
    */
@@ -41,16 +43,12 @@ public interface ServiceProxySupport {
    * By default, the service result handler is executed as blocking code.
    *
    * @return the executor used to execute a service result handler
-   * @see Vertx#executeBlocking(io.vertx.core.Handler, boolean, io.vertx.core.Handler)
+   * @see Vertx#executeBlocking(Callable, boolean, Handler)
    */
   default Executor getExecutor() {
-    return command -> getVertx().executeBlocking(f -> {
-      try {
-        command.run();
-        f.complete();
-      } catch (Exception e) {
-        f.fail(e);
-      }
+    return command -> getVertx().executeBlocking(() -> {
+      command.run();
+      return null;
     }, false, null);
   }
 

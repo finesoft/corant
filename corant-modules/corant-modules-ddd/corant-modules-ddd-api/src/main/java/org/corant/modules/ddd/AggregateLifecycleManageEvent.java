@@ -60,7 +60,8 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
     this(source, LifecycleAction.LOCK, false, lockModeType);
   }
 
-  public AggregateLifecycleManageEvent(Supplier<Aggregate> supplier, LockModeType lockModeType) {
+  public AggregateLifecycleManageEvent(Supplier<? extends Aggregate> supplier,
+      LockModeType lockModeType) {
     this(supplier.get(), lockModeType);
   }
 

@@ -80,7 +80,18 @@ public class Aggregates {
 
   public static <X extends Aggregate> void lock(Class<X> cls, Serializable id,
       LockModeType lockModeType, Object... properties) {
-    resolve(cls, id, lockModeType, properties);
+    if (id != null && cls != null) {
+      JPARepository repo = resolveRepository(getUserClass(cls));
+      X x = shouldNotNull(repo.get(cls, id), () -> new GeneralRuntimeException(ERR_ENT_NON_FUD_ID,
+          getUserClass(cls).getSimpleName(), asDefaultString(id)));
+      if (properties.length > 0) {
+        repo.lock(x, lockModeType, mapOf(properties));
+      } else {
+        repo.lock(x, lockModeType);
+      }
+    } else {
+      throw new GeneralRuntimeException(ERR_PARAM);
+    }
   }
 
   public static <X extends Aggregate> X lock(X aggregate, LockModeType lockModeType,

@@ -97,11 +97,8 @@ public class RequiredExtension implements Extension {
     // Veto bean which was discovered if necessary
     Annotated annotated = event.getAnnotated();
     Type baseType = annotated.getBaseType();
-    boolean veto = false;
-    if ((baseType instanceof Class baseClass)
-        && Services.getRequired().shouldVeto(getUserClass(baseClass))) {
-      veto = true;
-    }
+    boolean veto = (baseType instanceof Class<?> baseClass)
+        && Services.getRequired().shouldVeto(getUserClass(baseClass));
     if (!veto && (annotated.isAnnotationPresent(RequiredClassNotPresent.class)
         || annotated.isAnnotationPresent(RequiredClassPresent.class)
         || annotated.isAnnotationPresent(RequiredConfiguration.class))) {

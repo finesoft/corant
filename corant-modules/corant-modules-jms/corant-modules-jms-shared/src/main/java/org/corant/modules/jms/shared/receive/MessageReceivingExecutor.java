@@ -32,14 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.annotation.PostConstruct;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
@@ -184,7 +183,7 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
         final AbstractJMSConfig config = allConfigs.get(connectionFactoryId);
         if (config == null || !config.isEnable()) {
           logger.warning(() -> String.format(
-              "The receiver method %s can't be performed, the connection factory %s is not available!",
+              "The receiver method [%s] can't be performed, the connection factory [%s] is not available!",
               meta.getMethod().getMethod().toString(), connectionFactoryId));
           metaIt.remove();
           continue;

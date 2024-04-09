@@ -106,7 +106,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
       }
     });
     if (application != null) {
-      logger.info(() -> String.format("The jaxrs application is %s",
+      logger.info(() -> String.format("Jaxrs application: %s",
           getUserClass(application).getCanonicalName()));
       applicationInfo = new ApplicationInfo(application);
       servletMetaDatas.add(applicationInfo.toWebServletMetaData());
@@ -118,7 +118,7 @@ public class ResteasyProvider implements WebMetaDataProvider {
                 .map(Class::getName).collect(Collectors.toList()));
           }));
     } else {
-      logger.info(() -> "The jaxrs application not found!");
+      logger.info(() -> "Jaxrs application not found!");
     }
   }
 

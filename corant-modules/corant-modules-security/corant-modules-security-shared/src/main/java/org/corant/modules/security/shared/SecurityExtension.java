@@ -30,7 +30,6 @@ import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.WithAnnotations;
 import org.corant.config.Configs;
-import org.corant.modules.security.annotation.Secure;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredMetadata;
@@ -98,7 +97,8 @@ public class SecurityExtension implements Extension {
 
   protected void onProcessAnnotatedType(
       @Observes @Priority(Priorities.FRAMEWORK_HIGHER) @WithAnnotations({Secured.class,
-          Secure.class}) ProcessAnnotatedType<?> event) {
+          DenyAll.class, PermitAll.class, RolesAllowed.class,
+          RunAs.class}) ProcessAnnotatedType<?> event) {
     Class<?> beanClass = event.getAnnotatedType().getJavaClass();
     if (!beanClass.isInterface() && !Modifier.isAbstract(beanClass.getModifiers())
         && ENABLE_INTERCEPTOR) {

@@ -541,7 +541,7 @@ public class Corant implements AutoCloseable {
    * CDI.current().getBeanManager()
    */
   public synchronized BeanManager getBeanManager() {
-    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "[%s] instance is null or is not in running", APP_NAME);
     return container.getBeanManager();
   }
 
@@ -558,7 +558,7 @@ public class Corant implements AutoCloseable {
    * is not normally used, and should be use <tt> CDI.current().getBeanManager().getEvent()</tt>.
    */
   public synchronized Event<Object> getEvent() {
-    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "[%s] instance is null or is not in running", APP_NAME);
     return container.getBeanManager().getEvent();
   }
 
@@ -566,7 +566,7 @@ public class Corant implements AutoCloseable {
    * Returns current CDI container, or throws exception if the current CDI container is not started.
    */
   public synchronized Instance<Object> getInstance() {
-    shouldBeTrue(isRunning(), "The [%s] instance is null or is not in running", APP_NAME);
+    shouldBeTrue(isRunning(), "[%s] instance is null or is not in running", APP_NAME);
     return container;
   }
 
@@ -628,19 +628,19 @@ public class Corant implements AutoCloseable {
       stopWatch.start();
       invokeBootHandlerAfterStarted();
       stopWatch.stop((tk, sw) -> {
-        logInfo("The post-started spi processing has completed, takes %s ms.", tk.getTimeMillis());
-        double tt = sw.getTotalTimeSeconds();
-        if (tt > 8) {
-          logInfo("[%s] has been started, takes %ss. It's been a long way, but we're here.",
-              APP_NAME, tt);
-        } else {
-          logInfo("[%s] has started, takes %ss.", APP_NAME, tt);
-        }
+        logInfo("All post-started spi processing has completed, takes %s ms.", tk.getTimeMillis());
         logInfo("Application info: process-id: %s, java-version: %s, locale: %s, timezone: %s.",
             Launches.getPid(), Launches.getJavaVersion(), Locale.getDefault(),
             TimeZone.getDefault().getID());
-        logInfo("Final memory: %sM/%sM/%sM%s", Launches.getUsedMemoryMb(),
-            Launches.getTotalMemoryMb(), Launches.getMaxMemoryMb(), boostLine("-"));
+        logInfo("Final memory: %sM/%sM/%sM", Launches.getUsedMemoryMb(),
+            Launches.getTotalMemoryMb(), Launches.getMaxMemoryMb());
+        double tt = sw.getTotalTimeSeconds();
+        if (tt > 8) {
+          logInfo("[%s] has been started, takes %ss. It's been a long way, but we're here.%s",
+              APP_NAME, tt, boostLine("-"));
+        } else {
+          logInfo("[%s] has started, takes %ss.%s", APP_NAME, tt, boostLine("-"));
+        }
       });
 
       // emit post corant ready events
@@ -665,7 +665,7 @@ public class Corant implements AutoCloseable {
       stopWatch.stop(t -> {
         Defaults.CORANT_VERSION.ifPresent(v -> logInfo("Corant Version: %s", v));
         logInfo("Starting [%s] ...", APP_NAME);
-        logInfo("The pre-start spi processing has completed, takes %s ms.", t.getTimeMillis());
+        logInfo("All pre-start spi processing has completed, takes %s ms.", t.getTimeMillis());
       });
       registerMBean();
     } catch (Throwable e) {
@@ -692,8 +692,8 @@ public class Corant implements AutoCloseable {
       Services.selectRequired(Configurator.class, classLoader).sorted(Sortable::compare)
           .filter(c -> c.supports(initializer)).forEach(c -> c.accept(initializer));
       container = initializer.initialize();
-      stopWatch.stop(
-          t -> logInfo("The container has been initialized, takes %s ms.", t.getTimeMillis()));
+      stopWatch
+          .stop(t -> logInfo("Container has been initialized, takes %s ms.", t.getTimeMillis()));
     } catch (Throwable e) {
       log(Level.SEVERE, null, "Initialize [%s] container occurred error!", APP_NAME);
       throw new CorantRuntimeException(e);
@@ -733,7 +733,7 @@ public class Corant implements AutoCloseable {
       CorantBootHandler.load(classLoader, cmd.getArguments())
           .forEach(h -> h.handleAfterStarted(this, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      logInfo("The after start boot handlers are disabled!");
+      logInfo("All post-started spi processing is disabled!");
     }
   }
 
@@ -746,7 +746,7 @@ public class Corant implements AutoCloseable {
       CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
           h -> h.handleAfterStopped(classLoader, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      logInfo("The after stopped handlers are disabled!");
+      logInfo("All post-started spi processing is disabled!");
     }
   }
 
@@ -759,7 +759,7 @@ public class Corant implements AutoCloseable {
       CorantBootHandler.load(classLoader, cmd.getArguments()).forEach(
           h -> h.handleBeforeStart(classLoader, Arrays.copyOf(arguments, arguments.length)));
     } else {
-      logInfo("The before start boot handlers are disabled!");
+      logInfo("All pre-start spi processing is disabled!");
     }
   }
 

@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import io.smallrye.health.SmallRyeHealth;
-import io.smallrye.health.SmallRyeHealthReporter;
 
 /**
  * corant-modules-microprofile-healthcheck

@@ -78,7 +78,7 @@ public class JaxrsExtension implements Extension {
     }
   }
 
-  protected <T> void proessResources(
+  protected <T> void processResources(
       @WithAnnotations({Path.class}) @Observes ProcessAnnotatedType<T> event,
       BeanManager beanManager) {
     final AnnotatedType<T> annotatedType = event.getAnnotatedType();
@@ -93,7 +93,7 @@ public class JaxrsExtension implements Extension {
       }
     } else {
       logger.info(() -> String.format(
-          "Veto the jaxrs resource [%s] which not interface and are not EJB session bean", clazz));
+          "Veto a jaxrs resource [%s] which not interface and are not EJB session bean", clazz));
     }
   }
 

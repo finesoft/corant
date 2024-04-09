@@ -315,6 +315,36 @@ public enum ASTNodeType {
   },
 
   /**
+   * The null value logic node.
+   */
+  NVL("$nvl", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTNVLNode();
+    }
+  },
+
+  /**
+   * The non null value predicate node.
+   */
+  NON_NULL("$nonNull", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTNullCheckNode(true);
+    }
+  },
+
+  /**
+   * The non null value predicate node.
+   */
+  IS_NULL("$isNull", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTNullCheckNode(false);
+    }
+  },
+
+  /**
    * The function node
    */
   FUN("#", false) {

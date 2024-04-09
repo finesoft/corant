@@ -39,7 +39,7 @@
       <groupId>org.eclipse</groupId>
       <artifactId>yasson</artifactId>
     </dependency>
- 	<dependency>
+ 	  <dependency>
       <groupId>jakarta.security.enterprise</groupId>
       <artifactId>jakarta.security.enterprise-api</artifactId>
     </dependency>    

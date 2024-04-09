@@ -16,7 +16,9 @@ package org.corant.context.required;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.getUserClass;
-import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
+import java.lang.reflect.Type;
 import java.util.Set;
 import java.util.logging.Logger;
 import jakarta.annotation.Priority;
@@ -25,19 +27,17 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
 import jakarta.enterprise.inject.spi.Annotated;
-import jakarta.enterprise.inject.spi.AnnotatedField;
-import jakarta.enterprise.inject.spi.AnnotatedMethod;
-import jakarta.enterprise.inject.spi.AnnotatedType;
 import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.Extension;
-import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
-import jakarta.enterprise.inject.spi.WithAnnotations;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.service.RequiredClassNotPresent;
 import org.corant.shared.service.RequiredClassPresent;
 import org.corant.shared.service.RequiredConfiguration;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Services;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-context
@@ -45,6 +45,8 @@ import org.corant.shared.util.Services;
  * @author bingo 下午5:08:08
  */
 public class RequiredExtension implements Extension {
+
+  public static final String VETO_BEAN_CFG_NAMES = "corant.context.veto.beans";
 
   static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
 
@@ -62,17 +64,19 @@ public class RequiredExtension implements Extension {
     return beanType != null && Services.getRequired().removeVeto(getUserClass(beanType));
   }
 
-  protected void onProcessAnnotatedType(
-      @Observes @Priority(Priorities.FRAMEWORK_LOWER) @WithAnnotations({
-          RequiredClassNotPresent.class, RequiredClassPresent.class,
-          RequiredConfiguration.class}) ProcessAnnotatedType<?> event) {
-    // Veto bean which was discovered by normal scope
-    AnnotatedType<?> type = event.getAnnotatedType();
-    if (Services.getRequired().shouldVeto(getUserClass(type.getJavaClass()))) {
-      event.veto();
-      logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
-          event.getAnnotatedType().getJavaClass().getName()));
-    }
+  protected void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
+      final BeanManager beanManager) {
+    ConfigProvider.getConfig().getOptionalValues(VETO_BEAN_CFG_NAMES, String.class)
+        .ifPresent(beans -> {
+          for (String bean : beans) {
+            if (isNotBlank(bean)) {
+              Class<?> beanClass = Classes.tryAsClass(trim(bean));
+              if (beanClass != null) {
+                addVeto(beanClass);
+              }
+            }
+          }
+        });
   }
 
   void afterBeanDiscovery(@Observes @Priority(Priorities.FRAMEWORK_HIGHER) AfterBeanDiscovery e) {
@@ -90,25 +94,34 @@ public class RequiredExtension implements Extension {
 
   void onProcessBeanAttributes(
       @Observes @Priority(Priorities.FRAMEWORK_LOWER) ProcessBeanAttributes<?> event) {
-    // Veto bean which was discovered by producer method or producer field if necessary
+    // Veto bean which was discovered if necessary
     Annotated annotated = event.getAnnotated();
-    if (annotated instanceof AnnotatedMethod || annotated instanceof AnnotatedField) {
+    Type baseType = annotated.getBaseType();
+    boolean veto = false;
+    if ((baseType instanceof Class baseClass)
+        && Services.getRequired().shouldVeto(getUserClass(baseClass))) {
+      veto = true;
+    }
+    if (!veto && (annotated.isAnnotationPresent(RequiredClassNotPresent.class)
+        || annotated.isAnnotationPresent(RequiredClassPresent.class)
+        || annotated.isAnnotationPresent(RequiredConfiguration.class))) {
       Set<RequiredClassNotPresent> requiredClassNotPresents =
           annotated.getAnnotations(RequiredClassNotPresent.class);
       Set<RequiredClassPresent> requiredClassPresents =
           annotated.getAnnotations(RequiredClassPresent.class);
       Set<RequiredConfiguration> requiredConfigurations =
           annotated.getAnnotations(RequiredConfiguration.class);
-      if ((isNotEmpty(requiredClassNotPresents) || isNotEmpty(requiredClassPresents)
-          || isNotEmpty(requiredConfigurations))
-          && Services.getRequired().shouldVeto(this.getClass().getClassLoader(),
-              requiredClassPresents.toArray(RequiredClassPresent[]::new),
-              requiredClassNotPresents.toArray(RequiredClassNotPresent[]::new),
-              requiredConfigurations.toArray(RequiredConfiguration[]::new))) {
-        event.veto();
-        logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
-            event.getAnnotated().getBaseType().getTypeName()));
+      if (Services.getRequired().shouldVeto(this.getClass().getClassLoader(),
+          requiredClassPresents.toArray(RequiredClassPresent[]::new),
+          requiredClassNotPresents.toArray(RequiredClassNotPresent[]::new),
+          requiredConfigurations.toArray(RequiredConfiguration[]::new))) {
+        veto = true;
       }
+    }
+    if (veto) {
+      event.veto();
+      logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
+          baseType.getTypeName()));
     }
   }
 

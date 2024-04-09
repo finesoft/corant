@@ -84,8 +84,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected int compare(Object left, Object right) {
-      if (left instanceof Number numberLeft && right instanceof Number) {
-        Number numberRight = (Number) right;
+      if (left instanceof Number numberLeft && right instanceof Number numberRight) {
         if (numberLeft instanceof BigDecimal || numberRight instanceof BigDecimal) {
           return compare(numberLeft, numberRight, BigDecimal.class);
         } else if (numberLeft instanceof Double || numberRight instanceof Double) {
@@ -272,7 +271,10 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       if (left instanceof Number && right instanceof Number) {
         return compare(left, right) != 0;
       }
-      return !areEqual(left, right);
+      if (left != null) {
+        return left.equals(right);
+      }
+      return false;
     }
   }
 

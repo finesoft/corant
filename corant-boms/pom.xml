@@ -49,7 +49,7 @@
 		<version.commons-vfs2>2.9.0</version.commons-vfs2>
 		<version.datastax.cassandra>3.7.1</version.datastax.cassandra>
 		<version.eclipse-collections>11.1.0</version.eclipse-collections>
-		<version.eclipse.yasson>3.0.3</version.eclipse.yasson>
+		<version.eclipse.yasson>2.0.4</version.eclipse.yasson>
 		<version.ehcache>3.10.8</version.ehcache>
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.exec-maven-plugin>3.1.0</version.exec-maven-plugin>

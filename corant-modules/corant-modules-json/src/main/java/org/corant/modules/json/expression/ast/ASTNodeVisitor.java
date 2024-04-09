@@ -36,12 +36,19 @@ public interface ASTNodeVisitor extends Sortable {
       case LG_XOR:
         shouldBeTrue(node.getChildren().size() == 2);
         break;
+      case NON_NULL:
+      case IS_NULL:
+        shouldBeTrue(node.getChildren().size() == 1);
+        break;
       case CP_REGEX:
         shouldBeTrue(node.getChildren().size() == 2
             && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VAL);
         break;
       case CP_BTW:
+        shouldBeTrue(node.getChildren().size() == 3);
+        break;
       case CONDITIONAL:
+      case NVL:
         shouldBeTrue(node.getChildren().size() == 2 || node.getChildren().size() == 3);
         break;
       case CP_IN:

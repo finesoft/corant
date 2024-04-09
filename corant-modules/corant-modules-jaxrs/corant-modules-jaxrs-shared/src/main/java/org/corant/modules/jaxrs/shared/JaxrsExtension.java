@@ -67,7 +67,7 @@ public class JaxrsExtension implements Extension {
         && !ProxyUtils.isCDIUnproxyableClass(clazz)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         providers.add(clazz);
-        logger.fine(() -> String.format("Find a jaxrs provider [%s]", clazz));
+        logger.fine(() -> String.format("Found a jaxrs provider [%s]", clazz));
       } else {
         logger.info(() -> String
             .format("Veto a jaxrs provider [%s] which don't meet the requirements", clazz));
@@ -86,7 +86,7 @@ public class JaxrsExtension implements Extension {
     if (!clazz.isInterface() && !isSessionBean(annotatedType)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         resources.add(clazz);
-        logger.fine(() -> String.format("Find a jaxrs resource [%s]", clazz));
+        logger.fine(() -> String.format("Found a jaxrs resource [%s]", clazz));
       } else {
         logger.info(() -> String
             .format("Veto a jaxrs resource [%s] which don't meet the requirements", clazz));

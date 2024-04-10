@@ -13,9 +13,11 @@
  */
 package org.corant.modules.microprofile.jwt.jaxrs;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.io.IOException;
 import java.security.Principal;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -25,8 +27,6 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.SecurityContext;
-import jakarta.annotation.Priority;
-import org.corant.config.Configs;
 import org.corant.modules.microprofile.jwt.MpJWTAuthenticator;
 import org.corant.modules.microprofile.jwt.MpJWTJsonWebToken;
 import org.corant.modules.microprofile.jwt.MpJWTPrincipal;
@@ -53,7 +53,7 @@ public class MpJWTAuthenticationFilter extends JWTAuthenticationFilter {
   public static final String AUTHC_EXCEPTION_KEY = "___AUTHC-EX___";
   public static final String AUTHZ_EXCEPTION_KEY = "___AUTHZ-EX___";
   public static final boolean SUPPRESS_UNAUTHENTICATED =
-      Configs.getValue("corant.microprofile.jwt.suppress-unauthenticated", Boolean.class, false);
+      getConfigValue("corant.microprofile.jwt.suppress-unauthenticated", Boolean.class, false);
 
   protected static final Logger logger = Logger.getLogger(MpJWTAuthenticationFilter.class);
   protected static final boolean debugLogging = logger.isDebugEnabled();

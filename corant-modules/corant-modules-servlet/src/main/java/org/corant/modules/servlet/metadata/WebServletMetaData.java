@@ -14,6 +14,7 @@
 package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAllAssembledConfigValues;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,7 +23,6 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.ServletSecurity;
 import jakarta.servlet.annotation.WebServlet;
-import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -288,8 +288,8 @@ public class WebServletMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = defaultObject(Configs.assemblyStringConfigProperties(urlPatterns),
-        () -> Strings.EMPTY_ARRAY);
+    this.urlPatterns =
+        defaultObject(getAllAssembledConfigValues(urlPatterns), () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -297,8 +297,7 @@ public class WebServletMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value =
-        defaultObject(Configs.assemblyStringConfigProperties(value), () -> Strings.EMPTY_ARRAY);
+    this.value = defaultObject(getAllAssembledConfigValues(value), () -> Strings.EMPTY_ARRAY);
   }
 
 }

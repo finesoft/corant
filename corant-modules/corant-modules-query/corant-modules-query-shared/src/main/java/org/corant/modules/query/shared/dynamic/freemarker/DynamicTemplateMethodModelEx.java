@@ -15,13 +15,13 @@ package org.corant.modules.query.shared.dynamic.freemarker;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Classes.asClass;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.trim;
 import java.util.List;
-import org.corant.config.Configs;
 import org.corant.modules.query.QueryRuntimeException;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
@@ -96,11 +96,11 @@ public interface DynamicTemplateMethodModelEx<P> extends TemplateMethodModelEx {
           }
         }
         if (defaultValue == null) {
-          return Configs.getValue(configName, configClass);
+          return getConfigValue(configName, configClass);
         } else {
           final Class<?> cc = configClass;
           final Object dv = defaultValue;
-          return defaultObject(Configs.getValue(configName, configClass), () -> toObject(dv, cc));
+          return defaultObject(getConfigValue(configName, configClass), () -> toObject(dv, cc));
         }
       }
       return null;

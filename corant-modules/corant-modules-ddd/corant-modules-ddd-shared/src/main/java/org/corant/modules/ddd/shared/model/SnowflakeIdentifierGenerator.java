@@ -14,12 +14,12 @@
 package org.corant.modules.ddd.shared.model;
 
 import static org.corant.context.Beans.findAnyway;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Fields;
 import org.corant.shared.util.Identifiers.GeneralSnowflakeUUIDGenerator;
@@ -45,8 +45,8 @@ public class SnowflakeIdentifierGenerator {
   public static final String IG_SF_DL_TM = "corant.identifier.generator.snowflake.delayed-timing";
   static Logger logger = Logger.getLogger(SnowflakeIdentifierGenerator.class.getName());
 
-  final boolean retainEntitySelfId = Configs.getValue(IG_SF_RESI, Boolean.TYPE, false);
-  final String entityIdPropertyName = Configs.getValue(IG_SF_EIPN, String.class, "id");
+  final boolean retainEntitySelfId = getConfigValue(IG_SF_RESI, Boolean.TYPE, false);
+  final String entityIdPropertyName = getConfigValue(IG_SF_EIPN, String.class, "id");
 
   TimeService specTimeGenerator;
   GeneralSnowflakeUUIDGenerator generator;
@@ -66,10 +66,10 @@ public class SnowflakeIdentifierGenerator {
   synchronized void initialize() {
     specTimeGenerator = findAnyway(TimeService.class)
         .orElse((o, s) -> s ? System.currentTimeMillis() / 1000L + 1 : System.currentTimeMillis());
-    int dataCenterId = Configs.getValue(IG_SF_DC_ID, Integer.class, -1);
-    int workerId = Configs.getValue(IG_SF_WK_ID, Integer.class, -1);
-    String ip = Configs.getValue(IG_SF_WK_IP, String.class);
-    long delayedTiming = Configs.getValue(IG_SF_DL_TM, Long.class, 16000L);
+    int dataCenterId = getConfigValue(IG_SF_DC_ID, Integer.class, -1);
+    int workerId = getConfigValue(IG_SF_WK_ID, Integer.class, -1);
+    String ip = getConfigValue(IG_SF_WK_IP, String.class);
+    long delayedTiming = getConfigValue(IG_SF_DL_TM, Long.class, 16000L);
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
         generator = new SnowflakeD5W5S12UUIDGenerator(dataCenterId, workerId, delayedTiming);

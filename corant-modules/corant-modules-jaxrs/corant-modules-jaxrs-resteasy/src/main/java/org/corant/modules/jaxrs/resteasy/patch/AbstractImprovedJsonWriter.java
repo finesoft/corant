@@ -13,12 +13,12 @@
  */
 package org.corant.modules.jaxrs.resteasy.patch;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.MessageBodyWriter;
-import org.corant.config.Configs;
 import org.corant.shared.ubiquity.Atomics;
 import org.jboss.resteasy.core.providerfactory.ResteasyProviderFactoryImpl;
 import org.jboss.resteasy.core.providerfactory.SortedKey;
@@ -34,7 +34,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 public abstract class AbstractImprovedJsonWriter<T> implements AsyncMessageBodyWriter<T> {
 
   protected static boolean cacheOriginalJsonWriter =
-      Configs.getValue("corant.resteasy.patch.cache-original-json-writer", Boolean.TYPE, true);
+      getConfigValue("corant.resteasy.patch.cache-original-json-writer", Boolean.TYPE, true);
 
   protected static Supplier<ResteasyJackson2Provider> cacheProvider =
       Atomics.strictAtomicInitializer(AbstractImprovedJsonWriter::resolveOriginalProvider);

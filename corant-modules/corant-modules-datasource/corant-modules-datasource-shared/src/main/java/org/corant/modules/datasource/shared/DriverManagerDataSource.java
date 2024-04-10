@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.strip;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -25,7 +26,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
@@ -63,9 +63,9 @@ public class DriverManagerDataSource implements DataSource {
 
   public DriverManagerDataSource(String jdbcUrl, String driverClassName, Properties properties,
       String username, String password, String catalog, String schema) {
-    this.jdbcUrl = Configs.assemblyStringConfigProperty(strip(jdbcUrl));
-    this.catalog = Configs.assemblyStringConfigProperty(catalog);
-    this.schema = Configs.assemblyStringConfigProperty(schema);
+    this.jdbcUrl = getAssembledConfigValue(strip(jdbcUrl));
+    this.catalog = getAssembledConfigValue(catalog);
+    this.schema = getAssembledConfigValue(schema);
     this.properties = new Properties();
     if (properties != null) {
       properties.forEach((k, v) -> this.properties.put(k.toString(), v.toString()));

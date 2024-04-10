@@ -14,6 +14,7 @@
 package org.corant.modules.ddd.shared.model;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.Optional;
 import java.util.logging.Logger;
 import jakarta.persistence.ExcludeDefaultListeners;
@@ -24,7 +25,6 @@ import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
-import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.shared.unitwork.UnitOfWorks;
@@ -43,7 +43,7 @@ import org.corant.modules.jta.shared.TransactionService;
 public class DefaultAggregateListener {
 
   protected static final boolean supportsNotTransactionLoad =
-      Configs.getValue("corant.ddd.unitofwork.support-no-transaction-load", Boolean.TYPE, true);
+      getConfigValue("corant.ddd.unitofwork.support-no-transaction-load", Boolean.TYPE, true);
 
   protected final transient Logger logger = Logger.getLogger(this.getClass().toString());
 

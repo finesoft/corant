@@ -48,9 +48,9 @@ public class RequiredExtension implements Extension {
 
   public static final String VETO_BEAN_CFG_NAMES = "corant.context.veto.beans";
 
-  static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
+  protected static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
 
-  private static volatile boolean afterBeanDiscovery = false;
+  protected static volatile boolean afterBeanDiscovery = false;
 
   public static boolean addVeto(Class<?> beanType) {
     shouldBeFalse(afterBeanDiscovery,

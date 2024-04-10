@@ -13,10 +13,10 @@
  */
 package org.corant.modules.validation;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import org.corant.config.Configs;
 import org.corant.modules.bundle.PropertyMessageSource;
 import org.corant.modules.bundle.PropertyResourceBundle;
 import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
@@ -35,7 +35,7 @@ import org.hibernate.validator.spi.resourceloading.ResourceBundleLocator;
 public class PrioritizedResourceBundleLocator implements ResourceBundleLocator {
 
   protected static final Map<Locale, PropertyResourceBundle> bundles = PropertyResourceBundle
-      .getFoldedLocaleBundles(Configs.getValue(PropertyMessageSource.BUNDLE_PATHS_CFG_KEY,
+      .getFoldedLocaleBundles(getConfigValue(PropertyMessageSource.BUNDLE_PATHS_CFG_KEY,
           String.class, PropertyMessageSource.DEFAULT_BUNDLE_PATHS));
 
   @Override

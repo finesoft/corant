@@ -1,5 +1,6 @@
 package org.corant.modules.jcache.shared;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import javax.cache.CacheManager;
@@ -9,7 +10,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
-import org.corant.config.Configs;
 import org.corant.context.qualifier.SURI;
 
 /**
@@ -36,9 +36,9 @@ public class CacheManagerProducer {
       }
     }
     if (suri != null) {
-      cacheManager = cachingProvider.getCacheManager(
-          URI.create(Configs.assemblyStringConfigProperty(suri.value())),
-          CacheManagerProducer.class.getClassLoader());
+      cacheManager =
+          cachingProvider.getCacheManager(URI.create(getAssembledConfigValue(suri.value())),
+              CacheManagerProducer.class.getClassLoader());
     } else {
       cacheManager = cachingProvider.getCacheManager();
     }

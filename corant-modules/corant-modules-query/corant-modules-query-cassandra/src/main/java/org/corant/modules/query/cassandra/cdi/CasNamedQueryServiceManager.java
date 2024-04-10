@@ -14,6 +14,7 @@
 package org.corant.modules.query.cassandra.cdi;
 
 import static org.corant.context.Beans.findNamed;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -21,7 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import org.corant.config.Configs;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.cassandra.AbstractCasNamedQueryService;
 import org.corant.modules.query.cassandra.CasNamedQuerier;
@@ -34,11 +39,6 @@ import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.datastax.driver.core.Cluster;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-cassandra
@@ -104,9 +104,8 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return Configs
-        .assemblyStringConfigProperty(qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
-            : asDefaultString(qualifier));
+    return getAssembledConfigValue(qualifier instanceof CasQuery ? ((CasQuery) qualifier).value()
+        : asDefaultString(qualifier));
   }
 
   /**

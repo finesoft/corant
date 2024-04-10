@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.logging.Logger;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,7 +22,6 @@ import jakarta.enterprise.event.TransactionPhase;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import org.corant.config.Configs;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
@@ -42,8 +42,8 @@ import org.corant.shared.normal.Priorities;
 @InfrastructureServices
 public class DefaultAggregateLifecycleManager implements AggregateLifecycleManager {
 
-  protected static final boolean forceMerge = Configs.<Boolean>getValue(
-      "corant.ddd.aggregate.lifecycle.force-merge", Boolean.class, Boolean.FALSE);
+  protected static final boolean forceMerge =
+      getConfigValue("corant.ddd.aggregate.lifecycle.force-merge", Boolean.class, Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 

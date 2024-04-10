@@ -14,9 +14,9 @@
 package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import java.util.Arrays;
 import jakarta.servlet.annotation.WebInitParam;
-import org.corant.config.Configs;
 
 /**
  * corant-modules-servlet
@@ -83,7 +83,7 @@ public class WebInitParamMetaData {
   }
 
   protected void setValue(String value) {
-    this.value = Configs.assemblyStringConfigProperty(value);
+    this.value = getAssembledConfigValue(value);
   }
 
 }

@@ -15,6 +15,7 @@ package org.corant.modules.query.sql.cdi;
 
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.asDefaultString;
@@ -28,7 +29,11 @@ import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.corant.config.Configs;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.query.mapping.Query.QueryType;
@@ -46,11 +51,6 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-sql
@@ -148,10 +148,10 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
       // } catch (URISyntaxException e) {
       // throw new CorantRuntimeException(e);
       // }
-      return Configs.assemblyStringConfigProperty(
+      return getAssembledConfigValue(
           q.value().concat(Names.DOMAIN_SPACE_SEPARATORS).concat(q.dialect()));
     } else {
-      return Configs.assemblyStringConfigProperty(asDefaultString(qualifier));
+      return getAssembledConfigValue(asDefaultString(qualifier));
     }
   }
 

@@ -83,29 +83,6 @@ public class StringTemplate {
     this.expandedLimit = expandedLimit;
   }
 
-  public static String parseSimpleDollar(String propertyName, Function<String, String> provider) {
-    int startVar = 0;
-    String resolvedValue = propertyName;
-    while ((startVar = resolvedValue.indexOf(DEFAULT_MACRO_PREFIX, startVar)) >= 0) {
-      int endVar = resolvedValue.indexOf(DEFAULT_MACRO_SUFFIX, startVar);
-      if (endVar <= 0) {
-        break;
-      }
-      String varName = resolvedValue.substring(startVar + 2, endVar);
-      if (varName.isEmpty()) {
-        break;
-      }
-      String varVal = provider.apply(varName);
-      if (varVal != null) {
-        resolvedValue = parseSimpleDollar(
-            resolvedValue.replace(DEFAULT_MACRO_PREFIX + varName + DEFAULT_MACRO_SUFFIX, varVal),
-            provider);
-      }
-      startVar++;
-    }
-    return resolvedValue;
-  }
-
   public String getEscape() {
     return escape;
   }

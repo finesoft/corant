@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.jpql.cdi;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -20,7 +21,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import org.corant.config.Configs;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManagerFactory;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.PersistenceService;
 import org.corant.modules.query.jpql.AbstractJpqlNamedQueryService;
@@ -30,12 +36,6 @@ import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManagerFactory;
 
 /**
  * corant-modules-query-jpql
@@ -99,9 +99,8 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return Configs.assemblyStringConfigProperty(
-        qualifier instanceof JpqlQuery ? ((JpqlQuery) qualifier).value()
-            : asDefaultString(qualifier));
+    return getAssembledConfigValue(qualifier instanceof JpqlQuery ? ((JpqlQuery) qualifier).value()
+        : asDefaultString(qualifier));
   }
 
   /**

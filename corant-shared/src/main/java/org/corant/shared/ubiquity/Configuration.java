@@ -14,12 +14,13 @@
 package org.corant.shared.ubiquity;
 
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.parseDollarTemplate;
-import static org.corant.shared.util.Strings.split;
+import static org.corant.shared.util.Strings.escapedCommaSplit;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +48,8 @@ public interface Configuration extends Sortable {
    * Returns the assembled configuration value. According to the input string, analyze whether the
    * value contains the configuration key variable, for example: '${key}', if the key variable
    * exists, replace the key variable with the relevant configuration value, if without the key
-   * variable, the passed value is not changed, and the parsed-replaced string is finally returned,
-   * which is used to enhance some of the annotated configuration flexibility.
+   * variable, the passed value is not changed, otherwise the parsed-replaced string is finally
+   * returned, which is used to enhance some of the annotated configuration flexibility.
    *
    * @param value the configuration key or the original value
    * @return the assembled value or the original given value if it can't be assembled
@@ -56,11 +57,37 @@ public interface Configuration extends Sortable {
   String getAssembledValue(String value);
 
   /**
+   * Returns the assembled configuration value list. According to the input value, analyze whether
+   * the value contains the configuration key variable, for example:'$ {key}'. If the key variable
+   * exists, get the relevant configuration value, and then use '{@code ,}' to divide the value into
+   * a list and return it. If there is no attribute name variable, the passed value is not changed,
+   * and it is returned directly. This is used to enhance some annotated configuration flexibility.
+   *
+   * @param value the configuration key or the original value
+   * @return assembled values or the original given values if it can't be assembled
+   */
+  default List<String> getAssembledValues(String value) {
+    String actualValue = getAssembledValue(value);
+    if (actualValue != null) {
+      return Arrays.asList(escapedCommaSplit(actualValue));
+    }
+    return singletonList(value);
+  }
+
+  /**
    * Returns all configuration keys
    */
   default Iterable<String> getKeys() {
     return emptySet();
   }
+
+  /**
+   * Get the configuration value by key, if the configuration doesn't exist return null.
+   *
+   * @param key the configuration key
+   * @return the relevant configuration value
+   */
+  String getValue(String key);
 
   /**
    * Get the configuration value by key, if the configuration doesn't exist return null.
@@ -121,7 +148,7 @@ public interface Configuration extends Sortable {
   default <T> List<T> getValues(String key, Class<T> valueType) {
     Object object = getValue(key, Object.class);
     if (object instanceof String string) {
-      String[] arrays = split(string, ",");
+      String[] arrays = escapedCommaSplit(string);
       return toList(arrays, valueType);
     } else if (object instanceof Collection<?> collection) {
       return toList(collection, valueType);
@@ -148,7 +175,7 @@ public interface Configuration extends Sortable {
 
     @Override
     public String getAssembledValue(String value) {
-      return parseDollarTemplate(value, k -> getValue(k, String.class));
+      return StringTemplate.DEFAULT.parse(value, k -> getValue(k, String.class));
     }
 
     @Override
@@ -156,6 +183,11 @@ public interface Configuration extends Sortable {
       return Iterables.concat(
           Sets.transform(System.getProperties().keySet(), t -> t == null ? null : t.toString()),
           System.getenv().keySet());
+    }
+
+    @Override
+    public String getValue(String key) {
+      return StringTemplate.DEFAULT.parse(getRawValue(key), this::getRawValue);
     }
 
     @Override
@@ -168,7 +200,7 @@ public interface Configuration extends Sortable {
       return toObject(getValue(key), valueTypeLiteral);
     }
 
-    protected String getValue(String key) {
+    protected String getRawValue(String key) {
       return defaultObject(Systems.getProperty(key), () -> Systems.getEnvironmentVariable(key));
     }
   }

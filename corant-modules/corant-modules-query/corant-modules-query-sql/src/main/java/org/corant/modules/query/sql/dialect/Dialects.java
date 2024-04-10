@@ -14,11 +14,11 @@
 package org.corant.modules.query.sql.dialect;
 
 import static java.util.Collections.unmodifiableMap;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import org.corant.config.Configs;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.shared.util.Services;
 
@@ -30,7 +30,7 @@ import org.corant.shared.util.Services;
 public class Dialects {
 
   public static final boolean USE_CUSTOM_DIALECT =
-      Configs.getValue("corant.query.sql.use-custom-dialect", Boolean.TYPE, false);
+      getConfigValue("corant.query.sql.use-custom-dialect", Boolean.TYPE, false);
 
   public static final Map<DBMS, Dialect> DEFAULT_DIALECTS;
 

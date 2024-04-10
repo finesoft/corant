@@ -15,6 +15,7 @@ package org.corant.modules.jaxrs.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Streams.copy;
 import java.io.File;
@@ -23,7 +24,6 @@ import java.io.InputStream;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.StreamingOutput;
-import org.corant.config.Configs;
 import org.corant.modules.servlet.HttpStreamOutput;
 import org.corant.modules.servlet.HttpStreamOutput.HttpStreamOutputBuilder;
 import org.corant.modules.servlet.HttpStreamOutput.HttpStreamOutputResult;
@@ -49,7 +49,7 @@ public class StreamResponseBuilder {
   protected HttpStreamOutput output;
 
   protected boolean supportRange =
-      Configs.getValue("corant.modules.jaxrs.stream.support-range", Boolean.class, true);
+      getConfigValue("corant.modules.jaxrs.stream.support-range", Boolean.class, true);
 
   protected StreamResponseBuilder() {}
 

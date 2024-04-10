@@ -13,6 +13,7 @@
  */
 package org.corant.context.service;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -22,7 +23,6 @@ import java.util.stream.Stream;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.Configs;
 import org.corant.context.qualifier.SURI;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.URLResource;
@@ -46,7 +46,7 @@ public class ResourceProvider {
     }
     if (suri != null) {
       try {
-        return Resources.from(Configs.assemblyStringConfigProperty(suri.value()));
+        return Resources.from(getAssembledConfigValue(suri.value()));
       } catch (IOException e) {
         throw new CorantRuntimeException(e);
       }

@@ -14,6 +14,7 @@
 package org.corant.context.concurrent;
 
 import static org.corant.shared.util.Classes.tryAsClass;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Lists.newArrayList;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -96,21 +97,21 @@ public class ConcurrentExtension implements Extension {
   public static final String JNDI_SUBCTX_NAME = JndiNames.JNDI_COMP_NME + "/concurrent";
 
   public static final boolean ENABLE_DFLT_MES =
-      Configs.<Boolean>getValue(ENABLE_DFLT_MES_CFG, Boolean.class, Boolean.TRUE);
+      getConfigValue(ENABLE_DFLT_MES_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_DFLT_MSES =
-      Configs.<Boolean>getValue(ENABLE_DFLT_MSES_CFG, Boolean.class, Boolean.TRUE);
+      getConfigValue(ENABLE_DFLT_MSES_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_DFLT_CS =
-      Configs.<Boolean>getValue(ENABLE_DFLT_CS_CFG, Boolean.class, Boolean.TRUE);
+      getConfigValue(ENABLE_DFLT_CS_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_DFLT_MTF =
-      Configs.<Boolean>getValue(ENABLE_DFLT_MTF_CFG, Boolean.class, Boolean.TRUE);
+      getConfigValue(ENABLE_DFLT_MTF_CFG, Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_HUNG_TASK_LOGGER =
-      Configs.<Boolean>getValue(ENABLE_HUNG_TASK_LOGGER_CFG, Boolean.class, Boolean.FALSE);
+      getConfigValue(ENABLE_HUNG_TASK_LOGGER_CFG, Boolean.class, Boolean.FALSE);
   public static final boolean ENABLE_EXE_RUNNABLE_LOGGER =
-      Configs.<Boolean>getValue(ENABLE_EXE_RUNNABLE_LOGGER_CFG, Boolean.class, Boolean.TRUE);
-  public static final boolean ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR = Configs
-      .<Boolean>getValue(ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG, Boolean.class, Boolean.FALSE);
+      getConfigValue(ENABLE_EXE_RUNNABLE_LOGGER_CFG, Boolean.class, Boolean.TRUE);
+  public static final boolean ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR =
+      getConfigValue(ENABLE_CONCURRENT_THROTTLE_INTERCEPTOR_CFG, Boolean.class, Boolean.FALSE);
   public static final boolean ENABLE_ASYNC_INTERCEPTOR =
-      Configs.<Boolean>getValue(ENABLE_ASYNC_INTERCEPTOR_CFG, Boolean.class, Boolean.FALSE);
+      getConfigValue(ENABLE_ASYNC_INTERCEPTOR_CFG, Boolean.class, Boolean.FALSE);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 

@@ -14,6 +14,7 @@
 package org.corant.modules.servlet.metadata;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAllAssembledConfigValues;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import java.util.Map;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.annotation.WebFilter;
-import org.corant.config.Configs;
 import org.corant.shared.util.Strings;
 
 /**
@@ -258,8 +258,8 @@ public class WebFilterMetaData {
    * @param servletNames the servletNames to set
    */
   protected void setServletNames(String[] servletNames) {
-    this.servletNames = defaultObject(Configs.assemblyStringConfigProperties(servletNames),
-        () -> Strings.EMPTY_ARRAY);
+    this.servletNames =
+        defaultObject(getAllAssembledConfigValues(servletNames), () -> Strings.EMPTY_ARRAY);
   }
 
   /**
@@ -273,7 +273,7 @@ public class WebFilterMetaData {
    * @param urlPatterns the urlPatterns to set
    */
   protected void setUrlPatterns(String[] urlPatterns) {
-    this.urlPatterns = Configs.assemblyStringConfigProperties(urlPatterns);
+    this.urlPatterns = getAllAssembledConfigValues(urlPatterns);
   }
 
   /**
@@ -281,8 +281,7 @@ public class WebFilterMetaData {
    * @param value the value to set
    */
   protected void setValue(String[] value) {
-    this.value =
-        defaultObject(Configs.assemblyStringConfigProperties(value), () -> Strings.EMPTY_ARRAY);
+    this.value = defaultObject(getAllAssembledConfigValues(value), () -> Strings.EMPTY_ARRAY);
   }
 
 }

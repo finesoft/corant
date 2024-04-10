@@ -47,6 +47,11 @@ import junit.framework.TestCase;
  */
 public class StringsTest extends TestCase {
 
+  public static void main(String[] args) {
+    String s = "1.2.\\..  .  3.4.5";
+    System.out.println("#" + String.join("|", Strings.escapedDotSplit(s, true, true)) + "#");
+  }
+
   @Test
   public void testAsDefaultString() {
     Object obj = "bingo";

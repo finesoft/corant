@@ -13,7 +13,7 @@
  */
 package org.corant.config;
 
-import java.util.Collections;
+import static java.util.Collections.emptyList;
 import java.util.List;
 import org.corant.shared.ubiquity.Configuration;
 import org.corant.shared.ubiquity.TypeLiteral;
@@ -42,8 +42,18 @@ public class MicroprofileConfiguration implements Configuration {
   }
 
   @Override
+  public List<String> getAssembledValues(String value) {
+    return Configs.assemblyStringConfigProperties(value);
+  }
+
+  @Override
   public Iterable<String> getKeys() {
     return getConfig().getPropertyNames();
+  }
+
+  @Override
+  public String getValue(String key) {
+    return getConfig().getOptionalValue(key, String.class).orElse(null);
   }
 
   @Override
@@ -58,7 +68,7 @@ public class MicroprofileConfiguration implements Configuration {
 
   @Override
   public <T> List<T> getValues(String key, Class<T> valueType) {
-    return getConfig().getOptionalValues(key, valueType).orElse(Collections.emptyList());
+    return getConfig().getOptionalValues(key, valueType).orElse(emptyList());
   }
 
   protected CorantConfig getConfig() {

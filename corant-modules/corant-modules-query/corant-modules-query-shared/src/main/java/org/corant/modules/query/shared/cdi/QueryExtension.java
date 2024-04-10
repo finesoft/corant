@@ -14,17 +14,11 @@
 package org.corant.modules.query.shared.cdi;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.corant.config.Configs;
-import org.corant.context.qualifier.AutoCreated;
-import org.corant.modules.query.shared.QueryMappingService;
-import org.corant.modules.query.shared.declarative.DeclarativeQueryService;
-import org.corant.modules.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
-import org.corant.shared.normal.Priorities;
-import org.corant.shared.util.Services;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
@@ -34,6 +28,12 @@ import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.WithAnnotations;
+import org.corant.context.qualifier.AutoCreated;
+import org.corant.modules.query.shared.QueryMappingService;
+import org.corant.modules.query.shared.declarative.DeclarativeQueryService;
+import org.corant.modules.query.shared.declarative.DeclarativeQueryServiceDelegateBean;
+import org.corant.shared.normal.Priorities;
+import org.corant.shared.util.Services;
 
 /**
  * corant-modules-query-shared
@@ -45,7 +45,7 @@ import jakarta.enterprise.inject.spi.WithAnnotations;
 public class QueryExtension implements Extension {
 
   public static boolean verifyDeployment =
-      Configs.getValue("corant.query.verify-deployment", Boolean.TYPE, false);
+      getConfigValue("corant.query.verify-deployment", Boolean.TYPE, false);
 
   protected final Logger logger = Logger.getLogger(this.getClass().getName());
 

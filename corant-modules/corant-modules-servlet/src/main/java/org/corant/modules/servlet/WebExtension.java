@@ -13,10 +13,11 @@
  */
 package org.corant.modules.servlet;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
+import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.BeforeShutdown;
@@ -31,8 +32,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.annotation.WebListener;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
-import jakarta.annotation.Priority;
-import org.corant.config.Configs;
 import org.corant.modules.servlet.metadata.WebFilterMetaData;
 import org.corant.modules.servlet.metadata.WebListenerMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
@@ -48,7 +47,7 @@ import org.corant.shared.util.Services;
 public class WebExtension implements Extension, WebMetaDataProvider {
 
   protected static final boolean cdiDiscovery =
-      Configs.getValue("corant.servlet.discovery-by-cdi", Boolean.class, Boolean.TRUE);
+      getConfigValue("corant.servlet.discovery-by-cdi", Boolean.class, Boolean.TRUE);
   private final List<WebListenerMetaData> listenerMetaDatas = new ArrayList<>();
   private final List<WebServletMetaData> servletMetaDatas = new ArrayList<>();
   private final List<WebFilterMetaData> filterMetaDatas = new ArrayList<>();

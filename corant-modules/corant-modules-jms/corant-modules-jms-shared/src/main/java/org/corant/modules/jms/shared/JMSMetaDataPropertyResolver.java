@@ -13,9 +13,9 @@
  */
 package org.corant.modules.jms.shared;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Conversions.toObject;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.corant.config.Configs;
 import org.corant.modules.jms.metadata.MetaDataPropertyResolver;
 
 /**
@@ -29,7 +29,7 @@ public class JMSMetaDataPropertyResolver implements MetaDataPropertyResolver {
   @Override
   public <T> T resolve(String property, Class<T> clazz) {
     if (property != null && clazz != null) {
-      return toObject(Configs.assemblyStringConfigProperty(property), clazz);
+      return toObject(getAssembledConfigValue(property), clazz);
     }
     return toObject(property, clazz);
   }

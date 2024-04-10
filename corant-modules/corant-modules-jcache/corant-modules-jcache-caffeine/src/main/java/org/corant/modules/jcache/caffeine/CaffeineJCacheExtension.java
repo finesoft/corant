@@ -13,13 +13,13 @@
  */
 package org.corant.modules.jcache.caffeine;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
 import javax.cache.Caching;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.Extension;
-import org.corant.config.Configs;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.util.Systems;
@@ -74,15 +74,15 @@ public class CaffeineJCacheExtension implements Extension {
           Systems.getProperty(Caching.JAVAX_CACHE_CACHING_PROVIDER));
     }
     String configSource;
-    if (isNotBlank(configSource = Configs.getValue(CACHE_CONFIG_RESOURCE_KEY, String.class))) {
+    if (isNotBlank(configSource = getConfigValue(CACHE_CONFIG_RESOURCE_KEY, String.class))) {
       Systems.setProperty("config.resource", configSource);
     } else {
       for (String name : ConfigProvider.getConfig().getPropertyNames()) {
         if (name.startsWith(CACHE_CONFIG_KEY_PREFIX)) {
-          Systems.setProperty(name, Configs.getValue(name, String.class));
+          Systems.setProperty(name, getConfigValue(name, String.class));
         } else if (name.startsWith(CORANT_CAFFE_PREFIX)) {
           Systems.setProperty(CACHE_CONFIG_KEY_PREFIX + name.substring(CORANT_CAFFE_PREFIX_LEN),
-              Configs.getValue(name, String.class));
+              getConfigValue(name, String.class));
         }
       }
     }

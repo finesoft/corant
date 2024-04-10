@@ -13,7 +13,7 @@
  */
 package org.corant.context.command;
 
-import static org.corant.config.Configs.getValue;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Sets.newHashSet;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -49,10 +49,10 @@ public class CommandExtension implements Extension {
   private static final Logger logger = Logger.getLogger(CommandExtension.class.getName());
 
   static final boolean ENABLED_COMMANDS =
-      getValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
+      getConfigValue("corant.context.command.enable", Boolean.class, Boolean.TRUE);
 
-  static final boolean SUPPORT_ABSTRACT_COMMAND =
-      getValue("corant.context.command.support-abstract-command", Boolean.class, Boolean.FALSE);
+  static final boolean SUPPORT_ABSTRACT_COMMAND = getConfigValue(
+      "corant.context.command.support-abstract-command", Boolean.class, Boolean.FALSE);
 
   final Map<Class<?>, Set<Class<? extends CommandHandler<?>>>> commandAndHandler =
       new ConcurrentHashMap<>();

@@ -34,6 +34,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.StringTemplate;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.PathMatcher.GlobPatterns;
@@ -104,6 +105,16 @@ public class Strings {
   public static final String NUMBERS_AND_LOWER_CASE_LETTERS =
       "0123456789abcdefghijklmnopqrstuvwxyz";
   public static final int SPLIT_ARRAY_LENGTH = 8;
+
+  //common uses escaped delimiter
+  public static final Pattern COMMA_ESCAPED_SPLIT_PATTERN = escapedPattern(BACK_SLASH, COMMA);
+  public static final String COMMA_ESCAPED_SPLIT_REPLACEMENT = BACK_SLASH+COMMA;
+
+  public static final Pattern DOT_ESCAPED_SPLIT_PATTERN = escapedPattern(BACK_SLASH, DOT);
+  public static final String DOT_ESCAPED_SPLIT_REPLACEMENT = BACK_SLASH+DOT;
+
+  public static final Pattern SEMICOLON_ESCAPED_SPLIT_PATTERN = escapedPattern(BACK_SLASH, SEMICOLON);
+  public static final String SEMICOLON_ESCAPED_SPLIT_REPLACEMENT = BACK_SLASH+SEMICOLON;
   //@formatter:on
 
   private Strings() {}
@@ -297,6 +308,92 @@ public class Strings {
   }
 
   /**
+   * Split a string into an array of strings with comma '{@code ,}', supports escaping, use
+   * '{@code \\,}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedCommaSplit(final String str) {
+    return escapedCommaSplit(str, 0);
+  }
+
+  /**
+   * Split a string into an array of strings with comma '{@code ,}', delete blank elements or strip
+   * elements as needed. Supports escaping, use '{@code \\,}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedCommaSplit(final String str, boolean removeBlank, boolean strip) {
+    return escapedSplit(str, COMMA_ESCAPED_SPLIT_PATTERN, COMMA_ESCAPED_SPLIT_REPLACEMENT, COMMA, 0,
+        removeBlank, strip);
+  }
+
+  /**
+   * Split a string into an array of strings with comma '{@code ,}', supports escaping, use
+   * '{@code \\,}' as escape character.
+   *
+   * @param str the string to be separated
+   * @param limit The limit parameter controls the number of times the pattern is applied and
+   *        therefore affects the length of the resulting array.
+   * @return a string array or an empty string array if the given string is null or empty
+   *
+   * @see Pattern#split(CharSequence, int)
+   */
+  public static String[] escapedCommaSplit(final String str, int limit) {
+    return escapedSplit(str, COMMA_ESCAPED_SPLIT_PATTERN, COMMA_ESCAPED_SPLIT_REPLACEMENT, COMMA,
+        limit, false, false);
+  }
+
+  /**
+   * Split a string into an array of strings with dot '{@code .}', supports escaping, use
+   * '{@code \\.}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedDotSplit(final String str) {
+    return escapedDotSplit(str, 0);
+  }
+
+  /**
+   * Split a string into an array of strings with dot '{@code .}', delete blank elements or strip
+   * elements as needed. Supports escaping, use '{@code \\.}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedDotSplit(final String str, boolean removeBlank, boolean strip) {
+    return escapedSplit(str, DOT_ESCAPED_SPLIT_PATTERN, DOT_ESCAPED_SPLIT_REPLACEMENT, DOT, 0,
+        removeBlank, strip);
+  }
+
+  /**
+   * Split a string into an array of strings with dot '{@code .}', supports escaping, use
+   * '{@code \\.}' as escape character.
+   *
+   * @param str the string to be separated
+   * @param limit The limit parameter controls the number of times the pattern is applied and
+   *        therefore affects the length of the resulting array.
+   * @return a string array or an empty string array if the given string is null or empty
+   *
+   * @see Pattern#split(CharSequence, int)
+   */
+  public static String[] escapedDotSplit(final String str, int limit) {
+    return escapedSplit(str, DOT_ESCAPED_SPLIT_PATTERN, DOT_ESCAPED_SPLIT_REPLACEMENT, DOT, limit,
+        false, false);
+  }
+
+  /**
    * Returns the escaped string pattern.
    *
    * @param escapes the escape characters
@@ -313,7 +410,51 @@ public class Strings {
     } else if (isNotEmpty(quote)) {
       return Pattern.compile(Pattern.quote(quote));
     }
-    return null;
+    throw new NotSupportedException();
+  }
+
+  /**
+   * Split a string into an array of strings with semicolon '{@code ;}', supports escaping, use
+   * '{@code \\;}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedSemicolonSplit(final String str) {
+    return escapedSemicolonSplit(str, 0);
+  }
+
+  /**
+   * Split a string into an array of strings with semicolon '{@code ;}', delete blank elements or
+   * strip elements as needed. Supports escaping, use '{@code \\;}' as escape character.
+   *
+   *
+   * @param str the string to be separated
+   * @param removeBlank whether to remove the blank element in return array
+   * @param strip whether to strip the element in return array
+   * @return a string array or an empty string array if the given string is null or empty
+   */
+  public static String[] escapedSemicolonSplit(final String str, boolean removeBlank,
+      boolean strip) {
+    return escapedSplit(str, SEMICOLON_ESCAPED_SPLIT_PATTERN, SEMICOLON_ESCAPED_SPLIT_REPLACEMENT,
+        SEMICOLON, 0, removeBlank, strip);
+  }
+
+  /**
+   * Split a string into an array of strings with semicolon '{@code ;}', supports escaping, use
+   * '{@code \\;}' as escape character.
+   *
+   * @param str the string to be separated
+   * @param limit The limit parameter controls the number of times the pattern is applied and
+   *        therefore affects the length of the resulting array.
+   * @return a string array or an empty string array if the given string is null or empty
+   *
+   * @see Pattern#split(CharSequence, int)
+   */
+  public static String[] escapedSemicolonSplit(final String str, int limit) {
+    return escapedSplit(str, SEMICOLON_ESCAPED_SPLIT_PATTERN, SEMICOLON_ESCAPED_SPLIT_REPLACEMENT,
+        SEMICOLON, limit, false, false);
   }
 
   /**
@@ -1536,6 +1677,29 @@ public class Strings {
     return str.substring(i);
   }
 
+  static String[] escapedSplit(final String str, final Pattern pattern, final String replacement,
+      final String delimiter, final int limit, final boolean removeBlank, final boolean strip) {
+    if (isEmpty(str)) {
+      return EMPTY_ARRAY;
+    }
+    String[] splits = pattern.split(str, limit);
+    String[] result = new String[splits.length];
+    int i = 0;
+    for (String e : splits) {
+      String re = replace(e, replacement, delimiter);
+      if (!re.isEmpty()) {
+        if (removeBlank) {
+          if (!re.isBlank()) {
+            result[i++] = strip ? re.strip() : re;
+          }
+        } else {
+          result[i++] = strip ? re.strip() : re;
+        }
+      }
+    }
+    return Arrays.copyOf(result, i);
+  }
+
   static String joinIf(CharSequence delimiter, Iterable<?> elements,
       BiFunction<Object, String, Boolean> op) {
     shouldNoneNull(delimiter, elements);
@@ -1553,6 +1717,21 @@ public class Strings {
       }
     }
     return joiner.toString();
+  }
+
+  static String[] regulateSplits(String[] splits, final boolean removeBlank, final boolean strip) {
+    if (!removeBlank && !strip) {
+      return splits;
+    } else {
+      String[] result = new String[splits.length];
+      int i = 0;
+      for (String e : splits) {
+        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
+          result[i++] = strip ? strip(e) : e;
+        }
+      }
+      return Arrays.copyOf(result, i);
+    }
   }
 
   static List<Pair<Boolean, String>> segment(final String str, final String wholeSeparator) {
@@ -1583,22 +1762,6 @@ public class Strings {
       }
     }
     return list;
-  }
-
-  private static String[] regulateSplits(String[] splits, final boolean removeBlank,
-      final boolean strip) {
-    if (!removeBlank && !strip) {
-      return splits;
-    } else {
-      String[] result = new String[splits.length];
-      int i = 0;
-      for (String e : splits) {
-        if (isNotBlank(e) || isBlank(e) && !removeBlank) {
-          result[i++] = strip ? strip(e) : e;
-        }
-      }
-      return Arrays.copyOf(result, i);
-    }
   }
 
   /**

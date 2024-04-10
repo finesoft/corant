@@ -14,13 +14,13 @@
 package org.corant.modules.vertx.jaxrs;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jakarta.ws.rs.ApplicationPath;
-import org.corant.config.Configs;
 import org.corant.modules.jaxrs.shared.JaxrsExtension;
 import org.corant.modules.vertx.shared.CorantVerticle;
 import org.corant.shared.util.Classes;
@@ -75,7 +75,7 @@ public class ResteasyJaxrsVerticle extends AbstractVerticle {
         vertx.createHttpServer(defaultObject(serverOptions, HttpServerOptions::new))
             .requestHandler(new VertxRequestHandler(vertx, deployment,
                 resolveAppDeployment(deployment).orElse(""), securityDomain))
-            .listen(Configs.getValue("corant.vertx.jaxrs.server.port", Integer.class, 8080), ar -> {
+            .listen(getConfigValue("corant.vertx.jaxrs.server.port", Integer.class, 8080), ar -> {
               if (ar.succeeded()) {
                 Logger.getLogger(ResteasyJaxrsVerticle.class.getCanonicalName())
                     .info("Server started on port " + ar.result().actualPort());

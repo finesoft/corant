@@ -14,8 +14,8 @@
 package org.corant.modules.security.annotation;
 
 import static java.util.Collections.unmodifiableCollection;
-import static org.corant.config.Configs.assemblyStringConfigProperty;
-import static org.corant.config.Configs.getValue;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.EMPTY_ARRAY;
@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.corant.config.Configs;
+import org.corant.shared.util.Configurations;
 import org.corant.shared.util.Strings;
 
 public class SecuredMetadata implements Serializable {
@@ -58,11 +58,12 @@ public class SecuredMetadata implements Serializable {
   }
 
   public SecuredMetadata(String type, String runAs, String[] allowed, boolean denyAll) {
-    this.type = SecuredType.valueOf(defaultBlank(assemblyStringConfigProperty(type),
-        getValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name())).strip());
-    this.runAs = defaultTrim(assemblyStringConfigProperty(defaultString(runAs)));
+    this.type = SecuredType.valueOf(defaultBlank(getAssembledConfigValue(type),
+        getConfigValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name()))
+            .strip());
+    this.runAs = defaultTrim(getAssembledConfigValue(defaultString(runAs)));
     Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
-        .map(Configs::assemblyStringConfigProperties).flatMap(List::stream)
+        .map(Configurations::getAssembledConfigValues).flatMap(List::stream)
         .filter(Strings::isNotBlank).map(String::strip).collect(Collectors.toList());
     this.allowed = unmodifiableCollection(aws);
     this.denyAll = denyAll;

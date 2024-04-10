@@ -14,6 +14,7 @@
 package org.corant.modules.javafx.cdi;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Strings.isBlank;
 import java.net.URL;
@@ -22,7 +23,6 @@ import java.util.ResourceBundle;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.Configs;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 
@@ -38,13 +38,13 @@ public class CorantFXMLLoaderFactory {
   @CorantFXML
   protected FXMLLoader produce(final InjectionPoint ip) {
     final CorantFXML fxml = (CorantFXML) ip.getQualifiers().stream()
-        .filter(q -> q instanceof CorantFXML).findFirst().orElse(null);
+        .filter(CorantFXML.class::isInstance).findFirst().orElse(null);
     final URL url = fxml == null || isBlank(fxml.url()) ? null
-        : toObject(Configs.assemblyStringConfigProperty(fxml.url()), URL.class);
+        : toObject(getAssembledConfigValue(fxml.url()), URL.class);
     final ResourceBundle bundle = fxml == null || isBlank(fxml.bundle()) ? null
-        : ResourceBundle.getBundle(Configs.assemblyStringConfigProperty(fxml.bundle()));
+        : ResourceBundle.getBundle(getAssembledConfigValue(fxml.bundle()));
     final Charset charset = fxml == null || isBlank(fxml.charset()) ? UTF_8
-        : Charset.forName(Configs.assemblyStringConfigProperty(fxml.charset()));
+        : Charset.forName(getAssembledConfigValue(fxml.charset()));
 
     return FXMLLoaders.builder().location(url).builderFactory(new JavaFXBuilderFactory())
         .charset(charset).resources(bundle).build();

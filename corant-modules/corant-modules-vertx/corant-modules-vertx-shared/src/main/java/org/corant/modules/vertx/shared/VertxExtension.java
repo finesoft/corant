@@ -14,6 +14,7 @@ package org.corant.modules.vertx.shared;
 
 import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -38,7 +39,6 @@ import jakarta.enterprise.inject.spi.ObserverMethod;
 import jakarta.enterprise.inject.spi.ProcessBeanAttributes;
 import jakarta.enterprise.inject.spi.ProcessInjectionPoint;
 import jakarta.enterprise.inject.spi.ProcessObserverMethod;
-import org.corant.config.Configs;
 import org.corant.context.concurrent.AsynchronousReference;
 import org.jboss.weld.bean.builtin.BeanManagerProxy;
 import org.jboss.weld.util.reflection.Reflections;
@@ -242,7 +242,7 @@ public class VertxExtension implements Extension {
   private String getVertxAddress(ObserverMethod<?> observerMethod) {
     Annotation qualifier = getQualifier(observerMethod);
     String address = qualifier != null ? ((VertxConsumer) qualifier).value() : null;
-    return Configs.assemblyStringConfigProperty(address);
+    return getAssembledConfigValue(address);
   }
 
 }

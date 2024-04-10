@@ -15,6 +15,8 @@ package org.corant.modules.query.shared.declarative;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.defaultBlank;
@@ -26,7 +28,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.InjectionPoint;
-import org.corant.config.Configs;
 import org.corant.config.cdi.CurrentInjectionPoint;
 import org.corant.context.AbstractBean;
 import org.corant.context.proxy.MethodInvoker;
@@ -50,7 +51,7 @@ import org.corant.shared.util.Iterables;
 public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
 
   static final boolean useDeclaredMethod =
-      Configs.getValue("corant.query.declarative.use-declared-method", Boolean.TYPE, false);
+      getConfigValue("corant.query.declarative.use-declared-method", Boolean.TYPE, false);
 
   final Class<?> proxyType;
 
@@ -94,7 +95,7 @@ public class DeclarativeQueryServiceDelegateBean extends AbstractBean<Object> {
         proxyType.getSimpleName().concat(Names.NAME_SPACE_SEPARATORS).concat(method.getName());
     QueryWay queryWay;
     if (queryMethod != null) {
-      queryName = defaultBlank(Configs.assemblyStringConfigProperty(queryMethod.name()), queryName);
+      queryName = defaultBlank(getAssembledConfigValue(queryMethod.name()), queryName);
       queryWay = queryMethod.way();
     } else {
       queryWay = QueryWay.fromMethodName(method.getName());

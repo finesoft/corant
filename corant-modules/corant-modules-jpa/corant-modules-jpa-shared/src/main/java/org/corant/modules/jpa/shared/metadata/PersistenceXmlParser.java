@@ -14,6 +14,7 @@
 package org.corant.modules.jpa.shared.metadata;
 
 import static org.corant.shared.util.Assertions.shouldBeFalse;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -29,14 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.corant.config.Configs;
 import org.corant.modules.jpa.shared.JPAConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.FileUtils;
@@ -140,10 +140,10 @@ public class PersistenceXmlParser {
           puimd.setVersion(version);
           puimd.setPersistenceUnitRootUrl(extractRootUrl(url));
           if (isBlank(puName)) {
-            puimd.setEnable(Configs.getValue(JPAConfig.JC_PREFIX + JPAConfig.JCX_ENABLE,
+            puimd.setEnable(getConfigValue(JPAConfig.JC_PREFIX + JPAConfig.JCX_ENABLE,
                 Boolean.class, Boolean.TRUE));
           } else {
-            puimd.setEnable(Configs.getValue(JPAConfig.JC_PREFIX + puName + JPAConfig.JC_ENABLE,
+            puimd.setEnable(getConfigValue(JPAConfig.JC_PREFIX + puName + JPAConfig.JC_ENABLE,
                 Boolean.class, Boolean.TRUE));
           }
           doParse(element, puimd);

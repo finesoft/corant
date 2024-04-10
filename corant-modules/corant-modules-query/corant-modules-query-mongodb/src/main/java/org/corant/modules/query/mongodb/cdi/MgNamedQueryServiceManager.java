@@ -14,6 +14,7 @@
 package org.corant.modules.query.mongodb.cdi;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -21,8 +22,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 import org.bson.Document;
-import org.corant.config.Configs;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mongodb.AbstractMgNamedQueryService;
@@ -34,11 +39,6 @@ import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.mongodb.client.MongoDatabase;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-sql
@@ -105,9 +105,9 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected String resolveQualifier(Object qualifier) {
     if (qualifier instanceof MgQuery) {
-      return Configs.assemblyStringConfigProperty(((MgQuery) qualifier).value());
+      return getAssembledConfigValue(((MgQuery) qualifier).value());
     } else {
-      return Configs.assemblyStringConfigProperty(asDefaultString(qualifier));
+      return getAssembledConfigValue(asDefaultString(qualifier));
     }
   }
 

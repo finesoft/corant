@@ -17,6 +17,7 @@ import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.getMapInstant;
@@ -49,7 +50,6 @@ import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import org.bson.Document;
-import org.corant.config.Configs;
 import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Preference;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
@@ -251,8 +251,7 @@ public class MongoClientExtension implements Extension {
         }
       }
       if (preference != null) {
-        return MongoClientExtension
-            .getGridFSBucket(Configs.assemblyStringConfigProperty(preference.value()));
+        return MongoClientExtension.getGridFSBucket(getAssembledConfigValue(preference.value()));
       }
       return null;
     }

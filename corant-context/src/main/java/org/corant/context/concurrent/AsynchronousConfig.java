@@ -13,8 +13,8 @@
  */
 package org.corant.context.concurrent;
 
-import static org.corant.config.Configs.assemblyStringConfigProperty;
 import static org.corant.shared.util.Assertions.shouldNotEquals;
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Conversions.toDouble;
 import static org.corant.shared.util.Conversions.toDuration;
 import static org.corant.shared.util.Conversions.toEnum;
@@ -48,36 +48,36 @@ public class AsynchronousConfig {
   @SuppressWarnings("unchecked")
   public AsynchronousConfig(Asynchronous ann) {
     int retryAttempts = isNotBlank(ann.maxAttempts())
-        ? toInteger(assemblyStringConfigProperty(ann.maxAttempts())).intValue() + 1
+        ? toInteger(getAssembledConfigValue(ann.maxAttempts())) + 1
         : 0;
     if (retryAttempts > 0) {
       BackoffAlgorithm backoffAlgo =
-          toEnum(assemblyStringConfigProperty(ann.backoffStrategy()), BackoffAlgorithm.class);
+          toEnum(getAssembledConfigValue(ann.backoffStrategy()), BackoffAlgorithm.class);
       shouldNotEquals(backoffAlgo, BackoffAlgorithm.EXPO_DECORR,
           "Can't support EXPO_DECORR backoff algorithm on asynchronous method!");
       backoffStrategy = new BackoffStrategyBuilder().algorithm(backoffAlgo)
-          .baseDuration(toDuration(assemblyStringConfigProperty(ann.baseBackoffDuration())))
-          .maxDuration(toDuration(assemblyStringConfigProperty(ann.maxBackoffDuration())))
-          .factor(toDouble(assemblyStringConfigProperty(ann.backoffFactor()))).build();
+          .baseDuration(toDuration(getAssembledConfigValue(ann.baseBackoffDuration())))
+          .maxDuration(toDuration(getAssembledConfigValue(ann.maxBackoffDuration())))
+          .factor(toDouble(getAssembledConfigValue(ann.backoffFactor()))).build();
       RetryStrategy root = new MaxAttemptsRetryStrategy(retryAttempts);
       final Set<Class<? extends Throwable>> abortOn = new LinkedHashSet<>();
       final Set<Class<? extends Throwable>> retryOn = new LinkedHashSet<>();
       for (String abortOnCls : ann.abortOn()) {
         if (isNotBlank(abortOnCls)) {
-          abortOn.add((Class<? extends Throwable>) Classes
-              .asClass(assemblyStringConfigProperty(abortOnCls)));
+          abortOn.add(
+              (Class<? extends Throwable>) Classes.asClass(getAssembledConfigValue(abortOnCls)));
         }
       }
       for (String retryOnCls : ann.retryOn()) {
         if (isNotBlank(retryOnCls)) {
-          retryOn.add((Class<? extends Throwable>) Classes
-              .asClass(assemblyStringConfigProperty(retryOnCls)));
+          retryOn.add(
+              (Class<? extends Throwable>) Classes.asClass(getAssembledConfigValue(retryOnCls)));
         }
       }
       root = root.and(new ThrowableClassifierRetryStrategy(retryOn, abortOn));
       if (isNotBlank(ann.timeout())) {
-        root = root.and(new TimeoutRetryStrategy()
-            .timeout(toDuration(assemblyStringConfigProperty(ann.timeout()))));
+        root = root.and(
+            new TimeoutRetryStrategy().timeout(toDuration(getAssembledConfigValue(ann.timeout()))));
       }
       retryStrategy = root;
       retry = true;

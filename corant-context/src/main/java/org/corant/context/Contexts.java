@@ -14,6 +14,7 @@
 package org.corant.context;
 
 import static org.corant.context.Beans.tryResolve;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Annotation;
@@ -31,7 +32,6 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.TypeLiteral;
-import org.corant.config.Configs;
 import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.WeldAlterableContext;
 import org.jboss.weld.context.api.ContextualInstance;
@@ -53,7 +53,7 @@ public class Contexts {
   public static final String WELD_INTERCEPTOR_BINDINGS_KEY = "org.jboss.weld.interceptor.bindings";
 
   static final boolean propagateStrictly =
-      Configs.getValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
+      getConfigValue("corant.context.propagate.strictly", Boolean.class, Boolean.FALSE);
 
   /**
    * Returns whether there is an active context for all given scope types.

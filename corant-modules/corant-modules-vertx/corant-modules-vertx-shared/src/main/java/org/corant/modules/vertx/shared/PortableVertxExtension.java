@@ -12,6 +12,7 @@
  */
 package org.corant.modules.vertx.shared;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
-import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import io.vertx.config.ConfigRetriever;
@@ -47,8 +47,8 @@ public class PortableVertxExtension extends VertxExtension {
 
   static Vertx resolveVertx() {
     JsonObject configJson = null;
-    String path = Configs.getValue(OPTIONS_PATH_KEY, String.class);
-    boolean cluster = Configs.getValue(CLUSTERED_KEY, Boolean.class, false);
+    String path = getConfigValue(OPTIONS_PATH_KEY, String.class);
+    boolean cluster = getConfigValue(CLUSTERED_KEY, Boolean.class, false);
     if (isNotBlank(path)) {
       try {
         final Vertx configVertx = Vertx.vertx();
@@ -74,8 +74,7 @@ public class PortableVertxExtension extends VertxExtension {
   void onPreContainerStopEvent(
       @Observes @Priority(Integer.MAX_VALUE - 5) PreContainerStopEvent event) {
     try {
-      Duration timeout =
-          Configs.getValue(CLOSE_TIME_OUT_KEY, Duration.class, Duration.ofSeconds(8));
+      Duration timeout = getConfigValue(CLOSE_TIME_OUT_KEY, Duration.class, Duration.ofSeconds(8));
       vertx.close().toCompletionStage().whenComplete((v, t) -> {
         if (t != null) {
           LOGGER.log(Level.WARNING, "Close vertx instance occurred error.", t);

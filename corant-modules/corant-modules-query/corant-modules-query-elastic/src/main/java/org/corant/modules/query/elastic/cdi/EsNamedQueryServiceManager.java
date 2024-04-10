@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.elastic.cdi;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.annotation.Annotation;
@@ -21,7 +22,11 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
-import org.corant.config.Configs;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.InjectionPoint;
+import jakarta.inject.Inject;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.query.elastic.AbstractEsNamedQueryService;
 import org.corant.modules.query.elastic.DefaultEsQueryExecutor;
@@ -33,11 +38,6 @@ import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.elasticsearch.client.transport.TransportClient;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.InjectionPoint;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-elastic
@@ -102,7 +102,7 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
   }
 
   protected String resolveQualifier(Object qualifier) {
-    return Configs.assemblyStringConfigProperty(
+    return getAssembledConfigValue(
         qualifier instanceof EsQuery ? ((EsQuery) qualifier).value() : asDefaultString(qualifier));
   }
 

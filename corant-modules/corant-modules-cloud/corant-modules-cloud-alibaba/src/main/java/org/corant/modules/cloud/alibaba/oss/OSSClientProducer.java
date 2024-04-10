@@ -13,6 +13,7 @@
  */
 package org.corant.modules.cloud.alibaba.oss;
 
+import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.strip;
 import java.lang.annotation.Annotation;
@@ -21,7 +22,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
-import org.corant.config.Configs;
 import org.corant.context.qualifier.Preference;
 import org.corant.context.qualifier.Qualifiers;
 import com.aliyun.oss.OSS;
@@ -64,8 +64,7 @@ public class OSSClientProducer {
     if (preference != null) {
       name = strip(preference.value());
     }
-    OSSClientConfiguration config =
-        extension.getConfigs().get(Configs.assemblyStringConfigProperty(name));
+    OSSClientConfiguration config = extension.getConfigs().get(getAssembledConfigValue(name));
     if (config != null) {
       return build(config);
     }

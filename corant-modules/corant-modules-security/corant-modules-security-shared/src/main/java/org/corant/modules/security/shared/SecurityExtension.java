@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared;
 
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
@@ -29,7 +30,6 @@ import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.Extension;
 import jakarta.enterprise.inject.spi.ProcessAnnotatedType;
 import jakarta.enterprise.inject.spi.WithAnnotations;
-import org.corant.config.Configs;
 import org.corant.modules.security.annotation.Secured;
 import org.corant.modules.security.annotation.Secured.SecuredLiteral;
 import org.corant.modules.security.annotation.SecuredMetadata;
@@ -46,12 +46,12 @@ import org.corant.shared.normal.Priorities;
 public class SecurityExtension implements Extension {
 
   public static final boolean CACHE_FILTER_HANDLERS =
-      Configs.getValue("corant.security.filter.cache-handler", Boolean.class, Boolean.TRUE);
+      getConfigValue("corant.security.filter.cache-handler", Boolean.class, Boolean.TRUE);
   public static final boolean ENABLE_INTERCEPTOR =
-      Configs.getValue("corant.security.interceptor.enable", Boolean.class, Boolean.FALSE);
-  public static final boolean ENABLE_INTERCEPTOR_COMPATIBILITY = Configs
-      .getValue("corant.security.interceptor.compatibility", Boolean.class, ENABLE_INTERCEPTOR);
-  public static final boolean DENY_ALL_NO_SECURITY_MANAGER = Configs.getValue(
+      getConfigValue("corant.security.interceptor.enable", Boolean.class, Boolean.FALSE);
+  public static final boolean ENABLE_INTERCEPTOR_COMPATIBILITY = getConfigValue(
+      "corant.security.interceptor.compatibility", Boolean.class, ENABLE_INTERCEPTOR);
+  public static final boolean DENY_ALL_NO_SECURITY_MANAGER = getConfigValue(
       "corant.security.interceptor.deny-all-if-no-security-manager", Boolean.class, Boolean.FALSE);
 
   protected static final Map<Secured, SecuredMetadata> securedMetaDatas = new ConcurrentHashMap<>();

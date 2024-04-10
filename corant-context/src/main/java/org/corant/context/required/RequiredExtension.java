@@ -46,7 +46,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  */
 public class RequiredExtension implements Extension {
 
-  public static final String VETO_BEAN_CFG_NAMES = "corant.context.veto.beans";
+  public static final String VETO_BEANS_CFG_NAME = "corant.context.veto.beans";
 
   protected static final Logger logger = Logger.getLogger(RequiredExtension.class.getName());
 
@@ -66,7 +66,7 @@ public class RequiredExtension implements Extension {
 
   protected void beforeBeanDiscovery(@Observes final BeforeBeanDiscovery bbd,
       final BeanManager beanManager) {
-    ConfigProvider.getConfig().getOptionalValues(VETO_BEAN_CFG_NAMES, String.class)
+    ConfigProvider.getConfig().getOptionalValues(VETO_BEANS_CFG_NAME, String.class)
         .ifPresent(beans -> {
           for (String bean : beans) {
             if (isNotBlank(bean)) {

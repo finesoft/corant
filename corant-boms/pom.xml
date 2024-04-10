@@ -79,7 +79,8 @@
 		<version.jakarta.batch-api>2.1.1</version.jakarta.batch-api>
 		<version.jakarta.el-api>5.0.0</version.jakarta.el-api>
 		<version.jakarta.enterprise.cdi-api>4.0.1</version.jakarta.enterprise.cdi-api>
-		<version.jakarta.enterprise.concurrent-api>3.0.0</version.jakarta.enterprise.concurrent-api>
+		<version.jakarta.enterprise.concurrent-api>3.0.1</version.jakarta.enterprise.concurrent-api>
+		<version.jakarta.enterprise.concurrent-impl>3.0.0</version.jakarta.enterprise.concurrent-impl>
 		<version.jakarta.interceptor-api>2.1.0</version.jakarta.interceptor-api>
 		<version.jakarta.jaxb-api>4.0.0</version.jakarta.jaxb-api><!--jakarta.xml.bind-api-->
 		<version.jakarta.jms-api>3.1.0</version.jakarta.jms-api>
@@ -729,7 +730,7 @@
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.enterprise.concurrent</artifactId>
-				<version>${version.jakarta.enterprise.concurrent-api}</version>
+				<version>${version.jakarta.enterprise.concurrent-impl}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.activation</groupId>

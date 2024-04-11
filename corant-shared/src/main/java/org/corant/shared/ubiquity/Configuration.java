@@ -38,9 +38,9 @@ import java.util.stream.StreamSupport;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.ConfigNames;
 import org.corant.shared.resource.Resource;
+import org.corant.shared.util.Iterables;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
-import org.corant.shared.util.Sets;
 import org.corant.shared.util.Systems;
 
 /**
@@ -341,7 +341,7 @@ public interface Configuration extends Sortable {
 
       @Override
       public Iterable<String> getKeys() {
-        return Sets.transform(System.getProperties().keySet(),
+        return Iterables.transform(System.getProperties().keySet(),
             t -> t == null ? null : t.toString());
       }
 

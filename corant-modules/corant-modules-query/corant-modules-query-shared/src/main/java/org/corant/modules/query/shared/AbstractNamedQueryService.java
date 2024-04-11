@@ -94,14 +94,14 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     if (isNotEmpty(fetchQueries)) {
       if (parentQuerier.parallelFetch() && fetchQueries.size() > 1) {
         if (results instanceof List) {
-          parallelFetch((List<?>) results, parentQuerier);
+          parallelFetch((List<?>) results, parentQuerier, fetchQueries);
         } else {
-          parallelFetch(results, parentQuerier);
+          parallelFetch(results, parentQuerier, fetchQueries);
         }
       } else if (results instanceof List) {
-        serialFetch((List<?>) results, parentQuerier);
+        serialFetch((List<?>) results, parentQuerier, fetchQueries);
       } else {
-        serialFetch(results, parentQuerier);
+        serialFetch(results, parentQuerier, fetchQueries);
       }
     }
   }
@@ -243,10 +243,11 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
         name, String.join(",", asStrings(param)), String.join("\n", script)));
   }
 
-  protected <T> void parallelFetch(List<T> results, Querier parentQuerier) {
+  protected <T> void parallelFetch(List<T> results, Querier parentQuerier,
+      List<FetchQuery> allFetchQueries) {
     // parallel fetch, experimental features for proof of concept.
     // FIXME consider the context propagate
-    List<FetchQuery> fetchQueries = new ArrayList<>(parentQuerier.getQuery().getFetchQueries());
+    List<FetchQuery> fetchQueries = new ArrayList<>(allFetchQueries);// Make collection parallel
     final Collection<Triple<FetchedResult, Object, FetchableNamedQueryService>> workResults =
         new LinkedBlockingQueue<>();
     fetchQueries.parallelStream().forEach(fq -> {
@@ -288,11 +289,12 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     }
   }
 
-  protected <T> void parallelFetch(T result, Querier parentQuerier) {
+  protected <T> void parallelFetch(T result, Querier parentQuerier,
+      List<FetchQuery> allFetchQueries) {
     // parallel fetch, experimental functions for proof of concept.
-    List<FetchQuery> fetchQueries = new ArrayList<>(parentQuerier.getQuery().getFetchQueries());
     Collection<Pair<FetchedResult, FetchableNamedQueryService>> workResults =
         new LinkedBlockingQueue<>();
+    List<FetchQuery> fetchQueries = new ArrayList<>(allFetchQueries);// Make collection parallel
     fetchQueries.parallelStream().forEach(fq -> {
       FetchableNamedQueryService fetchQueryService = resolveFetchQueryService(fq);
       if (parentQuerier.decideFetch(result, fq)) {
@@ -346,8 +348,9 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     return service;
   }
 
-  protected <T> void serialFetch(List<T> results, Querier parentQuerier) {
-    for (FetchQuery fq : parentQuerier.getQuery().getFetchQueries()) {
+  protected <T> void serialFetch(List<T> results, Querier parentQuerier,
+      List<FetchQuery> fetchQueries) {
+    for (FetchQuery fq : fetchQueries) {
       FetchableNamedQueryService fetchQueryService = resolveFetchQueryService(fq);
       if (fq.isEagerInject()) {
         for (T result : results) {
@@ -371,8 +374,8 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     }
   }
 
-  protected <T> void serialFetch(T result, Querier parentQuerier) {
-    for (FetchQuery fq : parentQuerier.getQuery().getFetchQueries()) {
+  protected <T> void serialFetch(T result, Querier parentQuerier, List<FetchQuery> fetchQueries) {
+    for (FetchQuery fq : fetchQueries) {
       FetchableNamedQueryService fetchQueryService = resolveFetchQueryService(fq);
       if (parentQuerier.decideFetch(result, fq)) {
         FetchedResult fr = fetchQueryService.fetch(result, fq, parentQuerier);

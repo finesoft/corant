@@ -30,7 +30,6 @@ public class ThreadLocals {
    * corant-shared
    *
    * @author bingo 上午11:30:23
-   *
    */
   public static class ThreadLocalStack<T> {
 
@@ -84,14 +83,13 @@ public class ThreadLocals {
    * corant-shared
    *
    * @author bingo 上午11:31:21
-   *
    */
   public static class WeakThreadLocal<T> implements Supplier<T> {
     private final ThreadLocal<WeakReference<T>> cache;
     private final Supplier<T> supplier;
 
     public WeakThreadLocal(Supplier<T> supplier) {
-      this.cache = new ThreadLocal<>();
+      cache = new ThreadLocal<>();
       this.supplier = shouldNotNull(supplier, "The value supplier can't null!");
     }
 

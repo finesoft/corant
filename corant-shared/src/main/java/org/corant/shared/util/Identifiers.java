@@ -79,7 +79,6 @@ public class Identifiers {
    * as a suffix, support multi-segment infix, return 64-bit unsigned long UUID.
    *
    * @author bingo 下午8:31:09
-   *
    */
   public static class GeneralSnowflakeUUIDGenerator implements IdentifierGenerator {
 
@@ -240,10 +239,6 @@ public class Identifiers {
           : Instant.ofEpochMilli((Long.MAX_VALUE >>> timestampLeftShift) + epoch);
     }
 
-    /**
-     *
-     * @return the unit
-     */
     public ChronoUnit getUnit() {
       return unit;
     }
@@ -373,7 +368,6 @@ public class Identifiers {
    * The corant-shared
    *
    * @author bingo 下午11:20:37
-   *
    */
   public interface IdentifierGenerator {
     Serializable generate(Supplier<?> suppler);
@@ -385,7 +379,6 @@ public class Identifiers {
    * UUID generator use {@link java.util.UUID#randomUUID()}
    *
    * @author bingo 下午11:20:53
-   *
    */
   public static class JavaUUIDGenerator implements IdentifierGenerator {
     @Override
@@ -467,7 +460,6 @@ public class Identifiers {
    * epoch of 1970-01-01T00:00:00Z.
    *
    * @author bingo 下午8:49:33
-   *
    */
   public static class SnowflakeIpv4HostUUIDGenerator extends GeneralSnowflakeUUIDGenerator {
 
@@ -551,7 +543,6 @@ public class Identifiers {
    * </pre>
    *
    * @author bingo 下午11:22:34
-   *
    */
   public static class SnowflakeW10S12UUIDGenerator extends GeneralSnowflakeUUIDGenerator {
 

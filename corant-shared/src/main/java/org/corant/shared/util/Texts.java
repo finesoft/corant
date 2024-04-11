@@ -889,7 +889,6 @@ public class Texts {
    * corant-shared
    *
    * @author bingo 上午11:21:07
-   *
    */
   public static class LocableFileLine implements Serializable {
     private static final long serialVersionUID = -3379179413769504801L;
@@ -986,7 +985,6 @@ public class Texts {
    * corant-shared
    *
    * @author bingo 下午2:45:27
-   *
    */
   static class LocablelFileLineReader implements Closeable {
 

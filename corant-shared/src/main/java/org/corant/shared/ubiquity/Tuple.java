@@ -118,7 +118,6 @@ public interface Tuple {
    * corant-shared
    *
    * @author bingo 下午4:48:38
-   *
    */
   abstract class AbstractSeries implements Tuple {
 
@@ -182,12 +181,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of ten elements
    *
    * @author bingo 下午5:14:17
-   *
    */
   class Dectet<A, B, C, D, E, F, G, H, I, J> extends Nonet<A, B, C, D, E, F, G, H, I> {
 
@@ -209,7 +206,6 @@ public interface Tuple {
    * corant-shared
    *
    * @author bingo 下午2:46:46
-   *
    */
   class Duet<A, B> extends AbstractSeries {
 
@@ -233,12 +229,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of nine elements
    *
    * @author bingo 下午5:13:20
-   *
    */
   class Nonet<A, B, C, D, E, F, G, H, I> extends Octet<A, B, C, D, E, F, G, H> {
 
@@ -257,12 +251,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of eight elements
    *
    * @author bingo 下午5:09:43
-   *
    */
   class Octet<A, B, C, D, E, F, G, H> extends Septet<A, B, C, D, E, F, G> {
 
@@ -282,12 +274,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of two elements
    *
    * @author bingo 上午10:37:41
-   *
    */
   class Pair<L, R> implements Tuple, Serializable {
 
@@ -434,12 +424,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of four elements
    *
    * @author bingo 下午4:28:52
-   *
    */
   class Quartet<A, B, C, D> extends Triplet<A, B, C> {
 
@@ -458,12 +446,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of five elements
    *
    * @author bingo 下午4:52:00
-   *
    */
   class Quintet<A, B, C, D, E> extends Quartet<A, B, C, D> {
 
@@ -483,12 +469,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of two comparable elements
    *
    * @author bingo 20:26:59
-   *
    */
   class Range<T extends Comparable<T>> implements Tuple {
 
@@ -633,12 +617,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of seven elements
    *
    * @author bingo 下午4:57:02
-   *
    */
   class Septet<A, B, C, D, E, F, G> extends Sextet<A, B, C, D, E, F> {
 
@@ -657,12 +639,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of six elements
    *
    * @author bingo 下午4:57:02
-   *
    */
   class Sextet<A, B, C, D, E, F> extends Quintet<A, B, C, D, E> {
 
@@ -681,12 +661,10 @@ public interface Tuple {
 
   /**
    * corant-shared
-   *
    * <p>
    * Tuple of three elements
    *
    * @author bingo 上午10:37:46
-   *
    */
   class Triple<L, M, R> implements Tuple, Serializable {
 
@@ -824,7 +802,6 @@ public interface Tuple {
    * corant-shared
    *
    * @author bingo 下午2:47:13
-   *
    */
   class Triplet<A, B, C> extends Duet<A, B> {
 

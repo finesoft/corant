@@ -39,7 +39,7 @@ public class Atomics {
 
   /**
    * Return the atomic instance supplier. Suitable for singleton object construction in
-   * multithreaded scenarios; in most cases, it can replace those code blocks that use the volatile
+   * multi-threaded scenarios; in most cases, it can replace those code blocks that use the volatile
    * or synchronized keywords for one-off singleton object construction.
    * <p>
    * Note: The incoming {@code supplier} must non-null and must provide a non-null instance when
@@ -109,7 +109,6 @@ public class Atomics {
    * corant-shared
    *
    * @author bingo 下午8:54:10
-   *
    */
   public static class AtomicDouble extends Number {
 
@@ -212,7 +211,6 @@ public class Atomics {
    * corant-shared
    *
    * @author bingo 下午9:23:40
-   *
    */
   public static class AtomicDoubleArray implements Serializable {
 
@@ -302,7 +300,6 @@ public class Atomics {
    * corant-shared
    *
    * @author bingo 下午8:54:15
-   *
    */
   public static class AtomicFloat extends Number {
 
@@ -405,7 +402,6 @@ public class Atomics {
    * corant-shared
    *
    * @author bingo 下午9:23:48
-   *
    */
   public static class AtomicFloatArray implements Serializable {
     private static final long serialVersionUID = 7823813961079334435L;

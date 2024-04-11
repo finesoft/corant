@@ -381,7 +381,6 @@ public class Threads {
    * corant-shared
    *
    * @author bingo 上午10:24:59
-   *
    */
   public static class SimplePeriodRunnable implements Runnable {
 
@@ -452,7 +451,6 @@ public class Threads {
    * corant-shared
    *
    * @author bingo 上午10:54:19
-   *
    */
   public static class SimplePeriodRunner {
 

@@ -23,6 +23,7 @@ import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +32,7 @@ import java.util.Stack;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -1553,6 +1555,28 @@ public class Strings {
       list.add(toObject(ele, clazz));
     }
     return list;
+  }
+
+  /**
+   * Split the string into a collection of objects of the given class with the given whole separator
+   * string.
+   *
+   * @param <T> the type of element of the return collection
+   * @param str the string to be separated
+   * @param wholeSeparator the delimiting string
+   * @param clazz the class of element of the return collection
+   * @param factory the returned collection constructor
+   *
+   * @see Strings#split(String, String)
+   */
+  public static <T, C extends Collection<T>> C splitAs(final String str,
+      final String wholeSeparator, Class<T> clazz, IntFunction<C> factory) {
+    String[] array = split(str, wholeSeparator);
+    C collection = factory.apply(array.length);
+    for (String ele : array) {
+      collection.add(toObject(ele, clazz));
+    }
+    return collection;
   }
 
   /**

@@ -208,7 +208,6 @@ public interface PathMatcher extends Predicate<String> {
    * Use Glob wildcards for filtering.
    *
    * @author bingo 下午8:32:50
-   *
    */
   class GlobMatcher implements PathMatcher {
 
@@ -632,7 +631,6 @@ public interface PathMatcher extends Predicate<String> {
    * corant-shared
    *
    * @author bingo 下午2:28:39
-   *
    */
   class RegexMatcher implements PathMatcher {
 

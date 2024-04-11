@@ -15,16 +15,31 @@ package org.corant.shared.ubiquity;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
+import static org.corant.shared.util.Lists.immutableList;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.escapedCommaSplit;
+import static org.corant.shared.util.Strings.splitAs;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import org.corant.shared.util.Iterables;
+import java.util.PropertyResourceBundle;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.normal.Names.ConfigNames;
+import org.corant.shared.resource.Resource;
+import org.corant.shared.util.Objects;
+import org.corant.shared.util.Resources;
 import org.corant.shared.util.Sets;
 import org.corant.shared.util.Systems;
 
@@ -161,12 +176,35 @@ public interface Configuration extends Sortable {
   /**
    * corant-shared
    * <p>
-   * The default Configuration implementation which use system properties and system environment
-   * variables as configuration source.
+   * Default configuration implementation using system properties and system environment variables
+   * or configured property file paths as the configuration source.
    *
    * @author bingo 上午11:05:12
    */
-  class SystemConfiguration implements Configuration {
+  class DefaultConfiguration implements Configuration {
+
+    String configOrdinalKey = "config_ordinal";
+
+    final List<ConfigurationSource> sources;
+
+    public DefaultConfiguration() {
+      Stream<Resource> resources = splitAs(
+          defaultObject(Systems.getProperty(ConfigNames.CFG_LOCATION_KEY),
+              () -> Systems.getEnvironmentVariable(ConfigNames.CFG_LOCATION_KEY)),
+          ",", String.class, HashSet::new).stream().flatMap(Resources::tryFrom);
+      List<ConfigurationSource> temps = new ArrayList<>();
+      temps.add(new SystemPropertyConfigurationSource());
+      temps.add(new SystemEnvironmentConfigurationSource());
+      resources.filter(Objects::isNotNull).map(r -> {
+        try (InputStream is = r.openInputStream()) {
+          return new PropertyResourceBundleConfigurationSource(new PropertyResourceBundle(is));
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e);
+        }
+      }).forEach(temps::add);
+      Collections.sort(temps);
+      sources = immutableList(temps);
+    }
 
     @Override
     public boolean containsKey(String key) {
@@ -180,9 +218,8 @@ public interface Configuration extends Sortable {
 
     @Override
     public Iterable<String> getKeys() {
-      return Iterables.concat(
-          Sets.transform(System.getProperties().keySet(), t -> t == null ? null : t.toString()),
-          System.getenv().keySet());
+      return () -> sources.stream().map(it -> StreamSupport.stream(it.spliterator(), false))
+          .reduce(Stream::concat).orElseGet(Stream::empty).iterator();
     }
 
     @Override
@@ -201,7 +238,123 @@ public interface Configuration extends Sortable {
     }
 
     protected String getRawValue(String key) {
-      return defaultObject(Systems.getProperty(key), () -> Systems.getEnvironmentVariable(key));
+      for (ConfigurationSource s : sources) {
+        String value = s.getValue(key);
+        if (value != null) {
+          return value;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * corant-shared
+     *
+     * @author bingo 11:19:55
+     */
+    interface ConfigurationSource extends Comparable<ConfigurationSource>, Iterable<String> {
+
+      @Override
+      default int compareTo(ConfigurationSource o) {
+        return Integer.compare(getOrdinal(), o.getOrdinal()) * -1;
+      }
+
+      Iterable<String> getKeys();
+
+      int getOrdinal();
+
+      String getValue(String key);
+
+      @Override
+      default Iterator<String> iterator() {
+        return getKeys().iterator();
+      }
+
+    }
+
+    /**
+     * corant-shared
+     *
+     * @author bingo 11:22:01
+     */
+    class PropertyResourceBundleConfigurationSource implements ConfigurationSource {
+
+      protected final PropertyResourceBundle bundle;
+
+      public PropertyResourceBundleConfigurationSource(PropertyResourceBundle bundle) {
+        this.bundle = bundle;
+      }
+
+      @Override
+      public Iterable<String> getKeys() {
+        return bundle.keySet();
+      }
+
+      @Override
+      public int getOrdinal() {
+        if (bundle.containsKey(configOrdinalKey)) {
+          return toInteger(bundle.getObject(configOrdinalKey), 100);
+        }
+        return 100;
+      }
+
+      @Override
+      public String getValue(String key) {
+        if (bundle.containsKey(key)) {
+          return bundle.getString(key);
+        }
+        return null;
+      }
+
+    }
+
+    /**
+     * corant-shared
+     *
+     * @author bingo 11:22:19
+     */
+    class SystemEnvironmentConfigurationSource implements ConfigurationSource {
+
+      @Override
+      public Iterable<String> getKeys() {
+        return System.getenv().keySet();
+      }
+
+      @Override
+      public int getOrdinal() {
+        return 300;
+      }
+
+      @Override
+      public String getValue(String key) {
+        return Systems.getEnvironmentVariable(key);
+
+      }
+    }
+
+    /**
+     * corant-shared
+     *
+     * @author bingo 11:22:01
+     */
+    class SystemPropertyConfigurationSource implements ConfigurationSource {
+
+      @Override
+      public Iterable<String> getKeys() {
+        return Sets.transform(System.getProperties().keySet(),
+            t -> t == null ? null : t.toString());
+      }
+
+      @Override
+      public int getOrdinal() {
+        return 400;
+      }
+
+      @Override
+      public String getValue(String key) {
+        return Systems.getProperty(key);
+      }
     }
   }
+
 }

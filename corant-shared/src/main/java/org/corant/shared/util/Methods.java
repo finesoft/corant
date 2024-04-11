@@ -199,7 +199,6 @@ public class Methods {
    * @param classArray the Class array to calculate the distance from.
    * @param toClassArray the Class array to calculate the distance to.
    * @return the aggregate number of inheritance hops between assignable argument class types.
-   *
    */
   static int distance(final Class<?>[] classArray, final Class<?>[] toClassArray) {
     int answer = 0;
@@ -281,7 +280,6 @@ public class Methods {
    * corant-shared
    *
    * @author bingo 下午5:14:56
-   *
    */
   public static class InvokerBuilder {
     protected final Class<?> clazz;
@@ -367,7 +365,6 @@ public class Methods {
    * corant-shared
    *
    * @author bingo 下午5:20:37
-   *
    */
   public static class MethodSignature implements Serializable {
 

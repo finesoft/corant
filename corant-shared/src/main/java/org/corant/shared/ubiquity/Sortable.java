@@ -44,7 +44,6 @@ public interface Sortable {
    * @see Integer#compare(int, int)
    * @see Classes#getUserClass(Object)
    * @see String#compareTo(String)
-   *
    */
   static int compare(Sortable s1, Sortable s2) {
     int result;

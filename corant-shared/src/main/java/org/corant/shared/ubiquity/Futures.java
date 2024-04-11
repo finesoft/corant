@@ -38,7 +38,6 @@ public interface Futures {
    * This class is used to wrap some asynchronous compute result.
    *
    * @author bingo 下午10:26:51
-   *
    */
   final class FutureResult<V> implements Future<V> {
 
@@ -101,7 +100,6 @@ public interface Futures {
    * The simple future implementation
    *
    * @author bingo 下午10:27:45
-   *
    */
   class SimpleFuture<V> implements Future<V> {
 

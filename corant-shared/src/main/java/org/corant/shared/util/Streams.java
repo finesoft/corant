@@ -492,7 +492,6 @@ public class Streams {
    * exit.
    *
    * @author bingo 上午10:39:59
-   *
    */
   public abstract static class AbstractBatchHandlerSpliterator<T> extends AbstractSpliterator<T> {
 

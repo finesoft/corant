@@ -461,7 +461,6 @@ public class Iterables {
    * corant-shared
    *
    * @author bingo 上午11:19:28
-   *
    */
   public static class BreadthIterable<T extends Iterable<T>> implements Iterable<T> {
 
@@ -527,7 +526,6 @@ public class Iterables {
    * corant-shared
    *
    * @author bingo 上午11:19:56
-   *
    */
   public static class DepthIterable<T extends Iterable<T>> implements Iterable<T> {
     protected final Iterable<T> node;

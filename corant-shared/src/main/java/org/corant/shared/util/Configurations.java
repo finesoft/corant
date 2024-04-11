@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.shared.ubiquity.Configuration;
-import org.corant.shared.ubiquity.Configuration.SystemConfiguration;
+import org.corant.shared.ubiquity.Configuration.DefaultConfiguration;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Strings.WildcardMatcher;
 
@@ -35,7 +35,7 @@ import org.corant.shared.util.Strings.WildcardMatcher;
 public class Configurations {
 
   public static final Configuration INSTANCE = Services
-      .findRequired(Configuration.class, defaultClassLoader()).orElseGet(SystemConfiguration::new);
+      .findRequired(Configuration.class, defaultClassLoader()).orElseGet(DefaultConfiguration::new);
 
   /**
    * Returns the assembled configuration values. According to the input value, analyze whether the

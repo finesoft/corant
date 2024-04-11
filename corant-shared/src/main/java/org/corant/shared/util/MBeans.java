@@ -221,7 +221,6 @@ public class MBeans {
    *
    *
    * @author bingo 下午10:36:21
-   *
    */
   public static class MBInvoker<T> {
     JMXServiceURL url;

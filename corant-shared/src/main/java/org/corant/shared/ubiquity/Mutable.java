@@ -59,7 +59,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 上午1:00:35
-   *
    */
   class MutableBoolean extends MutableObject<Boolean> implements Comparable<MutableBoolean> {
 
@@ -190,7 +189,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 14:12:27
-   *
    */
   class MutableDouble extends MutableNumber<Double> {
 
@@ -269,7 +267,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 14:12:27
-   *
    */
   class MutableFloat extends MutableNumber<Float> {
 
@@ -348,7 +345,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 14:12:27
-   *
    */
   class MutableInteger extends MutableNumber<Integer> {
 
@@ -427,7 +423,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 14:12:27
-   *
    */
   class MutableLong extends MutableNumber<Long> {
 
@@ -506,7 +501,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 下午4:26:18
-   *
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   class MutableNumber<T extends Number> extends Number
@@ -725,11 +719,9 @@ public interface Mutable<T> extends Supplier<T> {
   }
 
   /**
-   *
    * corant-shared
    *
    * @author bingo 下午5:23:01
-   *
    */
   class MutableObject<T> implements Mutable<T> {
 
@@ -782,7 +774,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 14:12:27
-   *
    */
   class MutableShort extends MutableNumber<Short> {
     private static final long serialVersionUID = -6018676211622288641L;
@@ -860,7 +851,6 @@ public interface Mutable<T> extends Supplier<T> {
    * corant-shared
    *
    * @author bingo 上午1:00:35
-   *
    */
   class MutableString extends MutableObject<String> implements Comparable<MutableString> {
 
@@ -912,11 +902,9 @@ public interface Mutable<T> extends Supplier<T> {
   }
 
   /**
-   *
    * corant-shared
    *
    * @author bingo 上午1:02:18
-   *
    */
   @SuppressWarnings("unchecked")
   class MutableTemporal<T extends Temporal> extends MutableObject<T> implements Temporal {

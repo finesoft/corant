@@ -61,6 +61,16 @@ public enum ASTNodeType {
   },
 
   /**
+   * Performs a loop expressions. FIXME uncompleted
+   */
+  EACH("$each", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTEachNode();
+    }
+  },
+
+  /**
    * The return node.
    */
   RETURN("$ret", false) {

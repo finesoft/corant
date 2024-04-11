@@ -101,13 +101,14 @@ public class CorantConfigSources {
     MutableObject<String[]> profiles = new MutableObject<>(Strings.EMPTY_ARRAY);
     MutableBoolean enableExpressions = MutableBoolean.of(true);
     List<Pair<String, ConfigSource>> profileSources = new ArrayList<>(originalSources.size());
-    // collect the profile and source
+    // collect the profile and source from low -> high priority, return the high-priority profiles
     originalSources.stream().sorted(CONFIG_SOURCE_COMPARATOR.reversed()).forEachOrdered(cs -> {
       String sourceProfile = resolveSourceProfile(cs.getName());
       if (sourceProfile == null) {
         String propertyProfile =
             defaultString(cs.getValue(ConfigNames.CFG_PROFILE_KEY), cs.getValue(Config.PROFILE));
         if (propertyProfile != null) {
+          // replace with higher priority config source
           profiles.set(CorantConfigResolver.splitValue(propertyProfile));
         }
       }
@@ -117,6 +118,7 @@ public class CorantConfigSources {
         enableExpressions.set(toBoolean(expressionEnabled));
       }
     });
+    // apply config adjuster if necessary
     final ConfigAdjuster configAdjuster = ConfigAdjuster.resolve(classLoader);
     List<CorantConfigSource> sources = new ArrayList<>(originalSources.size());
     profileSources.forEach(ps -> {
@@ -127,8 +129,12 @@ public class CorantConfigSources {
         }
       }
     });
-    // collect the profiled microprofile-config-* sources if necessary, maybe we can use GLOB
-    // pattern to collect them in Config Builder
+    /*
+     * collect the profiled microprofile-config-* sources if necessary, maybe we can use GLOB
+     * pattern to collect them in Config Builder. Spec Note: If the property mp.config.profile is
+     * specified in the microprofile-config-<profile_name>.properties, this property will be
+     * discarded, so we load them separately here.
+     */
     if (isNotEmpty(profiles.get())) {
       for (String profile : profiles.get()) {
         for (ConfigSource mps : MicroprofileConfigSources.get(classLoader, profile)) {

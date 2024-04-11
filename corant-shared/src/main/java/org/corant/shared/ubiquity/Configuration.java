@@ -15,7 +15,6 @@ package org.corant.shared.ubiquity;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
-import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Lists.immutableList;
@@ -256,7 +255,7 @@ public interface Configuration extends Sortable {
 
       @Override
       default int compareTo(ConfigurationSource o) {
-        return Integer.compare(getOrdinal(), o.getOrdinal()) * -1;
+        return Integer.compare(o.getOrdinal(), getOrdinal());
       }
 
       Iterable<String> getKeys();
@@ -293,7 +292,13 @@ public interface Configuration extends Sortable {
       @Override
       public int getOrdinal() {
         if (bundle.containsKey(configOrdinalKey)) {
-          return toInteger(bundle.getObject(configOrdinalKey), 100);
+          String configOrdinal = getValue(configOrdinalKey);
+          if (configOrdinal != null) {
+            try {
+              return Integer.parseInt(configOrdinal);
+            } catch (NumberFormatException ignored) {
+            }
+          }
         }
         return 100;
       }

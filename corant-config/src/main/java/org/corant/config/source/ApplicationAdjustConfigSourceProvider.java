@@ -74,6 +74,14 @@ public class ApplicationAdjustConfigSourceProvider extends ApplicationConfigSour
 
     @Override
     public int getOrdinal() {
+      String configOrdinal = getValue(CONFIG_ORDINAL);
+      if (configOrdinal != null) {
+          try {
+              return Integer.parseInt(configOrdinal);
+          } catch (NumberFormatException ignored) {
+
+          }
+      }
       return APPLICATION_ADJUST_ORDINAL;
     }
 

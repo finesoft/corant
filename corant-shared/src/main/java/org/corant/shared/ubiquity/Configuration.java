@@ -17,13 +17,14 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Lists.immutableList;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.escapedCommaSplit;
 import static org.corant.shared.util.Strings.splitAs;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Iterables;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Services;
 import org.corant.shared.util.Systems;
 
 /**
@@ -175,6 +177,48 @@ public interface Configuration extends Sortable {
   /**
    * corant-shared
    * <p>
+   * A configuration source interface which used to load custom configuration key & values. The
+   * system uses java.util.ServiceLoader to load the implementations.
+   * <p>
+   * Services path: META-INF/services/org.corant.shared.ubiquity.Configuration$ConfigurationSource
+   *
+   * @author bingo 11:19:55
+   */
+  interface ConfigurationSource
+      extends Comparable<ConfigurationSource>, Iterable<String>, Sortable {
+
+    String configOrdinalKey = "config_ordinal";
+
+    @Override
+    default int compareTo(ConfigurationSource o) {
+      return Integer.compare(o.getPriority(), getPriority());
+    }
+
+    default boolean containsKey(String key) {
+      if (key != null) {
+        for (String k : getKeys()) {
+          if (key.equals(k)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    Iterable<String> getKeys();
+
+    String getValue(String key);
+
+    @Override
+    default Iterator<String> iterator() {
+      return getKeys().iterator();
+    }
+
+  }
+
+  /**
+   * corant-shared
+   * <p>
    * Default configuration implementation using system properties and system environment variables
    * or configured property file paths as the configuration source.
    *
@@ -182,32 +226,31 @@ public interface Configuration extends Sortable {
    */
   class DefaultConfiguration implements Configuration {
 
-    String configOrdinalKey = "config_ordinal";
-
-    final List<ConfigurationSource> sources;
+    protected List<ConfigurationSource> sources = new ArrayList<>();
 
     public DefaultConfiguration() {
+      sources.add(new SystemPropertyConfigurationSource());
+      sources.add(new SystemEnvironmentConfigurationSource());
+      Services.selectRequired(ConfigurationSource.class).forEach(sources::add);
       Stream<Resource> resources = splitAs(
           defaultObject(Systems.getProperty(ConfigNames.CFG_LOCATION_KEY),
               () -> Systems.getEnvironmentVariable(ConfigNames.CFG_LOCATION_KEY)),
           ",", String.class, HashSet::new).stream().flatMap(Resources::tryFrom);
-      List<ConfigurationSource> temps = new ArrayList<>();
-      temps.add(new SystemPropertyConfigurationSource());
-      temps.add(new SystemEnvironmentConfigurationSource());
-      resources.filter(Objects::isNotNull).map(r -> {
-        try (InputStream is = r.openInputStream()) {
-          return new PropertyResourceBundleConfigurationSource(new PropertyResourceBundle(is));
-        } catch (IOException e) {
-          throw new CorantRuntimeException(e);
-        }
-      }).forEach(temps::add);
-      Collections.sort(temps);
-      sources = immutableList(temps);
+      resources.filter(Objects::isNotNull).map(PropertyResourceBundleConfigurationSource::new)
+          .forEach(sources::add);
+      Collections.sort(sources);
     }
 
     @Override
     public boolean containsKey(String key) {
-      return System.getProperties().containsKey(key) || System.getenv().containsKey(key);
+      if (key != null) {
+        for (ConfigurationSource source : sources) {
+          if (source.containsKey(key)) {
+            return true;
+          }
+        }
+      }
+      return false;
     }
 
     @Override
@@ -249,39 +292,29 @@ public interface Configuration extends Sortable {
     /**
      * corant-shared
      *
-     * @author bingo 11:19:55
-     */
-    interface ConfigurationSource extends Comparable<ConfigurationSource>, Iterable<String> {
-
-      @Override
-      default int compareTo(ConfigurationSource o) {
-        return Integer.compare(o.getOrdinal(), getOrdinal());
-      }
-
-      Iterable<String> getKeys();
-
-      int getOrdinal();
-
-      String getValue(String key);
-
-      @Override
-      default Iterator<String> iterator() {
-        return getKeys().iterator();
-      }
-
-    }
-
-    /**
-     * corant-shared
-     *
      * @author bingo 11:22:01
      */
-    class PropertyResourceBundleConfigurationSource implements ConfigurationSource {
+    protected static class PropertyResourceBundleConfigurationSource
+        implements ConfigurationSource {
 
       protected final PropertyResourceBundle bundle;
 
-      public PropertyResourceBundleConfigurationSource(PropertyResourceBundle bundle) {
-        this.bundle = bundle;
+      public PropertyResourceBundleConfigurationSource(Resource resource) {
+        try (InputStream is = resource.openInputStream();
+            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+          bundle = new PropertyResourceBundle(isr);
+        } catch (IOException e) {
+          throw new CorantRuntimeException(e,
+              "Load configuration property resource bundle %s error!", resource.getLocation());
+        }
+      }
+
+      @Override
+      public boolean containsKey(String key) {
+        if (key != null) {
+          return bundle.containsKey(key);
+        }
+        return false;
       }
 
       @Override
@@ -290,7 +323,7 @@ public interface Configuration extends Sortable {
       }
 
       @Override
-      public int getOrdinal() {
+      public int getPriority() {
         if (bundle.containsKey(configOrdinalKey)) {
           String configOrdinal = getValue(configOrdinalKey);
           if (configOrdinal != null) {
@@ -310,7 +343,6 @@ public interface Configuration extends Sortable {
         }
         return null;
       }
-
     }
 
     /**
@@ -318,7 +350,12 @@ public interface Configuration extends Sortable {
      *
      * @author bingo 11:22:19
      */
-    class SystemEnvironmentConfigurationSource implements ConfigurationSource {
+    protected static class SystemEnvironmentConfigurationSource implements ConfigurationSource {
+
+      @Override
+      public boolean containsKey(String key) {
+        return getValue(key) != null;
+      }
 
       @Override
       public Iterable<String> getKeys() {
@@ -326,14 +363,20 @@ public interface Configuration extends Sortable {
       }
 
       @Override
-      public int getOrdinal() {
+      public int getPriority() {
+        String configOrdinal = getValue(configOrdinalKey);
+        if (configOrdinal != null) {
+          try {
+            return Integer.parseInt(configOrdinal);
+          } catch (NumberFormatException ignored) {
+          }
+        }
         return 300;
       }
 
       @Override
       public String getValue(String key) {
         return Systems.getEnvironmentVariable(key);
-
       }
     }
 
@@ -342,7 +385,15 @@ public interface Configuration extends Sortable {
      *
      * @author bingo 11:22:01
      */
-    class SystemPropertyConfigurationSource implements ConfigurationSource {
+    protected static class SystemPropertyConfigurationSource implements ConfigurationSource {
+
+      @Override
+      public boolean containsKey(String key) {
+        if (key != null) {
+          return System.getProperties().containsKey(key);
+        }
+        return false;
+      }
 
       @Override
       public Iterable<String> getKeys() {
@@ -351,7 +402,14 @@ public interface Configuration extends Sortable {
       }
 
       @Override
-      public int getOrdinal() {
+      public int getPriority() {
+        String configOrdinal = getValue(configOrdinalKey);
+        if (configOrdinal != null) {
+          try {
+            return Integer.parseInt(configOrdinal);
+          } catch (NumberFormatException ignored) {
+          }
+        }
         return 400;
       }
 
@@ -361,5 +419,4 @@ public interface Configuration extends Sortable {
       }
     }
   }
-
 }

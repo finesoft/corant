@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static org.corant.shared.util.Configurations.getConfig;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.NoSuchElementException;
 import org.junit.Test;
@@ -27,6 +28,7 @@ public class ConfigurationsTest extends TestCase {
 
   @Test
   public void testGetConfigValue() {
+    Systems.setProperty("corant.config.location", "filesystem:d:/application.properties");
     Systems.setProperty("a.b.c", "123");
     Systems.setProperty("123.d", "1234");
     Systems.setProperty("var", "${a.b.c}");
@@ -36,6 +38,10 @@ public class ConfigurationsTest extends TestCase {
     Systems.setProperty("varCompose3", "${${a.b.c}.d}+${a.b.c}");
     Systems.setProperty("varCompose4", "${${a.b.c}.d}+${a.b:\\:\\:}");
     Systems.setProperty("varNotExist", "${a.b}");
+
+    getConfig().getKeys().forEach(System.out::println);
+    System.out.println("=".repeat(100));
+
     assertNull(getConfigValue("a.b", String.class));
     assertEquals(getConfigValue("a.b.c", String.class), "123");
     assertEquals(getConfigValue("var", String.class), "123");

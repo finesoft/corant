@@ -191,7 +191,7 @@ public interface Configuration extends Sortable {
 
     @Override
     default int compareTo(ConfigurationSource o) {
-      return Integer.compare(o.getPriority(), getPriority());
+      return Sortable.reverseCompare(this, o);
     }
 
     default boolean containsKey(String key) {

@@ -66,7 +66,7 @@ public interface Sortable {
    * @see #compare(Sortable, Sortable)
    */
   static int reverseCompare(Sortable s1, Sortable s2) {
-    return -1 * compare(s1, s2);
+    return compare(s2, s1);
   }
 
   /**

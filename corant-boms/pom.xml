@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <packaging>pom</packaging>
   <parent>
@@ -143,13 +143,16 @@
     <version.ognl>3.2.13</version.ognl>
     <version.ojdbc8>19.8.0.0</version.ojdbc8>
     <version.opencv>3.4.2-2</version.opencv>
+    <version.opentelemetry>1.9.0</version.opentelemetry>
+    <version.opentelemetry.javaagent>1.9.0</version.opentelemetry.javaagent>
+    <version.opentelemetry.instrumentation>1.9.2-alpha</version.opentelemetry.instrumentation>
     <version.opentracing-tracerresolver>0.1.5</version.opentracing-tracerresolver>
     <version.org.openjdk.jmh>1.22</version.org.openjdk.jmh>
     <version.org.osgi.service.cdi>1.0.0</version.org.osgi.service.cdi>
     <version.osgi.annotation>7.0.0</version.osgi.annotation>
     <version.pinyin4j>2.5.1</version.pinyin4j>
     <version.projectreactor>3.5.7</version.projectreactor>
-
+    <version.prometheus>0.15.0</version.prometheus>
     <version.quartz>2.3.2</version.quartz>
     <version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
     <version.redisson>3.17.6</version.redisson>
@@ -374,7 +377,7 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-lang-shared</artifactId>
         <version>${revision}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-lang-groovy</artifactId>
@@ -559,17 +562,17 @@
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-vertx-shared</artifactId>
         <version>${revision}</version>
-      </dependency> 
+      </dependency>
       <dependency>
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-vertx-serviceproxy</artifactId>
         <version>${revision}</version>
-      </dependency>         
+      </dependency>
       <dependency>
         <groupId>org.corant</groupId>
         <artifactId>corant-modules-vertx-jaxrs</artifactId>
         <version>${revision}</version>
-      </dependency>          
+      </dependency>
       <!-- Java & Javax & Jakarta & Javafx -->
       <dependency>
         <groupId>jakarta.enterprise</groupId>
@@ -1452,7 +1455,7 @@
         <groupId>org.apache.activemq</groupId>
         <artifactId>artemis-jms-server</artifactId>
         <version>${version.artemis}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>org.apache.activemq</groupId>
         <artifactId>artemis-cdi-client</artifactId>
@@ -1897,70 +1900,70 @@
         <version>${version.vertx}</version>
       </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-config</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>    
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-config</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-rx-java</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>  
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-rx-java</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-rx-java2</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>       
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-rx-java2</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-rx-java3</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>             
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-rx-java3</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-jdbc-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>      
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-jdbc-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-pg-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>    
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-pg-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-mssql-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>      
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-mssql-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-sql-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>    
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-sql-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-oracle-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>             
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-oracle-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-mysql-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>    
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-mysql-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-db2-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>         
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-db2-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-mongo-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>          
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-mongo-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-redis-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>                
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-redis-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web</artifactId>
@@ -1970,62 +1973,62 @@
         <groupId>io.vertx</groupId>
         <artifactId>vertx-web-client</artifactId>
         <version>${version.vertx}</version>
-      </dependency>      
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-mqtt</artifactId>
         <version>${version.vertx}</version>
-      </dependency>    
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-amqp-client</artifactId>
         <version>${version.vertx}</version>
-      </dependency>        
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-grpc</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>    
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-grpc</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-grpc-server</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>           
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-grpc-server</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-grpc-client</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>        
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-grpc-client</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-auth-jwt</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>      
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-auth-jwt</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-auth-oauth2</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>        
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-auth-oauth2</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
-		<groupId>io.vertx</groupId>
-		<artifactId>vertx-circuit-breaker</artifactId>
-		<version>${version.vertx}</version>   
-      </dependency>         
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-circuit-breaker</artifactId>
+        <version>${version.vertx}</version>
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-service-proxy</artifactId>
         <version>${version.vertx}</version>
-      </dependency>   
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-service-discovery</artifactId>
         <version>${version.vertx}</version>
-      </dependency>           
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-codegen</artifactId>
         <version>${version.vertx}</version>
-      </dependency>       
+      </dependency>
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-hazelcast</artifactId>
@@ -2038,21 +2041,21 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-	    <groupId>io.projectreactor</groupId>
-	    <artifactId>reactor-core</artifactId>
-	    <version>${version.projectreactor}</version>
-	  </dependency>            
+        <groupId>io.projectreactor</groupId>
+        <artifactId>reactor-core</artifactId>
+        <version>${version.projectreactor}</version>
+      </dependency>
       <dependency>
-	    <groupId>io.projectreactor</groupId>
-	    <artifactId>reactor-test</artifactId>
-	    <version>${version.projectreactor}</version>
-	  </dependency> 
+        <groupId>io.projectreactor</groupId>
+        <artifactId>reactor-test</artifactId>
+        <version>${version.projectreactor}</version>
+      </dependency>
       <dependency>
-	    <groupId>io.projectreactor</groupId>
-	    <artifactId>reactor-tools</artifactId>
-	    <version>${version.projectreactor}</version>
-	  </dependency> 	  
-	   
+        <groupId>io.projectreactor</groupId>
+        <artifactId>reactor-tools</artifactId>
+        <version>${version.projectreactor}</version>
+      </dependency>
+
       <!-- Osgi -->
       <dependency>
         <groupId>org.osgi</groupId>
@@ -2244,6 +2247,32 @@
         <groupId>org.tensorflow</groupId>
         <artifactId>ndarray</artifactId>
         <version>${version.ndarray}</version>
+      </dependency>
+
+      <!-- apm -->
+      <dependency>
+        <groupId>io.prometheus.jmx</groupId>
+        <artifactId>jmx_prometheus_javaagent</artifactId>
+        <version>${version.prometheus}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>${version.opentelemetry}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+        <version>${version.opentelemetry.instrumentation}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.javaagent</groupId>
+        <artifactId>opentelemetry-javaagent</artifactId>
+        <version>${version.opentelemetry.javaagent}</version>
       </dependency>
 
       <!-- Testing -->

@@ -58,7 +58,7 @@ public class Preconditions {
   /**
    * Check if the given classes is an inheritance or implementation relationship
    *
-   * @param superCls the super class
+   * @param superCls the superclass
    * @param subCls the subclass
    * @param code error message code
    * @param parameters error message parameters
@@ -130,8 +130,8 @@ public class Preconditions {
 
   /**
    * Returns the first given {@code object1} if the given two objects are equal to each other and
-   * throw an exception with the given code and parameters otherwise. If both objects are null then
-   * considered they are equivalent. If the given two objects are {@link Comparable} and they are
+   * throw an exception with the given code and parameters otherwise. If both objects are null, then
+   * considered, they are equivalent. If the given two objects are {@link Comparable} and they are
    * not equivalent, the method will use {@link Comparable#compareTo(Object)} to check equivalent.
    *
    * @param object1 the object to be checked
@@ -170,8 +170,7 @@ public class Preconditions {
    * exception by the given supplier otherwise.
    *
    * @param expression the expression to be checked
-   * @param code error message code
-   * @param parameters error message parameters
+   * @param supplier the exception supplier
    */
   public static void requireFalse(boolean expression,
       Supplier<? extends RuntimeException> supplier) {
@@ -255,7 +254,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code object} if it is instance of the given class {@code klass} and throw
+   * Returns the given {@code object} if it is instanced of the given class {@code klass} and throw
    * an exception with the given code and parameters otherwise.
    *
    * @param object the object to be checked
@@ -273,7 +272,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code ipAddress} if it is IP v4 address and throw an exception with the
+   * Returns the given {@code ipAddress} if it is an IP v4 address and throw an exception with the
    * given code and parameters otherwise.
    *
    * @param ipAddress the address to be checked
@@ -349,8 +348,8 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code ipAddress} if it is mail address and throw an exception with the given
-   * code and parameters otherwise.
+   * Returns the given {@code ipAddress} if it is a mail address and throw an exception with the
+   * given code and parameters otherwise.
    *
    * @param mailAddress the address to be checked
    * @param code error message code
@@ -418,7 +417,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code strings} array if all elements of the strings array are not blank and
+   * Returns the given {@code strings} array if all elements of the string array are not blank and
    * throw an exception with the given code and parameters otherwise.
    *
    * @param code error message code
@@ -437,7 +436,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code strings} array if all elements of the strings array are not blank and
+   * Returns the given {@code strings} array if all elements of the string array are not blank and
    * throw an exception with the given code otherwise.
    *
    * @param code error message code
@@ -448,7 +447,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code objects} array if all elements of the objects array are not null and
+   * Returns the given {@code objects} array if all elements of the object array are not null and
    * throw an exception with the given code otherwise.
    *
    * @param code error message code
@@ -459,7 +458,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code objects} array if all elements of the objects array are not null and
+   * Returns the given {@code objects} array if all elements of the object array are not null and
    * throw an exception with the given code and parameters otherwise.
    *
    * @param code error message code
@@ -629,7 +628,7 @@ public class Preconditions {
    * and parameters otherwise.
    *
    * @param left the object to be checked
-   * @param right the another object to be checked
+   * @param right another object to be checked
    * @param code the exception code to use if the validation fails
    * @param parameters the exception parameters
    */

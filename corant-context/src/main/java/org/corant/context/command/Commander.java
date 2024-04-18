@@ -31,8 +31,8 @@ import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
  * The class is the realization of a simple command bus. This class method is used to automatically
  * invoke the command handler synchronously or asynchronously according to the given command object
  * type. To use this, you need a command and one or more command handlers that use this commands
- * type as generic parameter type and inherit the abstract class
- * {@link org.corant.context.command.AbstractCommandHandler}. The Commanders use
+ * type as generic parameter type and inherit the abstract class {@link AbstractCommandHandler} or
+ * implements {@link CommandHandler} with {@link Commands} annotation. The Commanders use
  * {@link CommandHandlerResolver} to resolve the appropriate command handler essentially.
  * <p>
  * Note: If a command has multiple handlers, following CDI Type Safe Resolution calls one of the
@@ -70,14 +70,14 @@ import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
  *
  * <b>The commander use case:</b>
  * <ul>
- * <li>accept: Commander.accept(new MyCommand("test"));</li>
- * <li>apply: String upperCase = Commander.apply(new MyCommand("test"));</li>
- * <li>asynchronous accept: Commander.async().accept(new MyCommand("test"));</li>
- * <li>asynchronous apply: Future&lt;String&gt; upperCase = Commander.async().apply(new
+ * <li><b>accept:</b> Commander.accept(new MyCommand("test"));</li>
+ * <li><b>apply:</b> String upperCase = Commander.apply(new MyCommand("test"));</li>
+ * <li><b>asynchronous accept:</b> Commander.async().accept(new MyCommand("test"));</li>
+ * <li><b>asynchronous apply:</b> Future&lt;String&gt; upperCase = Commander.async().apply(new
  * MyCommand("test"));</li>
- * <li>scheduled accept: Commander.schedule(10L,TimeUnit.SECONDS).accept(new
+ * <li><b>scheduled accept:</b> Commander.schedule(10L,TimeUnit.SECONDS).accept(new
  * MyCommand("test"));</li>
- * <li>scheduled apply: ScheduledFuture&lt;String&gt; upperCase =
+ * <li><b>scheduled apply:</b> ScheduledFuture&lt;String&gt; upperCase =
  * Commander.async(10L,TimeUnit.SECONDS).apply(new MyCommand("test"));</li>
  * </ul>
  *

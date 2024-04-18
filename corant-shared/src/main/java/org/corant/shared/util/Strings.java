@@ -33,6 +33,7 @@ import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -182,6 +183,18 @@ public class Strings {
 
   /**
    * Returns true if and only if the given parameters are not null and the given {@code str}
+   * contains any char decide by the given predicate string {@code searchPredicate}. This method is
+   * null safe.
+   *
+   * @param str the string being searched
+   * @param searchPredicate the predicate that use to decide which char contains
+   */
+  public static boolean containsAnyChars(String str, IntPredicate searchPredicate) {
+    return str != null && searchPredicate != null && str.chars().anyMatch(searchPredicate);
+  }
+
+  /**
+   * Returns true if and only if the given parameters are not null and the given {@code str}
    * contains any char from the given specified string {@code searchStr}. This method is null safe.
    *
    * <pre>
@@ -198,6 +211,51 @@ public class Strings {
   public static boolean containsAnyChars(String str, String searchStr) {
     return str != null && searchStr != null
         && str.chars().anyMatch(c -> searchStr.indexOf(c) != -1);
+  }
+
+  /**
+   * Returns true if and only if the given parameters are not null and the given {@code str} not
+   * contains the char decide by the given predicate string {@code searchPredicate}. This method is
+   * null safe.
+   *
+   * @param str the string being searched
+   * @param searchPredicate the predicate that use to decide which char contains
+   */
+  public static boolean containsNoneChars(String str, IntPredicate searchPredicate) {
+    return str != null && searchPredicate != null && str.chars().noneMatch(searchPredicate);
+  }
+
+  /**
+   * Returns true if and only if the given parameters are not null and the given {@code str} only
+   * contains the char decide by the given predicate string {@code searchPredicate}. This method is
+   * null safe.
+   *
+   * @param str the string being searched
+   * @param searchPredicate the predicate that use to decide which char contains
+   */
+  public static boolean containsOnlyChars(String str, IntPredicate searchPredicate) {
+    return str != null && searchPredicate != null && str.chars().allMatch(searchPredicate);
+  }
+
+  /**
+   * Returns true if and only if the given parameters are not null and the given {@code str} only
+   * contains the char from the given specified string {@code searchStr}. This method is null safe.
+   *
+   * <pre>
+   * Strings.containsOnlyChars(null, *)      = false
+   * Strings.containsOnlyChars("", *)        = false
+   * Strings.containsOnlyChars(" ", "a b")   = true
+   * Strings.containsOnlyChars("abc", "ab")  = true
+   * Strings.containsOnlyChars("abc", "z")   = false
+   * Strings.containsOnlyChars("abc", "ac")   = false
+   * </pre>
+   *
+   * @param str the string being searched
+   * @param searchStr the string that contains chars to search for
+   */
+  public static boolean containsOnlyChars(String str, String searchStr) {
+    return str != null && searchStr != null
+        && str.chars().allMatch(c -> searchStr.indexOf(c) != -1);
   }
 
   /**
@@ -517,6 +575,9 @@ public class Strings {
     for (int i = 0, j = len - 1; i <= j; i++, j--) {
       if (!Character.isWhitespace(cs.charAt(i)) || !Character.isWhitespace(cs.charAt(j))) {
         return false;
+      }
+      if (i >= j) {
+        break;
       }
     }
     return true;

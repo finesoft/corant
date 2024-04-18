@@ -56,7 +56,7 @@ public class Preconditions {
   }
 
   /**
-   * 必须是继承或实现关系
+   * Check if the given classes is an inheritance or implementation relationship
    *
    * @param superCls the super class
    * @param subCls the subclass
@@ -72,31 +72,46 @@ public class Preconditions {
   }
 
   /**
-   * 必须包含某个字符
+   * Returns the given {@code textToCheck} if it contains the given {@code substring}, otherwise
+   * throws an exception with the given code and parameters.
    *
-   * @param textToSearch the text string to be search
+   * @param textToCheck the text string to be search
    * @param substring the substring
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireContain(String textToSearch, String substring, Object code,
+  public static String requireContains(String textToCheck, String substring, Object code,
       Object... parameters) {
-    if (!contains(textToSearch, substring)) {
+    if (!contains(textToCheck, substring)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return textToSearch;
+    return textToCheck;
   }
 
-  public static <T> T requireDeepEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (areDeepEqual(obj1, obj2)) {
-      return obj1;
+  /**
+   * Returns the first given {@code object1} if the given objects are deeply equal to each other and
+   * throw an exception with the given code and parameters otherwise.Two null values are deeply
+   * equal. If both given objects are arrays, the algorithm in Arrays.deepEquals is used to
+   * determine equality.Otherwise, equality is determined by using the equals method of the first
+   * given object.
+   *
+   * @param <T> the object type
+   * @param object1 the object to be checked and returned
+   * @param object2 the other object to be checked to
+   * @param code the exception code or error message key
+   * @param parameters the exception parameters
+   */
+  public static <T> T requireDeepEqual(T object1, T object2, Object code, Object... parameters) {
+    if (areDeepEqual(object1, object2)) {
+      return object1;
     } else {
       throw new GeneralRuntimeException(code, parameters);
     }
   }
 
   /**
-   * 不能有相同的元素
+   * Returns the given {@code collection} if the elements of the given collection are distinct and
+   * throw an exception with the given code and parameters otherwise.
    *
    * @param collection the collection to be checked
    * @param code error message code
@@ -114,23 +129,31 @@ public class Preconditions {
   }
 
   /**
-   * 必须相同
+   * Returns the first given {@code object1} if the given two objects are equal to each other and
+   * throw an exception with the given code and parameters otherwise. If both objects are null then
+   * considered they are equivalent. If the given two objects are {@link Comparable} and they are
+   * not equivalent, the method will use {@link Comparable#compareTo(Object)} to check equivalent.
    *
-   * @param obj1 the object to be checked
-   * @param obj2 the object to be checked
+   * @param object1 the object to be checked
+   * @param object2 the object to be checked
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T> T requireEqual(T obj1, T obj2, Object code, Object... parameters) {
-    if (areEqual(obj1, obj2)) {
-      return obj1;
-    } else {
-      throw new GeneralRuntimeException(code, parameters);
+  @SuppressWarnings("unchecked")
+  public static <T> T requireEqual(T object1, T object2, Object code, Object... parameters) {
+    if (areEqual(object1, object2)) {
+      return object1;
+    } else if ((object1 instanceof Comparable no1 && object2 instanceof Comparable no2)
+        && (Objects.compare(no1, no2) == 0)) {
+      return object1;
     }
+    throw new GeneralRuntimeException(code, parameters);
+
   }
 
   /**
-   * 参数必须为false
+   * Requires that the result of a given boolean {@code expression} must be false and throw an
+   * exception by the given code and parameters otherwise.
    *
    * @param expression the expression to be checked
    * @param code error message code
@@ -143,65 +166,84 @@ public class Preconditions {
   }
 
   /**
-   * 参数必须为true
+   * Requires that the result of a given boolean {@code expression} must be false and throw an
+   * exception by the given supplier otherwise.
    *
-   * @param obj the object to be checked
-   * @param p the check expression
+   * @param expression the expression to be checked
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T> T requireFalse(T obj, Predicate<? super T> p, Object code,
+  public static void requireFalse(boolean expression,
+      Supplier<? extends RuntimeException> supplier) {
+    if (expression) {
+      throw supplier.get();
+    }
+  }
+
+  /**
+   * Returns the given {@code object} if it satisfies the given {@code predicate} and throw an
+   * exception with the given code and parameters otherwise.
+   *
+   * @param object the object to be checked
+   * @param predicate the check expression
+   * @param code error message code
+   * @param parameters error message parameters
+   */
+  public static <T> T requireFalse(T object, Predicate<? super T> predicate, Object code,
       Object... parameters) {
-    if (!p.test(obj)) {
-      return obj;
+    if (!predicate.test(object)) {
+      return object;
     } else {
       throw new GeneralRuntimeException(code, parameters);
     }
   }
 
   /**
-   * 必须大于或等于某个值
+   * Returns the given {@code object} if it greater than the given {@code compareObject} and throw
+   * an exception with the given code and parameters otherwise.
    *
-   * @param obj the object to be checked
-   * @param compareObj the object to be compared
+   * @param object the object to be checked
+   * @param compareObject the object to be compared
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T extends Comparable<T>> T requireGaet(T obj, T compareObj, Object code,
+  public static <T extends Comparable<T>> T requireGt(T object, T compareObject, Object code,
       Object... parameters) {
-    if (areEqual(obj, compareObj)) {
-      return obj;
-    }
-    if (obj == null || compareObj == null) {
+    if (object == null || compareObject == null) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    if (obj.compareTo(compareObj) < 0) {
+    if (object.compareTo(compareObject) <= 0) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return obj;
+    return object;
   }
 
   /**
-   * 必须大于某个值
+   * Returns the given {@code object} if it greater than equals the given {@code compareObject} and
+   * throw an exception with the given code and parameters otherwise.
    *
-   * @param obj the object to be checked
-   * @param compareObj the object to be compared
+   * @param object the object to be checked
+   * @param compareObject the object to be compared
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T extends Comparable<T>> T requireGt(T obj, T compareObj, Object code,
+  public static <T extends Comparable<T>> T requireGte(T object, T compareObject, Object code,
       Object... parameters) {
-    if (obj == null || compareObj == null) {
+    if (areEqual(object, compareObject)) {
+      return object;
+    }
+    if (object == null || compareObject == null) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    if (obj.compareTo(compareObj) <= 0) {
+    if (object.compareTo(compareObject) < 0) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return obj;
+    return object;
   }
 
   /**
-   * 输入必须是图片流
+   * Requires that the given image input stream {@code is} must be conforming to the given image
+   * format {@code formatNames} and throw an exception by the given code and parameters otherwise.
    *
    * @param is the image input stream
    * @param code error message code
@@ -213,24 +255,26 @@ public class Preconditions {
   }
 
   /**
-   * 必须是某个类型的对象
+   * Returns the given {@code object} if it is instance of the given class {@code klass} and throw
+   * an exception with the given code and parameters otherwise.
    *
-   * @param cls the required class
-   * @param obj the object to be checked
+   * @param object the object to be checked
+   * @param klass the required class
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T> T requireInstanceOf(Class<T> cls, Object obj, Object code,
+  public static <T> T requireInstanceOf(Object object, Class<T> klass, Object code,
       Object... parameters) {
-    requireNotNull(cls, code, parameters);
-    if (!cls.isInstance(obj)) {
+    requireNotNull(klass, code, parameters);
+    if (!klass.isInstance(object)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return forceCast(obj);
+    return forceCast(object);
   }
 
   /**
-   * ip地址校验
+   * Returns the given {@code ipAddress} if it is IP v4 address and throw an exception with the
+   * given code and parameters otherwise.
    *
    * @param ipAddress the address to be checked
    * @param code error message code
@@ -244,65 +288,69 @@ public class Preconditions {
   }
 
   /**
-   * 必须小于或等于某个值
+   * Returns the given {@code string} if its length is between the given minimum and maximum lengths
+   * and throw an exception with the given code and parameters otherwise.
    *
-   * @param obj the object to be checked
-   * @param compareObj the object to be compared
-   * @param code error message code
-   * @param parameters error message parameters
-   */
-  public static <T extends Comparable<T>> T requireLaet(T obj, T compareObj, Object code,
-      Object... parameters) {
-    if (areEqual(obj, compareObj)) {
-      return obj;
-    }
-    if (obj == null || compareObj == null) {
-      throw new GeneralRuntimeException(code, parameters);
-    }
-    if (obj.compareTo(compareObj) > 0) {
-      throw new GeneralRuntimeException(code, parameters);
-    }
-    return obj;
-  }
-
-  /**
-   * 字符串长度必须小于 MaxLen 且大于MinLen
-   *
-   * @param object the string object to be checked
+   * @param string the string object to be checked
    * @param minLen the required min length
    * @param maxLen the required max length
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireLength(String object, int minLen, int maxLen, Object code,
+  public static String requireLength(String string, int minLen, int maxLen, Object code,
       Object... parameters) {
-    if (!Validates.minMaxLength(object, minLen, maxLen)) {
+    if (!Validates.minMaxLength(string, minLen, maxLen)) {
+      throw new GeneralRuntimeException(code, parameters);
+    }
+    return string;
+  }
+
+  /**
+   * Returns the given {@code object} if it less than the given {@code compareObject} and throw an
+   * exception with the given code and parameters otherwise.
+   *
+   * @param object the object to be checked
+   * @param compareObject the object to be compared
+   * @param code error message code
+   * @param parameters error message parameters
+   */
+  public static <T extends Comparable<T>> T requireLt(T object, T compareObject, Object code,
+      Object... parameters) {
+    if (object == null || compareObject == null) {
+      throw new GeneralRuntimeException(code);
+    }
+    if (object.compareTo(compareObject) >= 0) {
       throw new GeneralRuntimeException(code, parameters);
     }
     return object;
   }
 
   /**
-   * 必须小于某个值
+   * Returns the given {@code object} if it less than equals the given {@code compareObject} and
+   * throw an exception with the given code and parameters otherwise.
    *
-   * @param obj the object to be checked
-   * @param compareObj the object to be compared
+   * @param object the object to be checked
+   * @param compareObject the object to be compared
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static <T extends Comparable<T>> T requireLt(T obj, T compareObj, Object code,
+  public static <T extends Comparable<T>> T requireLte(T object, T compareObject, Object code,
       Object... parameters) {
-    if (obj == null || compareObj == null) {
-      throw new GeneralRuntimeException(code);
+    if (areEqual(object, compareObject)) {
+      return object;
     }
-    if (obj.compareTo(compareObj) >= 0) {
+    if (object == null || compareObject == null) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return obj;
+    if (object.compareTo(compareObject) > 0) {
+      throw new GeneralRuntimeException(code, parameters);
+    }
+    return object;
   }
 
   /**
-   * 邮件地址校验
+   * Returns the given {@code ipAddress} if it is mail address and throw an exception with the given
+   * code and parameters otherwise.
    *
    * @param mailAddress the address to be checked
    * @param code error message code
@@ -316,86 +364,92 @@ public class Preconditions {
   }
 
   /**
-   * 必须满足正则表达式
+   * Returns the given {@code string} if it matches the given regular expression {@code pattern} and
+   * throw an exception with the given code and parameters otherwise.
    *
-   * @param object the string object to be checked
+   * @param string the string object to be checked
    * @param pattern the checked pattern
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireMatch(String object, String pattern, Object code,
+  public static String requireMatch(String string, String pattern, Object code,
       Object... parameters) {
-    if (object == null || pattern == null) {
+    if (string == null || pattern == null) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    if (!Pattern.compile(pattern).matcher(object).matches()) {
+    if (!Pattern.compile(pattern).matcher(string).matches()) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return object;
+    return string;
   }
 
   /**
-   * 字符串长度必须小于 len
+   * Returns the given {@code string} if its length is less than equals the given {@code maxLen} and
+   * throw an exception with the given code and parameters otherwise.
    *
-   * @param object the string object to be checked
+   * @param string the string object to be checked
    * @param maxLen the required max length
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireMaxLength(String object, int maxLen, Object code,
+  public static String requireMaxLength(String string, int maxLen, Object code,
       Object... parameters) {
-    if (!Validates.maxLength(object, maxLen)) {
+    if (!Validates.maxLength(string, maxLen)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return object;
+    return string;
   }
 
   /**
-   * 字符串长度必须大于 len
+   * Returns the given {@code string} if its length is greater than equals the given {@code minLen}
+   * and throw an exception with the given code and parameters otherwise.
    *
-   * @param object the string object to be checked
+   * @param string the string object to be checked
    * @param minLen the required min length
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireMinLength(String object, int minLen, Object code,
+  public static String requireMinLength(String string, int minLen, Object code,
       Object... parameters) {
-    if (!Validates.minLength(object, minLen)) {
+    if (!Validates.minLength(string, minLen)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return object;
+    return string;
   }
 
   /**
-   * 必须全部满足包含非空格字符
+   * Returns the given {@code strings} array if all elements of the strings array are not blank and
+   * throw an exception with the given code and parameters otherwise.
    *
    * @param code error message code
    * @param parameters error message parameters
-   * @param objects the string objects to be checked
+   * @param strings the string objects to be checked
    */
-  public static String[] requireNoneBlank(String code, Object[] parameters, String... objects) {
-    if (objects != null) {
-      for (String obj : objects) {
+  public static String[] requireNoneBlank(String code, Object[] parameters, String... strings) {
+    if (strings != null) {
+      for (String obj : strings) {
         if (!isNotBlank(obj)) {
           throw new GeneralRuntimeException(code, parameters);
         }
       }
     }
-    return objects;
+    return strings;
   }
 
   /**
-   * 必须全部满足包含非空格字符
+   * Returns the given {@code strings} array if all elements of the strings array are not blank and
+   * throw an exception with the given code otherwise.
    *
    * @param code error message code
-   * @param objects the string objects to be checked
+   * @param strings the string objects to be checked
    */
-  public static String[] requireNoneBlank(String code, String... objects) {
-    return requireNoneBlank(code, Objects.EMPTY_ARRAY, objects);
+  public static String[] requireNoneBlank(String code, String... strings) {
+    return requireNoneBlank(code, Objects.EMPTY_ARRAY, strings);
   }
 
   /**
-   * 全部不能为空
+   * Returns the given {@code objects} array if all elements of the objects array are not null and
+   * throw an exception with the given code otherwise.
    *
    * @param code error message code
    * @param objects the string objects to be checked
@@ -405,7 +459,8 @@ public class Preconditions {
   }
 
   /**
-   * 全部不能为空
+   * Returns the given {@code objects} array if all elements of the objects array are not null and
+   * throw an exception with the given code and parameters otherwise.
    *
    * @param code error message code
    * @param parameters error message parameters
@@ -423,39 +478,57 @@ public class Preconditions {
   }
 
   /**
-   * 字符串必须有包含非空格字符
+   * Returns the given {@code string} if it is not blank and throw an exception with the given code
+   * otherwise.
    *
-   * @param object the string object to be checked
+   * @param string the string object to be checked
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireNotBlank(String object, Object code, Object... parameters) {
-    if (isBlank(object)) {
+  public static String requireNotBlank(String string, Object code, Object... parameters) {
+    if (isBlank(string)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return object;
+    return string;
   }
 
   /**
-   * 不能包含某个字符
+   * Returns the given {@code string} if it is not blank and throw an exception by the given
+   * exception supplier.
    *
-   * @param textToSearch the string to be checked
+   * @param string the string object to be checked
+   * @param supplier exception supplier
+   */
+  public static String requireNotBlank(String string,
+      Supplier<? extends RuntimeException> supplier) {
+    if (isBlank(string)) {
+      throw supplier.get();
+    }
+    return string;
+  }
+
+  /**
+   * Returns the given {@code textToCheck} if it not contains the given {@code substring}, otherwise
+   * throws an exception with the given code and parameters.
+   *
+   * @param textToCheck the string to be checked
    * @param substring the substring to search
    * @param code error message code
    * @param parameters error message parameters
    */
-  public static String requireNotContain(String textToSearch, String substring, Object code,
+  public static String requireNotContains(String textToCheck, String substring, Object code,
       Object... parameters) {
-    if (contains(textToSearch, substring)) {
+    if (contains(textToCheck, substring)) {
       throw new GeneralRuntimeException(code, parameters);
     }
-    return textToSearch;
+    return textToCheck;
   }
 
   /**
-   * 不能为空且元素必须不能为空
+   * Returns the given {@code collection} if it is not null and not empty and the elements of the
+   * given collection are not null, throw an exception with the given code and parameters otherwise.
    *
-   * @param collection the collection to be che
+   * @param collection the collection to be checked
    * @param code error message code
    * @param parameters error message parameters
    */
@@ -473,7 +546,8 @@ public class Preconditions {
   }
 
   /**
-   * 集合不能为空，且必须至少包含一个元素
+   * Returns the given {@code collection} if it is not null and not empty, throw an exception with
+   * the given code and parameters otherwise.
    *
    * @param collection the collection to check
    * @param code the exception code to use if the validation fails
@@ -489,7 +563,8 @@ public class Preconditions {
   }
 
   /**
-   * Map不能为空，且必须至少包含一个分录
+   * Returns the given {@code map} if it is not null and not empty, throw an exception with the
+   * given code and parameters otherwise.
    *
    * @param map the map to check
    * @param code the exception code to use if the validation fails
@@ -504,7 +579,8 @@ public class Preconditions {
   }
 
   /**
-   * 数组不能为空，且必须至少包含一个元素
+   * Returns the given {@code array} if it is not null and not empty, throw an exception with the
+   * given code and parameters otherwise.
    *
    * @param array the array to check
    * @param code the exception code to use if the validation fails
@@ -519,25 +595,8 @@ public class Preconditions {
   }
 
   /**
-   * 必须不能有空元素，用于map或collection
-   *
-   * @param bag the Map/Collection object to be checked
-   * @param code the exception code to use if the validation fails
-   * @param parameters the exception parameters
-   */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static <T> T requireNotEmptyBag(T bag, Object code, Object... parameters) {
-    if (bag instanceof Map) {
-      return (T) requireNotEmpty((Map) bag, code, parameters);
-    } else if (bag instanceof Collection) {
-      return (T) requireNotEmpty((Collection) bag, code, parameters);
-    } else {
-      throw new GeneralRuntimeException(code, parameters);
-    }
-  }
-
-  /**
-   * 参数不能为null
+   * Returns the given {@code object} if it is not null, throw an exception with the given code and
+   * parameters otherwise.
    *
    * @param object the object to be checked
    * @param code the exception code to use if the validation fails
@@ -551,7 +610,23 @@ public class Preconditions {
   }
 
   /**
-   * 不能为空且必须相同
+   * Returns the given {@code object} if it is not null, throw an exception by the given supplier
+   * otherwise.
+   *
+   * @param object the object to be checked
+   * @param supplier the exception supplier
+   */
+  public static <T> T requireNotNull(T object, Object code,
+      Supplier<? extends RuntimeException> supplier) {
+    if (object == null) {
+      throw supplier.get();
+    }
+    return object;
+  }
+
+  /**
+   * Requires that the given left and right must be equals and throw an exception by the given code
+   * and parameters otherwise.
    *
    * @param left the object to be checked
    * @param right the another object to be checked
@@ -567,7 +642,8 @@ public class Preconditions {
   }
 
   /**
-   * 数组中的元素不能为空
+   * Returns the given {@code array} if it is null or the elements of the given collection are not
+   * null, throw an exception with the given code and parameters otherwise.
    *
    * @param array the array to check
    * @param code the exception code to use if the validation fails
@@ -586,7 +662,8 @@ public class Preconditions {
   }
 
   /**
-   * 参数只能为null
+   * Returns the given {@code object} if it is null, throw an exception with the given code and
+   * parameters otherwise.
    *
    * @param object the object to be checked
    * @param code the exception code to use if the validation fails
@@ -599,7 +676,8 @@ public class Preconditions {
   }
 
   /**
-   * 参数必须为true
+   * Requires that the result of a given boolean {@code expression} must be true and throw an
+   * exception by the given code and parameters otherwise.
    *
    * @param expression the expression to be checked
    * @param code the exception code to use if the validation fails
@@ -611,33 +689,41 @@ public class Preconditions {
     }
   }
 
-  public static <T> T requireTrue(T obj, Predicate<? super T> p, Object code) {
-    if (p.test(obj)) {
-      return obj;
-    } else {
-      throw new GeneralRuntimeException(code);
+  /**
+   * Requires that the result of a given boolean {@code expression} must be false and throw an
+   * exception by the given supplier.
+   *
+   * @param expression the expression to be checked
+   * @param supplier the exception supplier
+   */
+  public static void requireTrue(boolean expression,
+      Supplier<? extends RuntimeException> supplier) {
+    if (!expression) {
+      throw supplier.get();
     }
   }
 
   /**
-   * 参数必须为true
+   * Returns the given {@code object} if it satisfies the given {@code predicate} and throw an
+   * exception with the given code and parameters otherwise.
    *
-   * @param obj the object to be checked
-   * @param p the check expression
+   * @param object the object to be checked
+   * @param predicate the check expression
    * @param code the exception code to use if the validation fails
    * @param parameters the exception parameters
    */
-  public static <T> T requireTrue(T obj, Predicate<? super T> p, Object code,
+  public static <T> T requireTrue(T object, Predicate<? super T> predicate, Object code,
       Object... parameters) {
-    if (p.test(obj)) {
-      return obj;
+    if (predicate.test(object)) {
+      return object;
     } else {
       throw new GeneralRuntimeException(code, parameters);
     }
   }
 
   /**
-   * 手机号码校验
+   * Returns the given {@code mobileNumber} if it satisfies the China mobile number rule and throw
+   * an exception with the given code and parameters otherwise.
    *
    * @param mobileNumber the China mobile number to be checked
    * @param code the exception code to use if the validation fails
@@ -652,7 +738,8 @@ public class Preconditions {
   }
 
   /**
-   * 电话号码校验 正确格式 012-87654321、0123-87654321、0123－7654321
+   * Returns the given {@code phoneNumber} if it satisfies the China phone number rule and throw an
+   * exception with the given code and parameters otherwise.
    *
    * @param phoneNumber the China phone number to be checked
    * @param code the exception code to use if the validation fails

@@ -98,7 +98,7 @@ public class StringsTest extends TestCase {
 
   @Test
   public void testContainsAnyChars() {
-    assertFalse(Strings.containsAnyChars(null, null));
+    assertFalse(Strings.containsAnyChars(null, (String) null));
     assertFalse(Strings.containsAnyChars("", ""));
     assertTrue(Strings.containsAnyChars(" ", "a b"));
     assertTrue(Strings.containsAnyChars("abc", "ab"));

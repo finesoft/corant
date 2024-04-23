@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jta.narayana;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Conversions.toInteger;
 import java.util.Hashtable;
 import java.util.logging.Level;
@@ -116,18 +117,17 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
       } else {
         try {
           for (Object item : list.values()) {
-            if (item instanceof Thread) {
-              Thread thread = (Thread) item;
+            if (item instanceof Thread thread) {
               try {
                 Throwable t =
                     new Throwable("STACK TRACE OF ACTIVE THREAD IN TERMINATING TRANSACTION");
                 t.setStackTrace(thread.getStackTrace());
-                logger.log(Level.INFO, t, () -> String.format(
+                logger.log(Level.INFO, t, () -> format(
                     "Transaction %s is %s with active thread %s-%s, this may be caused by a timeout.",
                     actUid.toString(), isCommit ? "committing" : "aborting", thread.getName(),
                     thread.getId()));
               } catch (Exception e) {
-                logger.log(Level.WARNING, e, () -> String.format(
+                logger.log(Level.WARNING, e, () -> format(
                     "Narayana extension checked action execute failed on %s , isCommit %s. This may be caused by a timeout.",
                     actUid, isCommit));
               }
@@ -135,7 +135,7 @@ public class DefaultNarayanaConfigurator implements NarayanaConfigurator {
             }
           }
         } catch (Exception e) {
-          logger.log(Level.WARNING, e, () -> String.format(
+          logger.log(Level.WARNING, e, () -> format(
               "Narayana extension checked action execute failed on %s , isCommit %s. This may be caused by a timeout.",
               actUid, isCommit));
         }

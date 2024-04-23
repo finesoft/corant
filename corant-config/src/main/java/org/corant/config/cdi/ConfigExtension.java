@@ -13,6 +13,7 @@
  */
 package org.corant.config.cdi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Primitives.wrap;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.reflect.Type;
@@ -77,8 +78,7 @@ public class ConfigExtension implements Extension {
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperty.class)) {
-      logger.fine(
-          () -> String.format("Found config property inject point %s.", pip.getInjectionPoint()));
+      logger.fine(() -> format("Found config property inject point %s.", pip.getInjectionPoint()));
       injectionPoints.add(pip.getInjectionPoint());
     }
   }

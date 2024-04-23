@@ -55,7 +55,6 @@ public class DefaultMessageHandler implements ManagedMessageReceivingHandler {
     this.mediator = mediator;
   }
 
-  @SuppressWarnings("resource")
   @Override
   public Object onMessage(Message message, Session session) {
     try {

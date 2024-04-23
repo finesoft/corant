@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.cdi;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
@@ -109,7 +110,7 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
           dialect = toObject(qs[1], DBMS.class);
         }
       }
-      logger.fine(String.format(
+      logger.fine(format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
           dataSourceName, dialect));
       return new DefaultSqlNamedQueryService(dataSourceName, dialect, this);

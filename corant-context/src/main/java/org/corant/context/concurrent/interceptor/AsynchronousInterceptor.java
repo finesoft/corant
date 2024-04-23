@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.interceptor;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.concurrent.ConcurrentExtension.ENABLE_ASYNC_INTERCEPTOR_CFG;
 import java.util.concurrent.Callable;
@@ -73,7 +74,7 @@ public class AsynchronousInterceptor extends AbstractInterceptor {
         return ctx.proceed();
       } catch (Throwable t) {
         logger.log(Level.WARNING, t,
-            () -> String.format("Asynchronous invocation %s occurred error!", ctx.getMethod()));
+            () -> format("Asynchronous invocation %s occurred error!", ctx.getMethod()));
         throw t;
       }
     };

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared;
 
+import static java.lang.String.format;
 import static java.util.Collections.newSetFromMap;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.select;
@@ -75,8 +76,8 @@ public abstract class AbstractJMSExtension implements Extension {
     return null;
   }
 
-  public NamedQualifierObjectManager<? extends AbstractJMSConfig> getConfigManager() {
-    return configManager;
+  public Map<String, ? extends AbstractJMSConfig> getConfigs() {
+    return configManager.getAllWithNames();
   }
 
   public Set<ContextualMethodHandler> getReceiveMethods() {
@@ -85,6 +86,10 @@ public abstract class AbstractJMSExtension implements Extension {
 
   public Set<ContextualMethodHandler> getStreamMethods() {
     return Collections.unmodifiableSet(streamMethods);
+  }
+
+  protected NamedQualifierObjectManager<? extends AbstractJMSConfig> getConfigManager() {
+    return configManager;
   }
 
   protected void onBeforeShutdown(
@@ -108,11 +113,11 @@ public abstract class AbstractJMSExtension implements Extension {
         marshallers.add(ms.marshaller());
       }
     }
-    logger.fine(() -> String.format("Scanning message driven on bean: %s.", beanClass.getName()));
+    logger.fine(() -> format("Scanning message driven on bean: %s.", beanClass.getName()));
     ProxyBuilder.buildDeclaredMethods(beanClass, m -> m.isAnnotationPresent(MessageDriven.class))
         .forEach(cm -> {
           Method method = cm.getMethod();
-          logger.fine(() -> String.format("Found message driven method %s.", method.getName()));
+          logger.fine(() -> format("Found message driven method %s.", method.getName()));
           for (MessageDriven md : method.getAnnotationsByType(MessageDriven.class)) {
             for (MessageReply mr : md.reply()) {
               marshallers.add(mr.marshaller());

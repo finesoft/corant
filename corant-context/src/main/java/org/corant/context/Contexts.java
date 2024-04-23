@@ -13,6 +13,7 @@
  */
 package org.corant.context;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -166,8 +167,8 @@ public class Contexts {
       this.propagate = propagate;
       this.manager = manager;
       contextToApply = propagate ? capture(manager) : ContextSnapshot.EMPTY_INST;
-      logger.finer(
-          () -> String.format("Create CDI context installer with propagate=%s, context to apply %s",
+      logger
+          .finer(() -> format("Create CDI context installer with propagate=%s, context to apply %s",
               propagate, contextToApply));
     }
 
@@ -184,7 +185,7 @@ public class Contexts {
      */
     public ContextRestorer install() {
       final ContextSnapshot existingContexts = capture(manager);
-      logger.finer(() -> String.format("Capture current thread CDI context %s", existingContexts));
+      logger.finer(() -> format("Capture current thread CDI context %s", existingContexts));
       BoundRequestContext requestCtx =
           resolveBoundContext(existingContexts.getRequestContext(), BoundRequestContext.class);
       BoundSessionContext sessionCtx =
@@ -242,8 +243,8 @@ public class Contexts {
         } else {
           conversationCtx.deactivate();
         }
-        logger.finer(() -> String.format(
-            "Restore thread CDI context %s to current thread if necessary", existingContexts));
+        logger.finer(() -> format("Restore thread CDI context %s to current thread if necessary",
+            existingContexts));
         if (propagate && propagateStrictly
             && contextToApply.getBeanCount() != afterTaskContexts.getBeanCount()) {
           Set<ContextualInstance<?>> diffRegisteredBeans =
@@ -253,7 +254,7 @@ public class Contexts {
           diffRegisteredBeans.removeAll(contextToApply.getRequestInstances());
           diffRegisteredBeans.removeAll(contextToApply.getSessionInstances());
           diffRegisteredBeans.removeAll(contextToApply.getConversationInstances());
-          throw new IllegalStateException(String.format(
+          throw new IllegalStateException(format(
               "The following CDI beans must be reachable before the context was captured: %s",
               diffRegisteredBeans));
         }

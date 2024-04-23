@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableCollection;
 import static org.corant.shared.ubiquity.Throwing.uncheckedRunner;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
@@ -207,7 +208,7 @@ public class Threads {
     int count = group.activeGroupCount();
     ThreadGroup[] threadGroups;
     do {
-      threadGroups = new ThreadGroup[count + (count / 2) + 1]; // slightly grow the array size
+      threadGroups = new ThreadGroup[count + count / 2 + 1]; // slightly grow the array size
       count = group.enumerate(threadGroups, recurse);
       // return value of enumerate() must be strictly less than the array size according to javadoc
     } while (count >= threadGroups.length);
@@ -261,7 +262,7 @@ public class Threads {
     int count = group.activeCount();
     Thread[] threads;
     do {
-      threads = new Thread[count + (count / 2) + 1]; // slightly grow the array size
+      threads = new Thread[count + count / 2 + 1]; // slightly grow the array size
       count = group.enumerate(threads, recurse);
       // return value of enumerate() must be strictly less than the array size according to javadoc
     } while (count >= threads.length);
@@ -429,15 +430,15 @@ public class Threads {
       } finally {
         if (monitor != null) {
           synchronized (monitor) {
-            logger.fine(() -> String.format("The period runnable %s is about to exit.",
+            logger.fine(() -> format("The period runnable %s is about to exit.",
                 Thread.currentThread().getName()));
             if (!activated) {
               monitor.notifyAll();
             } else {
               activated = false;
             }
-            logger.fine(() -> String.format("The period runnable %s exits.",
-                Thread.currentThread().getName()));
+            logger.fine(
+                () -> format("The period runnable %s exits.", Thread.currentThread().getName()));
           }
         } else {
           activated = false;

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bson.codec;
 
+import static java.lang.String.format;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.bson.BsonInvalidOperationException;
@@ -35,7 +36,7 @@ public class URLStringCodec implements Codec<URL> {
       return new URL(urlString);
     } catch (MalformedURLException e) {
       throw new BsonInvalidOperationException(
-          String.format("Can't decode URL from string '%s'", urlString));
+          format("Can't decode URL from string '%s'", urlString));
 
     }
   }

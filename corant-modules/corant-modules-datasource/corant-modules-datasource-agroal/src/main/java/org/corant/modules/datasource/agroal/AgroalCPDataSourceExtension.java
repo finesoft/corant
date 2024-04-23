@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.agroal;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
@@ -102,12 +103,12 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
     // transaction
     if (cfg.isXa() && !XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-      logger.warning(() -> String.format(
-          "When using XA, the driver of data source [%s] should be a XADataSource.",
-          cfg.getName()));
+      logger.warning(
+          () -> format("When using XA, the driver of data source [%s] should be a XADataSource.",
+              cfg.getName()));
     }
     if (cfg.isJta() && !XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-      logger.info(() -> String.format(
+      logger.info(() -> format(
           "Use resource local transaction for the data source [%s] if it used in transactional scenario.",
           cfg.getName()));
     }
@@ -189,7 +190,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
 
   protected void registerMetricsMBean(String name) {
     final String useName = defaultString(name, "unnamed");
-    logger.info(() -> String.format("Register agroal data source %s metrices to jmx.", useName));
+    logger.info(() -> format("Register agroal data source %s metrices to jmx.", useName));
     final String mbeanName = applicationName().concat(":type=agroal,name=").concat(useName);
     registerToMBean(mbeanName, new AgroalCPDataSourceMetrics(name));
     mbeanNames.add(mbeanName);

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static java.lang.String.format;
 import java.util.Locale;
 import java.util.function.Function;
 import org.corant.shared.normal.Names;
@@ -34,7 +35,7 @@ public interface MessageResolver extends Sortable, AutoCloseable {
   String UNKNOWN_DES_KEY = "DES.message.unknown";
 
   static String getNoFoundMessage(Locale locale, Object key) {
-    return String.format("Can't find any message for %s.", key);
+    return format("Can't find any message for %s.", key);
   }
 
   /**

@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -126,14 +127,14 @@ public class CorantConfigBuilder implements ConfigBuilder {
     Class<?> type = (Class<?>) CorantConfigConversion.getTypeOfConverter(cls);
     shouldNotNull(type, "Converter %s must be a ParameterizedType.", cls);
     converters.add(new OrdinalConverter(type, converter, CorantConfigConversion.findPriority(cls)));
-    logger.fine(() -> String.format(
-        "Found config converter, name:[%s], target type:[%s], class loader:[%s].", cls.getName(),
-        type.getName(), classLoader));
+    logger.fine(
+        () -> format("Found config converter, name:[%s], target type:[%s], class loader:[%s].",
+            cls.getName(), type.getName(), classLoader));
   }
 
   void addSource(ConfigSource source) {
     sources.add(shouldNotNull(source, "Config source can not null."));
-    logger.fine(() -> String.format(
+    logger.fine(() -> format(
         "Found config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
         classLoader.getClass().getName(), source.getClass().getName()));
@@ -141,12 +142,12 @@ public class CorantConfigBuilder implements ConfigBuilder {
 
   void validate(CorantConfigSources sources, CorantConfig config) {
     if (isNotEmpty(sources.getProfiles())) {
-      logger.fine(() -> String.format("The activated config profiles: [%s].",
+      logger.fine(() -> format("The activated config profiles: [%s].",
           String.join(", ", sources.getProfiles())));
     }
-    logger.fine(() -> String.format("The config property expressions is %s.",
+    logger.fine(() -> format("The config property expressions is %s.",
         sources.isExpressionsEnabled() ? "enabled" : "disabled"));
-    logger.fine(() -> String.format("Found %s config_sources:%n%n[%n  %s%n]%n%n",
+    logger.fine(() -> format("Found %s config_sources:%n%n[%n  %s%n]%n%n",
         sources.getSources().size(), sources.getSources().stream().map(CorantConfigSource::getName)
             .collect(Collectors.joining(",\n  "))));
 

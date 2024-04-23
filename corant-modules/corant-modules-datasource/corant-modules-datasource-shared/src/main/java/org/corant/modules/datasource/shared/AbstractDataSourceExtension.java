@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -20,6 +21,9 @@ import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
@@ -27,9 +31,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import org.corant.config.Configs;
 import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers.DefaultNamedQualifierObjectManager;
@@ -72,7 +73,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any data source configurations.");
     } else {
-      logger.info(() -> String.format("Found %s data sources named [%s].", configManager.size(),
+      logger.info(() -> format("Found %s data sources named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }
@@ -91,7 +92,7 @@ public abstract class AbstractDataSourceExtension implements Extension {
         }
         String jndiName = DataSourceConfig.JNDI_SUBCTX_NAME + "/" + name;
         jndi.bind(jndiName, new NamingReference(DataSource.class, qualifiers));
-        logger.info(() -> String.format("Bind data source %s to jndi.", jndiName));
+        logger.info(() -> format("Bind data source %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
@@ -103,10 +104,10 @@ public abstract class AbstractDataSourceExtension implements Extension {
       if (cfg.isVerifyDeployment()) {
         try {
           for (int i = 0; i < cfg.getMinSize(); i++) {
-            logger.info(() -> String.format(
-                "Check data source %s connection, takes up to about %s seconds.",
-                defaultString(cfg.connectionUrl, cfg.getJdbcProperties().get("URL")),
-                cfg.getAcquisitionTimeout().getSeconds()));
+            logger
+                .info(() -> format("Check data source %s connection, takes up to about %s seconds.",
+                    defaultString(cfg.connectionUrl, cfg.getJdbcProperties().get("URL")),
+                    cfg.getAcquisitionTimeout().getSeconds()));
             resolve(DataSource.class, quas).getConnection().close();// FIXME use another ways.
           }
         } catch (SQLException e) {

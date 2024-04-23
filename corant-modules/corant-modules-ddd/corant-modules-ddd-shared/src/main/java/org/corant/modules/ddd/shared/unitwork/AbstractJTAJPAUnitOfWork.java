@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import static java.lang.String.format;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.persistence.FlushModeType;
@@ -65,7 +66,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
     try {
       complete(success);
     } finally {
-      logger.fine(() -> String.format("End unit of work [%s].", transaction.toString()));
+      logger.fine(() -> format("End unit of work [%s].", transaction.toString()));
       handlePostCompleted(success);
       clear();
     }
@@ -169,7 +170,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
 
   protected void flushEntityManagers() {
     entityManagers.values().forEach(em -> {
-      logger.fine(() -> String.format(
+      logger.fine(() -> format(
           "Enforce entity managers %s flush to collect the messages, before %s completion.", em,
           transaction.toString()));
       if (USE_MANUAL_FLUSH_MODEL) {

@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import static org.corant.shared.normal.Defaults.FOUR_KBS;
 import static org.corant.shared.normal.Defaults.SIXTEEN_KBS;
 import static org.corant.shared.ubiquity.Throwing.uncheckedConsumer;
@@ -120,7 +121,7 @@ public class FileUtils {
       long count;
       while (pos < size && !Thread.currentThread().isInterrupted()) {
         final long remain = size - pos;
-        count = remain > bufferSize ? bufferSize : remain;
+        count = Math.min(remain, bufferSize);
         final long bytesCopied = output.transferFrom(input, pos, count);
         if (bytesCopied == 0) {
           break;
@@ -135,8 +136,8 @@ public class FileUtils {
           + "' Expected length: " + srcLen + " Actual: " + dstLen);
     }
     if (preserveFileDate && destFile.setLastModified(srcFile.lastModified())) {
-      logger.warning(() -> String.format("Can not preserve file date for file %s!",
-          destFile.getAbsolutePath()));
+      logger.warning(
+          () -> format("Can not preserve file date for file %s!", destFile.getAbsolutePath()));
     }
   }
 
@@ -524,7 +525,7 @@ public class FileUtils {
         }
         final Map<String, String> news = operator.apply(olds);
         if (isEmpty(news)) {
-          oldAttNames.stream().forEach(uncheckedConsumer(view::delete));
+          oldAttNames.forEach(uncheckedConsumer(view::delete));
         } else {
           oldAttNames.stream().filter(atn -> !news.containsKey(atn))
               .forEach(uncheckedConsumer(view::delete));

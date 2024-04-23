@@ -13,6 +13,7 @@
  */
 package org.corant.shared.resource;
 
+import static java.lang.String.format;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
@@ -37,8 +38,7 @@ public interface WritableResource extends Resource {
     try {
       return openOutputStream();
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can't not open stream from %s.", getLocation()));
+      logger.log(Level.WARNING, e, () -> format("Can't not open stream from %s.", getLocation()));
     }
     return null;
   }

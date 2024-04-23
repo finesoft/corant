@@ -13,6 +13,8 @@
  */
 package org.corant.shared.exception;
 
+import static java.lang.String.format;
+
 /**
  * corant-shared
  *
@@ -33,7 +35,7 @@ public class CorantRuntimeException extends RuntimeException {
    * @see String#format(String, Object...)
    */
   public CorantRuntimeException(String msgOrFormat, Object... args) {
-    super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args));
+    super(args.length == 0 ? msgOrFormat : format(msgOrFormat, args));
   }
 
   /**
@@ -60,8 +62,8 @@ public class CorantRuntimeException extends RuntimeException {
    */
   public CorantRuntimeException(Throwable cause, boolean enableSuppression,
       boolean writableStackTrace, String msgOrFormat, Object... args) {
-    super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args), cause,
-        enableSuppression, writableStackTrace);
+    super(args.length == 0 ? msgOrFormat : format(msgOrFormat, args), cause, enableSuppression,
+        writableStackTrace);
   }
 
   /**
@@ -77,7 +79,7 @@ public class CorantRuntimeException extends RuntimeException {
    * @param args the message format parameter
    */
   public CorantRuntimeException(Throwable cause, String msgOrFormat, Object... args) {
-    super(args.length == 0 ? msgOrFormat : String.format(msgOrFormat, args), cause);
+    super(args.length == 0 ? msgOrFormat : format(msgOrFormat, args), cause);
   }
 
 }

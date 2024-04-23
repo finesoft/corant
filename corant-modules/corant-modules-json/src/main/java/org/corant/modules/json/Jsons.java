@@ -13,6 +13,7 @@ package org.corant.modules.json;
  * the License.
  */
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.IOException;
@@ -614,7 +615,7 @@ public class Jsons {
         return objectMapper.readerFor(cls).readValue(jsonBytes);
       } catch (IOException e) {
         logger.log(Level.WARNING, e,
-            () -> String.format("Can't deserialize bytes to %s object.", cls.getName()));
+            () -> format("Can't deserialize bytes to %s object.", cls.getName()));
       }
     }
     return null;
@@ -633,7 +634,7 @@ public class Jsons {
         return objectMapper.readValue(jsonString, clazz);
       } catch (IOException e) {
         logger.log(Level.WARNING, e,
-            () -> String.format("Can't deserialize String to %s object.", clazz.getName()));
+            () -> format("Can't deserialize String to %s object.", clazz.getName()));
       }
     }
     return null;

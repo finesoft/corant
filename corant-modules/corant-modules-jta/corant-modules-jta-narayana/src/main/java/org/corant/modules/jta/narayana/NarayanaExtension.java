@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jta.narayana;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
@@ -24,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Any;
@@ -34,7 +36,6 @@ import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.inject.Singleton;
-import javax.naming.NamingException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
@@ -138,8 +139,8 @@ public class NarayanaExtension implements TransactionExtension {
         BeanPopulator.getDefaultInstance(RecoveryEnvironmentBean.class);
     Services.selectRequired(NarayanaConfigurator.class, defaultClassLoader())
         .sorted(Sortable::reverseCompare).forEach(cfgr -> {
-          logger.fine(() -> String.format("Use customer narayana configurator %s.",
-              cfgr.getClass().getName()));
+          logger.fine(
+              () -> format("Use customer narayana configurator %s.", cfgr.getClass().getName()));
           cfgr.configCoreEnvironment(coreBean, config);
           cfgr.configCoordinatorEnvironment(coordinatorBean, config);
           cfgr.configRecoveryEnvironment(recoveryBean, config);
@@ -160,10 +161,10 @@ public class NarayanaExtension implements TransactionExtension {
       logger.info(() -> "Registered narayana environment beans to MBean server.");
     }
 
-    logger.info(() -> String.format("JTA default transaction timeout %ss",
-        coordinatorBean.getDefaultTimeout()));
+    logger.info(
+        () -> format("JTA default transaction timeout %ss", coordinatorBean.getDefaultTimeout()));
     if (config.isAutoRecovery()) {
-      logger.info(() -> String.format(
+      logger.info(() -> format(
           "JTA recovery settings: init-offset: %ss, period: %ss, back-off: %ss, expiry-scan-interval: %sh.",
           recoveryBean.getPeriodicRecoveryInitilizationOffset(),
           recoveryBean.getPeriodicRecoveryPeriod(), recoveryBean.getRecoveryBackoffPeriod(),

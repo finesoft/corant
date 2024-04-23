@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.escapedPattern;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -80,8 +81,8 @@ public class CorantConfigExpander {
       boolean eval = position[0] == 1;
       String extracted = template.substring(position[1] + MACRO_PREFIX_LENGTH, position[2]);
       final String logExtracted = extracted;
-      logger.finer(() -> String.format("%s stack%d -> %s %n", "-".repeat(stacks.size()),
-          stacks.size(), logExtracted));
+      logger.finer(() -> format("%s stack%d -> %s %n", "-".repeat(stacks.size()), stacks.size(),
+          logExtracted));
       if (isNotBlank(extracted)) {
         Optional<MatchResult> defaults;
         if (!eval && (defaults = MACRO_DEFAULT_PATTERN.matcher(extracted).results().findFirst())
@@ -99,7 +100,7 @@ public class CorantConfigExpander {
         return resolve(left(template, position[1]).concat(extracted)
             .concat(template.substring(position[2] + 1)), provider, stacks);
       } else {
-        throw new NoSuchElementException(String.format(
+        throw new NoSuchElementException(format(
             "Can not expanded the variable value, the extracted not found, the expanded path [%s].",
             String.join(" -> ", stacks)));
       }
@@ -134,7 +135,7 @@ public class CorantConfigExpander {
   static String resolveValue(boolean eval, String key, CorantConfigRawValueProvider provider,
       Collection<String> stacks) {
     if (stacks.size() > EXPANDED_LIMITED) {
-      throw new IllegalArgumentException(String.format(
+      throw new IllegalArgumentException(format(
           "Can not expanded the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           EXPANDED_LIMITED, String.join(" -> ", stacks)));
     }

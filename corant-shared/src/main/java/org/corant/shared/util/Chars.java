@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,9 +71,9 @@ public class Chars {
 
   /**
    * Converts alphabetic, numeric, and symbolic Unicode characters which are not in the first 127
-   * ASCII characters (the "Basic Latin" Unicode block) into their ASCII equivalents, if one exists.
+   * ASCII characters (the "Basic Latin" Unicode block) into their ASCII equivalents if one exists.
    *
-   * NOTE: code base come from Apache Lucene. if there is infringement, please inform
+   * NOTE: code base comes from Apache Lucene. if there is infringement, please inform
    * me(finesoft@gmail.com)
    *
    * @param input the input chars array to be folded
@@ -2025,7 +2026,7 @@ public class Chars {
       int length = foldToAscii(input, 0, output, 0, input.length);
       return String.valueOf(Arrays.copyOfRange(output, 0, length));
     } catch (Exception e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can't fold %s to ascii!", chars));
+      logger.log(Level.WARNING, e, () -> format("Can't fold %s to ascii!", chars));
       return chars;
     }
   }

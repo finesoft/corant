@@ -13,6 +13,7 @@
  */
 package org.corant.config.declarative;
 
+import static java.lang.String.format;
 import static org.corant.config.CorantConfigResolver.dashify;
 import static org.corant.config.CorantConfigResolver.splitKey;
 import static org.corant.shared.util.Annotations.findAnnotation;
@@ -52,9 +53,9 @@ public class ConfigClasses {
   public static ConfigKeyItem resolveItem(Field field) {
     String className = getUserClass(field.getDeclaringClass()).getCanonicalName();
     String fieldName = field.getName();
-    String keyItemCfgKey = String.format(SPEC_KEY_ITEM_FMT, className, fieldName);
-    String dfltValCfgKey = String.format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
-    String ptnCfgKey = String.format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
+    String keyItemCfgKey = format(SPEC_KEY_ITEM_FMT, className, fieldName);
+    String dfltValCfgKey = format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
+    String ptnCfgKey = format(SPEC_KEY_ITEM_DV_FMT, className, fieldName);
     String keyItem = Configs.getValue(keyItemCfgKey, String.class);
     String defaultValue = Configs.getValue(dfltValCfgKey, String.class);
     DeclarativePattern pattern = Configs.getValue(ptnCfgKey, DeclarativePattern.class);
@@ -77,9 +78,9 @@ public class ConfigClasses {
   public static Pair<Class<?>, ConfigKeyRoot> resolveRoot(Class<?> cls) {
     Class<?> clazz = resolveClass(cls);
     String className = clazz.getCanonicalName();
-    String rootCfgKey = String.format(SPEC_KEY_ROOT_FMT, className);
-    String indexCfgKey = String.format(SPEC_KEY_ROOT_INDEX_FMT, className);
-    String ignoreKey = String.format(SPEC_KEY_ROOT_IG_NOANN_ITEM_FMT, className);
+    String rootCfgKey = format(SPEC_KEY_ROOT_FMT, className);
+    String indexCfgKey = format(SPEC_KEY_ROOT_INDEX_FMT, className);
+    String ignoreKey = format(SPEC_KEY_ROOT_IG_NOANN_ITEM_FMT, className);
     String keyRoot = Configs.getValue(rootCfgKey, String.class);
     Integer keyIndex = Configs.getValue(indexCfgKey, Integer.class);
     String ignoreNotAnnItem = Configs.getValue(ignoreKey, String.class);
@@ -105,7 +106,7 @@ public class ConfigClasses {
 
   static Class<?> resolveClass(Class<?> clazz) {
     Class<?> klass = getUserClass(clazz);
-    String classNameKey = String.format(SPEC_REAL, klass.getCanonicalName());
+    String classNameKey = format(SPEC_REAL, klass.getCanonicalName());
     String className = Configs.getValue(classNameKey, String.class);
     if (isNotBlank(className)) {
       Class<?> realClass = asClass(className);

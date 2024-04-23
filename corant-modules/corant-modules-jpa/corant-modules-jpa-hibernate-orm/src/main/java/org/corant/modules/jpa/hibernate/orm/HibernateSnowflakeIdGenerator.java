@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
@@ -173,9 +174,9 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     } else {
       generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
     }
-    logger.info(() -> String.format(
-        "Create identifier generator for persistence unit[%s], the generator is %s.", ptu,
-        generator.description()));
+    logger.info(
+        () -> format("Create identifier generator for persistence unit[%s], the generator is %s.",
+            ptu, generator.description()));
     return new Generator(tryAsClass(metaData.getPersistenceProviderClassName()), generator, usePst);
   }
 

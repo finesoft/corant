@@ -13,6 +13,7 @@
  */
 package org.corant.shared.resource.watch;
 
+import static java.lang.String.format;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -169,9 +170,9 @@ public class DirectoryWatcher extends AbstractWatcher {
     if (trace) {
       Path prev = keys.get(key);
       if (prev == null) {
-        logger.fine(() -> String.format("register %s to watch service.", dir));
+        logger.fine(() -> format("register %s to watch service.", dir));
       } else if (!dir.equals(prev)) {
-        logger.fine(() -> String.format("update %s -> %s", prev, dir));
+        logger.fine(() -> format("update %s -> %s", prev, dir));
         fire(null, dir.toFile(), prev.toFile());
       }
     }

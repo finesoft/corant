@@ -12,6 +12,7 @@
  */
 package com.github.wxpay.sdk;
 
+import static java.lang.String.format;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -83,7 +84,7 @@ public class WXPayUtil {
     Arrays.sort(keyArray);
     StringBuilder sb = new StringBuilder();
     for (String k : keyArray) {
-      if (k.equals(WXPayConstants.FIELD_SIGN)) {
+      if (WXPayConstants.FIELD_SIGN.equals(k)) {
         continue;
       }
       if (data.get(k).trim().length() > 0) {
@@ -96,7 +97,7 @@ public class WXPayUtil {
     } else if (SignType.HMACSHA256.equals(signType)) {
       return HMACSHA256(sb.toString(), key);
     } else {
-      throw new Exception(String.format("Invalid sign_type: %s", signType));
+      throw new Exception(format("Invalid sign_type: %s", signType));
     }
   }
 
@@ -151,8 +152,7 @@ public class WXPayUtil {
    * @return
    */
   public static Logger getLogger() {
-    Logger logger = LoggerFactory.getLogger("wxpay java sdk");
-    return logger;
+    return LoggerFactory.getLogger("wxpay java sdk");
   }
 
   /**
@@ -284,7 +284,7 @@ public class WXPayUtil {
    */
   public static Map<String, String> xmlToMap(String strXML) throws Exception {
     try {
-      Map<String, String> data = new HashMap<String, String>();
+      Map<String, String> data = new HashMap<>();
       DocumentBuilder documentBuilder = WXPayXmlUtil.newDocumentBuilder();
       InputStream stream = new ByteArrayInputStream(strXML.getBytes("UTF-8"));
       org.w3c.dom.Document doc = documentBuilder.parse(stream);

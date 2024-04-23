@@ -75,8 +75,7 @@ public class MessageReceivingExecutorConfig
   protected Integer corePoolSize = max(2, Runtime.getRuntime().availableProcessors());
 
   public static MessageReceivingExecutorConfig getExecutorConfig(AbstractJMSConfig config) {
-    return CONFIGS.getOrDefault(config.getConnectionFactoryId(),
-        MessageReceivingExecutorConfig.DFLT_INST);
+    return getExecutorConfig(config.getConnectionFactoryId());
   }
 
   public static MessageReceivingExecutorConfig getExecutorConfig(String connectionFactoryId) {

@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
@@ -679,7 +680,7 @@ public class Texts {
                 break;
               case 1:
                 throw new IllegalArgumentException(
-                    String.format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
+                    format("Unexpected csv quote, line: [%s] char at: [%d]", line, i));
               case 3:
                 buf.append(CSV_FIELD_QUOTES);
                 state = 2;
@@ -695,7 +696,7 @@ public class Texts {
               case 2:
                 break;
               case 3:
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(format(
                     "Extra csv character after quoted string, line: [%s] char at: [%d]", line, i));
             }
             buf.append(c);
@@ -704,7 +705,7 @@ public class Texts {
       }
       if (state == 2) {
         throw new IllegalArgumentException(
-            String.format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
+            format("Unclosed csv quote, line: [%s] length: [%d]", line, line.length()));
       }
       result.add(buf.toString());
     }
@@ -925,7 +926,7 @@ public class Texts {
 
     @Override
     public String toString() {
-      return String.format("[%d-%d] %s", beginPosition, endPosition, content);
+      return format("[%d-%d] %s", beginPosition, endPosition, content);
     }
 
   }
@@ -1083,7 +1084,7 @@ public class Texts {
           case CR:
             eol = true;
             long pos = readBytes();
-            if ((read()) != LF) { // for windows '\r\n'
+            if (read() != LF) { // for windows '\r\n'
               skipBytes(pos);
             }
             break;
@@ -1100,7 +1101,7 @@ public class Texts {
         }
       }
 
-      if ((c == -1) && (offset == 0)) {
+      if (c == -1 && offset == 0) {
         return null;
       }
 

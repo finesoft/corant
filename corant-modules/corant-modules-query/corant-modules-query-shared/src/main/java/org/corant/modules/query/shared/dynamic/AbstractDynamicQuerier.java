@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -62,7 +63,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
     this.queryParameter = queryParameter;
     this.queryHandler = queryHandler;
     this.fetchQueryHandler = fetchQueryHandler;
-    this.config = queryHandler.getQuerierConfig();
+    config = queryHandler.getQuerierConfig();
   }
 
   @Override
@@ -130,7 +131,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
             "The size of query[%s] result is exceeded, the allowable range is %s.", getName(),
             maxSize);
       } else {
-        logger.warning(String.format(
+        logger.warning(format(
             "The size of query[%s] result is exceeded, the allowable range is %s, the excess records are silently dropped.",
             query.getName(), maxSize));
         do {
@@ -280,10 +281,9 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   }
 
   boolean thrownExceedMaxSelectSize() {
-    if (this.thrownExceedMaxSelectSize == null) {
-      this.thrownExceedMaxSelectSize =
-          resolveProperty(QuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE, Boolean.class,
-              config.isThrownOnMaxSelectSize());
+    if (thrownExceedMaxSelectSize == null) {
+      thrownExceedMaxSelectSize = resolveProperty(QuerierConfig.PRO_KEY_THROWN_ON_MAX_LIMIT_SIZE,
+          Boolean.class, config.isThrownOnMaxSelectSize());
     }
     return thrownExceedMaxSelectSize;
   }

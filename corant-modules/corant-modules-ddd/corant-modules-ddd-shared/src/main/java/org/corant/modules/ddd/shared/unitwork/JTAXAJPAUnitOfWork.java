@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import static java.lang.String.format;
 import java.util.LinkedList;
 import jakarta.transaction.Transaction;
 import org.corant.modules.ddd.Message;
@@ -35,12 +36,12 @@ public class JTAXAJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
 
   protected JTAXAJPAUnitOfWork(JTAXAJPAUnitOfWorksManager manager, Transaction transaction) {
     super(manager, transaction);
-    logger.fine(() -> String.format("Begin unit of work [%s].", transaction.toString()));
+    logger.fine(() -> format("Begin unit of work [%s].", transaction.toString()));
   }
 
   @Override
   protected void fanoutMessages() {
-    logger.fine(() -> String.format(
+    logger.fine(() -> format(
         "Sorted the flushed messages and store them if necessary, dispatch them to the message dispatcher, before %s completion.",
         transaction.toString()));
     LinkedList<WrappedMessage> messages = new LinkedList<>();

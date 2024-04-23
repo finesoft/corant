@@ -230,7 +230,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
 
   protected void log(String name, Object param, String... script) {
-    logger.fine(() -> String.format(
+    logger.fine(() -> format(
         "%n[QueryService name]: %s; %n[QueryService parameters]: %s; %n[QueryService script]: %s.",
         name,
         getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(param, false, true),
@@ -238,7 +238,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected void log(String name, Object[] param, String... script) {
-    logger.fine(() -> String.format(
+    logger.fine(() -> format(
         "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s.",
         name, String.join(",", asStrings(param)), String.join("\n", script)));
   }

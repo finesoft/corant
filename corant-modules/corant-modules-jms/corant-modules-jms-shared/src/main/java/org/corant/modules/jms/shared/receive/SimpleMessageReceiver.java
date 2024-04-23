@@ -13,11 +13,13 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.transaction.xa.XAResource;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
@@ -33,7 +35,6 @@ import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
 import org.corant.modules.jms.receive.ManagedMessageReceiver;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExceptionListener;
 import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
@@ -50,9 +51,9 @@ import org.corant.shared.ubiquity.Sortable;
  * consumer usually requires a network round trip to set up. Producer is often more lightweight,
  * although there is often some overhead in creating it.
  *
- * NOTE: This is not threadsafe.
+ * NOTE: This is not thread safe.
  *
- * Unfinish: use connection or session pool
+ * Unfinished: use connection or session pool
  *
  * <p>
  * <a href = "https://developer.jboss.org/wiki/ShouldICacheJMSConnectionsAndJMSSessions"> Should I
@@ -171,7 +172,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
 
   @Override
   public synchronized boolean receive() {
-    logger.log(Level.FINE, () -> String.format(">>> Begin receiving messages, %s.", meta));
+    logger.log(Level.FINE, () -> format(">>> Begin receiving messages, %s.", meta));
     Throwable throwable = null;
     try {
       if (initialize()) {
@@ -181,7 +182,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
           Message message = consume();
           postConsume(message);
           if (message == null) {
-            logger.log(Level.FINE, () -> String.format("No message for now, %s.", meta));
+            logger.log(Level.FINE, () -> format("No message for now, %s.", meta));
             break;
           }
         }
@@ -190,7 +191,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
       throwable = e;
       onException(e);
     } finally {
-      logger.log(Level.FINE, () -> String.format("<<< End receiving messages, %s.%n", meta));
+      logger.log(Level.FINE, () -> format("<<< End receiving messages, %s.%n", meta));
     }
     return throwable == null;
   }
@@ -212,8 +213,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
         connection.stop();
         connection.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Close connection occurred error, [%s]", meta));
+        logger.log(Level.SEVERE, e, () -> format("Close connection occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
         session = null;
@@ -227,8 +227,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
       try {
         messageConsumer.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Close consumer occurred error, [%s]", meta));
+        logger.log(Level.SEVERE, e, () -> format("Close consumer occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
       }
@@ -243,8 +242,7 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
           connection.stop();
         }
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Close session occurred error, [%s]", meta));
+        logger.log(Level.SEVERE, e, () -> format("Close session occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
         session = null;
@@ -260,10 +258,10 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
       message = messageConsumer.receive(receiveTimeout);
     }
     if (message != null) {
-      logger.log(Level.FINE, () -> String.format("Received message start handling, [%s]", meta));
+      logger.log(Level.FINE, () -> format("Received message start handling, [%s]", meta));
       Object result = messageHandler.onMessage(message, session);
       mediator.onPostMessageHandled(message, session, result);
-      logger.log(Level.FINE, () -> String.format("Complete message handling, [%s]", meta));
+      logger.log(Level.FINE, () -> format("Complete message handling, [%s]", meta));
     }
     return message;
   }
@@ -294,27 +292,27 @@ public class SimpleMessageReceiver implements ManagedMessageReceiver {
     try {
       mediator.onReceivingException(e);
     } catch (Exception ex) {
-      logger.log(Level.SEVERE, ex, () -> String.format("Execution occurred error!, %s.", meta));
+      logger.log(Level.SEVERE, ex, () -> format("Execution occurred error!, %s.", meta));
     }
     try {
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the transaction, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Rollback the transaction, %s.", meta));
         }
       } else if (session != null) {
         if (meta.getAcknowledge() == Session.SESSION_TRANSACTED) {
           session.rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the session, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Rollback the session, %s.", meta));
         } else if (meta.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE) {
           session.recover();
-          logger.log(Level.SEVERE, () -> String.format("Recover the session, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Recover the session, %s.", meta));
         }
       }
     } catch (Exception te) {
       e.addSuppressed(te);
     } finally {
-      logger.log(Level.SEVERE, e, () -> String.format("Execution occurred error!, %s.", meta));
+      logger.log(Level.SEVERE, e, () -> format("Execution occurred error!, %s.", meta));
     }
   }
 

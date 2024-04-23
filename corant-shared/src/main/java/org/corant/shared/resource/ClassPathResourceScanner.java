@@ -13,6 +13,7 @@
  */
 package org.corant.shared.resource;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.defaultClassLoader;
@@ -319,7 +320,7 @@ public class ClassPathResourceScanner {
       jarFile = new JarFile(file);
     } catch (IOException notJarFile) {
       logger.log(Level.WARNING, notJarFile,
-          () -> String.format("The file %s is not jar file!", file.getName()));
+          () -> format("The file %s is not jar file!", file.getName()));
       return;
     }
     try {
@@ -388,8 +389,7 @@ public class ClassPathResourceScanner {
         return new URI(fileUrlStr);
       }
     } catch (URISyntaxException ignore) {
-      logger.log(Level.WARNING, ignore,
-          () -> String.format("Can not extract file uri from %s.", jarUri));
+      logger.log(Level.WARNING, ignore, () -> format("Can not extract file uri from %s.", jarUri));
     }
     return null;
   }

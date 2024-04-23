@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static java.lang.String.format;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -97,7 +98,7 @@ public class ScheduledThreadPoolExecutorx extends ScheduledThreadPoolExecutor {
     public DynamicDelayRunnableWrapper<V> doSchedule() {
       long delay = task.getDelay();
       if (delay <= 0) {
-        logger.finer(() -> String.format("Task will not get rescheduled as delay is %s", delay));
+        logger.finer(() -> format("Task will not get rescheduled as delay is %s", delay));
       } else {
         future = schedule(this, delay, TimeUnit.MILLISECONDS);
         if (cancelled) {
@@ -146,7 +147,7 @@ public class ScheduledThreadPoolExecutorx extends ScheduledThreadPoolExecutor {
         }
         task.run();
       } catch (Throwable t) {
-        logger.log(Level.SEVERE, t, () -> String.format("Failed running task %s", task));
+        logger.log(Level.SEVERE, t, () -> format("Failed running task %s", task));
       }
       if (cancelled) {
         if (future != null) {

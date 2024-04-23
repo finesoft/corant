@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.cassandra.cdi;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
@@ -73,8 +74,8 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
     return services.computeIfAbsent(key, k -> {
       final String clusterName =
           isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
-      logger.fine(() -> String.format(
-          "Create default cassandra named query service, the cluster is [%s].", clusterName));
+      logger.fine(() -> format("Create default cassandra named query service, the cluster is [%s].",
+          clusterName));
       return new DefaultCasNamedQueryService(clusterName, this);
     });
   }

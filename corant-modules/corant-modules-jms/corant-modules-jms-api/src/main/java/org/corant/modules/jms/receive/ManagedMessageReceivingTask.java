@@ -13,12 +13,14 @@
  */
 package org.corant.modules.jms.receive;
 
+import java.util.concurrent.Delayed;
+
 /**
  * corant-modules-jms-api
  *
  * @author bingo 上午11:57:40
  */
-public interface ManagedMessageReceivingTask extends Runnable {
+public interface ManagedMessageReceivingTask extends Runnable, Delayed {
 
   boolean cancel();
 

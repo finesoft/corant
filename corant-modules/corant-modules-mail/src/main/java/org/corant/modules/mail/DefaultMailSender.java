@@ -1,5 +1,6 @@
 package org.corant.modules.mail;
 
+import static java.lang.String.format;
 import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import java.util.Date;
 import java.util.List;
@@ -39,8 +40,7 @@ public class DefaultMailSender implements MailSender {
 
   public void send(MimeMessage mimeMessage) throws MessagingException {
     MailConfig config = getConfig();
-    logger.log(Level.FINE,
-        () -> String.format("Connecting to %s:%s", config.getHost(), config.getPort()));
+    logger.log(Level.FINE, () -> format("Connecting to %s:%s", config.getHost(), config.getPort()));
     try (Transport transport = getSession().getTransport(config.getProtocol())) {
       transport.connect(config.getHost(), config.getPort(), config.getUsername(),
           config.getPassword());
@@ -52,8 +52,8 @@ public class DefaultMailSender implements MailSender {
       if (messageId != null) {
         mimeMessage.setHeader("Message-ID", messageId);
       }
-      logger.log(Level.FINE, () -> String.format("Sending message id : %s using host: %s",
-          messageId, config.getHost()));
+      logger.log(Level.FINE,
+          () -> format("Sending message id : %s using host: %s", messageId, config.getHost()));
       transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
     }
   }

@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion.converter;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.Map;
@@ -53,8 +54,8 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
    * {@code defaultValue}; if it cannot be converted or an exception occurs during the conversion,
    * an exception will be thrown.
    *
-   * @param defaultValue if the object to be converted is null or the converted result is null then
-   *        use this value as converted as result
+   * @param defaultValue if the object to be converted is null or the converted result is null, then
+   *        use this value as converted as a result
    */
   protected AbstractConverter(T defaultValue) {
     this.defaultValue = defaultValue;
@@ -63,8 +64,8 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
   /**
    * Constructs a converter with the given default value and whether to throw exceptions.
    *
-   * @param defaultValue if the object to be converted is null or the converted result is null then
-   *        use this value as converted as result
+   * @param defaultValue if the object to be converted is null or the converted result is null, then
+   *        use this value as converted as a result
    * @param throwException whether to throw an exception when a conversion error occurs
    */
   protected AbstractConverter(T defaultValue, boolean throwException) {
@@ -88,15 +89,15 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
       if (isThrowException()) {
         throw new ConversionException(e, "Can not convert %s.", asString(value));
       } else {
-        logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(value)));
+        logger.log(Level.WARNING, e, () -> format("Can not convert %s.", asString(value)));
       }
     }
     return defaultObject(result, this::getDefaultValue);
   }
 
   /**
-   * If the object to be converted is null or the converted result is null then use this value as
-   * converted as result. The default value is null.
+   * If the object to be converted is null or the converted result is null, then use this value as
+   * converted as a result. The default value is null.
    *
    * @return the defaultValue
    */
@@ -124,13 +125,11 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
 
   protected void warn(Class<?> target, Object object) {
     if (object == null) {
-      logger.warning(
-          () -> String.format("The conversion of an object from %s to %s may cause distortion!",
-              "Object", target.getName()));
+      logger.warning(() -> format("The conversion of an object from %s to %s may cause distortion!",
+          "Object", target.getName()));
     } else {
-      logger
-          .warning(() -> String.format("The conversion of [%s] from %s to %s may cause distortion!",
-              asString(object), object.getClass().getName(), target.getName()));
+      logger.warning(() -> format("The conversion of [%s] from %s to %s may cause distortion!",
+          asString(object), object.getClass().getName(), target.getName()));
     }
   }
 

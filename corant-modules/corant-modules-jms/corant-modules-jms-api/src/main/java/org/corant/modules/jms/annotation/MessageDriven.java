@@ -169,7 +169,7 @@ public @interface MessageDriven {
    *
    * @return loopIntervalMs
    */
-  String loopIntervalMs() default "1000";
+  String loopIntervalMs() default "512";
 
   /**
    * The max broken duration, if exceeds then start try mode.

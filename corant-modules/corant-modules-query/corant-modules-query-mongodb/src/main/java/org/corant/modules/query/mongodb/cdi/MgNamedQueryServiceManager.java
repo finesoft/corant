@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.mongodb.cdi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.asDefaultString;
@@ -73,8 +74,8 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     return services.computeIfAbsent(key, k -> {
       final String databaseName =
           isBlank(k) ? defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME) : k;
-      logger.fine(() -> String.format(
-          "Create default mongodb named query service, the data base is [%s].", databaseName));
+      logger.fine(() -> format("Create default mongodb named query service, the data base is [%s].",
+          databaseName));
       return new DefaultMgNamedQueryService(databaseName, this);
     });
   }

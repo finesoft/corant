@@ -13,11 +13,13 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.transaction.xa.XAResource;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
@@ -31,7 +33,6 @@ import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
 import org.corant.modules.jms.receive.ManagedMessageReceiver;
 import org.corant.modules.jms.receive.ManagedMessageReceivingHandler;
 import org.corant.modules.jta.shared.TransactionService;
@@ -41,15 +42,16 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-jms-shared
  *
  * <p>
- * JMS objects like connection, session, consumer and producer were designed to be re-used, but non
- * thread safe. In most implementations connection and session are pretty heavyweight to setup and
- * consumer usually requires a network round trip to set up. Producer is often more lightweight,
- * although there is often some overhead in creating it.
- *
+ * JMS objects like connection, session, consumer and producer were designed to be re-used, but
+ * non-thread safe. <br/>
+ * In most implementations, connection and session are pretty heavyweight to set up, and consumer
+ * usually requires a network round trip to set up.
+ * <p>
+ * Producer is often more lightweight, although there is often some overhead in creating it.
+ * <p>
  * NOTE: This is not thread safe.
- *
- * Unfinish: use connection or session pool
- *
+ * <p>
+ * Unfinished: use connection or session pool
  * <p>
  * <a href = "https://developer.jboss.org/wiki/ShouldICacheJMSConnectionsAndJMSSessions"> Should I
  * cache JMS connections and JMS sessions</a>
@@ -100,6 +102,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
         release(true);
       }
       this.connection = connection;
+      logger.log(Level.INFO, () -> format("Initialize connection success, %s.", meta));
     }
 
     // initialize session
@@ -111,6 +114,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
       }
       select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
           .forEach(c -> c.configSession(session, meta));
+      logger.log(Level.INFO, () -> format("Initialize session success, %s.", meta));
     }
     // initialize message consumer
     if (messageConsumer == null) {
@@ -126,6 +130,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
         }
         select(MessageReceivingTaskConfigurator.class).stream().sorted(Sortable::compare)
             .forEach(c -> c.configMessageConsumer(messageConsumer, meta));
+        logger.log(Level.INFO, () -> format("Initialize  message consumer success, %s.", meta));
       } catch (JMSException je) {
         try {
           if (session != null) {
@@ -138,12 +143,13 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
         throw je;
       }
     }
+
     return true;
   }
 
   @Override
   public synchronized boolean receive() {
-    logger.log(Level.FINE, () -> String.format(">>> Begin receiving messages, %s.", meta));
+    logger.log(Level.FINE, () -> format(">>> Begin receiving messages, %s.", meta));
     Throwable throwable = null;
     try {
       if (initialize()) {
@@ -153,7 +159,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
           Message message = consume();
           postConsume(message);
           if (message == null) {
-            logger.log(Level.FINE, () -> String.format("No message for now, %s.", meta));
+            logger.log(Level.FINE, () -> format("No message for now, %s.", meta));
             break;
           }
         }
@@ -162,7 +168,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
       throwable = e;
       onException(e);
     } finally {
-      logger.log(Level.FINE, () -> String.format("<<< End receiving messages, %s.%n", meta));
+      logger.log(Level.FINE, () -> format("<<< End receiving messages, %s.%n", meta));
     }
     return throwable == null;
   }
@@ -179,12 +185,11 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected void closeMessageConsumerIfNecessary(boolean forceClose) {
     if (messageConsumer != null && (forceClose || meta.getCacheLevel() <= 2)) {
-      logger.log(Level.INFO, () -> String.format("Close current consumer [%s].", meta));
+      logger.log(Level.INFO, () -> format("Close current consumer [%s].", meta));
       try {
         messageConsumer.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Close consumer occurred error, [%s]", meta));
+        logger.log(Level.SEVERE, e, () -> format("Close consumer occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
       }
@@ -193,12 +198,11 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
 
   protected void closeSessionIfNecessary(boolean forceClose) {
     if (session != null && (forceClose || meta.getCacheLevel() <= 1)) {
-      logger.log(Level.INFO, () -> String.format("Close current session of [%s].", meta));
+      logger.log(Level.INFO, () -> format("Close current session of [%s].", meta));
       try {
         session.close();
       } catch (JMSException e) {
-        logger.log(Level.SEVERE, e,
-            () -> String.format("Close session occurred error, [%s]", meta));
+        logger.log(Level.SEVERE, e, () -> format("Close session occurred error, [%s]", meta));
       } finally {
         messageConsumer = null;
         session = null;
@@ -214,10 +218,10 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
       message = messageConsumer.receive(receiveTimeout);
     }
     if (message != null) {
-      logger.log(Level.FINE, () -> String.format("Received message start handling, [%s]", meta));
+      logger.log(Level.FINE, () -> format("Received message start handling, [%s]", meta));
       Object result = messageHandler.onMessage(message, session);
       mediator.onPostMessageHandled(message, session, result);
-      logger.log(Level.FINE, () -> String.format("Complete message handling, [%s]", meta));
+      logger.log(Level.FINE, () -> format("Complete message handling, [%s]", meta));
     }
     return message;
   }
@@ -233,7 +237,7 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
   }
 
   /**
-   * Related work on consume occurred error, rollback transaction or rollback/recover session if
+   * Related work on consumes occurred error, rollback transaction or rollback/recover session if
    * necessary
    *
    * @param e onException
@@ -243,33 +247,32 @@ public class DefaultMessageReceiver implements ManagedMessageReceiver {
       mediator.onReceivingException(e);
     } catch (Exception ex) {
       logger.log(Level.SEVERE, ex,
-          () -> String.format("Message receiving task occurred error!, %s.", meta));
+          () -> format("Message receiving task occurred error!, %s.", meta));
     }
     try {
       if (meta.isXa()) {
         if (TransactionService.currentTransaction() != null) {
           TransactionService.transactionManager().rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the transaction, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Rollback the transaction, %s.", meta));
         }
       } else if (session != null) {
         if (meta.getAcknowledge() == Session.SESSION_TRANSACTED) {
           session.rollback();
-          logger.log(Level.SEVERE, () -> String.format("Rollback the session, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Rollback the session, %s.", meta));
         } else if (meta.getAcknowledge() == Session.CLIENT_ACKNOWLEDGE) {
           session.recover();
-          logger.log(Level.SEVERE, () -> String.format("Recover the session, %s.", meta));
+          logger.log(Level.SEVERE, () -> format("Recover the session, %s.", meta));
         }
       }
     } catch (Exception te) {
       e.addSuppressed(te);
     } finally {
-      logger.log(Level.SEVERE, e,
-          () -> String.format("Message receiving occurred error!, %s.", meta));
+      logger.log(Level.SEVERE, e, () -> format("Message receiving occurred error!, %s.", meta));
     }
   }
 
   /**
-   * Related work after consume, commit transaction or session if necessary
+   * Related work after consumption, commit transaction or session if necessary
    *
    * @param message the message that received and has been handled
    * @throws JMSException postConsume

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared.metadata;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -65,7 +66,7 @@ public class PersistenceXmlParser {
   public static Set<PersistenceUnitInfoMetaData> parse(URL url) {
     Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     doParse(url, cfgs);
-    logger.fine(() -> String.format("Parsed persistence unit from [%s]", url.toExternalForm()));
+    logger.fine(() -> format("Parsed persistence unit from [%s]", url.toExternalForm()));
     return cfgs;
   }
 
@@ -189,14 +190,13 @@ public class PersistenceXmlParser {
       if (rootUrl == null) {
         String urlToString = originalURL.toExternalForm();
         if (!urlToString.contains(META_INF)) {
-          logger.info(
-              () -> String.format("%s should be located inside META-INF directory", urlToString));
+          logger.info(() -> format("%s should be located inside META-INF directory", urlToString));
           return null;
         }
         if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/')
             - (1 + META_INF.length())) {
-          logger.info(() -> String.format("%s is not located in the root of META-INF directory",
-              urlToString));
+          logger.info(
+              () -> format("%s is not located in the root of META-INF directory", urlToString));
         }
         String rootUrlStr = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
         if (rootUrlStr.endsWith("/")) {

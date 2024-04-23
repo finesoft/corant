@@ -13,6 +13,7 @@
  */
 package org.corant.shared.retry;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Functions.asCallable;
 import static org.corant.shared.util.Objects.forceCast;
@@ -95,11 +96,11 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
       this.future = future;
       this.callable = callable;
       this.retryer = retryer;
-      this.context = retryer.getContext();
-      this.retryStrategy = retryer.getRetryStrategy();
-      this.backoffStrategy = retryer.getBackoffStrategy();
-      this.retryPrecondition = retryer.getRetryPrecondition();
-      this.recoverCallback = retryer.getRecoveryCallback();
+      context = retryer.getContext();
+      retryStrategy = retryer.getRetryStrategy();
+      backoffStrategy = retryer.getBackoffStrategy();
+      retryPrecondition = retryer.getRetryPrecondition();
+      recoverCallback = retryer.getRecoveryCallback();
     }
 
     @Override
@@ -111,17 +112,17 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
             context.getAttemptsCounter().incrementAndGet();
             T result = callable.call();
             if (future.success(result)) {
-              retryer.logger.fine(() -> String.format(
+              retryer.logger.fine(() -> format(
                   "Executed successfully, it has been tried %s times, no more retries.",
                   context.getAttempts()));
             }
           } else if (future.isCancelled()) {
-            retryer.logger.fine(() -> String.format(
+            retryer.logger.fine(() -> format(
                 "Execution was cancelled by caller, it has been tried %s times, no more retries.",
                 context.getAttempts()));
           }
         } else {
-          retryer.logger.info(() -> String.format(
+          retryer.logger.info(() -> format(
               "Cancel execution, unable to meet preconditions, it has been tried %s times",
               context.getAttempts()));
         }
@@ -130,7 +131,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
         try {
           if (retryStrategy.test(context.setLastThrowable(currThrowable))) {
             long wait = backoffStrategy.computeBackoffMillis(context);
-            retryer.logger.log(Level.WARNING, currThrowable, () -> String.format(
+            retryer.logger.log(Level.WARNING, currThrowable, () -> format(
                 "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
                 context.getAttempts(), wait));
             AsynchronousRetryTask<T> next = new AsynchronousRetryTask<>(future, callable, retryer);
@@ -144,7 +145,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
           if (currThrowable != null) {
             if (recoverCallback != null) {
               try {
-                retryer.logger.log(Level.WARNING, currThrowable, () -> String.format(
+                retryer.logger.log(Level.WARNING, currThrowable, () -> format(
                     "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
                     context.getAttempts()));
                 T result = forceCast(recoverCallback.recover(context));
@@ -158,7 +159,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
               }
             }
             if (!future.isDone()) {
-              retryer.logger.log(Level.WARNING, currThrowable, () -> String.format(
+              retryer.logger.log(Level.WARNING, currThrowable, () -> format(
                   "An error occurred in the execution, it has been tried %s times, no more retries.",
                   context.getAttempts()));
               future.failure(currThrowable);

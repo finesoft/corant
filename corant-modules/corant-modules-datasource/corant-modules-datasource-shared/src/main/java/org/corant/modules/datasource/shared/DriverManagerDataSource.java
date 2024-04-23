@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.strip;
 import java.io.PrintWriter;
@@ -87,7 +88,7 @@ public class DriverManagerDataSource implements DataSource {
         }
       }
       if (driver == null) {
-        LOGGER.warning(() -> String.format(
+        LOGGER.warning(() -> format(
             "Registered driver with driverClassName=%s was not found, trying direct instantiation.",
             driverClassName));
         Class<?> driverClass = null;
@@ -96,11 +97,10 @@ public class DriverManagerDataSource implements DataSource {
           if (threadContextClassLoader != null) {
             try {
               driverClass = threadContextClassLoader.loadClass(driverClassName);
-              LOGGER.fine(
-                  () -> String.format("Driver class %s found in Thread context class loader %s.",
-                      driverClassName, threadContextClassLoader));
+              LOGGER.fine(() -> format("Driver class %s found in Thread context class loader %s.",
+                  driverClassName, threadContextClassLoader));
             } catch (ClassNotFoundException e) {
-              LOGGER.fine(() -> String.format(
+              LOGGER.fine(() -> format(
                   "Driver class %s not found in Thread context class loader %s, trying classloader %s.",
                   driverClassName, threadContextClassLoader, this.getClass().getClassLoader()));
             }
@@ -108,12 +108,12 @@ public class DriverManagerDataSource implements DataSource {
 
           if (driverClass == null) {
             driverClass = this.getClass().getClassLoader().loadClass(driverClassName);
-            LOGGER.fine(() -> String.format(
+            LOGGER.fine(() -> format(
                 "Driver class %s found in the DriverManagerDataSource class classloader %s.",
                 driverClassName, this.getClass().getClassLoader()));
           }
         } catch (ClassNotFoundException e) {
-          LOGGER.fine(() -> String.format(
+          LOGGER.fine(() -> format(
               "Failed to load driver class %s from DriverManagerDataSource class classloader %s.",
               driverClassName, this.getClass().getClassLoader()));
         }
@@ -123,7 +123,7 @@ public class DriverManagerDataSource implements DataSource {
             driver = (Driver) Objects.newInstance(driverClass);
           } catch (Exception e) {
             LOGGER.log(Level.WARNING, e,
-                () -> String.format(
+                () -> format(
                     "Failed to create instance of driver class %s, trying jdbcUrl resolution",
                     driverClassName));
           }
@@ -135,7 +135,7 @@ public class DriverManagerDataSource implements DataSource {
     try {
       if (driver == null) {
         driver = DriverManager.getDriver(jdbcUrl);
-        LOGGER.fine(() -> String.format("Loaded driver with class name %s for jdbcUrl=%s.",
+        LOGGER.fine(() -> format("Loaded driver with class name %s for jdbcUrl=%s.",
             driver.getClass().getName(), sanitizedUrl));
       } else if (!driver.acceptsURL(jdbcUrl)) {
         throw new CorantRuntimeException("Driver %s claims to not accept jdbcUrl, %s.",

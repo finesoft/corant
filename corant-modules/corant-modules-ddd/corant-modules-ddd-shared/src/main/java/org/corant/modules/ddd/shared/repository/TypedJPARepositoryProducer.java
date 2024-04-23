@@ -45,7 +45,7 @@ public class TypedJPARepositoryProducer {
   @Produces
   @Dependent
   @AutoCreated
-  <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
+  protected <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
     final Type type = ip.getType();
     final ParameterizedType parameterizedType = (ParameterizedType) type;
     final Type argType = parameterizedType.getActualTypeArguments()[0];
@@ -57,7 +57,7 @@ public class TypedJPARepositoryProducer {
   @Produces
   @Dependent
   @Preference
-  <T extends Entity> TypedJPARepository<T> produceTypedJPARepositoryx(InjectionPoint ip) {
+  protected <T extends Entity> TypedJPARepository<T> produceTypedJPARepositoryx(InjectionPoint ip) {
     final Type type = ip.getType();
     final Preference named = (Preference) ip.getQualifiers().stream()
         .filter(p -> p.annotationType().equals(Preference.class)).findFirst().orElse(null);

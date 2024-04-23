@@ -96,8 +96,8 @@ public class Classes {
   }
 
   /**
-   * Return the appropriate class loader. if the current thread has context class loader then return
-   * it else return the Classes class loader, finally if class loader not found then return the
+   * Return the appropriate class loader. If the current thread has context class loader then return
+   * it else return the Classes class loader, finally, if class loader is not found, then return the
    * system class loader.
    *
    * @return defaultClassLoader

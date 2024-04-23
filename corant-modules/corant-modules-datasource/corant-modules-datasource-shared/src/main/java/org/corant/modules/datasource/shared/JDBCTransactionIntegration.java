@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.asStrings;
@@ -27,13 +28,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import org.corant.config.PropertyInjector;
 import org.corant.context.CDIs;
 import org.corant.modules.jta.shared.TransactionIntegration;
@@ -55,7 +56,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       return xads.getXAConnection();
     } catch (SQLException nfe) {
       LOGGER.log(Level.WARNING, nfe,
-          () -> String.format("Connect to xa data source [%s] occured exception, use another way!",
+          () -> format("Connect to xa data source [%s] occured exception, use another way!",
               cfg.getName()));
       return xads.getXAConnection(cfg.getUsername(), cfg.getPassword());
     }
@@ -81,7 +82,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       extensions.forEach(et -> et.getConfigManager().getAllWithNames().values().forEach(cfg -> {
         if (cfg.isJta() && cfg.isXa() && cfg.isValid()) {
           if (!XADataSource.class.isAssignableFrom(cfg.getDriver())) {
-            LOGGER.warning(() -> String.format(
+            LOGGER.warning(() -> format(
                 "The data source [%s] is XA, but driver class is not a XA data source, recovery connections are only available for XADataSource.",
                 cfg.getName()));
           } else {
@@ -135,8 +136,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       }).connectIfNecessary();
     } catch (XAException e) {
       LOGGER.log(Level.WARNING, e,
-          () -> String.format(
-              "Can not resolve JDBCRecoveryXAResource from JDBC XA data source [%s].",
+          () -> format("Can not resolve JDBCRecoveryXAResource from JDBC XA data source [%s].",
               config.getName()));
     }
     return Optional.ofNullable(res);
@@ -166,14 +166,14 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     protected JDBCRecoveryXAResource(XADataSource dataSource, DataSourceConfig config) {
       this.dataSource = dataSource;
       this.config = config;
-      LOGGER.fine(() -> String.format(
-          "Found JDBC XA data source[%s] XAResource for JTA recovery processes.",
-          config.getName()));
+      LOGGER
+          .fine(() -> format("Found JDBC XA data source[%s] XAResource for JTA recovery processes.",
+              config.getName()));
     }
 
     @Override
     public void commit(Xid xid, boolean onePhase) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Commit the JDBC XA [%s] transaction [%s] (onePhase:[%s]) that run in JTA recovery processes!",
           config.getName(), xid.toString(), onePhase));
 
@@ -191,7 +191,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void end(Xid xid, int flags) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Ended the work performed on behalf of the JDBC XA [%s] transaction branch [%s] flags [%s] that run in JTA recovery processes!",
           config.getName(), xid.toString(), flags));
       if (isConnected()) {
@@ -208,7 +208,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void forget(Xid xid) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Forget about the the JDBC XA [%s] heuristicallycompleted transaction branch [%s] that run in JTA recovery processes!",
           config.getName(), xid.toString()));
       if (isConnected()) {
@@ -276,11 +276,11 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       } finally {
         final Xid[] useXids = xids;
         if (useXids != null && useXids.length > 0) {
-          LOGGER.fine(() -> String.format(
+          LOGGER.fine(() -> format(
               "Found prepared JDBC XA [%s] transaction branches: [%s] for JTA recovery processes.",
               config.getName(), String.join(", ", asStrings((Object[]) useXids))));
         } else {
-          LOGGER.fine(() -> String.format(
+          LOGGER.fine(() -> format(
               "Prepared JDBC XA [%s] transaction branches for JTA recovery processes not found.",
               config.getName()));
         }
@@ -293,7 +293,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void rollback(Xid xid) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Roll back work done on behalfof the the JDBC XA [%s] transaction branch [%s] that run in JTA recovery processes!",
           config.getName(), xid.toString()));
       if (isConnected()) {
@@ -323,7 +323,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void start(Xid xid, int flags) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Start work on behalf of a transaction branch [%s] flags [%s] that run in JTA recovery processes!",
           xid.toString(), flags));
       if (isConnected()) {
@@ -340,8 +340,8 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
 
     JDBCRecoveryXAResource connectIfNecessary() throws XAException {
       if (!isConnected()) {
-        LOGGER.fine(() -> String.format(
-            "Connect to JDBC XA data source [%s] for JTA recovery processes.", config.getName()));
+        LOGGER.fine(() -> format("Connect to JDBC XA data source [%s] for JTA recovery processes.",
+            config.getName()));
         try {
           if (connection.get() == null) {
             connection.set(getXAConnection(dataSource, config));
@@ -366,9 +366,9 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
       if (!isConnected()) {
         return;
       }
-      LOGGER.fine(() -> String.format(
-          "Close JDBC XA data source [%s] connection after JTA recovery processes.",
-          config.getName()));
+      LOGGER.fine(
+          () -> format("Close JDBC XA data source [%s] connection after JTA recovery processes.",
+              config.getName()));
       try {
         connection.get().close();
       } catch (SQLException e) {

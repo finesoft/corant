@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findAnyway;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -81,8 +82,7 @@ public class SnowflakeIdentifierGenerator {
     } else {
       generator = new SnowflakeIpv4HostUUIDGenerator(delayedTiming);
     }
-    logger.info(
-        () -> String.format("Create global identifier generator %s.", generator.description()));
+    logger.info(() -> format("Create global identifier generator %s.", generator.description()));
   }
 
   public interface TimeService extends Sortable {

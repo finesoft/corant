@@ -13,6 +13,7 @@
  */
 package org.corant.modules.elastic.data;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -28,6 +29,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
+import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
+import jakarta.enterprise.inject.spi.BeforeShutdown;
+import jakarta.enterprise.inject.spi.Extension;
+import jakarta.inject.Singleton;
 import org.corant.config.Configs;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.qualifier.Qualifiers;
@@ -51,17 +63,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import jakarta.enterprise.inject.spi.AfterDeploymentValidation;
-import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
-import jakarta.enterprise.inject.spi.BeforeShutdown;
-import jakarta.enterprise.inject.spi.Extension;
-import jakarta.inject.Singleton;
 
 /**
  * corant-modules-elastic-data
@@ -120,7 +121,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any elastic cluster configurations.");
     } else {
-      logger.info(() -> String.format("Found %s elastic clusters named [%s]", configManager.size(),
+      logger.info(() -> format("Found %s elastic clusters named [%s]", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }
@@ -140,8 +141,8 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
       if (cfg.isVerifyDeployment()) {
         List<DiscoveryNode> nodes = getTransportClient(cfg.getName()).connectedNodes();
         if (nodes != null) {
-          logger.info(() -> String.format("Tranport client %s connected nodes: %s",
-              cfg.getClusterName(), Strings.join(", ",
+          logger.info(() -> format("Tranport client %s connected nodes: %s", cfg.getClusterName(),
+              Strings.join(", ",
                   nodes.stream().map(DiscoveryNode::getName).collect(Collectors.toList()))));
         }
       }
@@ -197,7 +198,7 @@ public class ElasticExtension implements Extension, Function<String, TransportCl
             (Object[]) hostPort);
       }
     }
-    logger.fine(() -> String.format("Built elastic transport client with cluster name is %s.",
+    logger.fine(() -> format("Built elastic transport client with cluster name is %s.",
         cfg.getClusterName()));
     return tc;
   }

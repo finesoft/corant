@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.context.qualifier.Qualifiers.resolveNameds;
 import static org.corant.shared.normal.Priorities.MODULES_LOWER;
@@ -29,6 +30,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
@@ -37,14 +41,10 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
-
 import org.corant.context.Beans;
 import org.corant.context.naming.NamingReference;
 import org.corant.context.qualifier.Qualifiers;
@@ -119,7 +119,7 @@ public class JPAExtension implements Extension {
         }
         String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName, new NamingReference(EntityManagerFactory.class, quas));
-        logger.info(() -> String.format("Bind entity manager factorties %s to jndi.", jndiName));
+        logger.info(() -> format("Bind entity manager factorties %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
@@ -151,7 +151,7 @@ public class JPAExtension implements Extension {
     persistenceUnitInfoMetaDatas.values().forEach(pu -> {
       if (pu.isVerifyDeployment()) {
         // FIXME use provider validation
-        logger.info(() -> String.format("Check entity manager, psersistence unit %s",
+        logger.info(() -> format("Check entity manager, psersistence unit %s",
             pu.getPersistenceUnitName()));
         resolve(EntityManagerFactory.class, qualifiers.get(pu.getPersistenceUnitName()))
             .createEntityManager(SynchronizationType.UNSYNCHRONIZED).close();

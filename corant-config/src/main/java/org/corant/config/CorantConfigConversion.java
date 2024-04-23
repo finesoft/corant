@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.mapOf;
@@ -118,14 +119,13 @@ public class CorantConfigConversion implements Serializable {
     }
     Type[] genericInterfaces = clazz.getGenericInterfaces();
     for (Type genericInterface : genericInterfaces) {
-      if (genericInterface instanceof ParameterizedType pt) {
-        if (pt.getRawType().equals(Converter.class)) {
-          Type[] typeArguments = pt.getActualTypeArguments();
-          if (typeArguments.length != 1) {
-            throw new IllegalStateException("Converter " + clazz + " must be a ParameterizedType.");
-          }
-          return typeArguments[0];
+      if ((genericInterface instanceof ParameterizedType pt)
+          && pt.getRawType().equals(Converter.class)) {
+        Type[] typeArguments = pt.getActualTypeArguments();
+        if (typeArguments.length != 1) {
+          throw new IllegalStateException("Converter " + clazz + " must be a ParameterizedType.");
         }
+        return typeArguments[0];
       }
     }
     return getTypeOfConverter(clazz.getSuperclass());
@@ -185,8 +185,7 @@ public class CorantConfigConversion implements Serializable {
         throw e;
       } catch (RuntimeException e) {
         throw new IllegalArgumentException(
-            String.format("Cannot convert config property value %s with type %s.", rawValue, type),
-            e);
+            format("Cannot convert config property value %s with type %s.", rawValue, type), e);
       }
     }
     return result;
@@ -437,8 +436,43 @@ public class CorantConfigConversion implements Serializable {
     } else if (argType instanceof WildcardType) {
       return Object.class;
     } else {
-      throw new IllegalStateException(
-          String.format("Can not resolve parameterized type %s.", ptype));
+      throw new IllegalStateException(format("Can not resolve parameterized type %s.", ptype));
+    }
+  }
+
+  /**
+   * corant-config
+   *
+   * @author bingo 上午11:25:40
+   */
+  protected static class OrdinalConverter implements Sortable {
+    final Class<?> type;
+    final Converter<?> converter;
+    final int ordinal;
+
+    OrdinalConverter(Class<?> type, Converter<?> converter, int ordinal) {
+      this.type = wrap(type);
+      this.converter = converter;
+      this.ordinal = ordinal;
+    }
+
+    static OrdinalConverter builtIn(Class<?> type) {
+      return new OrdinalConverter(type, s -> {
+        if (s == null) {
+          throw new NullPointerException();
+        }
+        try {
+          return toObject(s, type);
+        } catch (Exception e) {
+          throw new IllegalArgumentException(
+              "Unable to convert value to type " + type + " for value " + s);
+        }
+      }, BUILT_IN_CONVERTER_ORDINAL);
+    }
+
+    @Override
+    public int getPriority() {
+      return ordinal;
     }
   }
 
@@ -545,43 +579,6 @@ public class CorantConfigConversion implements Serializable {
         };
       }
       return converter == null ? Optional.empty() : Optional.of(converter);
-    }
-  }
-
-  /**
-   * corant-config
-   *
-   * @author bingo 上午11:25:40
-   *
-   */
-  protected static class OrdinalConverter implements Sortable {
-    final Class<?> type;
-    final Converter<?> converter;
-    final int ordinal;
-
-    OrdinalConverter(Class<?> type, Converter<?> converter, int ordinal) {
-      this.type = wrap(type);
-      this.converter = converter;
-      this.ordinal = ordinal;
-    }
-
-    static OrdinalConverter builtIn(Class<?> type) {
-      return new OrdinalConverter(type, s -> {
-        if (s == null) {
-          throw new NullPointerException();
-        }
-        try {
-          return toObject(s, type);
-        } catch (Exception e) {
-          throw new IllegalArgumentException(
-              "Unable to convert value to type " + type + " for value " + s);
-        }
-      }, BUILT_IN_CONVERTER_ORDINAL);
-    }
-
-    @Override
-    public int getPriority() {
-      return ordinal;
     }
   }
 

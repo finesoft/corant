@@ -13,6 +13,7 @@
  */
 package org.corant.config.source;
 
+import static java.lang.String.format;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_EXCLUDE_PATTERN;
 import static org.corant.shared.normal.Names.ConfigNames.CFG_LOCATION_KEY;
 import static org.corant.shared.normal.Priorities.ConfigPriorities.APPLICATION_ORDINAL;
@@ -80,13 +81,13 @@ public class ApplicationConfigSourceProvider implements ConfigSourceProvider {
     try {
       if (isNotEmpty(locations)) {
         // first find locations that designated in system properties or system environment
-        logger.fine(() -> String.format("Load config source from designated locations %s.",
+        logger.fine(() -> format("Load config source from designated locations %s.",
             String.join(",", locations)));
         list.addAll(ConfigSourceLoader.load(APPLICATION_ORDINAL, filter, locations));
       }
       // else {
-      logger.fine(() -> String.format("Load config source from class paths %s.",
-          String.join(",", classPaths)));
+      logger.fine(
+          () -> format("Load config source from class paths %s.", String.join(",", classPaths)));
       list.addAll(ConfigSourceLoader.load(classLoader, APPLICATION_ORDINAL, filter, classPaths));
       // }
     } catch (IOException e) {

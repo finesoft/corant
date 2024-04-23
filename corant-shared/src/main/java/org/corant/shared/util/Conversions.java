@@ -670,7 +670,6 @@ public class Conversions {
         target = toObject(obj, type, hints);
       } catch (Exception e) {
         // Ignore
-        e.printStackTrace();
       }
     }
     return Optional.ofNullable(target);

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -59,7 +60,7 @@ public class ResteasyServlet extends HttpServlet30Dispatcher {
         h.afterCompletion(success, httpMethod, request, response);
       } catch (Exception e) {
         logger.log(Level.SEVERE, e,
-            () -> String.format("%s handle after service completely occurred error!",
+            () -> format("%s handle after service completely occurred error!",
                 getUserClass(h).getName()));
       }
     });
@@ -71,8 +72,8 @@ public class ResteasyServlet extends HttpServlet30Dispatcher {
       try {
         h.postHandle(httpMethod, request, response);
       } catch (Exception e) {
-        logger.log(Level.SEVERE, e, () -> String.format("%s handle post service occurred error!",
-            getUserClass(h).getName()));
+        logger.log(Level.SEVERE, e,
+            () -> format("%s handle post service occurred error!", getUserClass(h).getName()));
       }
     });
   }
@@ -87,8 +88,8 @@ public class ResteasyServlet extends HttpServlet30Dispatcher {
         next = h.preHandle(httpMethod, request, response);
       } catch (Exception e) {
         next = false;
-        logger.log(Level.SEVERE, e, () -> String.format("%s handle pre service occurred error!",
-            getUserClass(h).getName()));
+        logger.log(Level.SEVERE, e,
+            () -> format("%s handle pre service occurred error!", getUserClass(h).getName()));
       } finally {
         if (!next) {
           break;

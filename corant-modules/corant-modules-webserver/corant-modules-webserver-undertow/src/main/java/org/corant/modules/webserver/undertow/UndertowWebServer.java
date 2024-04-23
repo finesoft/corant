@@ -13,6 +13,7 @@
  */
 package org.corant.modules.webserver.undertow;
 
+import static java.lang.String.format;
 import static org.corant.shared.normal.Defaults.DFLT_CHARSET_STR;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
@@ -118,8 +119,8 @@ public class UndertowWebServer extends AbstractWebServer {
           .orElse(Boolean.TRUE)) {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
-        sw.destroy(t -> logger.info(
-            () -> String.format("%s [%s] was started, takes %ss.", t.getLastTaskInfo().getName(),
+        sw.destroy(t -> logger
+            .info(() -> format("%s [%s] was started, takes %ss.", t.getLastTaskInfo().getName(),
                 config.getDescription(), t.getLastTaskInfo().getTimeSeconds())));
       } else {
         logger.info(() -> "Undertow can not start, due to some PreStartHandler interruption!");
@@ -172,8 +173,8 @@ public class UndertowWebServer extends AbstractWebServer {
         fi.setAsyncSupported(wfm.isAsyncSupported());
         wfm.getInitParamsAsMap().forEach(fi::addInitParam);
         di.addFilter(fi);
-        logger.fine(() -> String.format("Resolve filter [%s] url patterns [%s].",
-            wfm.getClazz().getName(), String.join(", ", wfm.getUrlPatterns())));
+        logger.fine(() -> format("Resolve filter [%s] url patterns [%s].", wfm.getClazz().getName(),
+            String.join(", ", wfm.getUrlPatterns())));
         streamOf(wfm.getServletNames()).forEach(sn -> {
           streamOf(wfm.getDispatcherTypes()).forEach(dt -> {
             di.addFilterServletNameMapping(wfm.getFilterName(), sn, dt);
@@ -196,7 +197,7 @@ public class UndertowWebServer extends AbstractWebServer {
     // weld listener
     di.addListener(new ListenerInfo(org.jboss.weld.environment.servlet.Listener.class));
     getListenerMetaDatas().map(WebListenerMetaData::getClazz).map(ListenerInfo::new).forEach(l -> {
-      logger.fine(() -> String.format("Resolve listener [%s].", l.getListenerClass().getName()));
+      logger.fine(() -> format("Resolve listener [%s].", l.getListenerClass().getName()));
       di.addListener(l);
     });
   }
@@ -325,7 +326,7 @@ public class UndertowWebServer extends AbstractWebServer {
               wsm.getMultipartConfig().getMaxRequestSize(),
               wsm.getMultipartConfig().getFileSizeThreshold()));
         }
-        logger.fine(() -> String.format("Resolve servlet [%s], url patterns [%s].", wsm.getName(),
+        logger.fine(() -> format("Resolve servlet [%s], url patterns [%s].", wsm.getName(),
             String.join(", ", wsm.getUrlPatterns())));
         return si;
       }
@@ -365,7 +366,7 @@ public class UndertowWebServer extends AbstractWebServer {
       SourceType st = SourceType.decide(c).orElse(SourceType.CLASS_PATH);
       String contentPath = st.resolve(c);
       String servingPath = s;
-      logger.fine(() -> String.format("Resolve static content path [%s] -> serving path [%s].",
+      logger.fine(() -> format("Resolve static content path [%s] -> serving path [%s].",
           contentPath, servingPath));
       if (st == SourceType.FILE_SYSTEM) {
         managers.add(new PathResourceManager(Paths.get(contentPath)));
@@ -390,7 +391,7 @@ public class UndertowWebServer extends AbstractWebServer {
       WebSocketDeploymentInfo wsdi = new WebSocketDeploymentInfo();
       webSocketExtension.getEndpointClasses().forEach(es -> {
         wsdi.addEndpoint(es);
-        logger.fine(() -> String.format("Resolve websocket endpoint class [%s].", es.getName()));
+        logger.fine(() -> format("Resolve websocket endpoint class [%s].", es.getName()));
       });
       wsdi.setBuffers(new DefaultByteBufferPool(specConfig.isWebsocketBufferPoolDirectBuffer(),
           specConfig.getWebsocketBufferPoolBufferSize(),

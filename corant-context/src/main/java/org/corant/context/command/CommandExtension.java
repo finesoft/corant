@@ -13,6 +13,7 @@
  */
 package org.corant.context.command;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Sets.newHashSet;
 import java.lang.reflect.Modifier;
@@ -80,15 +81,15 @@ public class CommandExtension implements Extension {
           if (!cmdCls.isInterface() && !Modifier.isAbstract(cmdCls.getModifiers())) {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
                 .add((Class<? extends CommandHandler<?>>) handlerCls);
-            logger.fine(() -> String.format("Resolved the command [%s] with handler [%s]", cmdCls,
-                handlerCls));
+            logger.fine(
+                () -> format("Resolved the command [%s] with handler [%s]", cmdCls, handlerCls));
           } else if (SUPPORT_ABSTRACT_COMMAND) {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
                 .add((Class<? extends CommandHandler<?>>) handlerCls);
-            logger.fine(() -> String.format("Resolved the abstract command [%s] with handler [%s]",
-                cmdCls, handlerCls));
+            logger.fine(() -> format("Resolved the abstract command [%s] with handler [%s]", cmdCls,
+                handlerCls));
           } else {
-            logger.warning(() -> String.format(
+            logger.warning(() -> format(
                 "The command class [%s] extract from handler [%s] must be a concrete class", cmdCls,
                 handlerCls));
           }
@@ -121,7 +122,7 @@ public class CommandExtension implements Extension {
       // adv.addDeploymentProblem(new CorantRuntimeException(errMsg.toString()));
     }
     if (!commandAndHandler.isEmpty()) {
-      logger.fine(() -> String.format("Found %s command handlers", commandAndHandler.size()));
+      logger.fine(() -> format("Found %s command handlers", commandAndHandler.size()));
     }
     // Make immutable
     for (Class<?> cls : newHashSet(commandAndHandler.keySet())) {

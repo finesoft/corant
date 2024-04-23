@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.asString;
@@ -88,7 +89,7 @@ public class ObjectEnumConverterFactory implements ConverterFactory<Object, Enum
         if (throwException) {
           throw new ConversionException(e);
         } else {
-          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
+          logger.log(Level.WARNING, e, () -> format("Can not convert %s.", asString(t)));
         }
       }
       return defaultObject(result, defaultValue);

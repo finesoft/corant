@@ -13,6 +13,7 @@
  */
 package org.corant.shared.resource;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Maps.getMapObject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -142,8 +143,7 @@ public interface Resource {
     try {
       return openInputStream();
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can't not open stream from %s.", getLocation()));
+      logger.log(Level.WARNING, e, () -> format("Can't not open stream from %s.", getLocation()));
     }
     return null;
   }

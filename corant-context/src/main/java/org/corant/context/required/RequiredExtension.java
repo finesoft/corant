@@ -13,6 +13,7 @@
  */
 package org.corant.context.required;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.getUserClass;
@@ -117,7 +118,7 @@ public class RequiredExtension implements Extension {
     }
     if (veto) {
       event.veto();
-      logger.info(() -> String.format("Veto a bean [%s] which don't meet the requirements",
+      logger.info(() -> format("Veto a bean [%s] which don't meet the requirements",
           baseType.getTypeName()));
     }
   }

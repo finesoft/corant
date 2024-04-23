@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.freemarker;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.io.StringWriter;
@@ -161,7 +162,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
                   if (!env.getKnownVariableNames().contains(key)) {
                     env.setVariable(key, ow.wrap(val));
                   } else {
-                    logger.warning(() -> String.format(
+                    logger.warning(() -> format(
                         "Query [%s] parameter reviser occurred variable name [%s] conflict.",
                         getQuery().getName(), key));
                   }

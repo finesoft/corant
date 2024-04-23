@@ -13,6 +13,7 @@
  */
 package org.corant.shared.retry;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,7 +123,7 @@ public abstract class AbstractRetryer<R extends AbstractRetryer<R>> implements R
       try {
         listener.onRetry(context);
       } catch (Throwable ex) {
-        logger.log(Level.SEVERE, ex, () -> String.format(
+        logger.log(Level.SEVERE, ex, () -> format(
             "Retry listener %s handling occurred error, but the retry process continued to execute!",
             listener));
       }

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared.cdi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.isBlank;
@@ -61,9 +62,8 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
       CreationalContext<EntityManagerFactory> creationalContext) {
     if (instance != null && instance.isOpen()) {
       instance.close();
-      logger.fine(
-          () -> String.format("Destroyed entity manager factory which persistence unit named %s.",
-              defaultBlank(pu.unitName(), "unnamed")));
+      logger.fine(() -> format("Destroyed entity manager factory which persistence unit named %s.",
+          defaultBlank(pu.unitName(), "unnamed")));
     }
   }
 

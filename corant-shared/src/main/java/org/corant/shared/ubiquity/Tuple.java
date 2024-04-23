@@ -13,6 +13,7 @@
  */
 package org.corant.shared.ubiquity;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.compare;
@@ -137,7 +138,7 @@ public interface Tuple {
       if (this == obj) {
         return true;
       }
-      if ((obj == null) || (getClass() != obj.getClass())) {
+      if (obj == null || getClass() != obj.getClass()) {
         return false;
       }
       AbstractSeries other = (AbstractSeries) obj;
@@ -312,7 +313,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, left, right);
+      return format(format, left, right);
     }
 
     @Override
@@ -498,7 +499,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, min, max);
+      return format(format, min, max);
     }
 
     public boolean coincide(Range<T> other) {
@@ -530,7 +531,7 @@ public interface Tuple {
       if (this == obj) {
         return true;
       }
-      if ((obj == null) || (getClass() != obj.getClass())) {
+      if (obj == null || getClass() != obj.getClass()) {
         return false;
       }
       Range other = (Range) obj;
@@ -697,7 +698,7 @@ public interface Tuple {
     }
 
     public String asString(final String format) {
-      return String.format(format, left, middle, right);
+      return format(format, left, middle, right);
     }
 
     @Override

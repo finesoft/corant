@@ -58,11 +58,8 @@ public class StringLocalTimeConverter extends AbstractTemporalConverter<String, 
     }
     String val = value.trim();
     Optional<DateTimeFormatter> dtf = resolveHintFormatter(hints);
-    if (dtf.isPresent()) {
-      return dtf.get().parse(val, LocalTime::from);
-    } else {
-      return LocalTime.parse(val, DateTimeFormatter.ISO_TIME);
-    }
+    return dtf.map(dateTimeFormatter -> dateTimeFormatter.parse(val, LocalTime::from))
+        .orElseGet(() -> LocalTime.parse(val, DateTimeFormatter.ISO_TIME));
   }
 
 }

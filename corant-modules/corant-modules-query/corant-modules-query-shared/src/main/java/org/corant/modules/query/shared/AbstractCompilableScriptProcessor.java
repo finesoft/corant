@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import java.util.HashMap;
@@ -86,7 +87,7 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
       String parameterPName, String resultPName) {
     return getParamResultFunctions().computeIfAbsent(script.getId(), k -> {
       try {
-        logger.fine(() -> String.format(
+        logger.fine(() -> format(
             "Compile the query consumer script, id is %s, the thread name is %s id is %s",
             script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Compilable se = getCompilable(script.getType());
@@ -113,7 +114,7 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
       String parameterPName, String parentResultPName, String fetchResultPName) {
     return getParamResultPairFunctions().computeIfAbsent(script.getId(), k -> {
       try {
-        logger.fine(() -> String.format(
+        logger.fine(() -> format(
             "Compile the query consumer script, id is %s, the thread name is %s id is %s",
             script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Compilable se = getCompilable(script.getType());
@@ -164,7 +165,7 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
       if (initializedVersion < cv) {
         initializedVersion = cv;
         executions.clear();
-        logger.info(() -> String.format(
+        logger.info(() -> format(
             "Clean thread local script executions cache, current initialized version: %s",
             initializedVersion));
       }

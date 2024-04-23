@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.select;
 import java.util.Map;
@@ -51,60 +52,54 @@ public class MessageReceivingConnections {
     if (removeAndClose) {
       if (xa) {
         if ((conn = xaconns.remove(connectionFactoryId)) != null) {
-          logger.info(() -> String.format(
+          logger.info(() -> format(
               "Stop and close and remove xa connection, the connection factory id [%s].",
               connectionFactoryId));
           conn.stop();
           conn.close();
         }
-      } else {
-        if ((conn = conns.remove(connectionFactoryId)) != null) {
-          logger.info(() -> String.format(
-              "Stop and close and remove connection, the connection factory id [%s].",
-              connectionFactoryId));
-          conn.stop();
-          conn.close();
-        }
+      } else if ((conn = conns.remove(connectionFactoryId)) != null) {
+        logger.info(
+            () -> format("Stop and close and remove connection, the connection factory id [%s].",
+                connectionFactoryId));
+        conn.stop();
+        conn.close();
       }
-    } else {
-      if (xa) {
-        if ((conn = xaconns.get(connectionFactoryId)) != null) {
-          logger.info(() -> String.format("Stop xa connection, the connection factory id [%s].",
-              connectionFactoryId));
-          conn.stop();
-        }
-      } else {
-        if ((conn = conns.get(connectionFactoryId)) != null) {
-          logger.info(() -> String.format("Stop connection, the connection factory id [%s].",
-              connectionFactoryId));
-          conn.stop();
-        }
+    } else if (xa) {
+      if ((conn = xaconns.get(connectionFactoryId)) != null) {
+        logger.info(() -> format("Stop xa connection, the connection factory id [%s].",
+            connectionFactoryId));
+        conn.stop();
       }
+    } else if ((conn = conns.get(connectionFactoryId)) != null) {
+      logger.info(
+          () -> format("Stop connection, the connection factory id [%s].", connectionFactoryId));
+      conn.stop();
     }
   }
 
   public synchronized void shutdown() {
     conns.forEach((k, v) -> {
       try {
-        logger
-            .info(() -> String.format("Dismantle connection, the connection factory id [%s].", k));
+        logger.info(() -> format("Dismantle connection, the connection factory id [%s].", k));
         v.stop();
         v.close();
       } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> String
-            .format("Dismantle connection occurred error, the connection factory id [%s].", k));
+        logger.log(Level.WARNING, e,
+            () -> format("Dismantle connection occurred error, the connection factory id [%s].",
+                k));
       }
     });
     conns.clear();
     xaconns.forEach((k, v) -> {
       try {
-        logger.info(
-            () -> String.format("Dismantle xa connection, the connection factory id [%s].", k));
+        logger.info(() -> format("Dismantle xa connection, the connection factory id [%s].", k));
         v.stop();
         v.close();
       } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> String
-            .format("Dismantle xa connection occurred error, the connection factory id [%s].", k));
+        logger.log(Level.WARNING, e,
+            () -> format("Dismantle xa connection occurred error, the connection factory id [%s].",
+                k));
       }
     });
     xaconns.clear();
@@ -117,14 +112,14 @@ public class MessageReceivingConnections {
       conn = useConns.computeIfAbsent(meta.getConnectionFactoryId(), cf -> createConnection(meta));
       conn.start();
     } catch (Throwable e) {
-      logger.warning(
-          () -> String.format("Start connection occurred error, the connection factory id [%s].",
+      logger
+          .warning(() -> format("Start connection occurred error, the connection factory id [%s].",
               meta.getConnectionFactoryId()));
       try {
-        // the connection can't start, need to evict it for next step to re-create new connection.
+        // connection can't start, need to evict it for the next step to re-create new connection.
         stopConnection(meta, true);
       } catch (Throwable se) {
-        logger.warning(() -> String.format(
+        logger.warning(() -> format(
             "Stop and close connection occurred error, the connection factory id [%s].",
             meta.getConnectionFactoryId()));
         e.addSuppressed(se);
@@ -155,7 +150,7 @@ public class MessageReceivingConnections {
   }
 
   protected Connection createConnection(MessageReceivingMetaData meta) {
-    logger.fine(() -> String.format("Create %s connection, the connection factory id [%s].",
+    logger.fine(() -> format("Create %s connection, the connection factory id [%s].",
         meta.isXa() ? "xa" : "", meta.getConnectionFactoryId()));
     ConnectionFactory connectionFactory =
         findNamed(ConnectionFactory.class, meta.getConnectionFactoryId()).orElseThrow(
@@ -181,7 +176,6 @@ public class MessageReceivingConnections {
 
     MixedConnectionListener(MessageReceivingMetaData meta,
         ManagedMessageReceivingExceptionListener userExceptionListener) {
-      super();
       this.meta = meta;
       this.userExceptionListener = userExceptionListener;
     }
@@ -189,14 +183,14 @@ public class MessageReceivingConnections {
     @Override
     public void onException(JMSException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("The connection occurred error, the connection factory id [%s].",
+          () -> format("The connection occurred error, the connection factory id [%s].",
               meta.getConnectionFactoryId()));
-      if (this.userExceptionListener != null) {
+      if (userExceptionListener != null) {
         try {
-          this.userExceptionListener.onException(e);
+          userExceptionListener.onException(e);
         } catch (Exception ex) {
           logger.log(Level.WARNING, e,
-              () -> String.format(
+              () -> format(
                   "User exception listener occurred error, the connection factory id [%s].",
                   meta.getConnectionFactoryId()));
         }
@@ -204,7 +198,7 @@ public class MessageReceivingConnections {
       try {
         stopConnection(meta, true);
       } catch (JMSException ex) {
-        logger.warning(() -> String.format(
+        logger.warning(() -> format(
             "Stop and close connection occurred error, the connection factory id [%s].",
             meta.getConnectionFactoryId()));
       }

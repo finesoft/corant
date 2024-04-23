@@ -12,6 +12,7 @@
  */
 package org.corant.modules.vertx.serviceproxy;
 
+import static java.lang.String.format;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
@@ -63,7 +64,7 @@ public class ServiceProxyExtension implements Extension {
     AnnotatedType<?> annotatedType = event.getAnnotatedType();
     if (annotatedType.isAnnotationPresent(ProxyGen.class)
         && annotatedType.getJavaClass().isInterface()) {
-      LOGGER.fine(String.format("Service interface %s discovered", annotatedType.getJavaClass()));
+      LOGGER.fine(format("Service interface %s discovered", annotatedType.getJavaClass()));
       serviceInterfaces.add(annotatedType.getJavaClass());
     }
   }
@@ -104,8 +105,7 @@ public class ServiceProxyExtension implements Extension {
                 new ServiceProxyInvocationHandler(serviceProxySupport, serviceInterface, address));
           });
 
-      LOGGER
-          .info(String.format("Custom bean for service interface %s registered", serviceInterface));
+      LOGGER.info(format("Custom bean for service interface %s registered", serviceInterface));
     }
   }
 

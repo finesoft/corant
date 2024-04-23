@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -133,9 +134,9 @@ public class JPAService implements PersistenceService {
         "Unable to obtain the transaction scope entity manager, the transaction isn't active!");// FIXME
     final ExtendedEntityManager em =
         tsEmManager.computeIfAbsent(pc, p -> newEntityManager(p, true));
-    logger.fine(() -> String.format(
-        "Get transactional scope entity manager [%s] for persistence unit [%s].", em,
-        pc.unitName()));
+    logger
+        .fine(() -> format("Get transactional scope entity manager [%s] for persistence unit [%s].",
+            em, pc.unitName()));
     return em;
   }
 
@@ -154,8 +155,8 @@ public class JPAService implements PersistenceService {
       shouldBeNull(tsEmManager.get(pc), "");// TODO FIXME
       em.joinTransaction();
     }
-    logger.fine(() -> String.format(
-        "Get request scope entity manager [%s] for persistence unit [%s].", em, pc.unitName()));
+    logger.fine(() -> format("Get request scope entity manager [%s] for persistence unit [%s].", em,
+        pc.unitName()));
     return em;
   }
 
@@ -174,7 +175,7 @@ public class JPAService implements PersistenceService {
     emfs.forEach((k, v) -> {
       if (v.isOpen()) {
         v.close();
-        logger.info(() -> String.format("Close entity manager factory [%s].", k));
+        logger.info(() -> format("Close entity manager factory [%s].", k));
       }
     });
   }
@@ -208,7 +209,7 @@ public class JPAService implements PersistenceService {
       Exception ex = null;
       for (final ExtendedEntityManager c : components.values()) {
         try {
-          logger.fine(() -> String.format("Close entity manager [%s].", c));
+          logger.fine(() -> format("Close entity manager [%s].", c));
           if (c.isOpen()) {
             c.destroy();
           }

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Strings.split;
 import java.util.Comparator;
@@ -141,7 +142,7 @@ public class PropertyEnumerationSource implements EnumerationSource {
             // TODO validate
           } finally {
             initialized = true;
-            logger.fine(() -> String.format("Found %s enumeration class literals from %s.",
+            logger.fine(() -> format("Found %s enumeration class literals from %s.",
                 holder.values().stream().mapToLong(e -> e.classLiteral.size()).sum(),
                 bundleFilePaths));
           }
@@ -183,16 +184,15 @@ public class PropertyEnumerationSource implements EnumerationSource {
       }
       Map<Enum, String> map = enumLiterals.get(declaringClass);
       if (map.put(e, literal) != null) {
-        logger.warning(
-            () -> String.format("Enum value [%s] literal description of type [%s] repeats.", e,
-                e.getClass().getName()));
+        logger.warning(() -> format("Enum value [%s] literal description of type [%s] repeats.", e,
+            e.getClass().getName()));
       }
     }
 
     @SuppressWarnings("unchecked")
     public void putEnumClass(Class clz, String literal) {
       if (classLiteral.put(clz, literal) != null) {
-        logger.warning(() -> String.format("Enum type [%s] literal description repeated.", clz));
+        logger.warning(() -> format("Enum type [%s] literal description repeated.", clz));
       }
     }
   }

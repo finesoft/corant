@@ -13,12 +13,14 @@
  */
 package org.corant.shared.conversion;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.min;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -57,17 +59,16 @@ public class ExperimentalConverters {
         }
       }
       loop(converterTypes, sourceClass, candidatedPipes, matchedPipes, maxNestingDepth);
-      ConverterPipe matchedPipe =
-          matchedPipes.stream().map(cp -> cp.complete(ConverterRegistry.getConverters()::get))
-              .sorted((cp1, cp2) -> Integer.compare(cp1.getMatchedScore(), cp2.getMatchedScore()))
-              .findFirst().orElse(null);
+      ConverterPipe matchedPipe = matchedPipes.stream()
+          .map(cp -> cp.complete(ConverterRegistry.getConverters()::get))
+          .sorted(Comparator.comparing(ConverterPipe::getMatchedScore)).findFirst().orElse(null);
       if (matchedPipe != null) {
         Converter converter = IdentityConverter.INSTANCE;
         while (!matchedPipe.getConverters().isEmpty()) {
           converter = converter.compose(matchedPipe.getConverters().remove(0));
         }
         consumer.accept(matchedPipe.getStack());
-        LOGGER.fine(() -> String.format(
+        LOGGER.fine(() -> format(
             "Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
             sourceClass, targetClass, String.join("->", matchedPipe.getStack().stream()
                 .map(ConverterType::toString).toArray(String[]::new))));
@@ -92,10 +93,10 @@ public class ExperimentalConverters {
       converter = converter.compose(converters.pop());
     }
     consumer.accept(converterTypes);
-    LOGGER.fine(() -> String.format(
-        "Can not find the direct converter for %s -> %s, use converter pipe [%s] !", sourceClass,
-        targetClass, String.join("->",
-            converterTypes.stream().map(ConverterType::toString).toArray(String[]::new))));
+    LOGGER.fine(
+        () -> format("Can not find the direct converter for %s -> %s, use converter pipe [%s] !",
+            sourceClass, targetClass, String.join("->",
+                converterTypes.stream().map(ConverterType::toString).toArray(String[]::new))));
     return converter;
   }
 
@@ -129,13 +130,11 @@ public class ExperimentalConverters {
           pipe.setMatch(true);
           matchedPipes.add(pipe);
           maxNestingDepth = min(pipe.getStack().size(), maxNestingDepth);
-        } else {
-          if (pipe.getStack().size() < maxNestingDepth) {
-            for (ConverterType candidate : candidates) {
-              ConverterPipe newPipe = ConverterPipe.of(pipe);
-              if (newPipe.append(candidate)) {
-                pipes.add(newPipe);
-              }
+        } else if (pipe.getStack().size() < maxNestingDepth) {
+          for (ConverterType candidate : candidates) {
+            ConverterPipe newPipe = ConverterPipe.of(pipe);
+            if (newPipe.append(candidate)) {
+              pipes.add(newPipe);
             }
           }
         }
@@ -173,7 +172,6 @@ public class ExperimentalConverters {
     }
 
     ConverterPipe(ConverterType<?, ?> tail) {
-      super();
       stack.add(tail);
       this.tail = tail;
     }

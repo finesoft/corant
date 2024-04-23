@@ -13,6 +13,7 @@
  */
 package org.corant.config.cdi;
 
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.corant.shared.util.Primitives.wrap;
 import java.util.HashSet;
@@ -93,18 +94,17 @@ public class ConfigExtension20 implements Extension {
 
   void onProcessInjectionPoint(@Observes ProcessInjectionPoint<?, ?> pip) {
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperty.class)) {
-      logger.finer(
-          () -> String.format("Found config property inject point %s.", pip.getInjectionPoint()));
+      logger.finer(() -> format("Found config property inject point %s.", pip.getInjectionPoint()));
       configPropertyInjectionPoints.add(pip.getInjectionPoint());
     }
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(ConfigProperties.class)) {
-      logger.finer(
-          () -> String.format("Found config properties inject point %s.", pip.getInjectionPoint()));
+      logger
+          .finer(() -> format("Found config properties inject point %s.", pip.getInjectionPoint()));
       configPropertiesInjectionPoints.add(pip.getInjectionPoint());
     }
     if (pip.getInjectionPoint().getAnnotated().isAnnotationPresent(DeclarativeConfigKey.class)) {
-      logger.finer(() -> String.format("Found declarative config key inject point %s.",
-          pip.getInjectionPoint()));
+      logger.finer(
+          () -> format("Found declarative config key inject point %s.", pip.getInjectionPoint()));
       declarativeConfigInjectionPoints.add(pip.getInjectionPoint());
     }
   }

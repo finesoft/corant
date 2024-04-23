@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.artemis;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.forceCast;
@@ -114,7 +115,7 @@ public class ArtemisJMSExtension extends AbstractJMSExtension {
     if (configManager.isEmpty()) {
       logger.info(() -> "Can not find any artemis configurations.");
     } else {
-      logger.info(() -> String.format("Found %s artemis brokers named [%s].", configManager.size(),
+      logger.info(() -> format("Found %s artemis brokers named [%s].", configManager.size(),
           String.join(", ", configManager.getAllDisplayNames())));
     }
   }

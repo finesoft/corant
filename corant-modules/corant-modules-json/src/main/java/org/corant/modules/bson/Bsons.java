@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bson;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -309,13 +310,13 @@ public class Bsons {
       return writer.getValue();
     } catch (CodecConfigurationException e) {
       throw new IllegalArgumentException(
-          String.format("Unable to convert %s to BsonValue.", source.getClass().getName()));
+          format("Unable to convert %s to BsonValue.", source.getClass().getName()));
     }
   }
 
   static Object decodeTransformer(Object objectToTransform) {
-    if ((objectToTransform instanceof Binary binary)
-        && (binary.getType() == BsonBinarySubType.BINARY.getValue())) {
+    if (objectToTransform instanceof Binary binary
+        && binary.getType() == BsonBinarySubType.BINARY.getValue()) {
       return binary.getData();
     }
     return objectToTransform;

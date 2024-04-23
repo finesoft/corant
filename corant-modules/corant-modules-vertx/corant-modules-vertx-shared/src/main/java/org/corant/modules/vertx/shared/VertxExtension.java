@@ -108,11 +108,11 @@ public class VertxExtension implements Extension {
   public void processVertxEventObserver(@Observes ProcessObserverMethod<VertxEvent, ?> event) {
     String vertxAddress = getVertxAddress(event.getObserverMethod());
     if (vertxAddress == null) {
-      LOGGER.warning(String.format("VertxEvent observer found but no @VertxConsumer declared: %s",
+      LOGGER.warning(format("VertxEvent observer found but no @VertxConsumer declared: %s",
           event.getObserverMethod()));
       return;
     }
-    LOGGER.fine(String.format("Vertx message consumer found: %s", event.getObserverMethod()));
+    LOGGER.fine(format("Vertx message consumer found: %s", event.getObserverMethod()));
     consumerAddresses.add(vertxAddress);
   }
 
@@ -140,10 +140,10 @@ public class VertxExtension implements Extension {
           vertx.eventBus().consumer(address, VertxMessageHandler.from(vertx, event, address));
       consumer.completionHandler(ar -> {
         if (ar.succeeded()) {
-          LOGGER.fine(String.format("Successfully registered event consumer for %s", address));
+          LOGGER.fine(format("Successfully registered event consumer for %s", address));
           latch.countDown();
         } else {
-          LOGGER.log(Level.SEVERE, String.format("Cannot register event consumer for %s", address),
+          LOGGER.log(Level.SEVERE, format("Cannot register event consumer for %s", address),
               ar.cause());
         }
       });
@@ -159,7 +159,7 @@ public class VertxExtension implements Extension {
             : DEFAULT_CONSUMER_REGISTRATION_TIMEOUT;
     try {
       if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
-        throw new IllegalStateException(String.format(
+        throw new IllegalStateException(format(
             "Message consumers not registered within %s ms [registered: %s, total: %s]", timeout,
             latch.getCount(), consumerAddresses.size()));
       }
@@ -182,7 +182,7 @@ public class VertxExtension implements Extension {
       @Observes ProcessBeanAttributes<VertxAsynchronousReference> event) {
     // Add all discovered qualifiers to VertxAsynchronousReference bean attributes
     if (!asyncReferenceQualifiers.isEmpty()) {
-      LOGGER.fine(String.format("Adding additional AsynchronousReference qualifiers: %s",
+      LOGGER.fine(format("Adding additional AsynchronousReference qualifiers: %s",
           asyncReferenceQualifiers));
       event.configureBeanAttributes().addQualifiers(asyncReferenceQualifiers);
     }

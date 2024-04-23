@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion.converter.factory;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.logging.Level;
@@ -54,7 +55,7 @@ public class PrimitiveByteArrayConverterFactory implements ConverterFactory<Obje
         if (throwException) {
           throw new ConversionException(e);
         } else {
-          logger.log(Level.WARNING, e, () -> String.format("Can not convert %s.", asString(t)));
+          logger.log(Level.WARNING, e, () -> format("Can not convert %s.", asString(t)));
         }
       }
       return defaultObject(result, defaultValue);

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Preconditions.requireNotNull;
@@ -82,7 +83,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
       if (uow.isPresent()) {
         for (Message msg : messages) {
           if (msg != null) {
-            logger.fine(() -> String.format(RISE_LOG, msg.toString()));
+            logger.fine(() -> format(RISE_LOG, msg.toString()));
             uow.get().register(msg);
           }
         }
@@ -92,7 +93,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
     } else {
       for (Message msg : messages) {
         if (msg != null) {
-          logger.fine(() -> String.format(RISE_LOG, msg.toString()));
+          logger.fine(() -> format(RISE_LOG, msg.toString()));
           // MessageUtils.mergeToQueue(this.messages, msg);
           this.messages.add(msg);
         }
@@ -122,14 +123,14 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   @Override
   public <U extends Event> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers) {
     shouldNotNull(event);
-    logger.fine(() -> String.format(FIRE_LOG, event.toString()));
+    logger.fine(() -> format(FIRE_LOG, event.toString()));
     return CDIs.fireAsyncEvent(event, qualifiers);
   }
 
   @Override
   public void fireEvent(Event event, Annotation... qualifiers) {
     shouldNotNull(event);
-    logger.fine(() -> String.format(FIRE_LOG, event.toString()));
+    logger.fine(() -> format(FIRE_LOG, event.toString()));
     CDIs.fireEvent(event, qualifiers);
   }
 

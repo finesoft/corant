@@ -13,8 +13,12 @@
  */
 package org.corant.modules.jndi;
 
+import static java.lang.String.format;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Default;
@@ -23,9 +27,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.BeforeBeanDiscovery;
 import jakarta.enterprise.inject.spi.BeforeShutdown;
 import jakarta.enterprise.inject.spi.Extension;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.naming.spi.NamingManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names.JndiNames;
 
@@ -92,10 +93,10 @@ public class InitialContextExtension implements Extension {
       }
     }
     if (useCorantContext) {
-      logger.info(() -> String.format("Initial corant naming context, create subcontexts with %s.",
+      logger.info(() -> format("Initial corant naming context, create subcontexts with %s.",
           String.join(", ", DFLT_SUB_CTX)));
     } else {
-      logger.info(() -> String.format("Initial naming context, create subcontexts with %s.",
+      logger.info(() -> format("Initial naming context, create subcontexts with %s.",
           String.join(", ", DFLT_SUB_CTX)));
     }
     bm.getEvent().fire(new PostCorantJNDIReadyEvent(useCorantContext, context));

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.areEqual;
 import java.time.Instant;
@@ -67,18 +68,18 @@ final class WrappedMessage {
       final MergableMessage older = oldMgbMsg == null ? null : (MergableMessage) oldMgbMsg.delegate;
       final MergableMessage newer = (MergableMessage) newMsg.delegate;
       if (older == null || !newer.canMerge(older)) {
-        logger.fine(() -> String.format("Enqueue message %s.", newer));
+        logger.fine(() -> format("Enqueue message %s.", newer));
         queue.add(newMsg);
       } else {
-        logger.fine(() -> String.format("Remove message %s from queue.", older));
+        logger.fine(() -> format("Remove message %s from queue.", older));
         queue.remove(oldMgbMsg);
         if (newer.merge(older).isValid()) {
-          logger.fine(() -> String.format("Merge message %s to %s and enqueue it.", older, newer));
+          logger.fine(() -> format("Merge message %s to %s and enqueue it.", older, newer));
           queue.add(newMsg);
         }
       }
     } else {
-      logger.fine(() -> String.format("Enqueue message %s.", newMsg.delegate));
+      logger.fine(() -> format("Enqueue message %s.", newMsg.delegate));
       queue.add(newMsg);
     }
   }

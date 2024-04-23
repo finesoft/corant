@@ -13,6 +13,7 @@
  */
 package org.corant.shared.retry;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Throwables.asUncheckedException;
@@ -70,7 +71,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
   protected <T> T doExecute(final Function<Integer, T> callable) {
     for (;;) {
       if (!getRetryPrecondition().test(context)) {
-        logger.info(() -> String.format(
+        logger.info(() -> format(
             "Cancel execution, unable to meet preconditions, it has been tried %s times",
             context.getAttempts()));
         return null;
@@ -79,16 +80,16 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
         emitOnRetry(context);
         context.getAttemptsCounter().incrementAndGet();
         T result = callable.apply(context.getAttempts());
-        logger.fine(() -> String.format(
-            "Executed successfully, it has been tried %s times, no more retries.",
-            context.getAttempts()));
+        logger.fine(
+            () -> format("Executed successfully, it has been tried %s times, no more retries.",
+                context.getAttempts()));
         return result;
       } catch (Throwable throwable) {
         Throwable currThrowable = throwable;
         try {
           if (getRetryStrategy().test(context.setLastThrowable(currThrowable))) {
             long wait = getBackoffStrategy().computeBackoffMillis(context);
-            logger.log(Level.WARNING, currThrowable, () -> String.format(
+            logger.log(Level.WARNING, currThrowable, () -> format(
                 "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
                 context.getAttempts(), wait));
             if (wait > 0) {
@@ -107,7 +108,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
           if (currThrowable != null) {
             if (getRecoveryCallback() != null) {
               try {
-                logger.log(Level.WARNING, currThrowable, () -> String.format(
+                logger.log(Level.WARNING, currThrowable, () -> format(
                     "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
                     context.getAttempts()));
                 T result = forceCast(getRecoveryCallback().recover(context));
@@ -118,7 +119,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
                 currThrowable = e;
               }
             }
-            logger.log(Level.WARNING, currThrowable, () -> String.format(
+            logger.log(Level.WARNING, currThrowable, () -> format(
                 "An error occurred in the execution, it has been tried %s times, and the retrying execution was interrupted.",
                 context.getAttempts()));
             rethrow(currThrowable);

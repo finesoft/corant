@@ -28,7 +28,7 @@ import java.util.Set;
  * <p>
  * The annotation utility class.
  * <p>
- * NOTE: Starting with Java8 we recommend using AnnotatedElement
+ * NOTE: Starting with Java8, we recommend using AnnotatedElement
  *
  * @author bingo 下午10:06:13
  */
@@ -37,8 +37,8 @@ public class Annotations {
   public static final Annotation[] EMPTY_ARRAY = {};
 
   /**
-   * Find the annotation object from given annotated element with given annotation type class, this
-   * is base method. NOTE: Starting with Java8, we recommend using
+   * Find the annotation object from a given annotated element with given annotation type class, this
+   * is a base method. NOTE: Starting with Java8, we recommend using
    * {@link AnnotatedElement#getDeclaredAnnotation(Class)}
    *
    * @param element the AnnotatedElement object corresponding to the annotation type
@@ -76,11 +76,11 @@ public class Annotations {
 
   /**
    * Find the annotation object from given class with given annotation type class or optionally find
-   * from the super classes (don't include interfaces) of the given class.
+   * from the superclasses (don't include interfaces) of the given class.
    *
    * @param clazz the class with annotated to be found
    * @param annotationType the annotation class which to be found
-   * @param searchSupers If true, all super classes are looked up.
+   * @param searchSupers If true, all superclasses are looked up.
    * @return the first matching annotation, or null if not found.
    */
   public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType,
@@ -97,13 +97,13 @@ public class Annotations {
 
   /**
    * Find the annotation object with the given annotation type that is present on the given method
-   * or optionally on any equivalent method in super classes and interfaces. Returns null if the
+   * or optionally on any equivalent method in superclasses and interfaces. Returns null if the
    * annotation type was not present.
    *
    * @param method the class with annotated to be found
    * @param annotationType the annotation class which to be found
-   * @param searchSupers If true, all super classes or interfaces are looked up.
-   * @param ignoreAccess determines if underlying method has to be accessible
+   * @param searchSupers If true, all superclasses or interfaces are looked up.
+   * @param ignoreAccess determines if the underlying method has to be accessible
    * @return the annotation if not found will return null.
    */
   public static <A extends Annotation> A findAnnotation(final Method method,

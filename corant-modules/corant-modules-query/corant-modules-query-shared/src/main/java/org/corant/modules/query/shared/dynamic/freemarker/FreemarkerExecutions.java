@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.freemarker;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Strings.defaultString;
 import java.util.Collection;
 import java.util.Map;
@@ -127,7 +128,7 @@ public class FreemarkerExecutions
       });
       src = sb.toString();
     }
-    return String.format("Source script:%n>>>%n%s%n<<<", src);
+    return format("Source script:%n>>>%n%s%n<<<", src);
   }
 
   public static FreemarkerDynamicQueryScriptResolver scriptResolver() {

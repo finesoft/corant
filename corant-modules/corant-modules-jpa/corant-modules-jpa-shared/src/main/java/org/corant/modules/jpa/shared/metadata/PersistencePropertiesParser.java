@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared.metadata;
 
+import static java.lang.String.format;
 import static org.corant.config.CorantConfigResolver.getGroupConfigKeys;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Conversions.toBoolean;
@@ -59,7 +60,7 @@ public class PersistencePropertiesParser {
         s -> defaultString(s).startsWith(JPAConfig.JC_PREFIX) && !dfltCfgKeys.contains(s), 2);
     namedCfgKeys.forEach((k, v) -> {
       doParse(config, k, v, cfgs);
-      logger.fine(() -> String.format("Parsed persistence unit [%s] from config file.", k));
+      logger.fine(() -> format("Parsed persistence unit [%s] from config file.", k));
     });
     return cfgs;
   }
@@ -123,14 +124,14 @@ public class PersistencePropertiesParser {
 
     if (isEmpty(puimd.getManagedClassNames()) && isEmpty(puimd.getJarFileUrls())) {
       if (isNotEmpty(cfgs)) {
-        logger.warning(() -> String.format(
+        logger.warning(() -> format(
             "Can not find any managed classes or jars for persistence unit %s, the persistence unit will be ignored!",
             puimd.getPersistenceUnitName()));
       }
     } else {
       if (isBlank(puimd.getPersistenceProviderClassName())) {
         puimd.resolvePersistenceProvider();
-        logger.warning(() -> String.format(
+        logger.warning(() -> format(
             "Can't find configured persistence provider class for persistence unit %s, use the runtime persistence provider %s.",
             puimd.getPersistenceUnitName(), puimd.getPersistenceProviderClassName()));
       }

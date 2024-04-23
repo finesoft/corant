@@ -13,6 +13,7 @@
  */
 package org.corant.modules.webserver.undertow;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.forceCast;
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +54,7 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
   @Override
   public void clear(String deploymentName) {
     if (getStore(deploymentName).delete()) {
-      logger.info(() -> String.format("Delete %s' session persistence file", deploymentName));
+      logger.info(() -> format("Delete %s' session persistence file", deploymentName));
     }
   }
 
@@ -78,7 +79,7 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
         UndertowServletLogger.ROOT_LOGGER.failedToPersistSessions(e);
       }
     } else {
-      logger.info(() -> String.format("Can not find persistence session content from file %s.",
+      logger.info(() -> format("Can not find persistence session content from file %s.",
           file.getAbsolutePath()));
     }
     return null;
@@ -117,12 +118,12 @@ public class FileSystemSessionPersistenceManager implements SessionPersistenceMa
         UndertowServletLogger.ROOT_LOGGER.failedToPersistSessions(e);
       }
       if (created) {
-        logger.info(() -> String.format("Created session persistence file %s.", path));
+        logger.info(() -> format("Created session persistence file %s.", path));
       } else {
-        logger.info(() -> String.format("Can not create session persistence file %s.", path));
+        logger.info(() -> format("Can not create session persistence file %s.", path));
       }
     }
-    logger.info(() -> String.format("Session persistence file is %s.", path));
+    logger.info(() -> format("Session persistence file is %s.", path));
     return file;
   }
 

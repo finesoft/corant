@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jaxrs.shared;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.isSessionBean;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.util.Collections;
@@ -67,13 +68,13 @@ public class JaxrsExtension implements Extension {
         && !ProxyUtils.isCDIUnproxyableClass(clazz)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         providers.add(clazz);
-        logger.fine(() -> String.format("Found a jaxrs provider [%s]", clazz));
+        logger.fine(() -> format("Found a jaxrs provider [%s]", clazz));
       } else {
         logger.info(() -> String
             .format("Veto a jaxrs provider [%s] which don't meet the requirements", clazz));
       }
     } else {
-      logger.info(() -> String.format(
+      logger.info(() -> format(
           "Veto a jaxrs provider [%s] which not interface and are not EJB session bean", clazz));
     }
   }
@@ -86,13 +87,13 @@ public class JaxrsExtension implements Extension {
     if (!clazz.isInterface() && !isSessionBean(annotatedType)) {
       if (!Services.getRequired().shouldVeto(clazz)) {
         resources.add(clazz);
-        logger.fine(() -> String.format("Found a jaxrs resource [%s]", clazz));
+        logger.fine(() -> format("Found a jaxrs resource [%s]", clazz));
       } else {
         logger.info(() -> String
             .format("Veto a jaxrs resource [%s] which don't meet the requirements", clazz));
       }
     } else {
-      logger.info(() -> String.format(
+      logger.info(() -> format(
           "Veto a jaxrs resource [%s] which not interface and are not EJB session bean", clazz));
     }
   }

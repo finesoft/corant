@@ -13,6 +13,7 @@
  */
 package org.corant.modules.elastic.data.metadata.resolver;
 
+import static java.lang.String.format;
 import static org.corant.modules.elastic.data.metadata.resolver.ElasticObjectMapper.isSimpleType;
 import static org.corant.modules.elastic.data.metadata.resolver.ResolverUtils.genFieldMapping;
 import static org.corant.modules.elastic.data.metadata.resolver.ResolverUtils.genJoinMapping;
@@ -41,10 +42,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.annotation.PostConstruct;
 import org.corant.modules.elastic.data.ElasticConfig;
 import org.corant.modules.elastic.data.metadata.ElasticIndexing;
 import org.corant.modules.elastic.data.metadata.ElasticMapping;
@@ -152,7 +152,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
     final Map<String, Object> schema = new HashMap<>(mapOf("properties", propertiesSchema));
     ElasticIndexing indexing = new ElasticIndexing(indexName, setting, mapping, schema);
     assembly(indexing, mapping);
-    logger.fine(() -> String.format("Build elastic index object for %s.", docCls.getName()));
+    logger.fine(() -> format("Build elastic index object for %s.", docCls.getName()));
   }
 
   protected void buildMetadata(Class<?> childDocCls, ElasticMapping parentMapping,
@@ -200,7 +200,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
         .collect(Collectors.toSet());
     Set<Class<?>> docClses = new LinkedHashSet<>();
     for (String docPath : docPaths) {
-      Resources.tryFromClassPath(docPath).filter(c -> c instanceof ClassResource)
+      Resources.tryFromClassPath(docPath).filter(ClassResource.class::isInstance)
           .map(c -> (ClassResource) c).map(ClassResource::load)
           .filter(dc -> dc.isAnnotationPresent(EsDocument.class)).forEach(docClses::add);
     }
@@ -225,7 +225,7 @@ public abstract class AbstractElasticIndexingResolver implements ElasticIndexing
 
   protected void notSupportLog(Class<?> docCls, List<String> path) {
     logger.warning(
-        () -> String.format("Field mapping of this type %s.%s is not supported for the time being.",
+        () -> format("Field mapping of this type %s.%s is not supported for the time being.",
             docCls.getName(), String.join(".", path)));
   }
 

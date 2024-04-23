@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
@@ -93,7 +94,7 @@ public class ExecutorServiceManager {
         final long useCheckPeriod = max(checkPeriod, 2000L);
         hungLogger = new HungLogger(this, useCheckPeriod);
         hungLogger.start();
-        logger.info(() -> String.format(
+        logger.info(() -> format(
             "Initialized the hung task logger for all managed executor services, check period %sms.",
             useCheckPeriod));
       }
@@ -107,12 +108,12 @@ public class ExecutorServiceManager {
   protected void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     releaseHungLoggerIfNecessary();
     for (DefaultManagedExecutorService service : executorService) {
-      logger.info(() -> String.format("The managed executor service %s will be shutdown!",
-          service.getName()));
+      logger.info(
+          () -> format("The managed executor service %s will be shutdown!", service.getName()));
       service.stop();
     }
     for (DefaultManagedScheduledExecutorService service : scheduledExecutorService) {
-      logger.info(() -> String.format("The managed scheduled executor service %s will be shutdown!",
+      logger.info(() -> format("The managed scheduled executor service %s will be shutdown!",
           service.getName()));
       service.stop();
     }
@@ -216,7 +217,7 @@ public class ExecutorServiceManager {
 
     void log(String esname, AbstractManagedThread t, long now) {
       if (dumpStack) {
-        logger.info(() -> String.format(
+        logger.info(() -> format(
             "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms, the stack:%n\t%s.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),
@@ -224,7 +225,7 @@ public class ExecutorServiceManager {
             String.join(Strings.NEWLINE.concat(Strings.TAB),
                 Arrays.stream(t.getStackTrace()).map(Objects::asString).toArray(String[]::new))));
       } else {
-        logger.info(() -> String.format(
+        logger.info(() -> format(
             "The thread [%s] id [%s] %s in managed executor service %s may suspected of being hung, started at %s, run time %sms.",
             t.getName(), t.getId(),
             areEqual("null", t.getTaskIdentityName()) ? Strings.EMPTY : t.getTaskIdentityName(),

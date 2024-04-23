@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Throwables.rethrow;
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
@@ -93,12 +94,12 @@ public class DefaultManagedExecutorService extends ManagedExecutorServiceImpl {
         super.shutdownNow();
         if (!super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
           logger.log(Level.WARNING,
-              () -> String.format("Shutdown managed executor service %s timeout!", name));
+              () -> format("Shutdown managed executor service %s timeout!", name));
         }
       }
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Shutdown managed executor service %s occurred error!", name));
+          () -> format("Shutdown managed executor service %s occurred error!", name));
       super.shutdownNow();
       Thread.currentThread().interrupt();
     }

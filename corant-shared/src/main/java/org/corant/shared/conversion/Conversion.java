@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Iterables.iterableOf;
@@ -97,14 +98,14 @@ public class Conversion {
     shouldNoneNull(sourceClass, targetClass);
     Converter converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
-      LOGGER.finer(() -> String.format("Resolve converter %s", converter));
+      LOGGER.finer(() -> format("Resolve converter %s", converter));
       return converter.iterable(value, hints);
     } else {
       Converter stringConverter = resolveConverter(String.class, targetClass);
       if (stringConverter != null) {
-        LOGGER.fine(() -> String.format(
-            "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
-            targetClass, targetClass));
+        LOGGER.fine(
+            () -> format("Can not find proper convert for %s -> %s, use String -> %s converter!",
+                sourceClass, targetClass, targetClass));
         return stringConverter.iterable(transform(value, Objects::asString), hints);
       }
     }
@@ -160,7 +161,7 @@ public class Conversion {
             throw new ConversionException("Can not find converter for type pair s% -> %s.",
                 sourceClass, targetClass);
           }
-          LOGGER.finer(() -> String.format("Resolve converter %s", converter));
+          LOGGER.finer(() -> format("Resolve converter %s", converter));
         }
         return (T) converter.convert(tryStringConverter ? next.toString() : next, hints);
       }
@@ -197,7 +198,7 @@ public class Conversion {
   }
 
   /**
-   * Convert single object to target class object without hints
+   * Convert a single object to a target class object without hints
    *
    * @param <T> the target class
    * @param value the value to convert
@@ -213,8 +214,8 @@ public class Conversion {
    * Convert a value object to a collection objects, use for converting the
    * iterable/array/iterator/enumeration objects to collection objects.
    * <p>
-   * If the value object not belong to above then regard the value object as the first item of
-   * collection and convert it.
+   * If the value object does not belong to above, then regard the value object as the first item of
+   * a collection and convert it.
    *
    * @param <T> the target class of item of the collection
    * @param <C> the target collection class
@@ -239,8 +240,7 @@ public class Conversion {
         size = ((Collection<?>) value).size();
       }
       it = convert(tryCast(value, Iterable.class), targetItemClass, hints);
-    } else if (value instanceof Object[]) {
-      Object[] array = (Object[]) value;
+    } else if (value instanceof Object[] array) {
       size = array.length;
       it = convert(iterableOf(array), targetItemClass, hints);
     } else if (value instanceof Iterator) {
@@ -268,7 +268,7 @@ public class Conversion {
   }
 
   /**
-   * Convert single object to target class object with hints
+   * Convert a single object to a target class object with hints
    *
    * @param <S> the source value object class
    * @param <T> the target class
@@ -288,14 +288,14 @@ public class Conversion {
     }
     Converter<S, T> converter = resolveConverter(sourceClass, targetClass);
     if (converter != null) {
-      LOGGER.finer(() -> String.format("Resolve converter %s", converter));
+      LOGGER.finer(() -> format("Resolve converter %s", converter));
       return converter.convert((S) value, hints);
     } else {
       Converter<String, T> stringConverter = resolveConverter(String.class, targetClass);
       if (stringConverter != null) {
-        LOGGER.fine(() -> String.format(
-            "Can not find proper convert for %s -> %s, use String -> %s converter!", sourceClass,
-            targetClass, targetClass));
+        LOGGER.fine(
+            () -> format("Can not find proper convert for %s -> %s, use String -> %s converter!",
+                sourceClass, targetClass, targetClass));
         return stringConverter.convert(value.toString(), hints);
       }
     }
@@ -335,9 +335,9 @@ public class Conversion {
   /**
    * Convert an array value to target array
    *
-   * @param <T> the target class of element of the array
+   * @param <T> the target class of an element of the array
    * @param value the array value to convert
-   * @param targetItemClass the target element class of array
+   * @param targetItemClass the target element class of the array
    * @param arrayFactory the constructor of array
    * @param hints the converter hints use for intervening converters
    * @return An array that elements were converted according to the target type
@@ -382,7 +382,7 @@ public class Conversion {
   }
 
   /**
-   * Convert an object to target class object array with hints
+   * Convert an object to a target class object array with hints
    *
    * @param <T> the target class
    * @param value the value to convert
@@ -589,7 +589,7 @@ public class Conversion {
         throw e;
       } catch (RuntimeException e) {
         throw new IllegalArgumentException(
-            String.format("Cannot convert value %s with type %s.", value, targetType), e);
+            format("Cannot convert value %s with type %s.", value, targetType), e);
       }
     }
     return result;

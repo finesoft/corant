@@ -13,6 +13,7 @@
  */
 package org.corant.config.source;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.streamOf;
@@ -81,7 +82,7 @@ public class ConfigSourceLoader {
           return Optional.of(new PropertiesConfigSource(resource, ordinal));
         } else if (location.endsWith(".yml") || location.endsWith(".yaml")) {
           if (tryAsClass("org.yaml.snakeyaml.Yaml") == null) {
-            logger.warning(() -> String.format(
+            logger.warning(() -> format(
                 "Can't not load config source [%s], the [class org.yaml.snakeyaml.Yaml] not not exists!",
                 location));
           } else {
@@ -89,7 +90,7 @@ public class ConfigSourceLoader {
           }
         } else if (location.endsWith(".json")) {
           if (Services.findRequired(JsonConfigSourceResolver.class).isEmpty()) {
-            logger.warning(() -> String.format(
+            logger.warning(() -> format(
                 "Can't not load config source [%s], the [JsonConfigSourceResolver] not not exists!",
                 location));
           } else {
@@ -99,8 +100,7 @@ public class ConfigSourceLoader {
           return Optional.of(new XmlConfigSource(resource, ordinal));
         }
       } catch (Exception ex) {
-        logger.warning(
-            () -> String.format("Can't not load config source [%s]", resource.getLocation()));
+        logger.warning(() -> format("Can't not load config source [%s]", resource.getLocation()));
       }
     }
     return Optional.empty();

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.util.LinkedList;
@@ -52,7 +53,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
     messageDispatcher.prepare();
     messageStorage.prepare();
     sagaService.prepare();
-    logger.fine(() -> String.format("Begin unit of work [%s].", transaction.toString()));
+    logger.fine(() -> format("Begin unit of work [%s].", transaction.toString()));
   }
 
   @Override
@@ -75,7 +76,7 @@ public class JTARLJPAUnitOfWork extends AbstractJTAJPAUnitOfWork {
 
   @Override
   protected void fanoutMessages() {
-    logger.fine(() -> String.format(
+    logger.fine(() -> format(
         "Sorted the flushed messages and trigger them if necessary, store them to the message storage, before %s completion.",
         transaction.toString()));
     LinkedList<WrappedMessage> messages = new LinkedList<>();

@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.provider;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.tryResolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Sets.immutableSetOf;
@@ -107,8 +108,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
     logger.fine(() -> "Reset application context if necessary.");
     if (contextInfos.contains(ContextInfo.APPLICATION)
         && contextHandle.getContextClassLoader() != null) {
-      logger.fine(
-          () -> String.format("Reset class loader %s", contextHandle.getContextClassLoader()));
+      logger.fine(() -> format("Reset class loader %s", contextHandle.getContextClassLoader()));
       final ClassLoader classLoaderToSet = contextHandle.getContextClassLoader();
       final Thread currentThread = Thread.currentThread();
       if (classLoaderToSet != currentThread.getContextClassLoader()) {
@@ -162,7 +162,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
       } else {
         contextClassloader = ClassLoader.getSystemClassLoader();
       }
-      logger.fine(() -> String.format("Save class loader %s", contextClassloader));
+      logger.fine(() -> format("Save class loader %s", contextClassloader));
       contextHandle.setContextClassLoader(contextClassloader);
     }
   }
@@ -195,7 +195,7 @@ public class ContextSetupProviderImpl implements ContextSetupProvider {
       if (classLoaderToSet != originalClassLoader) {
         currentThread.setContextClassLoader(classLoaderToSet);
       }
-      logger.fine(() -> String.format("Setup class loader %s", classLoaderToSet));
+      logger.fine(() -> format("Setup class loader %s", classLoaderToSet));
       resetContextHandle.setContextClassLoader(originalClassLoader);
     }
   }

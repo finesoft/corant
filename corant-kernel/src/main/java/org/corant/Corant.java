@@ -13,6 +13,7 @@
  */
 package org.corant;
 
+import static java.lang.String.format;
 import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -498,7 +499,7 @@ public class Corant implements AutoCloseable {
   private static void log(Level level, Throwable thrown, String msgOrFmt, Object... arguments) {
     if (arguments.length > 0) {
       Logger.getLogger(Corant.class.getName()).log(level, thrown,
-          () -> String.format(msgOrFmt, arguments));
+          () -> format(msgOrFmt, arguments));
     } else {
       Logger.getLogger(Corant.class.getName()).log(level, thrown, () -> msgOrFmt);
     }

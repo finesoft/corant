@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.defaultBiPredicate;
 import static org.corant.shared.util.Functions.emptyBiPredicate;
@@ -95,7 +96,7 @@ public class PropertyResourceBundle extends ResourceBundle implements Sortable {
     } catch (IOException e) {
       throw new NoSuchBundleException(e, "Can not load property resource bundle %s.", uri);
     }
-    logger.fine(() -> String.format("Load property resource from %s.", fo.getLocation()));
+    logger.fine(() -> format("Load property resource from %s.", fo.getLocation()));
     final BiPredicate<String, String> ufs = defaultBiPredicate(fs, true);
     properties.forEach((k, v) -> {
       if (k != null) {

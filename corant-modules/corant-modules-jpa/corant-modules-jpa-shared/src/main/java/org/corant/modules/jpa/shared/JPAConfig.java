@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.io.IOException;
 import java.util.HashSet;
@@ -123,8 +124,7 @@ public class JPAConfig {
         shouldBeTrue(metaDatas.add(u), "The persistence unit name %s is dup!",
             u.getPersistenceUnitName());
       } else {
-        logger.info(
-            () -> String.format("The persistence unit %s is disable", u.getPersistenceUnitName()));
+        logger.info(() -> format("The persistence unit %s is disable", u.getPersistenceUnitName()));
       }
     });
     return metaDatas;
@@ -150,9 +150,8 @@ public class JPAConfig {
                 m.getPersistenceUnitName());
           });
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Parse persistence meta data from %s error %s.", DFLT_PU_XML_LOCATION,
-              e.getMessage()));
+      logger.log(Level.WARNING, e, () -> format("Parse persistence meta data from %s error %s.",
+          DFLT_PU_XML_LOCATION, e.getMessage()));
     }
     return cfgs;
   }

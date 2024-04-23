@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jndi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.HashMap;
@@ -144,7 +145,7 @@ public class NamingContext implements Context {
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
-            String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+            format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                 useName.get(0)));
       }
       if (useName.size() > 1) {
@@ -226,7 +227,7 @@ public class NamingContext implements Context {
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
-            String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+            format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                 useName.get(0)));
       }
       if (entry.type != NamingContextEntry.CONTEXT) {
@@ -256,7 +257,7 @@ public class NamingContext implements Context {
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
-            String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+            format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                 useName.get(0)));
       }
       if (entry.type != NamingContextEntry.CONTEXT) {
@@ -361,7 +362,7 @@ public class NamingContext implements Context {
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
-            String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+            format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                 useName.get(0)));
       }
       if (useName.size() > 1) {
@@ -409,7 +410,7 @@ public class NamingContext implements Context {
       if (useName.size() > 1) {
         if (entry == null) {
           throw new NameNotFoundException(
-              String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+              format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                   useName.get(0)));
         } else if (entry.type != NamingContextEntry.CONTEXT) {
           throw new NamingException("Name must be bound to a Context, since it has children.");
@@ -421,7 +422,7 @@ public class NamingContext implements Context {
         }
       } else if (!rebind && entry != null) {
         throw new NameAlreadyBoundException(
-            String.format("Name [%s] is already bound in this Context", useName.get(0)));
+            format("Name [%s] is already bound in this Context", useName.get(0)));
       } else {
         Object toBind = NamingManager.getStateToBind(obj, useName, this, getEnvironment());
         if (toBind instanceof Context) {
@@ -467,7 +468,7 @@ public class NamingContext implements Context {
       NamingContextEntry entry = bindings.get(useName.get(0));
       if (entry == null) {
         throw new NameNotFoundException(
-            String.format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
+            format("Name [%s] is not bound in this Context. Unable to find [%s]", useName,
                 useName.get(0)));
       }
       if (useName.size() > 1) {

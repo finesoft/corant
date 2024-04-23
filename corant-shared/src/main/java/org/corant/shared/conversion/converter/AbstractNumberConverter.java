@@ -58,7 +58,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
    * Check if the string starts with the prefix of the number.
    *
    * @param value the string to check
-   * @param hints the hints may disable decode
+   * @param hints the hints may disable decoding
    */
   public static boolean isDecodable(String value, Map<String, ?> hints) {
     if (value == null
@@ -92,7 +92,7 @@ public abstract class AbstractNumberConverter<S, T extends Number> extends Abstr
   }
 
   /**
-   * Returns a stripped decimal point and trailing zero string for integer type conversion. If it
+   * Returns a stripped decimal point and trailing zero strings for integer type conversion. If it
    * cannot be stripped, or it is empty after stripping, the original string is returned.
    *
    * @param value the value to strip

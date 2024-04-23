@@ -127,7 +127,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the char value whose big-endian representation is stored in the first 2 bytes of byte
+   * Returns the char value whose big-endian representation is stored in the first 2 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up Character
@@ -138,7 +138,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the char value whose big-endian representation is stored in 2 bytes of byte array.
+   * Returns the char value whose big-endian representation is stored in 2 bytes of a byte array.
    *
    * @param bytes the given bytes that make up Character
    * @param strict whether to strictly follow the char bytes length constraint
@@ -156,7 +156,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the double value whose big-endian representation is stored in the first 8 bytes of byte
+   * Returns the double value whose big-endian representation is stored in the first 8 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up double
@@ -167,7 +167,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the double value whose big-endian representation is stored in 8 bytes of byte array.
+   * Returns the double value whose big-endian representation is stored in 8 bytes of a byte array.
    *
    * @param bytes the given bytes that make up double
    * @param strict whether to strictly follow the double bytes length constraint
@@ -185,7 +185,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the float value whose big-endian representation is stored in the first 4 bytes of byte
+   * Returns the float value whose big-endian representation is stored in the first 4 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up float
@@ -196,7 +196,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the float value whose big-endian representation is stored in 4 bytes of byte array.
+   * Returns the float value whose big-endian representation is stored in 4 bytes of a byte array.
    *
    * @param bytes the given bytes that make up float
    * @param strict whether to strictly follow the float bytes length constraint
@@ -215,7 +215,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the int value whose big-endian representation is stored in the first 4 bytes of byte
+   * Returns the int value whose big-endian representation is stored in the first 4 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up int
@@ -226,7 +226,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the int value whose big-endian representation is stored in 4 bytes of byte array.
+   * Returns the int value whose big-endian representation is stored in 4 bytes of a byte array.
    *
    * @param bytes the given bytes that make up int
    * @param strict whether to strictly follow the int bytes length constraint
@@ -244,7 +244,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the long value whose big-endian representation is stored in the first 8 bytes of byte
+   * Returns the long value whose big-endian representation is stored in the first 8 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up long
@@ -255,7 +255,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the long value whose big-endian representation is stored in 8 bytes of byte array.
+   * Returns the long value whose big-endian representation is stored in 8 bytes of a byte array.
    *
    * @param bytes the given bytes that make up long
    * @param strict whether to strictly follow the long bytes length constraint
@@ -275,7 +275,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the short value whose big-endian representation is stored in the first 2 bytes of byte
+   * Returns the short value whose big-endian representation is stored in the first 2 bytes of a byte
    * array.
    *
    * @param bytes the given bytes that make up short
@@ -286,7 +286,7 @@ public class Bytes {
   }
 
   /**
-   * Returns the short value whose big-endian representation is stored in 2 bytes of byte array.
+   * Returns the short value whose big-endian representation is stored in 2 bytes of a byte array.
    *
    * @param bytes the given bytes that make up short
    * @param strict whether to strictly follow the short bytes length constraint

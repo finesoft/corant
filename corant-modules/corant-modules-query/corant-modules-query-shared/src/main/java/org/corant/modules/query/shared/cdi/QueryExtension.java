@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.cdi;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -63,12 +64,12 @@ public class QueryExtension implements Extension {
     }
     Class<?> klass = pat.getAnnotatedType().getJavaClass();
     if (!klass.isInterface()) {
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "Found %s with annotation @DeclarativeQueryService, but it not an interface.", klass));
       return;
     }
     if (isEmpty(klass.getDeclaredMethods())) {
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "Found %s with annotation @DeclarativeQueryService, but it didn't declare any methods.",
           klass));
       return;
@@ -90,7 +91,7 @@ public class QueryExtension implements Extension {
       resolve(QueryMappingService.class).getQueries();
       for (Class<?> cls : declarativeQueryServiceClasses) {
         String inst = resolve(cls, AutoCreated.INST).toString();
-        logger.info(() -> String.format("Resolve declarative query service %s, %s", cls, inst));
+        logger.info(() -> format("Resolve declarative query service %s, %s", cls, inst));
       }
     }
   }

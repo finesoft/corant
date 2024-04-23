@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static java.lang.String.format;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -232,9 +233,9 @@ public class SQLServer2005Dialect extends SQLServerDialect {
               return offset;
             }
           } else {
-            throw new IllegalArgumentException(String.format(Locale.ROOT,
-                "Failed to parse CTE expression columns at offset %d, SQL [%s]", offset,
-                sql.toString()));
+            throw new IllegalArgumentException(
+                format(Locale.ROOT, "Failed to parse CTE expression columns at offset %d, SQL [%s]",
+                    offset, sql.toString()));
           }
         } else {
           matcher = WITH_AS.matcher(sql.substring(offset));
@@ -250,13 +251,13 @@ public class SQLServer2005Dialect extends SQLServerDialect {
               return offset;
             }
           } else {
-            throw new IllegalArgumentException(String.format(Locale.ROOT,
+            throw new IllegalArgumentException(format(Locale.ROOT,
                 "Failed to locate AS keyword in CTE query at offset %d, SQL [%s]", offset,
                 sql.toString()));
           }
         }
       } else {
-        throw new IllegalArgumentException(String.format(Locale.ROOT,
+        throw new IllegalArgumentException(format(Locale.ROOT,
             "Failed to locate CTE expression name at offset %d, SQL [%s]", offset, sql.toString()));
       }
     }

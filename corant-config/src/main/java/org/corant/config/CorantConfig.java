@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.NEWLINE;
 import java.io.ObjectStreamException;
@@ -100,8 +101,8 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-    logger.finer(() -> String.format("Retrieve optional config property key [%s] type [%s]",
-        propertyName, propertyType.getName()));
+    logger.finer(() -> format("Retrieve optional config property key [%s] type [%s]", propertyName,
+        propertyType.getName()));
     return Optional.ofNullable(forceCast(
         configConversion.convert(configSources.get().getValue(propertyName), propertyType)));
   }
@@ -134,13 +135,13 @@ public class CorantConfig implements Config, Serializable {
 
   @Override
   public <T> T getValue(String propertyName, Class<T> propertyType) {
-    logger.fine(() -> String.format("Retrieve config property key [%s] type [%s]", propertyName,
+    logger.fine(() -> format("Retrieve config property key [%s] type [%s]", propertyName,
         propertyType.getName()));
     T value = forceCast(
         configConversion.convert(configSources.get().getValue(propertyName), propertyType));
     if (value == null) {
       throw new NoSuchElementException(
-          String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
+          format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
               propertyType, String.join(NEWLINE, getPropertyNames())));
     }
     return value;
@@ -151,7 +152,7 @@ public class CorantConfig implements Config, Serializable {
         propertyType.getType()));
     if (value == null) {
       throw new NoSuchElementException(
-          String.format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
+          format("Config property name [%s] type [%s] not found! %n [%s]", propertyName,
               propertyType, String.join(NEWLINE, getPropertyNames())));
     }
     return value;

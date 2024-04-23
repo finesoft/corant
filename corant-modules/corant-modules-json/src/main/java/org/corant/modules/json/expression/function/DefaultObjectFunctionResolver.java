@@ -13,6 +13,7 @@
  */
 package org.corant.modules.json.expression.function;
 
+import static java.lang.String.format;
 import static org.corant.shared.normal.Names.DOMAIN_SPACE_SEPARATORS;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.split;
@@ -179,7 +180,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     return fs -> {
       Triple<Class<?>, String, Integer> sign = holder.get(name);
       if (sign == null) {
-        throw new IllegalArgumentException(String.format("Unsupported function: %s", name));
+        throw new IllegalArgumentException(format("Unsupported function: %s", name));
       }
       Class<?> cls = sign.first();
       String invokerName = sign.second();
@@ -283,7 +284,7 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
       return constructor.newInstance(fs);
     } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException | NoSuchMethodException e) {
-      throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls, NEW,
+      throw new IllegalArgumentException(format("Unsupported function: %s#%s(%s)", cls, NEW,
           Strings.join(",", (Object[]) paramTypes)));
     }
   }
@@ -312,13 +313,13 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
         }
       }
     }
-    throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls,
-        methodName, Strings.join(",", (Object[]) paramTypes)));
+    throw new IllegalArgumentException(format("Unsupported function: %s#%s(%s)", cls, methodName,
+        Strings.join(",", (Object[]) paramTypes)));
   }
 
   protected Object invokeStaticField(Object[] fs, Class<?> cls, String invokerName) {
     if (fs.length != 0) {
-      throw new IllegalArgumentException(String.format(
+      throw new IllegalArgumentException(format(
           "Unsupported function: %s.%s can't accept any parameters", cls.getName(), invokerName));
     }
     try {
@@ -342,8 +343,8 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
         throw new CorantRuntimeException(e);
       }
     }
-    throw new IllegalArgumentException(String.format("Unsupported function: %s#%s(%s)", cls,
-        methodName, Strings.join(",", (Object[]) paramTypes)));
+    throw new IllegalArgumentException(format("Unsupported function: %s#%s(%s)", cls, methodName,
+        Strings.join(",", (Object[]) paramTypes)));
   }
 
   private Object invokeNonStaticField(Object[] fs, Class<?> cls, String invokerName) {
@@ -351,8 +352,8 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
       return Fields.getFieldValue(getMatchingField(cls, invokerName), fs[0]);
     }
     throw new IllegalArgumentException(
-        String.format("Unsupported function: %s.%s must accept an instance as parameter",
-            cls.getName(), invokerName));
+        format("Unsupported function: %s.%s must accept an instance as parameter", cls.getName(),
+            invokerName));
   }
 
   protected static class FieldInvokeCacheKey {

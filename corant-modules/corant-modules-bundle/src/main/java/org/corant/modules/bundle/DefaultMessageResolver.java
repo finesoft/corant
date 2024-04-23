@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bundle;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Sets.newConcurrentHashSet;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -101,7 +102,7 @@ public class DefaultMessageResolver implements MessageResolver {
     String rawMsg = resolveRawMessage(useLocale, key);
     String msg = rawMsg == null ? null : resolveMessage(useLocale, key, rawMsg, parameters);
     if (msg == null) {
-      logger.warning(() -> String.format("Can't find any message for %s", key));
+      logger.warning(() -> format("Can't find any message for %s", key));
       if (failLookupHandler != null) {
         msg = failLookupHandler.apply(locale);
       } else {

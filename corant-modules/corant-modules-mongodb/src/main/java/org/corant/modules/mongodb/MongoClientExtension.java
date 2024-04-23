@@ -13,6 +13,7 @@
  */
 package org.corant.modules.mongodb;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.find;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
@@ -153,9 +154,9 @@ public class MongoClientExtension implements Extension {
     if (databaseConfigManager.isEmpty()) {
       logger.info(() -> "Can not find any mongodb databases!");
     } else {
-      logger.info(() -> String.format("Found %s mongodb databases named [%s].",
-          databaseConfigManager.size(),
-          String.join(",", databaseConfigManager.getAllDisplayNames())));
+      logger
+          .info(() -> format("Found %s mongodb databases named [%s].", databaseConfigManager.size(),
+              String.join(",", databaseConfigManager.getAllDisplayNames())));
     }
   }
 
@@ -208,7 +209,7 @@ public class MongoClientExtension implements Extension {
   protected void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     clientConfigManager.getAllWithQualifiers().forEach((cfg, quas) -> {
       if (cfg.isVerifyDeployment()) {
-        logger.info(() -> String.format("Check mongo client %s", cfg.getName()));
+        logger.info(() -> format("Check mongo client %s", cfg.getName()));
         resolve(MongoClient.class, quas).startSession().close();// FIXME use another ways.
       }
     });
@@ -224,7 +225,7 @@ public class MongoClientExtension implements Extension {
           }
           String jndiName = MongoClientConfig.JNDI_SUBCTX_NAME + "/" + name;
           jndi.bind(jndiName, new NamingReference(MongoClient.class, qualifiers));
-          logger.info(() -> String.format("Bind mongo client %s to jndi.", jndiName));
+          logger.info(() -> format("Bind mongo client %s to jndi.", jndiName));
         } catch (NamingException e) {
           throw new CorantRuntimeException(e);
         }

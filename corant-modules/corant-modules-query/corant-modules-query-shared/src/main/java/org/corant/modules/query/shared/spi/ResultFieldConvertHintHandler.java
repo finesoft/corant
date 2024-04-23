@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.spi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -198,7 +199,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
           }
         } catch (Exception e) {
           logger.log(Level.WARNING, e,
-              () -> String.format("Handle result conversion error on property %s with value %s.",
+              () -> format("Handle result conversion error on property %s with value %s.",
                   String.join(".", keyPath), orginalVal));
         }
       }

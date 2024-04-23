@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent.executor;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.time.Duration;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -42,16 +43,16 @@ public class RetryAbortHandler implements RejectedExecutionHandler {
   public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
     if (r != null && !executor.isShutdown() && !executor.isTerminated()
         && !executor.isTerminating()) {
-      logger.info(() -> String.format(
+      logger.info(() -> format(
           "The task %s was rejected from the executor %s in the executor service %s for the first time and needs to be tried once after %s.",
           r.toString(), executor.toString(), name, retryDelay));
       Threads.runInDaemonx(() -> {
         if (executor.getQueue().offer(r, retryDelay.toMillis(), TimeUnit.MILLISECONDS)) {
-          logger.info(() -> String.format(
+          logger.info(() -> format(
               "Succeeded in adding the task %s back to the queue of the executor %s in the executor service %s",
               r.toString(), executor.toString(), name));
         } else {
-          logger.warning(() -> String.format(
+          logger.warning(() -> format(
               "Failed to re-add the task %s to the queue of the executor %s in the executor service %s",
               r.toString(), executor.toString(), name));
         }

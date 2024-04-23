@@ -12,6 +12,7 @@
  */
 package com.github.wxpay.sdk;
 
+import static java.lang.String.format;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.wxpay.sdk.WXPayConstants.SignType;
@@ -173,7 +174,7 @@ public class WXPay {
       ret = WXPayUtil.xmlToMap(respStr);
     } else {
       // 正常返回csv数据
-      ret = new HashMap<String, String>();
+      ret = new HashMap<>();
       ret.put("return_code", WXPayConstants.SUCCESS);
       ret.put("return_msg", "ok");
       ret.put("data", respStr);
@@ -221,7 +222,7 @@ public class WXPay {
       } else if (WXPayConstants.HMACSHA256.equals(signTypeInData)) {
         signType = SignType.HMACSHA256;
       } else {
-        throw new Exception(String.format("Unsupported sign_type: %s", signTypeInData));
+        throw new Exception(format("Unsupported sign_type: %s", signTypeInData));
       }
     }
     return WXPayUtil.isSignatureValid(reqData, config.getKey(), signType);
@@ -307,11 +308,11 @@ public class WXPay {
         try {
           lastResult = this.microPay(reqData, connectTimeoutMs, readTimeoutMs);
           String returnCode = lastResult.get("return_code");
-          if (returnCode.equals("SUCCESS")) {
+          if ("SUCCESS".equals(returnCode)) {
             String resultCode = lastResult.get("result_code");
             String errCode = lastResult.get("err_code");
-            if (resultCode.equals("SUCCESS") || !errCode.equals("SYSTEMERROR")
-                && !errCode.equals("BANKERROR") && !errCode.equals("USERPAYING")) {
+            if ("SUCCESS".equals(resultCode) || !"SYSTEMERROR".equals(errCode)
+                && !"BANKERROR".equals(errCode) && !"USERPAYING".equals(errCode)) {
               break;
             } else {
               remainingTimeMs =
@@ -397,20 +398,20 @@ public class WXPay {
     if (respData.containsKey(RETURN_CODE)) {
       return_code = respData.get(RETURN_CODE);
     } else {
-      throw new Exception(String.format("No `return_code` in XML: %s", xmlStr));
+      throw new Exception(format("No `return_code` in XML: %s", xmlStr));
     }
 
-    if (return_code.equals(WXPayConstants.FAIL)) {
+    if (WXPayConstants.FAIL.equals(return_code)) {
       return respData;
-    } else if (return_code.equals(WXPayConstants.SUCCESS)) {
+    } else if (WXPayConstants.SUCCESS.equals(return_code)) {
       if (isResponseSignatureValid(respData)) {
         return respData;
       } else {
-        throw new Exception(String.format("Invalid sign value in XML: %s", xmlStr));
+        throw new Exception(format("Invalid sign value in XML: %s", xmlStr));
       }
     } else {
       throw new Exception(
-          String.format("return_code value %s is invalid in XML: %s", return_code, xmlStr));
+          format("return_code value %s is invalid in XML: %s", return_code, xmlStr));
     }
   }
 
@@ -536,9 +537,8 @@ public class WXPay {
     String msgUUID = reqData.get("nonce_str");
     String reqBody = WXPayUtil.mapToXml(reqData);
 
-    String resp = wxPayRequest.requestWithCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs,
+    return wxPayRequest.requestWithCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs,
         readTimeoutMs, autoReport);
-    return resp;
   }
 
   /**
@@ -556,9 +556,8 @@ public class WXPay {
     String msgUUID = reqData.get("nonce_str");
     String reqBody = WXPayUtil.mapToXml(reqData);
 
-    String resp = wxPayRequest.requestWithoutCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs,
+    return wxPayRequest.requestWithoutCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs,
         readTimeoutMs, autoReport);
-    return resp;
   }
 
   /**

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
@@ -423,7 +424,7 @@ public class SqlQueryTemplate {
 
   protected Map<String, Object> get(String sql, Object... parameter) {
     try {
-      logger.fine(() -> String.format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
+      logger.fine(() -> format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
           String.join(", ", asStrings(parameter)), sql));
       return defaultObject(runner.query(sql, mapHandler, parameter), HashMap::new);
     } catch (SQLException e) {
@@ -433,7 +434,7 @@ public class SqlQueryTemplate {
 
   protected List<Map<String, Object>> query(String sql, Object... parameter) {
     try {
-      logger.fine(() -> String.format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
+      logger.fine(() -> format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
           String.join(", ", asStrings(parameter)), sql));
       return defaultObject(runner.query(sql, mapListHander, parameter), ArrayList::new);
     } catch (SQLException e) {
@@ -444,7 +445,7 @@ public class SqlQueryTemplate {
   @SuppressWarnings({"rawtypes", "unchecked"})
   protected <T> List<T> querySingle(Class<T> resultClass, String sql, Object... parameter) {
     try {
-      logger.fine(() -> String.format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
+      logger.fine(() -> format("%nQuery parameter: [%s]%nQuery SQL:%n%s",
           String.join(", ", asStrings(parameter)), sql));
       return defaultObject(runner.query(sql, rs -> {
         if (rs != null) {

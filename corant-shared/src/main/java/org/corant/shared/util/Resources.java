@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
@@ -228,8 +229,7 @@ public class Resources {
     try {
       return from(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from path %s.", path));
+      logger.log(Level.WARNING, e, () -> format("Can not find resource from path %s.", path));
     }
     return Stream.empty();
   }
@@ -244,7 +244,7 @@ public class Resources {
       return fromClassPath(classLoader);
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from class loader %s.", classLoader));
+          () -> format("Can not find resource from class loader %s.", classLoader));
     }
     return Stream.empty();
   }
@@ -274,8 +274,7 @@ public class Resources {
     try {
       return fromClassPath(classPath);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from path %s.", classPath));
+      logger.log(Level.WARNING, e, () -> format("Can not find resource from path %s.", classPath));
     }
     return Stream.empty();
   }
@@ -289,8 +288,7 @@ public class Resources {
     try {
       return fromFileSystem(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from path %s.", path));
+      logger.log(Level.WARNING, e, () -> format("Can not find resource from path %s.", path));
     }
     return null;
   }
@@ -304,8 +302,7 @@ public class Resources {
     try {
       return fromFileSystem(path);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e,
-          () -> String.format("Can not find resource from path %s.", path));
+      logger.log(Level.WARNING, e, () -> format("Can not find resource from path %s.", path));
     }
     return null;
   }
@@ -333,7 +330,7 @@ public class Resources {
     try {
       return fromUrl(url);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
+      logger.log(Level.WARNING, e, () -> format("Can not find url resource from %s.", url));
     }
     return null;
   }
@@ -347,7 +344,7 @@ public class Resources {
     try {
       return fromUrl(url);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
+      logger.log(Level.WARNING, e, () -> format("Can not find url resource from %s.", url));
     }
     return null;
   }
@@ -361,7 +358,7 @@ public class Resources {
     try {
       return fromUrl(url, proxy);
     } catch (IOException e) {
-      logger.log(Level.WARNING, e, () -> String.format("Can not find url resource from %s.", url));
+      logger.log(Level.WARNING, e, () -> format("Can not find url resource from %s.", url));
     }
     return null;
   }

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.mapping;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Strings.split;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class QueryParser {
     final SAXParserFactory factory = createSAXParserFactory();
     final Map<String, Resource> fileMap = getQueryMappingFiles(pathExpresses);
     fileMap.entrySet().stream().parallel().forEach(entry -> {
-      logger.fine(() -> String.format("Parse query mapping file %s.", entry.getKey()));
+      logger.fine(() -> format("Parse query mapping file %s.", entry.getKey()));
       try (InputStream is = entry.getValue().openInputStream()) {
         QueryParseHandler handler = new QueryParseHandler(entry.getKey());
         XMLReader reader = factory.newSAXParser().getXMLReader();

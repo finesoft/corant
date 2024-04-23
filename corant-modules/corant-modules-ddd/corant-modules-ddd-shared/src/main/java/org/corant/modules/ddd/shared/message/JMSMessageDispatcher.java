@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.message;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.ubiquity.Throwing.uncheckedBiConsumer;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -33,7 +35,6 @@ import jakarta.inject.Inject;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSContext;
 import jakarta.transaction.Transactional;
-import jakarta.annotation.PreDestroy;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.Message.BinaryMessage;
 import org.corant.modules.ddd.MessageDispatcher;
@@ -103,8 +104,8 @@ public class JMSMessageDispatcher implements MessageDispatcher {
       Map<String, Object> properties, Message message) {
     JMSContext ctx = obtainJmsContext(broker);
     final Destination dest = resolveDestination(message, ctx, multicast, destination);
-    logger.finer(() -> String.format("Resolved JMS message destination %s for domain message %s",
-        dest, message.getClass()));
+    logger.finer(() -> format("Resolved JMS message destination %s for domain message %s", dest,
+        message.getClass()));
     final jakarta.jms.Message jmsMsg = createJMSMessage(ctx, message);
     if (isNotEmpty(properties)) {
       properties.forEach(uncheckedBiConsumer(jmsMsg::setObjectProperty));
@@ -122,7 +123,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
     if (message instanceof BinaryMessage) {
       try (InputStream is = ((BinaryMessage) message).openStream()) {
         jmsMsg = binaryMarshaller.serialize(ctx, is);
-        logger.finer(() -> String.format(
+        logger.finer(() -> format(
             "Convert the domain message %s to binary JMS message, serialize schema %s.",
             message.getClass(), binaryMarshallerName));
       } catch (IOException e) {
@@ -130,9 +131,8 @@ public class JMSMessageDispatcher implements MessageDispatcher {
       }
     } else {
       jmsMsg = marshaller.serialize(ctx, message);
-      logger.finer(
-          () -> String.format("Convert the domain message %s to JMS message, serialize schema %s",
-              message.getClass(), marshallerName));
+      logger.finer(() -> format("Convert the domain message %s to JMS message, serialize schema %s",
+          message.getClass(), marshallerName));
     }
     return jmsMsg;
   }

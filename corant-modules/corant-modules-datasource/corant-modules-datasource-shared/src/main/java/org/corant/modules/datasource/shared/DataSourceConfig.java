@@ -13,6 +13,7 @@
  */
 package org.corant.modules.datasource.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
@@ -372,7 +373,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
     setName(key);
     if (xa && !jta) {
       jta = true;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The XA attribute of the data source [%s] is True, and the JTA attribute will be forced from the False originally configured to True!",
           getName()));
     }

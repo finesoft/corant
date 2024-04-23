@@ -13,6 +13,7 @@
  */
 package org.corant.modules.keycloak.client;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -20,13 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.logging.Logger;
-
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import jakarta.annotation.PostConstruct;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.util.Resources;
@@ -88,14 +88,14 @@ public class KeycloakAdmin {
     synchronized (this) {
       try {
         if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
-          logger.fine(() -> String.format("Found keycloak admin client config json %s.",
-              keycloakJson.get()));
+          logger.fine(
+              () -> format("Found keycloak admin client config json %s.", keycloakJson.get()));
           adminConfig = JsonSerialization.readValue(keycloakJson.get(), AdapterConfig.class);
         } else if (keycloakJsonLocation.isPresent()) {
           Resource resource =
               Resources.tryFrom(keycloakJsonLocation.get()).findFirst().orElse(null);
           if (resource != null) {
-            logger.fine(() -> String.format("Found keycloak admin client config json %s.",
+            logger.fine(() -> format("Found keycloak admin client config json %s.",
                 keycloakJsonLocation.get()));
             try (InputStream is = resource.openInputStream()) {
               adminConfig = JsonSerialization.readValue(is, AdapterConfig.class);

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.security.shared.crypto;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.io.IOException;
 import java.io.InputStream;
@@ -300,9 +301,9 @@ public class Keys {
       name = name.substring(0, name.length() - 3).concat(" KEY");
     }
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format(PEM_BEG_FMT, name));
+    sb.append(format(PEM_BEG_FMT, name));
     sb.append(encodeBase64(key.getEncoded())).append("\n");
-    sb.append(String.format(PEM_END_FMT, name));
+    sb.append(format(PEM_END_FMT, name));
     return sb.toString();
   }
 }

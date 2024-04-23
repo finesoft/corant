@@ -13,6 +13,7 @@
  */
 package org.corant.modules.flyway;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
@@ -26,14 +27,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import org.corant.config.Configs;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
 import org.corant.modules.datasource.shared.DataSourceConfig;
@@ -93,7 +94,7 @@ public class FlywayMigrator {
       logger.info(() -> "Complete migration process.");
       sw.destroy(logger);
     } else {
-      logger.fine(() -> String.format(
+      logger.fine(() -> format(
           "Disable migration process, If you want to migrate, set %s in the configuration file!",
           "corant.flyway.migrate.enable=true"));
     }
@@ -119,7 +120,7 @@ public class FlywayMigrator {
       }
     });
     if (!locationsToUse.isEmpty()) {
-      logger.info(() -> String.format("Build flyway instance from locations [%s]",
+      logger.info(() -> format("Build flyway instance from locations [%s]",
           String.join(",", locationsToUse)));
       FluentConfiguration fc = Flyway.configure().configuration(globalFlywayConfig).dataSource(ds)
           .cleanDisabled(true).locations(locationsToUse.toArray(new String[0]));
@@ -144,7 +145,7 @@ public class FlywayMigrator {
           .anyMatch(r -> r.getLocation().toLowerCase(Locale.ROOT).endsWith(".sql"));
     } catch (IOException e) {
       logger.log(Level.WARNING, e,
-          () -> String.format("Can't find any migrated data from location %s.", location));
+          () -> format("Can't find any migrated data from location %s.", location));
       return false;
     }
   }

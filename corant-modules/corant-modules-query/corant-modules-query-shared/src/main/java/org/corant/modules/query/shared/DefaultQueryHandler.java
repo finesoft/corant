@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESULT;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULT_HINT;
@@ -36,6 +37,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.corant.config.Configs;
 import org.corant.context.service.ConversionService;
 import org.corant.modules.query.QueryHandler;
@@ -53,12 +60,6 @@ import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings.WildcardMatcher;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-query-shared
@@ -268,9 +269,8 @@ public class DefaultQueryHandler implements QueryHandler {
         try {
           handler.close();
         } catch (Exception e) {
-          logger.log(Level.WARNING, e,
-              () -> String.format("Close result hint handler %s occurred error!",
-                  handler.getClass().getName()));
+          logger.log(Level.WARNING, e, () -> format("Close result hint handler %s occurred error!",
+              handler.getClass().getName()));
         }
       });
     }

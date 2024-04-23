@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import java.time.Duration;
 import java.util.logging.Logger;
 import org.corant.config.declarative.ConfigKeyItem;
@@ -108,42 +109,42 @@ public class DefaultQuerierConfig implements QuerierConfig, DeclarativeConfig {
   public void onPostConstruct(Config config, String key) {
     if (maxSelectSize <= 0) {
       maxSelectSize = UN_LIMIT_SELECT_SIZE;
-      logger.warning(() -> String.format(
-          "The value of querier config [max select size] was revised, the value is %s",
-          maxSelectSize));
+      logger.warning(
+          () -> format("The value of querier config [max select size] was revised, the value is %s",
+              maxSelectSize));
     }
     if (defaultSelectSize <= 0) {
       defaultSelectSize = 128;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The value of querier config [default select size] was revised, the value is %s",
           defaultSelectSize));
     }
     if (defaultSelectSize > maxSelectSize) {
       defaultSelectSize = maxSelectSize;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The value of querier config [default select size] is greater than the value of [max select size], the value will be revised to %s",
           defaultSelectSize));
     }
     if (maxLimit <= 0) {
       maxLimit = UN_LIMIT_SELECT_SIZE;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The value of querier config [max limit] was revised, the value is %s", maxLimit));
     }
     if (defaultLimit <= 0) {
       defaultLimit = 16;
-      logger.warning(() -> String.format(
-          "The value of querier config [default limit] was revised, the value is %s",
-          defaultLimit));
+      logger.warning(
+          () -> format("The value of querier config [default limit] was revised, the value is %s",
+              defaultLimit));
     }
     if (defaultLimit > maxLimit) {
       defaultLimit = maxLimit;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The value of querier config [default limit] is greater than the value of [max limit], the value will be revised to %s",
           defaultLimit));
     }
     if (defaultStreamLimit <= 0) {
       defaultStreamLimit = 32;
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The value of querier config [default stream limit] was revised, the value is %s",
           defaultStreamLimit));
     }

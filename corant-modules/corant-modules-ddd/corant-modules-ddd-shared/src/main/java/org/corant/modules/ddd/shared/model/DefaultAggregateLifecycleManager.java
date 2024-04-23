@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.logging.Logger;
 import jakarta.annotation.Priority;
@@ -56,7 +57,7 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
     if (e.getSource() != null) {
       Aggregate entity = e.getSource();
       handle(entity, e.getAction(), e.isEffectImmediately(), e.getLockModeType());
-      logger.fine(() -> String.format("Handle %s %s %s.", entity.getClass().getName(),
+      logger.fine(() -> format("Handle %s %s %s.", entity.getClass().getName(),
           e.getAction().name(), entity.getId()));
     }
   }

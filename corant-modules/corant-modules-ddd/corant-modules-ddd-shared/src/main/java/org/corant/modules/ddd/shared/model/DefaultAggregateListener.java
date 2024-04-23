@@ -13,6 +13,7 @@
  */
 package org.corant.modules.ddd.shared.model;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class DefaultAggregateListener {
       return;
     }
     if (o.callAssistant().dequeueMessages(false).size() > 0) {
-      logger.warning(() -> String.format("The message held by aggregate %s will be clear.", o));
+      logger.warning(() -> format("The message held by aggregate %s will be clear.", o));
     }
     o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
     registerToUnitOfWork(o);

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared.context;
 
+import static java.lang.String.format;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.jms.JMSContext;
 import jakarta.jms.JMSRuntimeException;
@@ -34,7 +35,7 @@ public abstract class JMSContextManager
     JMSRuntimeException jre = null;
     for (final JMSContext c : components.values()) {
       try {
-        logger.fine(() -> String.format("Close JMSContext %s.", c));
+        logger.fine(() -> format("Close JMSContext %s.", c));
         c.close();
       } catch (final JMSRuntimeException e) {
         jre = e;

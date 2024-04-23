@@ -13,6 +13,7 @@
  */
 package org.corant.modules.webserver.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import java.util.Set;
@@ -74,8 +75,7 @@ public class WebServerBootstrapper {
       if (server == null) {
         throw new CorantRuntimeException("Web server not initialized yet!");
       }
-      logger
-          .info(() -> String.format("Start web server %s ", getUserClass(server).getSimpleName()));
+      logger.info(() -> format("Start web server %s ", getUserClass(server).getSimpleName()));
       server.start();
       running = true;
     }
@@ -83,7 +83,7 @@ public class WebServerBootstrapper {
 
   protected void onPreContainerStopEvent(@Observes PreContainerStopEvent event) {
     if (server != null && running) {
-      logger.info(() -> String.format("Stop web server %s ", getUserClass(server).getSimpleName()));
+      logger.info(() -> format("Stop web server %s ", getUserClass(server).getSimpleName()));
       server.stop();
       running = false;
     }

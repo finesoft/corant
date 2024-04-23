@@ -13,6 +13,7 @@
  */
 package org.corant.modules.bson.codec;
 
+import static java.lang.String.format;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.bson.BsonInvalidOperationException;
@@ -35,7 +36,7 @@ public class URIStringCodec implements Codec<URI> {
       return new URI(uriString);
     } catch (URISyntaxException e) {
       throw new BsonInvalidOperationException(
-          String.format("Can't decode URI from string '%s'", uriString));
+          format("Can't decode URI from string '%s'", uriString));
     }
   }
 

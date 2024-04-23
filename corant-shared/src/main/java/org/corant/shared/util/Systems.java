@@ -115,7 +115,6 @@ public class Systems {
       byte[] ip = inetAddress.getAddress();
       return Math.abs(ip[0] << 24 | ip[1] << 16 | ip[2] << 8 | ip[3]);
     } catch (Exception ex) {
-      ex.printStackTrace();
       return 0;
     }
   }

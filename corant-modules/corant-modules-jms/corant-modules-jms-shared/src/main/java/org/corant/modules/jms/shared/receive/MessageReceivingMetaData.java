@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
@@ -81,7 +82,7 @@ public class MessageReceivingMetaData {
     receiveThreshold = max(1, driven.getReceiveThreshold());
     failureThreshold = max(2, driven.getFailureThreshold());
     tryThreshold = max(1, driven.getTryThreshold());
-    loopIntervalMs = max(500L, driven.getLoopIntervalMs());
+    loopIntervalMs = max(16L, driven.getLoopIntervalMs());
     String bds = driven.getBrokenDuration();
     String maxBds = driven.getMaxBrokenDuration();
     Duration brokenDuration =
@@ -107,7 +108,7 @@ public class MessageReceivingMetaData {
           "The message receiving method %s requires a return type because the method is configured with a reply.",
           method.getMethod());
     } else if (!method.getMethod().getReturnType().equals(Void.TYPE)) {
-      logger.warning(() -> String.format(
+      logger.warning(() -> format(
           "The message receiving method %s has a return type, but the method is configured without a reply.",
           method.getMethod()));
     }

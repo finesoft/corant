@@ -23,34 +23,51 @@ import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
  */
 public class MessageReceivingTaskExecution {
 
-  private final ScheduledFuture<?> future;
-  private final ManagedMessageReceivingTask task;
-  private final Runnable cancelledHook;
+  protected final ManagedMessageReceivingTask task;
+  protected final Runnable cancelledHook;
+  protected final MessageReceivingMetaData metaData;
 
-  public MessageReceivingTaskExecution(ScheduledFuture<?> future,
+  protected volatile ScheduledFuture<?> future;
+  protected volatile boolean cancelled;
+
+  public MessageReceivingTaskExecution(MessageReceivingMetaData metaData,
       ManagedMessageReceivingTask task) {
-    this.future = future;
-    this.task = task;
-    cancelledHook = null;
+    this(metaData, null, task, null);
   }
 
-  public MessageReceivingTaskExecution(ScheduledFuture<?> future, ManagedMessageReceivingTask task,
-      Runnable cancelledHook) {
+  public MessageReceivingTaskExecution(MessageReceivingMetaData metaData, ScheduledFuture<?> future,
+      ManagedMessageReceivingTask task) {
+    this(metaData, future, task, null);
+  }
+
+  public MessageReceivingTaskExecution(MessageReceivingMetaData metaData, ScheduledFuture<?> future,
+      ManagedMessageReceivingTask task, Runnable cancelledHook) {
+    this.metaData = metaData;
     this.future = future;
     this.task = task;
     this.cancelledHook = cancelledHook;
   }
 
   public boolean cancel() {
+    cancelled = true;
     boolean cancelled = task.cancel();
     if (cancelledHook != null) {
       cancelledHook.run();
     }
-    future.cancel(false);
+    final ScheduledFuture<?> f = future;
+    if (f != null) {
+      f.cancel(false);
+    }
     return cancelled;
   }
 
   public ScheduledFuture<?> getFuture() {
     return future;
+  }
+
+  protected void updateFuture(ScheduledFuture<?> future) {
+    if (!cancelled) {
+      this.future = future;
+    }
   }
 }

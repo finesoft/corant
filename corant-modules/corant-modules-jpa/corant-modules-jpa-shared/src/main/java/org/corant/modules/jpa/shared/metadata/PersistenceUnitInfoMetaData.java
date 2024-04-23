@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.shared.metadata;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -26,13 +27,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import jakarta.persistence.SharedCacheMode;
 import jakarta.persistence.ValidationMode;
 import jakarta.persistence.spi.ClassTransformer;
 import jakarta.persistence.spi.PersistenceProvider;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.JPAConfig;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -101,20 +102,20 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     setNonJtaDataSource(dsSupplier.apply(getNonJtaDataSourceName()));
     if (persistenceUnitTransactionType == PersistenceUnitTransactionType.JTA) {
       if (getJtaDataSource() == null) {
-        logger.severe(() -> String.format(
-            "Can't provide a JTA data source with name %s for persistence unit %s.",
-            getJtaDataSourceName(), getPersistenceUnitName()));
+        logger.severe(
+            () -> format("Can't provide a JTA data source with name %s for persistence unit %s.",
+                getJtaDataSourceName(), getPersistenceUnitName()));
       } else if (getNonJtaDataSource() == null) {
-        logger.warning(() -> String.format(
+        logger.warning(() -> format(
             "Can't provide a non JTA data source with name %s for persistence unit %s, the entity manager with PersistenceContextType.EXTENDED may not be available.",
             getNonJtaDataSourceName(), getPersistenceUnitName()));
       }
     }
     if (persistenceUnitTransactionType == PersistenceUnitTransactionType.RESOURCE_LOCAL
         && getNonJtaDataSource() == null) {
-      logger.severe(() -> String.format(
-          "Can't provide a non JTA data source with name %s for persistence unit %s.",
-          getNonJtaDataSourceName(), getPersistenceUnitName()));
+      logger.severe(
+          () -> format("Can't provide a non JTA data source with name %s for persistence unit %s.",
+              getNonJtaDataSourceName(), getPersistenceUnitName()));
     }
     return this;
   }

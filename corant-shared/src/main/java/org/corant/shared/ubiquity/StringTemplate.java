@@ -13,6 +13,7 @@
  */
 package org.corant.shared.ubiquity;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.defaultString;
@@ -138,7 +139,7 @@ public class StringTemplate {
         return resolve(left(template, position[0]).concat(extracted)
             .concat(template.substring(position[1] + 1)), provider, stacks);
       } else {
-        throw new NoSuchElementException(String.format(
+        throw new NoSuchElementException(format(
             "Can not expand the variable value, the extracted not found, the expanded path [%s].",
             String.join(" -> ", stacks)));
       }
@@ -171,7 +172,7 @@ public class StringTemplate {
   protected String resolveValue(String key, Function<String, Object> provider,
       Collection<String> stacks) {
     if (stacks.size() > expandedLimit) {
-      throw new IllegalArgumentException(String.format(
+      throw new IllegalArgumentException(format(
           "Can not expand the variable value, lookups exceeds limit(max: %d), the expanded path [%s].",
           expandedLimit, String.join(" -> ", stacks)));
     }

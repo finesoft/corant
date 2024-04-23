@@ -13,12 +13,16 @@
  */
 package org.corant.modules.keycloak.client;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.http.client.methods.RequestBuilder;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Resources;
@@ -34,9 +38,6 @@ import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.util.BasicAuthHelper;
 import org.keycloak.util.JsonSerialization;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * corant-modules-keycloak-client
@@ -101,12 +102,12 @@ public class KeycloakAuthzClient {
       if (keycloakJson.isPresent() && isNotBlank(keycloakJson.get())) {
         authzClient = AuthzClient
             .create(JsonSerialization.readValue(keycloakJson.get(), Configuration.class));
-        logger.fine(() -> String.format("Create keycloak authz client instance %s.", keycloakJson));
+        logger.fine(() -> format("Create keycloak authz client instance %s.", keycloakJson));
       } else {
         authzClient = AuthzClient
             .create(Resources.from(keycloakJsonLocation).findFirst().get().openInputStream());
-        logger.fine(
-            () -> String.format("Create keycloak authz client instance %s.", keycloakJsonLocation));
+        logger
+            .fine(() -> format("Create keycloak authz client instance %s.", keycloakJsonLocation));
       }
       configuration = authzClient.getConfiguration();
       serverConfiguration = authzClient.getServerConfiguration();
@@ -146,7 +147,7 @@ public class KeycloakAuthzClient {
           String authorization = BasicAuthHelper.RFC6749.createHeader(clientId, clientSecret);
           requestHeaders.put("Authorization", authorization);
         } else {
-          logger.warning(String.format("Client '%s' doesn't have secret available", clientId));
+          logger.warning(format("Client '%s' doesn't have secret available", clientId));
         }
       } else {
         formParams.put(OAuth2Constants.CLIENT_ID, clientId);

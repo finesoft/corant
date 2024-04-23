@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Annotations.findAnnotation;
 import static org.corant.shared.util.Classes.asClass;
@@ -106,8 +107,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
       }
     });
     if (application != null) {
-      logger.info(() -> String.format("Jaxrs application: %s",
-          getUserClass(application).getCanonicalName()));
+      logger.info(
+          () -> format("Jaxrs application: %s", getUserClass(application).getCanonicalName()));
       applicationInfo = new ApplicationInfo(application);
       servletMetaDatas.add(applicationInfo.toWebServletMetaData());
       servletContextAttributes.put(ResteasyDeployment.class.getName(),

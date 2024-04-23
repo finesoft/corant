@@ -13,6 +13,7 @@
  */
 package org.corant.devops.docs.swagger;
 
+import static java.lang.String.format;
 import static org.corant.config.Configs.resolveSingle;
 import static org.corant.context.Beans.resolve;
 import java.util.logging.Logger;
@@ -56,7 +57,7 @@ public class SwaggerOpenApiExtension implements Extension {
     if (config != null) {
       try {
         ApplicationInfo appInfo = resolve(ResteasyProvider.class).getApplicationInfo();
-        logger.info(() -> String.format("Initialize swagger open api context, the visit path is %s",
+        logger.info(() -> format("Initialize swagger open api context, the visit path is %s",
             appInfo != null ? appInfo.getApplicationPath() + visitPath : visitPath));
         JaxrsOpenApiContextBuilder<?> builder = new JaxrsOpenApiContextBuilder<>();
         builder.openApiConfiguration(config);

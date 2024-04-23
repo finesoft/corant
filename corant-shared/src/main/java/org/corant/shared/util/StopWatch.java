@@ -13,6 +13,7 @@
  */
 package org.corant.shared.util;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
 import java.io.PrintStream;
@@ -91,7 +92,7 @@ public class StopWatch {
 
   public void destroy(Logger logger, Level level) {
     destroy(sw -> logger.log(level,
-        () -> String.format("%s takes %s ms.",
+        () -> format("%s takes %s ms.",
             String.join(" and ",
                 sw.taskInfos.stream().map(TaskInfo::getName).toArray(String[]::new)),
             sw.getTotalTimeMillis())));
@@ -222,7 +223,7 @@ public class StopWatch {
 
     @Override
     public String toString() {
-      return String.format("Task name: %s, uptime: %sms.", name, timeMillis);
+      return format("Task name: %s, uptime: %sms.", name, timeMillis);
     }
   }
 

@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableCollection;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -256,7 +257,7 @@ public class QueryMappingService {
       final long civn = getInitializedVersion();
       postInitializedHandlers.forEach(l -> l.afterQueryMappingInitialized(newQueries, civn));
     }
-    logger.info(() -> String.format("Found %s queries from mapping file path %s.", queries.size(),
+    logger.info(() -> format("Found %s queries from mapping file path %s.", queries.size(),
         mappingFilePaths));
   }
 

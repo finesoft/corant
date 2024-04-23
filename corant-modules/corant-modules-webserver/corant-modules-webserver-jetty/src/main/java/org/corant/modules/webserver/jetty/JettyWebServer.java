@@ -13,6 +13,7 @@
  */
 package org.corant.modules.webserver.jetty;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.getUserClass;
 import java.util.logging.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -55,8 +56,8 @@ public class JettyWebServer extends AbstractWebServer {
           .orElse(Boolean.TRUE)) {
         server.start();
         getPostStartedHandlers().forEach(h -> h.onPostStarted(this));
-        sw.destroy(t -> logger.info(
-            () -> String.format("%s [%s] was started, takes %ss.", t.getLastTaskInfo().getName(),
+        sw.destroy(t -> logger
+            .info(() -> format("%s [%s] was started, takes %ss.", t.getLastTaskInfo().getName(),
                 config.getDescription(), t.getLastTaskInfo().getTimeSeconds())));
         // server.join();
       } else {

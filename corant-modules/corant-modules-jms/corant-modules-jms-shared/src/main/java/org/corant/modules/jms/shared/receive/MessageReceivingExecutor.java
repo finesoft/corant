@@ -13,22 +13,29 @@
  */
 package org.corant.modules.jms.shared.receive;
 
+import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.corant.modules.jms.shared.receive.MessageReceivingExecutorConfig.getExecutorConfig;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Strings.isBlank;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,11 +49,11 @@ import jakarta.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.kernel.event.PostCorantReadyAsyncEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
-import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Threads;
 
 /**
  * corant-modules-jms-shared
@@ -72,67 +79,153 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
   @Any
   protected Instance<MessageReceivingMetaDataSupplier> metaDataSuppliers;
 
-  protected final Map<AbstractJMSConfig, ScheduledExecutorService> executors = new HashMap<>();
+  protected volatile boolean running;
 
-  protected final List<MessageReceivingMetaData> metaDatas = new ArrayList<>();
+  protected List<MessageReceivingMetaData> metaData = new ArrayList<>();
 
-  protected final List<MessageReceivingTaskExecution> receiveExecutions = new ArrayList<>();
+  protected List<MessageReceivingTaskExecution> executions = new ArrayList<>();
+
+  protected Map<String, ScheduledExecutorService> executors = new HashMap<>();
+
+  protected LinkedBlockingQueue<MessageReceivingTaskExecution> queue = new LinkedBlockingQueue<>();
+
+  protected long maxArrangerWaitMs;
+
+  protected TaskArranger arranger;
 
   @Override
-  public void start() {
-    Set<Pair<String, String>> anycasts = new HashSet<>();
-    for (final MessageReceivingMetaData meta : metaDatas) {
-      if (!meta.isMulticast()
-          && !anycasts.add(Pair.of(meta.getConnectionFactoryId(), meta.getDestination()))) {
-        logger.warning(() -> String.format(
-            "The anycast message receiver destination appeared more than once, it should be avoided in general. message receiver [%s].",
+  public synchronized void start() {
+    if (running) {
+      return;
+    }
+    logger.info("Starting message receiving tasks...");
+    running = true;
+    Set<Pair<String, String>> anyCasts = new HashSet<>();
+    for (MessageReceivingMetaData meta : metaData) {
+      final String id = meta.getConnectionFactoryId();
+      if (!meta.isMulticast() && !anyCasts.add(Pair.of(id, meta.getDestination()))) {
+        logger.warning(format(
+            "Any cast message receiver destination appeared more than once, it should be avoided in general, message receiver [%s].",
             meta));
       }
-      AbstractJMSConfig config = AbstractJMSExtension.getConfig(meta.getConnectionFactoryId());
-      if (config != null && config.isEnable()) {
-        MessageReceivingTaskExecution execution = createExecution(config, meta);
-        receiveExecutions.add(execution);
-        logger.fine(
-            () -> String.format("Scheduled message receiving task. message receiver [%s].", meta));
-      }
+      AbstractJMSConfig config = AbstractJMSExtension.getConfig(id);
+      executions.add(createExecution(config, meta));
+      logger.fine(format("Scheduled message receiving task. message receiver [%s].", meta));
     }
-    anycasts.clear();
+    if (!executions.isEmpty()) {
+      arranger = new TaskArranger();
+      arranger.start();
+      logger.info(format("Message receiving schedule arranger started, loop poll wait [%s]ms.",
+          maxArrangerWaitMs));
+    }
+    anyCasts.clear();
+    logger.info("Message receiving tasks and executors are started!");
   }
 
   @Override
-  public void stop() {
-    logger.info(() -> "Stopping the message receiving tasks...");
-    while (!receiveExecutions.isEmpty()) {
+  public synchronized void stop() {
+    logger.info(() -> "Stopping message receiving tasks...");
+    running = false;
+    while (!executions.isEmpty()) {
       try {
-        receiveExecutions.remove(0).cancel();
+        executions.remove(0).cancel();
       } catch (Exception e) {
         logger.log(Level.WARNING, e, () -> "Stop message receiving task error!");
       }
     }
-    logger.info(() -> "All message receiving tasks were stopped.");
-    logger.info(() -> "Stopping the message receiving executor services.");
-    Iterator<Entry<AbstractJMSConfig, ScheduledExecutorService>> it =
-        executors.entrySet().iterator();
+    if (arranger != null) {
+      while (arranger.isAlive()) {
+        Threads.tryThreadSleep(maxArrangerWaitMs);
+      }
+      arranger = null;
+      logger.info(() -> "Message receiving schedule arranger stopped.");
+    }
+    Iterator<Entry<String, ScheduledExecutorService>> it = executors.entrySet().iterator();
     while (it.hasNext()) {
-      Entry<AbstractJMSConfig, ScheduledExecutorService> entry = it.next();
+      Entry<String, ScheduledExecutorService> entry = it.next();
+      String id = entry.getKey();
+      ScheduledExecutorService executorService = entry.getValue();
+      long awaitTermination = getExecutorConfig(id).getAwaitTermination().toMillis();
       try {
-        entry.getValue().shutdown();
-        entry.getValue().awaitTermination(MessageReceivingExecutorConfig
-            .getExecutorConfig(entry.getKey()).getAwaitTermination().toMillis(),
-            TimeUnit.MILLISECONDS);
-        logger.info(() -> String.format("The message receiving executor service %s was stopped.",
-            entry.getKey().getConnectionFactoryId()));
+        executorService.shutdown();
+        if (executorService.awaitTermination(awaitTermination, MILLISECONDS)) {
+          logger.info(format("Message receiving executor service %s was stopped.", id));
+        } else {
+          logger.info(format("Message receiving executor service %s terminated timeout.", id));
+        }
       } catch (InterruptedException e) {
-        logger.log(Level.WARNING, e, () -> String.format("Can not await [%s] executor service.",
-            entry.getKey().getConnectionFactoryId()));
+        logger.log(Level.WARNING, e, () -> format("Can not await [%s] executor service.", id));
         Thread.currentThread().interrupt();
       } finally {
         it.remove();
       }
     }
-    logger.info(() -> "All message receiving executor services were stopped.");
     connections.shutdown();
-    logger.info(() -> "All message receiving connections were released.");
+    queue.clear();
+    logger.info(() -> "Message receiving tasks and executors were stopped!");
+  }
+
+  protected MessageReceivingTaskExecution createExecution(AbstractJMSConfig config,
+      MessageReceivingMetaData meta) {
+    if (meta.isXa()) {
+      shouldBeTrue(config.isXa(), "Connection factory doesn't support XA! message receiver [%s].",
+          meta);
+    }
+    String id = config.getConnectionFactoryId();
+    ScheduledExecutorService service = shouldNotNull(executors.get(id),
+        "Can't find any scheduled executor service! message receiver [%s].", meta);
+    MessageReceivingExecutorConfig executorConfig = getExecutorConfig(id);
+    MessageReceivingTaskExecution execution =
+        new MessageReceivingTaskExecution(meta, taskFactory.create(meta));
+    ScheduleFutureTask task = new ScheduleFutureTask(execution, queue);
+    long delay = Math.max(0, executorConfig.getInitialDelay().toMillis());
+    logger.info(format("Task will be executed after [%s]ms", delay));
+    ScheduledFuture<?> future = service.schedule(task, delay, MILLISECONDS);
+    execution.updateFuture(future);
+    return execution;
+  }
+
+  protected synchronized void initialize() {
+    metaData.clear();
+    extension.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
+        .forEach(metaData::addAll);
+    if (!metaDataSuppliers.isUnsatisfied()) {
+      metaDataSuppliers.stream().forEach(s -> metaData.addAll(s.get()));
+    }
+    if (metaData.isEmpty()) {
+      logger.info(() -> "Can't find any message receive methods");
+      return;
+    }
+    // FIXME check receive and reply recursion
+    Set<AbstractJMSConfig> useConfigs = new LinkedHashSet<>();
+    Map<String, ? extends AbstractJMSConfig> configs = extension.getConfigs();
+    Iterator<MessageReceivingMetaData> metaIt = metaData.listIterator();
+    while (metaIt.hasNext()) {
+      MessageReceivingMetaData meta = metaIt.next();
+      String id = meta.getConnectionFactoryId();
+      AbstractJMSConfig config = configs.get(id);
+      if (config == null || !config.isEnable()) {
+        final String methodName = meta.getMethod().getMethod().toString();
+        logger.warning(format(
+            "Receiver method [%s] can't be performed, the connection factory [%s] is not available!",
+            methodName, id));
+        metaIt.remove();
+        continue;
+      }
+      maxArrangerWaitMs = max(maxArrangerWaitMs, meta.getLoopIntervalMs());
+      useConfigs.add(config);
+    }
+    for (AbstractJMSConfig config : useConfigs) {
+      String id = config.getConnectionFactoryId();
+      MessageReceivingExecutorConfig executorConfig = getExecutorConfig(id);
+      int size = executorConfig.getCorePoolSize();
+      ThreadFactory tf = new MessageReceivingThreadFactory(id);
+      ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(size, tf);
+      executor.setRemoveOnCancelPolicy(true);
+      executors.put(id, executor);
+    }
+    logger.info(format("Found %s message receivers that involving %s connection factories.",
+        metaData.size(), executors.size()));
   }
 
   protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
@@ -148,68 +241,12 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
     initialize();
   }
 
-  MessageReceivingTaskExecution createExecution(AbstractJMSConfig config,
-      MessageReceivingMetaData meta) {
-    if (meta.isXa()) {
-      shouldBeTrue(config.isXa(),
-          "The connection factory doesn't support xa! message receiver [%s].", meta);
-    }
-    ScheduledExecutorService service = shouldNotNull(executors.get(config),
-        "Can't find any scheduled executore service! message receiver [%s].", meta);
-    final MessageReceivingExecutorConfig executorConfig =
-        MessageReceivingExecutorConfig.getExecutorConfig(config);
-    final ManagedMessageReceivingTask task = taskFactory.create(meta);
-    final ScheduledFuture<?> future =
-        service.scheduleWithFixedDelay(task, executorConfig.getInitialDelay().toMillis(),
-            executorConfig.getDelay().toMillis(), TimeUnit.MILLISECONDS);
-    return new MessageReceivingTaskExecution(future, task);
-  }
-
-  void initialize() {
-    extension.getReceiveMethods().stream().map(MessageReceivingMetaData::of)
-        .forEach(metaDatas::addAll);
-    if (!metaDataSuppliers.isUnsatisfied()) {
-      metaDataSuppliers.stream().forEach(s -> metaDatas.addAll(s.get()));
-    }
-    if (!metaDatas.isEmpty()) {
-      // FIXME check receive and reply recursion
-      final Map<String, ? extends AbstractJMSConfig> allConfigs =
-          extension.getConfigManager().getAllWithNames();
-      Set<AbstractJMSConfig> configs = new HashSet<>();
-      Iterator<MessageReceivingMetaData> metaIt = metaDatas.iterator();
-      while (metaIt.hasNext()) {
-        MessageReceivingMetaData meta = metaIt.next();
-        final String connectionFactoryId = meta.getConnectionFactoryId();
-        final AbstractJMSConfig config = allConfigs.get(connectionFactoryId);
-        if (config == null || !config.isEnable()) {
-          logger.warning(() -> String.format(
-              "The receiver method [%s] can't be performed, the connection factory [%s] is not available!",
-              meta.getMethod().getMethod().toString(), connectionFactoryId));
-          metaIt.remove();
-          continue;
-        }
-        configs.add(config);
-      }
-
-      if (!configs.isEmpty()) {
-        configs.forEach(cfg -> {
-          MessageReceivingExecutorConfig executorConfig =
-              MessageReceivingExecutorConfig.getExecutorConfig(cfg);
-          ScheduledThreadPoolExecutor executor =
-              new ScheduledThreadPoolExecutor(executorConfig.getCorePoolSize(),
-                  new MessageReceivingThreadFactory(cfg.getConnectionFactoryId()));
-          executor.setRemoveOnCancelPolicy(true);
-          executors.put(cfg, executor);
-        });
-      }
-
-      logger.info(
-          () -> String.format("Found %s message receivers that involving %s connection factories.",
-              metaDatas.size(), executors.size()));
-    }
-  }
-
-  static class MessageReceivingThreadFactory implements ThreadFactory {
+  /**
+   * corant-modules-jms-shared
+   *
+   * @author bingo 18:25:11
+   */
+  protected static class MessageReceivingThreadFactory implements ThreadFactory {
 
     private final static AtomicLong COUNT = new AtomicLong(1);
     private final String name;
@@ -225,6 +262,70 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
     @Override
     public Thread newThread(final Runnable r) {
       return new Thread(r, name + COUNT.getAndIncrement());
+    }
+
+  }
+
+  /**
+   * corant-modules-jms-shared
+   *
+   * @author bingo 11:53:22
+   */
+  protected static class ScheduleFutureTask extends FutureTask<Void> {
+
+    final MessageReceivingTaskExecution execution;
+    final Queue<MessageReceivingTaskExecution> queue;
+
+    public ScheduleFutureTask(MessageReceivingTaskExecution execution,
+        Queue<MessageReceivingTaskExecution> queue) {
+      super(execution.task, null);
+      this.execution = execution;
+      this.queue = queue;
+    }
+
+    @Override
+    protected void done() {
+      if (!isCancelled()) {
+        queue.add(execution);
+      }
+    }
+  }
+
+  /**
+   * corant-modules-jms-shared
+   *
+   * @author bingo 14:18:18
+   */
+  protected class TaskArranger extends Thread {
+
+    public TaskArranger() {
+      setName(Names.CORANT_PREFIX + "msg-rec-arranger");
+      setDaemon(true);
+    }
+
+    @Override
+    public void run() {
+      while (running) {
+        try {
+          final MessageReceivingTaskExecution execution =
+              queue.poll(maxArrangerWaitMs, MILLISECONDS);
+          if (execution != null) {
+            final long delay = max(execution.task.getDelay(MILLISECONDS), 0L);
+            if (delay > 0) {
+              logger.info(format("Task will be executed after [%s]ms", delay));
+            }
+            final String id = execution.metaData.getConnectionFactoryId();
+            ScheduledFuture<?> future = executors.get(id)
+                .schedule(new ScheduleFutureTask(execution, queue), delay, MILLISECONDS);
+            execution.updateFuture(future);
+          }
+        } catch (InterruptedException e) {
+          logger.log(Level.WARNING, "Arranger thread interrupted!", e);
+          Thread.currentThread().interrupt();
+        } catch (Exception e) {
+          logger.log(Level.WARNING, "Arranger occurred error!", e);
+        }
+      }
     }
 
   }

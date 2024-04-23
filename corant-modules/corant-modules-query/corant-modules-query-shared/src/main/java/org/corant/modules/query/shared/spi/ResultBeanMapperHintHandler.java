@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.spi;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -133,7 +134,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
       Named named = resolveBeanNamed(hint);
       can = named != null && !instances.select(named).isUnsatisfied();
       if (!can && named != null) {
-        logger.warning(String.format("Can't find any result bean mapper named %s", named.value()));
+        logger.warning(format("Can't find any result bean mapper named %s", named.value()));
       }
     }
     return can;

@@ -13,6 +13,7 @@
  */
 package org.corant.context.concurrent;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Classes.tryAsClass;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Lists.newArrayList;
@@ -155,7 +156,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> String.format("Resolved managed executor %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed executor %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedExecutorService.class, esn);
         }
@@ -171,7 +172,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> String.format("Resolved context service %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved context service %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ContextService.class, esn);
         }
@@ -189,8 +190,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(
-            () -> String.format("Resolved managed scheduled executor %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed scheduled executor %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedScheduledExecutorService.class, esn);
         }
@@ -207,8 +207,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger
-            .info(() -> String.format("Resolved managed thread factory %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed thread factory %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedThreadFactory.class, esn);
         }
@@ -220,7 +219,7 @@ public class ConcurrentExtension implements Extension {
     Collection<ManagedExecutorConfig> mecs =
         newArrayList(Configs.resolveMulti(ManagedExecutorConfig.class).values());
     if (mecs.isEmpty() && ENABLE_DFLT_MES) {
-      logger.info(() -> String.format("Use default managed executor configuration %s",
+      logger.info(() -> format("Use default managed executor configuration %s",
           ManagedExecutorConfig.DFLT_INST));
       mecs.add(ManagedExecutorConfig.DFLT_INST);
     }
@@ -228,7 +227,7 @@ public class ConcurrentExtension implements Extension {
     Collection<ManagedScheduledExecutorConfig> msecs =
         newArrayList(Configs.resolveMulti(ManagedScheduledExecutorConfig.class).values());
     if (msecs.isEmpty() && ENABLE_DFLT_MSES) {
-      logger.info(() -> String.format("Use default managed scheduled executor configuration %s",
+      logger.info(() -> format("Use default managed scheduled executor configuration %s",
           ManagedScheduledExecutorConfig.DFLT_INST));
       msecs.add(ManagedScheduledExecutorConfig.DFLT_INST);
     }
@@ -236,7 +235,7 @@ public class ConcurrentExtension implements Extension {
     Collection<ContextServiceConfig> cscs =
         newArrayList(Configs.resolveMulti(ContextServiceConfig.class).values());
     if (cscs.isEmpty() && ENABLE_DFLT_CS) {
-      logger.info(() -> String.format("Use default context service configuration %s",
+      logger.info(() -> format("Use default context service configuration %s",
           ContextServiceConfig.DFLT_INST));
       cscs.add(ContextServiceConfig.DFLT_INST);
     }
@@ -244,7 +243,7 @@ public class ConcurrentExtension implements Extension {
     Collection<ManagedThreadFactoryConfig> mtfcs =
         newArrayList(Configs.resolveMulti(ManagedThreadFactoryConfig.class).values());
     if (mtfcs.isEmpty() && ENABLE_DFLT_MTF) {
-      logger.info(() -> String.format("Use default managed thread factory configuration %s",
+      logger.info(() -> format("Use default managed thread factory configuration %s",
           ManagedThreadFactoryConfig.DFLT_INST));
       mtfcs.add(ManagedThreadFactoryConfig.DFLT_INST);
     }
@@ -269,7 +268,7 @@ public class ConcurrentExtension implements Extension {
 
   protected DefaultContextService produce(Instance<Object> instance, ContextServiceConfig cfg)
       throws NamingException {
-    logger.fine(() -> String.format("Create context service %s with %s.", cfg.getName(), cfg));
+    logger.fine(() -> format("Create context service %s with %s.", cfg.getName(), cfg));
     return createContextService(cfg.getName(), instance,
         cfg.getContextInfos().toArray(ContextInfo[]::new));
   }
@@ -282,8 +281,8 @@ public class ConcurrentExtension implements Extension {
     Instance<BlockingQueueProvider> ques =
         instance.select(BlockingQueueProvider.class, NamedLiteral.of(cfg.getName()));
     if (ques.isResolvable()) {
-      logger.fine(
-          () -> String.format("Create managed executor service %s with customer blocking queue %s.",
+      logger
+          .fine(() -> format("Create managed executor service %s with customer blocking queue %s.",
               cfg.getName(), cfg));
       return new DefaultManagedExecutorService(cfg.getName(), mtf, cfg.getHungTaskThreshold(),
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
@@ -291,8 +290,7 @@ public class ConcurrentExtension implements Extension {
           cfg.getThreadLifeTime().toMillis(), cfg.getAwaitTermination(), contextService,
           cfg.getRejectPolicy(), cfg.getRetryDelay(), ques.get().provide(cfg));
     } else {
-      logger.fine(
-          () -> String.format("Create managed executor service %s with %s.", cfg.getName(), cfg));
+      logger.fine(() -> format("Create managed executor service %s with %s.", cfg.getName(), cfg));
       return new DefaultManagedExecutorService(cfg.getName(), mtf, cfg.getHungTaskThreshold(),
           cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getMaxPoolSize(),
           cfg.getKeepAliveTime().toMillis(), TimeUnit.MILLISECONDS,
@@ -305,8 +303,8 @@ public class ConcurrentExtension implements Extension {
       ManagedScheduledExecutorConfig cfg) throws NamingException {
     DefaultContextService contextService =
         createContextService(cfg.getName(), instance, cfg.getContextInfos());
-    logger.fine(() -> String.format("Create managed scheduled executor service %s with %s.",
-        cfg.getName(), cfg));
+    logger.fine(
+        () -> format("Create managed scheduled executor service %s with %s.", cfg.getName(), cfg));
     return new DefaultManagedScheduledExecutorService(cfg.getName(),
         new DefaultManagedThreadFactory(cfg.getThreadName()), cfg.getHungTaskThreshold(),
         cfg.isLongRunningTasks(), cfg.getCorePoolSize(), cfg.getKeepAliveTime().toMillis(),
@@ -321,8 +319,7 @@ public class ConcurrentExtension implements Extension {
       Annotation[] qualifiers = contextServiceConfigs.getQualifiers(cfg.getContext());
       contextService = instance.select(ContextServiceImpl.class, qualifiers).get();
     }
-    logger
-        .fine(() -> String.format("Create managed thread factory %s with %s.", cfg.getName(), cfg));
+    logger.fine(() -> format("Create managed thread factory %s with %s.", cfg.getName(), cfg));
     return new DefaultManagedThreadFactory(cfg.getName(), contextService, cfg.getPriority());
   }
 
@@ -382,7 +379,7 @@ public class ConcurrentExtension implements Extension {
         }
         String jndiName = JNDI_SUBCTX_NAME + "/" + name;
         jndi.bind(jndiName, new NamingReference(clazz, qualifiers));
-        logger.fine(() -> String.format("Bind %s %s to jndi.", clazz.getName(), jndiName));
+        logger.fine(() -> format("Bind %s %s to jndi.", clazz.getName(), jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }

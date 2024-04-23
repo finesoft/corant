@@ -13,6 +13,7 @@
  */
 package org.corant.devops.docs.swagger;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Strings.isBlank;
 import java.io.IOException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -59,10 +60,8 @@ public class SwaggerOpenApiUIResource extends ResteasyResource {
   public Response get(@PathParam("path") String path) throws IOException {
     String realPath = contentRoot + (isBlank(path) || "/".equals(path) ? "index.html" : path);
     if (realPath.endsWith("/swagger-initializer.js")) {
-      return Response
-          .ok(String.format(initjs, restProvider.getApplicationInfo().getApplicationPath()),
-              "application/javascript")
-          .build();
+      return Response.ok(format(initjs, restProvider.getApplicationInfo().getApplicationPath()),
+          "application/javascript").build();
     } else {
       URLResource resource = Resources.from(realPath).findFirst().orElse(null);
       if (resource != null) {

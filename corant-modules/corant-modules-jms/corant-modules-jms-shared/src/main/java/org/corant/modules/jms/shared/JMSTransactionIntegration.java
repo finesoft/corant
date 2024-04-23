@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jms.shared;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -25,6 +26,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.jms.JMSException;
@@ -32,9 +36,6 @@ import jakarta.jms.JMSSecurityException;
 import jakarta.jms.XAConnection;
 import jakarta.jms.XAConnectionFactory;
 import jakarta.jms.XASession;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
 import org.corant.context.CDIs;
 import org.corant.modules.jta.shared.TransactionIntegration;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -88,7 +89,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
           .connectIfNecessary();
     } catch (XAException e) {
       LOGGER.log(Level.WARNING, e,
-          () -> String.format("Can not resolve JMSRecoveryXAResource from connection factory [%s]",
+          () -> format("Can not resolve JMSRecoveryXAResource from connection factory [%s]",
               config.getName()));
     }
     return Optional.ofNullable(res);
@@ -116,13 +117,13 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       factory = findNamed(XAConnectionFactory.class, config.getConnectionFactoryId()).orElseThrow(
           () -> new CorantRuntimeException("Can't resolve XAConnectionFactory by id %s.",
               config.getConnectionFactoryId()));
-      LOGGER.fine(() -> String.format("Found JMS [%s] XAResource for JTA recovery processes.",
+      LOGGER.fine(() -> format("Found JMS [%s] XAResource for JTA recovery processes.",
           config.getConnectionFactoryId()));
     }
 
     @Override
     public void commit(Xid xid, boolean onePhase) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Commit the JMS XA [%s] transaction [%s] (onePhase:[%s]) that run in JTA recovery processes!",
           config.getConnectionFactoryId(), xid.toString(), onePhase));
 
@@ -140,7 +141,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void end(Xid xid, int flags) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "End the work performed on behalf of the JMS XA [%s] transaction branch [%s] flags [%s] that run in JTA recovery processes!",
           config.getConnectionFactoryId(), xid.toString(), flags));
       if (isConnected()) {
@@ -157,7 +158,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void forget(Xid xid) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Forget about the JMS XA [%s] heuristicallycompleted transaction branch [%s] that run in JTA recovery processes!",
           config.getConnectionFactoryId(), xid.toString()));
 
@@ -226,11 +227,11 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       } finally {
         final Xid[] useXids = xids;
         if (useXids != null && useXids.length > 0) {
-          LOGGER.fine(() -> String.format(
+          LOGGER.fine(() -> format(
               "Found prepared JMS XA [%s] transaction branches: [%s] for JTA recovery processes.",
               config.getConnectionFactoryId(), String.join(", ", asStrings((Object[]) useXids))));
         } else {
-          LOGGER.fine(() -> String.format(
+          LOGGER.fine(() -> format(
               "Prepared JMS XA [%s] transaction branches for JTA recovery processes not found.",
               config.getConnectionFactoryId()));
         }
@@ -243,7 +244,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void rollback(Xid xid) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Roll back work done on behalfof the JMS XA [%s] transaction branch [%s] that run in JTA recovery processes!",
           config.getConnectionFactoryId(), xid.toString()));
       if (isConnected()) {
@@ -273,7 +274,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     @Override
     public void start(Xid xid, int flags) throws XAException {
-      LOGGER.fine(() -> String.format(
+      LOGGER.fine(() -> format(
           "Start work on behalf of a JMS XA [%s] transaction branch [%s] flags [%s] that run in JTA recovery processes!",
           config.getConnectionFactoryId(), xid.toString(), flags));
 
@@ -291,14 +292,14 @@ public class JMSTransactionIntegration implements TransactionIntegration {
 
     JMSRecoveryXAResource connectIfNecessary() throws XAException {
       if (!isConnected()) {
-        LOGGER.fine(() -> String.format("Connect to JMS XA server [%s] for JTA recovery processes.",
+        LOGGER.fine(() -> format("Connect to JMS XA server [%s] for JTA recovery processes.",
             config.getConnectionFactoryId()));
         try {
           try {
             connection.set(factory.createXAConnection());
           } catch (JMSSecurityException e) {
             LOGGER.log(Level.WARNING, e,
-                () -> String.format(
+                () -> format(
                     "Connect to JMS XA server [%s] occured security exception, use another way!",
                     config.connectionFactoryId));
             connection.set(factory.createXAConnection(config.getUsername(), config.getPassword()));
@@ -312,7 +313,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
               connection.get().close();
             } catch (JMSException ex) {
               LOGGER.log(Level.WARNING, e,
-                  () -> String.format("Release JMS XA [%s] connection occured exception!",
+                  () -> format("Release JMS XA [%s] connection occured exception!",
                       config.connectionFactoryId));
             }
           }
@@ -326,7 +327,7 @@ public class JMSTransactionIntegration implements TransactionIntegration {
       if (!isConnected()) {
         return;
       }
-      LOGGER.fine(() -> String.format("Close JMS XA [%s] connection after JTA recovery processes.",
+      LOGGER.fine(() -> format("Close JMS XA [%s] connection after JTA recovery processes.",
           config.getName()));
       try {
         connection.get().close();

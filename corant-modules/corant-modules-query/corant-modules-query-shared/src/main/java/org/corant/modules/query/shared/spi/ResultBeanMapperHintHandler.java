@@ -194,7 +194,6 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
    * corant-modules-query-shared
    *
    * @author bingo 上午11:33:20
-   *
    */
   @FunctionalInterface
   public interface ResultBeanMapper extends Sortable {
@@ -203,12 +202,12 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
      * Handle query result hint
      *
      * @param query the query object
-     * @param queryParmeter the parameters of the query corresponding to hint when executing the
+     * @param queryParameter the parameters of the query corresponding to hint when executing the
      *        query
      * @param extraParameters the extra parameters from query configuration
      * @param queryResult query result set of query corresponding to hint
      **/
-    void accept(Query query, Object queryParmeter, Map<String, Object> extraParameters,
+    void accept(Query query, Object queryParameter, Map<String, Object> extraParameters,
         List<Map<Object, Object>> queryResult);
 
   }

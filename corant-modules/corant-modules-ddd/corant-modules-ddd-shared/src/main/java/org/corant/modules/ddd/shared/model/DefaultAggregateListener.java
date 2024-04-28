@@ -54,7 +54,7 @@ public class DefaultAggregateListener {
       o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();
       return;
     }
-    if (o.callAssistant().dequeueMessages(false).size() > 0) {
+    if (!o.callAssistant().dequeueMessages(false).isEmpty()) {
       logger.warning(() -> format("The message held by aggregate %s will be clear.", o));
     }
     o.setLifecycle(Lifecycle.LOADED).callAssistant().clearMessages();

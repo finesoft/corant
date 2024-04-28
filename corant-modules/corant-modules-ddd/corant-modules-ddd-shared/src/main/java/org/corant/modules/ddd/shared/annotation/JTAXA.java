@@ -26,7 +26,7 @@ import jakarta.inject.Qualifier;
 
 /**
  * corant-modules-ddd-shared
- *
+ * <p>
  * Mark the use of XA resources
  *
  * @author bingo 下午9:05:13

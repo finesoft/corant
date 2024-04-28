@@ -68,7 +68,7 @@ public abstract class AbstractDefaultGenericAggregate<P, T extends AbstractDefau
   }
 
   /**
-   * Changed the aggregate's property value and return self for lambda use case, Example:
+   * Changed the aggregate's property value and return self for a lambda use case, Example:
    *
    * <pre>
    * object.with(newXXX, object::setXXX).with(newYYY, object::setYYY)

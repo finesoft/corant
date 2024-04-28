@@ -24,8 +24,8 @@ import org.corant.shared.util.Classes;
  * corant-modules-ddd-api
  *
  * <p>
- * The life cycle manage event, the infrastructure service will listen this event and do persist or
- * destroy the aggregate.
+ * The life cycle manages event, the infrastructure service will listen to this event and do persist
+ * or destroy the aggregate.
  *
  * @author bingo 上午9:39:28
  */

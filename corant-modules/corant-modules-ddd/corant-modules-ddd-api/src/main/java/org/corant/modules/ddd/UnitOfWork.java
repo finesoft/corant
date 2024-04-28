@@ -54,7 +54,8 @@ public interface UnitOfWork {
    * Register an object to this unit of works.
    *
    * <p>
-   * The object could be an aggregate or a message or a named object (represented by Pair<?,?>).
+   * The object could be an aggregate or a message or a named object (represented by
+   * {@code Pair<?,?>}).
    */
   void register(Object obj);
 

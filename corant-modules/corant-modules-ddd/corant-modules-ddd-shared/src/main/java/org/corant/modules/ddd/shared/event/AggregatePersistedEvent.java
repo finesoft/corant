@@ -28,9 +28,9 @@ import org.corant.modules.ddd.annotation.Events;
  * corant-modules-ddd-shared
  *
  * <p>
- * Every aggregate that extends AbstractAggregate when life cycle on persistence change then will
- * asynchronous fire AggregatePersistEvent . The Event triggers occur when the aggregate is
- * persisted/deleted/updated and has been updated to the persistence layer and the JTA transaction
+ * Every aggregate that extends AbstractAggregate when life cycle on persistence changes then will
+ * asynchronous fire AggregatePersistEvent. The Event triggers occur when the aggregate is
+ * persisted/deleted/updated and has been updated to the persistence layer, and the JTA transaction
  * has been finished successfully.
  *
  * @see EntityManager#flush()

@@ -43,7 +43,7 @@ public interface AggregateAssistant {
   Optional<? extends UnitOfWork> currentUnitOfWork();
 
   /**
-   * Obtain the message queue, if flush is true then clear queue.
+   * Obtain the message queue if flush is true then clear queue.
    */
   List<Message> dequeueMessages(boolean flush);
 
@@ -63,7 +63,7 @@ public interface AggregateAssistant {
   void fireEvent(Event event, Annotation... qualifiers);
 
   /**
-   * The aggregate which it serve
+   * The aggregate which it serves
    */
   Aggregate getAggregate();
 

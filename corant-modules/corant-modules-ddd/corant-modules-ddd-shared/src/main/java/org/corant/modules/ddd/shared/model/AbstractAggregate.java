@@ -89,7 +89,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Send message as long as the unit of works is completed anyway.
+   * Send the given message as long as the unit of works is completed anyway.
    *
    * @param message the message to send
    */
@@ -142,10 +142,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   }
 
   /**
-   * Destroy preconditions, in general use to validate the aggregate internal consistency, in JPA
+   * Destroy preconditions, in general use to validate the aggregate internal consistency; in JPA
    * environment this method is the EntityListener callback.
    * <p>
-   * <b>Note:</b> In JPA environment, this method should not invoke EntityManager or query
+   * <b>Note:</b> In JPA environment, this method should not invoke {@code EntityManager} or query
    * operations, access other aggregate instances, or modify relationships within the same
    * persistence context.
    *
@@ -157,10 +157,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected void onPreDestroy() {}
 
   /**
-   * Preserve preconditions, in general use to validate the aggregate internal consistency, in JPA
+   * Preserve preconditions, in general use to validate the aggregate internal consistency; in JPA
    * environment this method is the EntityListener callback.
    * <p>
-   * <b>Note:</b> In JPA environment, this method should not invoke EntityManager or query
+   * <b>Note:</b> In JPA environment, this method should not invoke {@code EntityManager} or query
    * operations, access other aggregate instances, or modify relationships within the same
    * persistence context, this method may modify the non-relationship state of the aggregate on
    * which it is invoked.
@@ -174,10 +174,10 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   protected void onPrePreserve() {}
 
   /**
-   * Preserve the aggregate if is not persisted then persist it else merge it, in JPA environment
+   * Preserve the aggregate if is not persisted then persist it else merges it, in JPA environment
    * this method will invoke entity manager to persist or merge the aggregate.
    *
-   * @param immediately flush to storage immediately, in JPA environment, if it true the entity
+   * @param immediately flush to storage immediately, in JPA environment if it true the entity
    *        manager will be flushed.
    * @see AggregateLifecycleManager
    * @see EntityManager#persist(Object)
@@ -204,7 +204,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
 
   /**
    * Set the aggregate lifecycle stage and raise lifecycle event.
-   *
+   * <p>
    * Raise Lifecycle.POST_REMOVED event by default.
    *
    * @param lifecycle the life cycle to change

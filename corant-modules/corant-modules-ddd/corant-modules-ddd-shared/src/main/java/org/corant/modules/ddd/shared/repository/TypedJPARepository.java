@@ -41,7 +41,7 @@ import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 public interface TypedJPARepository<T extends Entity> extends TypedRepository<T, Query> {
 
   /**
-   * Returns a typed JPA repository, the underling processing depend on CDI & Weld. If qualifiers
+   * Returns a typed JPA repository, the underling processing depends on CDI & Weld. If qualifiers
    * are not assigned, return an auto created instance.
    *
    * @param <T> the entity type to be used in the repository
@@ -107,7 +107,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   }
 
   /**
-   * Retrieve object from repository by id and object class
+   * Retrieve an object from repository by id and object class
    *
    * @param id the entity identifier
    * @return the entity
@@ -147,7 +147,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   T getReference(Serializable id);
 
   /**
-   * {@link javax.persistence.PersistenceUnitUtil#isLoaded(Object)}
+   * {@link jakarta.persistence.PersistenceUnitUtil#isLoaded(Object)}
    */
   default boolean isLoaded(Object object) {
     return object != null
@@ -188,7 +188,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    * @param preHandler merge operation preprocessor, used to configure the entity manager, such as
    *        setting batch size, etc. This is related to the Hints provided by the JPA provider.
    * @param postHandler merge operation post-processor, use to configure the entity manager, such as
-   *        flushing to underlying database,etc.
+   *        flushing to underlying database, etc.
    */
   default void mergeAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
@@ -258,7 +258,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
    *        such as setting batch size, etc. This is related to the Hints provided by the JPA
    *        provider.
    * @param postHandler persistence operation post-processor, use to configure the entity manager,
-   *        such as flushing to underlying database,etc.
+   *        such as flushing to underlying database, etc.
    */
   default void persistAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
@@ -304,7 +304,7 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   <X> TypedJPAQuery<X> query(final String qlString, Class<X> type);
 
   /**
-   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
    * any. {@link EntityManager#refresh(Object)}
    *
    * @param entity entity instance
@@ -316,8 +316,8 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   }
 
   /**
-   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
-   * any, and lock it with respect to given lock mode type.
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
+   * any, and lock it with respect to the given lock mode type.
    * <p>
    * {@link EntityManager#refresh(Object, LockModeType)}
    * </p>

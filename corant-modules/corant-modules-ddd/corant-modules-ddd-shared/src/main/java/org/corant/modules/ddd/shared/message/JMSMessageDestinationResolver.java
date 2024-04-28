@@ -22,7 +22,7 @@ import org.corant.shared.ubiquity.Sortable;
  * corant-modules-ddd-shared
  *
  * <p>
- * The message pre-dispatch hander use to configure the message properties purpose for message
+ * The message pre-dispatch handler used to configure the message properties purpose for message
  * consumer to select messages.
  *
  * @author bingo 下午5:57:40

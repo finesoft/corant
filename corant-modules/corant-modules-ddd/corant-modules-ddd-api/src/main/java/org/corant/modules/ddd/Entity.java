@@ -22,7 +22,8 @@ import jakarta.persistence.PersistenceContext;
  * corant-modules-ddd-api
  *
  * <p>
- * An object fundamentally defined not by its attributes, but by a thread of continuity and identity
+ * An object is fundamentally defined not by its attributes, but by a thread of continuity and
+ * identity
  *
  * @author bingo 下午12:01:50
  */

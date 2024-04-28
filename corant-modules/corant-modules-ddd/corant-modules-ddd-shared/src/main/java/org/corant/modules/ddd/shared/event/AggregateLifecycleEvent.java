@@ -27,9 +27,9 @@ import org.corant.shared.util.Classes;
  * corant-modules-ddd-shared
  *
  * <p>
- * Every aggregate that extends AbstractAggregate when life cycle change then will fire
+ * Every aggregate that extends AbstractAggregate when life cycle changes then will fire
  * AggregateLifecycleEvent. The Event triggers occur when the aggregate is persisted/deleted/updated
- * and has been propagated to the persistence context and the JTA transaction has not yet finished.
+ * and has been propagated to the persistence context, and the JTA transaction has not yet finished.
  *
  * @see EntityManager#flush()
  * @see TransactionSynchronizationRegistry

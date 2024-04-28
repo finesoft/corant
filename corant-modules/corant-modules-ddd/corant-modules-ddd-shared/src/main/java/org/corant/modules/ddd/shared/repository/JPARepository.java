@@ -113,7 +113,7 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Retrieves entity by the given identifier. Search for an entity by the type of the given
    * identifier and the id of the given identifier .If the entity instance is contained in the
-   * persistence context,it is returned from there.
+   * persistence context, it is returned from there.
    *
    * @param <T> the aggregate instance
    * @param identifier the aggregate id
@@ -154,7 +154,7 @@ public interface JPARepository extends Repository<Query> {
   /**
    * Retrieves the aggregate by primary key and version number.Search for an aggregate of the
    * specified class and primary key and version number. If the aggregate instance is contained in
-   * the persistence context,it is returned from there.
+   * the persistence context, it is returned from there.
    *
    * @param <T> the aggregate type
    * @param entityClass the aggregate class
@@ -235,7 +235,7 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
-   * Create name query
+   * Create a name query
    *
    * @param name the named query name
    * @return a JPAQuery
@@ -339,7 +339,7 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
-   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
    * any. {@link EntityManager#refresh(Object)}
    *
    * @param <T> the entity type
@@ -352,9 +352,9 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
-   * Refresh the state of the instance from the database,overwriting changes made to the entity, if
-   * any, and lock it with respect to given lock mode type.
-   *
+   * Refresh the state of the instance from the database, overwriting changes made to the entity, if
+   * any, and lock it with respect to the given lock mode type.
+   * <p>
    * {@link EntityManager#refresh(Object, LockModeType)}
    *
    * @param <T> the entity type
@@ -369,8 +369,8 @@ public interface JPARepository extends Repository<Query> {
 
   /**
    * Refresh the state of the instance from the database, overwriting changes made to the entity, if
-   * any, and lock it with respect to given lock mode type and with specified properties.
-   *
+   * any, and lock it with respect to the given lock mode type and with specified properties.
+   * <p>
    * {@link EntityManager#refresh(Object, LockModeType, Map)}
    *
    * @param <T> the entity type
@@ -385,9 +385,9 @@ public interface JPARepository extends Repository<Query> {
   }
 
   /**
-   * Refresh the state of the instance from the database, usingthe specified properties, and
+   * Refresh the state of the instance from the database, using the specified properties, and
    * overwriting changes made to the entity, if any.
-   *
+   * <p>
    * {@link EntityManager#refresh(Object, Map)}
    *
    * @param <T> the entity type
@@ -434,12 +434,12 @@ public interface JPARepository extends Repository<Query> {
 
   /**
    * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
-   *
+   * <p>
    * Parameters must be registered before the stored procedure can be executed.
-   *
+   * <p>
    * If the stored procedure returns one or more result sets, any result set will be returned as a
    * list of type Object[].
-   *
+   * <p>
    * {@link EntityManager#createStoredProcedureQuery(String)}
    *
    * @param procedureName name of the stored procedure in the database
@@ -451,12 +451,12 @@ public interface JPARepository extends Repository<Query> {
 
   /**
    * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
-   *
+   * <p>
    * Parameters must be registered before the stored procedure can be executed.
-   *
+   * <p>
    * The resultClass arguments must be specified in the order in which the result sets will be
    * returned by the stored procedure invocation.
-   *
+   * <p>
    * {@link EntityManager#createStoredProcedureQuery(String, Class...)}
    *
    * @param procedureName name of the stored procedure in the database
@@ -471,12 +471,12 @@ public interface JPARepository extends Repository<Query> {
   /**
    *
    * Create an instance of StoredProcedureQuery for executing a stored procedure in the database.
-   *
+   * <p>
    * Parameters must be registered before the stored procedure can be executed.
-   *
+   * <p>
    * The resultClass arguments must be specified in the order in which the result sets will be
    * returned by the stored procedure invocation.
-   *
+   * <p>
    * {@link EntityManager#createStoredProcedureQuery(String, String...)}
    *
    * @param procedureName name of the stored procedure in the database

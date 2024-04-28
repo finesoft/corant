@@ -30,7 +30,7 @@ import java.util.function.Function;
  *
  * <p>
  * The value objects are things like numbers, dates, monies and strings. Usually, they are small
- * objects which are used quite widely. Their identity is based on their state rather than on their
+ * objects that are used quite widely. Their identity is based on their state rather than on their
  * object identity.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Value_object"> Value Object</a>

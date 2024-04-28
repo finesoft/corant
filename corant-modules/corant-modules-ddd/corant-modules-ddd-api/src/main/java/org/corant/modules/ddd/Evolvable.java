@@ -28,16 +28,16 @@ public interface Evolvable<P, T> {
   /**
    * delete the object from persistence
    *
-   * @param Param
-   * @param handler destroy
+   * @param Param the parameter
+   * @param handler destroy handler
    */
   void destroy(P Param, DestroyingHandler<P, T> handler);
 
   /**
-   * preserve to underly persistence
+   * preserve to under persistence
    *
-   * @param param
-   * @param handler
+   * @param param the parameter
+   * @param handler pre-serving handler
    * @return preserve
    */
   T preserve(P param, PreservingHandler<P, T> handler);

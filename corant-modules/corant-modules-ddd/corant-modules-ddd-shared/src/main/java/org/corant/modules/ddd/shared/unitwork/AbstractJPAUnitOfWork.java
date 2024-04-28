@@ -55,7 +55,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * <p>
  * Abstract unit of work implementation, using JPA as a persistent implementation; this
  * implementation records the life cycle changes of entities and provide related registration and
- * deregistration operations, also provide the {@link EntityManager}.
+ * de-registration operations, also provide the {@link EntityManager}.
  * </p>
  * <p>
  * Note that in the current implementation, a unit of work can contain multiple EntityManagers, each
@@ -102,9 +102,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   @Override
   public void deregister(Object obj) {
     if (isActivated()) {
-      if (obj instanceof Aggregate) {
-        Aggregate aggregate = (Aggregate) obj;
-        if (aggregate.getId() != null) {
+      if (obj instanceof Aggregate aggregate) {
+          if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.remove(ai);
           evolutionaryAggregates.remove(ai);
@@ -112,9 +111,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
         }
       } else if (obj instanceof Message) {
         registeredMessages.removeIf(um -> areEqual(obj, um.delegate));
-      } else if (obj instanceof Map.Entry<?, ?>) {
-        Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
-        registeredVariables.remove(p.getKey());
+      } else if (obj instanceof Map.Entry<?, ?> p) {
+          registeredVariables.remove(p.getKey());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -200,9 +198,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   @Override
   public void register(Object obj) {
     if (isActivated()) {
-      if (obj instanceof Aggregate) {
-        Aggregate aggregate = (Aggregate) obj;
-        if (aggregate.getId() != null) {
+      if (obj instanceof Aggregate aggregate) {
+          if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.put(ai, aggregate);
           Lifecycle al = aggregate.getLifecycle();
@@ -220,9 +217,8 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
         }
       } else if (obj instanceof Message) {
         WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage((Message) obj));
-      } else if (obj instanceof Map.Entry<?, ?>) {
-        Map.Entry<?, ?> p = (Map.Entry<?, ?>) obj;
-        registeredVariables.put(p.getKey(), p.getValue());
+      } else if (obj instanceof Map.Entry<?, ?> p) {
+          registeredVariables.put(p.getKey(), p.getValue());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);

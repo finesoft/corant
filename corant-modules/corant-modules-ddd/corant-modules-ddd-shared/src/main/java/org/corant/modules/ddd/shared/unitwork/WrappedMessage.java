@@ -28,7 +28,7 @@ import org.corant.modules.ddd.Message;
  * @author bingo 下午5:00:15
  *
  */
-final class WrappedMessage {
+public final class WrappedMessage {
 
   static final Logger logger = Logger.getLogger(WrappedMessage.class.getName());
 

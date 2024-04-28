@@ -24,7 +24,7 @@ import java.util.List;
 public interface TypedRepository<T, Q> {
 
   /**
-   * Retrieve object from repository by id and object class
+   * Retrieve an object from repository by id and object class
    *
    *
    * @param id the entity i
@@ -49,8 +49,7 @@ public interface TypedRepository<T, Q> {
   T persist(T obj);
 
   /**
-   * Remove the object from repository
-   *
+   * Remove the given object from the repository
    *
    * @param obj the entity instance
    * @return true means successfully
@@ -59,7 +58,6 @@ public interface TypedRepository<T, Q> {
 
   /**
    * Retrieve objects from repository by query object
-   *
    *
    * @param q the query object
    * @return object list

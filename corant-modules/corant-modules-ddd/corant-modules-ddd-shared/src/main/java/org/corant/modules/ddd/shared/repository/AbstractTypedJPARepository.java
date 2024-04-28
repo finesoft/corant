@@ -143,9 +143,8 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
             } else {
               Type[] genericInterfaces = repoClass.getGenericInterfaces();
               for (Type type : genericInterfaces) {
-                if (type instanceof ParameterizedType) {
-                  ParameterizedType parameterizedType = (ParameterizedType) type;
-                  if (AbstractTypedJPARepository.class
+                if (type instanceof ParameterizedType parameterizedType) {
+                    if (AbstractTypedJPARepository.class
                       .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
                     resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
                     break;

@@ -42,7 +42,7 @@ public interface Aggregate extends Entity {
    * Extract the buffered messages that have been raised by the aggregate, this method was invoked
    * before unit of work completed.
    *
-   * @param flush if true then clear messages buffer
+   * @param flush if true, then clear messages buffer
    */
   List<Message> extractMessages(boolean flush);
 
@@ -63,7 +63,7 @@ public interface Aggregate extends Entity {
 
   /**
    * If the aggregate isn't persisted, or is destroyed, but still live in memory until the GC
-   * recycle then return true else return false. It means that the value of aggregate life cycle is
+   * recycle, then return true else return false. It means that the value of aggregate life cycle is
    * in one of {@link Lifecycle#INITIAL}, {@link Lifecycle#PRE_PERSIST},
    * {@link Lifecycle#POST_REMOVED}, {@link Lifecycle#DESTROYED}.
    */
@@ -84,7 +84,7 @@ public interface Aggregate extends Entity {
   }
 
   /**
-   * Raise message, add the message to the buffer and do not publish it immediately.
+   * Raise a message, add the message to the buffer and do not publish it immediately.
    *
    * <p>
    * Note: This method may be implemented in other ways in the future.
@@ -102,7 +102,7 @@ public interface Aggregate extends Entity {
    * Generally the message is the DDD domain event.
    *
    * @param anyway whether to send as long as the unit of works is completed anyway, or send only
-   *        when the aggregation state changes and unit of works is completed.
+   *        when the aggregation state changes and unit of works are completed.
    * @param messages the messages to be sent.
    *
    * @see UnitOfWork
@@ -170,7 +170,7 @@ public interface Aggregate extends Entity {
      */
     LOADED(4),
     /**
-     * Aggregate will be persist to storage
+     * Aggregate will be persisted to storage
      *
      * @see jakarta.persistence.PrePersist
      */
@@ -182,7 +182,7 @@ public interface Aggregate extends Entity {
      */
     PRE_UPDATE(16),
     /**
-     * Aggregate will be remove from storage
+     * Aggregate will be removed from storage
      *
      * @see jakarta.persistence.PreRemove
      */
@@ -206,8 +206,8 @@ public interface Aggregate extends Entity {
      */
     POST_REMOVED(256),
     /**
-     * If aggregate has already been persisted, the representation is removed from the persistence
-     * facility; otherwise it is just a token.
+     * If the aggregate has already been persisted, the representation is removed from the
+     * persistence facility; otherwise it is just a token.
      */
     DESTROYED(512);
 
@@ -223,7 +223,7 @@ public interface Aggregate extends Entity {
 
     /**
      * The aggregate remove from persistence context if has been persisted before, otherwise the
-     * aggregate has been created and marked destroyed means it can't not participate in any domain
+     * aggregate has been created and marked destroyed means it can't participate in any domain
      * logic.
      *
      * @return signDisabled
@@ -233,7 +233,7 @@ public interface Aggregate extends Entity {
     }
 
     /**
-     * The aggregate status have been synchronized to underling storage.
+     * The aggregate status has been synchronized to underling storage.
      *
      * @return signFlushed
      */

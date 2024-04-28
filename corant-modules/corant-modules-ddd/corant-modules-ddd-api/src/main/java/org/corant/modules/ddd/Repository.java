@@ -24,7 +24,7 @@ import java.util.List;
 public interface Repository<Q> {
 
   /**
-   * Retrieve object from repository by id and object class
+   * Retrieve an object from repository by id and object class
    *
    * @param <T> the entity type
    * @param cls the entity class

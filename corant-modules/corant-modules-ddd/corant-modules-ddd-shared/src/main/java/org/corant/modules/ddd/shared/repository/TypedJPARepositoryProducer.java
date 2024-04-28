@@ -36,9 +36,7 @@ public class TypedJPARepositoryProducer {
   @PostConstruct
   protected void onPostConstruct() {
     Optional<TypedJPARepositoryFactory> custom = findAnyway(TypedJPARepositoryFactory.class);
-    if (custom.isPresent()) {
-      factory = custom.get();
-    }
+    custom.ifPresent(typedJPARepositoryFactory -> factory = typedJPARepositoryFactory);
   }
 
   @SuppressWarnings("unchecked")

@@ -22,13 +22,16 @@ import jakarta.transaction.Synchronization;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
 import org.corant.context.CDIs;
+import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
+import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.MessageDispatcher;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
 import org.corant.modules.ddd.shared.event.AggregateEvolutionaryEvent;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.exception.GeneralRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableBoolean;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-ddd-shared
@@ -124,26 +127,29 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
   protected void fanoutEvolutions() {
     // flush the aggregate state changes to persistence in the current unit of work
     flushEntityManagers();
-    if (!evolutionaryAggregates.isEmpty()) {
-      Map<AggregateIdentifier, Integer> evolutions = new HashMap<>();
-      Map<AggregateIdentifier, Integer> temp = new HashMap<>(evolutionaryAggregates.size());
+    int evoSize = evolutionaryAggregates.size();
+    if (evoSize > 0) {
+      Map<AggregateIdentifier, Pair<Integer, Lifecycle>> evolutions = new HashMap<>();
+      Map<AggregateIdentifier, Pair<Integer, Lifecycle>> temp = new HashMap<>(evoSize);
       MutableBoolean fanout = new MutableBoolean(false);
       int i = MAX_CHANGES_ITERATIONS;
       while (true) {
         evolutionaryAggregates.forEach((k, v) -> {
           if (extension.supportsEvolutionaryObserver(k.getTypeCls())) {
-            temp.put(k, v.left());
+            temp.put(k, v);
           }
         });
         if (temp.isEmpty() || evolutions.equals(temp)) {
           break;
         }
         temp.forEach((k, v) -> {
-          Integer last = evolutions.get(k);
-          if (last == null || last.intValue() != v.intValue()) {
+          Pair<Integer, Lifecycle> last = evolutions.get(k);
+          if (last == null || last.left().intValue() != v.left().intValue()) {
             evolutions.put(k, v);
-            CDIs.fireEvent(new AggregateEvolutionaryEvent(registeredAggregates.get(k)),
-                AggregateTypeLiteral.of(k.getTypeCls()));
+            Aggregate aggregate = registeredAggregates.get(k);
+            Lifecycle lifecycle = v.right();
+            AggregateTypeLiteral type = AggregateTypeLiteral.of(k.getTypeCls());
+            CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate, lifecycle), type);
             fanout.set(true);
           }
         });

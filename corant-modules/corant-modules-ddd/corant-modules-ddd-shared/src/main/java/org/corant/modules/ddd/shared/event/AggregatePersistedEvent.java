@@ -68,4 +68,12 @@ public class AggregatePersistedEvent extends AbstractEvent {
     return forceCast(super.getSource());
   }
 
+  @Override
+  public String toString() {
+    AggregateIdentifier ai = getSource();
+    String source =
+        ai == null ? null : ai.getTypeCls().getSimpleName() + " [id=" + ai.getId() + "]";
+    return "AggregatePersistedEvent [source=" + source + ", lifecycle=" + getLifecycle()
+        + ", occurredTime=" + getOccurredTime() + "]";
+  }
 }

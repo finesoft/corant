@@ -16,6 +16,8 @@ package org.corant.modules.ddd.shared.event;
 import static org.corant.shared.util.Objects.forceCast;
 import org.corant.modules.ddd.AbstractEvent;
 import org.corant.modules.ddd.Aggregate;
+import org.corant.modules.ddd.Aggregate.Lifecycle;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-modules-ddd-shared
@@ -29,12 +31,33 @@ public class AggregateEvolutionaryEvent extends AbstractEvent {
 
   private static final long serialVersionUID = 2268460523721510639L;
 
-  public AggregateEvolutionaryEvent(Aggregate aggregate) {
+  private final Lifecycle lifecycle;
+
+  public AggregateEvolutionaryEvent(Aggregate aggregate, Lifecycle lifecycle) {
     super(aggregate);
+    this.lifecycle = lifecycle;
   }
 
   public <T extends Aggregate> T getAggregate() {
     return forceCast(getSource());
-
   }
+
+  public Lifecycle getLifecycle() {
+    return lifecycle;
+  }
+
+  public boolean isDestroyed() {
+    return lifecycle.signDestroyed();
+  }
+
+  @Override
+  public String toString() {
+    Aggregate aggregate = getAggregate();
+    String source = aggregate == null ? null
+        : Classes.getUserClass(aggregate).getSimpleName() + " [id=" + aggregate.getId() + ", vn="
+            + aggregate.getVn() + "]";
+    return "AggregateEvolutionaryEvent [source=" + source + ", lifecycle=" + getLifecycle()
+        + ", occurredTime=" + getOccurredTime() + "]";
+  }
+
 }

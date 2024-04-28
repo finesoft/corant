@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import jakarta.persistence.LockModeType;
 import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.annotation.Events;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-modules-ddd-api
@@ -84,8 +85,11 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   @Override
   public String toString() {
-    return "AggregateLifecycleManageEvent [action=" + action + ", effectImmediately="
-        + effectImmediately + ", lockModeType=" + lockModeType + "]";
+    Aggregate ai = getSource();
+    String source =
+        ai == null ? null : Classes.getUserClass(ai).getSimpleName() + " [id=" + ai.getId() + "]";
+    return "AggregateLifecycleManageEvent [source=" + source + ", action=" + action
+        + ", effectImmediately=" + effectImmediately + ", lockModeType=" + lockModeType + "]";
   }
 
 }

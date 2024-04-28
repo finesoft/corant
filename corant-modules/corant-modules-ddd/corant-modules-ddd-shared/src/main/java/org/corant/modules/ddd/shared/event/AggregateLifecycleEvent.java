@@ -21,6 +21,7 @@ import org.corant.modules.ddd.AbstractEvent;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.annotation.Events;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-modules-ddd-shared
@@ -63,5 +64,15 @@ public class AggregateLifecycleEvent extends AbstractEvent {
 
   public <T extends Aggregate> T getSourceAggregate() {
     return forceCast(super.getSource());
+  }
+
+  @Override
+  public String toString() {
+    Aggregate aggregate = getSourceAggregate();
+    String source = aggregate == null ? null
+        : Classes.getUserClass(aggregate).getSimpleName() + " [id=" + aggregate.getId() + ", vn="
+            + aggregate.getVn() + "]";
+    return "AggregateLifecycleEvent [source=" + source + ", lifecycle=" + getLifecycle()
+        + ", occurredTime=" + getOccurredTime() + "]";
   }
 }

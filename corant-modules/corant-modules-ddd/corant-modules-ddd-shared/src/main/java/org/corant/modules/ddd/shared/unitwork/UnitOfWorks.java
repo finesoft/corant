@@ -13,13 +13,14 @@
  */
 package org.corant.modules.ddd.shared.unitwork;
 
-import static org.corant.context.Beans.find;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Configurations.getConfigValue;
 import java.lang.annotation.Annotation;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.Status;
@@ -28,15 +29,12 @@ import jakarta.transaction.SystemException;
 import org.corant.context.CDIs;
 import org.corant.modules.ddd.Event;
 import org.corant.modules.ddd.Message;
-import org.corant.modules.ddd.UnitOfWork;
-import org.corant.modules.ddd.UnitOfWorksManager;
 import org.corant.modules.ddd.annotation.InfrastructureServices;
 import org.corant.modules.ddd.shared.annotation.JTARL;
 import org.corant.modules.ddd.shared.annotation.JTAXA;
 import org.corant.modules.jta.shared.SynchronizationAdapter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Tuple.Pair;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * corant-modules-ddd-shared
@@ -52,30 +50,28 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @InfrastructureServices
 public class UnitOfWorks {
 
+  protected static final boolean useJtaXa =
+      getConfigValue("corant.ddd.unitofwork.use-xa", Boolean.class, true);
+
   @Inject
-  @ConfigProperty(name = "corant.ddd.unitofwork.use-xa", defaultValue = "true")
-  protected boolean useJtaXa;
+  @Any
+  protected Instance<AbstractJTAJPAUnitOfWorksManager> managers;
 
-  public Optional<AbstractJTAJPAUnitOfWork> currentDefaultUnitOfWork() {
-    return currentDefaultUnitOfWorksManager()
-        .map(AbstractJTAJPAUnitOfWorksManager::getCurrentUnitOfWork);
+  public AbstractJTAJPAUnitOfWork currentDefaultUnitOfWork() {
+    return currentDefaultUnitOfWorksManager().getCurrentUnitOfWork();
   }
 
-  public Optional<AbstractJTAJPAUnitOfWorksManager> currentDefaultUnitOfWorksManager() {
-    return find(AbstractJTAJPAUnitOfWorksManager.class, useJtaXa ? JTAXA.INSTANCE : JTARL.INSTANCE);
-  }
-
-  public Optional<UnitOfWork> currentUnitOfWork(Annotation... qualifiers) {
-    return currentUnitOfWorksManager(qualifiers).map(UnitOfWorksManager::getCurrentUnitOfWork);
-  }
-
-  public Optional<UnitOfWorksManager> currentUnitOfWorksManager(Annotation... qualifiers) {
-    return find(UnitOfWorksManager.class, qualifiers);
+  public AbstractJTAJPAUnitOfWorksManager currentDefaultUnitOfWorksManager() {
+    if (useJtaXa) {
+      return managers.select(JTAXA.INSTANCE).get();
+    } else {
+      return managers.select(JTARL.INSTANCE).get();
+    }
   }
 
   public void deregisterMessage(Message... messages) {
     if (messages.length > 0) {
-      AbstractJTAJPAUnitOfWork uow = curUow();
+      AbstractJTAJPAUnitOfWork uow = currentDefaultUnitOfWork();
       for (Message message : messages) {
         uow.deregister(message);
       }
@@ -83,7 +79,7 @@ public class UnitOfWorks {
   }
 
   public void deregisterVariable(Object key, Object value) {
-    curUow().deregister(Pair.of(key, value));
+    currentDefaultUnitOfWork().deregister(Pair.of(key, value));
   }
 
   public <U extends Event> CompletionStage<U> fireAsyncEvent(U event, Annotation... qualifiers) {
@@ -98,7 +94,7 @@ public class UnitOfWorks {
 
   public int getTxStatus() {
     try {
-      return curUow().transaction.getStatus();
+      return currentDefaultUnitOfWork().transaction.getStatus();
     } catch (SystemException e) {
       throw new CorantRuntimeException(e);
     }
@@ -110,7 +106,7 @@ public class UnitOfWorks {
 
   public void makeTxRollbackOnly() {
     try {
-      curUow().transaction.setRollbackOnly();
+      currentDefaultUnitOfWork().transaction.setRollbackOnly();
     } catch (IllegalStateException | SystemException e) {
       throw new CorantRuntimeException(e);
     }
@@ -140,7 +136,7 @@ public class UnitOfWorks {
 
   public void registerMessage(Message... messages) {
     if (messages.length > 0) {
-      AbstractJTAJPAUnitOfWork uow = curUow();
+      AbstractJTAJPAUnitOfWork uow = currentDefaultUnitOfWork();
       for (Message message : messages) {
         uow.register(message);
       }
@@ -149,18 +145,14 @@ public class UnitOfWorks {
 
   public void registerTxSynchronization(Synchronization sync) {
     try {
-      curUow().transaction.registerSynchronization(sync);
+      currentDefaultUnitOfWork().transaction.registerSynchronization(sync);
     } catch (IllegalStateException | RollbackException | SystemException e) {
       throw new CorantRuntimeException(e);
     }
   }
 
   public void registerVariable(Object key, Object value) {
-    curUow().register(Pair.of(key, value));
+    currentDefaultUnitOfWork().register(Pair.of(key, value));
   }
 
-  protected AbstractJTAJPAUnitOfWork curUow() {
-    return currentDefaultUnitOfWork()
-        .orElseThrow(() -> new CorantRuntimeException("Can't find any unit of works"));
-  }
 }

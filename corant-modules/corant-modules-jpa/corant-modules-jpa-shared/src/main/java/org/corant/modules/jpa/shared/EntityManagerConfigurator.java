@@ -13,16 +13,22 @@
  */
 package org.corant.modules.jpa.shared;
 
-import java.util.function.UnaryOperator;
+import java.util.function.BiConsumer;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
  * corant-modules-jpa-shared
+ * <p>
+ * Note: This configurator is only valid for
+ * {@link PersistenceService#createEntityManager(PersistenceContext)}, getting the EntityManager by
+ * {@link EntityManagerFactory#createEntityManager()} manually will not call this configurator.
  *
  * @author bingo 下午8:56:48
  */
 @FunctionalInterface
-public interface EntityManagerConfigurator extends Sortable, UnaryOperator<EntityManager> {
-
+public interface EntityManagerConfigurator
+    extends Sortable, BiConsumer<PersistenceContext, EntityManager> {
 }

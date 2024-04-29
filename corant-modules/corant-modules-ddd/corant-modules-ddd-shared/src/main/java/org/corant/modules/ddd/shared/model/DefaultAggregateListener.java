@@ -16,7 +16,6 @@ package org.corant.modules.ddd.shared.model;
 import static java.lang.String.format;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Configurations.getConfigValue;
-import java.util.Optional;
 import java.util.logging.Logger;
 import jakarta.persistence.ExcludeDefaultListeners;
 import jakarta.persistence.PostLoad;
@@ -141,9 +140,9 @@ public class DefaultAggregateListener {
   }
 
   protected void registerToUnitOfWork(Object o) {
-    Optional<? extends UnitOfWork> uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
-    if (uow.isPresent()) {
-      uow.get().register(o);
+    UnitOfWork uow = resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
+    if (uow != null) {
+      uow.register(o);
     } else {
       logger.warning(() -> "The UnitOfWork not found! please check the implements!");
     }

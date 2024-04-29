@@ -39,7 +39,7 @@ import org.corant.shared.exception.CorantRuntimeException;
  */
 public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOfWorksManager {
 
-  protected final Map<Object, AbstractJTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
+  protected final Map<Transaction, AbstractJTAJPAUnitOfWork> uows = new ConcurrentHashMap<>();
 
   @Inject
   protected UnitOfWorkExtension extension;
@@ -51,22 +51,20 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
   @Any
   protected Instance<MessageDispatcher> messageDispatcher;
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * Register current unit of work to JTA transaction session synchronization if current unit of
+   * work doesn't register.
+   */
   @Override
   public AbstractJTAJPAUnitOfWork getCurrentUnitOfWork() {
     try {
       final Transaction curTx = shouldNotNull(transactionManager.getTransaction(),
           "For now we only support transactional unit of work.");
-      return uows.computeIfAbsent(wrapUnitOfWorksKey(curTx), key -> {
-        try {
-          logger.fine(() -> "Register an new unit of work with the current transaction context.");
-          AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(unwrapUnitOfWorksKey(key));
-          curTx.registerSynchronization(uow);
-          return uow;
-        } catch (IllegalStateException | RollbackException | SystemException e) {
-          throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
-        }
-      });
-    } catch (SystemException | IllegalStateException e) {
+      initializeCurrentUnitOfWork(curTx);
+      return uows.get(curTx);
+    } catch (SystemException e) {
       throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
     }
   }
@@ -83,9 +81,22 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     return transactionManager;
   }
 
+  public void initializeCurrentUnitOfWork(Transaction transaction) {
+    uows.computeIfAbsent(transaction, key -> {
+      try {
+        logger.fine(() -> "Register an new unit of work with the current transaction context.");
+        AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(key);
+        transaction.registerSynchronization(uow);
+        return uow;
+      } catch (IllegalStateException | RollbackException | SystemException e) {
+        throw new CorantRuntimeException(e, PkgMsgCds.ERR_UOW_CREATE);
+      }
+    });
+  }
+
   protected abstract AbstractJTAJPAUnitOfWork buildUnitOfWork(Transaction transaction);
 
-  protected void clearCurrentUnitOfWorks(Object key) {
+  protected void clearCurrentUnitOfWorks(Transaction key) {
     logger.fine(() -> "Deregister the unit of work with the current transaction context.");
     uows.remove(key);
   }
@@ -98,10 +109,6 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
 
   protected Transaction unwrapUnitOfWorksKey(Object object) {
     return object == null ? null : (Transaction) object;
-  }
-
-  protected Object wrapUnitOfWorksKey(Transaction transaction) {
-    return transaction;// JTA1.3 Spec-> 3.3.4 Transaction Equality and Hash Code
   }
 
 }

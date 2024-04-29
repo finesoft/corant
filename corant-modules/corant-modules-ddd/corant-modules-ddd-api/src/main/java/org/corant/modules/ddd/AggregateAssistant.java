@@ -15,7 +15,6 @@ package org.corant.modules.ddd;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -40,7 +39,7 @@ public interface AggregateAssistant {
    *
    * @return currentUnitOfWork
    */
-  Optional<? extends UnitOfWork> currentUnitOfWork();
+  UnitOfWork currentUnitOfWork();
 
   /**
    * Obtain the message queue if flush is true then clear queue.

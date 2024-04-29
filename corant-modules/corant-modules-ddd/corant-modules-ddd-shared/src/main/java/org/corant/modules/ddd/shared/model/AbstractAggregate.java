@@ -123,7 +123,7 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    */
   @Transient
   @jakarta.persistence.Transient
-  protected Optional<? extends UnitOfWork> currentUnitOfWork() {
+  protected UnitOfWork currentUnitOfWork() {
     return callAssistant().currentUnitOfWork();
   }
 

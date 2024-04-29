@@ -20,7 +20,6 @@ import static org.corant.shared.util.Preconditions.requireNotNull;
 import java.lang.annotation.Annotation;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletionStage;
 import java.util.logging.Logger;
@@ -63,7 +62,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   }
 
   @Override
-  public Optional<? extends UnitOfWork> currentUnitOfWork() {
+  public UnitOfWork currentUnitOfWork() {
     return resolve(UnitOfWorks.class).currentDefaultUnitOfWork();
   }
 
@@ -79,12 +78,12 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
   @Override
   public void enqueueMessages(boolean anyway, Message... messages) {
     if (aggregate.getId() == null || anyway) {
-      Optional<? extends UnitOfWork> uow = currentUnitOfWork();
-      if (uow.isPresent()) {
+      UnitOfWork uow = currentUnitOfWork();
+      if (uow != null) {
         for (Message msg : messages) {
           if (msg != null) {
-            logger.fine(() -> format(RISE_LOG, msg.toString()));
-            uow.get().register(msg);
+            logger.fine(() -> format(RISE_LOG, msg));
+            uow.register(msg);
           }
         }
       } else {
@@ -93,7 +92,7 @@ public class DefaultAggregateAssistant implements AggregateAssistant {
     } else {
       for (Message msg : messages) {
         if (msg != null) {
-          logger.fine(() -> format(RISE_LOG, msg.toString()));
+          logger.fine(() -> format(RISE_LOG, msg));
           // MessageUtils.mergeToQueue(this.messages, msg);
           this.messages.add(msg);
         }

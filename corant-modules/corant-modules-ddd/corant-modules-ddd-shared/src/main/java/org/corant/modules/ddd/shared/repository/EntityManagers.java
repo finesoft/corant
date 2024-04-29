@@ -16,7 +16,6 @@ package org.corant.modules.ddd.shared.repository;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Objects.asString;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -56,9 +55,9 @@ public class EntityManagers {
   }
 
   public EntityManager getEntityManager(PersistenceContext pc) {
-    Optional<AbstractJTAJPAUnitOfWork> uowo = unitOfWorks.currentDefaultUnitOfWork();
-    if (uowo.isPresent()) {
-      return uowo.get().getEntityManager(pc);
+    AbstractJTAJPAUnitOfWork uowo = unitOfWorks.currentDefaultUnitOfWork();
+    if (uowo != null) {
+      return uowo.getEntityManager(pc);
     }
     throw new NotSupportedException();
   }

@@ -15,11 +15,9 @@ package org.corant.modules.ddd.shared.repository;
 
 import static java.util.Collections.singleton;
 import static org.corant.context.Beans.resolve;
-import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.annotation.Priority;
@@ -77,10 +75,9 @@ public class JPARepositoryExtension implements Extension {
   }
 
   protected JPARepository produce(Instance<Object> instances, String unitName) {
-    Optional<AbstractJTAJPAUnitOfWorksManager> uowm =
+    AbstractJTAJPAUnitOfWorksManager uowm =
         instances.select(UnitOfWorks.class).get().currentDefaultUnitOfWorksManager();
-    shouldBeTrue(uowm.isPresent());
-    return new DefaultJPARepository(PersistenceContextLiteral.of(unitName), uowm.get());
+    return new DefaultJPARepository(PersistenceContextLiteral.of(unitName), uowm);
   }
 
   /**

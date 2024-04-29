@@ -40,13 +40,13 @@ public interface PersistenceService {
   String EMPTY_PERSISTENCE_UNIT_NAME = Qualifiers.EMPTY_NAME;
 
   /**
-   * Returns a not managed entity manager for given persistence context
+   * Returns a new not managed entity manager for given persistence context
    *
    * @param pc persistence context use to retrieve the entity manager from the managed entity
    *        manager factory
    * @return a not managed entity manager
    */
-  EntityManager createStandAloneEntityManager(PersistenceContext pc);
+  EntityManager createEntityManager(PersistenceContext pc);
 
   /**
    * Returns the managed entity manager for given persistence context

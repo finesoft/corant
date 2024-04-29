@@ -48,10 +48,12 @@ public class JPAInjectionServices implements JpaInjectionServices {
     final PersistenceContext pc = CDIs.getAnnotation(injectionPoint, PersistenceContext.class);
     return ResourceReferences
         .refac(() -> resolveApply(PersistenceService.class, b -> b.getEntityManager(pc)), t -> {
-          if (t instanceof ExtendedEntityManager) {
-            ((ExtendedEntityManager) t).destroy();
+          if (t instanceof ExtendedEntityManager eem) {
+            eem.destroy();
+          } else {
+            t.close();
           }
-        }); // FIXME close?
+        });
   }
 
   @Override
@@ -60,7 +62,7 @@ public class JPAInjectionServices implements JpaInjectionServices {
     PersistenceUnit pu = CDIs.getAnnotation(injectionPoint, PersistenceUnit.class);
     return ResourceReferences.refac(
         () -> resolveApply(PersistenceService.class, b -> b.getEntityManagerFactory(pu)),
-        EntityManagerFactory::close);// FIXME close?
+        EntityManagerFactory::close);
   }
 
 }

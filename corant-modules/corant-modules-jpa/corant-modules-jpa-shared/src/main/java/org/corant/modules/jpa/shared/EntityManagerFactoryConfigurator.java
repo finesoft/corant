@@ -13,8 +13,9 @@
  */
 package org.corant.modules.jpa.shared;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnit;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -23,6 +24,7 @@ import org.corant.shared.ubiquity.Sortable;
  * @author bingo 下午8:56:48
  */
 @FunctionalInterface
-public interface EntityManagerFactoryConfigurator extends Sortable, Consumer<EntityManagerFactory> {
+public interface EntityManagerFactoryConfigurator
+    extends Sortable, BiConsumer<PersistenceUnit, EntityManagerFactory> {
 
 }

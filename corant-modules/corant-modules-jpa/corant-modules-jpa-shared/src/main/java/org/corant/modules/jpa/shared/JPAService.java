@@ -142,17 +142,16 @@ public class JPAService implements PersistenceService {
       shouldBeNull(tsEmManager.get(pc), ""); // TODO FIXME
       em.joinTransaction();
     }
-    logger.fine(() -> format("Get request scope entity manager [%s] for persistence unit [%s].", em,
-        pc.unitName()));
+    logger.fine(
+        () -> format("Get request scope entity manager for persistence unit [%s].", pc.unitName()));
     return em;
   }
 
   protected ExtendedEntityManager createTxScopedManagedEntityManager(PersistenceContext pc) {
     ExtendedEntityManager em = new ExtendedEntityManager(
         () -> tsEmManager.computeIfAbsent(pc, this::createEntityManager), true);
-    logger.fine(
-        () -> format("Get transactional scoped entity manager [%s] for persistence unit [%s].", em,
-            pc.unitName()));
+    logger.fine(() -> format("Get transactional scoped entity manager for persistence unit [%s].",
+        pc.unitName()));
     return em;
   }
 

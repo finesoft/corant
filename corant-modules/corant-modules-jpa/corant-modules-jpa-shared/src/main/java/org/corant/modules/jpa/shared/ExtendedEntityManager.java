@@ -13,10 +13,12 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -40,6 +42,8 @@ import org.corant.modules.jta.shared.TransactionService;
  * @author bingo 下午5:45:13
  */
 public class ExtendedEntityManager implements EntityManager {
+
+  static Logger logger = Logger.getLogger(ExtendedEntityManager.class.getName());
 
   final boolean transaction;
   volatile EntityManager delegate;
@@ -162,6 +166,7 @@ public class ExtendedEntityManager implements EntityManager {
    */
   public synchronized void destroy() {
     if (delegate != null && delegate.isOpen()) {
+      logger.fine(() -> format("Destroy entity manager %s", delegate));
       delegate.close();
     }
     delegate = null;
@@ -328,12 +333,6 @@ public class ExtendedEntityManager implements EntityManager {
   }
 
   @Override
-  public String toString() {
-    return "ExtendedEntityManager [delegate=" + resolveDelegate() + ", transaction=" + transaction
-        + "]";
-  }
-
-  @Override
   public <T> T unwrap(Class<T> cls) {
     return resolveDelegate().unwrap(cls);
   }
@@ -355,6 +354,7 @@ public class ExtendedEntityManager implements EntityManager {
       synchronized (this) {
         if (delegate == null) {
           delegate = shouldNotNull(delegateSupplier.get(), "EntityManager can't null");
+          logger.fine(() -> format("Resolve entity manager %s", delegate));
         }
       }
     }

@@ -18,7 +18,7 @@ import jakarta.enterprise.inject.Specializes;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.SynchronizationType;
+import jakarta.persistence.PersistenceContextType;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
 import org.corant.modules.jpa.shared.JPAService;
@@ -42,8 +42,10 @@ public class UnitOfWorksJPAService extends JPAService {
 
   @Override
   public EntityManager createEntityManager(PersistenceContext pc) {
-    if (pc.synchronization() == SynchronizationType.SYNCHRONIZED
+    if (pc.type() == PersistenceContextType.TRANSACTION
         && TransactionService.isCurrentTransactionActive()) {
+      // Register transaction synchronization before any JPA provider, so the UOW can work correctly
+      // FIXME Find a better way, such as use JTA provider
       try {
         unitOfWorks.currentDefaultUnitOfWorksManager()
             .initializeCurrentUnitOfWork(transactionManager.getTransaction());

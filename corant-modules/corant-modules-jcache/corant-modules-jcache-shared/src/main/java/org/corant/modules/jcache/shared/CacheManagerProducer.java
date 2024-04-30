@@ -7,6 +7,8 @@ import javax.cache.CacheManager;
 import javax.cache.spi.CachingProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Disposes;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
@@ -23,6 +25,10 @@ public class CacheManagerProducer {
 
   @Inject
   protected CachingProvider cachingProvider;
+
+  protected void destroy(@Disposes @Any CacheManager cacheManager) {
+    cacheManager.close();
+  }
 
   @Produces
   @SURI

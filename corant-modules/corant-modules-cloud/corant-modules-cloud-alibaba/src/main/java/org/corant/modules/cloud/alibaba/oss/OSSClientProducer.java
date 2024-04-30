@@ -19,6 +19,8 @@ import static org.corant.shared.util.Strings.strip;
 import java.lang.annotation.Annotation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Disposes;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
@@ -47,6 +49,10 @@ public class OSSClientProducer {
       return new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
           config.getSecretAccessKey(), config);
     }
+  }
+
+  protected void disposes(@Disposes @Any OSS oss) {
+    oss.shutdown();
   }
 
   @Produces

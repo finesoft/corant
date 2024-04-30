@@ -13,10 +13,15 @@
  */
 package org.corant.modules.json;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Disposes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
@@ -30,6 +35,17 @@ import org.corant.shared.ubiquity.Sortable;
 @ApplicationScoped
 public class JsonbProvider {
 
+  @Inject
+  protected Logger logger;
+
+  protected void disposesJsonb(@Disposes @Any Jsonb jsonb) {
+    try {
+      jsonb.close();
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Disposes Jsonb error!", e);
+    }
+  }
+
   @Produces
   @ApplicationScoped
   protected Jsonb jsonb(JsonbConfig jsonbConfig) {
@@ -40,8 +56,8 @@ public class JsonbProvider {
   @Dependent
   protected JsonbConfig jsonbConfig(Instance<JsonbConfigConfigurator> configurators) {
     final JsonbConfig jsonbConfig = new JsonbConfig();
-    configurators.stream().sorted(Sortable::reverseCompare).forEach(cfr -> cfr.configure(jsonbConfig));
+    configurators.stream().sorted(Sortable::reverseCompare)
+        .forEach(cfr -> cfr.configure(jsonbConfig));
     return jsonbConfig;
   }
-
 }

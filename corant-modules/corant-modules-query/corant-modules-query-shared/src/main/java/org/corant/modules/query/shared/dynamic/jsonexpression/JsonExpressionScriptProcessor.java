@@ -202,7 +202,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
       if (handler != null && !injectResults.isEmpty()) {
         handledResults = handler.apply(injectResults, injectCtx, mapper);
       }
-      // inject the handled results to parent result
+      // inject the handled results to the parent result
       if (isNotEmpty(fetchQuery.getInjectPropertyNamePath())) {
         // inject with the property name path
         if (fetchQuery.isMultiRecords()) {
@@ -235,7 +235,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
   /**
    * Resolves a {@link InjectionHandler} from given projection maps and options
    *
-   * @param projectionMap a projection maps which is extracted from injection script.
+   * @param projectionMap projection maps that are extracted from the injection script.
    * @param single indicates whether is single value projection or not
    * @see InjectionHandler
    */
@@ -300,9 +300,9 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
   }
 
   /**
-   * Resolves an injection processing by given script code
+   * Resolves injection processing by given script code
    * <p>
-   * The returns injection processing is a pair, the left value of the pair is a script used for
+   * The return injection processing is a pair, the left value of the pair is a script used for
    * filtering and the right value of the pair is a {@link InjectionHandler} used to process the
    * filtered injection result.
    *
@@ -412,7 +412,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * corant-modules-query-shared
    * <p>
    * An evaluation context used for expression variables and function evaluation. The context may
-   * contain current parent query result, current fetch query result, current query parameter or a
+   * contain a current parent query result, current fetch query result, current query parameter or a
    * certain field value etc.
    * <p>
    * Note: This class is not thread-safe.
@@ -503,8 +503,8 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * corant-modules-query-shared
    * <p>
    * A single field(or property) projection configuration. Contains the field extract from and
-   * inject to paths, a target type used for value conversion, an evaluation script used for complex
-   * solution.
+   * inject to paths, a target type used for value conversion, an evaluation script used for some
+   * complex solution.
    * <p>
    * The evaluation script is used to solve a result according to the context
    *
@@ -548,11 +548,11 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * corant-modules-query-shared
    * <p>
    * A projection class for processing filtered results that match the injection criteria. It will
-   * do in order according to the projection configuration of each field: extraction and then
+   * do, in order according to the projection configuration of each field: extraction and then
    * complex evaluation(optional) and then type conversion(optional) and then rename the
    * field(optional).
    * <p>
-   * Note: Rename process and complex evaluation can't be used together.
+   * Note: A Rename process and complex evaluation can't be used together.
    *
    * @author bingo 下午3:17:15
    */
@@ -604,10 +604,10 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         extracted =
             mapping.evalNode.getValue(evalCtx.bindFetchResult((Map<Object, Object>) fetchResult));
       } else {
-        // extract the field value from fetched result
+        // extract the field value from the fetched result
         extracted = mapper.getMappedValue(fetchResult, mapping.extractPath);
       }
-      // convert the field value to target type if necessary
+      // convert the field value to the target type if necessary
       if (mapping.type != null) {
         extracted = toObject(extracted, mapping.type);
       }

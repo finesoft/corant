@@ -89,6 +89,8 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   public void handleFetching(Object results, Querier parentQuerier) {
     if (results == null) {
       return;
+    } else if ((results instanceof List<?> list) && list.isEmpty()) {
+      return;
     }
     List<FetchQuery> fetchQueries = parentQuerier.getQuery().getFetchQueries();
     if (isNotEmpty(fetchQueries)) {

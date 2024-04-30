@@ -96,6 +96,11 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
   @Override
   public synchronized void start() {
     if (running) {
+      logger.info("Message receiving tasks is running!");
+      return;
+    }
+    if (metaData.isEmpty()) {
+      logger.info("Message receiving tasks not found!");
       return;
     }
     logger.info("Starting message receiving tasks...");
@@ -124,6 +129,9 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
 
   @Override
   public synchronized void stop() {
+    if (!running) {
+      return;
+    }
     logger.info(() -> "Stopping message receiving tasks...");
     running = false;
     while (!executions.isEmpty()) {

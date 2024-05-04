@@ -29,6 +29,12 @@ import org.corant.shared.util.Streams;
  */
 public class ASTReduceNode extends AbstractASTNode<Object> {
 
+  protected Node<?> inputNode;
+  protected Node<?> identityNode;
+  protected ASTValueNode accumulatorNamesNode;
+  protected Node<?> accumulatorNode;
+  protected String[] accumulatorNames;
+
   @Override
   public ASTNodeType getType() {
     return ASTNodeType.REDUCE;
@@ -37,15 +43,11 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
   @SuppressWarnings("unchecked")
   @Override
   public Object getValue(EvaluationContext ctx) {
-    Node<?> inputNode = children.get(0);
     final Object input = inputNode.getValue(ctx);
     final SubEvaluationContext useCtx = new SubEvaluationContext(ctx);
 
-    if (children.size() == 3) {
+    if (identityNode == null) {
       // only accumulator;
-      Node<?> accumulatorNamesNode = children.get(1);
-      Node<?> accumulatorNode = children.get(2);
-      String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
       final BinaryOperator<Object> accumulatorFunc = (u, t) -> accumulatorNode
           .getValue(useCtx.unbindAll().bind(accumulatorNames[0], t).bind(accumulatorNames[1], u));
       if (input instanceof Object[] array) {
@@ -55,12 +57,8 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
       } else {
         return Arrays.stream(new Object[] {input}).reduce(accumulatorFunc).orElse(null);
       }
-    } else if (children.size() == 4) {
+    } else {
       // identity & accumulator
-      Node<?> identityNode = children.get(1);
-      Node<?> accumulatorNamesNode = children.get(2);
-      Node<?> accumulatorNode = children.get(3);
-      String[] accumulatorNames = ASTNode.variableNamesOf(accumulatorNamesNode, useCtx);
       final BinaryOperator<Object> accumulatorFunc = (u, t) -> accumulatorNode
           .getValue(useCtx.unbindAll().bind(accumulatorNames[0], u).bind(accumulatorNames[1], t));
       if (input instanceof Object[] array) {
@@ -72,7 +70,25 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
             accumulatorFunc);
       }
     }
-    throw new NotSupportedException();
   }
 
+  @Override
+  public void postConstruct() {
+    super.postConstruct();
+    inputNode = children.get(0);
+    if (children.size() == 3) {
+      // only accumulator;
+      accumulatorNamesNode = (ASTValueNode) children.get(1);
+      accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
+      accumulatorNode = children.get(2);
+    } else if (children.size() == 4) {
+      // identity & accumulator
+      identityNode = children.get(1);
+      accumulatorNamesNode = (ASTValueNode) children.get(2);
+      accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
+      accumulatorNode = children.get(3);
+    } else {
+      throw new NotSupportedException();
+    }
+  }
 }

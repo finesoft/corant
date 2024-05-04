@@ -66,7 +66,7 @@
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
-		<version.hsqldb>2.7.1</version.hsqldb>
+		<version.hsqldb>2.7.2</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
 		<version.jackson>2.17.0</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
@@ -139,6 +139,7 @@
 		<version.mokito>4.0.0</version.mokito>
 		<version.mssql-jdbc>12.4.2.jre11</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
+		<version.mysql-connector>8.4.0</version.mysql-connector>
 		<version.narayana>7.0.1.Final</version.narayana>
 		<version.ndarray>0.4.0</version.ndarray>
 		<version.netty>4.1.108.Final</version.netty>
@@ -1538,6 +1539,11 @@
 				<artifactId>mysql-connector-java</artifactId>
 				<version>${version.mysql}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.mysql</groupId>
+				<artifactId>mysql-connector-j</artifactId>
+				<version>${version.mysql-connector}</version>
+			</dependency>			
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>

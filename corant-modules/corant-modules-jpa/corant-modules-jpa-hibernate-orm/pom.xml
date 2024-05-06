@@ -34,7 +34,6 @@
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
-      <version>1.14.12</version>
       <exclusions>
         <exclusion>
           <groupId>xml-apis</groupId>

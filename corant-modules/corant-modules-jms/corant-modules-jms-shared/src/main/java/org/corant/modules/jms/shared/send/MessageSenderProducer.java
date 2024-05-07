@@ -14,7 +14,6 @@
 package org.corant.modules.jms.shared.send;
 
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -42,8 +41,9 @@ public class MessageSenderProducer {
   @Dependent
   protected MessageDispatcher produceDispatcher(final InjectionPoint ip) {
     final MessageDispatch at = CDIs.getAnnotation(ip, MessageDispatch.class);
-    shouldNotNull(at, "Message dispatcher must have a MessageDispatch annotation");
-    return new DefaultMessageDispatcher(MessageDispatchMetaData.of(at));
+    final MessageDispatchMetaData meta =
+        at != null ? MessageDispatchMetaData.of(at) : MessageDispatchMetaData.DEFAULT_INST;
+    return new DefaultMessageDispatcher(meta);
   }
 
   @Produces

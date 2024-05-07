@@ -18,6 +18,8 @@ import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getInt;
 import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getLong;
 import static org.corant.modules.jms.metadata.MetaDataPropertyResolver.getString;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import jakarta.jms.DeliveryMode;
+import org.corant.modules.jms.JMSNames;
 import org.corant.modules.jms.annotation.MessageDispatch;
 
 /**
@@ -26,6 +28,9 @@ import org.corant.modules.jms.annotation.MessageDispatch;
  * @author bingo 下午5:12:07
  */
 public class MessageDispatchMetaData {
+
+  public static final MessageDispatchMetaData DEFAULT_INST = new MessageDispatchMetaData(-1L,
+      DeliveryMode.PERSISTENT, false, JMSNames.MSG_MARSHAL_SCHEMA_STD_JAVA, -1L);
 
   private final long deliveryDelay;
 

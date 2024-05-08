@@ -40,7 +40,7 @@
 		<version.commons-codec>1.16.1</version.commons-codec>
 		<version.commons-collections4>4.4</version.commons-collections4>
 		<version.commons-compress>1.26.0</version.commons-compress>
-		<version.commons-dbcp2>2.11.0</version.commons-dbcp2>
+		<version.commons-dbcp2>2.12.0</version.commons-dbcp2>
 		<version.commons-dbutils>1.8.1</version.commons-dbutils>
 		<version.commons-io>2.15.1</version.commons-io>
 		<version.commons-lang3>3.12.0</version.commons-lang3>
@@ -62,8 +62,8 @@
 		<version.groovy>4.0.11</version.groovy>
 		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
-		<version.hibernate-ogm-core>5.4.1.Final</version.hibernate-ogm-core>
-		<version.hibernate-orm-core>6.5.0.Final</version.hibernate-orm-core>
+		<version.hibernate-orm>6.5.0.Final</version.hibernate-orm>
+		<version.hibernate-reactive>2.3.0.Final</version.hibernate-reactive>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
 		<version.hppc>0.9.1</version.hppc>
@@ -240,11 +240,13 @@
 				<artifactId>corant-modules-datasource-agroal</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-datasource-dbcp</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-datasource-hikari</artifactId>
@@ -309,7 +311,7 @@
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-jcache-cdi</artifactId>
 				<version>${revision}</version>
-			</dependency>				
+			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-jcache-shared</artifactId>
@@ -337,12 +339,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-modules-jpa-hibernate-ogm</artifactId>
+				<artifactId>corant-modules-jpa-hibernate-orm</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.corant</groupId>
-				<artifactId>corant-modules-jpa-hibernate-orm</artifactId>
+				<artifactId>corant-modules-jpa-hibernate-reactive</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -460,11 +462,13 @@
 				<artifactId>corant-modules-mongodb</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-mvc</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>org.corant</groupId>
 				<artifactId>corant-modules-quartz-embeddable</artifactId>
@@ -778,7 +782,11 @@
 				<version>${version.javafx}</version>
 				<scope>provided</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator-cdi</artifactId>
+				<version>${version.hibernate-validator-cdi}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.sun.activation</groupId>
@@ -823,10 +831,10 @@
 			</dependency>
 			<!-- nashorn -->
 			<dependency>
-			  <groupId>org.openjdk.nashorn</groupId>
-			  <artifactId>nashorn-core</artifactId>
-			  <version>${version.nashorn-core}</version>
-			</dependency>			
+				<groupId>org.openjdk.nashorn</groupId>
+				<artifactId>nashorn-core</artifactId>
+				<version>${version.nashorn-core}</version>
+			</dependency>
 
 			<!-- CDI -->
 			<dependency>
@@ -1040,11 +1048,11 @@
 				<version>${version.metadata-extractor}</version>
 			</dependency>
 			<dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy</artifactId>
-        <version>${version.byte-buddy}</version>
-      </dependency>
-			
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy</artifactId>
+				<version>${version.byte-buddy}</version>
+			</dependency>
+
 			<!-- Apache integration -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -1549,7 +1557,7 @@
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
 				<version>${version.mysql-connector}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
@@ -1635,62 +1643,47 @@
 
 			<!-- ORM -->
 			<dependency>
-				<groupId>org.hibernate</groupId>
+				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>${version.hibernate-orm-core}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.spec.javax.transaction</groupId>
-						<artifactId>jboss-transaction-api_1.2_spec</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.activation</groupId>
-						<artifactId>javax.activation-api</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>${version.hibernate-orm}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
+				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-jcache</artifactId>
-				<version>${version.hibernate-orm-core}</version>
+				<version>${version.hibernate-orm}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
+				<groupId>org.hibernate.orm</groupId>
 				<artifactId>hibernate-ant</artifactId>
-				<version>${version.hibernate-orm-core}</version>
+				<version>${version.hibernate-orm}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${version.hibernate-orm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-vector</artifactId>
+				<version>${version.hibernate-orm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-spatial</artifactId>
+				<version>${version.hibernate-orm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-graalvm</artifactId>
+				<version>${version.hibernate-orm}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.reactive</groupId>
+				<artifactId>hibernate-reactive-core</artifactId>
+				<version>${version.hibernate-reactive}</version>
+			</dependency>
+
 			<!-- OGM -->
-			<dependency>
-				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-core</artifactId>
-				<version>${version.hibernate-ogm-core}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-mongodb</artifactId>
-				<version>${version.hibernate-ogm-core}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.mongodb</groupId>
-						<artifactId>mongo-java-driver</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-neo4j</artifactId>
-				<version>${version.hibernate-ogm-core}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.ogm</groupId>
-				<artifactId>hibernate-ogm-infinispan</artifactId>
-				<version>${version.hibernate-ogm-core}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.validator</groupId>
-				<artifactId>hibernate-validator-cdi</artifactId>
-				<version>${version.hibernate-validator-cdi}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jnosql.mapping</groupId>
 				<artifactId>jnosql-mapping-document</artifactId>

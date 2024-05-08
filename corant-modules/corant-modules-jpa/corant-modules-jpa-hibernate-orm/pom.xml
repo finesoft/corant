@@ -27,7 +27,7 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
     </dependency>
     <!--since hibernate 6.5.0-->
@@ -42,7 +42,7 @@
       </exclusions>
     </dependency>    
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-ant</artifactId>
     </dependency>    
     <dependency>

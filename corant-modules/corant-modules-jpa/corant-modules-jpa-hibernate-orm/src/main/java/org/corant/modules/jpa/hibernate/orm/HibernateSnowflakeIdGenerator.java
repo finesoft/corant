@@ -69,6 +69,9 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
   public static final String IG_SF_DC_ID = "identifier.generator.snowflake.datacenter-id";
   public static final String IG_SF_DL_TM = "identifier.generator.snowflake.delayed-timing";
   public static final String IG_SF_UP_TM = "identifier.generator.snowflake.use-persistence-timer";
+
+  public static final String GL_IG_SF_RESI = Names.CORANT_PREFIX + IG_SF_RESI;
+  public static final String GL_IG_SF_EIPN = Names.CORANT_PREFIX + IG_SF_EIPN;
   public static final String GL_IG_SF_WK_IP = Names.CORANT_PREFIX + IG_SF_WK_IP;
   public static final String GL_IG_SF_WK_ID = Names.CORANT_PREFIX + IG_SF_WK_ID;
   public static final String GL_IG_SF_DC_ID = Names.CORANT_PREFIX + IG_SF_DC_ID;
@@ -79,7 +82,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
 
   static final HibernateSnowflakeIdTimeService specTimeGenerator = Services
       .selectRequired(HibernateSnowflakeIdTimeService.class, defaultClassLoader()).findFirst()
-      .orElse((u, s, o) -> (u ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+      .orElse((us, s, o) -> (us ? Instant.now().getEpochSecond() : Instant.now().toEpochMilli()));
+
   static final List<HibernateSessionTimeService> sessionTimeServices =
       Services.selectRequired(HibernateSessionTimeService.class, defaultClassLoader())
           .collect(Collectors.toList());
@@ -162,6 +166,10 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
         getConfigValue(GL_IG_SF_UP_TM, String.class, FALSE)));
     long delayedTiming = toLong(metaData.getProperties().getOrDefault(IG_SF_DL_TM,
         getConfigValue(GL_IG_SF_DL_TM, Long.class, 16000L)));
+    boolean retainEntitySelfId = toBoolean(metaData.getProperties().getOrDefault(IG_SF_RESI,
+        getConfigValue(GL_IG_SF_RESI, Boolean.TYPE, false)));
+    String entityIdPropertyName = metaData.getProperties()
+        .getOrDefault(IG_SF_EIPN, getConfigValue(GL_IG_SF_EIPN, String.class, "id")).toString();
 
     if (workerId >= 0) {
       if (dataCenterId >= 0) {
@@ -177,7 +185,8 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     logger.info(
         () -> format("Create identifier generator for persistence unit[%s], the generator is %s.",
             ptu, generator.description()));
-    return new Generator(tryAsClass(metaData.getPersistenceProviderClassName()), generator, usePst);
+    return new Generator(tryAsClass(metaData.getPersistenceProviderClassName()), generator, usePst,
+        retainEntitySelfId, entityIdPropertyName);
   }
 
   static Generator getGenerator(String ptu) {
@@ -205,12 +214,14 @@ public class HibernateSnowflakeIdGenerator implements IdentifierGenerator {
     final boolean useSecond;
     final HibernateSessionTimeService timeService;
     final boolean usePersistenceTimer;
-    final boolean retainEntitySelfId = getConfigValue(IG_SF_RESI, Boolean.TYPE, false);
-    final String entityIdPropertyName = getConfigValue(IG_SF_EIPN, String.class, "id");
+    final boolean retainEntitySelfId;
+    final String entityIdPropertyName;
 
     public Generator(final Class<?> providerClass, GeneralSnowflakeUUIDGenerator snowflakeGenerator,
-        boolean usePst) {
+        boolean usePst, boolean retainEntitySelfId, String entityIdPropertyName) {
       this.snowflakeGenerator = snowflakeGenerator;
+      this.retainEntitySelfId = retainEntitySelfId;
+      this.entityIdPropertyName = entityIdPropertyName;
       useSecond = snowflakeGenerator.getUnit() == ChronoUnit.SECONDS;
       usePersistenceTimer = usePst;
       if (!usePersistenceTimer) {

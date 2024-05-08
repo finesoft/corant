@@ -31,7 +31,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * @author bingo 下午10:05:46
  */
 @ApplicationScoped
-@WebFilter(filterName = "CharacterEncodingFilter", urlPatterns = {"/*"})
+@WebFilter(filterName = "CharacterEncodingFilter", asyncSupported = true, urlPatterns = {"/*"})
 public class CharacterEncodingFilter implements Filter {
 
   @Inject

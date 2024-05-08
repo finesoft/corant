@@ -156,7 +156,7 @@
 		<version.projectreactor>3.5.7</version.projectreactor>
 		<version.quartz>2.3.2</version.quartz>
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
-		<version.redisson>3.17.6</version.redisson>
+		<version.redisson>3.29.0</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
 		<version.resteasy>6.2.8.Final</version.resteasy>
 		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>

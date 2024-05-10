@@ -19,6 +19,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.min;
+import static org.corant.shared.util.Streams.streamOf;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -282,6 +284,12 @@ public class ExperimentalConverters {
       return null;
     }
 
+    static synchronized Converter getMatchedConverter(Class<?> sourceClass, Class<?> targetClass) {
+      return streamOf(ConverterRegistry.getConverters())
+          .filter(e -> e.getKey().match(sourceClass, targetClass)).map(Entry::getValue).findFirst()
+          .orElse(null);
+    }
+
     static Stack<Class<?>> searchMatchedClass(
         Map<Class<?>, Set<Class<?>>> srcClassMappedItsTagClasses,
         Class<?> classCanBeConvertedBySrcClass, Set<Class<?>> endClassesSetCanConvertTargetClass,
@@ -331,7 +339,7 @@ public class ExperimentalConverters {
       for (int i = 1; i <= stack.size() - 1; i++) {
         Class<?> tag = stack.get(i);
         Class<?> src = stack.get(i - 1);
-        Converter converter = Converters.getMatchedConverter(src, tag);
+        Converter converter = getMatchedConverter(src, tag);
         converters.push(converter);
       }
       return converters;

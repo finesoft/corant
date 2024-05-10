@@ -602,6 +602,6 @@ public class Conversion {
    * @param targetClass the specified converted type
    */
   private static Converter resolveConverter(Class<?> sourceClass, Class<?> targetClass) {
-    return Converters.lookup(wrap(sourceClass), wrap(targetClass)).orElse(null);
+    return Converters.lookup(wrap(sourceClass), wrap(targetClass));
   }
 }

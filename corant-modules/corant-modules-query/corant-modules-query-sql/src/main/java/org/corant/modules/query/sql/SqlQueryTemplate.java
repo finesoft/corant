@@ -459,8 +459,8 @@ public class SqlQueryTemplate {
               rows.add(null);
             } else {
               if (converter == null) {
-                converter = Converters.lookup(row.getClass(), resultClass)
-                    .orElse((t, m) -> resultClass.cast(t));
+                converter = defaultObject(Converters.lookup(row.getClass(), resultClass),
+                    (t, m) -> resultClass.cast(t));
               }
               rows.add((T) converter.convert(row, null));
             }

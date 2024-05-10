@@ -81,12 +81,12 @@ public class CommandExtension implements Extension {
           if (!cmdCls.isInterface() && !Modifier.isAbstract(cmdCls.getModifiers())) {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
                 .add((Class<? extends CommandHandler<?>>) handlerCls);
-            logger.fine(
-                () -> format("Resolved the command [%s] with handler [%s]", cmdCls, handlerCls));
+            logger
+                .fine(() -> format("Resolved command [%s] with handler [%s]", cmdCls, handlerCls));
           } else if (SUPPORT_ABSTRACT_COMMAND) {
             commandAndHandler.computeIfAbsent(cmdCls, k -> new HashSet<>())
                 .add((Class<? extends CommandHandler<?>>) handlerCls);
-            logger.fine(() -> format("Resolved the abstract command [%s] with handler [%s]", cmdCls,
+            logger.fine(() -> format("Resolved abstract command [%s] with handler [%s]", cmdCls,
                 handlerCls));
           } else {
             logger.warning(() -> format(

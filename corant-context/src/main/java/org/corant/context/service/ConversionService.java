@@ -70,7 +70,7 @@ public interface ConversionService {
 
     @Override
     public <S, T> Converter<S, T> getConverter(Class<S> sourceType, Class<T> targetType) {
-      return Converters.lookup(sourceType, targetType).orElse(null);
+      return Converters.lookup(sourceType, targetType);
     }
 
     @Override

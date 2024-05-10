@@ -36,7 +36,7 @@ public class ConverterType<S, T> implements Serializable {
   public ConverterType(Class<S> sourceClass, Class<T> targetClass) {
     this.sourceClass = shouldNotNull(sourceClass);
     this.targetClass = shouldNotNull(targetClass);
-    this.hash = Objects.hash(sourceClass, targetClass);
+    hash = Objects.hash(sourceClass, targetClass);
   }
 
   public static <S, T> ConverterType<S, T> of(Class<S> sourceClass, Class<T> targetClass) {
@@ -84,6 +84,15 @@ public class ConverterType<S, T> implements Serializable {
   @Override
   public int hashCode() {
     return hash;
+  }
+
+  public boolean match(Class<?> sourceClass, Class<?> targetClass) {
+    return targetClass.isAssignableFrom(this.targetClass)
+        && this.sourceClass.isAssignableFrom(sourceClass);
+  }
+
+  public boolean match(ConverterType<?, ?> type) {
+    return match(type.sourceClass, type.targetClass);
   }
 
   @Override

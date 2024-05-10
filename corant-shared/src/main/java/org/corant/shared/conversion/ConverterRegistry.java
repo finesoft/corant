@@ -221,12 +221,19 @@ public class ConverterRegistry {
   }
 
   static boolean isNotSupportType(Class<?> sourceClass, Class<?> targetClass) {
-    return NOT_SUPPORT_TYPES.stream()
-        .anyMatch(ct -> Converters.match(ct, sourceClass, targetClass));
+    return NOT_SUPPORT_TYPES.stream().anyMatch(ct -> ct.match(sourceClass, targetClass));
+  }
+
+  static boolean isNotSupportType(ConverterType<?, ?> type) {
+    return NOT_SUPPORT_TYPES.stream().anyMatch(ct -> ct.match(type));
   }
 
   static boolean isSupportType(Class<?> sourceClass, Class<?> targetClass) {
     return SUPPORT_CONVERTERS.containsKey(ConverterType.of(sourceClass, targetClass));
+  }
+
+  static boolean isSupportType(ConverterType<?, ?> type) {
+    return SUPPORT_CONVERTERS.containsKey(type);
   }
 
   static synchronized void load() {
@@ -287,8 +294,7 @@ public class ConverterRegistry {
   }
 
   private static void removeNotSupportType(ConverterType<?, ?> converterType) {
-    NOT_SUPPORT_TYPES.removeIf(
-        p -> Converters.match(p, converterType.getSourceClass(), converterType.getTargetClass()));
+    NOT_SUPPORT_TYPES.removeIf(c -> c.match(converterType));
   }
 
   private static Class[] resolveClasses(Type[] types) {

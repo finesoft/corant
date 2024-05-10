@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -156,7 +157,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed executor %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed executor: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedExecutorService.class, esn);
         }
@@ -172,7 +173,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved context service %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved context service: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ContextService.class, esn);
         }
@@ -190,7 +191,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed scheduled executor %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed scheduled executor: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedScheduledExecutorService.class, esn);
         }
@@ -207,7 +208,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed thread factory %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolved managed thread factory: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedThreadFactory.class, esn);
         }
@@ -219,32 +220,28 @@ public class ConcurrentExtension implements Extension {
     Collection<ManagedExecutorConfig> mecs =
         newArrayList(Configs.resolveMulti(ManagedExecutorConfig.class).values());
     if (mecs.isEmpty() && ENABLE_DFLT_MES) {
-      logger.info(() -> format("Use default managed executor configuration %s",
-          ManagedExecutorConfig.DFLT_INST));
+      logger.info(() -> "Use default managed executor configuration");
       mecs.add(ManagedExecutorConfig.DFLT_INST);
     }
 
     Collection<ManagedScheduledExecutorConfig> msecs =
         newArrayList(Configs.resolveMulti(ManagedScheduledExecutorConfig.class).values());
     if (msecs.isEmpty() && ENABLE_DFLT_MSES) {
-      logger.info(() -> format("Use default managed scheduled executor configuration %s",
-          ManagedScheduledExecutorConfig.DFLT_INST));
+      logger.info(() -> "Use default managed scheduled executor configuration");
       msecs.add(ManagedScheduledExecutorConfig.DFLT_INST);
     }
 
     Collection<ContextServiceConfig> cscs =
         newArrayList(Configs.resolveMulti(ContextServiceConfig.class).values());
     if (cscs.isEmpty() && ENABLE_DFLT_CS) {
-      logger.info(() -> format("Use default context service configuration %s",
-          ContextServiceConfig.DFLT_INST));
+      logger.info(() -> "Use default context service configuration");
       cscs.add(ContextServiceConfig.DFLT_INST);
     }
 
     Collection<ManagedThreadFactoryConfig> mtfcs =
         newArrayList(Configs.resolveMulti(ManagedThreadFactoryConfig.class).values());
     if (mtfcs.isEmpty() && ENABLE_DFLT_MTF) {
-      logger.info(() -> format("Use default managed thread factory configuration %s",
-          ManagedThreadFactoryConfig.DFLT_INST));
+      logger.info(() -> "Use default managed thread factory configuration");
       mtfcs.add(ManagedThreadFactoryConfig.DFLT_INST);
     }
 
@@ -344,7 +341,10 @@ public class ConcurrentExtension implements Extension {
             Asynchronous methodAsync =
                 defaultObject(m.getAnnotation(Asynchronous.class), clazzAsync);
             if (methodAsync != null) {
-              if (!m.getReturnType().equals(Void.TYPE) && !Future.class.equals(m.getReturnType())) {
+              Class<?> returnType = m.getReturnType();
+              boolean validReturnType = returnType.equals(Void.TYPE)
+                  || Future.class.equals(returnType) || CompletionStage.class.equals(returnType);
+              if (!validReturnType) {
                 adv.addDeploymentProblem(new CorantRuntimeException(
                     "The asynchronous method %s return type must be java.util.concurrent.Future or void!",
                     m.getName()));

@@ -165,8 +165,7 @@ public class JPAQueries {
    */
   public static <T> TypedJPAQuery<T> namedQuery(final String name, final Class<T> type) {
     Converter<Tuple, T> converter;
-    if (isPersistenceClass(type)
-        || (converter = Converters.lookup(Tuple.class, type).orElse(null)) == null) {
+    if (isPersistenceClass(type) || (converter = Converters.lookup(Tuple.class, type)) == null) {
       return new TypedJPAQuery<>() {
         @Override
         public String toString() {
@@ -270,8 +269,7 @@ public class JPAQueries {
    */
   public static <T> TypedJPAQuery<T> nativeQuery(final String sqlString, final Class<T> type) {
     Converter<Tuple, T> converter;
-    if (isPersistenceClass(type)
-        || (converter = Converters.lookup(Tuple.class, type).orElse(null)) == null) {
+    if (isPersistenceClass(type) || (converter = Converters.lookup(Tuple.class, type)) == null) {
       return new TypedJPAQuery<>() {
         @Override
         public String toString() {

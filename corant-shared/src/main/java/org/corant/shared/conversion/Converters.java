@@ -13,11 +13,8 @@
  */
 package org.corant.shared.conversion;
 
-import static org.corant.shared.util.Functions.optional;
-import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.util.Map.Entry;
-import java.util.Optional;
 import org.corant.shared.conversion.converter.IdentityConverter;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -39,60 +36,51 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Converters {
 
-  public static <S, T> Optional<Converter<S, T>> lookup(Class<S> sourceClass,
-      Class<T> targetClass) {
+  public static <S, T> Converter<S, T> lookup(Class<S> sourceClass, Class<T> targetClass) {
     if (targetClass.isAssignableFrom(sourceClass)) {
-      return optional((Converter<S, T>) IdentityConverter.INSTANCE);
-    } else if (ConverterRegistry.isSupportType(sourceClass, targetClass)) {
-      return optional(forceCast(ConverterRegistry.getConverter(sourceClass, targetClass)));
-    } else if (ConverterRegistry.isNotSupportType(sourceClass, targetClass)) {
-      return optional(null);
+      return (Converter<S, T>) IdentityConverter.INSTANCE;
     } else {
-      // find from registered converters
-      Converter converter = getMatchedConverter(sourceClass, targetClass);
-      if (converter == null) {
-        // find from registered converter factories
-        Pair<Converter, ConverterFactory> factoryConverter =
-            getMatchedConverterFromFactory(sourceClass, targetClass);
-        if (factoryConverter != null) {
-          converter = factoryConverter.getKey();
-          ConverterFactory converterFactory = factoryConverter.getValue();
-          ConverterRegistry.register(sourceClass, targetClass, converter, converterFactory);
-        }
-        /*
-         * if (converter == null) { // indirect way, try to traverse and connect the converters that
-         * meet the // requirements from the available converters Set<ConverterType<?, ?>>
-         * pipeConverterTypes = new LinkedHashSet<>(); converter =
-         * ExperimentalConverters.getMatchedConverterx(sourceClass, targetClass,
-         * pipeConverterTypes::addAll); if (converter != null) {
-         * ConverterRegistry.register(sourceClass, targetClass, (Converter<S, T>) converter,
-         * pipeConverterTypes.toArray(new ConverterType[pipeConverterTypes.size()])); } }
-         */
-      } else {
-        ConverterRegistry.register(sourceClass, targetClass, converter);
-      }
+      ConverterType<S, T> type = ConverterType.of(sourceClass, targetClass);
+      Converter converter = ConverterRegistry.getConverter(type);
       if (converter != null) {
-        return optional(forceCast(converter));
+        return converter;
+      } else if (ConverterRegistry.isNotSupportType(type)) {
+        return null;
       } else {
-        ConverterRegistry.registerNotSupportType(sourceClass, targetClass);
-        return optional(null);
+        // find from registered converters
+        converter = getMatchedConverter(type);
+        if (converter != null) {
+          ConverterRegistry.register(sourceClass, targetClass, converter);
+          return converter;
+        } else {
+          // find from registered converter factories
+          Pair<Converter, ConverterFactory> factoryConverter = getMatchedConverterFromFactory(type);
+          if (factoryConverter != null) {
+            converter = factoryConverter.getKey();
+            ConverterFactory converterFactory = factoryConverter.getValue();
+            ConverterRegistry.register(sourceClass, targetClass, converter, converterFactory);
+            return converter;
+          }
+        }
+        ConverterRegistry.registerNotSupportType(type);
+        return null;
       }
     }
   }
 
-  static synchronized Converter getMatchedConverter(Class<?> sourceClass, Class<?> targetClass) {
-    return streamOf(ConverterRegistry.getConverters())
-        .filter(e -> match(e.getKey(), sourceClass, targetClass)).map(Entry::getValue).findFirst()
-        .orElse(null);
+  static synchronized Converter getMatchedConverter(ConverterType<?, ?> type) {
+    return streamOf(ConverterRegistry.getConverters()).filter(e -> e.getKey().match(type))
+        .map(Entry::getValue).findFirst().orElse(null);
   }
 
-  static Pair<Converter, ConverterFactory> getMatchedConverterFromFactory(Class<?> sourceClass,
-      Class<?> targetClass) {
+  static Pair<Converter, ConverterFactory> getMatchedConverterFromFactory(
+      ConverterType<?, ?> type) {
     ConverterFactory factory = ConverterRegistry.getConverterFactories().stream()
-        .filter(f -> f.isSupports(sourceClass, targetClass)).min(Sortable::compare).orElse(null);
+        .filter(f -> f.isSupports(type.getSourceClass(), type.getTargetClass()))
+        .min(Sortable::compare).orElse(null);
     if (factory != null) {
       // FIXME initialize parameter
-      return Pair.of(factory.create(targetClass, null, true), factory);
+      return Pair.of(factory.create(type.getTargetClass(), null, true), factory);
     } else {
       return null;
     }
@@ -100,12 +88,6 @@ public class Converters {
 
   static boolean match(Class<?> a, Class<?> b) {
     return a.isAssignableFrom(b);
-  }
-
-  static boolean match(ConverterType<?, ?> converterType, Class<?> sourceClass,
-      Class<?> targetClass) {
-    return targetClass.isAssignableFrom(converterType.getTargetClass())
-        && converterType.getSourceClass().isAssignableFrom(sourceClass);
   }
 
 }

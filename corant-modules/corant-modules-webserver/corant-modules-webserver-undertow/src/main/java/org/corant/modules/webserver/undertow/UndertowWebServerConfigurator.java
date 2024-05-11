@@ -16,6 +16,7 @@ package org.corant.modules.webserver.undertow;
 import java.util.function.BiConsumer;
 import org.corant.shared.ubiquity.Sortable;
 import org.xnio.Option;
+import io.undertow.server.HttpHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 
 /**
@@ -26,6 +27,10 @@ import io.undertow.servlet.api.DeploymentInfo;
 public interface UndertowWebServerConfigurator extends Sortable {
 
   default void configureDeployment(DeploymentInfo deploymentInfo) {}
+
+  default HttpHandler configureHttpHandler(HttpHandler httpHandler) {
+    return httpHandler;
+  }
 
   default <T> void configureServerOptions(BiConsumer<Option<T>, T> consumer) {}
 

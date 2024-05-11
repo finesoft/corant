@@ -221,11 +221,11 @@ public class ConverterRegistry {
   }
 
   static boolean isNotSupportType(Class<?> sourceClass, Class<?> targetClass) {
-    return NOT_SUPPORT_TYPES.stream().anyMatch(ct -> ct.match(sourceClass, targetClass));
+    return isNotSupportType(ConverterType.of(sourceClass, targetClass));
   }
 
   static boolean isNotSupportType(ConverterType<?, ?> type) {
-    return NOT_SUPPORT_TYPES.stream().anyMatch(ct -> ct.match(type));
+    return NOT_SUPPORT_TYPES.contains(type);
   }
 
   static boolean isSupportType(Class<?> sourceClass, Class<?> targetClass) {

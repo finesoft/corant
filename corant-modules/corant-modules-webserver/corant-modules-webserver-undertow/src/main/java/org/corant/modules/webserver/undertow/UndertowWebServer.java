@@ -46,6 +46,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.resource.SourceType;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.StopWatch;
@@ -232,6 +233,10 @@ public class UndertowWebServer extends AbstractWebServer {
           handler = Handlers.predicates(predicateHandlers, handler);
         }
       }
+      if (!additionalConfigurators.isUnsatisfied()) {
+        handler = additionalConfigurators.stream().sorted(Sortable::compare).reduce(handler,
+            (h, c) -> c.configureHttpHandler(h), (h1, h2) -> h2);
+      }
       builder.setHandler(handler);
       return builder.build();
     } catch (Exception e) {
@@ -267,7 +272,7 @@ public class UndertowWebServer extends AbstractWebServer {
     di.addInitParameter(org.jboss.weld.environment.servlet.Container.CONTEXT_PARAM_CONTAINER_CLASS,
         UndertowContainer.class.getName());
     if (!additionalConfigurators.isUnsatisfied()) {
-      additionalConfigurators.stream().sorted()
+      additionalConfigurators.stream().sorted(Sortable::compare)
           .forEachOrdered(cfgr -> cfgr.configureDeployment(di));
     }
     // static content
@@ -289,7 +294,7 @@ public class UndertowWebServer extends AbstractWebServer {
     }
     builder.setServerOption(UndertowOptions.NO_REQUEST_TIMEOUT, specConfig.getNotRequestTimeout());
     if (!additionalConfigurators.isUnsatisfied()) {
-      additionalConfigurators.stream().sorted()
+      additionalConfigurators.stream().sorted(Sortable::compare)
           .forEachOrdered(cfgr -> cfgr.configureServerOptions(builder::setServerOption));
     }
   }
@@ -342,7 +347,7 @@ public class UndertowWebServer extends AbstractWebServer {
         .setSocketOption(Options.BALANCING_CONNECTIONS, specConfig.getBalancingConnections())
         .setSocketOption(Options.BACKLOG, specConfig.getBackLog());
     if (!additionalConfigurators.isUnsatisfied()) {
-      additionalConfigurators.stream().sorted()
+      additionalConfigurators.stream().sorted(Sortable::compare)
           .forEachOrdered(cfgr -> cfgr.configureSocketOptions(builder::setSocketOption));
     }
   }
@@ -411,7 +416,7 @@ public class UndertowWebServer extends AbstractWebServer {
         .setWorkerOption(Options.TCP_NODELAY, specConfig.isTcpNoDelay())
         .setWorkerOption(Options.CORK, specConfig.isCork());
     if (!additionalConfigurators.isUnsatisfied()) {
-      additionalConfigurators.stream().sorted()
+      additionalConfigurators.stream().sorted(Sortable::compare)
           .forEachOrdered(cfgr -> cfgr.configureWorkOptions(builder::setWorkerOption));
     }
   }

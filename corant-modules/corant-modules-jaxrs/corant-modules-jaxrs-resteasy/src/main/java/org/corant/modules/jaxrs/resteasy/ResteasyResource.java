@@ -13,6 +13,9 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
@@ -48,21 +51,19 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 /**
  * corant-modules-jaxrs-resteasy
- *
  * @author bingo 上午11:02:48
  */
 public class ResteasyResource extends AbstractJaxrsResource {
 
   /**
    * Parse multipart/form-data
-   *
    * @param uploadForm
    * @param fieldNames
    * @return
    * @throws IOException
    */
   protected Map<String, Object> parseFormFields(Map<String, List<InputPart>> uploadForm,
-      String... fieldNames) throws IOException {
+                                                String... fieldNames) throws IOException {
     if (isEmpty(uploadForm) || isEmpty(fieldNames)) {
       return new LinkedHashMap<>();
     }
@@ -94,117 +95,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
   /**
    * corant-modules-jaxrs-resteasy
-   *
-   * resteasy InputPart resource
-   *
-   * @author don
-   * @date 2019-09-26
-   *
-   */
-  public static class InputPartResource implements Resource {
-
-    protected InputPart inputPart;
-
-    protected String filename;
-
-    protected String fieldName;
-
-    protected Map<String, Object> metadata;
-
-    protected ContentDisposition disposition;
-
-    public InputPartResource(InputPart inputPart) {
-      this(shouldNotNull(inputPart), parse(inputPart.getHeaders().getFirst(CONTENT_DISPOSITION)));
-    }
-
-    protected InputPartResource(InputPart inputPart, ContentDisposition disposition) {
-      this.inputPart = inputPart;
-      fieldName = disposition.getName();
-      filename = disposition.getFilename();
-      if (filename != null) {
-        if (filename.startsWith("=?") && filename.endsWith("?=")) {
-          // For RFC 2047 bingo 2021-04-06
-          filename = DecoderUtil.decodeEncodedWords(filename, DecodeMonitor.SILENT);
-        } else if (disposition.getCharset() == null && isNotBlank(filename)) {
-          // 因为apache mime4j 解析浏览器提交的文件名按ISO_8859_1处理
-          // 上传文件断点ContentUtil.decode(ByteSequence byteSequence, int offset, int length)
-          filename = new String(filename.getBytes(ISO_8859_1), UTF_8);
-        }
-      }
-      this.disposition = disposition;
-      metadata = new HashMap<>();
-      this.filename = defaultObject(filename, () -> "unnamed-" + UUID.randomUUID());
-      metadata.put(META_NAME, this.filename);
-      if (inputPart.getMediaType() != null) {
-        metadata.put(META_CONTENT_TYPE, inputPart.getMediaType().toString());
-      }
-      if (disposition.getModificationDate() != null) {
-        metadata.put(META_LAST_MODIFIED,
-            disposition.getModificationDate().toInstant().toEpochMilli());
-      }
-      metadata.put(META_CONTENT_LENGTH, disposition.getSize());
-    }
-
-    public String getContentType() {
-      return inputPart.getMediaType().toString();
-    }
-
-    public ContentDisposition getDisposition() {
-      return disposition;
-    }
-
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public String getFilename() {
-      return filename;
-    }
-
-    public InputPart getInputPart() {
-      return inputPart;
-    }
-
-    @Override
-    public String getLocation() {
-      return getName();
-    }
-
-    @Override
-    public Map<String, Object> getMetadata() {
-      return metadata;
-    }
-
-    @Override
-    public String getName() {
-      return filename;
-    }
-
-    @Override
-    public SourceType getSourceType() {
-      return null;
-    }
-
-    @Override
-    public InputStream openInputStream() throws IOException {
-      return inputPart.getBody(InputStream.class, null);
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> cls) {
-      if (InputPartResource.class.isAssignableFrom(cls)) {
-        return cls.cast(this);
-      }
-      return Resource.super.unwrap(cls);
-    }
-
-  }
-
-  /**
-   * corant-modules-jaxrs-resteasy
-   *
    * @author bingo 上午12:42:18
-   *
    */
   public static class MultipartFormDataExtractor implements AutoCloseable {
 
@@ -223,12 +114,11 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     /**
      * Returns and converts the single filed value by given class.
-     *
-     * @param <T> the expected field type
+     * @param <T>       the expected field type
      * @param fieldName the field name to get
-     * @param clazz the expected field class
+     * @param clazz     the expected field class
      * @return the field value or null, if the field is not found or the field value is found to be
-     *         null
+     * null
      */
     public <T> T getField(String fieldName, Class<T> clazz) {
       List<InputPart> ips = formDataMap.get(fieldName);
@@ -245,14 +135,12 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     /**
      * Returns and converts the single filed value by given class.
-     *
-     * @see GenericType
-     *
-     * @param <T> the expected field type
+     * @param <T>       the expected field type
      * @param fieldName the field name to get
-     * @param type the expected field generic type
+     * @param type      the expected field generic type
      * @return the field value or null, if the field is not found or the field value is found to be
-     *         null
+     * null
+     * @see GenericType
      */
     public <T> T getField(String fieldName, GenericType<T> type) {
       List<InputPart> ips = formDataMap.get(fieldName);
@@ -270,7 +158,6 @@ public class ResteasyResource extends AbstractJaxrsResource {
     /**
      * Returns a list of values for a set of fields with the same given name, or empty list if the
      * field not found. Note: the returns field value list is unmodifiable.
-     *
      * @param <T>
      * @param fieldName
      * @param clazz
@@ -298,7 +185,6 @@ public class ResteasyResource extends AbstractJaxrsResource {
      * Returns a matrix of all field value lists based on the given field name array, where each
      * element (Map) in the list corresponds to the values of multiple fields, used to process
      * tabular data forms.
-     *
      * @param fieldNames the field names
      * @return the value lists
      */
@@ -344,7 +230,6 @@ public class ResteasyResource extends AbstractJaxrsResource {
     /**
      * Returns an uploaded file resource based on the given field name, or throws an exception if
      * the specified field is not a file field.
-     *
      * @param fieldName the field name
      * @return the uploaded file.
      */
@@ -364,7 +249,6 @@ public class ResteasyResource extends AbstractJaxrsResource {
      * Returns a list of uploaded file resources with the same name according to the given field
      * name. If the specified field is not a file or the field value is empty, an empty list is
      * returned. Note: the returned list is unmodifiable.
-     *
      * @param fieldName
      * @return getFiles
      */

@@ -26,6 +26,8 @@ import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -158,6 +160,8 @@ public class DefaultObjectFunctionResolver implements FunctionResolver {
     builtinClassAlias.put(Duration.class.getSimpleName(), Duration.class);
     builtinClassAlias.put(ZonedDateTime.class.getSimpleName(), ZonedDateTime.class);
     builtinClassAlias.put(LocalDate.class.getSimpleName(), LocalDate.class);
+    builtinClassAlias.put(LocalDateTime.class.getSimpleName(), LocalDateTime.class);
+    builtinClassAlias.put(OffsetDateTime.class.getSimpleName(), OffsetDateTime.class);
     builtinClassAlias.put(Arrays.class.getSimpleName(), Arrays.class);
     builtinClassAlias.put(Base64.class.getSimpleName(), Base64.class);
     builtinClassAlias.put(Collections.class.getSimpleName(), Collections.class);

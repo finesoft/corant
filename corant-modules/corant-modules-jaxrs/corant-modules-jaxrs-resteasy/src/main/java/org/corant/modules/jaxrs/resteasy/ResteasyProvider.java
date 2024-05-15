@@ -166,13 +166,9 @@ public class ResteasyProvider implements WebMetaDataProvider {
       }
       ApplicationInfo other = (ApplicationInfo) obj;
       if (applicationPath == null) {
-        if (other.applicationPath != null) {
-          return false;
-        }
-      } else if (!applicationPath.equals(other.applicationPath)) {
-        return false;
-      }
-      return true;
+        return other.applicationPath == null;
+      } else
+        return applicationPath.equals(other.applicationPath);
     }
 
     public Application getApplication() {
@@ -218,13 +214,13 @@ public class ResteasyProvider implements WebMetaDataProvider {
     public WebServletMetaData toWebServletMetaData() {
       String pattern = applicationPath.endsWith("/") ? applicationPath.concat("*")
           : applicationPath.concat("/*");
-      String diapatchName = dispatcherClass.getSimpleName();
+      String dispatchName = dispatcherClass.getSimpleName();
       String appName = applicationClass.getSimpleName();
-      WebInitParamMetaData[] ipmds =
+      WebInitParamMetaData[] metas =
           {new WebInitParamMetaData(ResteasyContextParameters.RESTEASY_SERVLET_MAPPING_PREFIX,
               applicationPath, null)};
-      return new WebServletMetaData(diapatchName, new String[] {pattern}, new String[] {pattern},
-          loadOnStartup, ipmds, true, null, null, null, diapatchName.concat("-").concat(appName),
+      return new WebServletMetaData(dispatchName, new String[] {pattern}, new String[] {pattern},
+          loadOnStartup, metas, true, null, null, null, dispatchName.concat("-").concat(appName),
           dispatcherClass, null, null);
     }
 
@@ -234,10 +230,8 @@ public class ResteasyProvider implements WebMetaDataProvider {
    * corant-modules-jaxrs-resteasy
    *
    * @author bingo 下午3:14:28
-   *
    */
-  @ApplicationPath("jaxrs")
+  @ApplicationPath("")
   public static class DefaultApplication extends Application {
-
   }
 }

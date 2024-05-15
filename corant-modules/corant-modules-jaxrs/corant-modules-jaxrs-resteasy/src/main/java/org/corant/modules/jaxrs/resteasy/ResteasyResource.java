@@ -13,37 +13,22 @@
  */
 package org.corant.modules.jaxrs.resteasy;
 
-import static jakarta.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
-import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static jakarta.ws.rs.core.HttpHeaders.LAST_MODIFIED;
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static jakarta.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.ContentDispositions.parse;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
-import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import jakarta.ws.rs.core.GenericType;
-import org.apache.james.mime4j.codec.DecodeMonitor;
-import org.apache.james.mime4j.codec.DecoderUtil;
 import org.corant.modules.jaxrs.shared.AbstractJaxrsResource;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.resource.Resource;
-import org.corant.shared.resource.SourceType;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.ContentDispositions.ContentDisposition;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -51,19 +36,19 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 /**
  * corant-modules-jaxrs-resteasy
+ *
  * @author bingo 上午11:02:48
  */
 public class ResteasyResource extends AbstractJaxrsResource {
 
   /**
    * Parse multipart/form-data
-   * @param uploadForm
-   * @param fieldNames
-   * @return
-   * @throws IOException
+   *
+   * @param uploadForm upload form parameters
+   * @param fieldNames field names
    */
   protected Map<String, Object> parseFormFields(Map<String, List<InputPart>> uploadForm,
-                                                String... fieldNames) throws IOException {
+      String... fieldNames) throws IOException {
     if (isEmpty(uploadForm) || isEmpty(fieldNames)) {
       return new LinkedHashMap<>();
     }
@@ -95,6 +80,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
   /**
    * corant-modules-jaxrs-resteasy
+   *
    * @author bingo 上午12:42:18
    */
   public static class MultipartFormDataExtractor implements AutoCloseable {
@@ -114,11 +100,12 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     /**
      * Returns and converts the single filed value by given class.
-     * @param <T>       the expected field type
+     *
+     * @param <T> the expected field type
      * @param fieldName the field name to get
-     * @param clazz     the expected field class
+     * @param clazz the expected field class
      * @return the field value or null, if the field is not found or the field value is found to be
-     * null
+     *         null
      */
     public <T> T getField(String fieldName, Class<T> clazz) {
       List<InputPart> ips = formDataMap.get(fieldName);
@@ -135,11 +122,12 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     /**
      * Returns and converts the single filed value by given class.
-     * @param <T>       the expected field type
+     *
+     * @param <T> the expected field type
      * @param fieldName the field name to get
-     * @param type      the expected field generic type
+     * @param type the expected field generic type
      * @return the field value or null, if the field is not found or the field value is found to be
-     * null
+     *         null
      * @see GenericType
      */
     public <T> T getField(String fieldName, GenericType<T> type) {
@@ -157,11 +145,13 @@ public class ResteasyResource extends AbstractJaxrsResource {
 
     /**
      * Returns a list of values for a set of fields with the same given name, or empty list if the
-     * field not found. Note: the returns field value list is unmodifiable.
-     * @param <T>
-     * @param fieldName
-     * @param clazz
-     * @return getFields
+     * field not found.
+     * <p>
+     * Note: the return field value list is unmodifiable.
+     *
+     * @param <T> field type
+     * @param fieldName name of the field
+     * @param clazz expected field value type
      */
     public <T> List<T> getFields(String fieldName, Class<T> clazz) {
       List<InputPart> ips = formDataMap.get(fieldName);
@@ -185,6 +175,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
      * Returns a matrix of all field value lists based on the given field name array, where each
      * element (Map) in the list corresponds to the values of multiple fields, used to process
      * tabular data forms.
+     *
      * @param fieldNames the field names
      * @return the value lists
      */
@@ -230,6 +221,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
     /**
      * Returns an uploaded file resource based on the given field name, or throws an exception if
      * the specified field is not a file field.
+     *
      * @param fieldName the field name
      * @return the uploaded file.
      */
@@ -249,7 +241,8 @@ public class ResteasyResource extends AbstractJaxrsResource {
      * Returns a list of uploaded file resources with the same name according to the given field
      * name. If the specified field is not a file or the field value is empty, an empty list is
      * returned. Note: the returned list is unmodifiable.
-     * @param fieldName
+     *
+     * @param fieldName field names
      * @return getFiles
      */
     public List<InputPartResource> getFiles(String fieldName) {
@@ -258,8 +251,7 @@ public class ResteasyResource extends AbstractJaxrsResource {
         return ips.stream()
             .map(ip -> Pair.of(parse(ip.getHeaders().getFirst(CONTENT_DISPOSITION)), ip))
             .filter(p -> p.left().getFilename() != null)
-            .map(p -> new InputPartResource(p.right(), p.left()))
-            .collect(Collectors.toUnmodifiableList());
+            .map(p -> new InputPartResource(p.right(), p.left())).toList();
       }
       return emptyList();
     }

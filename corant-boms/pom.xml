@@ -69,7 +69,7 @@
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.2</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
-		<version.jackson>2.17.0</version.jackson>
+		<version.jackson>2.17.1</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.7</version.javafx>
@@ -142,7 +142,7 @@
 		<version.mysql>5.1.48</version.mysql>
 		<version.mysql-connector>8.4.0</version.mysql-connector>
 		<version.narayana>7.0.1.Final</version.narayana>
-		<version.ndarray>0.4.0</version.ndarray>
+		<version.ndarray>1.0.0</version.ndarray>
 		<version.netty>4.1.108.Final</version.netty>
 		<version.nashorn-core>15.4</version.nashorn-core>
 		<version.ognl>3.2.13</version.ognl>
@@ -162,7 +162,7 @@
 		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro>1.7.1</version.shiro>
-		<version.slf4j>1.7.36</version.slf4j>
+		<version.slf4j>2.0.13</version.slf4j>
 		<version.smallrye-config>2.6.0</version.smallrye-config>
 		<version.smallrye-fault-tolerance>6.2.2</version.smallrye-fault-tolerance>
 		<version.smallrye-open-api>3.3.2</version.smallrye-open-api>

@@ -21,6 +21,7 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
  * corant-modules-jaxrs-resteasy
  * <p>
  * resteasy InputPart resource
+ *
  * @author don
  * @since 2019-09-26
  */
@@ -41,9 +42,9 @@ public class InputPartResource implements Resource {
   protected InputPartResource(InputPart inputPart, ContentDisposition disposition) {
     this.inputPart = inputPart;
     this.disposition = disposition;
-    this.filename = defaultObject(disposition.getFilename(), () -> "unnamed-" + UUID.randomUUID());
-    this.metadata = new HashMap<>();
-    metadata.put(META_NAME, this.filename);
+    filename = defaultObject(disposition.getFilename(), () -> "unnamed-" + UUID.randomUUID());
+    metadata = new HashMap<>();
+    metadata.put(META_NAME, filename);
     if (inputPart.getMediaType() != null) {
       metadata.put(CONTENT_TYPE, inputPart.getMediaType().toString());
     }

@@ -26,8 +26,17 @@ import org.corant.modules.jms.shared.context.JMSContextManager.TsJMSContextManag
 
 /**
  * corant-modules-jms-shared
- *
- * TODO: Use pooled connection
+ * <p>
+ * A service for obtaining JMS contexts.
+ * <p>
+ * In the current implementation, the life cycle of a JMS context depends on the CDI transaction
+ * scope and the CDI request scope, which means that a connection factory has only one JMS context
+ * in that scope, and the CDI Bean Manager is used to release the JMS context.
+ * <p>
+ * If obtaining JMS Context occurred in transaction, the returned JMS Context life cycle depends on
+ * current transaction scope, otherwise depends on current request scope.
+ * <p>
+ * In certain scenarios, user can obtain JMS Contexts from the connection factory manually.
  *
  * @author bingo 下午5:36:38
  */
@@ -48,18 +57,10 @@ public class DefaultJMSContextService implements JMSContextService {
         getRsJMSContextManager(), getTsJMSContextManager());
   }
 
-  /**
-   *
-   * @return the rsJMSContextManager
-   */
   public RsJMSContextManager getRsJMSContextManager() {
     return rsJMSContextManager;
   }
 
-  /**
-   *
-   * @return the tsJMSContextManager
-   */
   public TsJMSContextManager getTsJMSContextManager() {
     return tsJMSContextManager;
   }

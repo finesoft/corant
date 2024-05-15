@@ -15,6 +15,7 @@ package org.corant.modules.jms.shared.context;
 
 import static org.corant.context.Beans.find;
 import java.io.Serializable;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.jms.BytesMessage;
 import jakarta.jms.ConnectionMetaData;
 import jakarta.jms.Destination;
@@ -33,10 +34,12 @@ import jakarta.jms.TemporaryQueue;
 import jakarta.jms.TemporaryTopic;
 import jakarta.jms.TextMessage;
 import jakarta.jms.Topic;
+import org.corant.context.Contexts;
 import org.corant.modules.jms.shared.context.JMSContextManager.RsJMSContextManager;
 import org.corant.modules.jms.shared.context.JMSContextManager.TsJMSContextManager;
 import org.corant.modules.jms.shared.context.SecurityContextPropagator.SimpleSecurityContextPropagator;
 import org.corant.modules.jta.shared.TransactionService;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-jms-shared
@@ -329,8 +332,12 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
   synchronized JMSContext context() {
     if (TransactionService.isCurrentTransactionActive()) {
       return txCtxManager.computeIfAbsent(key, k -> k.create(true));
+    } else if (Contexts.isContextActive(RequestScoped.class)) {
+      return reqCtxManager.computeIfAbsent(key, k -> k.create(false));
+    } else {
+      throw new NotSupportedException(
+          "Only supports transaction scoped or request scoped JMS context");
     }
-    return reqCtxManager.computeIfAbsent(key, k -> k.create(false));
   }
 
   void prohibitStateChange() {

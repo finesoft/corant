@@ -105,7 +105,7 @@
 		<version.junit>4.13.2</version.junit>
 		<version.jython>2.7.3</version.jython>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
-		<version.keycloak>23.0.3</version.keycloak>
+		<version.keycloak>24.0.4</version.keycloak>
 		<version.kotlin>1.8.20</version.kotlin>
 		<version.kryo>5.5.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>

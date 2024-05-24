@@ -16,7 +16,6 @@ package org.corant.modules.query.shared.dynamic.freemarker;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.sizeOf;
-import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Primitives.wrapArray;
@@ -94,7 +93,7 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
     if (arg instanceof WrapperTemplateModel) {
       return ((WrapperTemplateModel) arg).getWrappedObject();
     } else if (arg instanceof TemplateScalarModel) {
-      return ((TemplateScalarModel) arg).getAsString().trim();
+      return ((TemplateScalarModel) arg).getAsString().trim(); // FIXME trim ?
     } else if (arg instanceof TemplateDateModel) {
       return ((TemplateDateModel) arg).getAsDate();
     } else if (arg instanceof TemplateNumberModel) {
@@ -111,11 +110,11 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
       return list;
     } else if (arg instanceof TemplateCollectionModel) {
       final TemplateModelIterator it = ((TemplateCollectionModel) arg).iterator();
-      List<TemplateModel> tsm = listOf(new SimpleTemplateModelIterator(it));
-      int size = tsm.size();
-      List<Object> list = new ArrayList<>(size);
-      for (int i = 0; i < size; i++) {
-        list.add(extractParamValue(tsm.get(i)));
+      List<Object> list = new ArrayList<>();
+      if (it != null) {
+        while (it.hasNext()) {
+          list.add(extractParamValue(it.next()));
+        }
       }
       return list;
     } else {

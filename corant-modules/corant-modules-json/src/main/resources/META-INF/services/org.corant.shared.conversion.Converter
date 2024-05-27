@@ -9,3 +9,5 @@ org.corant.modules.bson.converter.StringBsonSymbolConverter
 org.corant.modules.bson.converter.BsonDatetimeZonedDateTimeConverter
 org.corant.modules.bson.converter.BsonDatetimeSqlDateConverter
 org.corant.modules.bson.converter.BsonTimestampTimestampConverter
+org.corant.modules.bson.converter.BinaryByteArrayConverter
+org.corant.modules.bson.converter.BsonBinaryByteArrayConverter

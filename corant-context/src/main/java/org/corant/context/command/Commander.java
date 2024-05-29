@@ -78,7 +78,7 @@ import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
  * <li><b>scheduled accept:</b> Commander.schedule(10L,TimeUnit.SECONDS).accept(new
  * MyCommand("test"));</li>
  * <li><b>scheduled apply:</b> ScheduledFuture&lt;String&gt; upperCase =
- * Commander.async(10L,TimeUnit.SECONDS).apply(new MyCommand("test"));</li>
+ * Commander.schedule(10L,TimeUnit.SECONDS).apply(new MyCommand("test"));</li>
  * </ul>
  *
  * @see CommandHandler

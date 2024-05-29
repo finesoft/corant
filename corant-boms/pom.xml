@@ -29,7 +29,7 @@
 		<version.asciidoctor-pdf>2.3.7</version.asciidoctor-pdf>
 		<version.assertj>3.25.3</version.assertj>
 		<version.atomikos>6.0.0M2</version.atomikos>
-		<version.bouncycastle>1.70</version.bouncycastle>
+		<version.bouncycastle>1.78.1</version.bouncycastle>
 		<version.bson.mongodb>4.11.1</version.bson.mongodb>
 		<version.byte-buddy>1.14.14</version.byte-buddy>
 		<version.cache-annotations-ri>1.1.1</version.cache-annotations-ri>
@@ -62,7 +62,7 @@
 		<version.groovy>4.0.11</version.groovy>
 		<version.grpc>1.56.1</version.grpc>
 		<version.hanlp>portable-1.7.8</version.hanlp>
-		<version.hibernate-orm>6.5.0.Final</version.hibernate-orm>
+		<version.hibernate-orm>6.5.2.Final</version.hibernate-orm>
 		<version.hibernate-reactive>2.3.0.Final</version.hibernate-reactive>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
@@ -158,7 +158,7 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.29.0</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
-		<version.resteasy>6.2.8.Final</version.resteasy>
+		<version.resteasy>6.2.9.Final</version.resteasy>
 		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro>1.7.1</version.shiro>
@@ -179,7 +179,7 @@
 		<version.swagger-ui-webjars>4.18.2</version.swagger-ui-webjars>
 		<version.testng>6.9.9</version.testng>
 		<version.undertow>2.3.13.Final</version.undertow>
-		<version.vertx>4.5.7</version.vertx>
+		<version.vertx>4.5.8</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
 		<version.weld>5.1.2.Final</version.weld>
@@ -2204,12 +2204,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>${version.bouncycastle}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
+				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${version.bouncycastle}</version>
 			</dependency>
 

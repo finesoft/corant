@@ -100,9 +100,9 @@ public class TestJfx extends Application {
 
   protected void doStart() {
     OpenCV.loadLocally();
-    String modelWeights = getParameters().getNamed().get("mw");
-    String modelConfiguration = getParameters().getNamed().get("mc");
-    String filePath = getParameters().getNamed().get("file");
+    String modelWeights = getParameters().getRaw().get(0);
+    String modelConfiguration = getParameters().getRaw().get(1);
+    String filePath = getParameters().getRaw().get(2);
 
     AtomicBoolean running = new AtomicBoolean(true);
     Net net = Dnn.readNetFromDarknet(modelConfiguration, modelWeights);

@@ -656,14 +656,14 @@ public class Strings {
   /**
    * <pre>
    * Strings.isNoneBlank((String) null)    = false
-   * Strings.isNoneBlank((String[]) null)  = true
+   * Strings.isNoneBlank((String[]) null)  = false
    * Strings.isNoneBlank(null, "abc")      = false
    * Strings.isNoneBlank(null, null)       = false
    * Strings.isNoneBlank("", "123")        = false
    * Strings.isNoneBlank("xyz", "")        = false
    * Strings.isNoneBlank("  xyz  ", null)  = false
    * Strings.isNoneBlank(" ", "123")       = false
-   * Strings.isNoneBlank(new String[] {})  = true
+   * Strings.isNoneBlank(new String[] {})  = false
    * Strings.isNoneBlank(new String[]{""}) = false
    * Strings.isNoneBlank("abc", "123")     = true
    * </pre>

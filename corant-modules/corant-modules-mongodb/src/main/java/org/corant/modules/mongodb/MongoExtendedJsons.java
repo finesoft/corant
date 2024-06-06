@@ -47,6 +47,7 @@ import org.bson.BsonTimestamp;
 import org.bson.conversions.Bson;
 import org.bson.types.Decimal128;
 import org.bson.types.ObjectId;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.ubiquity.Experimental;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
@@ -85,7 +86,7 @@ import com.mongodb.DBRef;
  */
 public class MongoExtendedJsons {
 
-  public static final ObjectMapper OM = new ObjectMapper();// TODO FIXME
+  public static final ObjectMapper OM = ObjectMappers.copyDefaultObjectMapper();// TODO FIXME
   public static final ObjectWriter EOW = OM.writer(JsonpCharacterEscapes.instance());
   public static final Map<Class<?>, Function<Object, Object>> EXTJSON_CONVERTERS;
 

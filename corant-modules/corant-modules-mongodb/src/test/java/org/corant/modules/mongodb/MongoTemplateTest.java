@@ -18,6 +18,7 @@ import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Sets.setOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -81,6 +82,16 @@ public class MongoTemplateTest extends TestCase {
     MongoTemplate mt = new MongoTemplate(Mongos.resolveClient(murl).getDatabase("anncy"));
     mt.delete("save-many-test", 1);
     mt.deleteMany("save-many-test", mapOf("_id", mapOf("$lt", 10)));
+  }
+
+  @Test
+  public void testDocuemntConvert() throws JsonProcessingException {
+    MapPojo pojo = new MapPojo();
+    Document doc = new Document(ObjectMappers.toDocMap(pojo));
+    doc.put("_id", doc.remove("id"));
+    System.out.println(doc);
+    MapPojo pojox = Mongos.resolveEntity(doc, MapPojo.class);
+    System.out.println(areEqual(pojo, pojox));
   }
 
   @Test

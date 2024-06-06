@@ -17,6 +17,7 @@ import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Sets.setOf;
 import static org.corant.shared.util.Streams.batchCollectStream;
 import static org.corant.shared.util.Streams.batchStream;
@@ -38,6 +39,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.corant.modules.json.ObjectMappers;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -193,13 +195,100 @@ public class Mongos {
       if (mongoDatabase != null) {
         Cleaner.create().register(mongoDatabase, () -> {
           if (client != null) {
-            client.close(); // Do we need to automatically close the mongodb client here
+            client.close(); // Do we need to automatically close the mongodb client here?
           }
         });
       }
       return mongoDatabase;
     } else {
       return findNamed(MongoDatabase.class, database).orElse(null);
+    }
+  }
+
+  /**
+   * Returns a {@link Document} with primary key (named '_id') from the given object for persisting.
+   * <p>
+   * Note: If the given object is a Map instance, we assume it is a {@code Map<String, Object>}. If
+   * the given object has a property named 'id', the value of the property will be used as the
+   * primary key (named '_id') of the {@link Document} and the resolved document doesn't retain the
+   * id property.
+   *
+   * @param <T> the object type
+   * @param object the object to be resolved
+   * @return a document
+   */
+  public static <T> Document resolveDocument(T object) {
+    Document document = null;
+    if (object instanceof Document doc) {
+      document = doc;
+    } else if (object != null) {
+      Map<String, Object> map;
+      if (object instanceof Map m) {
+        // FIXME force cast, we assume the object is Map<String,Object>
+        map = forceCast(m);
+      } else {
+        // a common POJO
+        map = ObjectMappers.toDocMap(object);
+      }
+      document = new Document(map);
+    }
+    if (document != null && document.containsKey(ENTITY_ID_FIELD_NAME)
+        && !document.containsKey(DOC_ID_FIELD_NAME)) {
+      document.put(DOC_ID_FIELD_NAME, document.remove(ENTITY_ID_FIELD_NAME));
+    }
+    return document;
+  }
+
+  /**
+   * Returns an entity from the given document {@code doc} with the given entity type class.
+   * <p>
+   * Note: If the given document does not contain a key with the name 'id', but contains a key with
+   * the name '_id', then the value of the key with the name 'id' is automatically set to the value
+   * of the key with the name '_id'.
+   *
+   * @param <T> the entity type
+   * @param doc the doc to be resolved
+   * @param clazz the entity class
+   * @return an entity object
+   *
+   * @see #resolveObject(Document, Class, boolean)
+   */
+  public static <T> T resolveEntity(Document doc, Class<T> clazz) {
+    return resolveObject(doc, clazz, true);
+  }
+
+  /**
+   * Returns an object from the given document {@code doc} with the given object type class. The
+   * entity parameter indicates whether the returned object type is an entity, i.e., contains the id
+   * attribute.
+   * <p>
+   * Note: IF the returned object is entity and the given document does not contain a key with the
+   * name 'id', but contains a key with the name '_id', then the value of the key with the name 'id'
+   * is automatically set to the value of the key with the name '_id'.
+   * <p>
+   * Note: In the current implementation, the nanoseconds of the date time may be lost.
+   *
+   * @param <T> the returned object type
+   * @param doc the doc to be resolved
+   * @param clazz the returned object class
+   * @param entity whether the returned object is an entity
+   * @return an object
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T resolveObject(Document doc, Class<T> clazz, boolean entity) {
+    if (clazz == null) {
+      throw new IllegalArgumentException("Class can't null");
+    } else if (doc == null) {
+      return null;
+    } else if (clazz.isInstance(doc)) {
+      return (T) doc;
+    } else if (entity && !doc.containsKey(ENTITY_ID_FIELD_NAME)
+        && doc.containsKey(DOC_ID_FIELD_NAME)) {
+      Document newDoc = new Document(doc);
+      newDoc.put(ENTITY_ID_FIELD_NAME, doc.get(DOC_ID_FIELD_NAME));
+      return ObjectMappers.fromMap(newDoc, clazz);
+    } else {
+      return ObjectMappers.fromMap(doc, clazz);
     }
   }
 

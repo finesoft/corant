@@ -24,7 +24,6 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Lists.transform;
 import static org.corant.shared.util.Objects.defaultObject;
-import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
@@ -729,7 +728,7 @@ public class MongoTemplate {
     shouldNotNull(object, "Object must not be null");
     Document doc;
     if (handler == null) {
-      doc = resolveDocument(object);
+      doc = Mongos.resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
@@ -797,7 +796,7 @@ public class MongoTemplate {
       InsertManyOptions options, Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
-    Function<T, Document> useHandler = defaultObject(handler, this::resolveDocument);
+    Function<T, Document> useHandler = defaultObject(handler, Mongos::resolveDocument);
     List<Document> docs = objects.stream().map(useHandler).toList();
     return executeInsertMany(collectionName, Document.class, docs, null, options);
   }
@@ -866,7 +865,7 @@ public class MongoTemplate {
     shouldNotNull(object, "Object must not be null");
     Document doc;
     if (handler == null) {
-      doc = resolveDocument(object);
+      doc = Mongos.resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
@@ -931,7 +930,7 @@ public class MongoTemplate {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
     return executeSaveMany(collectionName, Document.class,
-        transform(objects, defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER,
+        transform(objects, defaultObject(handler, Mongos::resolveDocument)), null, DOC_ID_GETTER,
         options, null);
   }
 
@@ -996,7 +995,7 @@ public class MongoTemplate {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(stream, "Objects must not be null");
     return executeStreamSave(collectionName, Document.class,
-        stream.map(defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER, options);
+        stream.map(defaultObject(handler, Mongos::resolveDocument)), null, DOC_ID_GETTER, options);
   }
 
   /**
@@ -1166,40 +1165,6 @@ public class MongoTemplate {
       collection = collection.withCodecRegistry(codecRegistry);
     }
     return collection;
-  }
-
-  /**
-   * Returns a {@link Document} with primary key(named '_id') from the given object for persisting.
-   * <p>
-   * Note: If the given object is a Map instance, we assume it is a {@code Map<String, Object>}. If
-   * the given object has a property named 'id', the value of the property will be used as the
-   * primary key(named '_id') of the {@link Document} and the resolved document doesn't retain the
-   * id property.
-   *
-   * @param <T> the object type
-   * @param object the object to be resolved
-   * @return a document
-   */
-  protected <T> Document resolveDocument(T object) {
-    Document document = null;
-    if (object instanceof Document doc) {
-      document = doc;
-    } else if (object != null) {
-      Map<String, Object> map;
-      if (object instanceof Map m) {
-        // FIXME force cast, we assume the object is Map<String,Object>
-        map = forceCast(m);
-      } else {
-        // a common POJO
-        map = ObjectMappers.toDocMap(object);
-      }
-      document = new Document(map);
-    }
-    if (document != null && document.containsKey(ENTITY_ID_FIELD_NAME)
-        && !document.containsKey(DOC_ID_FIELD_NAME)) {
-      document.put(DOC_ID_FIELD_NAME, document.remove(ENTITY_ID_FIELD_NAME));
-    }
-    return document;
   }
 
   /**

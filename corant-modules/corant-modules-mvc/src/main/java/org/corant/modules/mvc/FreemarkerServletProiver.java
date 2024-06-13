@@ -21,7 +21,7 @@ import org.corant.config.Configs;
 import org.corant.modules.servlet.WebMetaDataProvider;
 import org.corant.modules.servlet.metadata.WebInitParamMetaData;
 import org.corant.modules.servlet.metadata.WebServletMetaData;
-import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.ext.jakarta.servlet.FreemarkerServlet;
 
 /**
  * corant-modules-mvc

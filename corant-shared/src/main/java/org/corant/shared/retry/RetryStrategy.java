@@ -67,7 +67,6 @@ public interface RetryStrategy {
    * corant-shared
    *
    * @author bingo 下午8:56:51
-   *
    */
   class AlwaysRetryStrategy implements RetryStrategy {
 
@@ -82,7 +81,6 @@ public interface RetryStrategy {
    * corant-shared
    *
    * @author bingo 下午9:09:29
-   *
    */
   class MaxAttemptsRetryStrategy implements RetryStrategy {
 
@@ -110,7 +108,6 @@ public interface RetryStrategy {
    * corant-shared
    *
    * @author bingo 下午8:55:44
-   *
    */
   class NonRetryStrategy implements RetryStrategy {
 
@@ -125,7 +122,6 @@ public interface RetryStrategy {
    * corant-shared
    *
    * @author bingo 下午9:06:47
-   *
    */
   class ThrowableClassifierRetryStrategy implements RetryStrategy {
 
@@ -192,11 +188,9 @@ public interface RetryStrategy {
   }
 
   /**
-   *
    * corant-shared
    *
    * @author bingo 下午9:18:46
-   *
    */
   class TimeoutRetryStrategy implements RetryStrategy {
 

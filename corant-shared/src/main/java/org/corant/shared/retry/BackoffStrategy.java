@@ -44,7 +44,6 @@ public interface BackoffStrategy {
    *      "https://aws.amazon.com/cn/blogs/architecture/exponential-backoff-and-jitter/">Exponential
    *      Backoff And Jitter</a>
    * @author bingo 9:37:51
-   *
    */
   enum BackoffAlgorithm {
     NON, FIXED, EXPO, EXPO_DECORR, EXPO_EQUAL_JITTER, EXPO_FULL_JITTER
@@ -54,7 +53,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 上午10:35:18
-   *
    */
   class BackoffStrategyBuilder {
     BackoffAlgorithm algorithm = BackoffAlgorithm.NON;
@@ -99,7 +97,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午10:32:30
-   *
    */
   class CappedExpoBackoffStrategy implements BackoffStrategy {
 
@@ -147,7 +144,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午11:27:28
-   *
    */
   class CappedExpoDecorrJitterBackoffStrategy extends CappedExpoBackoffStrategy {
 
@@ -185,7 +181,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午10:31:43
-   *
    */
   class CappedExpoEqualJitterBackoffStrategy extends CappedExpoBackoffStrategy {
 
@@ -223,7 +218,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午10:31:43
-   *
    */
   class CappedExpoFullJitterBackoffStrategy extends CappedExpoBackoffStrategy {
 
@@ -258,7 +252,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午12:01:00
-   *
    */
   class FixedBackoffStrategy implements BackoffStrategy {
 
@@ -287,7 +280,6 @@ public interface BackoffStrategy {
    * corant-shared
    *
    * @author bingo 下午10:31:43
-   *
    */
   class NonBackoffStrategy implements BackoffStrategy {
 

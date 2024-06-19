@@ -24,9 +24,14 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.corant.shared.retry.RetryContext.DefaultRetryContext;
 
+/**
+ * corant-shared
+ *
+ * @author bingo 14:17:50
+ */
 public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
 
-  protected RetryContext context = new DefaultRetryContext();
+  protected DefaultRetryContext context = new DefaultRetryContext();
 
   public <T> T execute(Callable<T> callable) {
     shouldNotNull(callable);
@@ -78,54 +83,66 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
       }
       try {
         emitOnRetry(context);
-        context.incrementAttempts();
-        T result = callable.apply(context.getAttempts());
-        logger.fine(
-            () -> format("Executed successfully, it has been tried %s times, no more retries.",
-                context.getAttempts()));
+        int attempts = increaseAttempts();
+        T result = callable.apply(attempts);
+        logger.fine(() -> format(
+            "Executed successfully, it has been tried %s times, no more retries.", attempts));
         return result;
       } catch (Throwable throwable) {
-        Throwable currThrowable = throwable;
+        Throwable currentThrowable = throwable;
         try {
-          if (getRetryStrategy().test(context.setLastThrowable(currThrowable))) {
-            long wait = getBackoffStrategy().computeBackoffMillis(context);
-            logger.log(Level.WARNING, currThrowable, () -> format(
-                "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
-                context.getAttempts(), wait));
-            if (wait > 0) {
-              Thread.sleep(wait);
-            }
-            currThrowable = null;
-          }
+          currentThrowable = testContinue(currentThrowable);
         } catch (InterruptedException ie) {
           Thread.currentThread().interrupt();
-          ie.addSuppressed(currThrowable);
-          currThrowable = ie;
+          ie.addSuppressed(currentThrowable);
+          currentThrowable = ie;
         } catch (Exception ee) {
-          ee.addSuppressed(currThrowable);
-          currThrowable = ee;
+          ee.addSuppressed(currentThrowable);
+          currentThrowable = ee;
         } finally {
-          if (currThrowable != null) {
+          if (currentThrowable != null) {
             if (getRecoveryCallback() != null) {
               try {
-                logger.log(Level.WARNING, currThrowable, () -> format(
-                    "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
-                    context.getAttempts()));
-                T result = forceCast(getRecoveryCallback().recover(context));
-                logger.log(Level.INFO, () -> "Retry recovery callback executed successfully.");
-                return result;
+                return recover(currentThrowable);
               } catch (Exception e) {
-                e.addSuppressed(currThrowable);
-                currThrowable = e;
+                e.addSuppressed(currentThrowable);
+                currentThrowable = e;
               }
             }
-            logger.log(Level.WARNING, currThrowable, () -> format(
+            logger.log(Level.WARNING, currentThrowable, () -> format(
                 "An error occurred in the execution, it has been tried %s times, and the retrying execution was interrupted.",
                 context.getAttempts()));
-            rethrow(currThrowable);
+            rethrow(currentThrowable);
           }
         }
       }
     }
+  }
+
+  protected int increaseAttempts() {
+    return context.getAttemptsCounter().incrementAndGet();
+  }
+
+  protected <T> T recover(Throwable currentThrowable) throws Exception {
+    logger.log(Level.WARNING, currentThrowable, () -> format(
+        "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
+        context.getAttempts()));
+    T result = forceCast(getRecoveryCallback().recover(context));
+    logger.log(Level.INFO, () -> "Retry recovery callback executed successfully.");
+    return result;
+  }
+
+  protected Throwable testContinue(Throwable currentThrowable) throws InterruptedException {
+    if (getRetryStrategy().test(context.setLastThrowable(currentThrowable))) {
+      long wait = getBackoffStrategy().computeBackoffMillis(context);
+      logger.log(Level.WARNING, currentThrowable, () -> format(
+          "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
+          context.getAttempts(), wait));
+      if (wait > 0) {
+        Thread.sleep(wait);
+      }
+      return null;
+    }
+    return currentThrowable;
   }
 }

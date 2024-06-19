@@ -31,7 +31,7 @@ import org.corant.shared.ubiquity.Futures.SimpleFuture;
 public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
 
   protected final ScheduledExecutorService executor;
-  protected RetryContext context = new DefaultRetryContext();
+  protected DefaultRetryContext context = new DefaultRetryContext();
 
   public AsynchronousRetryer(ScheduledExecutorService executor) {
     this.executor = shouldNotNull(executor);
@@ -56,7 +56,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
   }
 
   @Override
-  public RetryContext getContext() {
+  public DefaultRetryContext getContext() {
     return context;
   }
 
@@ -69,8 +69,17 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
         TimeUnit.MILLISECONDS);
     try {
       return future.get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new CorantRuntimeException(e);
+    } catch (InterruptedException ie) {
+      throw new CorantRuntimeException(ie);
+    } catch (ExecutionException ee) {
+      Throwable t = ee.getCause();
+      if (t instanceof RuntimeException) {
+        throw (RuntimeException) t;
+      }
+      if (t instanceof Error) {
+        throw (Error) t;
+      }
+      throw new CorantRuntimeException(t);
     }
   }
 
@@ -85,7 +94,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
     final SimpleFuture<T> future;
     final Callable<T> callable;
     final AsynchronousRetryer retryer;
-    final RetryContext context;
+    final DefaultRetryContext context;
     final RetryStrategy retryStrategy;
     final BackoffStrategy backoffStrategy;
     final RetryPrecondition retryPrecondition;
@@ -109,7 +118,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
         if (retryPrecondition.test(context)) {
           if (!future.isDone()) {
             retryer.emitOnRetry(context);
-            context.incrementAttempts();
+            context.getAttemptsCounter().incrementAndGet();
             T result = callable.call();
             if (future.success(result)) {
               retryer.logger.fine(() -> format(
@@ -127,46 +136,54 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
               context.getAttempts()));
         }
       } catch (Throwable throwable) {
-        Throwable currThrowable = throwable;
+        Throwable currentThrowable = throwable;
         try {
-          if (retryStrategy.test(context.setLastThrowable(currThrowable))) {
-            long wait = backoffStrategy.computeBackoffMillis(context);
-            retryer.logger.log(Level.WARNING, currThrowable, () -> format(
-                "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
-                context.getAttempts(), wait));
-            AsynchronousRetryTask<T> next = new AsynchronousRetryTask<>(future, callable, retryer);
-            retryer.executor.schedule(next, wait, TimeUnit.MILLISECONDS);
-            currThrowable = null;
-          }
+          currentThrowable = testContinue(currentThrowable);
         } catch (Exception ee) {
-          ee.addSuppressed(currThrowable);
-          currThrowable = ee;
+          ee.addSuppressed(currentThrowable);
+          currentThrowable = ee;
         } finally {
-          if (currThrowable != null) {
+          if (currentThrowable != null) {
             if (recoverCallback != null) {
               try {
-                retryer.logger.log(Level.WARNING, currThrowable, () -> format(
-                    "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
-                    context.getAttempts()));
-                T result = forceCast(recoverCallback.recover(context));
-                if (future.success(result)) {
-                  retryer.logger.log(Level.INFO,
-                      () -> "Retry recovery callback executed successfully.");
-                }
+                recover(currentThrowable);
               } catch (Exception e) {
-                e.addSuppressed(currThrowable);
-                currThrowable = e;
+                e.addSuppressed(currentThrowable);
+                currentThrowable = e;
               }
             }
             if (!future.isDone()) {
-              retryer.logger.log(Level.WARNING, currThrowable, () -> format(
+              retryer.logger.log(Level.WARNING, currentThrowable, () -> format(
                   "An error occurred in the execution, it has been tried %s times, no more retries.",
                   context.getAttempts()));
-              future.failure(currThrowable);
+              future.failure(currentThrowable);
             }
           }
         }
       }
+    }
+
+    protected void recover(Throwable currentThrowable) throws Exception {
+      retryer.logger.log(Level.WARNING, currentThrowable, () -> format(
+          "An error occurred in the execution, it has been tried %s times, the retrying execution was interrupted, started to execute the recovery callback.",
+          context.getAttempts()));
+      T result = forceCast(recoverCallback.recover(context));
+      if (future.success(result)) {
+        retryer.logger.log(Level.INFO, () -> "Retry recovery callback executed successfully.");
+      }
+    }
+
+    protected Throwable testContinue(Throwable currentThrowable) {
+      if (retryStrategy.test(context.setLastThrowable(currentThrowable))) {
+        long wait = backoffStrategy.computeBackoffMillis(context);
+        retryer.logger.log(Level.WARNING, currentThrowable, () -> format(
+            "An error occurred in the retrying execution, it has been tried %s times, wait for %s milliseconds and continue to try to execute!",
+            context.getAttempts(), wait));
+        AsynchronousRetryTask<T> next = new AsynchronousRetryTask<>(future, callable, retryer);
+        retryer.executor.schedule(next, wait, TimeUnit.MILLISECONDS);
+        return null;
+      }
+      return currentThrowable;
     }
 
   }

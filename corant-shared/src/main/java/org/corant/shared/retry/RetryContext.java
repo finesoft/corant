@@ -29,17 +29,10 @@ public interface RetryContext {
 
   Instant getStartTime();
 
-  RetryContext incrementAttempts();
-
-  RetryContext initialize();
-
-  RetryContext setLastThrowable(Throwable lastThrowable);
-
   /**
    * corant-shared
    *
    * @author bingo 下午11:38:10
-   *
    */
   class DefaultRetryContext implements RetryContext {
 
@@ -62,22 +55,18 @@ public interface RetryContext {
       return startTime;
     }
 
-    @Override
-    public DefaultRetryContext incrementAttempts() {
-      attemptsCounter.incrementAndGet();
-      return this;
+    protected AtomicInteger getAttemptsCounter() {
+      return attemptsCounter;
     }
 
-    @Override
-    public synchronized DefaultRetryContext initialize() {
+    protected DefaultRetryContext initialize() {
       attemptsCounter.set(0);
       lastThrowable = null;
       startTime = Instant.now();
       return this;
     }
 
-    @Override
-    public DefaultRetryContext setLastThrowable(Throwable lastThrowable) {
+    protected DefaultRetryContext setLastThrowable(Throwable lastThrowable) {
       this.lastThrowable = lastThrowable;
       return this;
     }

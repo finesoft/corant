@@ -31,7 +31,7 @@ import org.corant.shared.ubiquity.Futures.SimpleFuture;
 public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
 
   protected final ScheduledExecutorService executor;
-  protected final DefaultRetryContext context = new DefaultRetryContext();
+  protected RetryContext context = new DefaultRetryContext();
 
   public AsynchronousRetryer(ScheduledExecutorService executor) {
     this.executor = shouldNotNull(executor);
@@ -56,7 +56,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
   }
 
   @Override
-  public DefaultRetryContext getContext() {
+  public RetryContext getContext() {
     return context;
   }
 
@@ -85,7 +85,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
     final SimpleFuture<T> future;
     final Callable<T> callable;
     final AsynchronousRetryer retryer;
-    final DefaultRetryContext context;
+    final RetryContext context;
     final RetryStrategy retryStrategy;
     final BackoffStrategy backoffStrategy;
     final RetryPrecondition retryPrecondition;
@@ -109,7 +109,7 @@ public class AsynchronousRetryer extends AbstractRetryer<AsynchronousRetryer> {
         if (retryPrecondition.test(context)) {
           if (!future.isDone()) {
             retryer.emitOnRetry(context);
-            context.getAttemptsCounter().incrementAndGet();
+            context.incrementAttempts();
             T result = callable.call();
             if (future.success(result)) {
               retryer.logger.fine(() -> format(

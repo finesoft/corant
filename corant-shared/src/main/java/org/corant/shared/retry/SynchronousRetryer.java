@@ -26,7 +26,7 @@ import org.corant.shared.retry.RetryContext.DefaultRetryContext;
 
 public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
 
-  protected final DefaultRetryContext context = new DefaultRetryContext();
+  protected RetryContext context = new DefaultRetryContext();
 
   public <T> T execute(Callable<T> callable) {
     shouldNotNull(callable);
@@ -78,7 +78,7 @@ public class SynchronousRetryer extends AbstractRetryer<SynchronousRetryer> {
       }
       try {
         emitOnRetry(context);
-        context.getAttemptsCounter().incrementAndGet();
+        context.incrementAttempts();
         T result = callable.apply(context.getAttempts());
         logger.fine(
             () -> format("Executed successfully, it has been tried %s times, no more retries.",

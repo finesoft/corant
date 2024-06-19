@@ -29,6 +29,12 @@ public interface RetryContext {
 
   Instant getStartTime();
 
+  RetryContext incrementAttempts();
+
+  RetryContext initialize();
+
+  RetryContext setLastThrowable(Throwable lastThrowable);
+
   /**
    * corant-shared
    *
@@ -56,24 +62,23 @@ public interface RetryContext {
       return startTime;
     }
 
-    protected AtomicInteger getAttemptsCounter() {
-      return attemptsCounter;
+    @Override
+    public DefaultRetryContext incrementAttempts() {
+      attemptsCounter.incrementAndGet();
+      return this;
     }
 
-    protected DefaultRetryContext initialize() {
+    @Override
+    public synchronized DefaultRetryContext initialize() {
       attemptsCounter.set(0);
       lastThrowable = null;
       startTime = Instant.now();
       return this;
     }
 
-    protected DefaultRetryContext setLastThrowable(Throwable lastThrowable) {
+    @Override
+    public DefaultRetryContext setLastThrowable(Throwable lastThrowable) {
       this.lastThrowable = lastThrowable;
-      return this;
-    }
-
-    protected DefaultRetryContext setStartTime(Instant startTime) {
-      this.startTime = startTime;
       return this;
     }
 

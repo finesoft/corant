@@ -13,7 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
-import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static org.corant.modules.query.QueryParameter.CONTEXT_NME;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESULT;
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULT_HINT;
@@ -24,6 +24,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Strings.isBlank;
@@ -35,10 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -54,6 +53,7 @@ import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.spi.QueryParameterReviser;
 import org.corant.modules.query.spi.ResultHintHandler;
+import org.corant.modules.query.spi.ResultRecordConverter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
@@ -76,6 +76,10 @@ public class DefaultQueryHandler implements QueryHandler {
   @Inject
   @Any
   protected Instance<ResultHintHandler> resultHintHandlers;
+
+  @Inject
+  @Any
+  protected Instance<ResultRecordConverter> resultRecordConverters;
 
   @Inject
   protected ConversionService conversionService;
@@ -104,7 +108,7 @@ public class DefaultQueryHandler implements QueryHandler {
     if (result != null) {
       if (!getMapBoolean(parameter.getContext(), CTX_QHH_DONT_CONVERT_RESULT, false)) {
         return forceCast(Map.class.isAssignableFrom(query.getResultClass()) ? result
-            : convertRecord(result, query.getResultClass()));
+            : convertRecord(query, parameter, result));
       } else {
         return forceCast(result);
       }
@@ -152,7 +156,7 @@ public class DefaultQueryHandler implements QueryHandler {
   public <T> List<T> handleResults(List<Object> results, Query query, QueryParameter parameter) {
     if (!isEmpty(results)
         && !getMapBoolean(parameter.getContext(), CTX_QHH_DONT_CONVERT_RESULT, false)) {
-      return convertRecords(results, forceCast(query.getResultClass()));
+      return convertRecords(query, parameter, results);
     }
     return forceCast(results);
   }
@@ -185,13 +189,16 @@ public class DefaultQueryHandler implements QueryHandler {
   protected Map<String, Object> convertParameter(Map<?, ?> param,
       Map<String, Class<?>> convertSchema) {
     Map<String, Object> convertedParam = new HashMap<>();
+    Map<String, Class<?>> usedConvertSchema = defaultObject(convertSchema, emptyMap());
     if (param != null) {
       param.forEach((k, v) -> {
-        Class<?> cls;
-        if (k != null && convertSchema != null && (cls = convertSchema.get(k)) != null) {
-          convertedParam.put(k.toString(), conversionService.convert(v, cls));
-        } else if (k != null) {
-          convertedParam.put(k.toString(), v);
+        if (k != null) {
+          Class<?> cls = usedConvertSchema.get(k);
+          if (cls != null) {
+            convertedParam.put(k.toString(), conversionService.convert(v, cls));
+          } else {
+            convertedParam.put(k.toString(), v);
+          }
         }
       });
     }
@@ -199,16 +206,21 @@ public class DefaultQueryHandler implements QueryHandler {
   }
 
   /**
-   * Convert single record to expected class object.
+   * Convert a single record to an expected class object.
    *
    * @param <T> the expected type
+   * @param query the query
+   * @param queryParameter the query parameter
    * @param result the result to be converted
-   * @param expectedClass the excepted class
    */
-  protected <T> T convertRecord(Object result, Class<T> expectedClass) {
+  protected <T> T convertRecord(Query query, QueryParameter queryParameter, Object result) {
+    Class<?> expectedClass = query.getResultClass();
     final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
     if (needConvert) {
-      if (isSimpleClass(expectedClass)) {
+      ResultRecordConverter converter = resolveResultRecordConverter(query, queryParameter);
+      if (converter != null) {
+        return forceCast(converter.convert(query, queryParameter, result));
+      } else if (isSimpleClass(expectedClass)) {
         return convertSimpleRecord(result, expectedClass);
       } else {
         return objectMapper.toObject(result, expectedClass);
@@ -219,16 +231,22 @@ public class DefaultQueryHandler implements QueryHandler {
   }
 
   /**
-   * Convert multiple record to expected list.
+   * Convert multiple record to an expected list.
    *
    * @param <T> the expected type
+   * @param query the query
+   * @param queryParameter the query parameter
    * @param records the record to be converted
-   * @param expectedClass the excepted class
    */
-  protected <T> List<T> convertRecords(List<Object> records, Class<T> expectedClass) {
+  protected <T> List<T> convertRecords(Query query, QueryParameter queryParameter,
+      List<Object> records) {
+    Class<?> expectedClass = query.getResultClass();
     final boolean needConvert = !Map.class.isAssignableFrom(expectedClass);
     if (needConvert) {
-      if (isSimpleClass(expectedClass)) {
+      ResultRecordConverter converter = resolveResultRecordConverter(query, queryParameter);
+      if (converter != null) {
+        return forceCast(converter.convert(query, queryParameter, records));
+      } else if (isSimpleClass(expectedClass)) {
         records.replaceAll(e -> convertSimpleRecord(e, expectedClass));
         return forceCast(records);
       } else {
@@ -239,7 +257,7 @@ public class DefaultQueryHandler implements QueryHandler {
     }
   }
 
-  protected <T> T convertSimpleRecord(Object result, Class<T> expectedClass) {
+  protected <T> T convertSimpleRecord(Object result, Class<?> expectedClass) {
     if (result == null) {
       return null;
     }
@@ -248,7 +266,7 @@ public class DefaultQueryHandler implements QueryHandler {
       if (object == null) {
         return null;
       } else {
-        return Conversions.toObject(object, expectedClass);
+        return forceCast(Conversions.toObject(object, expectedClass));
       }
     } else if (expectedClass.isInstance(result)) {
       return forceCast(result);
@@ -262,17 +280,13 @@ public class DefaultQueryHandler implements QueryHandler {
     querierConfig = Configs.resolveSingle(DefaultQuerierConfig.class);
   }
 
-  @PreDestroy
-  protected synchronized void onPreDestroy() {
-    if (!resultHintHandlers.isUnsatisfied()) {
-      resultHintHandlers.stream().forEach(handler -> {
-        try {
-          handler.close();
-        } catch (Exception e) {
-          logger.log(Level.WARNING, e, () -> format("Close result hint handler %s occurred error!",
-              handler.getClass().getName()));
-        }
-      });
+  protected ResultRecordConverter resolveResultRecordConverter(Query query,
+      QueryParameter queryParameter) {
+    if (!resultRecordConverters.isUnsatisfied()) {
+      return resultRecordConverters.stream().filter(rrc -> rrc.supports(query, queryParameter))
+          .max(ResultRecordConverter::compare).orElse(null);
     }
+    return null;
   }
+
 }

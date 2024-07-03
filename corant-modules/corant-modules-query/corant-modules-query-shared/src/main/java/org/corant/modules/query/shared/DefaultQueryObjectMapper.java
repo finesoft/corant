@@ -180,11 +180,12 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     if (from == null) {
       return new ArrayList<>();
     }
-    if (type instanceof Class) {
-      if (isSimpleClass((Class<?>) type)) {
-        from.replaceAll(e -> Conversions.toObject(e, (Class<?>) type));
+    if (type instanceof Class<?> typeClass) {
+      if (isSimpleClass(typeClass)) {
+        from.replaceAll(e -> Conversions.toObject(e, typeClass));
       } else {
-        from.replaceAll(e -> objectMapper.convertValue(e, (Class<?>) type));
+        from.replaceAll(
+            e -> (typeClass.isInstance(e) ? e : objectMapper.convertValue(e, typeClass)));
       }
     } else {
       final JavaType targetType = objectMapper.constructType(type);

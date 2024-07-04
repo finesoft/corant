@@ -13,8 +13,6 @@
  */
 package org.corant.modules.security;
 
-import org.corant.context.security.SecurityContext;
-
 /**
  * corant-modules-security-api
  *
@@ -24,6 +22,6 @@ public interface SubjectManager {
 
   Subject createSubject(AuthenticationData authcData, AuthorizationData authzData);
 
-  Subject getCurrentSubject(SecurityContext context);
+  Subject getCurrentSubject(Object context);
 
 }

@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security;
 
-import org.corant.context.security.SecurityContext;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -49,8 +48,7 @@ public interface Authenticator extends Sortable {
    * @return true if it has been authenticated otherwise false
    */
   default boolean authenticated(Object context) {
-    return context instanceof SecurityContext
-        && ((SecurityContext) context).getCallerPrincipal() != null;
+    return false;
   }
 
   /**

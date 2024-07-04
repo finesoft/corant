@@ -163,14 +163,20 @@ public abstract class AbstractJMSExtension implements Extension {
             m.getMethod()));
       }
       if (isNotEmpty(mds.key()) && isNotEmpty(mds.value())) {
-        adv.addDeploymentProblem(new CorantRuntimeException(
-            "The message destination either appears on the method or on the first parameter "
-                + "class of the method, and cannot exist at the same time, the method [%s]",
+        // since 2024-07-04
+        logger.info(() -> String.format(
+            "Note: the message destination annotation appears on both the method and the first parameter "
+                + "of the method, and the system uses the annotation above the method by default, [%s].",
             m.getMethod()));
+        // adv.addDeploymentProblem(new CorantRuntimeException(
+        // "The message destination either appears on the method or on the first parameter "
+        // + "class of the method, and cannot exist at the same time, the method [%s]",
+        // m.getMethod()));
       } else if (isEmpty(mds.key()) && isEmpty(mds.value())) {
         adv.addDeploymentProblem(new CorantRuntimeException(
             "Can not find any message destinations on the method [%s]", m.getMethod()));
       }
+
       for (MessageDestination ds : union(mds.key(), mds.value())) {
         connectionFactories.add(ds.connectionFactoryId());
       }

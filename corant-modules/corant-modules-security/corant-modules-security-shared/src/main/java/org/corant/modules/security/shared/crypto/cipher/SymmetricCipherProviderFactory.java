@@ -103,7 +103,7 @@ public enum SymmetricCipherProviderFactory {
   SM4("SM4", 128, -1),
   SM4_IV_GCM("SM4/GCM/NoPadding", 128, 96),
   SM4_IV_CBC_PKCS5("SM4/CBC/PKCS5Padding", 128, 0),
-  SM4_IV_CFB_PKCS5("SM4/CFB/NoPadding", 128, 0),
+  SM4_IV_CFB("SM4/CFB/NoPadding", 128, 0),
   SM4_ECB_PKCS5("SM4/ECB/PKCS5Padding", 128, -1),
   SM4_IV_CTR_PKCS5("SM4/CTR/PKCS5Padding", 128, 0),
   SM4_IV_CTR("SM4/CTR/NoPadding", 128, 0),

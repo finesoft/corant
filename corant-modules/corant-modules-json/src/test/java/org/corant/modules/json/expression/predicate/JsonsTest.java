@@ -14,6 +14,7 @@
 package org.corant.modules.json.expression.predicate;
 
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Sets.setOf;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,10 +22,13 @@ import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.corant.modules.json.Jsons;
 import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
@@ -37,6 +41,13 @@ import junit.framework.TestCase;
  * @author bingo 11:18:16
  */
 public class JsonsTest extends TestCase {
+
+  @Test
+  public void testDate() {
+    Map<String, Object> map = mapOf("date", new Date(), "localDate", new Date());
+    TestDate td = ObjectMappers.fromMap(map, TestDate.class);
+    System.out.println(Jsons.toString(td));
+  }
 
   @Test
   public void testPojoToMap() {
@@ -442,6 +453,28 @@ public class JsonsTest extends TestCase {
 
     public boolean isBooleanValue() {
       return booleanValue;
+    }
+
+  }
+
+  static class TestDate {
+    Date date;
+    LocalDate localDate;
+
+    public Date getDate() {
+      return date;
+    }
+
+    public LocalDate getLocalDate() {
+      return localDate;
+    }
+
+    public void setDate(Date date) {
+      this.date = date;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+      this.localDate = localDate;
     }
 
   }

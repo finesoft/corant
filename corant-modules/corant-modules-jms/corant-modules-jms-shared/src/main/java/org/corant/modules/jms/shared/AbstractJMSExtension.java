@@ -17,9 +17,7 @@ import static java.lang.String.format;
 import static java.util.Collections.newSetFromMap;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.select;
-import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.union;
 import static org.corant.shared.util.Sets.setOf;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -162,23 +160,19 @@ public abstract class AbstractJMSExtension implements Extension {
             "The message driven method [%s] second parameter type must be session.",
             m.getMethod()));
       }
-      if (isNotEmpty(mds.key()) && isNotEmpty(mds.value())) {
-        // since 2024-07-04
-        logger.info(() -> String.format(
-            "Note: the message destination annotation appears on both the method and the first parameter "
-                + "of the method, and the system uses the annotation above the method by default, [%s].",
-            m.getMethod()));
-        // adv.addDeploymentProblem(new CorantRuntimeException(
-        // "The message destination either appears on the method or on the first parameter "
-        // + "class of the method, and cannot exist at the same time, the method [%s]",
-        // m.getMethod()));
-      } else if (isEmpty(mds.key()) && isEmpty(mds.value())) {
+      if (isNotEmpty(mds.key())) {
+        if (isNotEmpty(mds.value())) {
+          logger.info(() -> String.format(
+              "Note: the message destination annotation appears on both the method and the first parameter "
+                  + "of the method, and the system uses the annotation above the method by default, [%s].",
+              m.getMethod()));
+        }
+        mds.key().stream().map(d -> d.connectionFactoryId()).forEach(connectionFactories::add);
+      } else if (isNotEmpty(mds.value())) {
+        mds.value().stream().map(d -> d.connectionFactoryId()).forEach(connectionFactories::add);
+      } else {
         adv.addDeploymentProblem(new CorantRuntimeException(
             "Can not find any message destinations on the method [%s]", m.getMethod()));
-      }
-
-      for (MessageDestination ds : union(mds.key(), mds.value())) {
-        connectionFactories.add(ds.connectionFactoryId());
       }
     });
     for (String cf : connectionFactories) {

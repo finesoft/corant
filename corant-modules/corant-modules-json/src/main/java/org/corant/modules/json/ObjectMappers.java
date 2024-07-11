@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import org.corant.modules.json.extensions.CorantForwardingModule;
 import org.corant.modules.json.extensions.CorantTimeModule;
+import org.corant.modules.json.extensions.CorantTupleModule;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.TypeLiteral;
@@ -59,7 +60,8 @@ public class ObjectMappers {
     defaultObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     defaultObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     defaultObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    defaultObjectMapper.registerModules(new JavaTimeModule(), CorantTimeModule.INSTANCE);
+    defaultObjectMapper.registerModules(new JavaTimeModule(), CorantTimeModule.INSTANCE,
+        CorantTupleModule.INSTANCE);
     // disable nanoseconds
     defaultObjectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
     defaultObjectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
@@ -72,7 +74,8 @@ public class ObjectMappers {
     forwardingObjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     forwardingObjectMapper.getSerializerProvider().setNullKeySerializer(NullSerializer.instance);
     forwardingObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    forwardingObjectMapper.registerModules(new JavaTimeModule(), CorantForwardingModule.INSTANCE);
+    forwardingObjectMapper.registerModules(new JavaTimeModule(), CorantForwardingModule.INSTANCE,
+        CorantTupleModule.INSTANCE);
 
   }
 

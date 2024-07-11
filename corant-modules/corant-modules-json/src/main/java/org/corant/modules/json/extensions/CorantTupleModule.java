@@ -14,9 +14,20 @@
 package org.corant.modules.json.extensions;
 
 import java.io.IOException;
+import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.ubiquity.Tuple;
+import org.corant.shared.ubiquity.Tuple.Dectet;
+import org.corant.shared.ubiquity.Tuple.Duet;
+import org.corant.shared.ubiquity.Tuple.Nonet;
+import org.corant.shared.ubiquity.Tuple.Octet;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Quartet;
+import org.corant.shared.ubiquity.Tuple.Quintet;
 import org.corant.shared.ubiquity.Tuple.Range;
+import org.corant.shared.ubiquity.Tuple.Septet;
+import org.corant.shared.ubiquity.Tuple.Sextet;
 import org.corant.shared.ubiquity.Tuple.Triple;
+import org.corant.shared.ubiquity.Tuple.Triplet;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
@@ -60,15 +71,33 @@ public class CorantTupleModule extends Module {
   @Override
   public void setupModule(SetupContext context) {
     SimpleDeserializers desers = new SimpleDeserializers();
-    desers.addDeserializer(Pair.class, new PairDeserializer());
-    desers.addDeserializer(Range.class, new RangeDeserializer());
-    desers.addDeserializer(Triple.class, new TripleDeserializer());
+    desers.addDeserializer(Pair.class, new TupleDeserializer<>(Pair.class));
+    desers.addDeserializer(Triple.class, new TupleDeserializer<>(Triple.class));
+    desers.addDeserializer(Duet.class, new TupleDeserializer<>(Duet.class));
+    desers.addDeserializer(Triplet.class, new TupleDeserializer<>(Triplet.class));
+    desers.addDeserializer(Range.class, new TupleDeserializer<>(Range.class));
+    desers.addDeserializer(Quartet.class, new TupleDeserializer<>(Quartet.class));
+    desers.addDeserializer(Quintet.class, new TupleDeserializer<>(Quintet.class));
+    desers.addDeserializer(Sextet.class, new TupleDeserializer<>(Sextet.class));
+    desers.addDeserializer(Septet.class, new TupleDeserializer<>(Septet.class));
+    desers.addDeserializer(Octet.class, new TupleDeserializer<>(Octet.class));
+    desers.addDeserializer(Nonet.class, new TupleDeserializer<>(Nonet.class));
+    desers.addDeserializer(Dectet.class, new TupleDeserializer<>(Dectet.class));
     context.addDeserializers(desers);
 
     SimpleSerializers sers = new SimpleSerializers();
-    sers.addSerializer(Pair.class, new PairSerializer());
-    sers.addSerializer(Range.class, new RangeSerializer());
-    sers.addSerializer(Triple.class, new TripleSerializer());
+    sers.addSerializer(Pair.class, new TupleSerializer<>(Pair.class));
+    sers.addSerializer(Triple.class, new TupleSerializer<>(Triple.class));
+    sers.addSerializer(Duet.class, new TupleSerializer<>(Duet.class));
+    sers.addSerializer(Triplet.class, new TupleSerializer<>(Triplet.class));
+    sers.addSerializer(Range.class, new TupleSerializer<>(Range.class));
+    sers.addSerializer(Quartet.class, new TupleSerializer<>(Quartet.class));
+    sers.addSerializer(Quintet.class, new TupleSerializer<>(Quintet.class));
+    sers.addSerializer(Sextet.class, new TupleSerializer<>(Sextet.class));
+    sers.addSerializer(Septet.class, new TupleSerializer<>(Septet.class));
+    sers.addSerializer(Octet.class, new TupleSerializer<>(Octet.class));
+    sers.addSerializer(Nonet.class, new TupleSerializer<>(Nonet.class));
+    sers.addSerializer(Dectet.class, new TupleSerializer<>(Dectet.class));
     context.addSerializers(sers);
   }
 
@@ -80,97 +109,102 @@ public class CorantTupleModule extends Module {
   /**
    * corant-modules-json
    *
-   * @author bingo 下午12:10:10
+   * @author bingo 15:06:03
    */
-  @SuppressWarnings("rawtypes")
-  public static class PairDeserializer extends JsonDeserializer<Pair> {
+  public static class TupleDeserializer<T extends Tuple> extends JsonDeserializer<T> {
+
+    protected final Class<T> clazz;
+
+    public TupleDeserializer(Class<T> clazz) {
+      this.clazz = clazz;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Pair deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
         throws IOException {
       final Object[] array = jsonParser.readValueAs(Object[].class);
-      return Pair.of(array[0], array[1]);
+      if (clazz == Pair.class) {
+        return (T) Pair.of(array[0], array[1]);
+      } else if (clazz == Triple.class) {
+        return (T) Triple.of(array[0], array[1], array[2]);
+      } else if (clazz == Duet.class) {
+        return (T) Tuple.duetOf(array[0], array[1]);
+      } else if (clazz == Triplet.class) {
+        return (T) Tuple.tripletOf(array[0], array[1], array[2]);
+      } else if (clazz == Range.class) {
+        return (T) Range.of((Comparable) array[0], (Comparable) array[1]);
+      } else if (clazz == Quartet.class) {
+        return (T) Tuple.quartetOf(array[0], array[1], array[2], array[3]);
+      } else if (clazz == Quintet.class) {
+        return (T) Tuple.quintetOf(array[0], array[1], array[2], array[3], array[4]);
+      } else if (clazz == Sextet.class) {
+        return (T) Tuple.sextetOf(array[0], array[1], array[2], array[3], array[4], array[5]);
+      } else if (clazz == Septet.class) {
+        return (T) Tuple.septetOf(array[0], array[1], array[2], array[3], array[4], array[5],
+            array[6]);
+      } else if (clazz == Octet.class) {
+        return (T) Tuple.octetOf(array[0], array[1], array[2], array[3], array[4], array[5],
+            array[6], array[7]);
+      } else if (clazz == Nonet.class) {
+        return (T) Tuple.nonetOf(array[0], array[1], array[2], array[3], array[4], array[5],
+            array[6], array[7], array[8]);
+      } else if (clazz == Dectet.class) {
+        return (T) Tuple.dectetOf(array[0], array[1], array[2], array[3], array[4], array[5],
+            array[6], array[7], array[8], array[9]);
+      } else {
+        throw new IOException("Can't deserialize class: " + clazz);
+      }
     }
+
   }
 
   /**
    * corant-modules-json
    *
-   * @author bingo 下午12:10:14
+   * @author bingo 15:05:57
    */
-  @SuppressWarnings("rawtypes")
-  public static class PairSerializer extends JsonSerializer<Pair> {
-    @Override
-    public void serialize(Pair pair, JsonGenerator gen, SerializerProvider serializerProvider)
-        throws IOException {
-      gen.writeStartArray(pair, 2);
-      gen.writeObject(pair.getLeft());
-      gen.writeObject(pair.getRight());
-      gen.writeEndArray();
-    }
-  }
+  public static class TupleSerializer<T extends Tuple> extends JsonSerializer<T> {
 
-  /**
-   * corant-modules-json
-   *
-   * @author bingo 下午12:10:10
-   */
-  @SuppressWarnings("rawtypes")
-  public static class RangeDeserializer extends JsonDeserializer<Range> {
-    @SuppressWarnings("unchecked")
-    @Override
-    public Range deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-        throws IOException {
-      final Object[] array = jsonParser.readValueAs(Object[].class);
-      return Range.of((Comparable) array[0], (Comparable) array[1]);
-    }
-  }
+    protected final int size;
 
-  /**
-   * corant-modules-json
-   *
-   * @author bingo 下午12:10:14
-   */
-  @SuppressWarnings("rawtypes")
-  public static class RangeSerializer extends JsonSerializer<Range> {
-    @Override
-    public void serialize(Range range, JsonGenerator gen, SerializerProvider serializerProvider)
-        throws IOException {
-      gen.writeStartArray(range, 2);
-      gen.writeObject(range.getMin());
-      gen.writeObject(range.getMax());
-      gen.writeEndArray();
+    public TupleSerializer(Class<T> clazz) {
+      if (clazz == Pair.class) {
+        size = 2;
+      } else if (clazz == Triple.class) {
+        size = 3;
+      } else if (clazz == Duet.class) {
+        size = 2;
+      } else if (clazz == Triplet.class) {
+        size = 3;
+      } else if (clazz == Range.class) {
+        size = 2;
+      } else if (clazz == Quartet.class) {
+        size = 4;
+      } else if (clazz == Quintet.class) {
+        size = 5;
+      } else if (clazz == Sextet.class) {
+        size = 6;
+      } else if (clazz == Septet.class) {
+        size = 7;
+      } else if (clazz == Octet.class) {
+        size = 8;
+      } else if (clazz == Nonet.class) {
+        size = 9;
+      } else if (clazz == Dectet.class) {
+        size = 10;
+      } else {
+        throw new NotSupportedException("Can't support serialize class: " + clazz);
+      }
     }
-  }
 
-  /**
-   * corant-modules-json
-   *
-   * @author bingo 下午12:10:10
-   */
-  @SuppressWarnings("rawtypes")
-  public static class TripleDeserializer extends JsonDeserializer<Triple> {
     @Override
-    public Triple deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+    public void serialize(Tuple tuple, JsonGenerator gen, SerializerProvider serializerProvider)
         throws IOException {
-      final Object[] array = jsonParser.readValueAs(Object[].class);
-      return Triple.of(array[0], array[1], array[2]);
-    }
-  }
-
-  /**
-   * corant-modules-json
-   *
-   * @author bingo 下午12:10:14
-   */
-  @SuppressWarnings("rawtypes")
-  public static class TripleSerializer extends JsonSerializer<Triple> {
-    @Override
-    public void serialize(Triple triple, JsonGenerator gen, SerializerProvider serializerProvider)
-        throws IOException {
-      gen.writeStartArray(triple, 3);
-      gen.writeObject(triple.getLeft());
-      gen.writeObject(triple.getMiddle());
-      gen.writeObject(triple.getRight());
+      gen.writeStartArray(tuple, size);
+      for (int i = 0; i < size; i++) {
+        gen.writeObject(tuple.elementAt(i));
+      }
       gen.writeEndArray();
     }
   }

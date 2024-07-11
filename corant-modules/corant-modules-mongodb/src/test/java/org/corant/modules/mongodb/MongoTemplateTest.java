@@ -47,7 +47,9 @@ import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.corant.modules.json.ObjectMappers;
+import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Quartet;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,6 +144,28 @@ public class MongoTemplateTest extends TestCase {
       }
     });
     mt.saveMany("save-many-test", list);
+  }
+
+  @Test
+  public void testTuples() {
+    TuplePojo pojo = new TuplePojo();
+    pojo.setSinglePair(Pair.of("single", 91L));
+    pojo.setSingleQuartet(Tuple.quartetOf("SQA", "SQB", 123211, "4.98F"));
+    pojo.setSingleTriple(Tuple.tripleOf("sQB", 1231, "0.98F"));
+    pojo.setListPairs(listOf(Pair.of("a", 1L), Pair.of("b", 2L), Pair.of("c", 91231239123L)));
+    pojo.setListQuartets(listOf(Tuple.quartetOf("QA", "QB", 1, "0.98F"),
+        Tuple.quartetOf("QAA", "QBB", 11, "5.18F")));
+    pojo.setListTriples(
+        listOf(Tuple.tripleOf("QB", 1, "0.98F"), Tuple.tripleOf("QBB", 11, "5.18F")));
+
+    MongoClient mc = Mongos.resolveClient(murl);
+    MongoDatabase md = mc.getDatabase("anncy");
+    MongoTemplate mt = new MongoTemplate(md);
+    mt.save("tuple", pojo);
+    System.out.println(pojo.getId());
+    TuplePojo mapPojo = mt.query().collectionName("tuple").filterMap(mapOf("_id", pojo.getId()))
+        .findOneAs(TuplePojo.class);
+    System.out.println(pojo.equals(mapPojo));
   }
 
   @Test
@@ -591,5 +615,102 @@ public class MongoTemplateTest extends TestCase {
     public Class<PowerStatus> getEncoderClass() {
       return PowerStatus.class;
     }
+  }
+
+  static class TuplePojo {
+
+    Long id = System.currentTimeMillis();
+
+    Pair<String, Long> singlePair;
+    List<Pair<String, Long>> listPairs;
+
+    Quartet<String, String, Integer, String> singleQuartet;
+    List<Quartet<String, String, Integer, String>> listQuartets;
+
+    Triple<String, Integer, String> singleTriple;
+    List<Triple<String, Integer, String>> listTriples;
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      TuplePojo other = (TuplePojo) obj;
+      return Objects.equals(listPairs, other.listPairs)
+          && Objects.equals(listQuartets, other.listQuartets)
+          && Objects.equals(listTriples, other.listTriples)
+          && Objects.equals(singlePair, other.singlePair)
+          && Objects.equals(singleQuartet, other.singleQuartet)
+          && Objects.equals(singleTriple, other.singleTriple);
+    }
+
+    public Long getId() {
+      return id;
+    }
+
+    public List<Pair<String, Long>> getListPairs() {
+      return listPairs;
+    }
+
+    public List<Quartet<String, String, Integer, String>> getListQuartets() {
+      return listQuartets;
+    }
+
+    public List<Triple<String, Integer, String>> getListTriples() {
+      return listTriples;
+    }
+
+    public Pair<String, Long> getSinglePair() {
+      return singlePair;
+    }
+
+    public Quartet<String, String, Integer, String> getSingleQuartet() {
+      return singleQuartet;
+    }
+
+    public Triple<String, Integer, String> getSingleTriple() {
+      return singleTriple;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(listPairs, listQuartets, listTriples, singlePair, singleQuartet,
+          singleTriple);
+    }
+
+    public void setId(Long id) {
+      this.id = id;
+    }
+
+    public void setListPairs(List<Pair<String, Long>> listPairs) {
+      this.listPairs = listPairs;
+    }
+
+    public void setListQuartets(List<Quartet<String, String, Integer, String>> listQuartets) {
+      this.listQuartets = listQuartets;
+    }
+
+    public void setListTriples(List<Triple<String, Integer, String>> listTriples) {
+      this.listTriples = listTriples;
+    }
+
+    public void setSinglePair(Pair<String, Long> singlePair) {
+      this.singlePair = singlePair;
+    }
+
+    public void setSingleQuartet(Quartet<String, String, Integer, String> singleQuartet) {
+      this.singleQuartet = singleQuartet;
+    }
+
+    public void setSingleTriple(Triple<String, Integer, String> singleTriple) {
+      this.singleTriple = singleTriple;
+    }
+
   }
 }

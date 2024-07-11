@@ -100,6 +100,14 @@ public interface Tuple {
   boolean contains(Object o);
 
   /**
+   * Returns the element at the specified position in this tuple.
+   *
+   * @param <E> the expected element type
+   * @param index index of the element to return
+   */
+  <E> E elementAt(int index);
+
+  /**
    * Returns {@code true} if and only if all the elements of tuple are null.
    *
    * @return isEmpty
@@ -131,6 +139,12 @@ public interface Tuple {
     @Override
     public boolean contains(Object o) {
       return series != null && Arrays.stream(series).anyMatch(a -> Objects.areEqual(a, o));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <E> E elementAt(int index) {
+      return (E) series[index];
     }
 
     @Override
@@ -172,12 +186,6 @@ public interface Tuple {
       return join(",", series);
     }
 
-    @SuppressWarnings("unchecked")
-    protected <E> E elementAt(int index) {
-      // java.util.Objects.checkIndex(index, series.length);
-      return (E) series[index];
-    }
-
   }
 
   /**
@@ -193,8 +201,8 @@ public interface Tuple {
       this(new Object[] {a, b, c, d, e, f, g, h, i, j});
     }
 
-    protected Dectet(Object... datas) {
-      super(datas);
+    protected Dectet(Object... elements) {
+      super(elements);
     }
 
     public J tenth() {
@@ -214,8 +222,8 @@ public interface Tuple {
       this(new Object[] {a, b});
     }
 
-    protected Duet(Object... datas) {
-      super(datas);
+    protected Duet(Object... elements) {
+      super(elements);
     }
 
     public A first() {
@@ -241,8 +249,8 @@ public interface Tuple {
       this(new Object[] {a, b, c, d, e, f, g, h, i});
     }
 
-    protected Nonet(Object... datas) {
-      super(datas);
+    protected Nonet(Object... elements) {
+      super(elements);
     }
 
     public I ninth() {
@@ -263,8 +271,8 @@ public interface Tuple {
       this(new Object[] {a, b, c, d, e, f, g, h});
     }
 
-    protected Octet(Object... datas) {
-      super(datas);
+    protected Octet(Object... elements) {
+      super(elements);
     }
 
     public H eighth() {
@@ -319,6 +327,13 @@ public interface Tuple {
     @Override
     public boolean contains(Object o) {
       return areEqual(o, left) || areEqual(o, right);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E elementAt(int index) {
+      java.util.Objects.checkIndex(index, 2);
+      return (index == 0) ? (E) left : (E) right;
     }
 
     @Override
@@ -525,6 +540,13 @@ public interface Tuple {
       return lae(min, value) && gae(max, value);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E elementAt(int index) {
+      java.util.Objects.checkIndex(index, 2);
+      return (index == 0) ? (E) min : (E) max;
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
@@ -706,6 +728,13 @@ public interface Tuple {
       return areEqual(o, left) || areEqual(o, middle) || areEqual(o, right);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E> E elementAt(int index) {
+      java.util.Objects.checkIndex(index, 3);
+      return (index == 0) ? (E) left : (index == 1) ? (E) middle : (E) right;
+    }
+
     @Override
     public boolean equals(final Object obj) {
       if (obj == this) {
@@ -810,8 +839,8 @@ public interface Tuple {
       this(new Object[] {a, b, c});
     }
 
-    protected Triplet(Object... datas) {
-      super(datas);
+    protected Triplet(Object... elements) {
+      super(elements);
     }
 
     public C third() {

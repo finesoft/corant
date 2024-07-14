@@ -20,14 +20,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Stereotype;
-import feign.Contract;
-import feign.InvocationHandlerFactory;
-import feign.Logger;
-import feign.RequestInterceptor;
-import feign.Retryer;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
-import feign.codec.ErrorDecoder;
 
 /**
  * corant-modules-rpc-feign
@@ -61,25 +53,4 @@ public @interface RegisterFeignClient {
    */
   String configKey() default "";
 
-  int connectTimeoutMillis() default 10 * 1000;
-
-  Class<? extends Contract> contract() default Contract.Default.class;
-
-  boolean decode404() default false;
-
-  Class<? extends Decoder> decoder() default Decoder.Default.class;
-
-  Class<? extends Encoder> encoder() default Encoder.Default.class;
-
-  Class<? extends ErrorDecoder> errorDecoder() default ErrorDecoder.Default.class;
-
-  Class<? extends InvocationHandlerFactory> invocationHandlerFactory() default InvocationHandlerFactory.Default.class;
-
-  Class<? extends Logger> logger() default Logger.NoOpLogger.class;
-
-  int readTimeoutMillis() default 60 * 1000;
-
-  Class<? extends RequestInterceptor>[] requestInterceptors() default {};
-
-  Class<? extends Retryer> retryer() default Retryer.Default.class;
 }

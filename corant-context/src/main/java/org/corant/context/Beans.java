@@ -25,10 +25,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import jakarta.enterprise.context.NormalScope;
 import jakarta.enterprise.context.spi.CreationalContext;
 import jakarta.enterprise.inject.AmbiguousResolutionException;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.literal.NamedLiteral;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
 import jakarta.enterprise.inject.spi.AnnotatedType;
@@ -36,6 +38,7 @@ import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.TypeLiteral;
+import jakarta.inject.Scope;
 import jakarta.inject.Singleton;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.context.qualifier.Unnamed;
@@ -239,6 +242,9 @@ public class Beans {
   /**
    * Returns the CDI bean scope of the given type and qualifiers or null if the given type is not a
    * CDI bean type.
+   * <p>
+   * Note: This method must be called after the CDI has been initialized (AfterBeanDiscovery event
+   * is fired)
    *
    * @param type the bean class
    * @param qualifiers the type instance qualifiers
@@ -449,6 +455,55 @@ public class Beans {
   public static <T, R> R resolveApply(Class<T> instanceClass, Function<T, R> function,
       Annotation... qualifiers) {
     return shouldNotNull(function).apply(resolve(instanceClass, qualifiers));
+  }
+
+  /**
+   * Resolves and returns the bean scope of the given class via reflection, or null if not found.
+   * <p>
+   * Note: This method does not depend on the CDI being initialized or not, so the result returned
+   * is not necessarily the actual situation
+   *
+   * @param clazz the class to be resolve
+   */
+  public static Class<? extends Annotation> resolveScope(Class<?> clazz) {
+    if (clazz != null) {
+      for (Annotation annotation : clazz.getAnnotations()) {
+        if (annotation.annotationType().getAnnotation(NormalScope.class) != null
+            || annotation.annotationType().getAnnotation(Scope.class) != null) {
+          return annotation.annotationType();
+        }
+
+        if (annotation.annotationType().getAnnotation(Stereotype.class) != null) {
+          for (Annotation stereAnn : annotation.annotationType().getAnnotations()) {
+            if (stereAnn.annotationType().getAnnotation(NormalScope.class) != null
+                || stereAnn.annotationType().getAnnotation(Scope.class) != null) {
+              return stereAnn.annotationType();
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolves and returns the bean stereotype of the given class via reflection, or null if not
+   * found.
+   * <p>
+   * Note: This method does not depend on the CDI being initialized or not, so the result returned
+   * is not necessarily the actual situation
+   *
+   * @param clazz the class to be resolve
+   */
+  public static Class<? extends Annotation> resolveStereoType(Class<?> clazz) {
+    if (clazz != null) {
+      for (Annotation annotation : clazz.getAnnotations()) {
+        if (annotation.annotationType().getAnnotation(Stereotype.class) != null) {
+          return annotation.annotationType();
+        }
+      }
+    }
+    return null;
   }
 
   /**

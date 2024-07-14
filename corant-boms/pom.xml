@@ -54,7 +54,7 @@
 		<version.ehcache>3.10.8</version.ehcache>
 		<version.elasticsearch>6.5.4</version.elasticsearch>
 		<version.exec-maven-plugin>3.1.0</version.exec-maven-plugin>
-		<version.feign>12.3</version.feign>
+		<version.feign>13.3</version.feign>
 		<version.flatten-maven-plugin>1.4.1</version.flatten-maven-plugin>
 		<version.flyway>7.15.0</version.flyway>
 		<version.freemarker>2.3.33</version.freemarker>
@@ -69,7 +69,7 @@
 		<version.hppc>0.9.1</version.hppc>
 		<version.hsqldb>2.7.2</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
-		<version.jackson>2.17.1</version.jackson>
+		<version.jackson>2.17.2</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.11</version.javafx>
@@ -1915,6 +1915,11 @@
 			<dependency>
 				<groupId>io.github.openfeign</groupId>
 				<artifactId>feign-core</artifactId>
+				<version>${version.feign}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.github.openfeign</groupId>
+				<artifactId>feign-jackson</artifactId>
 				<version>${version.feign}</version>
 			</dependency>
 			<dependency>

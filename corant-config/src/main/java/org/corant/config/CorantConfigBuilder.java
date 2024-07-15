@@ -173,7 +173,7 @@ public class CorantConfigBuilder implements ConfigBuilder {
     }
 
     logger.fine(() -> {
-      StringBuilder sb = new StringBuilder("Resolved config_properties:\n\n{\n");
+      StringBuilder sb = new StringBuilder("Resolve config_properties:\n\n{\n");
       sortMap.forEach((k, v) -> sb.append("  ").append(k).append(" : ").append(v).append("\n"));
       sb.append("}\n\n");
       return sb.toString();

@@ -157,7 +157,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed executor: %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolve managed executor: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedExecutorService.class, esn);
         }
@@ -173,7 +173,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved context service: %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolve context service: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ContextService.class, esn);
         }
@@ -191,7 +191,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed scheduled executor: %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolve managed scheduled executor: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedScheduledExecutorService.class, esn);
         }
@@ -208,7 +208,7 @@ public class ConcurrentExtension implements Extension {
                 throw new CorantRuntimeException(e);
               }
             });
-        logger.info(() -> format("Resolved managed thread factory: %s %s", cfg.getName(), cfg));
+        logger.info(() -> format("Resolve managed thread factory: %s %s", cfg.getName(), cfg));
         if (cfg.isEnableJndi() && isNotBlank(cfg.getName())) {
           registerJndi(cfg.getName(), ManagedThreadFactory.class, esn);
         }

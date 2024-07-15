@@ -104,7 +104,7 @@ public class JMSMessageDispatcher implements MessageDispatcher {
       Map<String, Object> properties, Message message) {
     JMSContext ctx = obtainJmsContext(broker);
     final Destination dest = resolveDestination(message, ctx, multicast, destination);
-    logger.finer(() -> format("Resolved JMS message destination %s for domain message %s", dest,
+    logger.finer(() -> format("Resolve JMS message destination %s for domain message %s", dest,
         message.getClass()));
     final jakarta.jms.Message jmsMsg = createJMSMessage(ctx, message);
     if (isNotEmpty(properties)) {

@@ -91,7 +91,7 @@ public class QueryExtension implements Extension {
       resolve(QueryMappingService.class).getQueries();
       for (Class<?> cls : declarativeQueryServiceClasses) {
         String inst = resolve(cls, AutoCreated.INST).toString();
-        logger.info(() -> format("Resolve declarative query service %s, %s", cls, inst));
+        logger.info(() -> format("Resolve declarative query service %s, instance: %s", cls, inst));
       }
     }
   }

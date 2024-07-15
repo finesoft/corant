@@ -116,6 +116,6 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
   @Override
   public String toString() {
-    return "Corant proxy for ".concat(clazz.getName());
+    return clazz.getName().concat("(corant proxy)");
   }
 }

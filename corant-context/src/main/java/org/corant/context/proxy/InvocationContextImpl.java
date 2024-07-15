@@ -157,7 +157,7 @@ public class InvocationContextImpl implements InvocationContext {
     } else if ("hashCode".equals(method.getName()) && (args == null || args.length == 0)) {
       return hashCode();
     } else if ("toString".equals(method.getName()) && (args == null || args.length == 0)) {
-      return "Corant proxy for ".concat(targetClass.getName());
+      return targetClass.getName().concat("(corant proxy)");
     } else {
       throw new CorantRuntimeException("Can not find method %s.", method);
     }

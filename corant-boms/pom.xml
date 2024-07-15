@@ -72,7 +72,7 @@
 		<version.jackson>2.17.2</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
-		<version.javafx>17.0.11</version.javafx>
+		<version.javafx>17.0.12-ea+1</version.javafx>
 		<version.javassist>3.29.2-GA</version.javassist>
 		<version.jakarta.activation-api>2.0.1</version.jakarta.activation-api>
 		<version.jakarta.annotation-api>2.1.1</version.jakarta.annotation-api>

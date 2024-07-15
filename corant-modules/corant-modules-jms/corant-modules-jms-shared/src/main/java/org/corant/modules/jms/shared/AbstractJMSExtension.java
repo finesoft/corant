@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.Observes;
@@ -36,6 +37,7 @@ import jakarta.enterprise.inject.spi.ProcessInjectionPoint;
 import jakarta.enterprise.inject.spi.WithAnnotations;
 import jakarta.jms.JMSConnectionFactory;
 import jakarta.jms.Session;
+import org.corant.context.Beans;
 import org.corant.context.proxy.ContextualMethodHandler;
 import org.corant.context.proxy.ProxyBuilder;
 import org.corant.context.qualifier.Qualifiers.NamedQualifierObjectManager;
@@ -45,6 +47,7 @@ import org.corant.modules.jms.annotation.MessageDriven;
 import org.corant.modules.jms.annotation.MessageReply;
 import org.corant.modules.jms.annotation.MessageSend;
 import org.corant.modules.jms.marshaller.MessageMarshaller;
+import org.corant.modules.jta.shared.TransactionService;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Tuple.Pair;
@@ -143,8 +146,8 @@ public abstract class AbstractJMSExtension implements Extension {
   void validate(@Observes AfterDeploymentValidation adv, BeanManager bm) {
     for (String marshaller : marshallers) {
       if (findNamed(MessageMarshaller.class, marshaller).isEmpty()) {
-        adv.addDeploymentProblem(new CorantRuntimeException(
-            "Can not find any message marshaller named [%s]", marshaller));
+        adv.addDeploymentProblem(
+            new CorantRuntimeException("Can't find any message marshaller named [%s]", marshaller));
       }
     }
     receiveMethods.forEach((m, mds) -> {
@@ -167,21 +170,29 @@ public abstract class AbstractJMSExtension implements Extension {
                   + "of the method, and the system uses the annotation above the method by default, [%s].",
               m.getMethod()));
         }
-        mds.key().stream().map(d -> d.connectionFactoryId()).forEach(connectionFactories::add);
+        mds.key().stream().map(
+            (Function<? super MessageDestination, ? extends String>) MessageDestination::connectionFactoryId)
+            .forEach(connectionFactories::add);
       } else if (isNotEmpty(mds.value())) {
-        mds.value().stream().map(d -> d.connectionFactoryId()).forEach(connectionFactories::add);
+        mds.value().stream().map(
+            (Function<? super MessageDestination, ? extends String>) MessageDestination::connectionFactoryId)
+            .forEach(connectionFactories::add);
       } else {
         adv.addDeploymentProblem(new CorantRuntimeException(
-            "Can not find any message destinations on the method [%s]", m.getMethod()));
+            "Can't find any message destinations on the method [%s]", m.getMethod()));
       }
     });
     for (String cf : connectionFactories) {
-      if (configManager.get(cf) == null) {
-        adv.addDeploymentProblem(new CorantRuntimeException(
-            "Can not find JMS connection factory config by id [%s]", cf));
+      AbstractJMSConfig config = configManager.get(cf);
+      if (config == null) {
+        adv.addDeploymentProblem(
+            new CorantRuntimeException("Can't find JMS connection factory config id: [%s]", cf));
+      } else if (config.isXa() && Beans.find(TransactionService.class).isEmpty()) {
+        // FIXME
+        adv.addDeploymentProblem(
+            new CorantRuntimeException("Can't find any JTA XA provider for config id:[%s]", cf));
       }
     }
-
   }
 
 }

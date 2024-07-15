@@ -13,7 +13,10 @@
  */
 package org.corant.modules.jta.shared;
 
+import static org.corant.context.Beans.findAnyway;
 import static org.corant.context.Beans.resolveAnyway;
+import java.util.Optional;
+import javax.transaction.xa.XAResource;
 import jakarta.transaction.RollbackException;
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
@@ -21,7 +24,6 @@ import jakarta.transaction.SystemException;
 import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.UserTransaction;
-import javax.transaction.xa.XAResource;
 import org.corant.modules.jta.shared.TransactionalAction.TransactionalActuator;
 import org.corant.shared.exception.CorantRuntimeException;
 
@@ -58,13 +60,6 @@ public interface TransactionService {
    *
    */
   static TransactionalActuator actuator() {
-    return new TransactionalActuator();
-  }
-
-  /**
-   * @see #actuator()
-   */
-  static TransactionalActuator withTransaction() {
     return new TransactionalActuator();
   }
 
@@ -119,7 +114,8 @@ public interface TransactionService {
    * Returns whether the current transaction is active.
    */
   static boolean isCurrentTransactionActive() {
-    return resolveAnyway(TransactionService.class).isTransactionActive();
+    Optional<TransactionService> service = findAnyway(TransactionService.class);
+    return service.isPresent() && service.get().isTransactionActive();
   }
 
   static void registerSynchronizationToCurrentTransaction(Synchronization synchronization) {
@@ -132,6 +128,13 @@ public interface TransactionService {
 
   static UserTransaction userTransaction() {
     return resolveAnyway(TransactionService.class).getUserTransaction();
+  }
+
+  /**
+   * @see #actuator()
+   */
+  static TransactionalActuator withTransaction() {
+    return new TransactionalActuator();
   }
 
   default void delistXAResource(XAResource xar, int flag) throws SystemException {

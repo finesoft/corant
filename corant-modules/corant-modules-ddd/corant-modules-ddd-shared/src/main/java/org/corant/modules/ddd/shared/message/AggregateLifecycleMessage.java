@@ -44,6 +44,11 @@ public class AggregateLifecycleMessage extends AbstractAggregateMessage implemen
     }
   }
 
+  AggregateLifecycleMessage() {
+    lifecycle = null;
+    payload = null;
+  }
+
   public Lifecycle getLifecycle() {
     return lifecycle;
   }

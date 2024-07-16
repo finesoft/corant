@@ -55,6 +55,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+import org.assertj.core.util.Arrays;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter;
 import org.corant.shared.conversion.converter.AbstractTemporalConverter.TemporalFormatter;
@@ -63,6 +64,7 @@ import org.corant.shared.resource.SourceType;
 import org.corant.shared.retry.BackoffStrategy.BackoffAlgorithm;
 import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Sextet;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.junit.Test;
@@ -363,14 +365,35 @@ public class ConversionsTest extends TestCase {
     Pair<String, Instant> pair = Tuple.pairOf("left", Instant.ofEpochMilli(epoMills));
     Triple<String, String, Instant> triple =
         Tuple.tripleOf("left", "middle", Instant.ofEpochMilli(epoMills));
+    Sextet<String, String, String, Instant, Instant, Instant> sextet =
+        Tuple.sextetOf("first", "second", "third", Instant.ofEpochMilli(epoMills),
+            Instant.ofEpochMilli(epoMills), Instant.ofEpochMilli(epoMills));
+
     assertEquals(pair, toObject(mapOf("left", "left", "right", epoMills),
         new TypeLiteral<Pair<String, Instant>>() {}));
     assertEquals(triple, toObject(mapOf("left", "left", "middle", "middle", "right", epoMills),
         new TypeLiteral<Triple<String, String, Instant>>() {}));
+    assertEquals(sextet,
+        toObject(
+            mapOf("first", "first", "second", "second", "third", "third", "fourth", epoMills,
+                "fifth", epoMills, "sixth", epoMills),
+            new TypeLiteral<Sextet<String, String, String, Instant, Instant, Instant>>() {}));
     assertEquals(pair,
         toObject(new Object[] {"left", epoMills}, new TypeLiteral<Pair<String, Instant>>() {}));
     assertEquals(triple, toObject(new Object[] {"left", "middle", epoMills},
         new TypeLiteral<Triple<String, String, Instant>>() {}));
+    assertEquals(sextet,
+        toObject(new Object[] {"first", "second", "third", epoMills, epoMills, epoMills},
+            new TypeLiteral<Sextet<String, String, String, Instant, Instant, Instant>>() {}));
+    assertEquals(pair, toObject(Arrays.asList(new Object[] {"left", epoMills}),
+        new TypeLiteral<Pair<String, Instant>>() {}));
+    assertEquals(triple, toObject(Arrays.asList(new Object[] {"left", "middle", epoMills}),
+        new TypeLiteral<Triple<String, String, Instant>>() {}));
+    assertEquals(sextet,
+        toObject(
+            Arrays.asList(new Object[] {"first", "second", "third", epoMills, epoMills, epoMills}),
+            new TypeLiteral<Sextet<String, String, String, Instant, Instant, Instant>>() {}));
+
   }
 
   @SuppressWarnings("rawtypes")

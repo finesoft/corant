@@ -262,10 +262,10 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
     });
     if (success) {
       evolutionaryAggregates.forEach((k, v) -> {
-        if (v.right().signFlushed() && supportsPersistedObserver(k.getTypeCls())) {
+        if (v.right().signFlushed() && supportsPersistedObserver(k.getTypeClass())) {
           try {
             CDIs.fireAsyncEvent(new AggregatePersistedEvent(k, v.right()),
-                AggregateTypeLiteral.of(k.getTypeCls()));
+                AggregateTypeLiteral.of(k.getTypeClass()));
           } catch (Exception ex) {
             logger.log(Level.WARNING, ex, () -> "Fire persist event occurred error!");
           }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,25 +11,9 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.ddd;
-
-import java.beans.Transient;
-import java.io.Serializable;
-import java.time.Instant;
-
 /**
- * corant-modules-ddd-api
- *
- * @author bingo 上午12:27:12
+ * corant-shared
+ * 
+ * @author bingo 16:35:30
  */
-public interface Event extends Serializable {
-
-  default Instant getOccurredTime() {
-    return null;
-  }
-
-  @Transient
-  default Object getSource() {
-    return null;
-  }
-}
+package org.corant.shared.conversion.converter.particular;

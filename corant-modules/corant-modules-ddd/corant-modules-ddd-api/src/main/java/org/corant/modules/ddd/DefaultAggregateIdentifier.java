@@ -14,10 +14,12 @@
 package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
-import java.beans.Transient;
+import static org.corant.shared.util.Objects.forceCast;
 import java.io.Serializable;
+import java.util.Objects;
+import jakarta.persistence.Transient;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
-import org.corant.shared.util.Objects;
+import org.corant.shared.util.Classes;
 
 /**
  * corant-modules-ddd-api
@@ -30,14 +32,26 @@ public final class DefaultAggregateIdentifier implements AggregateIdentifier {
 
   private final Serializable id;
 
-  private final Class<? extends Aggregate> typeCls;
+  private final String type;
 
-  private final int hash;
+  private volatile Class<? extends Aggregate> typeClass;
 
+  @SuppressWarnings("unchecked")
   public DefaultAggregateIdentifier(Aggregate aggregate) {
     id = shouldNotNull(shouldNotNull(aggregate).getId());
-    typeCls = aggregate.getClass();
-    hash = Objects.hash(id, typeCls);
+    typeClass = (Class<? extends Aggregate>) Classes.getUserClass(aggregate);
+    type = typeClass.getCanonicalName();
+  }
+
+  public DefaultAggregateIdentifier(Serializable id, Class<? extends Aggregate> typeClass) {
+    this.id = shouldNotNull(id);
+    this.typeClass = shouldNotNull(forceCast(Classes.getUserClass(typeClass)));
+    type = this.typeClass.getCanonicalName();
+  }
+
+  DefaultAggregateIdentifier() {
+    id = null;
+    type = null;
   }
 
   @Override
@@ -52,18 +66,7 @@ public final class DefaultAggregateIdentifier implements AggregateIdentifier {
       return false;
     }
     DefaultAggregateIdentifier other = (DefaultAggregateIdentifier) obj;
-    if (id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!id.equals(other.id)) {
-      return false;
-    }
-    if (typeCls == null) {
-      return other.typeCls == null;
-    } else {
-      return typeCls.equals(other.typeCls);
-    }
+    return Objects.equals(id, other.id) && Objects.equals(type, other.type);
   }
 
   @Override
@@ -73,23 +76,28 @@ public final class DefaultAggregateIdentifier implements AggregateIdentifier {
 
   @Override
   public String getType() {
-    return typeCls == null ? null : typeCls.getName();
+    return type;
   }
 
   @Override
   @Transient
-  public Class<? extends Aggregate> getTypeCls() {
-    return typeCls;
+  @java.beans.Transient
+  public Class<? extends Aggregate> getTypeClass() {
+    if (typeClass == null) {
+      synchronized (this) {
+        typeClass = forceCast(Classes.tryAsClass(type));
+      }
+    }
+    return typeClass;
   }
 
   @Override
   public int hashCode() {
-    return hash;
+    return Objects.hash(id, type);
   }
 
   @Override
   public String toString() {
-    return "{\"typeCls\":\"" + typeCls + "\",\"id\":" + id + "}";
+    return "{\"type\":\"" + type + "\",\"id\":" + id + "}";
   }
-
 }

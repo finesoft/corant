@@ -144,7 +144,7 @@ public interface Aggregate extends Entity {
     @Override
     String getType();
 
-    default Class<? extends Aggregate> getTypeCls() {
+    default Class<? extends Aggregate> getTypeClass() {
       return forceCast(tryAsClass(getType()));
     }
   }

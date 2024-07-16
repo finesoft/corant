@@ -67,7 +67,7 @@ import net.jcip.annotations.GuardedBy;
 public class FreemarkerExecutions
     implements BeforeQueryMappingInitializeHandler, AfterQueryMappingInitializedHandler {
 
-  public static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_32);
+  public static final Configuration FM_CFG = new Configuration(Configuration.VERSION_2_3_33);
 
   protected static final Logger logger =
       Logger.getLogger(FreemarkerExecutions.class.getCanonicalName());

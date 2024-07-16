@@ -135,7 +135,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
       int i = MAX_CHANGES_ITERATIONS;
       while (true) {
         evolutionaryAggregates.forEach((k, v) -> {
-          if (extension.supportsEvolutionaryObserver(k.getTypeCls())) {
+          if (extension.supportsEvolutionaryObserver(k.getTypeClass())) {
             temp.put(k, v);
           }
         });
@@ -148,7 +148,7 @@ public abstract class AbstractJTAJPAUnitOfWork extends AbstractJPAUnitOfWork
             evolutions.put(k, v);
             Aggregate aggregate = registeredAggregates.get(k);
             Lifecycle lifecycle = v.right();
-            AggregateTypeLiteral type = AggregateTypeLiteral.of(k.getTypeCls());
+            AggregateTypeLiteral type = AggregateTypeLiteral.of(k.getTypeClass());
             CDIs.fireEvent(new AggregateEvolutionaryEvent(aggregate, lifecycle), type);
             fanout.set(true);
           }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.corant.modules.query.QueryRuntimeException;
+import org.corant.modules.query.mapping.Query;
 import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterHints;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -93,15 +94,17 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
     if (arg instanceof WrapperTemplateModel) {
       return ((WrapperTemplateModel) arg).getWrappedObject();
     } else if (arg instanceof TemplateScalarModel) {
-      return ((TemplateScalarModel) arg).getAsString().trim(); // FIXME trim ?
+      if (getQueryProperty(".disable-trim-string-parameter", Boolean.class, false)) {
+        return ((TemplateScalarModel) arg).getAsString();
+      }
+      return ((TemplateScalarModel) arg).getAsString().trim();
     } else if (arg instanceof TemplateDateModel) {
       return ((TemplateDateModel) arg).getAsDate();
     } else if (arg instanceof TemplateNumberModel) {
       return ((TemplateNumberModel) arg).getAsNumber();
     } else if (arg instanceof TemplateBooleanModel) {
       return ((TemplateBooleanModel) arg).getAsBoolean();
-    } else if (arg instanceof TemplateSequenceModel) {
-      TemplateSequenceModel tsm = (TemplateSequenceModel) arg;
+    } else if (arg instanceof TemplateSequenceModel tsm) {
       int size = tsm.size();
       List<Object> list = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
@@ -170,6 +173,62 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
     return null;
   }
 
+  protected abstract Query getQuery();
+
+  protected <T> T getQueryProperty(String name, Class<T> type, T nvl) {
+    if (getQuery() != null) {
+      return getQuery().getProperty(name, type, nvl);
+    }
+    return nvl;
+  }
+
+  /**
+   * Return whether the element of the passed iterable is simple type.
+   *
+   * @param it the iterable to be checked
+   */
+  protected boolean isSimpleElement(Iterable<?> it) {
+    if (it != null) {
+      for (Object o : it) {
+        if (o != null && !isSimpleType(o.getClass())) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Return whether the element of the passed array is simple type.
+   *
+   * @param array the array to be checked
+   */
+  protected boolean isSimpleElement(Object[] array) {
+    if (array != null) {
+      for (Object o : array) {
+        if (o != null && !isSimpleType(o.getClass())) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Return whether the passed object is simple type or simple type collection or simple type array.
+   *
+   * @param obj the object to be checked
+   */
+  protected boolean isSimpleObject(Object obj) {
+    if (obj instanceof Iterable<?> it) {
+      return isSimpleElement(it);
+    } else if (obj != null && obj.getClass().isArray()) {
+      return isSimpleElement(wrapArray(obj));
+    } else {
+      return obj == null || isSimpleType(obj.getClass());
+    }
+  }
+
   /**
    * check if is simple cls
    *
@@ -181,49 +240,9 @@ public abstract class AbstractTemplateMethodModelEx<P> implements DynamicTemplat
   }
 
   /**
-   * Return whether the passed object is simple type or simple type collection or simple type array.
-   * <p>
-   * Unfinished yet
-   *
-   * @param obj the object to be checked
-   * @return isSimpleTypeObject
-   */
-  protected byte isSimpleTypeObject(Object obj) {
-    byte simple = 0;
-    if (obj instanceof Iterable<?>) {
-      simple = 2;
-      for (Object o : (Iterable<?>) obj) {
-        if (o != null && !isSimpleType(o.getClass())) {
-          simple = -1;
-        }
-        if (simple < 0) {
-          break;
-        }
-      }
-    } else if (obj != null && obj.getClass().isArray()) {
-      simple = 2;
-      Object[] arrayObj = wrapArray(obj);
-      if (arrayObj.length > 0) {
-        for (Object o : arrayObj) {
-          if (o != null && !isSimpleType(o.getClass())) {
-            simple = -1;
-          }
-          if (simple < 0) {
-            break;
-          }
-        }
-      }
-    } else if (obj != null && isSimpleType(obj.getClass())) {
-      simple = 1;
-    }
-    return simple;
-  }
-
-  /**
    * corant-modules-query-shared
    *
    * @author bingo 上午9:26:56
-   *
    */
   public static final class SimpleTemplateModelIterator implements Iterator<TemplateModel> {
 

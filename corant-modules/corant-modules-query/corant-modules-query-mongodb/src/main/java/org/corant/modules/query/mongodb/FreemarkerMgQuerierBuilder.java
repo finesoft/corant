@@ -33,9 +33,9 @@ public class FreemarkerMgQuerierBuilder extends
     FreemarkerDynamicQuerierBuilder<Map<String, Object>, EnumMap<MgOperator, Object>, MgNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query the query for builder
+   * @param queryResolver the query handler
+   * @param fetchQueryResolver the query resolver
    */
   protected FreemarkerMgQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
@@ -56,7 +56,7 @@ public class FreemarkerMgQuerierBuilder extends
 
   @Override
   protected DynamicTemplateMethodModelEx<Map<String, Object>> getTemplateMethodModelEx() {
-    return new MgTemplateMethodModelEx();
+    return new MgTemplateMethodModelEx(getQuery());
   }
 
 }

@@ -15,13 +15,13 @@ package org.corant.modules.keycloak.event.selector;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.admin.AdminEvent;
-import com.google.common.base.Objects;
 
 /**
  * corant-modules-keycloak-event
@@ -66,23 +66,23 @@ public class AdminEventSelector implements Predicate<AdminEvent> {
       forward &= types.contains(t.getResourceType().name() + ":" + t.getOperationType().name());
     }
     if (forward && realmId != null) {
-      forward &= Objects.equal(realmId, t.getRealmId());
+      forward &= Objects.equals(realmId, t.getRealmId());
     }
     if (forward && authDetailsClientId != null) {
       forward &= t.getAuthDetails() != null
-          && Objects.equal(authDetailsClientId, t.getAuthDetails().getClientId());
+          && Objects.equals(authDetailsClientId, t.getAuthDetails().getClientId());
     }
     if (forward && authDetailsRealmId != null) {
       forward &= t.getAuthDetails() != null
-          && Objects.equal(authDetailsRealmId, t.getAuthDetails().getRealmId());
+          && Objects.equals(authDetailsRealmId, t.getAuthDetails().getRealmId());
     }
     if (forward && authDetailsUserId != null) {
       forward &= t.getAuthDetails() != null
-          && Objects.equal(authDetailsUserId, t.getAuthDetails().getUserId());
+          && Objects.equals(authDetailsUserId, t.getAuthDetails().getUserId());
     }
     if (forward && authDetailsIpAddress != null) {
       forward &= t.getAuthDetails() != null
-          && Objects.equal(authDetailsIpAddress, t.getAuthDetails().getIpAddress());
+          && Objects.equals(authDetailsIpAddress, t.getAuthDetails().getIpAddress());
     }
     if (forward && !resourcePaths.isEmpty()) {
       forward &= resourcePaths.contains(t.getResourcePath());

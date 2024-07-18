@@ -13,18 +13,16 @@
  */
 package org.corant.modules.query.mongodb;
 
-import static org.corant.modules.mongodb.MongoExtendedJsons.EXTJSON_CONVERTERS;
-import static org.corant.shared.util.Classes.getComponentClass;
-import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
 import static org.corant.shared.util.Primitives.isSimpleClass;
-import static org.corant.shared.util.Primitives.wrap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bson.BsonDateTime;
 import org.bson.BsonDbPointer;
 import org.bson.BsonMaxKey;
@@ -34,7 +32,10 @@ import org.bson.BsonRegularExpression;
 import org.bson.BsonSymbol;
 import org.bson.BsonTimestamp;
 import org.bson.types.Decimal128;
+import org.corant.modules.mongodb.MongoExtendedJsons;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
+import org.corant.shared.util.Primitives;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,19 +50,22 @@ import freemarker.template.TemplateModelException;
 public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 
   public static final ObjectMapper OM = new ObjectMapper();
+  private final Query query;
+
+  public MgTemplateMethodModelEx(Query query) {
+    this.query = query;
+  }
 
   @Override
   public Object defaultConvertParamValue(Object value) {
-    Class<?> type = getComponentClass(value);
-    if (Enum.class.isAssignableFrom(type)) {
-      if (value instanceof Iterable || value.getClass().isArray()) {
-        return toList(value, t -> t == null ? null : t.toString());
-      } else {
-        return value.toString();
-      }
-    } else {
-      return value;
+    if (value instanceof Iterable<?> it) {
+      return convertIterableParamValue(it);
+    } else if (value.getClass().isArray()) {
+      return convertArrayParamValue((Object[]) value);
+    } else if (value instanceof Enum<?> e) {
+      return e.toString();
     }
+    return value;
   }
 
   @SuppressWarnings({"rawtypes"})
@@ -71,27 +75,22 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
-          Class<?> argCls = wrap(arg.getClass());
-          if (EXTJSON_CONVERTERS.containsKey(argCls)) {
-            return OM.writeValueAsString(toBsonValue(arg));
-          } else if (isPrimitiveOrWrapper(argCls)) {
-            return arg;
-          } else if (argCls.isArray()) {
-            if (isEmpty(arg)) {
+          if (arg instanceof Iterable<?> it) {
+            if (isEmpty(it)) {
               return arg;
-            } else if (isSimpleType(getComponentClass(arg))) {
-              return OM.writeValueAsString(toBsonValue(arg));
+            } else if (isSimpleElement(it)) {
+              return OM.writeValueAsString(MongoExtendedJsons.extended(it));
             }
-          } else if (Collection.class.isAssignableFrom(argCls)) {
-            if (isEmpty(arg)) {
+          } else if (arg.getClass().isArray()) {
+            Object[] array = Primitives.wrapArray(arg);
+            if (isEmpty(array)) {
               return arg;
-            } else if (isSimpleType(getComponentClass(arg))) {
-              return OM.writeValueAsString(toBsonValue(arg));
+            } else if (isSimpleElement(array)) {
+              return OM.writeValueAsString(MongoExtendedJsons.extended(array));
             }
-          } else if (isSimpleType(getComponentClass(arg))) {
-            return OM.writeValueAsString(toBsonValue(arg));
+          } else if (isSimpleObject(arg)) {
+            return OM.writeValueAsString(MongoExtendedJsons.extended(arg));
           } else {
-            // Simple injection prevention
             return OM.writer(JsonpCharacterEscapes.instance())
                 .writeValueAsString(OM.writer().writeValueAsString(arg));
           }
@@ -119,18 +118,53 @@ public class MgTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
         || DBRef.class.isAssignableFrom(cls);
   }
 
-  protected Object toBsonValue(Object args) {
-    if (args == null) {
-      return null;
+  protected Object convertArrayParamValue(Object[] array) {
+    boolean need = false;
+    for (Object e : array) {
+      if (e instanceof Enum<?>) {
+        need = true;
+        break;
+      }
     }
-    Class<?> cls = wrap(getComponentClass(args));
-    if (!EXTJSON_CONVERTERS.containsKey(cls)) {
-      return args;
-    } else if (args.getClass().isArray() || args instanceof Iterable) {
-      return toList(args, EXTJSON_CONVERTERS.get(cls));
-    } else {
-      return EXTJSON_CONVERTERS.get(cls).apply(args);
+    if (need) {
+      Collection<Object> collection = new ArrayList<>();
+      for (Object e : array) {
+        if (e instanceof Enum<?>) {
+          collection.add(e.toString());
+        } else {
+          collection.add(e);
+        }
+      }
+      return collection;
     }
+    return array;
+  }
+
+  protected Object convertIterableParamValue(Iterable<?> it) {
+    boolean need = false;
+    for (Object e : it) {
+      if (e instanceof Enum<?>) {
+        need = true;
+        break;
+      }
+    }
+    if (need) {
+      Collection<Object> collection = (it instanceof Set<?>) ? new HashSet<>() : new ArrayList<>();
+      for (Object e : it) {
+        if (e instanceof Enum<?>) {
+          collection.add(e.toString());
+        } else {
+          collection.add(e);
+        }
+      }
+      return collection;
+    }
+    return it;
+  }
+
+  @Override
+  protected Query getQuery() {
+    return query;
   }
 
 }

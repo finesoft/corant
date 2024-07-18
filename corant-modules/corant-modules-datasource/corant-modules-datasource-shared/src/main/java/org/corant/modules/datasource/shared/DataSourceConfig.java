@@ -116,6 +116,9 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "false")
   protected boolean bindToJndi = false;
 
+  @ConfigKeyItem(defaultValue = "false")
+  protected boolean flushOnClose = false;
+
   @ConfigKeyItem(defaultValue = "true")
   protected boolean enable = true;
 
@@ -317,6 +320,13 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
    */
   public boolean isEnableTrackJdbcResources() {
     return enableTrackJdbcResources;
+  }
+
+  /**
+   * If connections should be flushed when returning to the pool.
+   */
+  public boolean isFlushOnClose() {
+    return flushOnClose;
   }
 
   /**

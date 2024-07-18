@@ -159,6 +159,7 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
     }
 
     // connection pool
+    cfgs.connectionPoolConfiguration().flushOnClose(cfg.isFlushOnClose());
     cfgs.connectionPoolConfiguration().acquisitionTimeout(cfg.getAcquisitionTimeout());
     cfgs.connectionPoolConfiguration().maxSize(cfg.getMaxSize());
     cfgs.connectionPoolConfiguration().minSize(cfg.getMinSize());

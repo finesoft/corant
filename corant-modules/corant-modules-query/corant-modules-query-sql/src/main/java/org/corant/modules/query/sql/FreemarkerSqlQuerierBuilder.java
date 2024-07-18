@@ -30,9 +30,9 @@ public class FreemarkerSqlQuerierBuilder
     extends FreemarkerDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query the query for builder
+   * @param queryResolver the query handler
+   * @param fetchQueryResolver the query resolver
    */
   public FreemarkerSqlQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
@@ -50,7 +50,7 @@ public class FreemarkerSqlQuerierBuilder
 
   @Override
   protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
-    return new SqlTemplateMethodModelEx();
+    return new SqlTemplateMethodModelEx(getQuery());
   }
 
 }

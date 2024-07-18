@@ -13,16 +13,14 @@
  */
 package org.corant.modules.query.elastic;
 
-import static org.corant.shared.util.Classes.getComponentClass;
-import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Primitives.isPrimitiveOrWrapper;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
+import org.corant.shared.util.Primitives;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +34,11 @@ import freemarker.template.TemplateModelException;
 public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<String, Object>> {
 
   public static final ObjectMapper OM = new ObjectMapper();
+  private final Query query;
+
+  public EsTemplateMethodModelEx(Query query) {
+    this.query = query;
+  }
 
   @SuppressWarnings({"rawtypes"})
   @Override
@@ -44,25 +47,22 @@ public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
       Object arg = getParamValue(arguments);
       try {
         if (arg != null) {
-          Class<?> argCls = getUserClass(arg.getClass());
-          if (isPrimitiveOrWrapper(argCls)) {
-            return arg;
-          } else if (argCls.isArray()) {
-            if (isEmpty(arg)) {
+          if (arg instanceof Iterable<?> it) {
+            if (isEmpty(it)) {
               return arg;
-            } else if (isSimpleType(getComponentClass(arg))) {
-              return OM.writeValueAsString(arg);
+            } else if (isSimpleElement(it)) {
+              return OM.writeValueAsString(it);
             }
-          } else if (Collection.class.isAssignableFrom(argCls)) {
-            if (isEmpty(arg)) {
+          } else if (arg.getClass().isArray()) {
+            Object[] array = Primitives.wrapArray(arg);
+            if (isEmpty(array)) {
               return arg;
-            } else if (isSimpleType(getComponentClass(arg))) {
-              return OM.writeValueAsString(arg);
+            } else if (isSimpleElement(array)) {
+              return OM.writeValueAsString(array);
             }
-          } else if (isSimpleType(getComponentClass(arg))) {
+          } else if (isSimpleObject(arg)) {
             return OM.writeValueAsString(arg);
           } else {
-            // FIXME throw exception or not ?
             return OM.writer(JsonpCharacterEscapes.instance())
                 .writeValueAsString(OM.writer().writeValueAsString(arg));
           }
@@ -77,6 +77,11 @@ public class EsTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Map<S
   @Override
   public Map<String, Object> getParameters() {
     return Collections.emptyMap();// elastic search query we use inline
+  }
+
+  @Override
+  protected Query getQuery() {
+    return query;
   }
 
 }

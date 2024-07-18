@@ -52,7 +52,6 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   protected volatile Integer limit;
   protected volatile Integer selectSize;
   protected volatile Integer streamLimit;
-  protected volatile Integer maxSelectSize;
   protected volatile Integer offset;
   protected volatile Boolean thrownExceedMaxSelectSize;
   protected volatile Duration timeout;

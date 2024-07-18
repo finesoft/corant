@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -25,7 +26,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.keycloak.Config.Scope;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Objects;
 
 /**
  * corant-modules-keycloak-event
@@ -98,7 +98,7 @@ public class AbstactSelector {
 
   boolean matchString(String cand, Map<?, ?> cmd, String key) {
     String cond = getMapString(cmd, key);
-    if (cond == null || Objects.equal(cand, cond)) {
+    if (cond == null || Objects.equals(cand, cond)) {
       return true;
     } else if (cand == null) {
       return false;

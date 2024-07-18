@@ -10,7 +10,7 @@
 	</parent>
 	<artifactId>corant-boms</artifactId>
 	<properties>
-		<version.agroal>2.4</version.agroal>
+		<version.agroal>2.5</version.agroal>
 		<version.aliyun-java-sdk-core>4.5.13</version.aliyun-java-sdk-core>
 		<version.aliyun-java-sdk-afs>1.0.1</version.aliyun-java-sdk-afs>
 		<version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
@@ -66,13 +66,13 @@
 		<version.hibernate-reactive>2.3.0.Final</version.hibernate-reactive>
 		<version.hibernate-validator-cdi>8.0.1.Final</version.hibernate-validator-cdi>
 		<version.hikariCP>5.0.1</version.hikariCP>
-		<version.hppc>0.9.1</version.hppc>
-		<version.hsqldb>2.7.2</version.hsqldb>
+		<version.hppc>0.10.0</version.hppc>
+		<version.hsqldb>2.7.3</version.hsqldb>
 		<version.icu4j>73.1</version.icu4j>
 		<version.jackson>2.17.2</version.jackson>
 		<version.jandex>3.1.5</version.jandex>
 		<version.jasperreports>6.10.0</version.jasperreports>
-		<version.javafx>17.0.12-ea+1</version.javafx>
+		<version.javafx>17.0.12</version.javafx>
 		<version.javassist>3.29.2-GA</version.javassist>
 		<version.jakarta.activation-api>2.0.1</version.jakarta.activation-api>
 		<version.jakarta.annotation-api>2.1.1</version.jakarta.annotation-api>
@@ -105,9 +105,9 @@
 		<version.junit>4.13.2</version.junit>
 		<version.jython>2.7.3</version.jython>
 		<version.kafka-cdi-extension>0.0.10</version.kafka-cdi-extension>
-		<version.keycloak>24.0.4</version.keycloak>
+		<version.keycloak>24.0.5</version.keycloak>
 		<version.kotlin>1.8.20</version.kotlin>
-		<version.kryo>5.5.0</version.kryo>
+		<version.kryo>5.6.0</version.kryo>
 		<version.liquibase-core>4.21.1</version.liquibase-core>
 		<version.log4j2>2.23.1</version.log4j2>
 		<version.lombok>1.18.28</version.lombok>
@@ -141,7 +141,7 @@
 		<version.mssql-jdbc>12.4.2.jre11</version.mssql-jdbc>
 		<version.mysql>5.1.48</version.mysql>
 		<version.mysql-connector>8.4.0</version.mysql-connector>
-		<version.narayana>7.0.1.Final</version.narayana>
+		<version.narayana>7.0.2.Final</version.narayana>
 		<version.ndarray>1.0.0</version.ndarray>
 		<version.netty>4.1.108.Final</version.netty>
 		<version.nashorn-core>15.4</version.nashorn-core>
@@ -178,15 +178,15 @@
 		<version.swagger>2.2.8</version.swagger>
 		<version.swagger-ui-webjars>4.18.2</version.swagger-ui-webjars>
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.3.14.Final</version.undertow>
-		<version.vertx>4.5.8</version.vertx>
+		<version.undertow>2.3.15.Final</version.undertow>
+		<version.vertx>4.5.9</version.vertx>
 		<version.weld-junit4>2.0.2.Final</version.weld-junit4>
 		<version.weld-junit5>2.0.2.Final</version.weld-junit5>
 		<version.weld>5.1.2.Final</version.weld>
 		<version.weld-api>5.0.SP3</version.weld-api>
 		<version.wxpay-sdk>3.0.9</version.wxpay-sdk>
 		<version.xadisk>1.2.2</version.xadisk>
-		<version.xnio>3.8.8.Final</version.xnio>
+		<version.xnio>3.8.16.Final</version.xnio>
 		<version.zxing>3.4.1</version.zxing>
 	</properties>
 

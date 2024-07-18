@@ -102,10 +102,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * <pre>
  * <b>Expression</b>                                                   <b>Evaluated result</b>
  * {"#java.lang.String:trim":["abc "]}                                 abc
+ * {"#String:trim":["abc "]}                                           abc
  * {"#java.lang.String:indexOf":["abc", "b"]}                          1
  * {"#java.lang.String:substring":["bingo.chen", 0, 7]}                bingo.c
  * {"#java.lang.System::currentTimeMillis":[]}                         1667269845452
  * {"#java.util.Date::new":[]}                                         Tue Nov 01 10:30:45 CST 2021
+ * {"#Date::new":[]}                                                   Tue Nov 01 10:30:45 CST 2021
  * {"#java.util.UUID:toString":[{"#java.util.UUID::randomUUID":[]}]}   2f6e8962-2f74-4e24-b039-e2b7c8523605
  * </pre>
  *

@@ -212,6 +212,7 @@ public class Classes {
    * @param object the given object
    * @return getComponentClass
    */
+  @Deprecated
   public static Class<?> getComponentClass(Object object) {
     Class<?> clazz = null;
     if (object instanceof Iterable<?>) {

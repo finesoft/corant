@@ -33,9 +33,9 @@ public class FreemarkerEsQuerierBuilder extends
   // public static final ObjectMapper OM = new ObjectMapper();
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query the query for builder
+   * @param queryResolver the query handler
+   * @param fetchQueryResolver the query resolver
    */
   protected FreemarkerEsQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
@@ -59,7 +59,7 @@ public class FreemarkerEsQuerierBuilder extends
 
   @Override
   protected DynamicTemplateMethodModelEx<Map<String, Object>> getTemplateMethodModelEx() {
-    return new EsTemplateMethodModelEx();
+    return new EsTemplateMethodModelEx(getQuery());
   }
 
 }

@@ -30,9 +30,9 @@ public class FreemarkerJpqlQuerierBuilder
     extends FreemarkerDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query the query for builder
+   * @param queryResolver the query handler
+   * @param fetchQueryResolver the query resolver
    */
   public FreemarkerJpqlQuerierBuilder(Query query, QueryHandler queryResolver,
       FetchQueryHandler fetchQueryResolver) {
@@ -50,7 +50,7 @@ public class FreemarkerJpqlQuerierBuilder
 
   @Override
   protected DynamicTemplateMethodModelEx<Object[]> getTemplateMethodModelEx() {
-    return new JpqlTemplateMethodModelEx();
+    return new JpqlTemplateMethodModelEx(getQuery());
   }
 
 }

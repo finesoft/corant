@@ -15,6 +15,7 @@ package org.corant.modules.keycloak.event.selector;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,7 +23,6 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
-import com.google.common.base.Objects;
 
 /**
  * corant-modules-keycloak-event
@@ -67,19 +67,19 @@ public class EventSelector implements Predicate<Event> {
       forward &= types.contains(t.getType());
     }
     if (forward && realmId != null) {
-      forward &= Objects.equal(realmId, t.getRealmId());
+      forward &= Objects.equals(realmId, t.getRealmId());
     }
     if (forward && clientId != null) {
-      forward &= Objects.equal(clientId, t.getClientId());
+      forward &= Objects.equals(clientId, t.getClientId());
     }
     if (forward && userId != null) {
-      forward &= Objects.equal(userId, t.getUserId());
+      forward &= Objects.equals(userId, t.getUserId());
     }
     if (forward && ipAddress != null) {
-      forward &= Objects.equal(ipAddress, t.getIpAddress());
+      forward &= Objects.equals(ipAddress, t.getIpAddress());
     }
     if (forward && sessionId != null) {
-      forward &= Objects.equal(sessionId, t.getSessionId());
+      forward &= Objects.equals(sessionId, t.getSessionId());
     }
     return forward;
   }

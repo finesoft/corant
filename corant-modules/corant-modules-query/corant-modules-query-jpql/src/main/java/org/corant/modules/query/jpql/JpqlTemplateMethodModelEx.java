@@ -16,6 +16,7 @@ package org.corant.modules.query.jpql;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.dynamic.freemarker.AbstractTemplateMethodModelEx;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateModelException;
@@ -32,15 +33,19 @@ public class JpqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Obj
 
   private List<Object> parameters = new ArrayList<>();
   private int seq = 0;
+  private final Query query;
+
+  public JpqlTemplateMethodModelEx(Query query) {
+    this.query = query;
+  }
 
   @SuppressWarnings({"rawtypes"})
   @Override
   public Object exec(List arguments) throws TemplateModelException {
     if (isNotEmpty(arguments)) {
       Object arg = getParamValue(arguments);
-      if (arg instanceof List) {
-        List argList = (List) arg;
-        int argSize = argList.size();
+      if (arg instanceof List argList) {
+          int argSize = argList.size();
         String[] placeHolders = new String[argSize];
         for (int i = 0; i < argSize; i++) {
           parameters.add(argList.get(i));
@@ -57,7 +62,12 @@ public class JpqlTemplateMethodModelEx extends AbstractTemplateMethodModelEx<Obj
 
   @Override
   public Object[] getParameters() {
-    return parameters.toArray(new Object[parameters.size()]);
+    return parameters.toArray(new Object[0]);
+  }
+
+  @Override
+  protected Query getQuery() {
+    return query;
   }
 
   String getPlaceHolder() {

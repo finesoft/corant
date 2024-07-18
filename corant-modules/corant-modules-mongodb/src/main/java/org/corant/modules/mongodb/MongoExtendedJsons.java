@@ -32,9 +32,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import org.bson.BsonDateTime;
 import org.bson.BsonDbPointer;
@@ -60,8 +62,8 @@ import com.mongodb.DBRef;
  * corant-modules-mongodb
  * <p>
  *
- * <a href="https://www.mongodb.com/docs/v6.0/reference/mongodb-extended-json-v1/">
- * mongodb-extended-json-v1</a>
+ * <a href="https://www.mongodb.com/docs/v6.0/reference/mongodb-extended-json-v2/">
+ * mongodb-extended-json-v2</a>
  * <p>
  *
  * <pre>
@@ -181,18 +183,19 @@ public class MongoExtendedJsons {
       final Class<?> valueClass = wrap(value.getClass());
       if (EXTJSON_CONVERTERS.containsKey(valueClass)) {
         return EXTJSON_CONVERTERS.get(valueClass).apply(value);
-      } else if (value instanceof Map) {
-        Map<Object, Object> valMap = new HashMap<>(((Map<?, ?>) value).size());
-        for (Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+      } else if (value instanceof Map<?, ?> map) {
+        Map<Object, Object> valMap = new HashMap<>(map.size());
+        for (Entry<?, ?> entry : map.entrySet()) {
           valMap.put(entry.getKey(), extended(entry.getValue()));
         }
         return valMap;
-      } else if (value instanceof Collection) {
-        List<Object> list = new ArrayList<>(((Collection<?>) value).size());
-        for (Object item : (Collection<?>) value) {
-          list.add(extended(item));
+      } else if (value instanceof Iterable<?> it) {
+        Collection<Object> collection =
+            (it instanceof Set<?>) ? new HashSet<>() : new ArrayList<>();
+        for (Object item : it) {
+          collection.add(extended(item));
         }
-        return list;
+        return collection;
       } else if (valueClass.isArray()) {
         Object[] valueArray = wrapArray(value);
         int length = valueArray.length;

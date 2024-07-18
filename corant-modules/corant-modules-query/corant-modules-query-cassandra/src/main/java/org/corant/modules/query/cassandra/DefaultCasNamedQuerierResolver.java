@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -28,9 +31,6 @@ import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerDynamicQueri
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple.Triple;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -94,7 +94,7 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
       @SuppressWarnings("unchecked")
       @Override
       protected DynamicTemplateMethodModelEx getTemplateMethodModelEx() {
-        return new CasTemplateMethodModelEx();
+        return new CasTemplateMethodModelEx(getQuery());
       }
 
     };

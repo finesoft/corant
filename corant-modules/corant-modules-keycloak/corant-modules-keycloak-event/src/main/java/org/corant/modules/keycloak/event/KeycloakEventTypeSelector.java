@@ -13,11 +13,11 @@
  */
 package org.corant.modules.keycloak.event;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
-import com.google.common.base.Objects;
 
 /**
  * corant-modules-keycloak-event
@@ -84,7 +84,7 @@ public class KeycloakEventTypeSelector implements KeycloakEventSelector<Event> {
         matched &= realmId.equals(t.getRealmId());
       }
       if (type != null && matched) {
-        matched &= Objects.equal(type, t.getType());
+        matched &= Objects.equals(type, t.getType());
       }
       return matched;
     }

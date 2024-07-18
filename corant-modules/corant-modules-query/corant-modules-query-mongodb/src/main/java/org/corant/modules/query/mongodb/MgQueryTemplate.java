@@ -507,6 +507,14 @@ public class MgQueryTemplate {
   }
 
   /**
+   * @see FindIterable#noCursorTimeout(boolean)
+   */
+  public MgQueryTemplate noCursorTimeout(boolean noCursorTimeout) {
+    this.noCursorTimeout = noCursorTimeout;
+    return this;
+  }
+
+  /**
    * @see FindIterable#skip(int)
    */
   public MgQueryTemplate offset(int offset) {

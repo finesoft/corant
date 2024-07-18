@@ -40,6 +40,10 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.corant.modules.json.ObjectMappers;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -64,13 +68,24 @@ public class Mongos {
   public static final String GFS_METADATA_PROPERTY_NAME = "metadata";
   public static final UpdateResult EMPTY_UPDATE_RESULT = new EmptyUpdateResult();
 
+  static final ObjectMapper WRITE_OBJECT_MAPPER = ObjectMappers.copyForwardingObjectMapper();
+  static final ObjectMapper READ_OBJECT_MAPPER = ObjectMappers.copyDefaultObjectMapper();
+  static final JavaType WRITE_DOC_MAP_TYPE =
+      WRITE_OBJECT_MAPPER.constructType(new TypeReference<Map<String, Object>>() {});
+  static {
+    READ_OBJECT_MAPPER.setVisibility(READ_OBJECT_MAPPER.getDeserializationConfig()
+        .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE));
+  }
+
   public static BsonValue bsonId(Object id) {
     if (id == null) {
       return null;
     }
-    if (id instanceof Long || Long.TYPE.equals(id.getClass())) {
+    if (id instanceof Long) {
       return new BsonInt64((Long) id);
-    } else if (id instanceof Integer || Integer.TYPE.equals(id.getClass())) {
+    } else if (id instanceof Integer) {
       return new BsonInt32((Integer) id);
     } else if (id instanceof BsonObjectId boid) {
       return boid;
@@ -190,15 +205,13 @@ public class Mongos {
     if (isNotBlank(database)
         && (database.startsWith("mongodb+srv://") || database.startsWith("mongodb://"))) {
       ConnectionString cs = new ConnectionString(database);
+      if (cs.getDatabase() == null) {
+        return null;
+      }
       MongoClient client = MongoClients.create(cs);
       MongoDatabase mongoDatabase = client.getDatabase(cs.getDatabase());
-      if (mongoDatabase != null) {
-        Cleaner.create().register(mongoDatabase, () -> {
-          if (client != null) {
-            client.close(); // Do we need to automatically close the mongodb client here?
-          }
-        });
-      }
+      // Do we need to automatically close the mongodb client here?
+      Cleaner.create().register(mongoDatabase, client::close);
       return mongoDatabase;
     } else {
       return findNamed(MongoDatabase.class, database).orElse(null);
@@ -228,7 +241,7 @@ public class Mongos {
         map = forceCast(m);
       } else {
         // a common POJO
-        map = ObjectMappers.toDocMap(object);
+        map = WRITE_OBJECT_MAPPER.convertValue(object, WRITE_DOC_MAP_TYPE);
       }
       document = new Document(map);
     }

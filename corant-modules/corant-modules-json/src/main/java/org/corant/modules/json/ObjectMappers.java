@@ -91,6 +91,10 @@ public class ObjectMappers {
     return defaultObjectMapper.copy();
   }
 
+  public static ObjectMapper copyForwardingObjectMapper() {
+    return forwardingObjectMapper.copy();
+  }
+
   public static <T> T fromMap(Map<?, ?> map, Class<T> klass) {
     if (klass != null) {
       return map == null ? null : defaultObjectMapper.convertValue(map, klass);

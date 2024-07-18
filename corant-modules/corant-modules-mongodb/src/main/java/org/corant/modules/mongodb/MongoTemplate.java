@@ -17,6 +17,9 @@ import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static org.corant.modules.mongodb.Mongos.DOC_ID_FIELD_NAME;
 import static org.corant.modules.mongodb.Mongos.ENTITY_ID_FIELD_NAME;
+import static org.corant.modules.mongodb.Mongos.READ_OBJECT_MAPPER;
+import static org.corant.modules.mongodb.Mongos.WRITE_DOC_MAP_TYPE;
+import static org.corant.modules.mongodb.Mongos.WRITE_OBJECT_MAPPER;
 import static org.corant.shared.ubiquity.Throwing.uncheckedFunction;
 import static org.corant.shared.util.Assertions.shouldNotBlank;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
@@ -24,6 +27,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Lists.transform;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
@@ -44,9 +48,11 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.corant.modules.bson.Bsons;
 import org.corant.modules.bson.ExtendedCodecProvider;
-import org.corant.modules.json.ObjectMappers;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
 import com.mongodb.MongoClientSettings;
@@ -103,6 +109,9 @@ public class MongoTemplate {
   protected ReadConcern readConcern;
   protected ClientSession session;
   protected CodecRegistry codecRegistry = DEFAULT_CODEC_REGISTRY;
+  protected ObjectMapper writeObjectMapper = WRITE_OBJECT_MAPPER;
+  protected JavaType writeDocMapType = WRITE_DOC_MAP_TYPE;
+  protected ObjectMapper readObjectMapper = READ_OBJECT_MAPPER;
 
   public MongoTemplate(MongoClient mongoClient, String databaseName) {
     this(mongoClient.getDatabase(databaseName));
@@ -728,7 +737,7 @@ public class MongoTemplate {
     shouldNotNull(object, "Object must not be null");
     Document doc;
     if (handler == null) {
-      doc = Mongos.resolveDocument(object);
+      doc = resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
@@ -796,7 +805,7 @@ public class MongoTemplate {
       InsertManyOptions options, Function<T, Document> handler) {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
-    Function<T, Document> useHandler = defaultObject(handler, Mongos::resolveDocument);
+    Function<T, Document> useHandler = defaultObject(handler, this::resolveDocument);
     List<Document> docs = objects.stream().map(useHandler).toList();
     return executeInsertMany(collectionName, Document.class, docs, null, options);
   }
@@ -806,6 +815,13 @@ public class MongoTemplate {
    */
   public MongoQuery query() {
     return new MongoQuery(this);
+  }
+
+  public MongoTemplate readObjectMapper(ObjectMapper objectMapper) {
+    if (objectMapper != null) {
+      readObjectMapper = objectMapper;
+    }
+    return this;
   }
 
   /**
@@ -865,7 +881,7 @@ public class MongoTemplate {
     shouldNotNull(object, "Object must not be null");
     Document doc;
     if (handler == null) {
-      doc = Mongos.resolveDocument(object);
+      doc = resolveDocument(object);
     } else {
       doc = handler.apply(object);
     }
@@ -930,7 +946,7 @@ public class MongoTemplate {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(objects, "Objects list must not be null");
     return executeSaveMany(collectionName, Document.class,
-        transform(objects, defaultObject(handler, Mongos::resolveDocument)), null, DOC_ID_GETTER,
+        transform(objects, defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER,
         options, null);
   }
 
@@ -995,7 +1011,7 @@ public class MongoTemplate {
     shouldNotNull(collectionName, "CollectionName must not be null");
     shouldNotNull(stream, "Objects must not be null");
     return executeStreamSave(collectionName, Document.class,
-        stream.map(defaultObject(handler, Mongos::resolveDocument)), null, DOC_ID_GETTER, options);
+        stream.map(defaultObject(handler, this::resolveDocument)), null, DOC_ID_GETTER, options);
   }
 
   /**
@@ -1146,6 +1162,19 @@ public class MongoTemplate {
         session);
   }
 
+  public MongoTemplate writeObjectMapper(ObjectMapper objectMapper) {
+    if (objectMapper != null) {
+      writeObjectMapper = objectMapper;
+      writeDocMapType =
+          writeObjectMapper.constructType(new TypeReference<Map<String, Object>>() {});
+    }
+    return this;
+  }
+
+  protected <T> T convertDocument(Document doc, Class<T> clazz) {
+    return doc == null ? null : readObjectMapper.convertValue(doc, clazz);
+  }
+
   protected MongoCollection<Document> obtainCollection(String collectionName) {
     return obtainCollection(collectionName, Document.class);
   }
@@ -1165,6 +1194,28 @@ public class MongoTemplate {
       collection = collection.withCodecRegistry(codecRegistry);
     }
     return collection;
+  }
+
+  protected <T> Document resolveDocument(T object) {
+    Document document = null;
+    if (object instanceof Document doc) {
+      document = doc;
+    } else if (object != null) {
+      Map<String, Object> map;
+      if (object instanceof Map m) {
+        // FIXME force cast, we assume the object is Map<String,Object>
+        map = forceCast(m);
+      } else {
+        // a common POJO
+        map = writeObjectMapper.convertValue(object, writeDocMapType);
+      }
+      document = new Document(map);
+    }
+    if (document != null && document.containsKey(ENTITY_ID_FIELD_NAME)
+        && !document.containsKey(DOC_ID_FIELD_NAME)) {
+      document.put(DOC_ID_FIELD_NAME, document.remove(ENTITY_ID_FIELD_NAME));
+    }
+    return document;
   }
 
   /**
@@ -1212,7 +1263,7 @@ public class MongoTemplate {
      */
     public <T> List<T> aggregateAs(Class<T> klass) {
       try (MongoCursor<Document> cursor = doAggregate().iterator()) {
-        return streamOf(cursor).map(a -> ObjectMappers.fromMap(a, klass)).onClose(cursor::close)
+        return streamOf(cursor).map(a -> tpl.convertDocument(a, klass)).onClose(cursor::close)
             .toList();
       }
     }
@@ -1235,7 +1286,7 @@ public class MongoTemplate {
      */
     public <T> Stream<T> aggregateStreamAs(Class<T> klass) {
       MongoCursor<Document> cursor = doAggregate().iterator();
-      return streamOf(cursor).map(a -> ObjectMappers.fromMap(a, klass)).onClose(cursor::close);
+      return streamOf(cursor).map(a -> tpl.convertDocument(a, klass)).onClose(cursor::close);
     }
 
     /**
@@ -1799,7 +1850,7 @@ public class MongoTemplate {
      */
     public <T> List<T> findAs(Class<T> clazz) {
       try (MongoCursor<Document> it = query(Document.class).iterator()) {
-        return streamOf(it).map(this::convert).map(x -> ObjectMappers.fromMap(x, clazz))
+        return streamOf(it).map(this::convert).map(x -> tpl.convertDocument(x, clazz))
             .collect(Collectors.toList());
       }
     }
@@ -1848,7 +1899,7 @@ public class MongoTemplate {
      */
     public <T> T findOneAs(Class<T> type) {
       try (MongoCursor<Document> it = query(Document.class).limit(1).iterator()) {
-        return it.hasNext() ? ObjectMappers.fromMap(convert(it.next()), type) : null;
+        return it.hasNext() ? tpl.convertDocument(convert(it.next()), type) : null;
       }
     }
 
@@ -2123,7 +2174,7 @@ public class MongoTemplate {
      * @param clazz the class to which the document is to be converted
      */
     public <T> Stream<T> streamAs(final Class<T> clazz) {
-      return streamAs(x -> ObjectMappers.fromMap(x, clazz));
+      return streamAs(x -> tpl.convertDocument(x, clazz));
     }
 
     /**

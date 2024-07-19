@@ -73,10 +73,19 @@ public class Mongos {
   static final JavaType WRITE_DOC_MAP_TYPE =
       WRITE_OBJECT_MAPPER.constructType(new TypeReference<Map<String, Object>>() {});
   static {
-    READ_OBJECT_MAPPER.setVisibility(READ_OBJECT_MAPPER.getDeserializationConfig()
-        .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withSetterVisibility(JsonAutoDetect.Visibility.NONE));
+    WRITE_OBJECT_MAPPER.setVisibility(
+        WRITE_OBJECT_MAPPER.getSerializationConfig()
+            .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+    );
+
+    READ_OBJECT_MAPPER.setVisibility(
+        READ_OBJECT_MAPPER.getDeserializationConfig()
+            .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+    );
   }
 
   public static BsonValue bsonId(Object id) {

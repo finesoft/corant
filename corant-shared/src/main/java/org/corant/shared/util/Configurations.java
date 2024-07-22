@@ -20,10 +20,12 @@ import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.corant.shared.ubiquity.Configuration;
 import org.corant.shared.ubiquity.Configuration.DefaultConfiguration;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Strings.WildcardMatcher;
 
@@ -174,12 +176,23 @@ public class Configurations {
   }
 
   /**
-   * Returns all raw configuration values that match any given key or key wildcard.
+   * Returns the optional configuration value by the given key, if the configuration value doesn't
+   * exist return {@link Optional#empty()}.
+   *
+   * @param key the configuration key
+   * @return the optional relevant configuration value
+   */
+  public static Optional<String> getOptionalConfigValue(String key) {
+    return Optional.ofNullable(getConfig().getValue(key));
+  }
+
+  /**
+   * Returns all raw configuration key & values that match any given key or key wildcard.
    *
    * @param keyOrWildcards key or key wildcard
    * @return the matched raw stream
    */
-  public static Stream<String> searchConfigValues(String... keyOrWildcards) {
+  public static Stream<Pair<String, String>> searchConfigValues(String... keyOrWildcards) {
     if (keyOrWildcards.length == 0) {
       return Stream.empty();
     }
@@ -192,7 +205,7 @@ public class Configurations {
       }
     }
     return streamOf(getConfig().getKeys()).filter(predicate)
-        .map(pn -> getConfigValue(pn, String.class)).filter(Objects::isNoneNull);
+        .map(pn -> Pair.of(pn, getConfigValue(pn, String.class))).filter(Objects::isNoneNull);
 
   }
 }

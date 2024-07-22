@@ -31,7 +31,6 @@ import java.lang.annotation.Annotation;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -240,17 +239,8 @@ public class MongoClientExtension implements Extension {
     @Dependent
     @Preference
     protected GridFSBucket produce(InjectionPoint ip) {
-      Preference preference = null;
-      if (ip.getAnnotated() != null) {
-        preference = ip.getAnnotated().getAnnotation(Preference.class);
-      }
-      if (preference == null) {
-        Optional<Annotation> annop = ip.getQualifiers().stream()
-            .filter(p -> p.annotationType().equals(Preference.class)).findFirst();
-        if (annop.isPresent()) {
-          preference = (Preference) annop.get();
-        }
-      }
+      Preference preference = (Preference) ip.getQualifiers().stream()
+          .filter(p -> p.annotationType().equals(Preference.class)).findFirst().orElse(null);
       if (preference != null) {
         return MongoClientExtension.getGridFSBucket(getAssembledConfigValue(preference.value()));
       }

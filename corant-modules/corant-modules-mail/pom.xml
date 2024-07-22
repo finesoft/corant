@@ -18,8 +18,8 @@
       <artifactId>corant-context</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>jakarta.mail</artifactId>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>jakarta.mail</artifactId>
     </dependency>
     <dependency>
       <groupId>jakarta.mail</groupId>
@@ -35,5 +35,10 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.corant</groupId>
+      <artifactId>corant-kernel</artifactId>
+      <scope>test</scope>
+    </dependency>    
   </dependencies>
 </project>

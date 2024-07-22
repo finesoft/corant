@@ -16,6 +16,7 @@
 		<version.aliyun-java-sdk-green>3.6.5</version.aliyun-java-sdk-green>
 		<version.alipay-sdk-java>4.10.167.ALL</version.alipay-sdk-java>
 		<version.aliyun-sdk-oss>3.17.4</version.aliyun-sdk-oss>
+		<version.angus-mail>2.0.0</version.angus-mail>
 		<version.ansj_seg>5.1.6</version.ansj_seg>
 		<version.apache-poi>5.2.3</version.apache-poi>
 		<version.apache-bcel>6.7.0</version.apache-bcel>
@@ -24,7 +25,7 @@
 		<version.apache.johnzon-core>1.2.20</version.apache.johnzon-core>
 		<version.apache.httpcomponents>4.5.14</version.apache.httpcomponents>
 		<version.arquillian-core>1.6.0.Final</version.arquillian-core>
-		<version.artemis>2.31.2</version.artemis>
+		<version.artemis>2.35.0</version.artemis>
 		<version.asciidoctor-maven-plugin>2.2.3</version.asciidoctor-maven-plugin>
 		<version.asciidoctor-pdf>2.3.7</version.asciidoctor-pdf>
 		<version.assertj>3.25.3</version.assertj>
@@ -74,7 +75,7 @@
 		<version.jasperreports>6.10.0</version.jasperreports>
 		<version.javafx>17.0.12</version.javafx>
 		<version.javassist>3.29.2-GA</version.javassist>
-		<version.jakarta.activation-api>2.0.1</version.jakarta.activation-api>
+		<version.jakarta.activation-api>2.1.1</version.jakarta.activation-api>
 		<version.jakarta.annotation-api>2.1.1</version.jakarta.annotation-api>
 		<version.jakarta.authorization-api>2.1.0</version.jakarta.authorization-api>
 		<version.jakarta.batch-api>2.1.1</version.jakarta.batch-api>
@@ -88,7 +89,7 @@
 		<version.jakarta.jnosql>1.1.0</version.jakarta.jnosql>
 		<version.jakarta.json-api>2.0.1</version.jakarta.json-api>
 		<version.jakarta.json.bind-api>3.0.0</version.jakarta.json.bind-api>
-		<version.jakarta.mail-api>2.0.1</version.jakarta.mail-api>
+		<version.jakarta.mail-api>2.1.1</version.jakarta.mail-api>
 		<version.jakarta.persistence-api>3.1.0</version.jakarta.persistence-api>
 		<version.jakarta.security.enterprise-api>3.0.0</version.jakarta.security.enterprise-api>
 		<version.jakarta.servlet-api>6.0.0</version.jakarta.servlet-api>
@@ -143,7 +144,7 @@
 		<version.mysql-connector>8.4.0</version.mysql-connector>
 		<version.narayana>7.0.2.Final</version.narayana>
 		<version.ndarray>1.0.0</version.ndarray>
-		<version.netty>4.1.108.Final</version.netty>
+		<version.netty>4.1.111.Final</version.netty>
 		<version.nashorn-core>15.4</version.nashorn-core>
 		<version.ognl>3.2.13</version.ognl>
 		<version.ojdbc8>19.8.0.0</version.ojdbc8>
@@ -704,10 +705,17 @@
 				<version>${version.jakarta.mail-api}</version>
 				<scope>provided</scope>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>jakarta.mail</artifactId>
 				<version>${version.jakarta.mail-api}</version>
+			</dependency>
+			-->
+			<dependency>
+				<groupId>org.eclipse.angus</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>${version.angus-mail}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.persistence</groupId>

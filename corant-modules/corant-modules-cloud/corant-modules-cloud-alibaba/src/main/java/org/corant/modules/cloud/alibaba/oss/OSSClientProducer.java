@@ -16,7 +16,6 @@ package org.corant.modules.cloud.alibaba.oss;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.strip;
-import java.lang.annotation.Annotation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
@@ -59,13 +58,8 @@ public class OSSClientProducer {
   @Preference
   @Dependent
   protected OSS produce(InjectionPoint ip) {
-    Preference preference = null;
-    for (Annotation a : ip.getQualifiers()) {
-      if (a.annotationType().equals(Preference.class)) {
-        preference = (Preference) a;
-        break;
-      }
-    }
+    Preference preference = (Preference) ip.getQualifiers().stream()
+        .filter(p -> p.annotationType().equals(Preference.class)).findFirst().orElse(null);
     String name = Qualifiers.EMPTY_NAME;
     if (preference != null) {
       name = strip(preference.value());

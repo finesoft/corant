@@ -684,12 +684,12 @@ public class Mail {
             .toArray(InternetAddress[]::new));
       }
       if (isNotEmpty(cc)) {
-        mm.setRecipients(RecipientType.CC, to.stream().map(uncheckedFunction(InternetAddress::new))
+        mm.setRecipients(RecipientType.CC, cc.stream().map(uncheckedFunction(InternetAddress::new))
             .toArray(InternetAddress[]::new));
       }
       if (isNotEmpty(bcc)) {
-        mm.setRecipients(RecipientType.BCC, to.stream().map(uncheckedFunction(InternetAddress::new))
-            .toArray(InternetAddress[]::new));
+        mm.setRecipients(RecipientType.BCC, bcc.stream()
+            .map(uncheckedFunction(InternetAddress::new)).toArray(InternetAddress[]::new));
       }
       if (isNotEmpty(replyTo)) {
         mm.setReplyTo(replyTo.stream().map(uncheckedFunction(InternetAddress::new))

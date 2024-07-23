@@ -24,17 +24,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.Querier;
-import org.corant.modules.query.mapping.FetchQuery;
-import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.AbstractNamedQueryService;
-import org.corant.shared.exception.NotSupportedException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.SynchronizationType;
+import org.corant.modules.query.Querier;
+import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.modules.query.shared.AbstractNamedQueryService;
+import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-query-jpql
@@ -101,7 +101,7 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
         hints.forEach(query::setHint);
       }
     }
-    int counter = 0;
+    int counter = 1;
     for (Object parameter : args) {
       query.setParameter(counter++, parameter);
     }

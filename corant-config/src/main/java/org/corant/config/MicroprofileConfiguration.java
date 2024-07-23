@@ -15,6 +15,7 @@ package org.corant.config;
 
 import static java.util.Collections.emptyList;
 import java.util.List;
+import java.util.Optional;
 import org.corant.shared.ubiquity.Configuration;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.eclipse.microprofile.config.spi.ConfigSource;
@@ -49,6 +50,11 @@ public class MicroprofileConfiguration implements Configuration {
   @Override
   public Iterable<String> getKeys() {
     return getConfig().getPropertyNames();
+  }
+
+  @Override
+  public <T> Optional<T> getOptionalValue(String key, Class<T> valueType) {
+    return getConfig().getOptionalValue(key, valueType);
   }
 
   @Override

@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.PropertyResourceBundle;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -95,6 +96,18 @@ public interface Configuration extends Sortable {
    */
   default Iterable<String> getKeys() {
     return emptySet();
+  }
+
+  /**
+   * Return the resolved configuration value with the specified type for the specified configuration
+   * key or {@link Optional#empty()} if configuration value doesn't exist.
+   *
+   * @param <T> the configuration value type
+   * @param key the configuration key
+   * @param valueType the configuration value class
+   */
+  default <T> Optional<T> getOptionalValue(String key, Class<T> valueType) {
+    return Optional.ofNullable(getValue(key, valueType));
   }
 
   /**

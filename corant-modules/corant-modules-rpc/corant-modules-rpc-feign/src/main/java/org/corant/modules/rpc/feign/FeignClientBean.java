@@ -13,6 +13,7 @@
  */
 package org.corant.modules.rpc.feign;
 
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -189,6 +190,7 @@ public class FeignClientBean extends AbstractBean<Object> {
       if (instance == null) {
         instance = Objects.newInstance(cls);
       }
+      shouldInstanceOf(instance, clazz);
     }
     return Optional.ofNullable(instance);
   }
@@ -217,6 +219,7 @@ public class FeignClientBean extends AbstractBean<Object> {
         if (instance == null) {
           instance = Objects.newInstance(cls);
         }
+        shouldInstanceOf(instance, clazz);
         list.add(instance);
       }
     }

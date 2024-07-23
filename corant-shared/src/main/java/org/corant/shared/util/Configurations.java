@@ -179,11 +179,12 @@ public class Configurations {
    * Returns the optional configuration value by the given key, if the configuration value doesn't
    * exist return {@link Optional#empty()}.
    *
+   * @param <T> the configuration value type
    * @param key the configuration key
-   * @return the optional relevant configuration value
+   * @param valueType the configuration value class
    */
-  public static Optional<String> getOptionalConfigValue(String key) {
-    return Optional.ofNullable(getConfig().getValue(key));
+  public static <T> Optional<T> getOptionalConfigValue(String key, Class<T> valueType) {
+    return getConfig().getOptionalValue(key, valueType);
   }
 
   /**

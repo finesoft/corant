@@ -79,9 +79,9 @@ public interface MailManager extends Sortable {
         Properties pros = new Properties();
 
         // set username & password
-        getOptionalConfigValue(rootPrefix + "username")
+        getOptionalConfigValue(rootPrefix + "username", String.class)
             .ifPresent(x -> pros.put("mail.username", x));
-        getOptionalConfigValue(rootPrefix + "password")
+        getOptionalConfigValue(rootPrefix + "password", String.class)
             .ifPresent(x -> pros.put("mail.password", x));
 
         streamOf(getConfig().getKeys()).filter(k -> k.startsWith(prefix)).forEach(k -> {

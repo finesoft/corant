@@ -264,6 +264,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
     log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
     final MongoIterable<Document> mi = query(querier);
+    final boolean setId = isAutoSetIdField(querier);
     final MongoCursor<Document> cursor = mi.batchSize(parameter.getLimit()).iterator();
     final boolean autoClose = parameter.isAutoClose();
     final Iterator<T> iterator = new Iterator<>() {
@@ -306,7 +307,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         int size = parameter.getLimit();
         List<Object> list = new ArrayList<>(size);
         while (it.hasNext() && --size >= 0) {
-          list.add(it.next());
+          Object next = convertDocument(it.next(), querier, setId);
+          list.add(next);
         }
         handleFetching(list, querier);
         return Forwarding.of(querier.handleResults(list), it.hasNext());

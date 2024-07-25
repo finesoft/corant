@@ -54,15 +54,15 @@ public class JPAUtils {
   }
 
   public static Set<Class<?>> getPersistenceClasses(String packages) {
-    Set<Class<?>> clses = new LinkedHashSet<>();
+    Set<Class<?>> classes = new LinkedHashSet<>();
     try {
-      Resources.fromClassPath(replace(packages, ".", "/")).filter(c -> c instanceof ClassResource)
+      Resources.fromClassPath(replace(packages, ".", "/")).filter(ClassResource.class::isInstance)
           .map(c -> (ClassResource) c).map(ClassResource::load).filter(JPAUtils::isPersistenceClass)
-          .forEach(clses::add);
+          .forEach(classes::add);
     } catch (IOException e) {
       throw new CorantRuntimeException(e);
     }
-    return clses;
+    return classes;
   }
 
   public static Set<String> getPersistenceMappingFiles(String... pathExpressions) {
@@ -80,9 +80,9 @@ public class JPAUtils {
 
   public static boolean isPersistenceClass(Class<?> cls) {
     return cls != null && !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers())
-        && (PERSIS_ANN.stream().anyMatch(pn -> cls.isAnnotationPresent(pn))
+        && (PERSIS_ANN.stream().anyMatch(cls::isAnnotationPresent)
             || getAllSuperclassesAndInterfaces(cls).stream()
-                .anyMatch(c -> PERSIS_ANN.stream().anyMatch(pn -> c.isAnnotationPresent(pn))));
+                .anyMatch(c -> PERSIS_ANN.stream().anyMatch(c::isAnnotationPresent)));
   }
 
   public static boolean isPersistenceClass(String clsName) {
@@ -101,25 +101,26 @@ public class JPAUtils {
 
   public static void stdoutPersistClasses(String pkg, PrintStream ps) throws IOException {
     String path = shouldNotNull(pkg).replace('.', '/');
-    Resources.fromClassPath(path).filter(c -> c instanceof ClassResource)
+    Resources.fromClassPath(path).filter(ClassResource.class::isInstance)
         .map(c -> (ClassResource) c).map(ClassResource::load).filter(JPAUtils::isPersistenceClass)
         .map(Class::getName).sorted(String::compareTo)
         .map(x -> new StringBuilder("<class>").append(x).append("</class>").toString())
         .forEach(ps::println);
   }
 
-  public static void stdoutPersistes(String pkg, PrintStream ps) throws IOException {
+  public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
+    String path = shouldNotNull(pkg).replace('.', '/');
+    Resources.fromClassPath(path).map(ClassPathResource::getClassPath)
+        .filter(classPath -> classPath.endsWith("JpaOrm.xml"))
+        .map(s -> new StringBuilder().append("<mapping-file>").append(s.substring(s.indexOf(path)))
+            .append("</mapping-file>"))
+        .forEach(ps::println);
+  }
+
+  public static void stdoutPersists(String pkg, PrintStream ps) throws IOException {
     ps.println("<!-- mapping files -->");
     stdoutPersistJpaOrmXml(pkg, ps);
     ps.println("<!-- mapping classes -->");
     stdoutPersistClasses(pkg, ps);
-  }
-
-  public static void stdoutPersistJpaOrmXml(String pkg, PrintStream ps) throws IOException {
-    String path = shouldNotNull(pkg).replace('.', '/');
-    Resources.fromClassPath(path).filter(r -> r.getClassPath().endsWith("JpaOrm.xml"))
-        .map(ClassPathResource::getClassPath).map(s -> new StringBuilder().append("<mapping-file>")
-            .append(s.substring(s.indexOf(path))).append("</mapping-file>"))
-        .forEach(ps::println);
   }
 }

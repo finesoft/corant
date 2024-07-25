@@ -156,7 +156,7 @@ public class Validates {
     }
     for (byte b : address) {
       if (b != 0x00) {
-        return true; // If any of the bytes are non zero assume a good address
+        return true; // If any of the bytes are non-zero assume a good address
       }
     }
     return false;

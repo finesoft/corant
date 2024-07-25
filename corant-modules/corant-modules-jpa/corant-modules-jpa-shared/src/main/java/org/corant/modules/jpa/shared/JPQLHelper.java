@@ -51,7 +51,7 @@ public class JPQLHelper {
   static int shallowIndexOf(String sb, String search, int fromIndex) {
     final String lowercase = sb.toLowerCase(Locale.ROOT); // case-insensitive match
     final int len = lowercase.length();
-    final int searchlen = search.length();
+    final int searchLen = search.length();
     int pos = -1;
     int depth = 0;
     int cur = fromIndex;
@@ -66,7 +66,7 @@ public class JPQLHelper {
             depth = depth - 1;
           }
         }
-        cur = pos + searchlen;
+        cur = pos + searchLen;
       }
     } while (cur < len && depth != 0 && pos != -1);
     return depth == 0 ? pos : -1;

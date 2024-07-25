@@ -40,10 +40,6 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
 
   final PersistenceUnit pu;
 
-  /**
-   * @param beanManager
-   * @param pu
-   */
   public EntityManagerFactoryBean(BeanManager beanManager, PersistenceUnit pu,
       Annotation[] qualifiers) {
     super(beanManager);
@@ -77,16 +73,6 @@ public class EntityManagerFactoryBean extends AbstractBean<EntityManagerFactory>
     return isBlank(pu.unitName()) ? EntityManagerFactory.class.getName()
         : EntityManagerFactory.class.getName().concat(Names.DOMAIN_SPACE_SEPARATORS)
             .concat(pu.unitName());
-  }
-
-  @Override
-  public boolean isAlternative() {
-    return false;
-  }
-
-  @Override
-  public boolean isNullable() {
-    return false;
   }
 
 }

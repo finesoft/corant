@@ -47,7 +47,7 @@ public class CaffeineJCacheExtension implements Extension {
    *
    * <p>
    * 1. Use additional configuration resource for Caffeine, the additional configuration resource
-   * URI is specified in the cornat configuration properties named
+   * URI is specified in the corant configuration properties named
    * '<b>corant.jcache.caffeine.config.resource</b>'.
    * <p>
    * 2. Use the configuration name prefixed with '<b>caffeine.jcache.</b>' in the corant

@@ -75,7 +75,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
   private boolean verifyDeployment = false;
 
   /**
-   * @param persistenceUnitName
+   * @param persistenceUnitName the persistence unit name
    */
   public PersistenceUnitInfoMetaData(String persistenceUnitName) {
     this.persistenceUnitName = Qualifiers.resolveName(persistenceUnitName);
@@ -146,13 +146,10 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     }
     PersistenceUnitInfoMetaData other = (PersistenceUnitInfoMetaData) obj;
     if (persistenceUnitName == null) {
-      if (other.persistenceUnitName != null) {
-        return false;
-      }
-    } else if (!persistenceUnitName.equals(other.persistenceUnitName)) {
-      return false;
+      return other.persistenceUnitName == null;
+    } else {
+      return persistenceUnitName.equals(other.persistenceUnitName);
     }
-    return true;
   }
 
   @Override
@@ -237,9 +234,6 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
 
   @Override
   public Properties getProperties() {
-    // Properties pops = new Properties();
-    // properties.forEach(pops::put);
-    // return pops;
     return properties; // FIXME
   }
 
@@ -289,7 +283,7 @@ public class PersistenceUnitInfoMetaData implements PersistenceUnitInfo {
     return verifyDeployment;
   }
 
-  public void putPropertity(String name, String value) {
+  public void putProperty(String name, String value) {
     properties.put(name, value);
   }
 

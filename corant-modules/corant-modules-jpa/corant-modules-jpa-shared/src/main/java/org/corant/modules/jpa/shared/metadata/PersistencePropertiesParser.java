@@ -108,12 +108,9 @@ public class PersistencePropertiesParser {
         config.getOptionalValue(pn, String.class)
             .ifPresent(s -> puimd.setSharedCacheMode(SharedCacheMode.valueOf(s)));
       } else if (pn.endsWith(JPAConfig.JC_CLS_PKG)) {
-        config.getOptionalValue(pn, String.class).ifPresent(s -> {
-          streamOf(split(s, ",", true, true)).forEach(p -> {
-            JPAUtils.getPersistenceClasses(p).stream().map(Class::getName)
-                .forEach(puimd::addManagedClassName);
-          });
-        });
+        config.getOptionalValue(pn, String.class).ifPresent(
+            s -> streamOf(split(s, ",", true, true)).forEach(p -> JPAUtils.getPersistenceClasses(p)
+                .stream().map(Class::getName).forEach(puimd::addManagedClassName)));
       } else if (pn.endsWith(JPAConfig.JC_MAP_FILE_PATH)) {
         JPAUtils.getPersistenceMappingFiles(
             split(config.getOptionalValue(pn, String.class).orElse(JPAConfig.DFLT_ORM_XML_LOCATION),
@@ -140,7 +137,7 @@ public class PersistencePropertiesParser {
       // FIXME hibernate only
       if (puimd.getProperties().get("javax.persistence.schema-generation.database.action") == null
           && puimd.isVerifyDeployment()) {
-        puimd.putPropertity("javax.persistence.schema-generation.database.action", "validate");
+        puimd.putProperty("javax.persistence.schema-generation.database.action", "validate");
       }
       shouldBeTrue(cfgs.add(puimd), "The jpa configuration error persistence unit name %s dup!",
           puimd.getPersistenceUnitName());
@@ -157,7 +154,7 @@ public class PersistencePropertiesParser {
           if (JPAConfig.BIND_JNDI.equals(proName)) {
             metaData.setBindToJndi(toBoolean(s));
           } else {
-            metaData.putPropertity(proName, s);
+            metaData.putProperty(proName, s);
           }
         });
       }

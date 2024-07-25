@@ -43,6 +43,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TupleElement;
@@ -195,9 +196,9 @@ public class JPAQueries {
 
   /**
    * Create an instance of AbstractJPAQuery for executing a stored procedure in the database.
-   *
+   * <p>
    * Parameters must be registered before the stored procedure can be executed.
-   *
+   * <p>
    * If the stored procedure returns one or more result sets,any result set will be returned as a
    * list of type Object[].
    *
@@ -210,7 +211,7 @@ public class JPAQueries {
     return new JPAQuery() {
       @Override
       public String toString() {
-        return "Named stroed procedure query: " + name + getParameterDescription();
+        return "Named stored procedure query: " + name + getParameterDescription();
       }
 
       @Override
@@ -391,7 +392,7 @@ public class JPAQueries {
     return new JPAQuery() {
       @Override
       public String toString() {
-        return "Stored proceduce query: " + procedureName + getParameterDescription();
+        return "Stored procedure query: " + procedureName + getParameterDescription();
       }
 
       @Override
@@ -405,7 +406,7 @@ public class JPAQueries {
     return new JPAQuery() {
       @Override
       public String toString() {
-        return "Stored proceduce query: " + procedureName + getParameterDescription();
+        return "Stored procedure query: " + procedureName + getParameterDescription();
       }
 
       @Override
@@ -420,13 +421,83 @@ public class JPAQueries {
     return new JPAQuery() {
       @Override
       public String toString() {
-        return "Stored proceduce query: " + procedureName + getParameterDescription();
+        return "Stored procedure query: " + procedureName + getParameterDescription();
       }
 
       @Override
       protected Query createQuery() {
         return entityManagerSupplier.get().createStoredProcedureQuery(procedureName,
             resultSetMappings);
+      }
+    };
+  }
+
+  /**
+   * Create an instance of UpdatableJPAQuery for executing a named query(in the Jakarta Persistence
+   * query language or in native SQL).
+   *
+   * @param name the name of a query defined in metadata
+   * @return UpdatableJPAQuery
+   * @see EntityManager#createNamedQuery(String)
+   */
+  public static UpdatableJPAQuery updatableNamedQuery(final String name) {
+    return new UpdatableJPAQuery() {
+      @Override
+      public String toString() {
+        return "Named: " + name + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createNamedQuery(name);
+      }
+    };
+  }
+
+  /**
+   * Create an instance of UpdatableJPAQuery for executing a native SQL statement, e.g., query
+   * execution will result in each row of the SQL result being returned as a result of type Object[]
+   * (or a result of type Object if there is only one column in the select list.) Column values are
+   * returned in the order of their appearance in the select list and default JDBC type mappings are
+   * applied.
+   *
+   *
+   * @param sqlString a native SQL query string
+   * @return nativeQuery
+   * @see EntityManager#createNativeQuery(String)
+   */
+  public static UpdatableJPAQuery updatableNativeQuery(final String sqlString) {
+    return new UpdatableJPAQuery() {
+      @Override
+      public String toString() {
+        return "Native query: " + sqlString + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createNativeQuery(sqlString);
+      }
+    };
+  }
+
+  /**
+   * Create an instance of UpdatableJPAQuery for executing a Jakarta Persistence query language
+   * statement.
+   *
+   * @param qlString the Jakarta Persistence query language statement
+   * @return the UpdatableJPAQuery
+   * @see EntityManager#createQuery(String)
+   */
+  public static UpdatableJPAQuery updatableQuery(final String qlString) {
+    return new UpdatableJPAQuery() {
+      @Override
+      public String toString() {
+        return "Query: " + qlString + getParameterDescription();
+      }
+
+      @Override
+      protected Query createQuery() {
+        return entityManagerSupplier.get().createQuery(qlString);
       }
     };
   }
@@ -448,7 +519,6 @@ public class JPAQueries {
    * corant-modules-jpa-shared
    *
    * @author bingo 下午6:05:36
-   *
    */
   public static abstract class AbstractQuery {
 
@@ -571,7 +641,6 @@ public class JPAQueries {
    * corant-modules-jpa-shared
    *
    * @author bingo 下午6:05:43
-   *
    */
   public static abstract class AdvancedJPAQuery extends JPAQuery {
 
@@ -636,7 +705,7 @@ public class JPAQueries {
     /**
      * Execute SELECT query and return the paging result set, the paging result set contains paging
      * results and the total number of results in the query result.
-     *
+     * <p>
      * Note: If the offset exceeds the total number of results in the query result, the total number
      * of returned paging result set results is 0.
      *
@@ -690,14 +759,12 @@ public class JPAQueries {
       setParameters(parameters);
       return this;
     }
-
   }
 
   /**
    * corant-modules-jpa-shared
    *
    * @author bingo 下午6:05:43
-   *
    */
   public static abstract class JPAQuery extends AbstractQuery {
 
@@ -732,20 +799,24 @@ public class JPAQueries {
      * Execute a SELECT query that returns a single result.
      *
      * @param <T> the single result type
-     * @return get
+     * @return the result object
      */
+    @SuppressWarnings("unchecked")
     public <T> T get() {
-      setMaxResults(1);
-      List<T> results = this.select();
-      if (isNotEmpty(results)) {
-        return results.get(0);
+      /*
+       * setMaxResults(1); List<T> results = this.select(); if (isNotEmpty(results)) { return
+       * results.get(0); } return null;
+       */
+      try {
+        return (T) populateQuery(createQuery()).getSingleResult();
+      } catch (NoResultException ex) {
+        return null;
       }
-      return null;
     }
 
     /**
      * Set the query hint pairs.
-     *
+     * <p>
      * {@link Query#setHint(String, Object)}
      */
     public JPAQuery hints(Object... hints) {
@@ -819,7 +890,7 @@ public class JPAQueries {
 
     /**
      * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
-     * default this method delegates to getResultList().stream(),however persistence provider may
+     * default, this method delegates to getResultList().stream(),however persistence provider may
      * choose to override this method to provide additional capabilities.
      *
      * @param <T> the type of the resulting instance(s)
@@ -837,7 +908,6 @@ public class JPAQueries {
    * corant-modules-jpa-shared
    *
    * @author bingo 下午3:13:23
-   *
    */
   public static class PagingResultSet<T> {
     protected int total;
@@ -863,11 +933,14 @@ public class JPAQueries {
 
   }
 
+  public abstract static class ParameterBuilder {
+    public abstract void populateQuery(EntityManager entityManager, Query query);
+  }
+
   /**
    * corant-modules-jpa-shared
    *
    * @author bingo 下午6:05:50
-   *
    */
   public static abstract class TypedJPAQuery<T> extends AbstractQuery {
 
@@ -916,18 +989,22 @@ public class JPAQueries {
      *
      * @return the result object
      */
+    @SuppressWarnings("unchecked")
     public T get() {
-      setMaxResults(1);
-      List<T> results = this.select();
-      if (isNotEmpty(results)) {
-        return results.get(0);
+      /*
+       * setMaxResults(1); List<T> results = this.select(); if (isNotEmpty(results)) { return
+       * results.get(0); } return null;
+       */
+      try {
+        return (T) populateQuery(createQuery()).getSingleResult();
+      } catch (NoResultException ex) {
+        return null;
       }
-      return null;
     }
 
     /**
      * Set the query hint pairs.
-     *
+     * <p>
      * {@link Query#setHint(String, Object)}
      */
     public TypedJPAQuery<T> hints(Object... hints) {
@@ -954,7 +1031,7 @@ public class JPAQueries {
     /**
      * Execute SELECT query and return the paging result set, the paging result set contains paging
      * results and the total number of results in the query result.
-     *
+     * <p>
      * Note: If the offset exceeds the total number of results in the query result, the total number
      * of returned paging result set results is 0.
      *
@@ -1023,7 +1100,7 @@ public class JPAQueries {
     }
 
     /**
-     * Execute a SELECT query and return the query results as an typed List.
+     * Execute a SELECT query and return the query results as a typed List.
      *
      *
      * @return a list of the results
@@ -1039,7 +1116,7 @@ public class JPAQueries {
 
     /**
      * Execute a SELECT query and return the query results as an untyped java.util.stream.Stream.By
-     * default this method delegates to getResultList().stream(),however persistence provider may
+     * default, this method delegates to getResultList().stream(),however persistence provider may
      * choose to override this method to provide additional capabilities.
      *
      * @return a stream of the results
@@ -1058,7 +1135,67 @@ public class JPAQueries {
     protected abstract Query createQuery();
   }
 
-  abstract static class ParameterBuilder {
-    public abstract void populateQuery(EntityManager entityManager, Query query);
+  /**
+   * corant-modules-jpa-shared
+   *
+   * @author bingo 下午6:05:43
+   */
+  public static abstract class UpdatableJPAQuery extends AbstractQuery {
+
+    public UpdatableJPAQuery entityManager(final EntityManager entityManager) {
+      setEntityManagerSupplier(
+          () -> shouldNotNull(entityManager, "The entity manager cannot null!"));
+      return this;
+    }
+
+    public UpdatableJPAQuery entityManager(final Supplier<EntityManager> entityManagerSupplier) {
+      setEntityManagerSupplier(entityManagerSupplier);
+      return this;
+    }
+
+    public int executeUpdate() {
+      return populateQuery(createQuery()).executeUpdate();
+    }
+
+    /**
+     * {@link Query#setFlushMode(FlushModeType)}
+     */
+    public UpdatableJPAQuery flushMode(FlushModeType flushMode) {
+      setFlushMode(flushMode);
+      return this;
+    }
+
+    /**
+     * {@link Query#setHint(String, Object)}
+     */
+    public UpdatableJPAQuery hints(Object... hints) {
+      setHints(hints);
+      return this;
+    }
+
+    /**
+     * {@link Query#setLockMode(LockModeType)}
+     */
+    public UpdatableJPAQuery lockMode(LockModeType lockMode) {
+      setLockMode(lockMode);
+      return this;
+    }
+
+    public UpdatableJPAQuery parameters(List<?> parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    public UpdatableJPAQuery parameters(final Map<?, ?> parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    public UpdatableJPAQuery parameters(final Object... parameters) {
+      setParameters(parameters);
+      return this;
+    }
+
+    protected abstract Query createQuery();
   }
 }

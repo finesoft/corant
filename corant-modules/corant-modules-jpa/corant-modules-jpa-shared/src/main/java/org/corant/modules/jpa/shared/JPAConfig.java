@@ -145,10 +145,9 @@ public class JPAConfig {
     Set<PersistenceUnitInfoMetaData> cfgs = new HashSet<>();
     try {
       Resources.fromClassPath(DFLT_PU_XML_LOCATION).map(ClassPathResource::getURL)
-          .map(PersistenceXmlParser::parse).flatMap(Set::stream).forEach(m -> {
-            shouldBeTrue(cfgs.add(m), "The persistence unit name %s is dup!",
-                m.getPersistenceUnitName());
-          });
+          .map(PersistenceXmlParser::parse).flatMap(Set::stream)
+          .forEach(m -> shouldBeTrue(cfgs.add(m), "The persistence unit name %s is dup!",
+              m.getPersistenceUnitName()));
     } catch (IOException e) {
       logger.log(Level.WARNING, e, () -> format("Parse persistence meta data from %s error %s.",
           DFLT_PU_XML_LOCATION, e.getMessage()));

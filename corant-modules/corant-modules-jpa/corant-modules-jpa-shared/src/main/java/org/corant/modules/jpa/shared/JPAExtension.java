@@ -58,10 +58,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  * corant-modules-jpa-shared
- *
+ * <p>
  * Initialize the named qualifier Entity Manager Factory bean for injection, use Unnamed qualifier
  * for injection while the configurations do not assign a name.
- *
+ * </p>
  * TODO: Check persistence unit data source availability AfterDeploymentValidation.
  *
  * @author bingo 上午11:32:56
@@ -119,7 +119,7 @@ public class JPAExtension implements Extension {
         }
         String jndiName = JPAConfig.JNDI_SUBCTX_NAME + "/" + un;
         jndi.bind(jndiName, new NamingReference(EntityManagerFactory.class, quas));
-        logger.info(() -> format("Bind entity manager factorties %s to jndi.", jndiName));
+        logger.info(() -> format("Bind entity manager factories %s to jndi.", jndiName));
       } catch (NamingException e) {
         throw new CorantRuntimeException(e);
       }
@@ -151,8 +151,8 @@ public class JPAExtension implements Extension {
     persistenceUnitInfoMetaDatas.values().forEach(pu -> {
       if (pu.isVerifyDeployment()) {
         // FIXME use provider validation
-        logger.info(() -> format("Check entity manager, psersistence unit %s",
-            pu.getPersistenceUnitName()));
+        logger.info(
+            () -> format("Check entity manager, persistence unit %s", pu.getPersistenceUnitName()));
         resolve(EntityManagerFactory.class, qualifiers.get(pu.getPersistenceUnitName()))
             .createEntityManager(SynchronizationType.UNSYNCHRONIZED).close();
       }

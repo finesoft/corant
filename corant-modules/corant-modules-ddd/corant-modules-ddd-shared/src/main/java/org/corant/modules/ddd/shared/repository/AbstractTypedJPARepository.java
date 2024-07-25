@@ -27,6 +27,7 @@ import jakarta.persistence.LockModeType;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries.UpdatableJPAQuery;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceContextLiteral;
 
 /**
@@ -127,6 +128,21 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
     return JPAQueries.query(qlString, type).entityManager(this::getEntityManager);
   }
 
+  @Override
+  public UpdatableJPAQuery updatableNativeQuery(String sqlString) {
+    return JPAQueries.updatableNativeQuery(sqlString).entityManager(this::getEntityManager);
+  }
+
+  @Override
+  public UpdatableJPAQuery updatableNamedQuery(String name) {
+    return JPAQueries.updatableNamedQuery(name).entityManager(this::getEntityManager);
+  }
+
+  @Override
+  public UpdatableJPAQuery updatableQuery(String qlString) {
+    return JPAQueries.updatableQuery(qlString).entityManager(this::getEntityManager);
+  }
+
   @SuppressWarnings("unchecked")
   @PostConstruct
   protected void onPostConstruct() {
@@ -143,12 +159,11 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
             } else {
               Type[] genericInterfaces = repoClass.getGenericInterfaces();
               for (Type type : genericInterfaces) {
-                if (type instanceof ParameterizedType parameterizedType) {
-                    if (AbstractTypedJPARepository.class
-                      .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-                    resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
-                    break;
-                  }
+                if ((type instanceof ParameterizedType parameterizedType)
+                    && AbstractTypedJPARepository.class
+                        .isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+                  resolvedClass = (Class<T>) parameterizedType.getActualTypeArguments()[0];
+                  break;
                 }
               }
             }

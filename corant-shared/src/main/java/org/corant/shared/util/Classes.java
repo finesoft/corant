@@ -422,10 +422,6 @@ public class Classes {
         return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
             || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
       }
-      if (Short.TYPE.equals(useCls)) {
-        return Integer.TYPE.equals(toClass) || Long.TYPE.equals(toClass)
-            || Float.TYPE.equals(toClass) || Double.TYPE.equals(toClass);
-      }
       if (Byte.TYPE.equals(useCls)) {
         return Short.TYPE.equals(toClass) || Integer.TYPE.equals(toClass)
             || Long.TYPE.equals(toClass) || Float.TYPE.equals(toClass)

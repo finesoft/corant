@@ -32,6 +32,7 @@ import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
+import org.corant.modules.jpa.shared.JPAQueries.UpdatableJPAQuery;
 
 /**
  * corant-modules-ddd-shared
@@ -184,19 +185,19 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Merge the state of the given objects into repository.
    *
-   * @param objs the objects to be saved
+   * @param objects the objects to be saved
    * @param preHandler merge operation preprocessor, used to configure the entity manager, such as
    *        setting batch size, etc. This is related to the Hints provided by the JPA provider.
    * @param postHandler merge operation post-processor, use to configure the entity manager, such as
    *        flushing to underlying database, etc.
    */
-  default void mergeAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
+  default void mergeAll(Iterable<T> objects, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
-    if (objs != null) {
+    if (objects != null) {
       final EntityManager em =
           preHandler != null ? preHandler.apply(getEntityManager()) : getEntityManager();
       try {
-        for (T obj : objs) {
+        for (T obj : objects) {
           em.merge(obj);
         }
       } finally {
@@ -253,20 +254,20 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Save the state of the given objects into repository.
    *
-   * @param objs the objects to be saved
+   * @param objects the objects to be saved
    * @param preHandler persistence operation preprocessor, used to configure the entity manager,
    *        such as setting batch size, etc. This is related to the Hints provided by the JPA
    *        provider.
    * @param postHandler persistence operation post-processor, use to configure the entity manager,
    *        such as flushing to underlying database, etc.
    */
-  default void persistAll(Iterable<T> objs, UnaryOperator<EntityManager> preHandler,
+  default void persistAll(Iterable<T> objects, UnaryOperator<EntityManager> preHandler,
       Consumer<EntityManager> postHandler) {
-    if (objs != null) {
+    if (objects != null) {
       final EntityManager em =
           preHandler != null ? preHandler.apply(getEntityManager()) : getEntityManager();
       try {
-        for (T obj : objs) {
+        for (T obj : objects) {
           em.persist(obj);
         }
       } finally {
@@ -400,5 +401,26 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   default List<T> select(Query q) {
     return defaultObject(q.getResultList(), ArrayList::new);
   }
+
+  /**
+   * Returns a JPA query for execute updating.
+   *
+   * @param sqlString the native SQL query statement
+   */
+  UpdatableJPAQuery updatableNativeQuery(final String sqlString);
+
+  /**
+   * Returns a JPA query for execute updating.
+   *
+   * @param name the name of a query defined in metadata
+   */
+  UpdatableJPAQuery updatableNamedQuery(final String name);
+
+  /**
+   * Returns a JPA query for execute updating.
+   *
+   * @param qlString the Jakarta Persistence query string
+   */
+  UpdatableJPAQuery updatableQuery(final String qlString);
 
 }

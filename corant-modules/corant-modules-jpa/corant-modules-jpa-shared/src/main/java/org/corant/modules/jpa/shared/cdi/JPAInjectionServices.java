@@ -29,8 +29,9 @@ import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 
 /**
  * corant-modules-jpa-shared
- *
- * The JPAInjectionServices implementation
+ * <p>
+ * The JPAInjectionServices SPI implementation
+ * </p>
  *
  * @see JPAProvider
  * @author bingo 下午4:18:45

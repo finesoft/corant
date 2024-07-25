@@ -412,7 +412,6 @@ public interface PathMatcher extends Predicate<String> {
    * backslash is escaped; as a string literal in the Java Language the pattern would be
    * <tt>"C:&#92;&#92;&#92;&#92;*"</tt>)</td>
    * </tr>
-   *
    * </table>
    * </blockquote>
    *

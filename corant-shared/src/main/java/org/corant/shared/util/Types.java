@@ -39,7 +39,7 @@ import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-shared
- *
+ * <p>
  * Extracted from google gson.
  *
  * Static methods for working with types.

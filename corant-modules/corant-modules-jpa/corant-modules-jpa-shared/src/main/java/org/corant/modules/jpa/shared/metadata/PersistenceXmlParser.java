@@ -113,7 +113,7 @@ public class PersistenceXmlParser {
               if (JPAConfig.BIND_JNDI.equals(propName)) {
                 puimd.setBindToJndi(toBoolean(propValue));
               } else {
-                puimd.putPropertity(propName, propValue);
+                puimd.putProperty(propName, propValue);
               }
             }
           }

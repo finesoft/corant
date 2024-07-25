@@ -16,7 +16,6 @@ package org.corant.modules.datasource.hikari;
 import static org.corant.shared.util.Assertions.shouldBeFalse;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Maps.getOpt;
 import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.Maps.toProperties;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -25,12 +24,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.corant.modules.datasource.shared.AbstractDataSourceExtension;
@@ -87,13 +86,13 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     getOptMapObject(cfg.getCtrlProperties(), "allow-pool-suspension", Conversions::toBoolean)
         .ifPresent(hcfg::setAllowPoolSuspension);
     hcfg.setAutoCommit(cfg.isAutoCommit());
-    getOpt(cfg.getCtrlProperties(), "catalog").ifPresent(hcfg::setCatalog);
+    getOptMapObject(cfg.getCtrlProperties(), "catalog").ifPresent(hcfg::setCatalog);
     hcfg.setConnectionInitSql(cfg.getInitialSql());
-    getOpt(cfg.getCtrlProperties(), "test-query").ifPresent(hcfg::setConnectionTestQuery);
+    getOptMapObject(cfg.getCtrlProperties(), "test-query").ifPresent(hcfg::setConnectionTestQuery);
     hcfg.setConnectionTimeout(cfg.getAcquisitionTimeout().toMillis());
-    getOpt(cfg.getCtrlProperties(), "data-source-class-name")
+    getOptMapObject(cfg.getCtrlProperties(), "data-source-class-name")
         .ifPresent(hcfg::setDataSourceClassName);
-    getOpt(cfg.getCtrlProperties(), "data-source-jndi").ifPresent(hcfg::setDataSourceJNDI);
+    getOptMapObject(cfg.getCtrlProperties(), "data-source-jndi").ifPresent(hcfg::setDataSourceJNDI);
     if (isNotEmpty(cfg.getJdbcProperties())) {
       hcfg.setDataSourceProperties(toProperties(cfg.getJdbcProperties()));
     }
@@ -102,7 +101,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
       hcfg.setDriverClassName(cfg.getDriver().getName());
     }
 
-    getOpt(cfg.getCtrlProperties(), "exception-override-class-name")
+    getOptMapObject(cfg.getCtrlProperties(), "exception-override-class-name")
         .ifPresent(hcfg::setExceptionOverrideClassName);
 
     // cfgs.setHealthCheckProperties(); // Use Configurator SPI
@@ -142,7 +141,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
     hcfg.setRegisterMbeans(cfg.isEnableMetrics());
 
-    getOpt(cfg.getCtrlProperties(), "schema").ifPresent(hcfg::setSchema);
+    getOptMapObject(cfg.getCtrlProperties(), "schema").ifPresent(hcfg::setSchema);
 
     if (cfg.getIsolationLevel() > -1) {
       switch (cfg.getIsolationLevel()) {

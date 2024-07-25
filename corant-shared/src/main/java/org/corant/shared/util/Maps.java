@@ -17,6 +17,7 @@ import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Conversions.toSet;
+import static org.corant.shared.util.Functions.emptyPredicate;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -36,9 +37,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -50,6 +53,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -1106,13 +1110,17 @@ public class Maps {
     return getMapObject(map, key, v -> Conversions.toZonedDateTime(v, zoneId), null);
   }
 
-  public static <K, V> Optional<V> getOpt(Map<K, V> map, K key) {
-    return Optional.ofNullable(map != null ? map.get(key) : null);
-  }
-
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);
+  }
+
+  public static <K, V> Optional<V> getOptMapObject(Map<K, V> map, K key) {
+    return Optional.ofNullable(map != null ? map.get(key) : null);
+  }
+
+  public static <K, V> Optional<V> getOptMapObject(Map<K, V> map, K key, Class<V> type) {
+    return Optional.ofNullable(getMapObject(map, key, type));
   }
 
   public static <K, V> Map<K, V> immutableMap(Map<? extends K, ? extends V> map) {
@@ -1293,7 +1301,7 @@ public class Maps {
     return target;
   }
 
-  public static <K, V> Map<K, V> removeIfKey(Predicate<K> predicate, Map<K, V> map) {
+  public static <K, V> Map<K, V> removeIfKey(Map<K, V> map, Predicate<K> predicate) {
     Map<K, V> removed = new HashMap<>();
     if (predicate != null && map != null) {
       Set<K> removeKeys = map.keySet().stream().filter(predicate).collect(Collectors.toSet());
@@ -1310,6 +1318,86 @@ public class Maps {
       target.remove(key);
     }
     return target;
+  }
+
+  /**
+   * Filters the given map by the given key predicate and value predicate, returning a new map or
+   * null if the given map is null.
+   * <p>
+   * Note: If the given predicate is null, it is assumed that the filter is an all-match
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map use for filtering entries and generate sub map
+   * @param keyPredicate the predicate use to filter the key of the given map, null means match
+   * @param valuePredicate the predicate use to filter the value of the given map, null means match
+   * @return a new map or null if the given map is null
+   */
+  @SuppressWarnings({"unchecked"})
+  public static <K, V> Map<K, V> subMap(Map<K, V> map, Predicate<K> keyPredicate,
+      Predicate<V> valuePredicate) {
+    if (map == null) {
+      return null;
+    }
+    Map<K, V> subMap;
+    if (map instanceof LinkedHashMap<K, V>) {
+      subMap = new LinkedHashMap<>();
+    } else if (map instanceof TreeMap<K, V> tm) {
+      subMap = new TreeMap<>(tm.comparator());
+    } else if (map instanceof IdentityHashMap<K, V>) {
+      subMap = new IdentityHashMap<>();
+    } else if (map instanceof ConcurrentHashMap<K, V>) {
+      subMap = new ConcurrentHashMap<>();
+    } else if (map instanceof EnumMap em) {
+      subMap = em.clone();// FIXME use clone
+      subMap.clear();
+    } else {
+      subMap = new HashMap<>();
+    }
+    if (keyPredicate == null && valuePredicate == null) {
+      subMap.putAll(map);
+      return subMap;
+    }
+    Predicate<K> kp = keyPredicate == null ? emptyPredicate(true) : keyPredicate;
+    Predicate<V> vp = valuePredicate == null ? emptyPredicate(true) : valuePredicate;
+    map.forEach((k, v) -> {
+      if (kp.test(k) && vp.test(v)) {
+        subMap.put(k, v);
+      }
+    });
+    return subMap;
+  }
+
+  /**
+   * Filters the given map by the given key predicate, returning a new map or null if the given map
+   * is null.
+   * <p>
+   * Note: If the given predicate is null, it is assumed that the filter is an all-match
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map use for filtering keys and generate sub map
+   * @param predicate the predicate use to filter the key of the given map, null means match
+   * @return a new map or null if the given map is null
+   */
+  public static <K, V> Map<K, V> subMapByKeyPredicate(Map<K, V> map, Predicate<K> predicate) {
+    return subMap(map, predicate, null);
+  }
+
+  /**
+   * Filters the given map by the given value predicate, returning a new map or null if the given
+   * map is null.
+   * <p>
+   * Note: If the given predicate is null, it is assumed that the filter is an all-match
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map use for filtering keys and generate sub map
+   * @param predicate the predicate use to filter the value of the given map, null means match
+   * @return a new map or null if the given map is null
+   */
+  public static <K, V> Map<K, V> subMapByValuePredicate(Map<K, V> map, Predicate<V> predicate) {
+    return subMap(map, null, predicate);
   }
 
   public static Map<String, String> toMap(final Properties properties) {
@@ -1417,8 +1505,7 @@ public class Maps {
       final IntFunction<C> collectionFactory, final Function<Object, T> converter) {
     if (obj == null) {
       return null;
-    } else if (obj instanceof Collection) {
-      Collection<?> vals = (Collection<?>) obj;
+    } else if (obj instanceof Collection<?> vals) {
       C results = collectionFactory.apply(vals.size());
       for (Object val : vals) {
         results.add(converter.apply(val));
@@ -1431,22 +1518,19 @@ public class Maps {
         results.add(converter.apply(val));
       }
       return results;
-    } else if (obj instanceof Iterable) {
-      Iterable<?> vals = (Iterable<?>) obj;
+    } else if (obj instanceof Iterable<?> vals) {
       C results = collectionFactory.apply(10);
       for (Object val : vals) {
         results.add(converter.apply(val));
       }
       return results;
-    } else if (obj instanceof Iterator) {
-      Iterator<?> vals = (Iterator<?>) obj;
+    } else if (obj instanceof Iterator<?> vals) {
       C results = collectionFactory.apply(10);
       while (vals.hasNext()) {
         results.add(converter.apply(vals.next()));
       }
       return results;
-    } else if (obj instanceof Enumeration) {
-      Enumeration<?> vals = (Enumeration<?>) obj;
+    } else if (obj instanceof Enumeration<?> vals) {
       C results = collectionFactory.apply(10);
       while (vals.hasMoreElements()) {
         results.add(converter.apply(vals.nextElement()));
@@ -1463,9 +1547,8 @@ public class Maps {
     if (key == null || key.keys.size() > maxDepth) {
       return;
     }
-    if (val instanceof Collection) {
+    if (val instanceof Collection<?> vals) {
       int idx = 0;
-      Collection<?> vals = (Collection<?>) val;
       for (Object obj : vals) {
         doFlatMap(resultMap, FlatMapKey.of(key).append(idx++), obj, maxDepth);
       }
@@ -1523,7 +1606,6 @@ public class Maps {
     }
   }
 
-  @SuppressWarnings("rawtypes")
   static void iterateMapValue(Object value, Object[] keyPath, int deep, boolean flat,
       boolean remove, List<Object> holder) {
     if (value == null) {
@@ -1532,9 +1614,8 @@ public class Maps {
     final int index = keyPath.length - deep;
     final boolean removed = remove && index == 1;
     if (index > 0) {
-      if (value instanceof Map) {
+      if (value instanceof Map<?, ?> mapValue) {
         final Object key = keyPath[deep];
-        final Map mapValue = (Map) value;
         final Object next = removed ? mapValue.remove(key) : mapValue.get(key);
         if (next != null) {
           iterateMapValue(next, keyPath, deep + 1, flat, remove, holder);

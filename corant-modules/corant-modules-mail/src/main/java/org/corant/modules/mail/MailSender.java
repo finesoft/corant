@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import jakarta.mail.Authenticator;
-import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
@@ -36,7 +35,7 @@ public interface MailSender {
 
   void send(List<String> to, String subject, String message, Resource... resources);
 
-  void send(Mail... mail) throws MessagingException;
+  void send(Mail... mail);
 
   void send(String to, String subject, String message, Resource... resources);
 

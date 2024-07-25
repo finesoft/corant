@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Predicate;
-import jakarta.mail.MessagingException;
 import org.corant.modules.mail.MailSender.DefaultMailSender;
-import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.Resource;
 
 /**
@@ -97,11 +95,7 @@ public class MailSenderTemplate {
       if (mail.from() == null && username != null) {
         mail.from(username);
       }
-      try {
-        sender.send(mail);
-      } catch (MessagingException e) {
-        throw new CorantRuntimeException(e);
-      }
+      sender.send(mail);
     }
   }
 

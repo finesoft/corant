@@ -14,6 +14,7 @@
 package org.corant.modules.json.extensions;
 
 import java.io.IOException;
+import org.corant.shared.conversion.converter.particular.TupleConverter;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Tuple;
 import org.corant.shared.ubiquity.Tuple.Dectet;
@@ -30,6 +31,7 @@ import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.ubiquity.Tuple.Triplet;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.json.PackageVersion;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -52,6 +54,36 @@ public class CorantTupleModule extends Module {
   public static final CorantTupleModule INSTANCE = new CorantTupleModule();
 
   protected CorantTupleModule() {}
+
+  static int getSize(Class<? extends Tuple> clazz) {
+    if (clazz == Pair.class) {
+      return 2;
+    } else if (clazz == Triple.class) {
+      return 3;
+    } else if (clazz == Duet.class) {
+      return 2;
+    } else if (clazz == Triplet.class) {
+      return 3;
+    } else if (clazz == Range.class) {
+      return 2;
+    } else if (clazz == Quartet.class) {
+      return 4;
+    } else if (clazz == Quintet.class) {
+      return 5;
+    } else if (clazz == Sextet.class) {
+      return 6;
+    } else if (clazz == Septet.class) {
+      return 7;
+    } else if (clazz == Octet.class) {
+      return 8;
+    } else if (clazz == Nonet.class) {
+      return 9;
+    } else if (clazz == Dectet.class) {
+      return 10;
+    } else {
+      throw new NotSupportedException("Can't support serialize class: " + clazz);
+    }
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -114,15 +146,25 @@ public class CorantTupleModule extends Module {
   public static class TupleDeserializer<T extends Tuple> extends JsonDeserializer<T> {
 
     protected final Class<T> clazz;
+    protected final Class<?>[] types;
 
     public TupleDeserializer(Class<T> clazz) {
       this.clazz = clazz;
+      int size = getSize(clazz);
+      types = new Class[size];
+      for (int i = 0; i < size; i++) {
+        types[i] = Object.class;
+      }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
         throws IOException {
+      if (jsonParser.hasToken(JsonToken.START_OBJECT)) {
+        // FIXME Experimental
+        return (T) TupleConverter.convert(jsonParser.readValueAs(Object.class), clazz, types, null);
+      }
       final Object[] array = jsonParser.readValueAs(Object[].class);
       if (clazz == Pair.class) {
         return (T) Pair.of(array[0], array[1]);
@@ -169,33 +211,7 @@ public class CorantTupleModule extends Module {
     protected final int size;
 
     public TupleSerializer(Class<T> clazz) {
-      if (clazz == Pair.class) {
-        size = 2;
-      } else if (clazz == Triple.class) {
-        size = 3;
-      } else if (clazz == Duet.class) {
-        size = 2;
-      } else if (clazz == Triplet.class) {
-        size = 3;
-      } else if (clazz == Range.class) {
-        size = 2;
-      } else if (clazz == Quartet.class) {
-        size = 4;
-      } else if (clazz == Quintet.class) {
-        size = 5;
-      } else if (clazz == Sextet.class) {
-        size = 6;
-      } else if (clazz == Septet.class) {
-        size = 7;
-      } else if (clazz == Octet.class) {
-        size = 8;
-      } else if (clazz == Nonet.class) {
-        size = 9;
-      } else if (clazz == Dectet.class) {
-        size = 10;
-      } else {
-        throw new NotSupportedException("Can't support serialize class: " + clazz);
-      }
+      size = getSize(clazz);
     }
 
     @Override

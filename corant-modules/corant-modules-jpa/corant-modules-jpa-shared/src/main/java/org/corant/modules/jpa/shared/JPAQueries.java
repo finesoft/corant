@@ -22,6 +22,7 @@ import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Objects.asString;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Primitives.isSimpleClass;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -737,6 +738,7 @@ public class JPAQueries {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public AdvancedJPAQuery parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
@@ -800,6 +802,8 @@ public class JPAQueries {
      *
      * @param <T> the single result type
      * @return the result object
+     *
+     * @see Query#getSingleResult()
      */
     @SuppressWarnings("unchecked")
     public <T> T get() {
@@ -847,6 +851,7 @@ public class JPAQueries {
      * @param parameters positional parameters
      * @see Query#setParameter(int, Object)
      */
+    @Deprecated
     public JPAQuery parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
@@ -988,15 +993,20 @@ public class JPAQueries {
      * Execute a SELECT query that returns a single typed result.
      *
      * @return the result object
+     * @see Query#getSingleResult()
      */
-    @SuppressWarnings("unchecked")
     public T get() {
       /*
        * setMaxResults(1); List<T> results = this.select(); if (isNotEmpty(results)) { return
        * results.get(0); } return null;
        */
       try {
-        return (T) populateQuery(createQuery()).getSingleResult();
+        Object result = populateQuery(createQuery()).getSingleResult();
+        if (resultType == null || converter == null) {
+          return forceCast(result);
+        } else {
+          return convertTuple(converter, (Tuple) result, resultType);
+        }
       } catch (NoResultException ex) {
         return null;
       }
@@ -1069,6 +1079,7 @@ public class JPAQueries {
      * @param parameters positional parameters
      * @see Query#setParameter(int, Object)
      */
+    @Deprecated
     public TypedJPAQuery<T> parameters(List<?> parameters) {
       setParameters(parameters);
       return this;
@@ -1178,11 +1189,6 @@ public class JPAQueries {
      */
     public UpdatableJPAQuery lockMode(LockModeType lockMode) {
       setLockMode(lockMode);
-      return this;
-    }
-
-    public UpdatableJPAQuery parameters(List<?> parameters) {
-      setParameters(parameters);
       return this;
     }
 

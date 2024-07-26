@@ -86,13 +86,15 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
     getOptMapObject(cfg.getCtrlProperties(), "allow-pool-suspension", Conversions::toBoolean)
         .ifPresent(hcfg::setAllowPoolSuspension);
     hcfg.setAutoCommit(cfg.isAutoCommit());
-    getOptMapObject(cfg.getCtrlProperties(), "catalog").ifPresent(hcfg::setCatalog);
+    getOptMapObject(cfg.getCtrlProperties(), "catalog", String.class).ifPresent(hcfg::setCatalog);
     hcfg.setConnectionInitSql(cfg.getInitialSql());
-    getOptMapObject(cfg.getCtrlProperties(), "test-query").ifPresent(hcfg::setConnectionTestQuery);
+    getOptMapObject(cfg.getCtrlProperties(), "test-query", String.class)
+        .ifPresent(hcfg::setConnectionTestQuery);
     hcfg.setConnectionTimeout(cfg.getAcquisitionTimeout().toMillis());
-    getOptMapObject(cfg.getCtrlProperties(), "data-source-class-name")
+    getOptMapObject(cfg.getCtrlProperties(), "data-source-class-name", String.class)
         .ifPresent(hcfg::setDataSourceClassName);
-    getOptMapObject(cfg.getCtrlProperties(), "data-source-jndi").ifPresent(hcfg::setDataSourceJNDI);
+    getOptMapObject(cfg.getCtrlProperties(), "data-source-jndi", String.class)
+        .ifPresent(hcfg::setDataSourceJNDI);
     if (isNotEmpty(cfg.getJdbcProperties())) {
       hcfg.setDataSourceProperties(toProperties(cfg.getJdbcProperties()));
     }
@@ -101,7 +103,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
       hcfg.setDriverClassName(cfg.getDriver().getName());
     }
 
-    getOptMapObject(cfg.getCtrlProperties(), "exception-override-class-name")
+    getOptMapObject(cfg.getCtrlProperties(), "exception-override-class-name", String.class)
         .ifPresent(hcfg::setExceptionOverrideClassName);
 
     // cfgs.setHealthCheckProperties(); // Use Configurator SPI
@@ -141,7 +143,7 @@ public class HikariCPDataSourceExtension extends AbstractDataSourceExtension {
 
     hcfg.setRegisterMbeans(cfg.isEnableMetrics());
 
-    getOptMapObject(cfg.getCtrlProperties(), "schema").ifPresent(hcfg::setSchema);
+    getOptMapObject(cfg.getCtrlProperties(), "schema", String.class).ifPresent(hcfg::setSchema);
 
     if (cfg.getIsolationLevel() > -1) {
       switch (cfg.getIsolationLevel()) {

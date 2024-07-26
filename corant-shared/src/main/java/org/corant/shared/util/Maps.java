@@ -1110,17 +1110,17 @@ public class Maps {
     return getMapObject(map, key, v -> Conversions.toZonedDateTime(v, zoneId), null);
   }
 
+  public static <T> Optional<T> getOptMapObject(Map<?, ?> map, Object key) {
+    return getOptMapObject(map, key, Objects::forceCast);
+  }
+
+  public static <T> Optional<T> getOptMapObject(Map<?, ?> map, Object key, Class<T> type) {
+    return Optional.ofNullable(getMapObject(map, key, type));
+  }
+
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);
-  }
-
-  public static <K, V> Optional<V> getOptMapObject(Map<K, V> map, K key) {
-    return Optional.ofNullable(map != null ? map.get(key) : null);
-  }
-
-  public static <K, V> Optional<V> getOptMapObject(Map<K, V> map, K key, Class<V> type) {
-    return Optional.ofNullable(getMapObject(map, key, type));
   }
 
   public static <K, V> Map<K, V> immutableMap(Map<? extends K, ? extends V> map) {

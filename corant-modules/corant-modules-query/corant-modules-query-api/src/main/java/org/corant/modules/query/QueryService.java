@@ -48,13 +48,6 @@ public interface QueryService<Q, P> {
   <T> T get(Q q, P p);
 
   /**
-   * Returns a query object mapper to be used in result type conversion.
-   *
-   * @return getQueryObjectMapper
-   */
-  QueryObjectMapper getObjectMapper();
-
-  /**
    * Paging query, returns the query result set and total record counts etc.
    *
    * @param <T> The expected query result object type.

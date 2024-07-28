@@ -44,11 +44,8 @@ import org.elasticsearch.client.transport.TransportClient;
  * corant-modules-query-elastic
  *
  * @author bingo 下午6:04:28
- *
  */
-// @Priority(1)
 @ApplicationScoped
-// @Alternative
 public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, EsNamedQueryService> services = new ConcurrentHashMap<>();
@@ -111,31 +108,22 @@ public class EsNamedQueryServiceManager implements NamedQueryServiceManager {
    * corant-modules-query-elastic
    *
    * @author bingo 上午10:50:50
-   *
    */
   public static class DefaultEsNamedQueryService extends AbstractEsNamedQueryService {
 
     protected final EsQueryExecutor executor;
     protected final AbstractNamedQuerierResolver<EsNamedQuerier> resolver;
 
-    /**
-     * @param transportClient
-     * @param manager
-     */
-    public DefaultEsNamedQueryService(TransportClient transportClient,
-        EsNamedQueryServiceManager manager) {
-      executor = new DefaultEsQueryExecutor(transportClient);
-      resolver = manager.resolver;
-    }
-
-    /**
-     * @param executor
-     * @param resolver
-     */
-    protected DefaultEsNamedQueryService(EsQueryExecutor executor,
+    public DefaultEsNamedQueryService(EsQueryExecutor executor,
         AbstractNamedQuerierResolver<EsNamedQuerier> resolver) {
       this.executor = executor;
       this.resolver = resolver;
+    }
+
+    protected DefaultEsNamedQueryService(TransportClient transportClient,
+        EsNamedQueryServiceManager manager) {
+      executor = new DefaultEsQueryExecutor(transportClient);
+      resolver = manager.resolver;
     }
 
     @Override

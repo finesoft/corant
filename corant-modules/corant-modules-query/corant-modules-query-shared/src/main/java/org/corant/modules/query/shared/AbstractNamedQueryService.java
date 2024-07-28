@@ -15,7 +15,6 @@ package org.corant.modules.query.shared;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -36,7 +35,6 @@ import java.util.stream.Stream;
 import org.corant.Corant;
 import org.corant.modules.query.NamedQuerier;
 import org.corant.modules.query.Querier;
-import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
@@ -78,11 +76,6 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
       throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s]!",
           q);
     }
-  }
-
-  @Override
-  public QueryObjectMapper getObjectMapper() {
-    return resolve(QueryObjectMapper.class);
   }
 
   @Override
@@ -333,8 +326,8 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     FetchableNamedQueryService service;
-    final Query query =
-        resolve(QueryMappingService.class).getQuery(fq.getReferenceQuery().getVersionedName());
+    final Query query = getQuerierResolver().getMappingService()
+        .getQuery(fq.getReferenceQuery().getVersionedName());
     final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
     final String qualifier =
         defaultObject(fq.getReferenceQuery().getQualifier(), query.getQualifier());

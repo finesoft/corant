@@ -45,11 +45,8 @@ import com.datastax.driver.core.Cluster;
  * corant-modules-query-cassandra
  *
  * @author bingo 下午6:04:28
- *
  */
-// @Priority(1)
 @ApplicationScoped
-// @Alternative
 public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
@@ -113,35 +110,25 @@ public class CasNamedQueryServiceManager implements NamedQueryServiceManager {
    * corant-modules-query-cassandra
    *
    * @author bingo 下午3:41:34
-   *
    */
   public static class DefaultCasNamedQueryService extends AbstractCasNamedQueryService {
 
     protected final AbstractNamedQuerierResolver<CasNamedQuerier> resolver;
     protected final CasQueryExecutor executor;
 
-    /**
-     * @param clusterName
-     * @param manager
-     */
-    public DefaultCasNamedQueryService(String clusterName, CasNamedQueryServiceManager manager) {
+    public DefaultCasNamedQueryService(Cluster cluster, int fetchSize,
+        AbstractNamedQuerierResolver<CasNamedQuerier> resolver) {
+      this.resolver = resolver;
+      executor = new DefaultCasQueryExecutor(cluster, fetchSize);
+    }
+
+    protected DefaultCasNamedQueryService(String clusterName, CasNamedQueryServiceManager manager) {
       resolver = manager.resolver;
       executor = new DefaultCasQueryExecutor(
           findNamed(Cluster.class, clusterName).orElseThrow(() -> new CorantRuntimeException(
               "Can't build default cassandra named query, the cluster named %s not found.",
               clusterName)),
           manager.fetchSize);
-    }
-
-    /**
-     * @param cluster
-     * @param fetchSize
-     * @param resolver
-     */
-    protected DefaultCasNamedQueryService(Cluster cluster, int fetchSize,
-        AbstractNamedQuerierResolver<CasNamedQuerier> resolver) {
-      this.resolver = resolver;
-      executor = new DefaultCasQueryExecutor(cluster, fetchSize);
     }
 
     @Override

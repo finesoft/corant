@@ -54,7 +54,7 @@ public class StreamQueryParameter extends DefaultQueryParameter {
 
   protected boolean autoClose = false;
 
-  protected List<RetryListener> retryListeners;
+  protected transient List<RetryListener> retryListeners;
 
   public StreamQueryParameter() {}
 

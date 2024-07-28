@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * corant-modules-query-api
@@ -129,6 +130,22 @@ public interface QueryParameter extends Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      DefaultQueryParameter other = (DefaultQueryParameter) obj;
+      return Objects.equals(context, other.context) && Objects.equals(criteria, other.criteria)
+          && Objects.equals(limit, other.limit) && Objects.equals(offset, other.offset);
+    }
+
+    @Override
     public Map<String, Object> getContext() {
       return context;
     }
@@ -146,6 +163,11 @@ public interface QueryParameter extends Serializable {
     @Override
     public Integer getOffset() {
       return offset;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(context, criteria, limit, offset);
     }
 
     public DefaultQueryParameter limit(Integer limit) {

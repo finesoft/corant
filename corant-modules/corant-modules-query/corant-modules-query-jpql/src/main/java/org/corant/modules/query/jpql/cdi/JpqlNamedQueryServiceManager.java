@@ -41,11 +41,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-query-jpql
  *
  * @author bingo 下午6:04:28
- *
  */
-// @Priority(1)
 @ApplicationScoped
-// @Alternative
 public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
@@ -107,31 +104,22 @@ public class JpqlNamedQueryServiceManager implements NamedQueryServiceManager {
    * corant-modules-query-jpql
    *
    * @author bingo 下午12:02:33
-   *
    */
   public static class DefaultJpqlNamedQueryService extends AbstractJpqlNamedQueryService {
 
     protected final EntityManagerFactory emf;
     protected final AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver;
 
-    /**
-     * @param emf
-     * @param manager
-     */
     public DefaultJpqlNamedQueryService(EntityManagerFactory emf,
-        JpqlNamedQueryServiceManager manager) {
-      this.emf = emf;
-      resolver = manager.resolver;
-    }
-
-    /**
-     * @param emf
-     * @param resolver
-     */
-    protected DefaultJpqlNamedQueryService(EntityManagerFactory emf,
         AbstractNamedQuerierResolver<JpqlNamedQuerier> resolver) {
       this.emf = emf;
       this.resolver = resolver;
+    }
+
+    protected DefaultJpqlNamedQueryService(EntityManagerFactory emf,
+        JpqlNamedQueryServiceManager manager) {
+      this.emf = emf;
+      resolver = manager.resolver;
     }
 
     @Override

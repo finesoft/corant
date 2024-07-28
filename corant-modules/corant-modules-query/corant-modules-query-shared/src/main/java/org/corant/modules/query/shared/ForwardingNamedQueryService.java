@@ -21,7 +21,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.corant.modules.query.NamedQueryService;
-import org.corant.modules.query.QueryObjectMapper;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Query.QueryType;
@@ -42,9 +41,6 @@ public class ForwardingNamedQueryService implements NamedQueryService {
   protected QueryMappingService mappingService;
 
   @Inject
-  protected QueryObjectMapper objectMapper;
-
-  @Inject
   protected Instance<NamedQueryServiceManager> queryServiceManagers;
 
   @Override
@@ -55,11 +51,6 @@ public class ForwardingNamedQueryService implements NamedQueryService {
   @Override
   public <T> T get(String q, Object p) {
     return getQueryService(q).get(q, p);
-  }
-
-  @Override
-  public QueryObjectMapper getObjectMapper() {
-    return objectMapper;
   }
 
   @Override

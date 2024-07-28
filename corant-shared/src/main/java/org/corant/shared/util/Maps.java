@@ -937,10 +937,15 @@ public class Maps {
    * @param map the map to use
    * @param key the key to lookup
    * @param clazz the expected value class
+   * @param hints the conversion hints key and values
    * @return the mapped object
    */
-  public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz) {
-    return toObject(map == null ? null : map.get(key), shouldNotNull(clazz));
+  public static <T> T getMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz,
+      Object... hints) {
+    shouldNotNull(clazz);
+    return map == null ? null
+        : hints.length > 0 ? toObject(map.get(key), clazz, mapOf(hints))
+            : toObject(map.get(key), clazz);
   }
 
   /**
@@ -982,11 +987,15 @@ public class Maps {
    * @param map the map to use
    * @param key the key to lookup
    * @param typeLiteral the value type
+   * @param hints the conversion hints key and values
    * @return the mapped object
    */
   public static <T> T getMapObject(final Map<?, ?> map, final Object key,
-      final TypeLiteral<T> typeLiteral) {
-    return map == null ? null : toObject(map.get(key), typeLiteral);
+      final TypeLiteral<T> typeLiteral, Object... hints) {
+    shouldNotNull(typeLiteral);
+    return map == null ? null
+        : hints.length == 0 ? toObject(map.get(key), typeLiteral)
+            : toObject(map.get(key), typeLiteral, mapOf(hints));
   }
 
   /**
@@ -1114,13 +1123,19 @@ public class Maps {
     return getOptMapObject(map, key, Objects::forceCast);
   }
 
-  public static <T> Optional<T> getOptMapObject(Map<?, ?> map, Object key, Class<T> type) {
-    return Optional.ofNullable(getMapObject(map, key, type));
+  public static <T> Optional<T> getOptMapObject(Map<?, ?> map, Object key, Class<T> type,
+      Object... hints) {
+    return Optional.ofNullable(getMapObject(map, key, type, hints));
   }
 
   public static <T> Optional<T> getOptMapObject(final Map<?, ?> map, final Object key,
       final Function<Object, T> extractor) {
     return Optional.ofNullable(map != null ? extractor.apply(map.get(key)) : null);
+  }
+
+  public static <T> Optional<T> getOptMapObject(Map<?, ?> map, Object key, TypeLiteral<T> type,
+      Object... hints) {
+    return Optional.ofNullable(getMapObject(map, key, type, hints));
   }
 
   public static <K, V> Map<K, V> immutableMap(Map<? extends K, ? extends V> map) {
@@ -1269,6 +1284,52 @@ public class Maps {
   public static <T> T popMapObject(final Map<?, ?> map, final Object key, final Class<T> clazz,
       final Map<String, ?> hints) {
     return toObject(map == null ? null : map.remove(key), shouldNotNull(clazz), hints);
+  }
+
+  /**
+   * Remove and return optional converted the value corresponding to the given key in the given map,
+   * and the intermediate process may involve type conversion
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param clazz the expected value class
+   * @param hints the conversion hints
+   * @return the optional converted value or empty
+   */
+  public static <T> Optional<T> popOptMapObject(final Map<?, ?> map, final Object key,
+      Class<T> clazz, Object... hints) {
+    Object obj = map == null ? null : map.remove(key);
+    if (obj == null) {
+      return Optional.empty();
+    } else if (hints.length > 0) {
+      return Optional.ofNullable(toObject(obj, clazz, mapOf(hints)));
+    } else {
+      return Optional.ofNullable(toObject(obj, clazz));
+    }
+  }
+
+  /**
+   * Remove and return optional converted the value corresponding to the given key in the given map,
+   * and the intermediate process may involve type conversion
+   *
+   * @param <T> the expected value type
+   * @param map the map to use
+   * @param key the key to lookup
+   * @param type the expected value class
+   * @param hints the conversion hints
+   * @return the optional converted value or empty
+   */
+  public static <T> Optional<T> popOptMapObject(final Map<?, ?> map, final Object key,
+      TypeLiteral<T> type, Object... hints) {
+    Object obj = map == null ? null : map.remove(key);
+    if (obj == null) {
+      return Optional.empty();
+    } else if (hints.length > 0) {
+      return Optional.ofNullable(toObject(obj, type, mapOf(hints)));
+    } else {
+      return Optional.ofNullable(toObject(obj, type));
+    }
   }
 
   public static Properties propertiesOf(String... strings) {

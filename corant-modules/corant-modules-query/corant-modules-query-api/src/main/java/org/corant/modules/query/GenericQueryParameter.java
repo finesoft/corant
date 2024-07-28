@@ -47,8 +47,18 @@ public class GenericQueryParameter<T> extends DefaultQueryParameter {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    return super.equals(obj);
+  }
+
+  @Override
   public T getCriteria() {
     return forceCast(criteria);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
   }
 
   @Override

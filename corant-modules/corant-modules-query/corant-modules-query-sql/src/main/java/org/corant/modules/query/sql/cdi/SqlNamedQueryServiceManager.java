@@ -57,11 +57,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
  * corant-modules-query-sql
  *
  * @author bingo 下午6:04:28
- *
  */
-// @Priority(1)
 @ApplicationScoped
-// @Alternative
 public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
@@ -160,28 +157,18 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
    * corant-modules-query-sql
    *
    * @author bingo 下午6:54:23
-   *
    */
   public static class DefaultSqlNamedQueryService extends AbstractSqlNamedQueryService {
 
     protected final SqlQueryExecutor executor;
     protected final AbstractNamedQuerierResolver<SqlNamedQuerier> resolver;
 
-    /**
-     * @param executor
-     * @param resolver
-     */
-    protected DefaultSqlNamedQueryService(SqlQueryExecutor executor,
+    public DefaultSqlNamedQueryService(SqlQueryExecutor executor,
         AbstractNamedQuerierResolver<SqlNamedQuerier> resolver) {
       this.executor = executor;
       this.resolver = resolver;
     }
 
-    /**
-     * @param dataSourceName
-     * @param dbms
-     * @param manager
-     */
     protected DefaultSqlNamedQueryService(String dataSourceName, DBMS dbms,
         SqlNamedQueryServiceManager manager) {
       resolver = manager.resolver;

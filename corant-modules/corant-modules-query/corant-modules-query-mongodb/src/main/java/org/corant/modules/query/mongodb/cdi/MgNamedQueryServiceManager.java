@@ -45,11 +45,8 @@ import com.mongodb.client.MongoDatabase;
  * corant-modules-query-sql
  *
  * @author bingo 下午6:04:28
- *
  */
-// @Priority(1)
 @ApplicationScoped
-// @Alternative
 public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
 
   protected final Map<String, FetchableNamedQueryService> services = new ConcurrentHashMap<>();
@@ -116,7 +113,6 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
    * corant-modules-query-mongodb
    *
    * @author bingo 下午3:41:34
-   *
    */
   public static class DefaultMgNamedQueryService extends AbstractMgNamedQueryService {
 
@@ -124,34 +120,25 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final AbstractNamedQuerierResolver<MgNamedQuerier> resolver;
     protected final boolean convertDecimal;
 
-    /**
-     * @param dataBase
-     * @param manager
-     */
-    public DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
-      this.dataBase = shouldNotNull(MongoDatabases.resolveDatabase(dataBase),
-          "Can't build default mongo named query, the data base named %s not found.", dataBase);
-      resolver = manager.resolver;
-      convertDecimal = manager.convertDecimal;
-    }
-
-    /**
-     * @param dataBase
-     * @param convertDecimal
-     * @param resolver
-     */
-    protected DefaultMgNamedQueryService(MongoDatabase dataBase, boolean convertDecimal,
+    public DefaultMgNamedQueryService(MongoDatabase dataBase, boolean convertDecimal,
         AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
       this.dataBase = dataBase;
       this.resolver = resolver;
       this.convertDecimal = convertDecimal;
     }
 
+    protected DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
+      this.dataBase = shouldNotNull(MongoDatabases.resolveDatabase(dataBase),
+          "Can't build default mongo named query, the data base named %s not found.", dataBase);
+      resolver = manager.resolver;
+      convertDecimal = manager.convertDecimal;
+    }
+
     @Override
     protected Map<String, Object> convertDocument(Document doc, MgNamedQuerier querier,
         boolean autoSetIdField) {
       if (doc == null) {
-        return doc;
+        return null;
       } else if (autoSetIdField && !doc.containsKey("id") && doc.containsKey("_id")) {
         doc.put("id", doc.get("_id"));
       }

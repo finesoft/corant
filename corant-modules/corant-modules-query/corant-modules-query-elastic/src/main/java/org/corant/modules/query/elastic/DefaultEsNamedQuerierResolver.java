@@ -18,12 +18,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.shared.exception.NotSupportedException;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.corant.modules.query.QueryParameter;
+import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
+import org.corant.shared.exception.NotSupportedException;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -46,12 +47,12 @@ public class DefaultEsNamedQuerierResolver extends AbstractNamedQuerierResolver<
   }
 
   @Override
-  public EsNamedQuerier resolve(String name, Object param) {
-    FreemarkerEsQuerierBuilder builder = builders.get(name);
+  public EsNamedQuerier resolve(Query query, QueryParameter param) {
+    final String queryName = query.getVersionedName();
+    FreemarkerEsQuerierBuilder builder = builders.get(queryName);
     if (builder == null) {
       // Note: this.builders & QueryMappingService.queries may cause deadlock
-      Query query = resolveQuery(name);
-      builder = builders.computeIfAbsent(name, k -> createBuilder(query));
+      builder = builders.computeIfAbsent(queryName, k -> createBuilder(query));
     }
     return forceCast(builder.build(param));
   }

@@ -23,6 +23,7 @@ import org.corant.modules.query.Querier;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
 
@@ -40,7 +41,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-      CasNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      CasNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       String cql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
@@ -62,15 +63,15 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
-    CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Forwarding<T> doForward(Query query, QueryParameter parameter) throws Exception {
+    CasNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Duration timeout = querier.resolveTimeout();
-    log(queryName, scriptParameter, cql);
+    log(query.getVersionedName(), scriptParameter, cql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list =
         getExecutor().paging(ks, cql, offset, limit + 1, timeout, scriptParameter);
@@ -86,28 +87,28 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> T doGet(String queryName, Object parameter) throws Exception {
-    CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> T doGet(Query query, QueryParameter parameter) throws Exception {
+    CasNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     Duration timeout = querier.resolveTimeout();
-    log(queryName, scriptParameter, cql);
+    log(query.getVersionedName(), scriptParameter, cql);
     Map<String, Object> result = getExecutor().get(ks, cql, timeout, scriptParameter);
     handleFetching(result, querier);
     return querier.handleResult(result);
   }
 
   @Override
-  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
-    CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Paging<T> doPage(Query query, QueryParameter parameter) throws Exception {
+    CasNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Duration timeout = querier.resolveTimeout();
-    log(queryName, scriptParameter, cql);
+    log(query.getVersionedName(), scriptParameter, cql);
     List<Map<String, Object>> list =
         getExecutor().paging(ks, cql, offset, limit, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
@@ -124,14 +125,14 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
-    CasNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> List<T> doSelect(Query query, QueryParameter parameter) throws Exception {
+    CasNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String cql = querier.getScript();
     String ks = resolveKeyspace(querier);
     int maxSelectSize = querier.resolveSelectSize();
     Duration timeout = querier.resolveTimeout();
-    log(queryName, scriptParameter, cql);
+    log(query.getVersionedName(), scriptParameter, cql);
     List<Map<String, Object>> results =
         getExecutor().paging(ks, cql, 0, maxSelectSize + 1, timeout, scriptParameter);
     if (querier.handleResultSize(results) > 0) {
@@ -148,11 +149,11 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   /**
    * Resolve key space from query parameter context or query object.
    *
-   * @param querier
+   * @param querier the querier
    * @return resolveKeyspace
    */
   protected String resolveKeyspace(CasNamedQuerier querier) {
     String keyspace = querier.resolveProperty(PRO_KEY_KEYSPACE, String.class, null);
-    return isNotBlank(keyspace) ? keyspace : split(querier.getQuery().getName(), ".")[0];
+    return isNotBlank(keyspace) ? keyspace : split(querier.getQuery().getVersionedName(), ".")[0];
   }
 }

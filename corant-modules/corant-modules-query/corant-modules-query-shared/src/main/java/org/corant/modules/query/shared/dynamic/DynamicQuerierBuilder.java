@@ -15,6 +15,7 @@ package org.corant.modules.query.shared.dynamic;
 
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
+import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
 
 /**
@@ -24,7 +25,7 @@ import org.corant.modules.query.mapping.Query;
  */
 public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
 
-  Q build(Object originalParameter);
+  Q build(QueryParameter originalParameter);
 
   Long getCachedTimestamp();
 

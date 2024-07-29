@@ -16,7 +16,6 @@ package org.corant.modules.query.shared.dynamic;
 import java.time.Instant;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
-import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 
@@ -39,7 +38,7 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
       throw new QueryRuntimeException(
           "Can not initialize dynamic querier builder from null query param!");
     }
-    this.cachedTimestamp = Instant.now().toEpochMilli();
+    cachedTimestamp = Instant.now().toEpochMilli();
     this.query = query;
     this.queryHandler = queryHandler;
     this.fetchQueryHandler = fetchQueryHandler;
@@ -64,9 +63,4 @@ public abstract class AbstractDynamicQuerierBuilder<P, S, Q extends DynamicQueri
   public QueryHandler getQueryHandler() {
     return queryHandler;
   }
-
-  protected QueryParameter resolveParameter(Object param) {
-    return queryHandler.resolveParameter(query, param);
-  }
-
 }

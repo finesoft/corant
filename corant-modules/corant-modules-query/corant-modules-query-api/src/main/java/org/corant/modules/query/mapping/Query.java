@@ -62,6 +62,7 @@ public class Query implements Serializable {
   private String macroScript;// FIXME temporary
   private QueryType type; // since 2023-11-21
   private String qualifier; // since 2023-11-21
+  private String versionedName; // since 2024-07-29
 
   public Query() {}
 
@@ -298,8 +299,7 @@ public class Query implements Serializable {
    * the query.
    */
   public String getVersionedName() {
-    return defaultString(getName())
-        + (isNotBlank(getVersion()) ? UNDERSCORE + getVersion() : EMPTY);
+    return versionedName;
   }
 
   @Override
@@ -334,6 +334,10 @@ public class Query implements Serializable {
 
   protected void addProperty(String name, String value) {
     getProperties().put(name, value);
+  }
+
+  protected void handleVersionedName() {
+    versionedName = defaultString(name) + (isNotBlank(version) ? UNDERSCORE + version : EMPTY);
   }
 
   /**
@@ -381,6 +385,7 @@ public class Query implements Serializable {
 
   protected void setName(String name) {
     this.name = name;
+    handleVersionedName();
   }
 
   protected void setParamMappings(Map<String, ParameterMapping> paramMappings) {
@@ -415,6 +420,7 @@ public class Query implements Serializable {
 
   protected void setVersion(String version) {
     this.version = version;
+    handleVersionedName();
   }
 
   /**

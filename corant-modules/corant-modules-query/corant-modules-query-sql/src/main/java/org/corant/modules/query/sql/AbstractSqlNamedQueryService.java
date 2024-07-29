@@ -27,6 +27,7 @@ import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
 import org.corant.modules.query.sql.dialect.Dialect;
@@ -43,7 +44,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-      SqlNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      SqlNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       String sql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
@@ -67,12 +68,13 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
    * query.
    * </p>
    *
-   * @see AbstractNamedQueryService#doStream(String, StreamQueryParameter)
+   * @see AbstractNamedQueryService#doStream(Query, StreamQueryParameter)
    */
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    QueryParameter queryParam = querier.getQueryParameter();
+    Query query = getQuery(queryName);
+    QueryParameter queryParam = resolveQueryParameter(query, parameter);
+    SqlNamedQuerier querier = getQuerierResolver().resolve(query, queryParam);
     StreamQueryParameter useQueryParam;
     if (queryParam instanceof StreamQueryParameter) {
       useQueryParam = (StreamQueryParameter) queryParam;
@@ -82,7 +84,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     useQueryParam.limit(max(querier.resolveStreamLimit(), 1));
     if (useQueryParam.getOffset() > 0 || useQueryParam.needRetry()
         || useQueryParam.getEnhancer() != null) {
-      return doStream(queryName, useQueryParam);
+      return doStream(query, useQueryParam);
     } else {
       Object[] scriptParameter = querier.getScriptParameter();
       String sql = querier.getScript();
@@ -99,8 +101,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws SQLException {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Forwarding<T> doForward(Query query, QueryParameter parameter) throws SQLException {
+    SqlNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
@@ -108,7 +110,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     Map<String, String> properties = querier.getQuery().getProperties();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1, properties);
-    log(queryName, scriptParameter, sql, "Limit script: " + limitSql);
+    log(query.getVersionedName(), scriptParameter, sql, "Limit script: " + limitSql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     int size = sizeOf(list);
@@ -124,12 +126,12 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> T doGet(String queryName, Object parameter) throws SQLException {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> T doGet(Query query, QueryParameter parameter) throws SQLException {
+    SqlNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     Duration timeout = querier.resolveTimeout();
-    log(queryName, scriptParameter, sql);
+    log(query.getVersionedName(), scriptParameter, sql);
     Map<String, Object> result = getExecutor().get(sql, timeout, scriptParameter);
     handleFetching(result, querier);
     return querier.handleResult(result);
@@ -137,8 +139,8 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> Paging<T> doPage(String queryName, Object parameter) throws SQLException {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Paging<T> doPage(Query query, QueryParameter parameter) throws SQLException {
+    SqlNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int offset = querier.resolveOffset();
@@ -146,7 +148,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     Map<String, String> properties = querier.getQuery().getProperties();
     String limitSql = getDialect().getLimitSql(sql, offset, limit, properties);
-    log(queryName, scriptParameter, sql, "Limit script: " + limitSql);
+    log(query.getVersionedName(), scriptParameter, sql, "Limit script: " + limitSql);
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
     int size = sizeOf(list);
@@ -155,7 +157,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
         result.withTotal(offset + size);
       } else {
         String totalSql = getDialect().getCountSql(sql, properties);
-        log(queryName + " -> total", scriptParameter, totalSql);
+        log(query.getVersionedName() + " -> total", scriptParameter, totalSql);
         result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
             Dialect.COUNT_FIELD_NAME));
       }
@@ -165,14 +167,14 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   }
 
   @Override
-  protected <T> List<T> doSelect(String queryName, Object parameter) throws SQLException {
-    SqlNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> List<T> doSelect(Query query, QueryParameter parameter) throws SQLException {
+    SqlNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     Object[] scriptParameter = querier.getScriptParameter();
     String sql = querier.getScript();
     int maxSelectSize = querier.resolveSelectSize();
     Duration timeout = querier.resolveTimeout();
     // sql = getDialect().getLimitSql(sql, maxSelectSize + 1);
-    log(queryName, scriptParameter, sql);
+    log(query.getVersionedName(), scriptParameter, sql);
     List<Map<String, Object>> results =
         getExecutor().select(sql, maxSelectSize + 1, timeout, scriptParameter);
     if (querier.handleResultSize(results) > 0) {

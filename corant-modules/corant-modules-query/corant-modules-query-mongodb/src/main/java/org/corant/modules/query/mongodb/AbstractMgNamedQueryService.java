@@ -42,6 +42,7 @@ import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mongodb.MgNamedQuerier.MgOperator;
 import org.corant.modules.query.mongodb.converter.MongoIterableWrapper;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -109,7 +110,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
-      MgNamedQuerier querier = getQuerierResolver().resolve(refQueryName, fetchParam);
+      MgNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
       final MongoIterable<Document> mi = query(querier);
@@ -119,7 +120,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       if (!querier.getQuery().getProperties().containsKey(PRO_KEY_BATCH_SIZE)) {
         mi.batchSize(min(maxFetchSize, 128));
       }
-      List<Map<String, Object>> fetchedList = null;
+      List<Map<String, Object>> fetchedList;
       try (MongoCursor<Document> cursor = mi.iterator()) {
         fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
       }
@@ -132,7 +133,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   protected List<Document> collect(MongoIterable<Document> fi) {
-    List<Document> docList = null;
+    List<Document> docList;
     try (MongoCursor<Document> cursor = fi.iterator()) {
       docList = listOf(cursor);
     }
@@ -145,12 +146,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> Forwarding<T> doForward(String queryName, Object parameter) throws Exception {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Forwarding<T> doForward(Query query, QueryParameter parameter) throws Exception {
+    MgNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     int fetchLimit = limit + 1;
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    log(query.getVersionedName(), querier.getQueryParameter(), querier.getOriginalScript());
     Forwarding<T> result = Forwarding.inst();
     MongoIterable<Document> fi = query(querier);
     fi.batchSize(fetchLimit);
@@ -176,9 +177,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> T doGet(String queryName, Object parameter) throws Exception {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+  protected <T> T doGet(Query query, QueryParameter parameter) throws Exception {
+    MgNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
+    log(query.getVersionedName(), querier.getQueryParameter(), querier.getOriginalScript());
     Iterable<Document> fi = query(querier);
     Document result = null;
     if (fi instanceof MongoIterable) {
@@ -197,12 +198,12 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> Paging<T> doPage(String queryName, Object parameter) throws Exception {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
+  protected <T> Paging<T> doPage(Query query, QueryParameter parameter) throws Exception {
+    MgNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
     int offset = querier.resolveOffset();
     int limit = querier.resolveLimit();
     Paging<T> result = Paging.of(offset, limit);
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    log(query.getVersionedName(), querier.getQueryParameter(), querier.getOriginalScript());
     MongoIterable<Document> mi = query(querier);
     if (mi instanceof FindIterable) {
       ((FindIterable<Document>) mi).batchSize(limit).skip(offset).limit(limit);
@@ -226,9 +227,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  protected <T> List<T> doSelect(String queryName, Object parameter) throws Exception {
-    MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    log(queryName, querier.getQueryParameter(), querier.getOriginalScript());
+  protected <T> List<T> doSelect(Query query, QueryParameter parameter) throws Exception {
+    MgNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
+    log(query.getVersionedName(), querier.getQueryParameter(), querier.getOriginalScript());
     int maxSelectSize = querier.resolveSelectSize();
     MongoIterable<Document> mi = query(querier);
     if (mi instanceof FindIterable) {
@@ -257,12 +258,13 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
    * @see #PRO_KEY_NO_CURSOR_TIMEOUT
    */
   @Override
-  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter parameter) {
+  protected <T> Stream<T> doStream(Query query, StreamQueryParameter parameter) {
     if (parameter.getEnhancer() != null) {
-      return super.doStream(queryName, parameter);
+      return super.doStream(query, parameter);
     }
-    final MgNamedQuerier querier = getQuerierResolver().resolve(queryName, parameter);
-    log("stream->" + queryName, querier.getQueryParameter(), querier.getOriginalScript());
+    final MgNamedQuerier querier = getQuerierResolver().resolve(query, parameter);
+    log("stream->" + query.getVersionedName(), querier.getQueryParameter(),
+        querier.getOriginalScript());
     final MongoIterable<Document> mi = query(querier);
     final boolean setId = isAutoSetIdField(querier);
     final MongoCursor<Document> cursor = mi.batchSize(parameter.getLimit()).iterator();

@@ -39,13 +39,6 @@ public class DefaultEsNamedQuerier extends
   protected final String indexName;
   protected final String[] hintKeys;
 
-  /**
-   * @param query
-   * @param queryParameter
-   * @param queryResolver
-   * @param fetchQueryResolver
-   * @param scriptMap
-   */
   @SuppressWarnings("rawtypes")
   protected DefaultEsNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver,

@@ -58,12 +58,12 @@ public class DefaultCasNamedQuerierResolver extends AbstractNamedQuerierResolver
   }
 
   @Override
-  public DefaultCasNamedQuerier resolve(String name, Object param) {
-    DynamicQuerierBuilder builder = builders.get(name);
+  public DefaultCasNamedQuerier resolve(Query query, QueryParameter param) {
+    final String queryName = query.getVersionedName();
+    DynamicQuerierBuilder builder = builders.get(query.getVersionedName());
     if (builder == null) {
       /* Note: this.builders & QueryMappingService.queries may cause deadlock */
-      Query query = resolveQuery(name);
-      builder = builders.computeIfAbsent(name, k -> createBuilder(query));
+      builder = builders.computeIfAbsent(queryName, k -> createBuilder(query));
     }
     return forceCast(builder.build(param));
   }

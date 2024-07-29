@@ -70,8 +70,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
   }
 
   @Override
-  public Q build(Object param) {
-    return build(execute(resolveParameter(param)));
+  public Q build(QueryParameter param) {
+    return build(execute(param));
   }
 
   protected abstract Q build(Triple<QueryParameter, P, String> processed);
@@ -134,8 +134,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
     } catch (TemplateException te) {
       throw new QueryRuntimeException(te,
           "Freemarker dynamic querier builder [%s] execute occurred error! %s",
-          getQuery().getName(), FreemarkerExecutions.resolveScriptExceptionInfo(syntheticScript,
-              te.getLineNumber(), te.getEndLineNumber()));
+          getQuery().getVersionedName(), FreemarkerExecutions.resolveScriptExceptionInfo(
+              syntheticScript, te.getLineNumber(), te.getEndLineNumber()));
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "Freemarker dynamic querier builder [%s] execute occurred error!", getQuery().getName());
@@ -164,13 +164,13 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
                   } else {
                     logger.warning(() -> format(
                         "Query [%s] parameter reviser occurred variable name [%s] conflict.",
-                        getQuery().getName(), key));
+                        getQuery().getVersionedName(), key));
                   }
                 }
               } catch (TemplateModelException e) {
                 throw new QueryRuntimeException(e,
                     "Freemarker dynamic querier builder handle environment variables [%s] [%s] occurred error!",
-                    getQuery().getName(), key);
+                    getQuery().getVersionedName(), key);
               }
             }
           }
@@ -182,7 +182,7 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
       if (e.getKnownVariableNames().contains(varName)) {
         throw new QueryRuntimeException(
             "Freemarker dynamic querier buildr [%s] error, the key [%s] name conflict.",
-            query.getName(), varName);
+            query.getVersionedName(), varName);
       }
     }
   }

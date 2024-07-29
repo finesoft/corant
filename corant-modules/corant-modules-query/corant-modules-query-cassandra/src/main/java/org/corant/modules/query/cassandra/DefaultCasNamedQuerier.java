@@ -32,14 +32,6 @@ public class DefaultCasNamedQuerier extends AbstractDynamicQuerier<Object[], Str
   private final Object[] scriptParameter;
   private final String script;
 
-  /**
-   * @param query
-   * @param queryParameter
-   * @param queryResolver
-   * @param fetchQueryResolver
-   * @param scriptParameter
-   * @param script
-   */
   protected DefaultCasNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {

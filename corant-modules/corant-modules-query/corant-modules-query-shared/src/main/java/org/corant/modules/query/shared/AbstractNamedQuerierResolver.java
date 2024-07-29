@@ -30,7 +30,7 @@ import net.jcip.annotations.GuardedBy;
  */
 @ApplicationScoped
 public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?>>
-    implements NamedQuerierResolver<String, Object, Q>, BeforeQueryMappingInitializeHandler {
+    implements NamedQuerierResolver<Q>, BeforeQueryMappingInitializeHandler {
 
   @Inject
   protected QueryMappingService mappingService;
@@ -56,8 +56,9 @@ public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?
     return queryHandler;
   }
 
+  @Override
   @GuardedBy("QueryMappingService.rwl.readLock")
-  protected Query resolveQuery(String name) {
+  public Query resolveQuery(String name) {
     Query query = getMappingService().getQuery(name);
     if (query == null) {
       throw new QueryRuntimeException("Can not find name query for name [%s]", name);

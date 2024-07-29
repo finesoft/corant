@@ -72,7 +72,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
 
   @Override
   public String getName() {
-    return query.getName();
+    return query.getVersionedName();
   }
 
   @Override
@@ -132,7 +132,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
       } else {
         logger.warning(format(
             "The size of query[%s] result is exceeded, the allowable range is %s, the excess records are silently dropped.",
-            query.getName(), maxSize));
+            query.getVersionedName(), maxSize));
         do {
           results.remove(--size);
         } while (size > maxSize);

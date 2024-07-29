@@ -98,11 +98,12 @@ public class FreemarkerExecutions
         return Pair.of(new Template(query.getVersionedName(), script, FM_CFG), script);
       } catch (ParseException pe) {
         throw new QueryRuntimeException(pe,
-            "An error occurred while executing the query template [%s]. %s", query.getName(),
+            "An error occurred while executing the query template [%s]. %s",
+            query.getVersionedName(),
             resolveScriptExceptionInfo(script, pe.getLineNumber(), pe.getEndLineNumber()));
       } catch (Exception e) {
         throw new QueryRuntimeException(e,
-            "An error occurred while executing the query template [%s].", query.getName());
+            "An error occurred while executing the query template [%s].", query.getVersionedName());
       }
     });
   }

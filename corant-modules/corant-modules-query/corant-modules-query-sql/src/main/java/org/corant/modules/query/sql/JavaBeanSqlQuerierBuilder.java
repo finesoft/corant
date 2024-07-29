@@ -33,13 +33,13 @@ public class JavaBeanSqlQuerierBuilder
     extends JavaBeanDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query the query
+   * @param queryHandler query handler
+   * @param fetchQueryHandler fetch query handler
    */
-  public JavaBeanSqlQuerierBuilder(Query query, QueryHandler queryResolver,
-      FetchQueryHandler fetchQueryResolver) {
-    super(query, queryResolver, fetchQueryResolver);
+  public JavaBeanSqlQuerierBuilder(Query query, QueryHandler queryHandler,
+      FetchQueryHandler fetchQueryHandler) {
+    super(query, queryHandler, fetchQueryHandler);
   }
 
   /**
@@ -47,8 +47,7 @@ public class JavaBeanSqlQuerierBuilder
    */
   @SuppressWarnings("unchecked")
   @Override
-  public DefaultSqlNamedQuerier build(Object param) {
-    QueryParameter queryParameter = resolveParameter(param);// convert parameter
+  public DefaultSqlNamedQuerier build(QueryParameter queryParameter) {
     Object resolved = scriptResolver.resolve(queryParameter);
     if (resolved instanceof Pair<?, ?>) {
       Pair<String, List<Object>> re = (Pair<String, List<Object>>) resolved;

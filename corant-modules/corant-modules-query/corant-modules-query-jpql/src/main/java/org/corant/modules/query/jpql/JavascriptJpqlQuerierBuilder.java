@@ -30,9 +30,9 @@ public class JavascriptJpqlQuerierBuilder
     extends JavaScriptDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryHandler
-   * @param fetchQueryHandler
+   * @param query the query
+   * @param queryHandler query handler
+   * @param fetchQueryHandler fetch query handler
    */
   protected JavascriptJpqlQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
@@ -43,8 +43,7 @@ public class JavascriptJpqlQuerierBuilder
    * Generate JPQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultJpqlNamedQuerier build(Object param) {
-    QueryParameter queryParam = getQueryHandler().resolveParameter(getQuery(), param);
+  public DefaultJpqlNamedQuerier build(QueryParameter queryParam) {
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {queryParam, useParam});
     return new DefaultJpqlNamedQuerier(getQuery(), queryParam, getQueryHandler(),

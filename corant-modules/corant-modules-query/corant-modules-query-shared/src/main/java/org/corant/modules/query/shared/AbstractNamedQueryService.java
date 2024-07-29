@@ -61,20 +61,32 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   @Override
   public <T> Forwarding<T> forward(String q, Object p) {
     try {
-      return doForward(q, p);
+      Query query = getQuery(q);
+      QueryParameter queryParameter = resolveQueryParameter(query, p);
+      return doForward(query, queryParameter);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e,
-          "An error occurred while executing the forward query [%s]!", q);
+      if (e instanceof QueryRuntimeException qre) {
+        throw qre;
+      } else {
+        throw new QueryRuntimeException(e,
+            "An error occurred while executing the forward query [%s]!", q);
+      }
     }
   }
 
   @Override
   public <T> T get(String q, Object p) {
     try {
-      return doGet(q, p);
+      Query query = getQuery(q);
+      QueryParameter queryParameter = resolveQueryParameter(query, p);
+      return doGet(query, queryParameter);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s]!",
-          q);
+      if (e instanceof QueryRuntimeException qre) {
+        throw qre;
+      } else {
+        throw new QueryRuntimeException(e, "An error occurred while executing the get query [%s]!",
+            q);
+      }
     }
   }
 
@@ -112,20 +124,32 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   @Override
   public <T> Paging<T> page(String q, Object p) {
     try {
-      return doPage(q, p);
+      Query query = getQuery(q);
+      QueryParameter queryParameter = resolveQueryParameter(query, p);
+      return doPage(query, queryParameter);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s]!",
-          q);
+      if (e instanceof QueryRuntimeException qre) {
+        throw qre;
+      } else {
+        throw new QueryRuntimeException(e, "An error occurred while executing the page query [%s]!",
+            q);
+      }
     }
   }
 
   @Override
   public <T> List<T> select(String q, Object p) {
     try {
-      return doSelect(q, p);
+      Query query = getQuery(q);
+      QueryParameter queryParameter = resolveQueryParameter(query, p);
+      return doSelect(query, queryParameter);
     } catch (Exception e) {
-      throw new QueryRuntimeException(e, "An error occurred while executing the select query [%s]",
-          q);
+      if (e instanceof QueryRuntimeException qre) {
+        throw qre;
+      } else {
+        throw new QueryRuntimeException(e,
+            "An error occurred while executing the select query [%s]", q);
+      }
     }
   }
 
@@ -135,11 +159,13 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
    * This method use {@link #forward(String, Object)} to fetch next data records.
    * </p>
    *
-   * @see AbstractNamedQueryService#doStream(String, StreamQueryParameter)
+   * @see AbstractNamedQueryService#doStream(Query, StreamQueryParameter)
    */
   @Override
   public <T> Stream<T> stream(String queryName, Object parameter) {
-    DynamicQuerier<?, ?> querier = getQuerierResolver().resolve(queryName, parameter);
+    Query query = getQuery(queryName);
+    QueryParameter queryParameter = resolveQueryParameter(query, parameter);
+    DynamicQuerier<?, ?> querier = getQuerierResolver().resolve(query, queryParameter);
     QueryParameter queryParam = querier.getQueryParameter();
     StreamQueryParameter useQueryParam;
     if (queryParam instanceof StreamQueryParameter) {
@@ -148,26 +174,29 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
       useQueryParam = new StreamQueryParameter(queryParam);
     }
     useQueryParam.limit(max(querier.resolveStreamLimit(), 1));
-    return doStream(queryName, useQueryParam);
+    return doStream(query, useQueryParam);
   }
 
-  protected abstract <T> Forwarding<T> doForward(String q, Object p) throws Exception;
+  protected abstract <T> Forwarding<T> doForward(Query query, QueryParameter queryParameter)
+      throws Exception;
 
-  protected abstract <T> T doGet(String q, Object p) throws Exception;
+  protected abstract <T> T doGet(Query query, QueryParameter queryParameter) throws Exception;
 
-  protected abstract <T> Paging<T> doPage(String q, Object p) throws Exception;
+  protected abstract <T> Paging<T> doPage(Query query, QueryParameter queryParameter)
+      throws Exception;
 
-  protected abstract <T> List<T> doSelect(String q, Object p) throws Exception;
+  protected abstract <T> List<T> doSelect(Query query, QueryParameter queryParameter)
+      throws Exception;
 
   /**
    * Actual execution method for {@link #stream(String, Object)}
    *
    * @param <T> the result record type
-   * @param queryName the query name
+   * @param query the query
    * @param param the query parameter
    * @return stream the query result stream
    */
-  protected <T> Stream<T> doStream(String queryName, StreamQueryParameter param) {
+  protected <T> Stream<T> doStream(Query query, StreamQueryParameter param) {
     return streamOf(new Iterator<T>() {
       Forwarding<T> buffer = null;
       int counter = 0;
@@ -179,7 +208,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
         if (!param.terminateIf(counter, next)) {
           if (!buffer.hasResults()) {
             if (buffer.hasNext()) {
-              buffer.with(doForward(queryName, param.forward(next)));
+              buffer.with(forwardNext(query, param.forward(next)));
               return buffer.hasResults();
             }
           } else {
@@ -200,22 +229,22 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
         return next;
       }
 
-      private Forwarding<T> doForward(String queryName, StreamQueryParameter parameter) {
+      private Forwarding<T> forwardNext(Query query, StreamQueryParameter parameter) {
         if (parameter.needRetry()) {
           return Retry.synchronousRetryer()
               .retryStrategy(new MaxAttemptsRetryStrategy(parameter.getRetryTimes() + 1))
               .backoffStrategy(parameter.getRetryBackoffStrategy())
               .retryListeners(parameter.getRetryListeners())
               .retryPrecondition(c -> Corant.current() != null && Corant.current().isRunning())
-              .execute(() -> forward(queryName, parameter));
+              .execute(() -> forward(query.getVersionedName(), parameter));
         } else {
-          return forward(queryName, parameter);
+          return forward(query.getVersionedName(), parameter);
         }
       }
 
       private void initialize() {
         if (buffer == null) {
-          buffer = defaultObject(doForward(queryName, param), Forwarding::inst);
+          buffer = defaultObject(forwardNext(query, param), Forwarding::inst);
           counter = buffer.hasResults() ? 1 : 0;
         }
       }
@@ -223,6 +252,10 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
+
+  protected Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
 
   protected void log(String name, Object param, String... script) {
     logger.fine(() -> format(
@@ -326,8 +359,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     FetchableNamedQueryService service;
-    final Query query = getQuerierResolver().getMappingService()
-        .getQuery(fq.getReferenceQuery().getVersionedName());
+    final Query query = getQuery(fq.getReferenceQuery().getVersionedName());
     final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
     final String qualifier =
         defaultObject(fq.getReferenceQuery().getQualifier(), query.getQualifier());
@@ -341,6 +373,10 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     logger.fine(() -> format("Resolve fetch query [%s] service [%s]",
         fq.getReferenceQuery().getName(), Classes.getUserClass(service)));
     return service;
+  }
+
+  protected QueryParameter resolveQueryParameter(Query query, Object parameter) {
+    return getQuerierResolver().getQueryHandler().resolveParameter(query, parameter);
   }
 
   protected <T> void serialFetch(List<T> results, Querier parentQuerier,

@@ -31,14 +31,6 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
   private final Object[] scriptParameter;
   private final String script;
 
-  /**
-   * @param query
-   * @param queryParameter
-   * @param queryResolver
-   * @param fetchQueryResolver
-   * @param scriptParameter
-   * @param script
-   */
   protected DefaultSqlNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryResolver, FetchQueryHandler fetchQueryResolver, Object[] scriptParameter,
       String script) {
@@ -48,7 +40,7 @@ public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], Str
   }
 
   @Override
-  public String getScript(Map<?, ?> additionals) {
+  public String getScript(Map<?, ?> additions) {
     return script;
   }
 

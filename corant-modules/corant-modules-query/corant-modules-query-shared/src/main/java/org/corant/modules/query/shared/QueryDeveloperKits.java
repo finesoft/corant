@@ -96,7 +96,7 @@ public class QueryDeveloperKits {
       } catch (Exception e) {
         throwabls
             .add(new CorantRuntimeException(e, "FETCH-QUERY-PREDICATE-SCRIPT-ERROR : [%s -> %s]",
-                query.getName(), fq.getReferenceQuery()));
+                query.getVersionedName(), fq.getReferenceQuery()));
       }
     }
     if (fq.getInjectionScript().isValid()) {

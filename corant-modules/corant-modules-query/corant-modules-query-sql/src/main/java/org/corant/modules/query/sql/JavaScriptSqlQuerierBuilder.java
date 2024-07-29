@@ -30,21 +30,20 @@ public class JavaScriptSqlQuerierBuilder
     extends JavaScriptDynamicQuerierBuilder<Object[], String, SqlNamedQuerier> {
 
   /**
-   * @param query
-   * @param queryResolver
-   * @param fetchQueryResolver
+   * @param query query
+   * @param queryHandler query handler
+   * @param fetchQueryHandler fetch query handler
    */
-  public JavaScriptSqlQuerierBuilder(Query query, QueryHandler queryResolver,
-      FetchQueryHandler fetchQueryResolver) {
-    super(query, queryResolver, fetchQueryResolver);
+  public JavaScriptSqlQuerierBuilder(Query query, QueryHandler queryHandler,
+      FetchQueryHandler fetchQueryHandler) {
+    super(query, queryHandler, fetchQueryHandler);
   }
 
   /**
    * Generate SQL script with placeholder, and converted the parameter to appropriate type.
    */
   @Override
-  public DefaultSqlNamedQuerier build(Object param) {
-    QueryParameter queryParameter = resolveParameter(param);// convert parameter
+  public DefaultSqlNamedQuerier build(QueryParameter queryParameter) {
     List<Object> useParam = new ArrayList<>();
     Object script = getExecution().apply(new Object[] {queryParameter, useParam});
     return new DefaultSqlNamedQuerier(getQuery(), queryParameter, getQueryHandler(),

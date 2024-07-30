@@ -19,10 +19,10 @@ import static org.corant.modules.query.QueryParameter.CTX_QHH_DONT_CONVERT_RESUL
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_RESULT_HINT;
 import static org.corant.modules.query.QueryParameter.LIMIT_PARAM_NME;
 import static org.corant.modules.query.QueryParameter.OFFSET_PARAM_NME;
-import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.popOptMapObject;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
@@ -33,7 +33,6 @@ import static org.corant.shared.util.Strings.split;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -57,6 +56,7 @@ import org.corant.modules.query.spi.ResultRecordConverter;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Mutable.MutableObject;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Conversions;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings.WildcardMatcher;
@@ -67,7 +67,6 @@ import org.corant.shared.util.Strings.WildcardMatcher;
  * @author bingo 下午6:50:41
  */
 @ApplicationScoped
-// @Alternative
 public class DefaultQueryHandler implements QueryHandler {
 
   @Inject
@@ -161,21 +160,19 @@ public class DefaultQueryHandler implements QueryHandler {
     return forceCast(results);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public QueryParameter resolveParameter(Query query, Object param) {
     MutableObject<QueryParameter> resolved = new MutableObject<>();
-    if (param instanceof QueryParameter) {
-      resolved.set((QueryParameter) param);
-    } else if (param instanceof Map) {
-      Map<?, ?> mp = new HashMap<>((Map<?, ?>) param);
-      DefaultQueryParameter qp = new DefaultQueryParameter();
-      Optional.ofNullable(mp.remove(LIMIT_PARAM_NME)).ifPresent(x -> qp.limit(toInteger(x, 1)));
-      Optional.ofNullable(mp.remove(OFFSET_PARAM_NME)).ifPresent(x -> qp.offset(toInteger(x, 0)));
-      Optional.ofNullable(mp.remove(CONTEXT_NME))
-          .ifPresent(x -> qp.context((Map<String, Object>) x));
+    if (param instanceof QueryParameter queryParameter) {
+      resolved.set(queryParameter);
+    } else if (param instanceof Map<?, ?> mapParameter) {
+      Map<?, ?> mp = new HashMap<>(mapParameter);
+      DefaultQueryParameter queryParameter = new DefaultQueryParameter();
+      popOptMapObject(mp, LIMIT_PARAM_NME, Integer.class).ifPresent(queryParameter::limit);
+      popOptMapObject(mp, OFFSET_PARAM_NME, Integer.class).ifPresent(queryParameter::offset);
+      popOptMapObject(mp, CONTEXT_NME, TypeLiteral.DOC_TYPE).ifPresent(queryParameter::context);
       Map<String, Class<?>> convertSchema = query == null ? null : query.getParamConvertSchema();
-      resolved.set(qp.criteria(convertParameter(mp, convertSchema)));
+      resolved.set(queryParameter.criteria(convertParameter(mp, convertSchema)));
     } else if (param != null) {
       resolved.set(new DefaultQueryParameter().criteria(param));
     } else {
@@ -189,18 +186,27 @@ public class DefaultQueryHandler implements QueryHandler {
   protected Map<String, Object> convertParameter(Map<?, ?> param,
       Map<String, Class<?>> convertSchema) {
     Map<String, Object> convertedParam = new HashMap<>();
-    Map<String, Class<?>> usedConvertSchema = defaultObject(convertSchema, emptyMap());
     if (param != null) {
-      param.forEach((k, v) -> {
-        if (k != null) {
-          Class<?> cls = usedConvertSchema.get(k);
-          if (cls != null) {
-            convertedParam.put(k.toString(), conversionService.convert(v, cls));
-          } else {
+      Map<String, Class<?>> usedConvertSchema = defaultObject(convertSchema, emptyMap());
+      if (isEmpty(convertSchema)) {
+        param.forEach((k, v) -> {
+          if (k != null) {
             convertedParam.put(k.toString(), v);
           }
-        }
-      });
+        });
+      } else {
+        param.forEach((k, v) -> {
+          if (k != null) {
+            String key = k.toString();
+            Class<?> cls = usedConvertSchema.get(key);
+            if (cls != null) {
+              convertedParam.put(key, conversionService.convert(v, cls));
+            } else {
+              convertedParam.put(key, v);
+            }
+          }
+        });
+      }
     }
     return convertedParam;
   }

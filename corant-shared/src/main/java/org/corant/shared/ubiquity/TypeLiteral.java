@@ -16,6 +16,8 @@ package org.corant.shared.ubiquity;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
 import org.corant.shared.exception.CorantRuntimeException;
 
 /**
@@ -30,9 +32,27 @@ public abstract class TypeLiteral<T> {
 
   public static final Type[] EMPTY_ARRAY = {};
 
-  private transient Type actualType;
+  public static final TypeLiteral<Map<Object, Object>> MAP_TYPE = new TypeLiteral<>() {};
 
-  protected TypeLiteral() {}
+  public static final TypeLiteral<List<Map<Object, Object>>> LIST_MAP_TYPE = new TypeLiteral<>() {};
+
+  public static final TypeLiteral<Map<String, Object>> DOC_TYPE = new TypeLiteral<>() {};
+
+  public static final TypeLiteral<List<Map<String, Object>>> LIST_DOC_TYPE = new TypeLiteral<>() {};
+
+  protected final Type actualType;
+
+  protected TypeLiteral() {
+    Class<?> typeLiteralSubclass = getTypeLiteralSubclass(this.getClass());
+    if (typeLiteralSubclass == null) {
+      throw new CorantRuntimeException(getClass() + " is not a subclass of TypeLiteral");
+    }
+    actualType = getTypeParameter(typeLiteralSubclass);
+    if (actualType == null) {
+      throw new CorantRuntimeException(
+          getClass() + " does not specify the type parameter T of TypeLiteral<T>");
+    }
+  }
 
   private static Class<?> getTypeLiteralSubclass(Class<?> clazz) {
     Class<?> superclass = clazz.getSuperclass();
@@ -47,10 +67,9 @@ public abstract class TypeLiteral<T> {
 
   private static Type getTypeParameter(Class<?> superclass) {
     Type type = superclass.getGenericSuperclass();
-    if (type instanceof ParameterizedType parameterizedType) {
-      if (parameterizedType.getActualTypeArguments().length == 1) {
-        return parameterizedType.getActualTypeArguments()[0];
-      }
+    if ((type instanceof ParameterizedType parameterizedType)
+        && (parameterizedType.getActualTypeArguments().length == 1)) {
+      return parameterizedType.getActualTypeArguments()[0];
     }
     return null;
   }
@@ -58,7 +77,7 @@ public abstract class TypeLiteral<T> {
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof TypeLiteral<?> that) {
-      return this.getType().equals(that.getType());
+      return actualType.equals(that.actualType);
     }
     return false;
   }
@@ -68,12 +87,11 @@ public abstract class TypeLiteral<T> {
    */
   @SuppressWarnings("unchecked")
   public final Class<T> getRawType() {
-    Type type = getType();
-    if (type instanceof Class) {
-      return (Class<T>) type;
-    } else if (type instanceof ParameterizedType) {
-      return (Class<T>) ((ParameterizedType) type).getRawType();
-    } else if (type instanceof GenericArrayType) {
+    if (actualType instanceof Class) {
+      return (Class<T>) actualType;
+    } else if (actualType instanceof ParameterizedType) {
+      return (Class<T>) ((ParameterizedType) actualType).getRawType();
+    } else if (actualType instanceof GenericArrayType) {
       return (Class<T>) Object[].class;
     } else {
       throw new CorantRuntimeException("Illegal type");
@@ -84,28 +102,17 @@ public abstract class TypeLiteral<T> {
    * @return the actual type represented by this object
    */
   public final Type getType() {
-    if (actualType == null) {
-      Class<?> typeLiteralSubclass = getTypeLiteralSubclass(this.getClass());
-      if (typeLiteralSubclass == null) {
-        throw new CorantRuntimeException(getClass() + " is not a subclass of TypeLiteral");
-      }
-      actualType = getTypeParameter(typeLiteralSubclass);
-      if (actualType == null) {
-        throw new CorantRuntimeException(
-            getClass() + " does not specify the type parameter T of TypeLiteral<T>");
-      }
-    }
     return actualType;
   }
 
   @Override
   public int hashCode() {
-    return getType().hashCode();
+    return actualType.hashCode();
   }
 
   @Override
   public String toString() {
-    return getType().toString();
+    return actualType.toString();
   }
 
 }

@@ -484,12 +484,12 @@ public class Conversion {
     if (value != null) {
       final Class<?> typeClass;
       final Class[] argClasses;
-      if (targetType instanceof Class) {
-        typeClass = forceCast(targetType);
+      if (targetType instanceof Class<?> classType) {
+        typeClass = classType;
         argClasses = Classes.EMPTY_ARRAY;
-      } else if (targetType instanceof ParameterizedType) {
-        typeClass = forceCast(((ParameterizedType) targetType).getRawType());
-        Type[] argTypes = ((ParameterizedType) targetType).getActualTypeArguments();
+      } else if (targetType instanceof ParameterizedType parameterizedType) {
+        typeClass = (Class<?>) parameterizedType.getRawType();
+        Type[] argTypes = parameterizedType.getActualTypeArguments();
         int argTypesLen = argTypes.length;
         argClasses = new Class[argTypesLen];
         for (int i = 0; i < argTypesLen; i++) {

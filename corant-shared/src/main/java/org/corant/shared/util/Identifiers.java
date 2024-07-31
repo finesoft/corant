@@ -218,6 +218,19 @@ public class Identifiers {
       return workersBits == other.workersBits;
     }
 
+    /**
+     * Generate with current time
+     *
+     * @return the generated identifier
+     */
+    public Long generate() {
+      if (unit == ChronoUnit.SECONDS) {
+        return generate(() -> System.currentTimeMillis() / 1000);
+      } else {
+        return generate(System::currentTimeMillis);
+      }
+    }
+
     @Override
     public Long generate(Supplier<?> timeGener) {
       if (delayedTimingMs > 0) {

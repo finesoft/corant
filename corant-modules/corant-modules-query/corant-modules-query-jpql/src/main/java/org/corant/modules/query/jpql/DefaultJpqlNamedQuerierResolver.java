@@ -83,8 +83,8 @@ public class DefaultJpqlNamedQuerierResolver
     return new FreemarkerJpqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
-  protected JavascriptJpqlQuerierBuilder createJsProcessor(Query query) {
-    return new JavascriptJpqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
+  protected JavaScriptJpqlQuerierBuilder createJsProcessor(Query query) {
+    return new JavaScriptJpqlQuerierBuilder(query, getQueryHandler(), getFetchQueryHandler());
   }
 
   @PreDestroy

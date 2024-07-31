@@ -90,7 +90,6 @@ public interface QueryParameter extends Serializable {
    * converted to this.
    *
    * @author bingo 下午4:09:56
-   *
    */
   class DefaultQueryParameter implements QueryParameter {
 

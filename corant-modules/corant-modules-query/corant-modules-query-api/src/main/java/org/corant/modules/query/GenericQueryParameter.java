@@ -20,7 +20,6 @@ import java.util.Map;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 
 /**
- *
  * corant-modules-query-api
  *
  * @author bingo 下午6:56:58

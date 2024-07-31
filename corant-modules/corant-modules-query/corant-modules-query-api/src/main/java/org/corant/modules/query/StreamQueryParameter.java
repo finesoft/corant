@@ -92,6 +92,15 @@ public class StreamQueryParameter extends DefaultQueryParameter {
     return this;
   }
 
+  /**
+   * Provide an improved tuning program that allows the current query parameters to be adjusted, and
+   * the effect of the adjustment will be directly applied to the next iteration of the query
+   * <p>
+   * the first parameter of the tuning program is the last record of the result set of the previous
+   * iteration of the query, and the second parameter of the current query parameters.
+   *
+   * @param enhancer the improved tuning program
+   */
   public StreamQueryParameter enhancer(BiConsumer<Object, StreamQueryParameter> enhancer) {
     this.enhancer = enhancer;
     return this;
@@ -106,6 +115,11 @@ public class StreamQueryParameter extends DefaultQueryParameter {
     return this;
   }
 
+  /**
+   * Returns the improved tuning program that used in each iteration of the query
+   *
+   * @see #enhancer(BiConsumer)
+   */
   public BiConsumer<Object, StreamQueryParameter> getEnhancer() {
     return enhancer;
   }

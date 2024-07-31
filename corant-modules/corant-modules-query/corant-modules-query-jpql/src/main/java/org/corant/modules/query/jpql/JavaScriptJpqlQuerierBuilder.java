@@ -26,7 +26,7 @@ import org.corant.modules.query.shared.dynamic.javascript.JavaScriptDynamicQueri
  *
  * @author bingo 下午7:46:22
  */
-public class JavascriptJpqlQuerierBuilder
+public class JavaScriptJpqlQuerierBuilder
     extends JavaScriptDynamicQuerierBuilder<Object[], String, JpqlNamedQuerier> {
 
   /**
@@ -34,7 +34,7 @@ public class JavascriptJpqlQuerierBuilder
    * @param queryHandler query handler
    * @param fetchQueryHandler fetch query handler
    */
-  protected JavascriptJpqlQuerierBuilder(Query query, QueryHandler queryHandler,
+  protected JavaScriptJpqlQuerierBuilder(Query query, QueryHandler queryHandler,
       FetchQueryHandler fetchQueryHandler) {
     super(query, queryHandler, fetchQueryHandler);
   }

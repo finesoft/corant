@@ -15,12 +15,15 @@ package org.corant.config.declarative;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import org.corant.shared.util.Strings;
 import jakarta.enterprise.util.AnnotationLiteral;
+import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-config
@@ -44,19 +47,42 @@ public @interface ConfigKeyItem {
 
     private static final long serialVersionUID = -6856666130654737130L;
 
-    final String defaultValue;
-    final String name;
-    final DeclarativePattern pattern;
+    private String defaultValue;
+    private String name;
+    private DeclarativePattern pattern;
+    private transient volatile Integer hashCode;
 
     public ConfigKeyItemLiteral(String defaultValue, String name, DeclarativePattern pattern) {
       this.defaultValue = defaultObject(defaultValue, NO_DFLT_VALUE);
-      this.name = name;
-      this.pattern = pattern;
+      this.name = defaultString(name);
+      this.pattern = defaultObject(pattern, DeclarativePattern.SUFFIX);
     }
 
     @Override
     public String defaultValue() {
       return defaultValue;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !ConfigKeyItem.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      ConfigKeyItem other = (ConfigKeyItem) obj;
+      return defaultValue.equals(other.defaultValue()) && name.equals(other.name())
+          && pattern.equals(other.pattern());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("defaultValue", defaultValue),
+            Pair.of("name", name), Pair.of("pattern", pattern));
+      }
+      return hashCode;
     }
 
     @Override

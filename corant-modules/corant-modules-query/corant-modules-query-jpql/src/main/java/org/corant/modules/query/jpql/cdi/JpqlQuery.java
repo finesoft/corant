@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
@@ -27,6 +28,7 @@ import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-jpql
@@ -66,14 +68,35 @@ public @interface JpqlQuery {
 
     private static final long serialVersionUID = 1L;
 
-    private final String value;
+    private String value;
+    private transient volatile Integer hashCode;
 
     private JpqlQueryLiteral(String value) {
-      this.value = value;
+      this.value = defaultString(value);
     }
 
     public static JpqlQueryLiteral of(String value) {
       return new JpqlQueryLiteral(defaultString(value));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !JpqlQuery.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      JpqlQuery other = (JpqlQuery) obj;
+      return value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("value", value));
+      }
+      return hashCode;
     }
 
     @Override

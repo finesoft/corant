@@ -18,6 +18,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Objects.forceCast;
 import java.lang.annotation.Documented;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
 import org.corant.modules.ddd.Aggregate;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-ddd-api
@@ -45,7 +47,8 @@ public @interface AggregateType {
 
     private static final long serialVersionUID = -5552841006073177750L;
 
-    private final Class<? extends Aggregate> value;
+    private Class<? extends Aggregate> value;
+    private transient volatile Integer hashCode;
 
     private AggregateTypeLiteral(Class<? extends Aggregate> value) {
       this.value = forceCast(getUserClass(value));
@@ -63,6 +66,26 @@ public @interface AggregateType {
 
     public static AggregateTypeLiteral of(Class<? extends Aggregate> value) {
       return new AggregateTypeLiteral(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !AggregateType.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      AggregateType other = (AggregateType) obj;
+      return value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("value", value));
+      }
+      return hashCode;
     }
 
     @Override

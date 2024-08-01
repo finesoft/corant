@@ -18,7 +18,10 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -26,6 +29,7 @@ import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
 import org.corant.modules.query.mapping.Query.QueryType;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-sql
@@ -52,18 +56,26 @@ public @interface QueryTypeQualifier {
    *
    * <pre>
    *
-   *  1. In SQL query <i>({@code type()} is QueryType.SQL)</i>, the qualifier represents the
+   *  1. In SQL query <i>({@code
+   * type()
+   * } is QueryType.SQL)</i>, the qualifier represents the
    *  data source name and the database dialect and use ':' to concat.
    *  example: blog:MYSQL, blog is the data source name, MYSQL is the dialect.
    *
-   *  2. In Mongodb <i>(query {@code type()})</i> is QueryType.MG, the qualifier represents the
+   *  2. In Mongodb <i>(query {@code
+   * type()
+   * })</i> is QueryType.MG, the qualifier represents the
    *  mongodb data base name.
    *
-   *  3. In elastic and cassandra query <i>({@code type()} is QueryType.ES or QueryType.CAS) </i>,
+   *  3. In elastic and cassandra query <i>({@code
+   * type()
+   * } is QueryType.ES or QueryType.CAS) </i>,
    *  the qualifier represents the cluster name.
    *
    *  Default is empty string, meaning that if there is only one data source for the particular
-   *  query type ({@code type()}) in the application, then the qualifier represents that data source.
+   *  query type ({@code
+   * type()
+   * }) in the application, then the qualifier represents that data source.
    *
    * </pre>
    *
@@ -90,17 +102,37 @@ public @interface QueryTypeQualifier {
 
     private static final long serialVersionUID = -771777257818902465L;
 
-    private final QueryType type;
-
-    private final String qualifier;
+    private QueryType type;
+    private String qualifier;
+    private transient volatile Integer hashCode;
 
     public QueryTypeQualifierLiteral(QueryType type, String qualifier) {
-      this.type = type;
-      this.qualifier = qualifier;
+      this.type = defaultObject(type, QueryType.$$);
+      this.qualifier = defaultString(qualifier);
     }
 
     public static QueryTypeQualifierLiteral of(QueryType type, String qualifier) {
       return new QueryTypeQualifierLiteral(type, qualifier);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !QueryTypeQualifier.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      QueryTypeQualifier other = (QueryTypeQualifier) obj;
+      return type.equals(other.type()) && qualifier.equals(other.qualifier());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("type", type), Pair.of("qualifier", qualifier));
+      }
+      return hashCode;
     }
 
     @Override

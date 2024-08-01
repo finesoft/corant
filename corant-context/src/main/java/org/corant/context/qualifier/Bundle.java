@@ -13,6 +13,7 @@
  */
 package org.corant.context.qualifier;
 
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,6 +21,7 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-context
@@ -41,7 +43,8 @@ public @interface Bundle {
 
     private static final long serialVersionUID = -5766940942537035511L;
 
-    final String value;
+    private String value;
+    private transient volatile Integer hashCode;
 
     public BundleLiteral(String value) {
       this.value = value;
@@ -52,10 +55,29 @@ public @interface Bundle {
     }
 
     @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !Bundle.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      Bundle other = (Bundle) obj;
+      return value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("value", value));
+      }
+      return hashCode;
+    }
+
+    @Override
     public String value() {
       return value;
     }
-
   }
 
 }

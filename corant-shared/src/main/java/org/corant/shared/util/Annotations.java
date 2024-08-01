@@ -18,10 +18,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-shared
@@ -37,8 +39,97 @@ public class Annotations {
   public static final Annotation[] EMPTY_ARRAY = {};
 
   /**
-   * Find the annotation object from a given annotated element with given annotation type class, this
-   * is a base method. NOTE: Starting with Java8, we recommend using
+   * Returns annotation members hash code
+   *
+   * @param members the member name and value pairs
+   *
+   * @see Annotation#hashCode()
+   */
+  @SafeVarargs
+  public static int calculateMembersHashCode(Pair<String, Object>... members) {
+    int hashCode = 0;
+    for (Pair<String, Object> member : members) {
+      int memberNameHashCode = 127 * member.left().hashCode();
+      Object value = member.right();
+      int memberValueHashCode;
+      if (value instanceof boolean[]) {
+        memberValueHashCode = Arrays.hashCode((boolean[]) value);
+      } else if (value instanceof short[]) {
+        memberValueHashCode = Arrays.hashCode((short[]) value);
+      } else if (value instanceof int[]) {
+        memberValueHashCode = Arrays.hashCode((int[]) value);
+      } else if (value instanceof long[]) {
+        memberValueHashCode = Arrays.hashCode((long[]) value);
+      } else if (value instanceof float[]) {
+        memberValueHashCode = Arrays.hashCode((float[]) value);
+      } else if (value instanceof double[]) {
+        memberValueHashCode = Arrays.hashCode((double[]) value);
+      } else if (value instanceof byte[]) {
+        memberValueHashCode = Arrays.hashCode((byte[]) value);
+      } else if (value instanceof char[]) {
+        memberValueHashCode = Arrays.hashCode((char[]) value);
+      } else if (value instanceof Object[]) {
+        memberValueHashCode = Arrays.hashCode((Object[]) value);
+      } else {
+        memberValueHashCode = value.hashCode();
+      }
+      hashCode += memberNameHashCode ^ memberValueHashCode;
+    }
+    return hashCode;
+  }
+
+  /**
+   * Returns whether the given two annotation member are equal.
+   *
+   * @param m1 member one
+   * @param m2 member two
+   */
+  public static boolean equalMember(Object m1, Object m2) {
+    if (m1 instanceof byte[] && m2 instanceof byte[]) {
+      if (!Arrays.equals((byte[]) m1, (byte[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof short[] && m2 instanceof short[]) {
+      if (!Arrays.equals((short[]) m1, (short[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof int[] && m2 instanceof int[]) {
+      if (!Arrays.equals((int[]) m1, (int[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof long[] && m2 instanceof long[]) {
+      if (!Arrays.equals((long[]) m1, (long[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof float[] && m2 instanceof float[]) {
+      if (!Arrays.equals((float[]) m1, (float[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof double[] && m2 instanceof double[]) {
+      if (!Arrays.equals((double[]) m1, (double[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof char[] && m2 instanceof char[]) {
+      if (!Arrays.equals((char[]) m1, (char[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof boolean[] && m2 instanceof boolean[]) {
+      if (!Arrays.equals((boolean[]) m1, (boolean[]) m2)) {
+        return false;
+      }
+    } else if (m1 instanceof Object[] && m2 instanceof Object[]) {
+      if (!Arrays.equals((Object[]) m1, (Object[]) m2)) {
+        return false;
+      }
+    } else if (!m1.equals(m2)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Find the annotation object from a given annotated element with given annotation type class,
+   * this is a base method. NOTE: Starting with Java8, we recommend using
    * {@link AnnotatedElement#getDeclaredAnnotation(Class)}
    *
    * @param element the AnnotatedElement object corresponding to the annotation type

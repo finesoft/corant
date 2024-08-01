@@ -13,13 +13,15 @@
  */
 package org.corant.modules.jpa.shared;
 
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Maps.mapOf;
-import static org.corant.shared.util.Objects.defaultObject;
-import java.util.Collections;
+import static org.corant.shared.util.Strings.defaultString;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -29,6 +31,7 @@ import jakarta.persistence.PersistenceProperty;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.persistence.SynchronizationType;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-jpa-shared
@@ -100,30 +103,44 @@ public interface PersistenceService {
    * corant-modules-jpa-shared
    *
    * @author bingo 下午12:01:07
-   *
    */
   class PersistenceContextLiteral extends AnnotationLiteral<PersistenceContext>
       implements PersistenceContext {
 
     private static final long serialVersionUID = -6911793060874174440L;
 
-    private final String name;
-    private final String unitName;
-    private final PersistenceContextType type;
-    private final SynchronizationType synchronization;
-    private final Map<String, String> properties;
+    private String name;
+    private String unitName;
+    private PersistenceContextType type = PersistenceContextType.TRANSACTION;
+    private SynchronizationType synchronization = SynchronizationType.SYNCHRONIZED;
+    private PersistenceProperty[] properties = {};
+    private transient volatile Integer hashCode;
+
+    public PersistenceContextLiteral() {
+      this(null, null, null, null, (PersistenceProperty[]) null);
+    }
+
+    public PersistenceContextLiteral(String name, String unitName, PersistenceContextType type,
+        SynchronizationType synchronization, PersistenceProperty[] properties) {
+      this.name = defaultString(name);
+      this.unitName = defaultString(unitName);
+      if (type != null) {
+        this.type = type;
+      }
+      if (synchronization != null) {
+        this.synchronization = synchronization;
+      }
+      if (properties != null) {
+        this.properties = Arrays.copyOf(properties, properties.length);
+      }
+    }
 
     protected PersistenceContextLiteral(String name, String unitName, PersistenceContextType type,
         SynchronizationType synchronization, Map<String, String> properties) {
-      this.name = Qualifiers.resolveName(name);
-      this.unitName = Qualifiers.resolveName(unitName);
-      this.type = defaultObject(type, PersistenceContextType.TRANSACTION);
-      this.synchronization = defaultObject(synchronization, SynchronizationType.SYNCHRONIZED);
-      if (!isEmpty(properties)) {
-        this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
-      } else {
-        this.properties = Collections.emptyMap();
-      }
+      this(name, unitName, type, synchronization,
+          properties == null ? null
+              : properties.entrySet().stream().map(PersistencePropertyLiteral::new)
+                  .toArray(PersistencePropertyLiteral[]::new));
     }
 
     public static Map<String, String> extractProperties(PersistenceProperty[] pps) {
@@ -139,7 +156,7 @@ public interface PersistenceService {
     public static PersistenceContextLiteral of(PersistenceContext pc) {
       shouldNotNull(pc);
       return new PersistenceContextLiteral(pc.name(), pc.unitName(), pc.type(),
-          pc.synchronization(), extractProperties(pc.properties()));
+          pc.synchronization(), pc.properties());
     }
 
     public static PersistenceContextLiteral of(String unitName) {
@@ -157,7 +174,12 @@ public interface PersistenceService {
 
     public static PersistenceContextLiteral of(String unitName, PersistenceContextType type,
         SynchronizationType synchronization, String... properties) {
-      return new PersistenceContextLiteral(null, unitName, type, synchronization,
+      return of(null, unitName, type, synchronization, properties);
+    }
+
+    public static PersistenceContextLiteral of(String name, String unitName,
+        PersistenceContextType type, SynchronizationType synchronization, String... properties) {
+      return new PersistenceContextLiteral(name, unitName, type, synchronization,
           mapOf((Object[]) properties));
     }
 
@@ -166,8 +188,28 @@ public interface PersistenceService {
       return of(unitName, null, synchronization, (String[]) null);
     }
 
-    public Map<String, String> getProperties() {
-      return properties;
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null || !PersistenceContext.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      PersistenceContext other = (PersistenceContext) obj;
+      return name.equals(other.name()) && unitName.equals(other.unitName())
+          && type.equals(other.type()) && synchronization.equals(other.synchronization())
+          && Arrays.equals(properties, other.properties());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("name", name), Pair.of("unitName", unitName),
+            Pair.of("type", type), Pair.of("synchronization", synchronization),
+            Pair.of("properties", properties));
+      }
+      return hashCode;
     }
 
     @Override
@@ -177,9 +219,10 @@ public interface PersistenceService {
 
     @Override
     public PersistenceProperty[] properties() {
-      return getProperties().entrySet().stream()
-          .map(e -> new PersistencePropertyLiteral(e.getKey(), e.getValue()))
-          .toArray(PersistenceProperty[]::new);
+      if (properties.length > 0) {
+        return Arrays.copyOf(properties, properties.length);
+      }
+      return properties;
     }
 
     @Override
@@ -196,24 +239,51 @@ public interface PersistenceService {
     public String unitName() {
       return unitName;
     }
+
   }
 
   /**
    * corant-modules-jpa-shared
    *
    * @author bingo 上午11:50:24
-   *
    */
   class PersistencePropertyLiteral extends AnnotationLiteral<PersistenceProperty>
       implements PersistenceProperty {
     private static final long serialVersionUID = -5166046527595649735L;
 
-    final String name;
-    final String value;
+    public static final PersistenceProperty[] EMPTY_ARRAY = {};
+
+    private String name;
+    private String value;
+    private transient volatile Integer hashCode;
+
+    public PersistencePropertyLiteral(Entry<String, String> entry) {
+      this(entry.getKey(), entry.getValue());
+    }
 
     public PersistencePropertyLiteral(String name, String value) {
-      this.name = Qualifiers.resolveName(name);
-      this.value = Qualifiers.resolveName(value);
+      this.name = shouldNotNull(name);
+      this.value = shouldNotNull(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !PersistenceProperty.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      PersistenceProperty other = (PersistenceProperty) obj;
+      return name.equals(other.name()) && value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("name", name), Pair.of("value", value));
+      }
+      return hashCode;
     }
 
     @Override
@@ -232,17 +302,21 @@ public interface PersistenceService {
    * corant-modules-jpa-shared
    *
    * @author bingo 下午12:04:52
-   *
    */
   class PersistenceUnitLiteral extends AnnotationLiteral<PersistenceUnit>
       implements PersistenceUnit {
     private static final long serialVersionUID = -2508891695595998643L;
-    private final String name;
-    private final String unitName;
+    private String name;
+    private String unitName;
+    private transient volatile Integer hashCode;
+
+    public PersistenceUnitLiteral() {
+      this(null, null);
+    }
 
     protected PersistenceUnitLiteral(String name, String unitName) {
-      this.name = Qualifiers.resolveName(name);
-      this.unitName = Qualifiers.resolveName(unitName);
+      this.name = defaultString(name);
+      this.unitName = defaultString(unitName);
     }
 
     public static PersistenceUnitLiteral of(PersistenceContext pc) {
@@ -260,6 +334,26 @@ public interface PersistenceService {
     }
 
     @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !PersistenceUnit.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      PersistenceUnit other = (PersistenceUnit) obj;
+      return name.equals(other.name()) && unitName.equals(other.unitName());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("name", name), Pair.of("unitName", unitName));
+      }
+      return hashCode;
+    }
+
+    @Override
     public String name() {
       return name;
     }
@@ -268,5 +362,6 @@ public interface PersistenceService {
     public String unitName() {
       return unitName;
     }
+
   }
 }

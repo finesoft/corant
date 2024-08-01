@@ -15,11 +15,13 @@ package org.corant.config.declarative;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-config
@@ -74,14 +76,37 @@ public @interface ConfigKeyRoot {
 
     private static final long serialVersionUID = 4676760366128922922L;
 
-    final boolean ignoreNoAnnotatedItem;
-    final int keyIndex;
-    final String value;
+    private boolean ignoreNoAnnotatedItem;
+    private int keyIndex;
+    private String value;
+    private transient volatile Integer hashCode;
 
     public ConfigKeyRootLiteral(boolean ignoreNoAnnotatedItem, int keyIndex, String value) {
       this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
       this.keyIndex = keyIndex;
       this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !ConfigKeyRoot.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      ConfigKeyRoot other = (ConfigKeyRoot) obj;
+      return ignoreNoAnnotatedItem == other.ignoreNoAnnotatedItem() && keyIndex == other.keyIndex()
+          && value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("ignoreNoAnnotatedItem", ignoreNoAnnotatedItem),
+            Pair.of("keyIndex", keyIndex), Pair.of("value", value));
+      }
+      return hashCode;
     }
 
     @Override

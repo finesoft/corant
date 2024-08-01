@@ -13,7 +13,9 @@
  */
 package org.corant.context.qualifier;
 
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,6 +23,7 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-context
@@ -41,10 +44,11 @@ public @interface SURI {
 
     private static final long serialVersionUID = 4186590008857391708L;
 
-    private final String value;
+    private String value;
+    private transient volatile Integer hashCode;
 
     private SURILiteral(String value) {
-      this.value = value;
+      this.value = defaultString(value);
     }
 
     public static SURILiteral of(String value) {
@@ -52,9 +56,28 @@ public @interface SURI {
     }
 
     @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !SURI.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      SURI other = (SURI) obj;
+      return value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("value", value));
+      }
+      return hashCode;
+    }
+
+    @Override
     public String value() {
       return value;
     }
-
   }
 }

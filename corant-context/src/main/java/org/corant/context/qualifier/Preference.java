@@ -13,7 +13,9 @@
  */
 package org.corant.context.qualifier;
 
+import static org.corant.shared.util.Annotations.calculateMembersHashCode;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,6 +23,7 @@ import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
+import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-context
@@ -41,14 +44,35 @@ public @interface Preference {
 
     private static final long serialVersionUID = 2627528079165566439L;
 
-    private final String value;
+    private String value;
+    private transient volatile Integer hashCode;
 
     private PreferenceLiteral(String value) {
-      this.value = value;
+      this.value = defaultString(value);
     }
 
     public static PreferenceLiteral of(String value) {
       return new PreferenceLiteral(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || !Preference.class.isAssignableFrom(obj.getClass())) {
+        return false;
+      }
+      Preference other = (Preference) obj;
+      return value.equals(other.value());
+    }
+
+    @Override
+    public int hashCode() {
+      if (hashCode == null) {
+        hashCode = calculateMembersHashCode(Pair.of("value", value));
+      }
+      return hashCode;
     }
 
     @Override

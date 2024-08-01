@@ -46,7 +46,6 @@ public class AlipayConfig implements DeclarativeConfig {
   protected int proxyPort;
 
   /**
-   *
    * @return the alipayPublicCertPath
    */
   public String getAlipayPublicCertPath() {
@@ -54,7 +53,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the appId
    */
   public String getAppId() {
@@ -62,7 +60,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the certPath
    */
   public String getCertPath() {
@@ -70,7 +67,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the charset
    */
   public String getCharset() {
@@ -78,7 +74,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the encryptor
    */
   public String getEncryptor() {
@@ -86,7 +81,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the encryptType
    */
   public String getEncryptType() {
@@ -94,7 +88,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the format
    */
   public String getFormat() {
@@ -102,7 +95,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the privateKey
    */
   public String getPrivateKey() {
@@ -110,7 +102,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the proxyHost
    */
   public String getProxyHost() {
@@ -118,7 +109,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the proxyPort
    */
   public int getProxyPort() {
@@ -126,7 +116,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the rootCertPath
    */
   public String getRootCertPath() {
@@ -134,7 +123,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the serverUrl
    */
   public String getServerUrl() {
@@ -142,7 +130,6 @@ public class AlipayConfig implements DeclarativeConfig {
   }
 
   /**
-   *
    * @return the signType
    */
   public String getSignType() {

@@ -24,7 +24,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.microprofile.config.Config;
+import org.corant.config.CorantConfig;
+import org.corant.config.declarative.ConfigInjector.InjectStrategy;
 
 /**
  * corant-config
@@ -36,21 +37,29 @@ import org.eclipse.microprofile.config.Config;
  */
 public class ConfigInstances {
 
-  public static <T> Map<String, T> resolveConfigInstances(Config config,
+  public static <T> Map<String, T> resolveConfigInstances(CorantConfig config,
       ConfigMetaClass configClass) throws Exception {
     return resolveConfigInstances(config, resolveKeys(configClass, config), configClass);
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Map<String, T> resolveConfigInstances(Config config, Set<String> keys,
+  public static <T> Map<String, T> resolveConfigInstances(CorantConfig config, Set<String> keys,
       ConfigMetaClass configClass) throws Exception {
     if (isNotEmpty(keys)) {
       Map<String, T> configMaps = new HashMap<>(keys.size());
       for (String key : keys) {
         // T configObject = configClass.getClazz().newInstance();// JDK8
         Object configObject = configClass.getClazz().getDeclaredConstructor().newInstance();// JDK9+
-        for (ConfigMetaField cf : configClass.getFields()) {
-          cf.getInjector().inject(config, key, configObject, cf);
+        if (configClass.getInjectStrategy() == InjectStrategy.FIELD) {
+          injectFields(config, configClass, key, configObject);
+        } else if (configClass.getInjectStrategy() == InjectStrategy.PROPERTY) {
+          injectMethods(config, configClass, key, configObject);
+        } else if (configClass.getInjectStrategy() == InjectStrategy.PROPERTY_FIELD) {
+          injectMethods(config, configClass, key, configObject);
+          injectFields(config, configClass, key, configObject);
+        } else {
+          injectFields(config, configClass, key, configObject);
+          injectMethods(config, configClass, key, configObject);
         }
         if (configObject instanceof DeclarativeConfig declarativeConfigObject) {
           declarativeConfigObject.onPostConstruct(config, key);
@@ -66,7 +75,21 @@ public class ConfigInstances {
     return null;
   }
 
-  static Set<String> resolveKeys(ConfigMetaClass configClass, Config config) {
+  protected static void injectMethods(CorantConfig config, ConfigMetaClass configClass, String key,
+      Object configObject) throws Exception {
+    for (ConfigMetaMethod cp : configClass.getMethods()) {
+      cp.getInjector().inject(config, key, configObject, cp);
+    }
+  }
+
+  protected static void injectFields(CorantConfig config, ConfigMetaClass configClass, String key,
+      Object configObject) throws Exception {
+    for (ConfigMetaField cf : configClass.getFields()) {
+      cf.getInjector().inject(config, key, configObject, cf);
+    }
+  }
+
+  static Set<String> resolveKeys(ConfigMetaClass configClass, CorantConfig config) {
     final String prefix = regulateKeyPrefix(configClass.getKeyRoot());
     Set<String> keys = new HashSet<>();
     Set<String> itemKeys = new LinkedHashSet<>();

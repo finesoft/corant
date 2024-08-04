@@ -41,24 +41,17 @@ public interface Immutable {
 
     public ImmutableListBuilder() {}
 
-    public ImmutableListBuilder(Collection<? extends E> collection) {
-      addAll(collection);
-    }
-
     @SafeVarargs
     public ImmutableListBuilder(final E... eles) {
       addAll(eles);
     }
 
-    public ImmutableListBuilder<E> add(final E ele) {
-      list.add(ele);
-      return this;
+    public ImmutableListBuilder(Iterable<? extends E> collection) {
+      addAll(collection);
     }
 
-    public ImmutableListBuilder<E> addAll(final Collection<? extends E> collections) {
-      if (collections != null) {
-        list.addAll(collections);
-      }
+    public ImmutableListBuilder<E> add(final E ele) {
+      list.add(ele);
       return this;
     }
 
@@ -80,6 +73,17 @@ public interface Immutable {
     public ImmutableListBuilder<E> addAll(final ImmutableSetBuilder<? extends E> other) {
       if (other != null) {
         list.addAll(other.set);
+      }
+      return this;
+    }
+
+    public ImmutableListBuilder<E> addAll(final Iterable<? extends E> iterable) {
+      if (iterable instanceof Collection<? extends E> collection) {
+        list.addAll(collection);
+      } else if (iterable != null) {
+        for (E e : iterable) {
+          list.add(e);
+        }
       }
       return this;
     }
@@ -204,24 +208,17 @@ public interface Immutable {
 
     public ImmutableSetBuilder() {}
 
-    public ImmutableSetBuilder(Collection<? extends E> collection) {
-      addAll(collection);
-    }
-
     @SafeVarargs
     public ImmutableSetBuilder(final E... eles) {
       addAll(eles);
     }
 
-    public ImmutableSetBuilder<E> add(final E ele) {
-      set.add(ele);
-      return this;
+    public ImmutableSetBuilder(Iterable<? extends E> iterable) {
+      addAll(iterable);
     }
 
-    public ImmutableSetBuilder<E> addAll(final Collection<? extends E> collections) {
-      if (collections != null) {
-        set.addAll(collections);
-      }
+    public ImmutableSetBuilder<E> add(final E ele) {
+      set.add(ele);
       return this;
     }
 
@@ -243,6 +240,17 @@ public interface Immutable {
     public ImmutableSetBuilder<E> addAll(final ImmutableSetBuilder<? extends E> other) {
       if (other != null) {
         set.addAll(other.set);
+      }
+      return this;
+    }
+
+    public ImmutableSetBuilder<E> addAll(final Iterable<? extends E> iterable) {
+      if (iterable instanceof Collection<? extends E> collection) {
+        set.addAll(collection);
+      } else if (iterable != null) {
+        for (E e : iterable) {
+          set.add(e);
+        }
       }
       return this;
     }

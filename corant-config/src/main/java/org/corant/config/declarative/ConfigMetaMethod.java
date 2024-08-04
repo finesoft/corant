@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,27 +13,27 @@
  */
 package org.corant.config.declarative;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * corant-config
  *
- * @author bingo 11:32:23
+ * @author bingo 11:17:04
  */
-public class ConfigMetaField {
+public class ConfigMetaMethod {
 
   private final ConfigMetaClass configClass;
-  private final Field field;
+  private final Method method;
   private final String keyItem;
   private final ConfigInjector injector;
   private final String defaultValue;
   private final String defaultKey;
   private final String defaultNull;
 
-  protected ConfigMetaField(ConfigMetaClass configClass, Field field, String keyItem,
+  protected ConfigMetaMethod(ConfigMetaClass configClass, Method method, String keyItem,
       ConfigInjector injector, String defaultValue, String defaultKey, String defaultNull) {
     this.configClass = configClass;
-    this.field = field;
+    this.method = method;
     this.keyItem = keyItem;
     this.injector = injector;
     this.defaultValue = defaultValue;
@@ -53,10 +53,6 @@ public class ConfigMetaField {
     return defaultValue.equals(defaultNull) ? null : defaultValue;
   }
 
-  public Field getField() {
-    return field;
-  }
-
   public ConfigInjector getInjector() {
     return injector;
   }
@@ -69,11 +65,15 @@ public class ConfigMetaField {
     return configClass.getKeyRoot();
   }
 
+  public Method getMethod() {
+    return method;
+  }
+
   @Override
   public String toString() {
-    return "ConfigField [configClass=" + configClass.getClazz() + ", field=" + field + ", keyItem="
-        + keyItem + ", pattern=" + injector + ", defaultValue=" + defaultValue + ", defaultKey="
-        + defaultKey + ", defaultNull=" + defaultNull + "]";
+    return "ConfigMetaProperty [configClass=" + configClass.getClazz() + ", method="
+        + method.getName() + ", keyItem=" + keyItem + ", injector=" + injector + ", defaultValue="
+        + defaultValue + ", defaultKey=" + defaultKey + ", defaultNull=" + defaultNull + "]";
   }
 
 }

@@ -241,14 +241,13 @@ public class Lists {
     }
   }
 
-  public static <E> ImmutableListBuilder<E> immutableListBuilder(
-      Collection<? extends E> collection) {
-    return new ImmutableListBuilder<>(collection);
-  }
-
   @SafeVarargs
   public static <E> ImmutableListBuilder<E> immutableListBuilder(final E... objects) {
     return new ImmutableListBuilder<>(objects);
+  }
+
+  public static <E> ImmutableListBuilder<E> immutableListBuilder(Iterable<? extends E> iterable) {
+    return new ImmutableListBuilder<>(iterable);
   }
 
   /**

@@ -149,33 +149,4 @@ public class DefaultQuerierConfig implements QuerierConfig, DeclarativeConfig {
           defaultStreamLimit));
     }
   }
-
-  public void setDefaultLimit(int defaultLimit) {
-    this.defaultLimit = defaultLimit;
-  }
-
-  public void setDefaultSelectSize(int defaultSelectSize) {
-    this.defaultSelectSize = defaultSelectSize;
-  }
-
-  public void setDefaultStreamLimit(int defaultStreamLimit) {
-    this.defaultStreamLimit = defaultStreamLimit;
-  }
-
-  public void setMaxLimit(int maxLimit) {
-    this.maxLimit = maxLimit;
-  }
-
-  public void setMaxSelectSize(int maxSelectSize) {
-    this.maxSelectSize = maxSelectSize;
-  }
-
-  public void setThrownOnMaxSelectSize(boolean thrownOnMaxSelectSize) {
-    this.thrownOnMaxSelectSize = thrownOnMaxSelectSize;
-  }
-
-  public void setTimeout(Duration timeout) {
-    this.timeout = timeout;
-  }
-
 }

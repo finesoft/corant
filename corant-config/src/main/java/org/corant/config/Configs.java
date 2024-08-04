@@ -246,7 +246,8 @@ public class Configs {
       Config config = ConfigProvider.getConfig();
       try {
         // FIXME EMPTY?
-        map = ConfigInstances.resolveConfigInstances(config, singleton(EMPTY), configClass);
+        map = ConfigInstances.resolveConfigInstances((CorantConfig) config, singleton(EMPTY),
+            configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -270,7 +271,7 @@ public class Configs {
     if (configClass != null) {
       Config config = ConfigProvider.getConfig();
       try {
-        configMaps = ConfigInstances.resolveConfigInstances(config, configClass);
+        configMaps = ConfigInstances.resolveConfigInstances((CorantConfig) config, configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
@@ -295,7 +296,8 @@ public class Configs {
       Config config = ConfigProvider.getConfig();
       try {
         // FIXME EMPTY?
-        map = ConfigInstances.resolveConfigInstances(config, singleton(EMPTY), configClass);
+        map = ConfigInstances.resolveConfigInstances((CorantConfig) config, singleton(EMPTY),
+            configClass);
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }

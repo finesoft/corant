@@ -60,11 +60,10 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
   public ManagedExecutorConfig() {}
 
   private ManagedExecutorConfig(String threadName) {
-    setThreadName(threadName);
+    this.threadName = threadName;
   }
 
   /**
-   *
    * @return the awaitTermination
    */
   public Duration getAwaitTermination() {
@@ -140,58 +139,6 @@ public class ManagedExecutorConfig extends AbstractNamedObject implements Declar
         + awaitTermination + ", rejectPolicy=" + rejectPolicy + ", threadPriority=" + threadPriority
         + ", threadName=" + threadName + ", queueCapacity=" + queueCapacity + ", contextInfos="
         + Arrays.toString(contextInfos) + ", enableJndi=" + enableJndi + "]";
-  }
-
-  protected void setAwaitTermination(Duration awaitTermination) {
-    this.awaitTermination = awaitTermination;
-  }
-
-  protected void setContextInfos(ContextInfo[] contextInfos) {
-    this.contextInfos = contextInfos;
-  }
-
-  protected void setCorePoolSize(int corePoolSize) {
-    this.corePoolSize = corePoolSize;
-  }
-
-  protected void setEnableJndi(boolean enableJndi) {
-    this.enableJndi = enableJndi;
-  }
-
-  protected void setHungTaskThreshold(long hungTaskThreshold) {
-    this.hungTaskThreshold = hungTaskThreshold;
-  }
-
-  protected void setKeepAliveTime(Duration keepAliveTime) {
-    this.keepAliveTime = keepAliveTime;
-  }
-
-  protected void setLongRunningTasks(boolean longRunningTasks) {
-    this.longRunningTasks = longRunningTasks;
-  }
-
-  protected void setMaxPoolSize(int maxPoolSize) {
-    this.maxPoolSize = maxPoolSize;
-  }
-
-  protected void setQueueCapacity(int queueCapacity) {
-    this.queueCapacity = queueCapacity;
-  }
-
-  protected void setRejectPolicy(RejectPolicy rejectPolicy) {
-    this.rejectPolicy = rejectPolicy;
-  }
-
-  protected void setThreadLifeTime(Duration threadLifeTime) {
-    this.threadLifeTime = threadLifeTime;
-  }
-
-  protected void setThreadName(String threadName) {
-    this.threadName = threadName;
-  }
-
-  protected void setThreadPriority(int threadPriority) {
-    this.threadPriority = threadPriority;
   }
 
 }

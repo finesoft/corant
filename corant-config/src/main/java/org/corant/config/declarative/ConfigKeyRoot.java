@@ -16,11 +16,13 @@ package org.corant.config.declarative;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.corant.shared.util.Annotations.calculateMembersHashCode;
+import static org.corant.shared.util.Objects.defaultObject;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import jakarta.enterprise.util.AnnotationLiteral;
+import org.corant.config.declarative.ConfigInjector.InjectStrategy;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
@@ -68,6 +70,8 @@ public @interface ConfigKeyRoot {
 
   boolean ignoreNoAnnotatedItem() default true;
 
+  InjectStrategy injectStrategy() default InjectStrategy.PROPERTY_FIELD;
+
   int keyIndex() default -1;
 
   String value();
@@ -79,12 +83,15 @@ public @interface ConfigKeyRoot {
     private boolean ignoreNoAnnotatedItem;
     private int keyIndex;
     private String value;
+    private InjectStrategy injectStrategy;
     private transient volatile Integer hashCode;
 
-    public ConfigKeyRootLiteral(boolean ignoreNoAnnotatedItem, int keyIndex, String value) {
+    public ConfigKeyRootLiteral(boolean ignoreNoAnnotatedItem, int keyIndex, String value,
+        InjectStrategy injectStrategy) {
       this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
       this.keyIndex = keyIndex;
       this.value = value;
+      this.injectStrategy = defaultObject(injectStrategy, InjectStrategy.PROPERTY_FIELD);
     }
 
     @Override
@@ -97,14 +104,15 @@ public @interface ConfigKeyRoot {
       }
       ConfigKeyRoot other = (ConfigKeyRoot) obj;
       return ignoreNoAnnotatedItem == other.ignoreNoAnnotatedItem() && keyIndex == other.keyIndex()
-          && value.equals(other.value());
+          && value.equals(other.value()) && injectStrategy.equals(other.injectStrategy());
     }
 
     @Override
     public int hashCode() {
       if (hashCode == null) {
         hashCode = calculateMembersHashCode(Pair.of("ignoreNoAnnotatedItem", ignoreNoAnnotatedItem),
-            Pair.of("keyIndex", keyIndex), Pair.of("value", value));
+            Pair.of("keyIndex", keyIndex), Pair.of("value", value),
+            Pair.of("injectStrategy", injectStrategy));
       }
       return hashCode;
     }
@@ -112,6 +120,11 @@ public @interface ConfigKeyRoot {
     @Override
     public boolean ignoreNoAnnotatedItem() {
       return ignoreNoAnnotatedItem;
+    }
+
+    @Override
+    public InjectStrategy injectStrategy() {
+      return injectStrategy;
     }
 
     @Override

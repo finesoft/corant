@@ -14,11 +14,11 @@
 package org.corant.config.declarative;
 
 import static org.corant.config.CorantConfigResolver.concatKey;
-import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isBlank;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import org.corant.config.CorantConfig;
-import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-config
@@ -29,24 +29,46 @@ public interface ConfigInjector {
 
   ConfigInjector DEFAULT_INJECTOR = new ConfigInjector() {};
 
-  static String resolveInfixKey(String infix, ConfigMetaField field) {
-    return isBlank(infix) ? field.getDefaultKey()
-        : concatKey(field.getConfigClass().getKeyRoot(), infix, field.getKeyItem());
+  static String resolveInfixKey(String infix, String keyRoot, String keyItem, String defaultKey) {
+    return isBlank(infix) ? defaultKey : concatKey(keyRoot, infix, keyItem);
   }
 
-  static String resolvePrefixKey(ConfigMetaField field) {
-    return concatKey(field.getConfigClass().getKeyRoot(), field.getKeyItem());
+  static String resolvePrefixKey(String keyRoot, String keyItem) {
+    return concatKey(keyRoot, keyItem);
   }
 
-  default void inject(Config config, String infix, Object configObject, ConfigMetaField configField)
-      throws Exception {
-    CorantConfig corantConfig = forceCast(config);
+  default void inject(CorantConfig config, String infix, Object configObject,
+      ConfigMetaField configField) throws Exception {
+    String keyRoot = configField.getKeyRoot();
+    String keyItem = configField.getKeyItem();
+    String key = resolvePrefixKey(keyRoot, keyItem);
     Field field = configField.getField();
-    String key = resolvePrefixKey(configField);
-    Object obj =
-        corantConfig.getConvertedValue(key, field.getGenericType(), configField.getDefaultValue());
+    Type type = field.getGenericType();
+    String defaultValue = configField.getDefaultValue();
+    Object obj = config.getConvertedValue(key, type, defaultValue);
     if (obj != null) {
       field.set(configObject, obj);
     }
+  }
+
+  default void inject(CorantConfig config, String infix, Object configObject,
+      ConfigMetaMethod configMethod) throws Exception {
+    String keyRoot = configMethod.getKeyRoot();
+    String keyItem = configMethod.getKeyItem();
+    String key = resolvePrefixKey(keyRoot, keyItem);
+    if (!config.getCorantConfigSources().getInitializedPropertyNames().contains(key)) {
+      return;
+    }
+    Method setter = configMethod.getMethod();
+    Type type = setter.getGenericParameterTypes()[0];
+    String defaultValue = configMethod.getDefaultValue();
+    Object obj = config.getConvertedValue(key, type, defaultValue);
+    if (obj != null) {
+      setter.invoke(configObject, obj);
+    }
+  }
+
+  enum InjectStrategy {
+    FIELD, PROPERTY, PROPERTY_FIELD, FIELD_PROPERTY
   }
 }

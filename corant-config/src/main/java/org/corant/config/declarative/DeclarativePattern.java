@@ -16,9 +16,9 @@ package org.corant.config.declarative;
 import static org.corant.config.CorantConfigResolver.KEY_DELIMITER;
 import static org.corant.config.CorantConfigResolver.removeSplitor;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.corant.config.CorantConfig;
 import org.corant.config.CorantConfigConversion;
-import org.eclipse.microprofile.config.Config;
 
 /**
  * corant-config
@@ -42,15 +41,36 @@ public enum DeclarativePattern implements ConfigInjector {
   SUFFIX() {
 
     @Override
-    public void inject(Config config, String infix, Object configObject,
+    public void inject(CorantConfig config, String infix, Object configObject,
         ConfigMetaField configField) throws Exception {
-      CorantConfig corantConfig = forceCast(config);
       Field field = configField.getField();
-      String key = ConfigInjector.resolveInfixKey(infix, configField);
-      Object obj = corantConfig.getConvertedValue(key, field.getGenericType(),
+      String keyRoot = configField.getKeyRoot();
+      String keyItem = configField.getKeyItem();
+      String defaultKey = configField.getDefaultKey();
+      String key = ConfigInjector.resolveInfixKey(infix, keyRoot, keyItem, defaultKey);
+      Object obj = config.getConvertedValue(key, field.getGenericType(),
           configField.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE); // FIXME NO_DFLT_VALUE
       if (obj != null) {
         field.set(configObject, obj);
+      }
+    }
+
+    @Override
+    public void inject(CorantConfig config, String infix, Object configObject,
+        ConfigMetaMethod configMethod) throws Exception {
+
+      String keyRoot = configMethod.getKeyRoot();
+      String keyItem = configMethod.getKeyItem();
+      String defaultKey = configMethod.getDefaultKey();
+      String key = ConfigInjector.resolveInfixKey(infix, keyRoot, keyItem, defaultKey);
+      if (!config.getCorantConfigSources().getInitializedPropertyNames().contains(key)) {
+        return;
+      }
+      Method setter = configMethod.getMethod();
+      Object obj = config.getConvertedValue(key, setter.getGenericParameterTypes()[0],
+          configMethod.getDefaultValue(), ConfigKeyItem.NO_DFLT_VALUE); // FIXME NO_DFLT_VALUE
+      if (obj != null) {
+        setter.invoke(configObject, obj);
       }
     }
 
@@ -58,47 +78,86 @@ public enum DeclarativePattern implements ConfigInjector {
 
   PREFIX() {
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void inject(Config config, String infix, Object configObject,
+    public void inject(CorantConfig config, String infix, Object configObject,
         ConfigMetaField configField) throws Exception {
 
       Map<String, Optional<String>> rawMap = new HashMap<>();
-      String key = ConfigInjector.resolveInfixKey(infix, configField) + KEY_DELIMITER;
+
+      String keyRoot = configField.getKeyRoot();
+      String keyItem = configField.getKeyItem();
+      String defaultKey = configField.getDefaultKey();
+
+      String key =
+          ConfigInjector.resolveInfixKey(infix, keyRoot, keyItem, defaultKey) + KEY_DELIMITER;
       streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> rawMap
           .put(removeSplitor(k.substring(key.length())), config.getOptionalValue(k, String.class)));
 
       if (isNotEmpty(rawMap)) {
         Field field = configField.getField();
         Type fieldType = field.getGenericType();
-        Supplier<Map<?, ?>> factory;
-        Object defaultFieldValue = field.get(configObject);
-        if (defaultFieldValue instanceof LinkedHashMap) {
-          factory = LinkedHashMap::new;
-        } else if (defaultFieldValue instanceof TreeMap) {
-          factory = TreeMap::new;
+        Class<?> fieldClass = Object.class;
+        if (field.getGenericType() instanceof Class) {
+          fieldClass = (Class<?>) field.getGenericType();
         } else {
-          factory = HashMap::new;
-        }
-        CorantConfig corantConfig = forceCast(config);
-        CorantConfigConversion conversion = corantConfig.getConversion();
-        Map valueMap;
-        Type keyType = Object.class;
-        Type valueType = Object.class;
-        if (fieldType instanceof ParameterizedType parameterizedFieldType) {
-          if (!(parameterizedFieldType.getActualTypeArguments()[0] instanceof WildcardType)) {
-            keyType = parameterizedFieldType.getActualTypeArguments()[0];
-          }
-          if (!(parameterizedFieldType.getActualTypeArguments()[1] instanceof WildcardType)) {
-            valueType = parameterizedFieldType.getActualTypeArguments()[1];
+          Object defaultFieldValue = field.get(configObject);
+          if (defaultFieldValue != null) {
+            fieldClass = defaultFieldValue.getClass();
           }
         }
-        valueMap = conversion.convertMap(rawMap, factory, keyType, valueType);
-        field.set(configObject, valueMap); // FIXME
-                                           // need
-                                           // merge???
+        // FIXME need merge???
+        field.set(configObject, resolveValueMap(config, rawMap, fieldType, fieldClass));
       }
     }
+
+    @Override
+    public void inject(CorantConfig config, String infix, Object configObject,
+        ConfigMetaMethod configMethod) throws Exception {
+      Map<String, Optional<String>> rawMap = new HashMap<>();
+
+      String keyRoot = configMethod.getKeyRoot();
+      String keyItem = configMethod.getKeyItem();
+      String defaultKey = configMethod.getDefaultKey();
+
+      String key =
+          ConfigInjector.resolveInfixKey(infix, keyRoot, keyItem, defaultKey) + KEY_DELIMITER;
+      streamOf(config.getPropertyNames()).filter(p -> p.startsWith(key)).forEach(k -> rawMap
+          .put(removeSplitor(k.substring(key.length())), config.getOptionalValue(k, String.class)));
+
+      if (isNotEmpty(rawMap)) {
+        Method setter = configMethod.getMethod();
+        Type parameterType = setter.getGenericParameterTypes()[0];
+        Class<?> parameterClass = setter.getParameterTypes()[0];
+        // FIXME need merge???
+        setter.invoke(configObject, resolveValueMap(config, rawMap, parameterType, parameterClass));
+      }
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected Map resolveValueMap(CorantConfig config, Map<String, Optional<String>> rawMap,
+        Type type, Class<?> typeClass) {
+      Supplier<Map<?, ?>> factory;
+      if (LinkedHashMap.class.isAssignableFrom(typeClass)) {
+        factory = LinkedHashMap::new;
+      } else if (TreeMap.class.isAssignableFrom(typeClass)) {
+        factory = TreeMap::new;
+      } else {
+        factory = HashMap::new;
+      }
+      CorantConfigConversion conversion = config.getConversion();
+      Type keyType = Object.class;
+      Type valueType = Object.class;
+      if (type instanceof ParameterizedType parameterizedType) {
+        if (!(parameterizedType.getActualTypeArguments()[0] instanceof WildcardType)) {
+          keyType = parameterizedType.getActualTypeArguments()[0];
+        }
+        if (!(parameterizedType.getActualTypeArguments()[1] instanceof WildcardType)) {
+          valueType = parameterizedType.getActualTypeArguments()[1];
+        }
+      }
+      return conversion.convertMap(rawMap, factory, keyType, valueType);
+    }
+
   }
 
 }

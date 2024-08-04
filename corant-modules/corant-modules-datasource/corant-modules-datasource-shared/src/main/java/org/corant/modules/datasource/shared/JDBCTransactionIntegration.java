@@ -101,16 +101,16 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     XADataSource xads;
     try {
       xads = cfg.getDriver().asSubclass(XADataSource.class).getDeclaredConstructor().newInstance();
-      PropertyInjector pi = new PropertyInjector(true, xads);
+      PropertyInjector pi = new PropertyInjector(xads.getClass(), true);
       if (isNotEmpty(cfg.getJdbcProperties())) {
-        pi.inject(cfg.getJdbcProperties());
+        pi.inject(xads, cfg.getJdbcProperties());
       }
       if (isNotBlank(cfg.getUsername()) && isNotBlank(cfg.getPassword())) {
-        pi.inject("user", cfg.getUsername());
-        pi.inject("password", cfg.getPassword());
+        pi.inject(xads, "user", cfg.getUsername());
+        pi.inject(xads, "password", cfg.getPassword());
       }
       if (isNotBlank(cfg.getConnectionUrl())) {
-        pi.inject("url", cfg.getConnectionUrl());
+        pi.inject(xads, "url", cfg.getConnectionUrl());
       }
     } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException | NoSuchMethodException | SecurityException e) {

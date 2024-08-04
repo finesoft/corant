@@ -479,7 +479,7 @@ public class Conversion {
    * @param targetType the target type
    * @param hints the conversion hints
    */
-  static Object convertType(Object value, Type targetType, Map<String, ?> hints) {
+  public static Object convertType(Object value, Type targetType, Map<String, ?> hints) {
     Object result = null;
     if (value != null) {
       final Class<?> typeClass;

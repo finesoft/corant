@@ -76,13 +76,13 @@ public class Sets {
     }
   }
 
-  public static <E> ImmutableSetBuilder<E> immutableSetBuilder(Collection<E> collection) {
-    return new ImmutableSetBuilder<>(collection);
-  }
-
   @SafeVarargs
   public static <E> ImmutableSetBuilder<E> immutableSetBuilder(final E... objects) {
     return new ImmutableSetBuilder<>(objects);
+  }
+
+  public static <E> ImmutableSetBuilder<E> immutableSetBuilder(Iterable<? extends E> iterable) {
+    return new ImmutableSetBuilder<>(iterable);
   }
 
   /**
@@ -230,7 +230,8 @@ public class Sets {
   @SafeVarargs
   public static <E> TreeSet<E> treeSetOf(final Comparator<? super E> comparator,
       final E... objects) {
-    TreeSet<E> set = comparator == null ? new TreeSet<>() : new TreeSet<>(comparator);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    TreeSet<E> set = comparator == null ? new TreeSet() : new TreeSet<>(comparator);
     if (objects != null) {
       Collections.addAll(set, objects);
     }

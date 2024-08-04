@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.corant.config.declarative.ConfigInjector.InjectStrategy;
 
 /**
  * corant-config
@@ -28,7 +29,9 @@ public class ConfigMetaClass {
   private final String keyRoot;
   private final int keyIndex;
   private final Class<?> clazz;
+  private final InjectStrategy injectStrategy;
   private final List<ConfigMetaField> fields = new ArrayList<>();
+  private final List<ConfigMetaMethod> methods = new ArrayList<>();
   private final boolean ignoreNoAnnotatedItem;
 
   /**
@@ -37,13 +40,15 @@ public class ConfigMetaClass {
    * @param keyRoot the configuration key prefix
    * @param keyIndex the configuration property index
    * @param clazz the declarative configuration class
+   * @param injectStrategy the declarative configuration inject strategy
    * @param ignoreNoAnnotatedItem whether to ignore the field that does not have annotation.
    */
   protected ConfigMetaClass(String keyRoot, int keyIndex, Class<?> clazz,
-      boolean ignoreNoAnnotatedItem) {
+      boolean ignoreNoAnnotatedItem, InjectStrategy injectStrategy) {
     this.keyRoot = keyRoot;
     this.keyIndex = keyIndex;
     this.clazz = clazz;
+    this.injectStrategy = injectStrategy;
     this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
   }
 
@@ -59,6 +64,10 @@ public class ConfigMetaClass {
     return fields;
   }
 
+  public InjectStrategy getInjectStrategy() {
+    return injectStrategy;
+  }
+
   public int getKeyIndex() {
     return keyIndex;
   }
@@ -67,24 +76,40 @@ public class ConfigMetaClass {
     return keyRoot;
   }
 
+  public List<ConfigMetaMethod> getMethods() {
+    return methods;
+  }
+
   public boolean isIgnoreNoAnnotatedItem() {
     return ignoreNoAnnotatedItem;
   }
 
   @Override
   public String toString() {
-    return "ConfigClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
-        + ", fields=" + fields + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
+    return "ConfigMetaClass [keyRoot=" + keyRoot + ", keyIndex=" + keyIndex + ", clazz=" + clazz
+        + ", injectStrategy=" + injectStrategy + ", fields=" + fields + ", methods=" + methods
+        + ", ignoreNoAnnotatedItem=" + ignoreNoAnnotatedItem + "]";
   }
 
   void addField(ConfigMetaField field) {
     fields.add(field);
   }
 
+  void addMethod(ConfigMetaMethod property) {
+    methods.add(property);
+  }
+
   void setFields(List<ConfigMetaField> fields) {
     this.fields.clear();
     if (fields != null) {
       this.fields.addAll(fields);
+    }
+  }
+
+  void setMethods(List<ConfigMetaMethod> methods) {
+    this.methods.clear();
+    if (methods != null) {
+      this.methods.addAll(methods);
     }
   }
 

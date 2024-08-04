@@ -36,7 +36,7 @@ public class ManagedScheduledExecutorConfig extends ManagedExecutorConfig {
   public ManagedScheduledExecutorConfig() {}
 
   private ManagedScheduledExecutorConfig(String threadName) {
-    setThreadName(threadName);
+    this.threadName = threadName;
   }
 
   @Override

@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.util.Collections.unmodifiableList;
 import static org.corant.config.CorantConfig.CORANT_CONFIG_SOURCE_BASE_NAME_PREFIX;
 import static org.corant.config.CorantConfig.MP_CONFIG_SOURCE_BASE_NAME_PREFIX;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -21,12 +22,14 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.defaultObject;
+import static org.corant.shared.util.Sets.immutableSetBuilder;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.strip;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.corant.config.expression.ConfigELProcessor;
 import org.corant.config.source.MicroprofileConfigSources;
@@ -66,6 +69,7 @@ public class CorantConfigSources {
   protected final String[] profilePrefixes;
   protected final ConfigELProcessor elProcessor;
   protected final boolean expressionsEnabled;
+  protected final Set<String> initializedPropertyNames;
 
   /**
    * Build an instance
@@ -76,7 +80,7 @@ public class CorantConfigSources {
    */
   protected CorantConfigSources(List<CorantConfigSource> sources, boolean expressionsEnabled,
       String[] profiles) {
-    this.sources = sources;
+    this.sources = unmodifiableList(sources);
     this.profiles = defaultObject(profiles, Strings.EMPTY_ARRAY);
     this.expressionsEnabled = expressionsEnabled;
     if (isNotEmpty(profiles)) {
@@ -87,6 +91,7 @@ public class CorantConfigSources {
       profilePrefixes = Strings.EMPTY_ARRAY;
     }
     elProcessor = new ConfigELProcessor(this::retrieveValue);
+    initializedPropertyNames = immutableSetBuilder(getPropertyNames()).build();
   }
 
   /**
@@ -177,6 +182,17 @@ public class CorantConfigSources {
     return new CorantConfigValue(propertyName, null, defaultValue, null, 0);
   }
 
+  /**
+   * Returns the names of all config properties after the config sources initialized.
+   * <p>
+   * Note: the names may be changed since config source may changed.
+   *
+   * @see Config#getPropertyNames()
+   */
+  public Set<String> getInitializedPropertyNames() {
+    return initializedPropertyNames;
+  }
+
   public String[] getProfiles() {
     return Arrays.copyOf(profiles, profiles.length);
   }
@@ -201,7 +217,6 @@ public class CorantConfigSources {
   }
 
   /**
-   *
    * @return the expressionsEnabled
    */
   public boolean isExpressionsEnabled() {

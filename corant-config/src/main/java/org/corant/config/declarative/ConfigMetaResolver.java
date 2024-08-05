@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import org.corant.config.Configs;
 import org.corant.config.PropertyAccessor;
-import org.corant.config.PropertyAccessor.PropertyMethod;
+import org.corant.config.PropertyAccessor.PropertyMetadata;
 import org.corant.config.declarative.ConfigInjector.InjectStrategy;
 import org.corant.config.declarative.ConfigKeyItem.ConfigKeyItemLiteral;
 import org.corant.config.declarative.ConfigKeyRoot.ConfigKeyRootLiteral;
@@ -95,8 +95,8 @@ public class ConfigMetaResolver {
     }
 
     if (injectStrategy != InjectStrategy.FIELD) {
-      List<PropertyMethod> propertyMethods = new PropertyAccessor(klass).getPropertyMethods();
-      for (PropertyMethod pm : propertyMethods) {
+      List<PropertyMetadata> propertyMethods = new PropertyAccessor(klass).getPropertyMethods();
+      for (PropertyMetadata pm : propertyMethods) {
         if (pm.getWriteMethod() == null) {
           continue;
         }
@@ -105,7 +105,7 @@ public class ConfigMetaResolver {
                 && pm.getReadMethod().getAnnotation(ConfigKeyItem.class) != null)
             || pm.getWriteMethod().getAnnotation(ConfigKeyItem.class) != null) {
           configClass.addMethod(extractedDeclarativeMethod(klass, root, configClass,
-              pm.getPropertyName(), pm.getReadMethod(), pm.getWriteMethod()));
+              pm.getName(), pm.getReadMethod(), pm.getWriteMethod()));
         }
       }
     }

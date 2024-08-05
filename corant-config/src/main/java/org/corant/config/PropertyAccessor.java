@@ -138,9 +138,9 @@ public class PropertyAccessor {
     return propertyGetters;
   }
 
-  public List<PropertyMethod> getPropertyMethods() {
+  public List<PropertyMetadata> getPropertyMethods() {
     return Sets.union(propertyGetters.keySet(), propertySetters.keySet()).stream()
-        .map(p -> new PropertyMethod(p, propertyGetters.get(p), propertySetters.get(p))).toList();
+        .map(p -> new PropertyMetadata(p, propertyGetters.get(p), propertySetters.get(p))).toList();
   }
 
   public Map<String, Method> getPropertySetters() {
@@ -200,19 +200,19 @@ public class PropertyAccessor {
    *
    * @author bingo 13:58:55
    */
-  public static class PropertyMethod {
-    final String propertyName;
+  public static class PropertyMetadata {
+    final String name;
     final Method readMethod;
     final Method writeMethod;
 
-    public PropertyMethod(String propertyName, Method readMethod, Method writeMethod) {
-      this.propertyName = propertyName;
+    public PropertyMetadata(String name, Method readMethod, Method writeMethod) {
+      this.name = name;
       this.readMethod = readMethod;
       this.writeMethod = writeMethod;
     }
 
-    public String getPropertyName() {
-      return propertyName;
+    public String getName() {
+      return name;
     }
 
     public Method getReadMethod() {

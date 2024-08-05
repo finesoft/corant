@@ -13,6 +13,7 @@
  */
 package org.corant.config;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
 import static org.corant.shared.util.Maps.immutableMap;
@@ -22,10 +23,12 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Sets;
@@ -47,8 +50,7 @@ public class PropertyAccessor {
   }
 
   public PropertyAccessor(Class<?> instanceClass, boolean supportNamedProperty) {
-    this.instanceClass =
-        getUserClass(shouldNotNull(instanceClass, "The class to inject can't null"));
+    this.instanceClass = getUserClass(shouldNotNull(instanceClass, "The class can't null"));
     this.supportNamedProperty = supportNamedProperty;
 
     Map<String, Method> setters = new HashMap<>();
@@ -91,13 +93,13 @@ public class PropertyAccessor {
   protected PropertyAccessor(boolean supportNamedProperty, Class<?> instanceClass,
       Map<String, Method> propertySetters, Map<String, Method> propertyGetters) {
     this.supportNamedProperty = supportNamedProperty;
-    this.instanceClass = shouldNotNull(instanceClass, "The class to inject can't null");
+    this.instanceClass = shouldNotNull(instanceClass, "The class can't null");
     this.propertySetters = immutableMap(propertySetters);
     this.propertyGetters = immutableMap(propertyGetters);
   }
 
   public static PropertyAccessor introspect(Class<?> beanClass) {
-    Class<?> clazz = getUserClass(shouldNotNull(beanClass, "The class to inject can't null"));
+    Class<?> clazz = getUserClass(shouldNotNull(beanClass, "The class can't null"));
     try {
       Map<String, Method> setters = new HashMap<>();
       Map<String, Method> getters = new HashMap<>();
@@ -159,16 +161,21 @@ public class PropertyAccessor {
 
   public void inject(Object instance, String propertyName, Object propertyValue)
       throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    inject(instance, propertyName, propertyValue, Conversion::convertType);
+  }
+
+  public void inject(Object instance, String propertyName, Object propertyValue,
+      BiFunction<Object, Type, Object> converter)
+      throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
     String realName = decapitalize(propertyName);
     if (propertySetters.containsKey(realName)) {
       Method method = propertySetters.get(realName);
-      // TODO FIXME complex object type
-      method.invoke(instance,
-          Conversion.convertType(propertyValue, method.getGenericParameterTypes()[0], null));
+      method.invoke(instance, converter.apply(propertyValue, method.getGenericParameterTypes()[0]));
     } else if (supportNamedProperty && propertySetters.containsKey("Property")) {
       propertySetters.get("Property").invoke(instance, propertyName, propertyValue);
     } else {
-      throw new NoSuchMethodException("No setter in class " + instanceClass.getName());
+      throw new NoSuchMethodException(format("No setter for property [%s] in class [%s]",
+          propertyName, instanceClass.getName()));
     }
   }
 
@@ -182,7 +189,8 @@ public class PropertyAccessor {
     } else if (supportNamedProperty && propertyGetters.containsKey("Property")) {
       return forceCast(propertyGetters.get("Property").invoke(instance, propertyName));
     } else {
-      throw new NoSuchMethodException("No getter in class " + instanceClass.getName());
+      throw new NoSuchMethodException(format("No getter for property [%s] in class [%s]",
+          propertyName, instanceClass.getName()));
     }
 
   }

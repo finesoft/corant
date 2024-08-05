@@ -477,6 +477,18 @@ public class Conversion {
    *
    * @param value the source object
    * @param targetType the target type
+   */
+  public static Object convertType(Object value, Type targetType) {
+    return convertType(value, targetType);
+  }
+
+  /**
+   * Convert the given object to the given target type. Note: If the target type is generic, only
+   * List/Set/Supplier/Optional/Map, etc. are supported, and the type parameter must be a concrete
+   * type.
+   *
+   * @param value the source object
+   * @param targetType the target type
    * @param hints the conversion hints
    */
   public static Object convertType(Object value, Type targetType, Map<String, ?> hints) {

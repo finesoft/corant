@@ -95,7 +95,7 @@ public class ConfigMetaResolver {
     }
 
     if (injectStrategy != InjectStrategy.FIELD) {
-      List<PropertyMetadata> propertyMethods = new PropertyAccessor(klass).getPropertyMethods();
+      List<PropertyMetadata> propertyMethods = new PropertyAccessor(klass).getPropertyMetadata();
       for (PropertyMetadata pm : propertyMethods) {
         if (pm.getWriteMethod() == null) {
           continue;

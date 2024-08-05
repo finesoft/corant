@@ -138,7 +138,7 @@ public class PropertyAccessor {
     return propertyGetters;
   }
 
-  public List<PropertyMetadata> getPropertyMethods() {
+  public List<PropertyMetadata> getPropertyMetadata() {
     return Sets.union(propertyGetters.keySet(), propertySetters.keySet()).stream()
         .map(p -> new PropertyMetadata(p, propertyGetters.get(p), propertySetters.get(p))).toList();
   }

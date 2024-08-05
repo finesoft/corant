@@ -26,11 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.util.Methods;
-import org.corant.shared.util.Primitives;
 import org.corant.shared.util.Sets;
 
 /**
@@ -133,22 +130,6 @@ public class PropertyAccessor {
 
   protected static boolean isPrefix(String name, String prefix) {
     return name.length() > prefix.length() && name.startsWith(prefix);
-  }
-
-  protected static Optional<Method> resolveGetter(Method setter) {
-    String propertyName = setter.getName().substring(3);
-    Class<?> propertyType = Primitives.wrap(setter.getParameterTypes()[0]);
-    Method getter = null;
-    if (propertyType.equals(Boolean.class)) {
-      getter = Methods.getMatchingMethod(setter.getDeclaringClass(), "is" + propertyName);
-    }
-    if (getter == null) {
-      getter = Methods.getMatchingMethod(setter.getDeclaringClass(), "get" + propertyName);
-    }
-    if (getter != null && Primitives.wrap(getter.getReturnType()).isAssignableFrom(propertyType)) {
-      return Optional.of(getter);
-    }
-    return Optional.empty();
   }
 
   public Map<String, Method> getPropertyGetters() {

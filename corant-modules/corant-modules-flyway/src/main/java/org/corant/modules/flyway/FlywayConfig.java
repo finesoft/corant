@@ -41,21 +41,14 @@ public class FlywayConfig extends ClassicConfiguration implements DeclarativeCon
   @ConfigKeyItem(defaultValue = "true")
   protected boolean useDriverManagerDataSource;
 
-  public FlywayConfig() {
+  public FlywayConfig() {}
 
-  }
-
-  /**
-   * @param enable
-   * @param locationPrefix
-   */
   protected FlywayConfig(boolean enable, String locationPrefix) {
     this.enable = enable;
     this.locationPrefix = locationPrefix;
   }
 
   /**
-   *
    * @return the locationPrefix
    */
   public String getLocationPrefix() {
@@ -63,7 +56,6 @@ public class FlywayConfig extends ClassicConfiguration implements DeclarativeCon
   }
 
   /**
-   *
    * @return the enable
    */
   public boolean isEnable() {

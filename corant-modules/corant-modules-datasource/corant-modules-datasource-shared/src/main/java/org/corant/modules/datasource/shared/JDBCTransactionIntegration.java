@@ -35,7 +35,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
-import org.corant.config.PropertyInjector;
+import org.corant.config.PropertyAccessor;
 import org.corant.context.CDIs;
 import org.corant.modules.jta.shared.TransactionIntegration;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -101,7 +101,7 @@ public class JDBCTransactionIntegration implements TransactionIntegration {
     XADataSource xads;
     try {
       xads = cfg.getDriver().asSubclass(XADataSource.class).getDeclaredConstructor().newInstance();
-      PropertyInjector pi = new PropertyInjector(xads.getClass(), true);
+      PropertyAccessor pi = new PropertyAccessor(xads.getClass(), true);
       if (isNotEmpty(cfg.getJdbcProperties())) {
         pi.inject(xads, cfg.getJdbcProperties());
       }

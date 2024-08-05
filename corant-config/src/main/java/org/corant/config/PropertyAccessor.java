@@ -13,12 +13,15 @@
  */
 package org.corant.config;
 
-import static java.util.Collections.emptyMap;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Classes.getUserClass;
+import static org.corant.shared.util.Maps.immutableMap;
+import static org.corant.shared.util.Objects.forceCast;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,51 +31,91 @@ import org.corant.shared.conversion.Conversion;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Methods;
 import org.corant.shared.util.Primitives;
+import org.corant.shared.util.Sets;
 
 /**
  * corant-config
  *
  * @author bingo 下午2:53:54
  */
-public class PropertyInjector {
+public class PropertyAccessor {
 
-  private final boolean supportPropertySetter;
+  private final boolean supportNamedProperty;
   private final Class<?> instanceClass;
   private final Map<String, Method> propertySetters;
   private final Map<String, Method> propertyGetters;
 
-  public PropertyInjector(Class<?> instanceClass) {
+  public PropertyAccessor(Class<?> instanceClass) {
     this(instanceClass, false);
   }
 
-  public PropertyInjector(Class<?> instanceClass, boolean supportPropertySetter) {
+  public PropertyAccessor(Class<?> instanceClass, boolean supportNamedProperty) {
     this.instanceClass =
         getUserClass(shouldNotNull(instanceClass, "The class to inject can't null"));
-    this.supportPropertySetter = supportPropertySetter;
+    this.supportNamedProperty = supportNamedProperty;
+
     Map<String, Method> setters = new HashMap<>();
     Map<String, Method> getters = new HashMap<>();
     for (Method method : instanceClass.getMethods()) {
-      if (method.isBridge()) {
+      if (method.isBridge() || Modifier.isStatic(method.getModifiers())) {
         // TODO consider the bridge method "change" visibility of base class's methods ??
         continue;
       }
-      String methodName = method.getName();
-      if (method.getParameterCount() == 1 && methodName.startsWith("set")) {
-        String propertyName = decapitalize(methodName.substring(3));
-        method.setAccessible(true);
-        setters.put(propertyName, method);
-        resolveGetter(method).ifPresent(m -> {
-          m.setAccessible(true);
-          getters.put(propertyName, m);
-        });
-      } else if (supportPropertySetter && method.getParameterCount() == 2
-          && "setProperty".equals(methodName)) {
-        method.setAccessible(true);
-        setters.put("Property", method);
+      Class<?> returnType = method.getReturnType();
+      String name = method.getName();
+      switch (method.getParameterCount()) {
+        case 0:
+          if (returnType.equals(boolean.class) && isPrefix(name, "is")) {
+            getters.put(decapitalize(name.substring(2)), method);
+          } else if (!returnType.equals(void.class) && isPrefix(name, "get")) {
+            getters.put(decapitalize(name.substring(3)), method);
+          }
+          break;
+        case 1:
+          if (isPrefix(name, "set")) {
+            setters.put(decapitalize(name.substring(3)), method);
+          } else if (supportNamedProperty && !returnType.equals(void.class)
+              && method.getParameterTypes()[0].equals(String.class) && "getProperty".equals(name)) {
+            getters.put("Property", method);
+          }
+          break;
+        case 2:
+          if (supportNamedProperty && method.getParameterTypes()[0].equals(String.class)
+              && "setProperty".equals(name)) {
+            setters.put("Property", method);
+          }
+          break;
       }
     }
     propertySetters = Collections.unmodifiableMap(setters);
     propertyGetters = Collections.unmodifiableMap(getters);
+  }
+
+  protected PropertyAccessor(boolean supportNamedProperty, Class<?> instanceClass,
+      Map<String, Method> propertySetters, Map<String, Method> propertyGetters) {
+    this.supportNamedProperty = supportNamedProperty;
+    this.instanceClass = shouldNotNull(instanceClass, "The class to inject can't null");
+    this.propertySetters = immutableMap(propertySetters);
+    this.propertyGetters = immutableMap(propertyGetters);
+  }
+
+  public static PropertyAccessor introspect(Class<?> beanClass) {
+    Class<?> clazz = getUserClass(shouldNotNull(beanClass, "The class to inject can't null"));
+    try {
+      Map<String, Method> setters = new HashMap<>();
+      Map<String, Method> getters = new HashMap<>();
+      for (PropertyDescriptor desc : Introspector.getBeanInfo(clazz).getPropertyDescriptors()) {
+        if (desc.getWriteMethod() != null) {
+          setters.put(desc.getName(), desc.getWriteMethod());
+        }
+        if (desc.getReadMethod() != null) {
+          getters.put(desc.getName(), desc.getReadMethod());
+        }
+      }
+      return new PropertyAccessor(false, clazz, setters, getters);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
   }
 
   protected static String decapitalize(String name) {
@@ -86,6 +129,10 @@ public class PropertyInjector {
     char[] chars = name.toCharArray();
     chars[0] = Character.toLowerCase(chars[0]);
     return new String(chars);
+  }
+
+  protected static boolean isPrefix(String name, String prefix) {
+    return name.length() > prefix.length() && name.startsWith(prefix);
   }
 
   protected static Optional<Method> resolveGetter(Method setter) {
@@ -109,11 +156,8 @@ public class PropertyInjector {
   }
 
   public List<PropertyMethod> getPropertyMethods() {
-    List<PropertyMethod> methods = new ArrayList<>();
-    propertySetters.forEach((p, w) -> {
-      methods.add(new PropertyMethod(p, propertyGetters.get(p), w));
-    });
-    return methods;
+    return Sets.union(propertyGetters.keySet(), propertySetters.keySet()).stream()
+        .map(p -> new PropertyMethod(p, propertyGetters.get(p), propertySetters.get(p))).toList();
   }
 
   public Map<String, Method> getPropertySetters() {
@@ -139,15 +183,34 @@ public class PropertyInjector {
       Method method = propertySetters.get(realName);
       // TODO FIXME complex object type
       method.invoke(instance,
-          Conversion.convertType(propertyValue, method.getGenericParameterTypes()[0], emptyMap()));
-    } else if (supportPropertySetter && propertySetters.containsKey("Property")) {
-      instanceClass.getMethod("setProperty", propertyName.getClass(), propertyValue.getClass())
-          .invoke(instance, propertyName, propertyValue);
+          Conversion.convertType(propertyValue, method.getGenericParameterTypes()[0], null));
+    } else if (supportNamedProperty && propertySetters.containsKey("Property")) {
+      propertySetters.get("Property").invoke(instance, propertyName, propertyValue);
     } else {
       throw new NoSuchMethodException("No setter in class " + instanceClass.getName());
     }
   }
 
+  public <T> T obtain(Object instance, String propertyName)
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException {
+    String realName = decapitalize(propertyName);
+    if (propertyGetters.containsKey(realName)) {
+      Method method = propertyGetters.get(realName);
+      return forceCast(method.invoke(instance));
+    } else if (supportNamedProperty && propertyGetters.containsKey("Property")) {
+      return forceCast(propertyGetters.get("Property").invoke(instance, propertyName));
+    } else {
+      throw new NoSuchMethodException("No getter in class " + instanceClass.getName());
+    }
+
+  }
+
+  /**
+   * corant-config
+   *
+   * @author bingo 13:58:55
+   */
   public static class PropertyMethod {
     final String propertyName;
     final Method readMethod;

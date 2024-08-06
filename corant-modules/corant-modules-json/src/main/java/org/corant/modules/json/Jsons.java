@@ -561,6 +561,16 @@ public class Jsons {
   }
 
   /**
+   * Returns serialized JSON string with pretty printer indentation from given object or null if the
+   * given object is null.
+   *
+   * @param obj the object to be serialized
+   */
+  public static String toPrettyString(Object obj) {
+    return toString(obj, true);
+  }
+
+  /**
    * Returns serialized JSON string from given object or null if the given object is null.
    *
    * @param obj the object to be serialized

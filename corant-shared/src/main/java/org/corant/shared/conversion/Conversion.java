@@ -479,7 +479,7 @@ public class Conversion {
    * @param targetType the target type
    */
   public static Object convertType(Object value, Type targetType) {
-    return convertType(value, targetType);
+    return convertType(value, targetType, null);
   }
 
   /**

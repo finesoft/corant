@@ -37,7 +37,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.util.Resources;
 import org.hibernate.boot.spi.MetadataImplementor;
-import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.Bootstrap;
@@ -119,8 +119,8 @@ public class HibernateOrmDeveloperKits {
     }
   }
 
-  public static void stdoutUpdateSchema(String pu, String... integrations) {
-    stdoutUpdateSchema(pu, ";", integrations);
+  public static void stdoutUpdateSchema(String pu) {
+    stdoutUpdateSchema(pu, ";");
   }
 
   public static void stdoutUpdateSchema(String pu, String delimiter, String... integrations) {
@@ -159,10 +159,10 @@ public class HibernateOrmDeveloperKits {
   protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
       String... integrations) {
     Properties props = propertiesOf(integrations);
-    props.put(AvailableSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
+    props.put(SchemaToolingSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
-    props.put(AvailableSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
-    props.put(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, "none");
+    props.put(SchemaToolingSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
+    props.put(SchemaToolingSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, "none");
     JPAExtension extension = select(JPAExtension.class).get();
     DataSourceService dataSourceService = select(DataSourceService.class).get();
     PersistenceUnitInfoMetaData pum =

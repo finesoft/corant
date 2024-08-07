@@ -40,10 +40,10 @@ import org.corant.shared.util.Sets;
  */
 public class PropertyAccessor {
 
-  private final boolean supportNamedProperty;
-  private final Class<?> instanceClass;
-  private final Map<String, Method> propertySetters;
-  private final Map<String, Method> propertyGetters;
+  protected final boolean supportNamedProperty;
+  protected final Class<?> instanceClass;
+  protected final Map<String, Method> propertySetters;
+  protected final Map<String, Method> propertyGetters;
 
   public PropertyAccessor(Class<?> instanceClass) {
     this(instanceClass, false);
@@ -83,6 +83,8 @@ public class PropertyAccessor {
               && "setProperty".equals(name)) {
             setters.put("Property", method);
           }
+          break;
+        default:
           break;
       }
     }

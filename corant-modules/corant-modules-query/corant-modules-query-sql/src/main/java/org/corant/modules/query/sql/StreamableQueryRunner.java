@@ -50,7 +50,7 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
   }
 
   <T> Stream<T> streamQuery(Connection conn, boolean closeConn, String sql,
-      ResultSetHandler<T> resultSetHandler, BiPredicate<Integer, Object> terminater,
+      ResultSetHandler<T> resultSetHandler, BiPredicate<Integer, Object> terminator,
       boolean autoClose, Object... params) throws SQLException {
     preCondition(conn, closeConn, sql, resultSetHandler);
     Releaser releaser = null;
@@ -59,7 +59,7 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
       ResultSet resultSet = wrap(statement.executeQuery());
       releaser = new Releaser(conn, statement, resultSet, closeConn);
       Stream<T> stream = StreamSupport
-          .stream(new ResultSetSpliterator<>(releaser, resultSetHandler, terminater), false)
+          .stream(new ResultSetSpliterator<>(releaser, resultSetHandler, terminator), false)
           .onClose(releaser);
       if (autoClose) {
         Cleaner.create().register(resultSet, releaser);// JDK9+
@@ -152,21 +152,21 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
     private final Runnable releaser;
     private final ResultSet resultSet;
     private final ResultSetHandler<T> resultSetHandler;
-    private final BiPredicate<Integer, Object> terminater;
+    private final BiPredicate<Integer, Object> terminator;
     private final MutableInteger counter = MutableInteger.of(0);
 
     public ResultSetSpliterator(ResultSet resultSet, ResultSetHandler<T> resultSetHandler,
-        BiPredicate<Integer, Object> terminater, Runnable releaser) {
+        BiPredicate<Integer, Object> terminator, Runnable releaser) {
       super(Long.MAX_VALUE, CHARACTERISTICS);
-      this.terminater = terminater;
+      this.terminator = terminator;
       this.releaser = releaser;
       this.resultSet = resultSet;
       this.resultSetHandler = resultSetHandler;
     }
 
     ResultSetSpliterator(Releaser obj, ResultSetHandler<T> resultSetHandler,
-        BiPredicate<Integer, Object> terminater) {
-      this(obj.resultSet, resultSetHandler, terminater, obj);
+        BiPredicate<Integer, Object> terminator) {
+      this(obj.resultSet, resultSetHandler, terminator, obj);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class StreamableQueryRunner extends DefaultQueryRunner {
         boolean hasMore =
             !resultSet.isClosed() && (object = resultSetHandler.handle(resultSet)) != null;
         if (hasMore) {
-          hasMore = terminater == null || terminater.test(counter.incrementAndGet(), object);
+          hasMore = terminator == null || !terminator.test(counter.incrementAndGet(), object);
         }
         if (hasMore) {
           action.accept(object);

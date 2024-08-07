@@ -158,6 +158,39 @@ public class UndertowWebServerConfig {
       defaultValue = "0")
   protected Integer websocketBufferPoolLeakDecetionPercent;
 
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.access-log.receiver-class")
+  protected Optional<String> accessLogReceiverClass;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.access-log.dir")
+  protected Optional<String> accessLogDir;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.access-log.filename", defaultValue = "access")
+  protected String accessLogFilename;
+
+  @Inject
+  @ConfigProperty(name = "corant.webserver.undertow.access-log.format",
+      defaultValue = "%h %l %u %t \"%r\" %s %b")
+  protected String accessLogFormat;
+
+  public Optional<String> getAccessLogDir() {
+    return accessLogDir;
+  }
+
+  public String getAccessLogFilename() {
+    return accessLogFilename;
+  }
+
+  public String getAccessLogFormat() {
+    return accessLogFormat;
+  }
+
+  public Optional<String> getAccessLogReceiverClass() {
+    return accessLogReceiverClass;
+  }
+
   public int getBackLog() {
     return backLog;
   }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
 import org.corant.shared.retry.BackoffStrategy;
 import org.corant.shared.retry.BackoffStrategy.FixedBackoffStrategy;
@@ -69,6 +70,12 @@ public class StreamQueryParameter extends DefaultQueryParameter {
         .terminator(other.terminator).autoClose(other.autoClose);
   }
 
+  /**
+   * Set whether the query stream needs to be closed automatically, the stream will be close before
+   * GC recycle.
+   *
+   * @see java.lang.ref.Cleaner
+   */
   public StreamQueryParameter autoClose(boolean autoClose) {
     this.autoClose = autoClose;
     return this;
@@ -93,8 +100,8 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   }
 
   /**
-   * Provide an improved tuning program that allows the current query parameters to be adjusted, and
-   * the effect of the adjustment will be directly applied to the next iteration of the query
+   * Set an improved tuning program that allows the current query parameters to be adjusted, and the
+   * effect of the adjustment will be directly applied to the next iteration of the query
    * <p>
    * the first parameter of the tuning program is the last record of the result set of the previous
    * iteration of the query, and the second parameter of the current query parameters.
@@ -164,7 +171,7 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   }
 
   /**
-   * The expected size of the result set of each iteration of the streaming query
+   * Set the expected size of the result set of each iteration of the streaming query
    */
   @Override
   public StreamQueryParameter limit(Integer limit) {
@@ -189,10 +196,14 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   }
 
   /**
+   * Set the retry back-off strategy.
+   * <p>
    * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
    * batches, in this process the exception may be occurred, the query may retry after exception
    * occurred, this method use to set the retry back-off strategy. The under query service
    * implementation may not support
+   * <p>
+   * This setting will take effect in case {@link #needRetry()} is {@code true}
    *
    * @param retryBackoffStrategy the retry back-off strategy, if given is null, the default interval
    *        is 2 seconds.
@@ -203,6 +214,13 @@ public class StreamQueryParameter extends DefaultQueryParameter {
     return this;
   }
 
+  /**
+   * Set the retry listeners
+   * <p>
+   * This setting will take effect in case {@link #needRetry()} is {@code true}
+   *
+   * @param retryListeners the listeners to be applied on retry
+   */
   public StreamQueryParameter retryListeners(List<RetryListener> retryListeners) {
     if (this.retryListeners != null) {
       this.retryListeners.clear();
@@ -215,12 +233,21 @@ public class StreamQueryParameter extends DefaultQueryParameter {
     return this;
   }
 
+  /**
+   * Set the retry listeners
+   * <p>
+   * This setting will take effect in case {@link #needRetry()} is {@code true}
+   *
+   * @param retryListeners the listeners to be applied on retry
+   */
   public StreamQueryParameter retryListeners(RetryListener... retryListeners) {
     this.retryListeners = listOf(retryListeners);
     return this;
   }
 
   /**
+   * Set the retry attempt times
+   * <p>
    * The stream query may be use {@link QueryService#forward(Object, Object)} to fetch data in
    * batches, in this process the exception may be occurred, the query may retry after exception
    * occurred, this method use to set the retry times. The under query service implementation may
@@ -236,19 +263,25 @@ public class StreamQueryParameter extends DefaultQueryParameter {
   /**
    * Check whether to terminate the stream
    *
-   * @param counter the number of objects that have flowed out
+   * @param count the number of objects that have flowed out
    * @param current the last object that has flowed out
-   * @return terminateIf
+   * @return {@code true} means need to terminate the stream otherwise terminate naturally
    */
-  public boolean terminateIf(Integer counter, Object current) {
-    return terminator != null && !terminator.test(counter, current);
+  public boolean terminateIf(Integer count, Object current) {
+    return terminator != null && terminator.test(count, current);
   }
 
   /**
-   * The terminator is used to terminate the stream. If it is not set, the stream will terminate
-   * naturally. The terminator determines whether to terminate the stream by testing two parameters,
-   * The first parameter is an integer that represents the number of objects that have flowed out,
-   * The second parameter is an object that represents the last object that has flowed out.
+   * Set the terminator. The terminator is used to terminate the stream. If it is not set, the
+   * stream will terminate naturally.
+   *
+   * <p>
+   * The terminator determines whether to terminate the stream by testing two parameters, The first
+   * parameter is an integer that represents the number of objects that have flowed out, The second
+   * parameter is an object that represents the last object that has flowed out.
+   * <p>
+   * The terminator returns {@code true} means terminate the stream otherwise stream will terminate
+   * naturally.
    *
    * @param terminator the terminator to terminate the stream if the conditions are met.
    */
@@ -257,4 +290,14 @@ public class StreamQueryParameter extends DefaultQueryParameter {
     return this;
   }
 
+  /**
+   * Set a terminator to terminate the query stream when the number of result sets meets the
+   * terminator requirements (the terminator return {@code true}).
+   *
+   * @param terminator the number of result set records terminator
+   */
+  public StreamQueryParameter terminator(Predicate<Integer> terminator) {
+    this.terminator = (i, o) -> terminator.test(i);
+    return this;
+  }
 }

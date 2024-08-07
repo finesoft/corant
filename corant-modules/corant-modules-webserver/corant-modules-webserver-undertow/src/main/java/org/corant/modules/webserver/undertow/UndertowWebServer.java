@@ -21,6 +21,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.split;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -47,6 +49,7 @@ import org.corant.shared.normal.Names;
 import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.resource.SourceType;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Classes;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Resources;
 import org.corant.shared.util.StopWatch;
@@ -59,6 +62,9 @@ import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.AccessLogReceiver;
+import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.server.handlers.builder.PredicatedHandler;
 import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
@@ -158,6 +164,26 @@ public class UndertowWebServer extends AbstractWebServer {
     }
   }
 
+  protected HttpHandler resolveAccessLog(HttpHandler handler) {
+    if (!specConfig.getAccessLogReceiverClass().isEmpty()) {
+      Class<?> receiverClass = Classes.tryAsClass(specConfig.getAccessLogReceiverClass().get());
+      if (receiverClass != null && AccessLogReceiver.class.isAssignableFrom(receiverClass)) {
+        AccessLogReceiver receiver = (AccessLogReceiver) Objects.newInstance(receiverClass);
+        return new AccessLogHandler(handler, receiver, specConfig.getAccessLogFormat(),
+            receiverClass.getClassLoader());
+      } else {
+        logger.warning(() -> format("The access log receiver class must assignable from %s",
+            AccessLogReceiver.class));
+      }
+    } else if (!specConfig.getAccessLogDir().isEmpty()) {
+      return new AccessLogHandler(handler,
+          new DefaultAccessLogReceiver(Executors.newSingleThreadExecutor(),
+              new File(specConfig.getAccessLogDir().get()), specConfig.getAccessLogFilename()),
+          specConfig.getAccessLogFormat(), this.getClass().getClassLoader());
+    }
+    return handler;
+  }
+
   protected EmptyRoleSemantic resolveEmptyRoleSemantic(HttpConstraintMetaData hcm) {
     if (hcm != null
         && hcm.getValue() == jakarta.servlet.annotation.ServletSecurity.EmptyRoleSemantic.PERMIT) {
@@ -237,6 +263,7 @@ public class UndertowWebServer extends AbstractWebServer {
         handler = additionalConfigurators.stream().sorted(Sortable::compare).reduce(handler,
             (h, c) -> c.configureHttpHandler(h), (h1, h2) -> h2);
       }
+      handler = resolveAccessLog(handler);
       builder.setHandler(handler);
       return builder.build();
     } catch (Exception e) {

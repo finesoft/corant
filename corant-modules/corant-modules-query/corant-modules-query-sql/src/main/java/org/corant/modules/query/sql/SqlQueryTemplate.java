@@ -663,7 +663,7 @@ public class SqlQueryTemplate {
     }
 
     public boolean terminateIf(Integer counter, Map<String, Object> current) {
-      return terminator != null && !terminator.test(counter, current);
+      return terminator != null && terminator.test(counter, current);
     }
 
     /**

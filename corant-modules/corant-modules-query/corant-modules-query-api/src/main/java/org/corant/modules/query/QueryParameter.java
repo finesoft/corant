@@ -113,16 +113,40 @@ public interface QueryParameter extends Serializable {
       }
     }
 
+    /**
+     * Set the query context, the query context usually refers to the source of the value of a
+     * variable or expression parameter used in a query.
+     * <p>
+     * For example: the context may be contained current caller context, the context information may
+     * include the security context information of the caller, etc.
+     *
+     * @param context the key & value maps
+     */
     public DefaultQueryParameter context(Map<String, Object> context) {
       this.context = newHashMap(context);
       return this;
     }
 
+    /**
+     * Set the query context, the query context usually refers to the source of the value of a
+     * variable or expression parameter used in a query.
+     * <p>
+     * For example: the context may be contained current caller context, the context information may
+     * include the security context information of the caller, etc.
+     *
+     * @param objects the key & value pairs
+     */
     public DefaultQueryParameter context(Object... objects) {
       context = mapOf(objects);
       return this;
     }
 
+    /**
+     * Set the query criteria, the query criteria usually refers to query filter expressions or
+     * condition parameters, etc.
+     *
+     * @param criteria the query criteria
+     */
     public DefaultQueryParameter criteria(Object criteria) {
       this.criteria = criteria;
       return this;
@@ -169,11 +193,23 @@ public interface QueryParameter extends Serializable {
       return Objects.hash(context, criteria, limit, offset);
     }
 
+    /**
+     * Set the limit, the limit is the expected number of query result set or the expected size of
+     * the result set of each iteration of the streaming query.
+     *
+     * @param limit the limit number to set default is null.
+     */
     public DefaultQueryParameter limit(Integer limit) {
       this.limit = limit;
       return this;
     }
 
+    /**
+     * Set the offset, the offset is used for query result handling or specific database query
+     * instructions, means skips the offset rows before beginning to return the rows. Default is 0.
+     *
+     * @param offset the skips number before beginning to return the results.
+     */
     public DefaultQueryParameter offset(Integer offset) {
       this.offset = offset == null ? 0 : max(offset, 0);
       return this;

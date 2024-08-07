@@ -129,13 +129,16 @@ public class StreamNamedQueryServices {
   /**
    * Key and value pairs
    *
-   * @param objects
+   * @see StreamQueryParameter#context(Object...)
    */
   public StreamNamedQueryServices context(Object... objects) {
     parameter.context(objects);
     return this;
   }
 
+  /**
+   * @see StreamQueryParameter#context(Map)
+   */
   public StreamNamedQueryServices criteria(Map<String, Object> context) {
     parameter.criteria(context);
     return this;
@@ -144,7 +147,7 @@ public class StreamNamedQueryServices {
   /**
    * Key and value pairs
    *
-   * @param objects
+   * @see StreamQueryParameter#criteria(Object)
    */
   public StreamNamedQueryServices criteria(Object... objects) {
     parameter.criteria(mapOf(objects));
@@ -157,8 +160,7 @@ public class StreamNamedQueryServices {
    * obtain query data in batches; this method can perform some intervention before each batch of
    * forward to improve query efficiency.
    *
-   * @param enhancer
-   * @return enhancer
+   * @see StreamQueryParameter#enhancer(BiConsumer)
    */
   public StreamNamedQueryServices enhancer(BiConsumer<Object, StreamQueryParameter> enhancer) {
     parameter.enhancer(enhancer);
@@ -168,14 +170,16 @@ public class StreamNamedQueryServices {
   /**
    * The expected size of the result set of each iteration of the streaming query
    *
-   * @param limit
-   * @return limit
+   * @see StreamQueryParameter#limit(Integer)
    */
   public StreamNamedQueryServices limit(Integer limit) {
     parameter.limit(limit);
     return this;
   }
 
+  /**
+   * @see StreamQueryParameter#offset(Integer)
+   */
   public StreamNamedQueryServices offset(Integer offset) {
     parameter.offset(offset);
     return this;
@@ -188,8 +192,6 @@ public class StreamNamedQueryServices {
 
   /**
    * Fixed back-off strategy
-   *
-   * @param duration
    */
   public StreamNamedQueryServices retryBackoffStrategy(Duration duration) {
     parameter.retryBackoffStrategy(new FixedBackoffStrategy(duration));
@@ -215,10 +217,10 @@ public class StreamNamedQueryServices {
 
   /**
    * Accept a Predicate&lt;Integer&gt; to interrupt the current stream. When Predicate test returns
-   * false, interrupt the current stream. The parameter accepted by Predicate.test is the number of
-   * query records that have been output.
+   * {@code true} interrupt the current stream. The parameter accepted by {@code Predicate.test} is
+   * the number of query records that have been output.
    *
-   * @param terminator
+   * @param terminator the terminator
    * @return terminateByCounter
    */
   public StreamNamedQueryServices terminateByCounter(Predicate<Integer> terminator) {
@@ -227,10 +229,10 @@ public class StreamNamedQueryServices {
 
   /**
    * Accept a Predicate&lt;Object&gt; to interrupt the current stream. When Predicate test returns
-   * false, interrupt the current stream. The parameter accepted by Predicate.test is the last
-   * record of the query records that have been output.
+   * {@code true}, interrupt the current stream. The parameter accepted by {@code Predicate.test} is
+   * the last record of the query records that have been output.
    *
-   * @param terminator
+   * @param terminator the terminator
    * @return terminateByLastRecord
    */
   public StreamNamedQueryServices terminateByLastRecord(Predicate<Object> terminator) {
@@ -239,11 +241,11 @@ public class StreamNamedQueryServices {
 
   /**
    * Accept a Predicate&lt;Integer,Object&gt; to interrupt the current stream. When Predicate test
-   * returns false, interrupt the current stream. The parameters accepted by Predicate.test is the
-   * last record of the query records that have been output and he number of query records that have
-   * been output.
+   * returns {@code true} interrupt the current stream. The parameters accepted by
+   * {@code Predicate.test} is the last record of the query records that have been output and the
+   * number of query records that have been output.
    *
-   * @param terminator
+   * @param terminator the terminator
    */
   public StreamNamedQueryServices terminator(BiPredicate<Integer, Object> terminator) {
     parameter.terminator(terminator);

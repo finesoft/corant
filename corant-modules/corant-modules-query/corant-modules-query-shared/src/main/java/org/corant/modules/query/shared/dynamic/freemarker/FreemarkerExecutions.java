@@ -26,12 +26,13 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.QueryMappingService.AfterQueryMappingInitializedHandler;
 import org.corant.modules.query.shared.QueryMappingService.BeforeQueryMappingInitializeHandler;
 import org.corant.modules.query.shared.cdi.QueryExtension;
-import org.corant.shared.ubiquity.Mutable.MutableInteger;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Services;
+import org.corant.shared.util.Texts;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -99,8 +100,7 @@ public class FreemarkerExecutions
       } catch (ParseException pe) {
         throw new QueryRuntimeException(pe,
             "An error occurred while executing the query template [%s]. %s",
-            query.getVersionedName(),
-            resolveScriptExceptionInfo(script, pe.getLineNumber(), pe.getEndLineNumber()));
+            query.getVersionedName(), resolveScriptExceptionInfo(script, pe));
       } catch (Exception e) {
         throw new QueryRuntimeException(e,
             "An error occurred while executing the query template [%s].", query.getVersionedName());
@@ -108,28 +108,14 @@ public class FreemarkerExecutions
     });
   }
 
-  public static String resolveScriptExceptionInfo(String script, Integer lineNumber,
-      Integer endLineNumber) {
-    String src = script;
-    final String lsp = System.lineSeparator();
-    if (lineNumber != null) {
-      int es = lineNumber;
-      int ee = endLineNumber == null ? -1 : endLineNumber;
-      StringBuilder sb = new StringBuilder();
-      MutableInteger lines = new MutableInteger(0);
-      script.lines().forEach(line -> {
-        int idx = lines.incrementAndGet();
-        if (es == idx) {
-          sb.append("[*" + idx + "*] " + line).append(lsp);
-        } else if (idx > es && idx <= ee) {
-          sb.append("[*" + idx + "*] " + line).append(lsp);
-        } else {
-          sb.append(idx + ". " + line).append(lsp);
-        }
-      });
-      src = sb.toString();
-    }
-    return format("Source script:%n>>>%n%s%n<<<", src);
+  public static String resolveScriptExceptionInfo(String script, ParseException pe) {
+    return format("Source script:%n>>>%n%s%n<<<", Texts.labelLineAndColumn(script,
+        pe.getLineNumber(), pe.getColumnNumber(), pe.getEndLineNumber(), pe.getEndColumnNumber()));
+  }
+
+  public static String resolveScriptExceptionInfo(String script, TemplateException pe) {
+    return format("Source script:%n>>>%n%s%n<<<", Texts.labelLineAndColumn(script,
+        pe.getLineNumber(), pe.getColumnNumber(), pe.getEndLineNumber(), pe.getEndColumnNumber()));
   }
 
   public static FreemarkerDynamicQueryScriptResolver scriptResolver() {

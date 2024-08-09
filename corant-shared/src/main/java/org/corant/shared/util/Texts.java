@@ -65,6 +65,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Defaults;
 import org.corant.shared.resource.Resource;
 import org.corant.shared.ubiquity.Experimental;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
 
 /**
  * corant-shared
@@ -327,6 +328,44 @@ public class Texts {
     try (InputStream is = resource.openInputStream()) {
       return fromInputStream(is, charset);
     }
+  }
+
+  public static String labelLineAndColumn(String text, Integer lineNumber, Integer columnNumber,
+      Integer endLineNumber, Integer endColumnNumber) {
+    return labelLineAndColumn(text, lineNumber, columnNumber, endLineNumber, endColumnNumber, null,
+        null);
+  }
+
+  public static String labelLineAndColumn(String text, Integer lineNumber, Integer columnNumber,
+      Integer endLineNumber, Integer endColumnNumber, String labeledFormat,
+      String noLabeledFormat) {
+    if (lineNumber != null && text != null) {
+      final String lsp = System.lineSeparator();
+      String lf = defaultObject(labeledFormat, "[*%s, %s*] ");
+      String nlf = defaultObject(noLabeledFormat, "%s. ");
+      int els = lineNumber;
+      int ecs = columnNumber == null ? 0 : columnNumber;
+      int ele = endLineNumber == null ? 0 : endLineNumber;
+      int ece = endColumnNumber == null ? 0 : endColumnNumber;
+      StringBuilder sb = new StringBuilder();
+      MutableInteger lines = new MutableInteger(0);
+      text.lines().forEach(line -> {
+        int idx = lines.incrementAndGet();
+        if (els == idx) {
+          sb.append(format(lf, idx, ecs)).append(line).append(lsp);
+        } else if (idx > els) {
+          if (idx < ele) {
+            sb.append(format(lf, idx, 0)).append(line).append(lsp);
+          } else if (idx == ele) {
+            sb.append(format(lf, idx, ece)).append(line).append(lsp);
+          }
+        } else {
+          sb.append(format(nlf, idx)).append(line).append(lsp);
+        }
+      });
+      return sb.toString();
+    }
+    return text;
   }
 
   public static <T> Stream<T> lines(final BufferedReader reader, final int offset,

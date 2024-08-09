@@ -126,6 +126,10 @@ public class ObjectMappers {
     throw new CorantRuntimeException("The target type reference can't null");
   }
 
+  public static ObjectReader mapReader() {
+    return mapReader;
+  }
+
   public static <K, V> Map<K, V> readStringAsMap(String content) {
     try {
       return mapReader.readValue(content);
@@ -141,5 +145,4 @@ public class ObjectMappers {
   public static <K, V> Map<K, V> toMap(Object object) {
     return object == null ? null : forwardingObjectMapper.convertValue(object, mapType);
   }
-
 }

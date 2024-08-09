@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Maps.getMapKeyPathValues;
 import static org.corant.shared.util.Maps.putMapKeyPathValue;
 import static org.corant.shared.util.Objects.forceCast;
@@ -32,6 +33,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.corant.shared.util.Conversions;
+import org.corant.shared.util.Texts;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonpCharacterEscapes;
 import com.fasterxml.jackson.databind.JavaType;
@@ -107,16 +109,25 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
     if (object == null) {
       return null;
     }
-    try {
-      if (!convert) {
-        return mapReader.readValue(object.toString());
-      } else {
-        // Use forwarding object mappers
-        return ObjectMappers.toMap(object);
+    if (convert) {
+      // Use forwarding object mappers
+      return ObjectMappers.toMap(object);
+    } else {
+      String jsonString = object.toString();
+      try {
+        return mapReader.readValue(jsonString);
+      } catch (JsonProcessingException e) {
+        if (jsonString != null && e.getLocation() != null) {
+          throw new QueryRuntimeException(e,
+              format("Query occurred error, source:%n>>>%n%s%n<<<",
+                  Texts.labelLineAndColumn(jsonString, e.getLocation().getLineNr(),
+                      e.getLocation().getColumnNr(), null, null)));
+        } else {
+          throw new QueryRuntimeException(e);
+        }
       }
-    } catch (JsonProcessingException e) {
-      throw new QueryRuntimeException(e);
     }
+
   }
 
   @Override

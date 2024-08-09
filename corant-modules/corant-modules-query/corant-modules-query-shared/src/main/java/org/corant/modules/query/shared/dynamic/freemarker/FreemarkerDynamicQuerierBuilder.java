@@ -134,8 +134,8 @@ public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQue
     } catch (TemplateException te) {
       throw new QueryRuntimeException(te,
           "Freemarker dynamic querier builder [%s] execute occurred error! %s",
-          getQuery().getVersionedName(), FreemarkerExecutions.resolveScriptExceptionInfo(
-              syntheticScript, te.getLineNumber(), te.getEndLineNumber()));
+          getQuery().getVersionedName(),
+          FreemarkerExecutions.resolveScriptExceptionInfo(syntheticScript, te));
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "Freemarker dynamic querier builder [%s] execute occurred error!", getQuery().getName());

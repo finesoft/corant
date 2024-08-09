@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.shared.dynamic.jsonexpression;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableCollection;
@@ -44,7 +45,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.corant.modules.json.Jsons;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.FunctionResolver;
 import org.corant.modules.json.expression.Node;
@@ -65,6 +66,8 @@ import org.corant.modules.query.shared.cdi.QueryExtension;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.util.Texts;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -309,7 +312,18 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @param code the script code to be resolved
    */
   protected Pair<Node<Boolean>, InjectionHandler> resolveInjectionScript(String code) {
-    final Map<String, Object> root = Jsons.fromString(code);
+    Map<String, Object> root;
+    try {
+      root = ObjectMappers.mapReader().readValue(code);
+    } catch (JsonProcessingException e) {
+      if (e.getLocation() != null && code != null) {
+        throw new QueryRuntimeException(e,
+            format("Injection script syntax error:%n%s", Texts.labelLineAndColumn(code,
+                e.getLocation().getLineNr(), e.getLocation().getColumnNr(), null, null)));
+      } else {
+        throw new QueryRuntimeException(e);
+      }
+    }
     Map<String, Object> filterMap = getMapMap(root, FILTER_KEY);
     Map<String, Object> projectionMap = getMapMap(root, PROJECTION_KEY);
     boolean single = getMapBoolean(root, SINGLE_KEY, Boolean.FALSE);

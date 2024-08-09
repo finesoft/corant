@@ -13,6 +13,7 @@
  */
 package org.corant.modules.json.expression;
 
+import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -22,13 +23,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
-import org.corant.modules.json.Jsons;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.modules.json.expression.ast.ASTNode;
 import org.corant.modules.json.expression.ast.ASTNodeBuilder;
 import org.corant.modules.json.expression.ast.ASTNodeType;
 import org.corant.modules.json.expression.ast.ASTNodeVisitor;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Services;
+import org.corant.shared.util.Texts;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * corant-modules-json
@@ -69,7 +72,18 @@ public class SimpleParser {
   }
 
   public static Node<?> parse(String json, ASTNodeBuilder builder, ASTNodeVisitor visitor) {
-    return parse(Jsons.fromString(json), builder, visitor);
+    Map<String, Object> map;
+    try {
+      map = ObjectMappers.mapReader().readValue(json);
+      return parse(map, builder, visitor);
+    } catch (JsonProcessingException e) {
+      if (json != null && e.getLocation() != null) {
+        throw new ParseException(e, format("Syntax error:%n%s", Texts.labelLineAndColumn(json,
+            e.getLocation().getLineNr(), e.getLocation().getColumnNr(), null, null)));
+      } else {
+        throw new ParseException(e);
+      }
+    }
   }
 
   public static ASTNodeBuilder resolveBuilder() {

@@ -454,6 +454,10 @@ public class Query implements Serializable {
      */
     CAS,
     /**
+     * Indicates that the query is a remote procedure call query.
+     */
+    RPC,
+    /**
      * Indicates that the query can be any query.
      */
     $$

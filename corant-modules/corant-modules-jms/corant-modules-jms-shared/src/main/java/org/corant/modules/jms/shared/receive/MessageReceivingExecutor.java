@@ -42,12 +42,11 @@ import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.ObservesAsync;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.kernel.event.PostCorantReadyAsyncEvent;
+import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
 import org.corant.modules.jms.shared.AbstractJMSExtension;
@@ -236,11 +235,11 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
         metaData.size(), executors.size()));
   }
 
-  protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
+  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     start();
   }
 
-  protected void onPreContainerStopEvent(@Observes final PreContainerStopEvent event) {
+  protected void onPreContainerStopEvent(@Observes PreContainerStopEvent event) {
     stop();
   }
 

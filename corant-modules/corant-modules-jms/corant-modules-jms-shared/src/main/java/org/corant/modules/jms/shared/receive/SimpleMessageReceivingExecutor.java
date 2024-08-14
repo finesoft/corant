@@ -35,12 +35,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.event.ObservesAsync;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Vetoed;
 import jakarta.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
-import org.corant.kernel.event.PostCorantReadyAsyncEvent;
+import org.corant.kernel.event.PostCorantReadyEvent;
 import org.corant.modules.jms.receive.ManagedMessageReceivingExecutor;
 import org.corant.modules.jms.receive.ManagedMessageReceivingTask;
 import org.corant.modules.jms.shared.AbstractJMSConfig;
@@ -54,6 +54,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
  * @author bingo 下午2:37:45
  */
 // @ApplicationScoped
+@Vetoed
 public class SimpleMessageReceivingExecutor implements ManagedMessageReceivingExecutor {
 
   @Inject
@@ -131,11 +132,11 @@ public class SimpleMessageReceivingExecutor implements ManagedMessageReceivingEx
     logger.info(() -> "All message receiving connections were released.");
   }
 
-  protected void onPostCorantReadyEvent(@ObservesAsync PostCorantReadyAsyncEvent adv) {
+  protected void onPostCorantReadyEvent(@Observes PostCorantReadyEvent adv) {
     start();
   }
 
-  protected void onPreContainerStopEvent(@Observes final PreContainerStopEvent event) {
+  protected void onPreContainerStopEvent(@Observes PreContainerStopEvent event) {
     stop();
   }
 

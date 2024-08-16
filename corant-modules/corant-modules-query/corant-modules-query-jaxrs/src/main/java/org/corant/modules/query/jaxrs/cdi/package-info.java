@@ -12,8 +12,8 @@
  * the License.
  */
 /**
- * corant-modules-query-rpc
+ * corant-modules-query-jaxrs
  * 
- * @author bingo 14:50:41
+ * @author bingo 16:31:49
  */
-package org.corant.modules.query.rpc;
+package org.corant.modules.query.jaxrs.cdi;

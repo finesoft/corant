@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.Querier;
+import org.corant.modules.query.FetchableNamedQuerier;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
@@ -58,7 +59,8 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
   }
 
   @Override
-  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery,
+      FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -157,8 +159,17 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract EsQueryExecutor getExecutor();
 
-  @Override
   protected abstract AbstractNamedQuerierResolver<EsNamedQuerier> getQuerierResolver();
+
+  @Override
+  protected Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
+
+  @Override
+  protected QueryHandler getQueryHandler() {
+    return getQuerierResolver().getQueryHandler();
+  }
 
   protected String resolveIndexName(EsNamedQuerier querier) {
     String indexName = querier.resolveProperty(PRO_KEY_INDEX_NAME, String.class, null);

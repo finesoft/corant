@@ -33,7 +33,6 @@ public interface CountingStream {
    * corant-shared
    *
    * @author bingo 上午10:00:51
-   *
    */
   class CountingInputStream extends FilterInputStream implements CountingStream {
 
@@ -98,7 +97,6 @@ public interface CountingStream {
    * corant-shared
    *
    * @author bingo 上午10:01:18
-   *
    */
   class CountingOutputStream extends FilterOutputStream implements CountingStream {
 

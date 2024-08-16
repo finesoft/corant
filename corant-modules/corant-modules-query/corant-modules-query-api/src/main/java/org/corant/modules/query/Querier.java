@@ -13,9 +13,8 @@
  */
 package org.corant.modules.query;
 
-import static org.corant.shared.util.Maps.getMapBoolean;
+import java.time.Duration;
 import java.util.List;
-import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
 
 /**
@@ -28,14 +27,6 @@ import org.corant.modules.query.mapping.Query;
 public interface Querier {
 
   /**
-   * Returns whether to fetch
-   *
-   * @param result the parent query result for decide whether to fetch
-   * @param fetchQuery the fetch query
-   */
-  boolean decideFetch(Object result, FetchQuery fetchQuery);
-
-  /**
    * Returns the query object that this querier binds, the Query object defines the execution plan.
    */
   Query getQuery();
@@ -44,26 +35,6 @@ public interface Querier {
    * Returns the query parameter that this querier bind.
    */
   QueryParameter getQueryParameter();
-
-  /**
-   * Inject the fetched result to single result
-   *
-   * @param result the single parent query result
-   * @param fetchedResult the fetched result use to inject
-   * @param fetchQuery the fetch query
-   * @see FetchQueryHandler#handleFetchedResult(QueryParameter, Object, List, FetchQuery)
-   */
-  void handleFetchedResult(Object result, List<?> fetchedResult, FetchQuery fetchQuery);
-
-  /**
-   * Inject the fetched result to result list
-   *
-   * @param results the parent query results
-   * @param fetchedResult the fetched result use to inject
-   * @param fetchQuery the fetch query
-   * @see FetchQueryHandler#handleFetchedResults(QueryParameter, List, List, FetchQuery)
-   */
-  void handleFetchedResults(List<?> results, List<?> fetchedResult, FetchQuery fetchQuery);
 
   /**
    * Handle single result, handle hints and conversions.
@@ -92,26 +63,59 @@ public interface Querier {
   <T> List<T> handleResults(List<?> results);
 
   /**
-   * Experiential functions for proof of concept.
+   * Returns either the limit value from the query parameter, or if the value is {@code null}, the
+   * value of {@link QuerierConfig#getDefaultLimit()}.
    *
-   * @return whether to fetch in parallel
+   * <p>
+   * Note: If the limit value <=0 then returns {@link QuerierConfig#getMaxLimit()}, if the limit
+   * value greater than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
    */
-  default boolean parallelFetch() {
-    QueryParameter param = getQueryParameter();
-    if (param != null && param.getContext() != null) {
-      return getMapBoolean(param.getContext(), QuerierConfig.CTX_KEY_PARALLEL_FETCH, false);
-    }
-    return false;
-  }
+  int resolveLimit();
 
   /**
-   * Returns a resolved fetch query parameter, merge parent querier criteria.
-   * <p>
-   * Note: The implementer must completely copy all contexts in the parent query parameter object.
-   *
-   * @param result the parent result use to extract the child query parameter
-   * @param fetchQuery the fetch query
-   * @see FetchQueryHandler#resolveFetchQueryParameter(Object, FetchQuery, QueryParameter)
+   * Returns the offset from query parameter
    */
-  QueryParameter resolveFetchQueryParameter(Object result, FetchQuery fetchQuery);
+  int resolveOffset();
+
+  /**
+   * Returns the resolved properties, first we try resolve it from the query parameter context, if
+   * not found try resolve it from query properties.
+   *
+   * @param <X> the property value type
+   * @param key the property key
+   * @param cls the property value class
+   * @param dflt the default value if property not set
+   *
+   * @see QueryParameter#getContext()
+   * @see Query#getProperties()
+   */
+  <X> X resolveProperty(String key, Class<X> cls, X dflt);
+
+  /**
+   * Returns either the value of the query select size property(the property name is
+   * {@link QuerierConfig#PRO_KEY_MAX_SELECT_SIZE}), or if the value is {@code null}, the value of
+   * {@link QuerierConfig#getDefaultSelectSize()}.
+   * <p>
+   * Note: If the value <=0 then returns {@link QuerierConfig#getMaxSelectSize()}
+   */
+  int resolveSelectSize();
+
+  /**
+   * Returns either the limit value from the query parameter, or if the value is {@code null}, the
+   * value of {@link QuerierConfig#getDefaultStreamLimit()}.
+   *
+   * <p>
+   * Note: If the limit value <=0 then returns {@link QuerierConfig#getMaxLimit()}, if the limit
+   * value greater than the {@link #resolveSelectSize()} a {@link QueryRuntimeException} thrown.
+   */
+  int resolveStreamLimit();
+
+  /**
+   * Returns either the value of the query timeout property (the property name is
+   * {@link QuerierConfig#PRO_KEY_TIMEOUT}), or if the value is {@code null}, the value of
+   * {@link QuerierConfig#getTimeout()}.
+   *
+   * @return query timeout
+   */
+  Duration resolveTimeout();
 }

@@ -42,14 +42,14 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   public static final MapListHandler MAP_LIST_HANDLER =
       new MapListHandler(DbUtilBasicRowProcessor.INST);
 
-  protected final SqlQueryConfiguration confiuration;
+  protected final SqlQueryConfiguration configuration;
   protected final DefaultQueryRunner runner;
   protected final Dialect dialect;
 
-  public DefaultSqlQueryExecutor(SqlQueryConfiguration confiuration) {
-    this.confiuration = confiuration;
-    runner = new DefaultQueryRunner(confiuration);
-    dialect = confiuration.getDialect();
+  public DefaultSqlQueryExecutor(SqlQueryConfiguration configuration) {
+    this.configuration = configuration;
+    runner = new DefaultQueryRunner(configuration);
+    dialect = configuration.getDialect();
   }
 
   public static DefaultSqlQueryExecutor of(DataSource ds) {
@@ -100,11 +100,11 @@ public class DefaultSqlQueryExecutor implements SqlQueryExecutor {
   }
 
   @Override
-  public Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminater,
+  public Stream<Map<String, Object>> stream(String sql, BiPredicate<Integer, Object> terminator,
       Duration timeout, boolean autoClose, Object... args) {
     try {
-      return new StreamableQueryRunner(confiuration, timeout).streamQuery(
-          confiuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, terminater,
+      return new StreamableQueryRunner(configuration, timeout).streamQuery(
+          configuration.getDataSource().getConnection(), true, sql, MAP_HANDLER, terminator,
           autoClose, args);
     } catch (SQLException e) {
       throw new CorantRuntimeException(e);

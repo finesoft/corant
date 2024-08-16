@@ -38,7 +38,7 @@ import org.corant.shared.util.Services;
 
 /**
  * corant-modules-query-shared
- *
+ * <p>
  * Unfinish yet
  *
  * @author bingo 下午2:39:57

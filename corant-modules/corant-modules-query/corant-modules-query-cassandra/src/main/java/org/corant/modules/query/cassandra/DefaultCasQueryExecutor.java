@@ -31,7 +31,7 @@ import com.datastax.driver.core.Statement;
 
 /**
  * corant-modules-query-cassandra
- *
+ * <p>
  * Unfinish yet!
  *
  * @author bingo 上午10:52:01
@@ -43,7 +43,7 @@ public class DefaultCasQueryExecutor implements CasQueryExecutor {
   final int fetchSize;
 
   /**
-   * @param cluster
+   * @param cluster the elastic search cluster
    */
   public DefaultCasQueryExecutor(Cluster cluster, int fetchSize) {
     this.cluster = shouldNotNull(cluster);

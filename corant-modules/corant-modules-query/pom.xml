@@ -10,13 +10,13 @@
   <artifactId>corant-modules-query</artifactId>
   <packaging>pom</packaging>
   <modules>
+    <module>corant-modules-query-api</module>
     <module>corant-modules-query-shared</module>
     <module>corant-modules-query-sql</module>
     <module>corant-modules-query-mongodb</module>
     <module>corant-modules-query-jpql</module>
     <module>corant-modules-query-elastic</module>
     <module>corant-modules-query-cassandra</module>
-    <module>corant-modules-query-api</module>
-    <module>corant-modules-query-rpc</module>
+    <module>corant-modules-query-jaxrs</module>
   </modules>
 </project>

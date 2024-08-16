@@ -15,7 +15,7 @@ package org.corant.modules.query.elastic;
 
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.shared.FetchableNamedQueryService;
+import org.corant.modules.query.FetchableNamedQueryService;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**

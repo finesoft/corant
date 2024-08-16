@@ -16,11 +16,11 @@ package org.corant.modules.query.shared;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.FetchableNamedQuerier;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.QueryMappingService.BeforeQueryMappingInitializeHandler;
-import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import net.jcip.annotations.GuardedBy;
 
 /**
@@ -29,7 +29,7 @@ import net.jcip.annotations.GuardedBy;
  * @author bingo 下午4:44:33
  */
 @ApplicationScoped
-public abstract class AbstractNamedQuerierResolver<Q extends DynamicQuerier<?, ?>>
+public abstract class AbstractNamedQuerierResolver<Q extends FetchableNamedQuerier>
     implements NamedQuerierResolver<Q>, BeforeQueryMappingInitializeHandler {
 
   @Inject

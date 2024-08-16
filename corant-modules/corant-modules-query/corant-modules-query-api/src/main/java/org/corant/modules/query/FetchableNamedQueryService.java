@@ -11,36 +11,35 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.shared;
+package org.corant.modules.query;
 
 import java.util.List;
 import java.util.Map;
-import org.corant.modules.query.NamedQueryService;
-import org.corant.modules.query.Querier;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.shared.exception.NotSupportedException;
 
 /**
- * corant-modules-query-shared
+ * corant-modules-query-api
  *
  * @author bingo 上午11:41:34
  */
 public interface FetchableNamedQueryService extends NamedQueryService {
 
-  default FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  default FetchedResult fetch(Object result, FetchQuery fetchQuery,
+      FetchableNamedQuerier parentQuerier) {
     throw new NotSupportedException();
   }
 
-  default void handleFetching(Object result, Querier parentQuerier) {
+  default void handleFetching(Object result, FetchableNamedQuerier parentQuerier) {
     throw new NotSupportedException();
   }
 
   class FetchedResult {
     public final FetchQuery fetchQuery;
-    public final Querier fetchQuerier;
+    public final FetchableNamedQuerier fetchQuerier;
     public final List<Map<String, Object>> fetchedList;
 
-    public FetchedResult(FetchQuery fetchQuery, Querier fetchQuerier,
+    public FetchedResult(FetchQuery fetchQuery, FetchableNamedQuerier fetchQuerier,
         List<Map<String, Object>> fetchedList) {
       this.fetchQuery = fetchQuery;
       this.fetchQuerier = fetchQuerier;

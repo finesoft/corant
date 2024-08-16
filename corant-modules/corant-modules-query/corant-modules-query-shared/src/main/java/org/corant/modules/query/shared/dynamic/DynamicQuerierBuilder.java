@@ -13,26 +13,13 @@
  */
 package org.corant.modules.query.shared.dynamic;
 
-import org.corant.modules.query.FetchQueryHandler;
-import org.corant.modules.query.QueryHandler;
-import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.mapping.Query;
+import org.corant.modules.query.shared.NamedQuerierBuilder;
 
 /**
  * corant-modules-query-shared
  *
  * @author bingo 上午9:52:43
  */
-public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>> {
-
-  Q build(QueryParameter originalParameter);
-
-  Long getCachedTimestamp();
-
-  FetchQueryHandler getFetchQueryHandler();
-
-  Query getQuery();
-
-  QueryHandler getQueryHandler();
-
+public interface DynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
+    extends NamedQuerierBuilder<Q> {
 }

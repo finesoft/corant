@@ -64,18 +64,19 @@ public class DefaultQueryRunner extends DbUtilQueryRunner {
     super(ds, stmtConfig, resultSetConfig);
   }
 
-  public DefaultQueryRunner(SqlQueryConfiguration confiuration) {
-    this(confiuration, null);
+  public DefaultQueryRunner(SqlQueryConfiguration configuration) {
+    this(configuration, null);
   }
 
-  public DefaultQueryRunner(SqlQueryConfiguration confiuration, Duration timeout) {
-    this(confiuration.getDataSource(),
-        new StatementConfiguration(confiuration.getFetchDirection(), confiuration.getFetchSize(),
-            confiuration.getMaxFieldSize(), null, timeout),
-        containsNotNull(confiuration.getResultSetType(), confiuration.getResultSetConcurrency(),
-            confiuration.getResultSetHoldability())
-                ? new ResultSetConfiguration(confiuration.getResultSetType(),
-                    confiuration.getResultSetConcurrency(), confiuration.getResultSetHoldability())
+  public DefaultQueryRunner(SqlQueryConfiguration configuration, Duration timeout) {
+    this(configuration.getDataSource(),
+        new StatementConfiguration(configuration.getFetchDirection(), configuration.getFetchSize(),
+            configuration.getMaxFieldSize(), null, timeout),
+        containsNotNull(configuration.getResultSetType(), configuration.getResultSetConcurrency(),
+            configuration.getResultSetHoldability())
+                ? new ResultSetConfiguration(configuration.getResultSetType(),
+                    configuration.getResultSetConcurrency(),
+                    configuration.getResultSetHoldability())
                 : null);
   }
 

@@ -148,15 +148,15 @@ public class FileUtils {
 
   public static void copyToFile(final InputStream source, final File destination, int bufferSize)
       throws IOException {
-    try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
-      Streams.copy(in, out, bufferSize);
+    try (OutputStream out = new FileOutputStream(destination)) {
+      Streams.copy(source, out, bufferSize);
     }
   }
 
   public static void copyToFile(final InputStream source, final File destination, int bufferSize,
       Checksum checksum) throws IOException {
-    try (InputStream in = source; OutputStream out = new FileOutputStream(destination)) {
-      Streams.copy(in, out, bufferSize, checksum);
+    try (OutputStream out = new FileOutputStream(destination)) {
+      Streams.copy(source, out, bufferSize, checksum);
     }
   }
 

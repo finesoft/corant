@@ -25,15 +25,14 @@ import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.modules.query.shared.AbstractNamedQuerier;
 
 /**
  * corant-modules-query-elastic
  *
  * @author bingo 下午4:35:55
  */
-public class DefaultEsNamedQuerier extends
-    AbstractDynamicQuerier<Map<String, Object>, Map<Object, Object>> implements EsNamedQuerier {
+public class DefaultEsNamedQuerier extends AbstractNamedQuerier implements EsNamedQuerier {
 
   protected final Map<Object, Object> script;
   protected final String indexName;
@@ -70,7 +69,7 @@ public class DefaultEsNamedQuerier extends
   }
 
   @Override
-  public Map<Object, Object> getScript(Map<?, ?> additionals) {
+  public Map<Object, Object> getScript(Map<?, ?> additional) {
     return script;
   }
 

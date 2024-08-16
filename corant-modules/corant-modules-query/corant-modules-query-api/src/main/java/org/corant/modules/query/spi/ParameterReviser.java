@@ -19,7 +19,7 @@ import org.corant.modules.query.mapping.Query;
 
 /**
  * corant-modules-query-api
- *
+ * <p>
  * Deprecated since 1.6.2, replace with {@link QueryParameterReviser}
  *
  * @author bingo 上午10:51:35

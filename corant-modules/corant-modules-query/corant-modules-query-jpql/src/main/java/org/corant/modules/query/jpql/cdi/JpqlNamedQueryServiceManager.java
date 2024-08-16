@@ -29,11 +29,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManagerFactory;
 import org.corant.context.qualifier.Qualifiers;
 import org.corant.modules.jpa.shared.PersistenceService;
+import org.corant.modules.query.FetchableNamedQueryService;
 import org.corant.modules.query.jpql.AbstractJpqlNamedQueryService;
 import org.corant.modules.query.jpql.JpqlNamedQuerier;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
-import org.corant.modules.query.shared.FetchableNamedQueryService;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

@@ -141,7 +141,7 @@ public class SQLServer2005Dialect extends SQLServerDialect {
 
   /**
    * Add a LIMIT clause to the given SQL SELECT (ROW_NUMBER for Paging)
-   *
+   * <p>
    * The LIMIT SQL will look like:
    *
    * <pre>
@@ -187,7 +187,7 @@ public class SQLServer2005Dialect extends SQLServerDialect {
    * Get the starting point for the limit handler to begin injecting and transforming the SQL. For
    * non-CTE queries, this is offset 0. For CTE queries, this will be where the CTE's SELECT clause
    * begins (skipping all query definitions, column definitions and expressions).
-   *
+   * <p>
    * This method also sets {@code isCTE} if the query is parsed as a CTE query.
    *
    * @param sql The sql buffer.

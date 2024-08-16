@@ -18,6 +18,8 @@ import static java.util.stream.Collectors.toList;
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Maps.getMapInteger;
+import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.asStrings;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -30,11 +32,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.corant.Corant;
-import org.corant.modules.query.NamedQuerier;
-import org.corant.modules.query.Querier;
+import org.corant.modules.query.FetchableNamedQuerier;
+import org.corant.modules.query.FetchableNamedQueryService;
+import org.corant.modules.query.QuerierConfig;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
@@ -42,7 +47,6 @@ import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Query.QueryType;
-import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 import org.corant.shared.retry.RetryStrategy.MaxAttemptsRetryStrategy;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.ubiquity.Tuple.Triple;
@@ -91,7 +95,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   @Override
-  public void handleFetching(Object results, Querier parentQuerier) {
+  public void handleFetching(Object results, FetchableNamedQuerier parentQuerier) {
     if (results == null) {
       return;
     } else if ((results instanceof List<?> list) && list.isEmpty()) {
@@ -165,15 +169,13 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   public <T> Stream<T> stream(String queryName, Object parameter) {
     Query query = getQuery(queryName);
     QueryParameter queryParameter = resolveQueryParameter(query, parameter);
-    DynamicQuerier<?, ?> querier = getQuerierResolver().resolve(query, queryParameter);
-    QueryParameter queryParam = querier.getQueryParameter();
     StreamQueryParameter useQueryParam;
-    if (queryParam instanceof StreamQueryParameter) {
-      useQueryParam = (StreamQueryParameter) queryParam;
+    if (queryParameter instanceof StreamQueryParameter) {
+      useQueryParam = (StreamQueryParameter) queryParameter;
     } else {
-      useQueryParam = new StreamQueryParameter(queryParam);
+      useQueryParam = new StreamQueryParameter(queryParameter);
     }
-    useQueryParam.limit(max(querier.resolveStreamLimit(), 1));
+    useQueryParam.limit(resolveStreamLimit(query, queryParameter));
     return doStream(query, useQueryParam);
   }
 
@@ -251,27 +253,29 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     });
   }
 
-  protected abstract AbstractNamedQuerierResolver<? extends NamedQuerier> getQuerierResolver();
+  protected abstract Query getQuery(String queryName);
 
-  protected Query getQuery(String queryName) {
-    return getQuerierResolver().resolveQuery(queryName);
-  }
+  protected abstract QueryHandler getQueryHandler();
 
   protected void log(String name, Object param, String... script) {
-    logger.fine(() -> format(
-        "%n[QueryService name]: %s; %n[QueryService parameters]: %s; %n[QueryService script]: %s.",
-        name,
-        getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(param, false, true),
+    logger.fine(() -> format("%n[Query name]: %s %n[Query parameters]:%n%s %n[Query script]:%n%s",
+        name, getQueryHandler().getObjectMapper().toJsonString(param, false, true),
         String.join("\n", script)));
   }
 
   protected void log(String name, Object[] param, String... script) {
-    logger.fine(() -> format(
-        "%n[QueryService name]: %s; %n[QueryService parameters]: [%s]; %n[QueryService script]: %s.",
+    logger.fine(() -> format("%n[Query name]: %s %n[Query parameters]:%n[%s] %n[Query script]:%n%s",
         name, String.join(",", asStrings(param)), String.join("\n", script)));
   }
 
-  protected <T> void parallelFetch(List<T> results, Querier parentQuerier,
+  protected void log(String name, Supplier<List<String>> execution, Object param) {
+    logger
+        .fine(() -> format("%n[Query name]: %s %n[Query execution]:%n%s %n[Query parameters]:%n%s ",
+            name, String.join("\n", execution.get()),
+            getQueryHandler().getObjectMapper().toJsonString(param, false, true)));
+  }
+
+  protected <T> void parallelFetch(List<T> results, FetchableNamedQuerier parentQuerier,
       List<FetchQuery> allFetchQueries) {
     // parallel fetch, experimental features for proof of concept.
     // FIXME consider the context propagate
@@ -317,7 +321,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     }
   }
 
-  protected <T> void parallelFetch(T result, Querier parentQuerier,
+  protected <T> void parallelFetch(T result, FetchableNamedQuerier parentQuerier,
       List<FetchQuery> allFetchQueries) {
     // parallel fetch, experimental functions for proof of concept.
     Collection<Pair<FetchedResult, FetchableNamedQueryService>> workResults =
@@ -343,7 +347,7 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected void postFetch(FetchableNamedQueryService service, FetchedResult fetchedResult,
-      Querier parentQuerier, Object result) {
+      FetchableNamedQuerier parentQuerier, Object result) {
     if (fetchedResult != null && isNotEmpty(fetchedResult.fetchedList)) {
       service.handleFetching(fetchedResult.fetchedList, fetchedResult.fetchQuerier);// Next fetch
       fetchedResult.fetchQuerier.handleResultHints(fetchedResult.fetchedList);
@@ -376,10 +380,29 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   }
 
   protected QueryParameter resolveQueryParameter(Query query, Object parameter) {
-    return getQuerierResolver().getQueryHandler().resolveParameter(query, parameter);
+    return getQueryHandler().resolveParameter(query, parameter);
   }
 
-  protected <T> void serialFetch(List<T> results, Querier parentQuerier,
+  protected int resolveStreamLimit(Query query, QueryParameter parameter) {
+    Integer limit = parameter.getLimit();
+    QuerierConfig config = getQueryHandler().getQuerierConfig();
+    if (limit == null || limit <= 0) {
+      Integer proLimit = defaultObject(
+          getOptMapObject(parameter.getContext(), QuerierConfig.PRO_KEY_STREAM_LIMIT, Integer.class)
+              .orElseGet(
+                  () -> getMapInteger(query.getProperties(), QuerierConfig.PRO_KEY_STREAM_LIMIT)),
+          config.getDefaultStreamLimit());
+      limit = proLimit <= 0 ? config.getMaxLimit() : proLimit;
+    }
+    if (limit > config.getMaxLimit()) {
+      throw new QueryRuntimeException(
+          "Exceeded the maximum number of query [%s] results, limit is [%s].",
+          query.getVersionedName(), config.getMaxLimit());
+    }
+    return max(limit, 1);
+  }
+
+  protected <T> void serialFetch(List<T> results, FetchableNamedQuerier parentQuerier,
       List<FetchQuery> fetchQueries) {
     for (FetchQuery fq : fetchQueries) {
       FetchableNamedQueryService fetchQueryService = resolveFetchQueryService(fq);
@@ -405,7 +428,8 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
     }
   }
 
-  protected <T> void serialFetch(T result, Querier parentQuerier, List<FetchQuery> fetchQueries) {
+  protected <T> void serialFetch(T result, FetchableNamedQuerier parentQuerier,
+      List<FetchQuery> fetchQueries) {
     for (FetchQuery fq : fetchQueries) {
       FetchableNamedQueryService fetchQueryService = resolveFetchQueryService(fq);
       if (parentQuerier.decideFetch(result, fq)) {

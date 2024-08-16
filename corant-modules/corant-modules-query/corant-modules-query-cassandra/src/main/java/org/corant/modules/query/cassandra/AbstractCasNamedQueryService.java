@@ -19,7 +19,8 @@ import static org.corant.shared.util.Strings.split;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import org.corant.modules.query.Querier;
+import org.corant.modules.query.FetchableNamedQuerier;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
@@ -37,7 +38,8 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
   public static final String PRO_KEY_KEYSPACE = "cassandra.query.keyspace";
 
   @Override
-  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery,
+      FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -143,8 +145,17 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
 
   protected abstract CasQueryExecutor getExecutor();
 
-  @Override
   protected abstract AbstractNamedQuerierResolver<CasNamedQuerier> getQuerierResolver();
+
+  @Override
+  protected Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
+
+  @Override
+  protected QueryHandler getQueryHandler() {
+    return getQuerierResolver().getQueryHandler();
+  }
 
   /**
    * Resolve key space from query parameter context or query object.

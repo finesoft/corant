@@ -18,15 +18,14 @@ import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.modules.query.shared.AbstractNamedQuerier;
 
 /**
  * corant-modules-query-sql
  *
  * @author bingo 下午4:35:55
  */
-public class DefaultSqlNamedQuerier extends AbstractDynamicQuerier<Object[], String>
-    implements SqlNamedQuerier {
+public class DefaultSqlNamedQuerier extends AbstractNamedQuerier implements SqlNamedQuerier {
 
   private final Object[] scriptParameter;
   private final String script;

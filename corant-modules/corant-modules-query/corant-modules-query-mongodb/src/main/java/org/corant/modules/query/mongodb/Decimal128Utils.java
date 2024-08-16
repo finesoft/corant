@@ -36,8 +36,8 @@ public class Decimal128Utils {
   /**
    * Very simple and crude conversion Decimal128 to BigDecimal, fix me pls!!!
    *
-   * @param doc
-   * @return convert
+   * @param doc the document to be converted
+   * @return converted document
    */
   public static Document convert(Document doc) {
     if (doc == null) {

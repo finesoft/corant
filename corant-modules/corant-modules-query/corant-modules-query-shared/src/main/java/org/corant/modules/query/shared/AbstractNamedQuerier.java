@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.shared.dynamic;
+package org.corant.modules.query.shared;
 
 import static java.lang.String.format;
 import static org.corant.shared.util.Conversions.toObject;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.corant.modules.query.FetchQueryHandler;
+import org.corant.modules.query.FetchableNamedQuerier;
 import org.corant.modules.query.QuerierConfig;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
@@ -39,9 +40,9 @@ import org.corant.modules.query.mapping.Query;
  *
  * @author bingo 下午5:56:22
  */
-public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, S> {
+public abstract class AbstractNamedQuerier implements FetchableNamedQuerier {
 
-  protected static final Logger logger = Logger.getLogger(AbstractDynamicQuerier.class.getName());
+  protected static final Logger logger = Logger.getLogger(AbstractNamedQuerier.class.getName());
 
   protected final Query query;
   protected final QueryHandler queryHandler;
@@ -56,7 +57,7 @@ public abstract class AbstractDynamicQuerier<P, S> implements DynamicQuerier<P, 
   protected volatile Boolean thrownExceedMaxSelectSize;
   protected volatile Duration timeout;
 
-  protected AbstractDynamicQuerier(Query query, QueryParameter queryParameter,
+  protected AbstractNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryHandler, FetchQueryHandler fetchQueryHandler) {
     this.query = query;
     this.queryParameter = queryParameter;

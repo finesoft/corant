@@ -15,14 +15,14 @@ package org.corant.modules.query.sql;
 
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
-import static org.corant.shared.util.Objects.max;
 import static org.corant.shared.util.Streams.batchStream;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.corant.modules.query.Querier;
+import org.corant.modules.query.FetchableNamedQuerier;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
@@ -40,7 +40,8 @@ import org.corant.modules.query.sql.dialect.Dialect;
 public abstract class AbstractSqlNamedQueryService extends AbstractNamedQueryService {
 
   @Override
-  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery,
+      FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -74,18 +75,18 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
   public <T> Stream<T> stream(String queryName, Object parameter) {
     Query query = getQuery(queryName);
     QueryParameter queryParam = resolveQueryParameter(query, parameter);
-    SqlNamedQuerier querier = getQuerierResolver().resolve(query, queryParam);
     StreamQueryParameter useQueryParam;
     if (queryParam instanceof StreamQueryParameter) {
       useQueryParam = (StreamQueryParameter) queryParam;
     } else {
       useQueryParam = new StreamQueryParameter(queryParam);
     }
-    useQueryParam.limit(max(querier.resolveStreamLimit(), 1));
     if (useQueryParam.getOffset() > 0 || useQueryParam.needRetry()
         || useQueryParam.getEnhancer() != null) {
+      useQueryParam.limit(resolveStreamLimit(query, useQueryParam));
       return doStream(query, useQueryParam);
     } else {
+      SqlNamedQuerier querier = getQuerierResolver().resolve(query, queryParam);
       Object[] scriptParameter = querier.getScriptParameter();
       String sql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
@@ -189,7 +190,16 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
 
   protected abstract SqlQueryExecutor getExecutor();// FIXME use one connection for one method stack
 
-  @Override
   protected abstract AbstractNamedQuerierResolver<SqlNamedQuerier> getQuerierResolver();
+
+  @Override
+  protected Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
+
+  @Override
+  protected QueryHandler getQueryHandler() {
+    return getQuerierResolver().getQueryHandler();
+  }
 
 }

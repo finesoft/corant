@@ -27,17 +27,14 @@ import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.Query;
-import org.corant.modules.query.mongodb.MgNamedQuerier.MgOperator;
-import org.corant.modules.query.shared.dynamic.AbstractDynamicQuerier;
+import org.corant.modules.query.shared.AbstractNamedQuerier;
 
 /**
  * corant-modules-query-mongodb
  *
  * @author bingo 下午4:35:55
  */
-public class DefaultMgNamedQuerier
-    extends AbstractDynamicQuerier<Map<String, Object>, EnumMap<MgOperator, Object>>
-    implements MgNamedQuerier {
+public class DefaultMgNamedQuerier extends AbstractNamedQuerier implements MgNamedQuerier {
 
   protected String collectionName;
   protected final EnumMap<MgOperator, Object> script = new EnumMap<>(MgOperator.class);
@@ -68,7 +65,7 @@ public class DefaultMgNamedQuerier
   }
 
   @Override
-  public EnumMap<MgOperator, Object> getScript(Map<?, ?> additionals) {
+  public EnumMap<MgOperator, Object> getScript(Map<?, ?> additional) {
     return script;
   }
 

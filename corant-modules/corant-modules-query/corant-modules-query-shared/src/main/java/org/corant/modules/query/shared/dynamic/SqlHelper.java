@@ -31,7 +31,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 
 /**
  * corant-modules-query-shared
- *
+ * <p>
  * NOTE: Some code come from hibernate, if there is infringement, please inform
  * me(finesoft@gmail.com).
  *
@@ -118,7 +118,7 @@ public class SqlHelper {
    * Return a pre-processed SQL statement containing place holders according to the given SQL and
    * parameter array. If the parameter is an array or list, it will be automatically expanded into
    * multiple place holders.
-   *
+   * <p>
    * FIXME: Need another implementation
    *
    * @param sql the SQL statement may containing place holders

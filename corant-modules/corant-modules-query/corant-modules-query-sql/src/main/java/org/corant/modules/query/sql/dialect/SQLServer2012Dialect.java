@@ -19,7 +19,7 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
  * corant-modules-query-sql
- *
+ * <p>
  * When OFFSET is 0, then no rows are skipped.
  *
  * @author bingo 上午11:03:33

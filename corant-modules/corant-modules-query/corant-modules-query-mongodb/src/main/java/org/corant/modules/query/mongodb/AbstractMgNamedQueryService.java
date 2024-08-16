@@ -37,7 +37,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.corant.modules.query.Querier;
+import org.corant.modules.query.FetchableNamedQuerier;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.StreamQueryParameter;
@@ -106,7 +107,8 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
   public static final String PRO_KEY_CO_COLA_BACKWARDS = PRO_KEY_CO_COLA + ".backwards";
 
   @Override
-  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
+  public FetchedResult fetch(Object result, FetchQuery fetchQuery,
+      FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
       String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
@@ -336,8 +338,17 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
 
   protected abstract MongoDatabase getDataBase();
 
-  @Override
   protected abstract AbstractNamedQuerierResolver<MgNamedQuerier> getQuerierResolver();
+
+  @Override
+  protected Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
+
+  @Override
+  protected QueryHandler getQueryHandler() {
+    return getQuerierResolver().getQueryHandler();
+  }
 
   protected AggregateIterable<Document> handleAggregate(MgNamedQuerier querier) {
     List<Bson> pipeline = forceCast(querier.getScript().get(MgOperator.AGGREGATE));
@@ -355,11 +366,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         .ifPresent(t -> ai.maxAwaitTime(t, TimeUnit.MILLISECONDS));
     Optional<Bson> bson = Optional.ofNullable(forceCast(querier.getScript().get(MgOperator.HINT)));
     bson.ifPresent(ai::hint);
-    resovleCollation(querier).ifPresent(ai::collation);
+    resolveCollation(querier).ifPresent(ai::collation);
     return ai;
   }
 
-  @SuppressWarnings("rawtypes")
   protected long handleCount(MgNamedQuerier querier, boolean paging) {
     CountOptions co = new CountOptions();
     Bson filter = null;
@@ -372,7 +382,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       co.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
     getOptMapObject(pros, PRO_KEY_CO_SKIP, Conversions::toInteger).ifPresent(co::skip);
-    resovleCollation(querier).ifPresent(co::collation);
+    resolveCollation(querier).ifPresent(co::collation);
     if (co.getLimit() <= 0) {
       co.limit(max(resolveCountOptionsLimit(), 1));
     }
@@ -383,8 +393,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       filter = forceCast(querier.getScript(null).get(MgOperator.FILTER));
     } else {
       Object script = querier.getScript().get(MgOperator.COUNT);
-      if (script instanceof Map) {
-        Map scriptMap = (Map) script;
+      if (script instanceof Map scriptMap) {
         filter = forceCast(scriptMap.get(MgOperator.FILTER.getOps()));
         if (scriptMap.get(MgOperator.HINT.getOps()) != null) {
           co.hint((Bson) querier.getScript().get(MgOperator.HINT));
@@ -416,7 +425,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     } else if (querier.resolveTimeout() != null) {
       di.maxTime(querier.resolveTimeout().toMillis(), TimeUnit.MILLISECONDS);
     }
-    resovleCollation(querier).ifPresent(di::collation);
+    resolveCollation(querier).ifPresent(di::collation);
     return di.map(s -> new Document("value", s));
   }
 
@@ -478,7 +487,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     getOptMapObject(pros, PRO_KEY_RETURN_KEY, Conversions::toBoolean).ifPresent(fi::returnKey);
     getOptMapObject(pros, PRO_KEY_SHOW_RECORDID, Conversions::toBoolean)
         .ifPresent(fi::showRecordId);
-    resovleCollation(querier).ifPresent(fi::collation);
+    resolveCollation(querier).ifPresent(fi::collation);
     return fi;
   }
 
@@ -499,25 +508,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
   }
 
-  protected MongoCollection<Document> resolveCollection(MgNamedQuerier querier) {
-    String colName =
-        defaultBlank(querier.resolveProperty(PRO_KEY_COLLECTION_NAME, String.class, null),
-            querier.getCollectionName()); // FIXME
-    MongoCollection<Document> collection = getDataBase().getCollection(colName);
-    Object readConcernLevel = querier.getScript().get(MgOperator.READ_CONCERN);
-    if (readConcernLevel != null) {
-      collection = collection
-          .withReadConcern(new ReadConcern(ReadConcernLevel.valueOf(readConcernLevel.toString())));
-    }
-    // Object readPreference = querier.getScript().get(MgOperator.READ_PREFERENCE);
-    return collection;
-  }
-
-  protected int resolveCountOptionsLimit() {
-    return 1024;
-  }
-
-  protected Optional<Collation> resovleCollation(MgNamedQuerier querier) {
+  protected Optional<Collation> resolveCollation(MgNamedQuerier querier) {
     Map<String, String> pros = querier.getQuery().getProperties();
     if (pros.keySet().stream().anyMatch(t -> t.startsWith(PRO_KEY_CO_COLA))) {
       Collation.Builder b = Collation.builder();
@@ -542,5 +533,23 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     }
 
     return Optional.empty();
+  }
+
+  protected MongoCollection<Document> resolveCollection(MgNamedQuerier querier) {
+    String colName =
+        defaultBlank(querier.resolveProperty(PRO_KEY_COLLECTION_NAME, String.class, null),
+            querier.getCollectionName()); // FIXME
+    MongoCollection<Document> collection = getDataBase().getCollection(colName);
+    Object readConcernLevel = querier.getScript().get(MgOperator.READ_CONCERN);
+    if (readConcernLevel != null) {
+      collection = collection
+          .withReadConcern(new ReadConcern(ReadConcernLevel.valueOf(readConcernLevel.toString())));
+    }
+    // Object readPreference = querier.getScript().get(MgOperator.READ_PREFERENCE);
+    return collection;
+  }
+
+  protected int resolveCountOptionsLimit() {
+    return 1024;
   }
 }

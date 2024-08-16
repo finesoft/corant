@@ -30,11 +30,9 @@ import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.SynchronizationType;
-import org.corant.modules.query.Querier;
-import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
-import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-query-jpql
@@ -48,11 +46,6 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
   public static final String PRO_KEY_HINT_PREFIX = "jpa.query.hint";
   public static final int PRO_KEY_HINT_PREFIX_LEN = PRO_KEY_HINT_PREFIX.length();
   public static final String PRO_KEY_NATIVE_QUERY = "jpa.query.isNative";
-
-  @Override
-  public FetchedResult fetch(Object result, FetchQuery fetchQuery, Querier parentQuerier) {
-    throw new NotSupportedException();
-  }
 
   @SuppressWarnings({"unchecked"})
   @Override
@@ -242,8 +235,17 @@ public abstract class AbstractJpqlNamedQueryService extends AbstractNamedQuerySe
 
   protected abstract EntityManagerFactory getEntityManagerFactory();
 
-  @Override
   protected abstract AbstractNamedQuerierResolver<JpqlNamedQuerier> getQuerierResolver();
+
+  @Override
+  protected org.corant.modules.query.mapping.Query getQuery(String queryName) {
+    return getQuerierResolver().resolveQuery(queryName);
+  }
+
+  @Override
+  protected QueryHandler getQueryHandler() {
+    return getQuerierResolver().getQueryHandler();
+  }
 
   protected void handleQuery(Query query, Class<?> cls, Map<String, String> properties) {}
 

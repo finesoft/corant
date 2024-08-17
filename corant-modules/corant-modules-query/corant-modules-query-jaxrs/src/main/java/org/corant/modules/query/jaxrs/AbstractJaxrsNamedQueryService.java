@@ -89,11 +89,7 @@ public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryS
   @Override
   protected <T> T doGet(Query query, QueryParameter queryParameter) throws Exception {
     JaxrsNamedQuerier querier = getQuerierResolver().resolve(query, queryParameter);
-    WebTarget target = querier.getTarget();
-    Object result = target.request()
-        .build(querier.getTargetConfig().getHttpMethod(),
-            Entity.entity(queryParameter, querier.getTargetConfig().getEntityMediaType()))
-        .invoke(Object.class);
+    Object result = resolveInvocation(queryParameter, querier).invoke(Object.class);
     if (result == null) {
       return null;
     }

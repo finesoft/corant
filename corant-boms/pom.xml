@@ -1585,6 +1585,11 @@
 				<version>${version.flyway}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-mysql</artifactId>
+				<version>${version.flyway}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-core</artifactId>
 				<version>${version.liquibase-core}</version>

@@ -29,7 +29,7 @@ import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 public class ASTMapNode extends AbstractASTNode<Object> {
 
   protected Node<?> inputNode;
-  protected ASTValueNode inputNameNode;
+  protected ASTDeclarationNode inputNameNode;
   protected Node<?> outputNode;
   protected String inputName;
 
@@ -64,9 +64,9 @@ public class ASTMapNode extends AbstractASTNode<Object> {
   public void postConstruct() {
     super.postConstruct();
     inputNode = children.get(0);
-    inputNameNode = (ASTValueNode) children.get(1);
+    inputNameNode = (ASTDeclarationNode) children.get(1);
     outputNode = children.get(2);
-    inputName = ASTNode.parseVariableNames(inputNameNode.value.toString())[0];
+    inputName = inputNameNode.getVariableNames()[0];
   }
 
 }

@@ -22,6 +22,7 @@ import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.split;
 import java.beans.Transient;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.client.WebTarget;
@@ -40,14 +41,14 @@ public interface JaxrsNamedQuerier extends FetchableNamedQuerier {
 
   WebTarget getTarget();
 
-  WebTargetConfig getTargetConfig();
+  JaxrsQueryParameter getParameter();
 
   /**
    * corant-modules-query-jaxrs
    *
    * @author bingo 20:13:50
    */
-  class WebTargetConfig {
+  class JaxrsQueryParameter {
 
     public static final List<MediaType> DEFAULT_MEDIA_TYPES =
         singletonList(MediaType.APPLICATION_JSON_TYPE);
@@ -55,27 +56,32 @@ public interface JaxrsNamedQuerier extends FetchableNamedQuerier {
     public static final String DEFAULT_HTTP_METHOD = "POST";
 
     protected String path;
-    protected List<String> templateNames;
-    protected List<String> encodeSlashTemplateNames;
-    protected List<String> formEncodedTemplateNames;
-    protected List<String> queryParameterNames;
-    protected List<String> matrixParameterNames;
+
+    protected Map<String, Object> templateVariables;
+    protected Map<String, Object> encodeSlashTemplateVariables;
+    protected Map<String, Object> formEncodedTemplateVariables;
+    protected Map<String, Object> queryParameters;
+    protected Map<String, Object> matrixParameters;
+
     protected String httpMethod = DEFAULT_HTTP_METHOD;
     protected String propagateHeaderNames;
     protected List<MediaType> requestMediaTypes = DEFAULT_MEDIA_TYPES;
     protected List<MediaType> acceptMediaTypes = DEFAULT_MEDIA_TYPES;
-    protected MediaType entityMediaType = MediaType.APPLICATION_JSON_TYPE;
+
     protected boolean onlyUseEmptyMapAsParameter;
     protected boolean onlyUsePathParameters;
+
+    protected MediaType entityMediaType = DEFAULT_MEDIA_TYPE;
+    protected Object entity;
 
     protected transient MediaType[] requestMediaTypeArray = {};
     protected transient MediaType[] acceptMediaTypeArray = {};
     protected transient Predicate<String> propagateHeaderNameFilter = null;
 
     public boolean containsTempleOrParameter() {
-      return isNotEmpty(encodeSlashTemplateNames) || isNotEmpty(formEncodedTemplateNames)
-          || isNotEmpty(matrixParameterNames) || isNotEmpty(queryParameterNames)
-          || isNotEmpty(templateNames);
+      return isNotEmpty(templateVariables) || isNotEmpty(encodeSlashTemplateVariables)
+          || isNotEmpty(formEncodedTemplateVariables) || isNotEmpty(queryParameters)
+          || isNotEmpty(matrixParameters);
     }
 
     @Transient
@@ -87,24 +93,28 @@ public interface JaxrsNamedQuerier extends FetchableNamedQuerier {
       return isEmpty(acceptMediaTypes) ? DEFAULT_MEDIA_TYPES : acceptMediaTypes;
     }
 
-    public List<String> getEncodeSlashTemplateNames() {
-      return encodeSlashTemplateNames;
+    public Map<String, Object> getEncodeSlashTemplateVariables() {
+      return encodeSlashTemplateVariables;
+    }
+
+    public Object getEntity() {
+      return entity;
     }
 
     public MediaType getEntityMediaType() {
       return defaultObject(entityMediaType, DEFAULT_MEDIA_TYPE);
     }
 
-    public List<String> getFormEncodedTemplateNames() {
-      return formEncodedTemplateNames;
+    public Map<String, Object> getFormEncodedTemplateVariables() {
+      return formEncodedTemplateVariables;
     }
 
     public String getHttpMethod() {
       return defaultBlank(httpMethod, DEFAULT_HTTP_METHOD);
     }
 
-    public List<String> getMatrixParameterNames() {
-      return matrixParameterNames;
+    public Map<String, Object> getMatrixParameters() {
+      return matrixParameters;
     }
 
     public String getPath() {
@@ -120,8 +130,8 @@ public interface JaxrsNamedQuerier extends FetchableNamedQuerier {
       return propagateHeaderNames;
     }
 
-    public List<String> getQueryParameterNames() {
-      return queryParameterNames;
+    public Map<String, Object> getQueryParameters() {
+      return queryParameters;
     }
 
     @Transient
@@ -133,8 +143,8 @@ public interface JaxrsNamedQuerier extends FetchableNamedQuerier {
       return isEmpty(requestMediaTypes) ? DEFAULT_MEDIA_TYPES : requestMediaTypes;
     }
 
-    public List<String> getTemplateNames() {
-      return templateNames;
+    public Map<String, Object> getTemplateVariables() {
+      return templateVariables;
     }
 
     public boolean isOnlyUseEmptyMapAsParameter() {

@@ -18,6 +18,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
 import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +30,12 @@ import jakarta.ws.rs.core.GenericType;
 import org.corant.modules.query.FetchableNamedQuerier;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
-import org.corant.modules.query.jaxrs.JaxrsNamedQuerier.WebTargetConfig;
+import org.corant.modules.query.jaxrs.JaxrsNamedQuerier.JaxrsQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.AbstractNamedQueryService;
+import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.TypeLiteral;
 import org.jboss.resteasy.client.jaxrs.internal.ClientInvocationBuilder;
 import org.jboss.resteasy.spi.HttpRequest;
@@ -44,6 +46,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
  *
  * @author bingo 21:35:05
  */
+@Experimental
 public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryService {
 
   protected static final GenericType<List<Map<String, Object>>> listMapType =
@@ -130,18 +133,21 @@ public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryS
 
   protected abstract AbstractNamedQuerierResolver<JaxrsNamedQuerier> getQuerierResolver();
 
-  protected Invocation resolveInvocation(QueryParameter parameter, JaxrsNamedQuerier querier) {
+  protected Invocation resolveInvocation(QueryParameter queryParameter, JaxrsNamedQuerier querier) {
     WebTarget target = querier.getTarget();
-    WebTargetConfig targetConfig = querier.getTargetConfig();
+    JaxrsQueryParameter parameter = querier.getParameter();
+    if (isNotBlank(parameter.getPath())) {
+      target = target.path(parameter.getPath());
+    }
     JaxrsNamedQueryClientConfig clientConfig = querier.getClientConfig();
-    Builder builder = target.request(targetConfig.getRequestMediaTypeArray())
-        .accept(targetConfig.getAcceptMediaTypeArray());
-    if (targetConfig.getPropagateHeaderNameFilter() != null) {
+    Builder builder = target.request(parameter.getRequestMediaTypeArray())
+        .accept(parameter.getAcceptMediaTypeArray());
+    if (parameter.getPropagateHeaderNameFilter() != null) {
       // TODO FIXME use client request filter
       HttpRequest request = ResteasyProviderFactory.getInstance().getContextData(HttpRequest.class);
       if (request != null) {
         request.getHttpHeaders().getRequestHeaders().forEach((k, v) -> {
-          if (targetConfig.getPropagateHeaderNameFilter().test(k)) {
+          if (parameter.getPropagateHeaderNameFilter().test(k)) {
             builder.header(k, v);
           }
         });
@@ -150,32 +156,31 @@ public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryS
     if (isNotEmpty(clientConfig.getHeaders())) {
       clientConfig.getHeaders().forEach(builder::header);
     }
-    Entity<?> entity = resolveInvocationEntity(parameter, querier);
+    Entity<?> entity = resolveInvocationEntity(querier.getParameter());
     // FIXME logging
     log(querier.getName(), () -> {
       List<String> exes = new ArrayList<>();
-      exes.add("Path: " + clientConfig.getRoot() + defaultString(targetConfig.getPath()));
-      exes.add("Method: " + targetConfig.getHttpMethod());
-      exes.add("Content-type: " + querier.getTargetConfig().getEntityMediaType());
+      exes.add("Path: " + clientConfig.getRoot() + defaultString(parameter.getPath()));
+      exes.add("Method: " + parameter.getHttpMethod());
+      exes.add("Content-type: " + querier.getParameter().getEntityMediaType());
       if (builder instanceof ClientInvocationBuilder cb) {
         cb.getHeaders().asMap().forEach((k, v) -> exes.add(k + ": " + v));
       }
       return exes;
-    }, parameter);
+    }, entity == null ? null : entity.getEntity());
     if (entity != null) {
-      return builder.build(querier.getTargetConfig().getHttpMethod(), entity);
+      return builder.build(querier.getParameter().getHttpMethod(), entity);
     } else {
-      return builder.build(querier.getTargetConfig().getHttpMethod());
+      return builder.build(querier.getParameter().getHttpMethod());
     }
   }
 
-  protected Entity<?> resolveInvocationEntity(QueryParameter parameter, JaxrsNamedQuerier querier) {
-    if (querier.getTargetConfig().isOnlyUsePathParameters()) {
+  protected Entity<?> resolveInvocationEntity(JaxrsQueryParameter parameter) {
+    if (parameter.isOnlyUsePathParameters()) {
       return null;
     }
-    Object entity =
-        querier.getTargetConfig().isOnlyUseEmptyMapAsParameter() ? emptyMap() : parameter;
-    return Entity.entity(entity, querier.getTargetConfig().getEntityMediaType());
+    Object entity = parameter.isOnlyUseEmptyMapAsParameter() ? emptyMap() : parameter.getEntity();
+    return Entity.entity(entity, parameter.getEntityMediaType());
 
   }
 }

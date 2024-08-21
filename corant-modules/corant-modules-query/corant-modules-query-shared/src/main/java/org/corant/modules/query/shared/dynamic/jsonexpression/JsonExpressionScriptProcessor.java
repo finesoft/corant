@@ -242,7 +242,6 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @param single indicates whether is single value projection or not
    * @see InjectionHandler
    */
-  @SuppressWarnings("unchecked")
   protected InjectionHandler resolveInjectionHandler(Map<String, Object> projectionMap,
       boolean single) {
     Set<ProjectionMapping> mappings = new LinkedHashSet<>();

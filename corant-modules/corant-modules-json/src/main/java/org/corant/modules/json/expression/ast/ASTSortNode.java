@@ -31,7 +31,7 @@ import org.corant.shared.util.Streams;
 public class ASTSortNode extends AbstractASTNode<Object> {
 
   protected Node<?> inputNode;
-  protected ASTValueNode sortableNamesNode;
+  protected ASTDeclarationNode sortableNamesNode;
   protected Node<?> sorterNode;
   protected String[] sortableNames;
 
@@ -59,8 +59,8 @@ public class ASTSortNode extends AbstractASTNode<Object> {
   public void postConstruct() {
     super.postConstruct();
     inputNode = children.get(0);
-    sortableNamesNode = (ASTValueNode) children.get(1);
+    sortableNamesNode = (ASTDeclarationNode) children.get(1);
     sorterNode = children.get(2);
-    sortableNames = ASTNode.parseVariableNames(sortableNamesNode.value.toString());
+    sortableNames = sortableNamesNode.getVariableNames();
   }
 }

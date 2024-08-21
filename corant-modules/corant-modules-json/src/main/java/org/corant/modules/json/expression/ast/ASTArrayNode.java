@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,43 +13,29 @@
  */
 package org.corant.modules.json.expression.ast;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
-import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 
 /**
  * corant-modules-json
  *
- * @author bingo 下午5:04:44
+ * @author bingo 18:19:29
  */
-public class ASTValueNode implements ASTNode<Object> {
-  protected ASTNode<?> parent;
-  protected final Object value;
-
-  public ASTValueNode(Object value) {
-    this.value = value;
-  }
-
-  @Override
-  public ASTNode<?> getParent() {
-    return parent;
-  }
+public class ASTArrayNode extends AbstractASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
-    return ASTNodeType.VALUE;
+    return ASTNodeType.ARRAY;
   }
 
   @Override
   public Object getValue(EvaluationContext ctx) {
-    return value;
+    if (children.isEmpty()) {
+      return new ArrayList<>();
+    }
+    return children.stream().map(c -> c.getValue(ctx)).collect(Collectors.toList());
   }
 
-  @Override
-  public void setParent(Node<?> parent) {
-    this.parent = (ASTNode<?>) parent;
-  }
-
-  public Object value() {
-    return value;
-  }
 }

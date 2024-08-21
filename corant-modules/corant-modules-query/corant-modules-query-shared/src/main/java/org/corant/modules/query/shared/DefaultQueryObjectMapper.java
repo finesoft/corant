@@ -85,6 +85,15 @@ public class DefaultQueryObjectMapper implements QueryObjectMapper {
   }
 
   @Override
+  public <T> T fromJsonString(String jsonString, TypeLiteral<T> type) {
+    try {
+      return objectMapper.readValue(jsonString, objectMapper.constructType(type.getType()));
+    } catch (JsonProcessingException e) {
+      throw new QueryRuntimeException(e);
+    }
+  }
+
+  @Override
   @SuppressWarnings("rawtypes")
   public Object getMappedValue(Object object, Object key) {
     String[] keyPath = (String[]) key;

@@ -42,7 +42,7 @@ public interface ASTNodeVisitor extends Sortable {
         break;
       case CP_REGEX:
         shouldBeTrue(node.getChildren().size() == 2
-            && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VAL);
+            && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VALUE);
         break;
       case CP_BTW:
         shouldBeTrue(node.getChildren().size() == 3);
@@ -63,35 +63,34 @@ public interface ASTNodeVisitor extends Sortable {
         shouldBeTrue(!node.getChildren().isEmpty());
         break;
       case FILTER:
-        shouldBeTrue(
-            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
-                && vn.value() instanceof String vns && isNotBlank(vns));
+        shouldBeTrue(node.getChildren().size() == 3
+            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+            && vn.value() instanceof String vns && isNotBlank(vns));
         break;
       case MAP:
-        shouldBeTrue(
-            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
-                && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 1);
+        shouldBeTrue(node.getChildren().size() == 3
+            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+            && vn.getVariableNames().length == 1);
         break;
       case SORT:
       case MAX:
       case MIN:
-        shouldBeTrue(
-            node.getChildren().size() == 3 && node.getChildren().get(1) instanceof ASTValueNode vn
-                && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
+        shouldBeTrue(node.getChildren().size() == 3
+            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+            && vn.getVariableNames().length == 2);
       case REDUCE: {
         if (node.getChildren().size() == 3) {
-          shouldBeTrue(node.getChildren().get(1) instanceof ASTValueNode vn
-              && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
+          shouldBeTrue(node.getChildren().get(1) instanceof ASTDeclarationNode vn
+              && vn.getVariableNames().length == 2);
         } else if (node.getChildren().size() == 4) {
-          shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode vn
-              && vn.value() instanceof String vns && ASTNode.parseVariableNames(vns).length == 2);
+          shouldBeTrue(node.getChildren().get(2) instanceof ASTDeclarationNode vn
+              && vn.getVariableNames().length == 2);
         }
         // else if (node.getChildren().size() == 6) {
-        // shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode avn
-        // && avn.value() instanceof String avns && ASTNode.parseVariableNames(avns).length == 2
-        // && node.getChildren().get(4) instanceof ASTValueNode cvn
-        // && cvn.value() instanceof String cvns
-        // && ASTNode.parseVariableNames(cvns).length == 2);
+        // shouldBeTrue(node.getChildren().get(2) instanceof ASTDeclarationNode avn
+        // && avn.getVariableNames().length == 2
+        // && node.getChildren().get(4) instanceof ASTDeclarationNode cvn
+        // && cvn.getVariableNames().length == 2);
         // }
         else {
           throw new CorantRuntimeException(
@@ -101,16 +100,14 @@ public interface ASTNodeVisitor extends Sortable {
       }
       case COLLECT:
         // if (node.getChildren().size() == 6) {
-        // shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode avn
-        // && avn.value() instanceof String avns && ASTNode.parseVariableNames(avns).length == 2
-        // && node.getChildren().get(4) instanceof ASTValueNode cvn
-        // && cvn.value() instanceof String cvns
-        // && ASTNode.parseVariableNames(cvns).length == 2);
+        // shouldBeTrue(node.getChildren().get(2) instanceof ASTDeclarationNode avn
+        // && avn.getVariableNames().length == 2
+        // && node.getChildren().get(4) instanceof ASTDeclarationNode cvn
+        // && cvn.getVariableNames().length == 2);
         // } else
         if (node.getChildren().size() == 4) {
-          shouldBeTrue(node.getChildren().get(2) instanceof ASTValueNode avn
-              && avn.value() instanceof String avns
-              && ASTNode.parseVariableNames(avns).length == 2);
+          shouldBeTrue(node.getChildren().get(2) instanceof ASTDeclarationNode avn
+              && avn.getVariableNames().length == 2);
         } else {
           throw new CorantRuntimeException(
               "Expression error! Collect expression must contain a target object and a variable declaration and an accumulator expression!");

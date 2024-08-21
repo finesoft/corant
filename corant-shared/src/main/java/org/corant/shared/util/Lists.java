@@ -155,6 +155,25 @@ public class Lists {
   }
 
   /**
+   * Returns either the passed in list, or if the list is {@code null} or {@link List#isEmpty()} the
+   * value of {@code defaultList}.
+   *
+   * @param <E> the element type
+   * @param list the list, possibly {@code null} or {@link List#isEmpty()}
+   * @param defaultList the returned values if list is {@code null} or {@link List#isEmpty()}
+   */
+  public static <E> List<E> defaultEmpty(Collection<E> list, List<E> defaultList) {
+    if (list == null || list.isEmpty()) {
+      return defaultList;
+    }
+    if (list instanceof List<E> s) {
+      return s;
+    } else {
+      return new ArrayList<>(list);
+    }
+  }
+
+  /**
    * Remove duplicate elements of the array and return a new array of unique elements sorted in the
    * original order. Return null if the given {@code src} array is null, return an empty new array
    * if the given {@code src} array is empty.

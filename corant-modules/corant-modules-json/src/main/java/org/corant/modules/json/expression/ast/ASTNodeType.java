@@ -375,12 +375,41 @@ public enum ASTNodeType {
   },
 
   /**
+   * The declaration node
+   */
+  DEC("", true) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTDeclarationNode(object);
+    }
+  },
+  /**
    * The value node
    */
-  VAL("", true) {
+  VALUE("", true) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTValueNode(object);
+    }
+  },
+
+  /**
+   * The array node
+   */
+  ARRAY("", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTArrayNode();
+    }
+  },
+
+  /**
+   * The object node
+   */
+  OBJECT("", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTObjectNode();
     }
   };
 
@@ -402,6 +431,8 @@ public enum ASTNodeType {
         } else if (useToken.startsWith(ASTNodeType.FUN.token)
             && useToken.length() > ASTNodeType.FUN.token.length()) {
           return ASTNodeType.FUN;
+        } else if (useToken.startsWith("(") && useToken.endsWith(")")) {
+          return ASTNodeType.DEC;
         } else {
           for (ASTNodeType t : ASTNodeType.values()) {
             if (t != ASTNodeType.FUN && t != ASTNodeType.VAR
@@ -412,7 +443,7 @@ public enum ASTNodeType {
         }
       }
     }
-    return ASTNodeType.VAL;
+    return null;
   }
 
   public abstract ASTNode<?> buildNode(Object object);

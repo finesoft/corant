@@ -31,7 +31,7 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
 
   protected Node<?> inputNode;
   protected Node<?> identityNode;
-  protected ASTValueNode accumulatorNamesNode;
+  protected ASTDeclarationNode accumulatorNamesNode;
   protected Node<?> accumulatorNode;
   protected String[] accumulatorNames;
 
@@ -78,14 +78,14 @@ public class ASTReduceNode extends AbstractASTNode<Object> {
     inputNode = children.get(0);
     if (children.size() == 3) {
       // only accumulator;
-      accumulatorNamesNode = (ASTValueNode) children.get(1);
-      accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
+      accumulatorNamesNode = (ASTDeclarationNode) children.get(1);
+      accumulatorNames = accumulatorNamesNode.getVariableNames();
       accumulatorNode = children.get(2);
     } else if (children.size() == 4) {
       // identity & accumulator
       identityNode = children.get(1);
-      accumulatorNamesNode = (ASTValueNode) children.get(2);
-      accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
+      accumulatorNamesNode = (ASTDeclarationNode) children.get(2);
+      accumulatorNames = accumulatorNamesNode.getVariableNames();
       accumulatorNode = children.get(3);
     } else {
       throw new NotSupportedException();

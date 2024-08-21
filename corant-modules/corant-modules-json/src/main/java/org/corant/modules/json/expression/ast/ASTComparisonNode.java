@@ -319,7 +319,7 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     @Override
     public void postConstruct() {
       shouldBeTrue(sizeOf(getChildren()) == 2
-          && ((ASTNode<?>) getChildren().get(1)).getType() == ASTNodeType.VAL);
+          && ((ASTNode<?>) getChildren().get(1)).getType() == ASTNodeType.VALUE);
       pattern = Pattern.compile(((ASTValueNode) getChildren().get(1)).getValue(null).toString());
     }
   }

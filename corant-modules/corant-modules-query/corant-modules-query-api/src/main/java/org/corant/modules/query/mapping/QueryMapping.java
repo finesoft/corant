@@ -98,11 +98,15 @@ public class QueryMapping {
             "The 'script' element: [query-mappings > query(%s) > script] can not null! query file [%s]",
             q.getName(), getUrl()));
       }
-      if (q.getScript().getType() == ScriptType.JSE) {
-        brokens.add(format(
-            "The 'type' attribute: [query-mappings > query(%s) > script -> type] not support! query file [%s]",
-            q.getName(), getUrl()));
-      }
+
+      // // since 2024/08/19
+      // if (q.getScript().getType() == ScriptType.JSE) {
+      // brokens.add(format(
+      // "The 'type' attribute: [query-mappings > query(%s) > script -> type] not support! query
+      // file [%s]",
+      // q.getName(), getUrl()));
+      // }
+
       if (queryNames.contains(q.getVersionedName())) {
         brokens.add(format(
             "The 'name' attribute: [query-mappings > query(%s) -> name] can not repeat! query file [%s]",
@@ -134,6 +138,7 @@ public class QueryMapping {
               q.getName(), fq.getReferenceQuery().getName(), getUrl()));
         }
 
+        // // comment: allow for more liberal injections
         // if (isBlank(fq.getInjectPropertyName())) {
         // brokens.add(format(
         // "The 'inject-property-name' attribute of 'fetch-query' in query element [%s] in query

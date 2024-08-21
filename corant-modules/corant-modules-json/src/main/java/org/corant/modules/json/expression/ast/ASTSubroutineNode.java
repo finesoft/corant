@@ -36,8 +36,8 @@ public class ASTSubroutineNode extends AbstractASTNode<Object> {
   public Object getValue(EvaluationContext ctx) {
     final Node<?> xNode = children.get(0);
     String varName = null;
-    if (xNode instanceof ASTValueNode avn && avn.value() instanceof String anvs) {
-      String[] ns = ASTNode.parseVariableNames(anvs);
+    if (xNode instanceof ASTDeclarationNode avn) {
+      String[] ns = avn.getVariableNames();
       if (ns.length > 0) {
         varName = ns[0];
       }

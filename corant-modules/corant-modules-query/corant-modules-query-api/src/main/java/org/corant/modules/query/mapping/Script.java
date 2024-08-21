@@ -112,7 +112,8 @@ public class Script implements Serializable {
      */
     CDI,
     /**
-     * Indicates that the script or expression language is Json expression.
+     * Indicates that the script or expression language is JSON or JSON expression or or a mix of
+     * both.
      */
     JSE;
 

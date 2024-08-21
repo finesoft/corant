@@ -27,17 +27,17 @@ import org.corant.modules.query.shared.AbstractNamedQuerier;
  */
 public class DefaultJaxrsNamedQuerier extends AbstractNamedQuerier implements JaxrsNamedQuerier {
 
-  protected WebTarget target;
-  protected WebTargetConfig targetConfig;
   protected JaxrsNamedQueryClientConfig clientConfig;
+  protected WebTarget target;
+  protected JaxrsQueryParameter parameter;
 
   protected DefaultJaxrsNamedQuerier(Query query, QueryParameter queryParameter,
       QueryHandler queryHandler, FetchQueryHandler fetchQueryHandler,
-      JaxrsNamedQueryClientConfig clientConfig, WebTargetConfig targetConfig, WebTarget target) {
+      JaxrsNamedQueryClientConfig clientConfig, WebTarget target, JaxrsQueryParameter parameter) {
     super(query, queryParameter, queryHandler, fetchQueryHandler);
     this.clientConfig = clientConfig;
-    this.targetConfig = targetConfig;
     this.target = target;
+    this.parameter = parameter;
   }
 
   @Override
@@ -46,12 +46,12 @@ public class DefaultJaxrsNamedQuerier extends AbstractNamedQuerier implements Ja
   }
 
   @Override
-  public WebTarget getTarget() {
-    return target;
+  public JaxrsQueryParameter getParameter() {
+    return parameter;
   }
 
   @Override
-  public WebTargetConfig getTargetConfig() {
-    return targetConfig;
+  public WebTarget getTarget() {
+    return target;
   }
 }

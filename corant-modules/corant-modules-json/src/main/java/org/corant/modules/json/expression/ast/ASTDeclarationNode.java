@@ -13,20 +13,36 @@
  */
 package org.corant.modules.json.expression.ast;
 
+import static org.corant.shared.util.Strings.split;
+import java.util.Arrays;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-json
  *
  * @author bingo 下午5:04:44
  */
-public class ASTValueNode implements ASTNode<Object> {
+public class ASTDeclarationNode implements ASTNode<Object> {
   protected ASTNode<?> parent;
   protected final Object value;
+  protected String[] variableNames;
 
-  public ASTValueNode(Object value) {
+  public ASTDeclarationNode(Object value) {
     this.value = value;
+    variableNames = parseVariableNames(value.toString());
+  }
+
+  public static String[] parseVariableNames(String varNames) {
+    if (varNames.startsWith("(") && varNames.endsWith(")")) {
+      return split(varNames.substring(1, varNames.length() - 1), ",", true, true);
+    }
+    return Strings.EMPTY_ARRAY;
+  }
+
+  public static String[] variableNamesOf(Node<?> node, EvaluationContext ctx) {
+    return parseVariableNames(node.getValue(ctx).toString());
   }
 
   @Override
@@ -36,12 +52,16 @@ public class ASTValueNode implements ASTNode<Object> {
 
   @Override
   public ASTNodeType getType() {
-    return ASTNodeType.VALUE;
+    return ASTNodeType.DEC;
   }
 
   @Override
   public Object getValue(EvaluationContext ctx) {
     return value;
+  }
+
+  public String[] getVariableNames() {
+    return Arrays.copyOf(variableNames, variableNames.length);
   }
 
   @Override

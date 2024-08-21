@@ -31,7 +31,7 @@ public class ASTCollectNode extends AbstractASTNode<Object> {
 
   protected Node<?> inputNode;
   protected Node<?> supplierNode;
-  protected ASTValueNode accumulatorNamesNode;
+  protected ASTDeclarationNode accumulatorNamesNode;
   protected Node<?> accumulatorNode;
   protected String[] accumulatorNames;
 
@@ -66,9 +66,9 @@ public class ASTCollectNode extends AbstractASTNode<Object> {
     inputNode = children.get(0);
     // supplier & accumulator & combiner(fake)
     supplierNode = children.get(1);
-    accumulatorNamesNode = (ASTValueNode) children.get(2);
+    accumulatorNamesNode = (ASTDeclarationNode) children.get(2);
     accumulatorNode = children.get(3);
-    accumulatorNames = ASTNode.parseVariableNames(accumulatorNamesNode.value.toString());
+    accumulatorNames = accumulatorNamesNode.getVariableNames();
   }
 
 }

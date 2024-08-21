@@ -28,7 +28,7 @@ import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 public class ASTEachNode extends AbstractASTNode<Object> {
 
   protected Node<?> inputNode;
-  protected ASTValueNode eachNameNode;
+  protected ASTDeclarationNode eachNameNode;
   protected Node<?> subroutineNode;
   protected Node<?> breakNode;
   protected String eachName;
@@ -60,9 +60,9 @@ public class ASTEachNode extends AbstractASTNode<Object> {
   public void postConstruct() {
     super.postConstruct();
     inputNode = children.get(0);
-    eachNameNode = (ASTValueNode) children.get(1);
+    eachNameNode = (ASTDeclarationNode) children.get(1);
     subroutineNode = children.get(2);
-    eachName = ASTNode.parseVariableNames(eachNameNode.value.toString())[0];
+    eachName = eachNameNode.getVariableNames()[0];
   }
 
 }

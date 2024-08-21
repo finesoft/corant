@@ -14,13 +14,10 @@
 package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldInstanceOf;
-import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.List;
-import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
 import org.corant.shared.exception.NotSupportedException;
-import org.corant.shared.util.Strings;
 
 /**
  * corant-modules-json
@@ -28,17 +25,6 @@ import org.corant.shared.util.Strings;
  * @author bingo 下午5:04:44
  */
 public interface ASTNode<T> extends Node<T> {
-
-  static String[] parseVariableNames(String varNames) {
-    if (varNames.startsWith("(") && varNames.endsWith(")")) {
-      return split(varNames.substring(1, varNames.length() - 1), ",", true, true);
-    }
-    return Strings.EMPTY_ARRAY;
-  }
-
-  static String[] variableNamesOf(Node<?> node, EvaluationContext ctx) {
-    return parseVariableNames(node.getValue(ctx).toString());
-  }
 
   @Override
   default boolean addChild(Node<?> child) {

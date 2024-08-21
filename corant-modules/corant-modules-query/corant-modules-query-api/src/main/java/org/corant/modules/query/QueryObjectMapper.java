@@ -53,6 +53,17 @@ public interface QueryObjectMapper {
   <T> T fromJsonString(String jsonString, Class<T> type);
 
   /**
+   * Deserialize JSON content from given JSON content String and expected type.
+   *
+   * @param <T> the expected type
+   * @param jsonString the JSON content
+   * @param type the expected type literal
+   * @return the object
+   * @since 2024-08-19
+   */
+  <T> T fromJsonString(String jsonString, TypeLiteral<T> type);
+
+  /**
    * From the object of the given map struct, get the corresponding value through the given key.
    *
    * @param object the map struct object

@@ -38,6 +38,25 @@ import org.corant.shared.ubiquity.Immutable.ImmutableSetBuilder;
 public class Sets {
 
   /**
+   * Returns either the passed in set, or if the set is {@code null} or {@link Set#isEmpty()} the
+   * value of {@code defaultSet}.
+   *
+   * @param <E> the element type
+   * @param set the set, possibly {@code null} or {@link Set#isEmpty()}
+   * @param defaultSet the returned values if set is {@code null} or {@link Set#isEmpty()}
+   */
+  public static <E> Set<E> defaultEmpty(Collection<E> set, Set<E> defaultSet) {
+    if (set == null || set.isEmpty()) {
+      return defaultSet;
+    }
+    if (set instanceof Set<E> s) {
+      return s;
+    } else {
+      return new HashSet<>(set);
+    }
+  }
+
+  /**
    * The relative complement, or difference, of the specified left and right set. Namely, the
    * resulting set contains all the elements that are in the left set but not in the right set.
    * Neither input is mutated by this operation, an entirely new set is returned.

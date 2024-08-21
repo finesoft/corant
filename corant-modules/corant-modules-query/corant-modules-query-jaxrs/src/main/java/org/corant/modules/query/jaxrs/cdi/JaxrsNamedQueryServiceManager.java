@@ -28,12 +28,14 @@ import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
+import org.corant.shared.ubiquity.Experimental;
 
 /**
  * corant-modules-query-jaxrs
  *
  * @author bingo 下午6:04:28
  */
+@Experimental
 @ApplicationScoped
 public class JaxrsNamedQueryServiceManager implements NamedQueryServiceManager {
 

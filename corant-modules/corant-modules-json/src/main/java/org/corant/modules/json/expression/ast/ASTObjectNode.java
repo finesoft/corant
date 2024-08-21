@@ -13,7 +13,7 @@
  */
 package org.corant.modules.json.expression.ast;
 
-import static org.corant.shared.util.Assertions.shouldInstanceOf;
+import static org.corant.shared.util.Assertions.shouldBeTrue;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,7 +40,8 @@ public class ASTObjectNode extends AbstractASTNode<Object> {
     if (childNode instanceof EntryNode) {
       keyValue = true;
       if (!children.isEmpty()) {
-        shouldInstanceOf(children.get(0), EntryNode.class);
+        shouldBeTrue(children.stream().allMatch(EntryNode.class::isInstance),
+            "All children of an object node are either all values or all key-value pairs");
       }
     }
     return children.add(childNode);

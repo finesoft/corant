@@ -37,7 +37,6 @@ import org.corant.modules.query.shared.AbstractNamedQuerierBuilder;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Sortable;
-import org.corant.shared.ubiquity.TypeLiteral;
 
 /**
  * corant-modules-query-jaxrs
@@ -59,9 +58,7 @@ public class JsonExpressionJaxrsQuerierBuilder
     super(query, queryHandler, fetchQueryHandler);
     this.client = client;
     this.clientConfig = clientConfig;
-    Map<String, Object> map = queryHandler.getObjectMapper()
-        .fromJsonString(query.getScript().getCode(), new TypeLiteral<Map<String, Object>>() {});
-    execution = SimpleParser.parse(map);
+    execution = SimpleParser.parse(query.getScript().getCode());
     functionResolvers = SimpleParser.resolveFunction().toList();
   }
 

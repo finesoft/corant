@@ -136,7 +136,7 @@ public class SimpleParser {
   }
 
   static Node<?> parse(ASTNodeBuilder builder, ASTNodeVisitor visitor, JsonNode jsonNode)
-      throws Exception, IOException {
+      throws Exception {
     ASTNode<?> root;
     if (jsonNode.isArray()) {
       root = builder.arrayNodeOf();
@@ -165,7 +165,7 @@ public class SimpleParser {
   }
 
   static void parseJsonArrayNode(ASTNodeBuilder builder, ASTNodeVisitor visitor, Node<?> parent,
-      JsonNode jsonNode) throws IOException, Exception {
+      JsonNode jsonNode) throws Exception {
     Iterator<JsonNode> iterator = jsonNode.elements();
     while (iterator.hasNext()) {
       JsonNode subJsonNode = iterator.next();
@@ -204,6 +204,8 @@ public class SimpleParser {
           makeRelation(visitor, parent, subNode);
         }
 
+      } else {
+        throw new NotSupportedException("Can't support % json node!", jsonNode);
       }
     }
   }
@@ -227,7 +229,7 @@ public class SimpleParser {
           makeRelation(visitor, parent, nonValNode);
         }
       } else {
-        ASTNode<?> entryNode = null;
+        ASTNode<?> entryNode;
         if (subJsonNode.isValueNode() || subJsonNode.isNull()) {
           entryNode = builder.entryNodeOf(name, createASTNodeFromJsonValue(builder, subJsonNode));
         } else if (subJsonNode.isArray()) {
@@ -238,6 +240,8 @@ public class SimpleParser {
           ASTNode<?> entryValueNode = builder.objectNode();
           parseJsonObjectNode(builder, visitor, entryValueNode, subJsonNode);
           entryNode = builder.entryNodeOf(name, entryValueNode);
+        } else {
+          throw new NotSupportedException("Can't support % json node!", subJsonNode);
         }
         makeRelation(visitor, parent, entryNode);
       }

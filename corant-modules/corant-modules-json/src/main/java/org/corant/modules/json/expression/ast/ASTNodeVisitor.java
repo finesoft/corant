@@ -15,7 +15,7 @@ package org.corant.modules.json.expression.ast;
 
 import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Strings.isNotBlank;
-import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.modules.json.expression.ParseException;
 import org.corant.shared.ubiquity.Sortable;
 
 /**
@@ -34,22 +34,30 @@ public interface ASTNodeVisitor extends Sortable {
       case CP_LTE:
       case CP_NE:
       case LG_XOR:
-        shouldBeTrue(node.getChildren().size() == 2);
+        shouldBeTrue(node.getChildren().size() == 2,
+            () -> new ParseException("AST node [%s] must contain 2 children nodes",
+                node.getType().token()));
         break;
       case NON_NULL:
       case IS_NULL:
         shouldBeTrue(node.getChildren().size() == 1);
         break;
       case CP_REGEX:
-        shouldBeTrue(node.getChildren().size() == 2
-            && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VALUE);
+        shouldBeTrue(
+            node.getChildren().size() == 2
+                && ((ASTNode<?>) node.getChildren().get(1)).getType() == ASTNodeType.VALUE,
+            () -> new ParseException(
+                "AST node [%s] must contain 2 children nodes and the second must be a value node",
+                node.getType().token()));
         break;
       case CP_BTW:
         shouldBeTrue(node.getChildren().size() == 3);
         break;
       case CONDITIONAL:
       case NVL:
-        shouldBeTrue(node.getChildren().size() == 2 || node.getChildren().size() == 3);
+        shouldBeTrue(node.getChildren().size() == 2 || node.getChildren().size() == 3,
+            () -> new ParseException("AST node [%s] must contain 2 or 3 children nodes",
+                node.getType().token()));
         break;
       case CP_IN:
       case CP_NIN:
@@ -63,21 +71,34 @@ public interface ASTNodeVisitor extends Sortable {
         shouldBeTrue(!node.getChildren().isEmpty());
         break;
       case FILTER:
-        shouldBeTrue(node.getChildren().size() == 3
-            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
-            && vn.value() instanceof String vns && isNotBlank(vns));
+        shouldBeTrue(
+            node.getChildren().size() == 3
+                && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+                && vn.value() instanceof String vns && isNotBlank(vns),
+            () -> new ParseException(
+                "AST node [%s] must contain 3 children nodes and the second must be a declaration node",
+                node.getType().token()));
         break;
       case MAP:
-        shouldBeTrue(node.getChildren().size() == 3
-            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
-            && vn.getVariableNames().length == 1);
+        shouldBeTrue(
+            node.getChildren().size() == 3
+                && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+                && vn.getVariableNames().length == 1,
+            () -> new ParseException(
+                "AST node [%s] must contain 3 children nodes and the second must be a declaration node containing 1 variable declaration",
+                node.getType().token()));
         break;
       case SORT:
       case MAX:
       case MIN:
-        shouldBeTrue(node.getChildren().size() == 3
-            && node.getChildren().get(1) instanceof ASTDeclarationNode vn
-            && vn.getVariableNames().length == 2);
+        shouldBeTrue(
+            node.getChildren().size() == 3
+                && node.getChildren().get(1) instanceof ASTDeclarationNode vn
+                && vn.getVariableNames().length == 2,
+            () -> new ParseException(
+                "AST node [%s] nodes must contain 3 children nodes and the second must be a declaration node containing 2 variable declarations",
+                node.getType().token()));
+        break;
       case REDUCE: {
         if (node.getChildren().size() == 3) {
           shouldBeTrue(node.getChildren().get(1) instanceof ASTDeclarationNode vn
@@ -93,8 +114,9 @@ public interface ASTNodeVisitor extends Sortable {
         // && cvn.getVariableNames().length == 2);
         // }
         else {
-          throw new CorantRuntimeException(
-              "Expression error! REDUCE expression must contain a target object and an identity object (optional) and a variable declaration and an accumulator expression!");
+          throw new ParseException(
+              "AST node [%s] must contain a target object and an identity object (optional) and a variable declaration and an accumulator expression!",
+              node.getType().token());
         }
         break;
       }
@@ -109,8 +131,9 @@ public interface ASTNodeVisitor extends Sortable {
           shouldBeTrue(node.getChildren().get(2) instanceof ASTDeclarationNode avn
               && avn.getVariableNames().length == 2);
         } else {
-          throw new CorantRuntimeException(
-              "Expression error! Collect expression must contain a target object and a variable declaration and an accumulator expression!");
+          throw new ParseException(
+              "AST node [%s] must contain a target object and a variable declaration and an accumulator expression!",
+              node.getType().token());
         }
         break;
       default:

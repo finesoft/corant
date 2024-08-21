@@ -20,6 +20,7 @@ import static org.corant.shared.util.Strings.strip;
 import java.util.Arrays;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ParseException;
 
 /**
  * corant-modules-json
@@ -42,7 +43,8 @@ public interface ASTVariableNode extends ASTNode<Object> {
     protected final String[] namespace;
 
     public ASTDefaultVariableNode(String name) {
-      this.name = shouldNotBlank(strip(name));
+      this.name = shouldNotBlank(strip(name),
+          () -> new ParseException("AST node [%s] must have a name", ASTNodeType.VAR.token));
       namespace = splitNameSpace(this.name, true, false);
       shouldBeTrue(namespace.length > 0);
     }

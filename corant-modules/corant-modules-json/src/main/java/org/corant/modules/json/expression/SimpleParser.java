@@ -22,8 +22,6 @@ import org.corant.modules.json.expression.ast.ASTNode;
 import org.corant.modules.json.expression.ast.ASTNodeBuilder;
 import org.corant.modules.json.expression.ast.ASTNodeType;
 import org.corant.modules.json.expression.ast.ASTNodeVisitor;
-import org.corant.shared.exception.CorantRuntimeException;
-import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.util.Services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +48,7 @@ public class SimpleParser {
       JsonNode jsonNode = objectMapper.valueToTree(map);
       return parse(builder, visitor, jsonNode);
     } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      throw new ParseException(e);
     }
   }
 
@@ -67,7 +65,7 @@ public class SimpleParser {
       JsonNode jsonNode = objectMapper.readTree(json);
       return parse(builder, visitor, jsonNode);
     } catch (Exception e) {
-      throw new CorantRuntimeException(e);
+      throw new ParseException(e);
     }
   }
 
@@ -109,7 +107,7 @@ public class SimpleParser {
     } else if (jsonNode.isNull()) {
       jsonNodeValue = null;
     } else {
-      throw new NotSupportedException("Can't support % json node!", jsonNode);
+      throw new ParseException("Can't support % json node!", jsonNode);
     }
     ASTNode<?> node = null;
     if (jsonNodeValue instanceof String name) {
@@ -205,7 +203,7 @@ public class SimpleParser {
         }
 
       } else {
-        throw new NotSupportedException("Can't support % json node!", jsonNode);
+        throw new ParseException("Can't support % json node!", jsonNode);
       }
     }
   }
@@ -241,7 +239,7 @@ public class SimpleParser {
           parseJsonObjectNode(builder, visitor, entryValueNode, subJsonNode);
           entryNode = builder.entryNodeOf(name, entryValueNode);
         } else {
-          throw new NotSupportedException("Can't support % json node!", subJsonNode);
+          throw new ParseException("Can't support % json node!", subJsonNode);
         }
         makeRelation(visitor, parent, entryNode);
       }

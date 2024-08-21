@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.modules.json.expression.Node;
+import org.corant.modules.json.expression.ParseException;
 import org.corant.modules.json.expression.ast.ASTNode.AbstractASTNode;
 import org.corant.shared.ubiquity.Tuple.Pair;
 
@@ -41,7 +42,8 @@ public class ASTObjectNode extends AbstractASTNode<Object> {
       keyValue = true;
       if (!children.isEmpty()) {
         shouldBeTrue(children.stream().allMatch(EntryNode.class::isInstance),
-            "All children of an object node are either all values or all key-value pairs");
+            () -> new ParseException(
+                "All children of an object node are either all values or all key-value pairs"));
       }
     }
     return children.add(childNode);

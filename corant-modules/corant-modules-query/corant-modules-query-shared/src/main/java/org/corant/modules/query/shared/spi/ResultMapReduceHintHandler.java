@@ -54,18 +54,18 @@ import org.corant.shared.util.Objects;
  * <p>
  * The simple result map reduce hints.
  * <ul>
- * <li>The key is 'result-map-reduce'</li>
- * <li>The value of the parameter that named 'reduce-field-names' are the reduce field names during
- * reduction.</li>
- * <li>Multiple reduce field names use ',' to split, and if the field name end with ':?1@?2', the
- * '?1' is the projection name, '?2' is the projection type class name, both '?1' and '?2' are
- * optional.</li>
- * <li>The value of the parameter named 'retain-reduce-fields' is used to keep the reduced fields,
- * default is false.</li>
- * <li>The value of the parameter named 'nullable-reduce' is used to determine whether or not to
- * keep the reduced object. If 'nullable-reduce' is false, a null value is reduced if all mapped
- * fields are null, otherwise the reduced object is returned, but all properties of the object are
- * null, default is true.</li>
+ * <li>The key is {@code result-map-reduce}</li>
+ * <li>The value of the parameter that named {@code reduce-field-names} are the reduce field names
+ * during reduction.</li>
+ * <li>Multiple reduce field names use '{@code ,}' to split, and if the field name end with
+ * '{@code :?1@?2}', the '{@code ?1}' is the projection name, '{@code ?2}' is the projection type
+ * class name, both '{@code ?1}' and '{@code ?2}' are optional.</li>
+ * <li>The value of the parameter named {@code retain-reduce-fields} is used to keep the reduced
+ * fields, default is false.</li>
+ * <li>The value of the parameter named {@code nullable-reduce} is used to determine whether or not
+ * to keep the reduced object. If {@code nullable-reduce} is false, a null value is reduced if all
+ * mapped fields are null, otherwise the reduced object is returned, but all properties of the
+ * object are null, default is true.</li>
  * </ul>
  * </p>
  *

@@ -52,10 +52,11 @@ import org.corant.shared.ubiquity.Sortable;
  * The result bean mapper hints, use bean to intervene the result.
  * </p>
  * <ul>
- * <li>The key is 'result-bean-mapper'</li>
+ * <li>The key is {@code result-bean-mapper}</li>
  * <li>All beans must implement {@link ResultBeanMapper} with a {@link Named} qualifier and beans
  * scope are {@link ApplicationScoped}. The value of the {@link Named} annotation corresponds to the
- * hint parameter 'named', This annotation is used to distinguish bean instances at runtime.</li>
+ * hint parameter {@code named}, This annotation is used to distinguish bean instances at
+ * runtime.</li>
  * </ul>
  *
  * <p>

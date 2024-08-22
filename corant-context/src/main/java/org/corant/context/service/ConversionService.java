@@ -15,6 +15,7 @@ package org.corant.context.service;
 
 import static org.corant.shared.util.Maps.mapOf;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.IntFunction;
 import jakarta.inject.Singleton;
 import org.corant.shared.conversion.Conversion;
@@ -30,8 +31,10 @@ import org.corant.shared.conversion.Converters;
  */
 public interface ConversionService {
 
-  <C extends Collection<T>, T> C convert(final Object value, final Class<C> collectionClazz,
-      final Class<T> clazz, Object... hints);
+  <C extends Collection<T>, T> C convert(final Class<T> clazz,
+      final IntFunction<C> collectionFactory, final Map<String, Object> hints, final Object value);
+
+  <T> T convert(final Class<T> clazz, final Map<String, Object> hints, final Object value);
 
   <C extends Collection<T>, T> C convert(final Object value, final Class<T> clazz,
       final IntFunction<C> collectionFactory, Object... hints);
@@ -46,15 +49,19 @@ public interface ConversionService {
    * corant-context
    *
    * @author bingo 下午6:47:49
-   *
    */
   @Singleton
   class DefaultConversionService implements ConversionService {
 
     @Override
-    public <C extends Collection<T>, T> C convert(Object value, Class<C> collectionClazz,
-        Class<T> clazz, Object... hints) {
-      return Conversion.convert(value, collectionClazz, clazz, mapOf(hints));
+    public <C extends Collection<T>, T> C convert(Class<T> clazz, IntFunction<C> collectionFactory,
+        Map<String, Object> hints, Object value) {
+      return Conversion.convert(value, clazz, collectionFactory, hints, false);
+    }
+
+    @Override
+    public <T> T convert(Class<T> clazz, Map<String, Object> hints, Object value) {
+      return Conversion.convert(value, clazz, hints);
     }
 
     @Override
@@ -65,7 +72,11 @@ public interface ConversionService {
 
     @Override
     public <T> T convert(Object value, Class<T> clazz, Object... hints) {
-      return Conversion.convert(value, clazz, mapOf(hints));
+      if (hints.length > 0) {
+        return Conversion.convert(value, clazz, mapOf(hints));
+      } else {
+        return Conversion.convert(value, clazz);
+      }
     }
 
     @Override

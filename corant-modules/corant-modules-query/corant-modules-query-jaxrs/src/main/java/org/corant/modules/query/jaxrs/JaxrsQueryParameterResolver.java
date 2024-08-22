@@ -15,7 +15,6 @@ package org.corant.modules.query.jaxrs;
 
 import java.util.function.Function;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.jaxrs.JaxrsNamedQuerier.JaxrsQueryParameter;
 import org.corant.shared.ubiquity.Sortable;
 
 /**

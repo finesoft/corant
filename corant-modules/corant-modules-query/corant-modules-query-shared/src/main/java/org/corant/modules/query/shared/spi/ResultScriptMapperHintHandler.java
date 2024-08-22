@@ -40,10 +40,11 @@ import org.corant.modules.query.spi.ResultHintHandler;
  * <p>
  * The result script mapper hints, use script to intervene the result.
  * <ul>
- * <li>The key is 'result-script-mapper'</li>
+ * <li>The key is {@code result-script-mapper}</li>
  * <li>In the current implementation, we recommend the use of stateless functions, which take two
- * arguments. The first argument 'p' is used to accept the query parameter, usually a Map structure,
- * and the second argument 'r' is the row data of the result set, usually a Map structure.</li>
+ * arguments. The first argument '{@code p}' is used to accept the query parameter, usually a Map
+ * structure, and the second argument '{@code r}' is the row data of the result set, usually a Map
+ * structure.</li>
  * <li>The script engine of the current implementation is 'Oracle Nashorn' that supports java script
  * language. We use CompiledScript to improve performance, which means you have to pay attention to
  * writing scripts, preferably stateless functions, that can be problematic in multi-threaded

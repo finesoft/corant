@@ -159,10 +159,14 @@ public class HibernateOrmDeveloperKits {
   protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
       String... integrations) {
     Properties props = propertiesOf(integrations);
+    HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach((k, v) -> {
+      props.putIfAbsent(k, v);
+    });
     props.put(SchemaToolingSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(SchemaToolingSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
     props.put(SchemaToolingSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, "none");
+
     JPAExtension extension = select(JPAExtension.class).get();
     DataSourceService dataSourceService = select(DataSourceService.class).get();
     PersistenceUnitInfoMetaData pum =

@@ -17,11 +17,13 @@ import static java.util.Collections.emptyMap;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.mapOf;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -30,7 +32,6 @@ import jakarta.ws.rs.core.GenericType;
 import org.corant.modules.query.FetchableNamedQuerier;
 import org.corant.modules.query.QueryParameter;
 import org.corant.modules.query.QueryParameter.DefaultQueryParameter;
-import org.corant.modules.query.jaxrs.JaxrsNamedQuerier.JaxrsQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
@@ -50,7 +51,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryService {
 
   protected static final GenericType<List<Map<String, Object>>> listMapType =
-      new GenericType<>(new TypeLiteral<List<Map<String, Object>>>() {}.getType());
+      new GenericType<>(TypeLiteral.LIST_DOC_TYPE.getType());
 
   protected static final GenericType<Paging<Map<String, Object>>> pagingMapType =
       new GenericType<>(new TypeLiteral<Paging<Map<String, Object>>>() {}.getType());
@@ -142,12 +143,14 @@ public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryS
     JaxrsNamedQueryClientConfig clientConfig = querier.getClientConfig();
     Builder builder = target.request(parameter.getRequestMediaTypeArray())
         .accept(parameter.getAcceptMediaTypeArray());
-    if (parameter.getPropagateHeaderNameFilter() != null) {
+    Predicate<String> propagateHeaderNameFilter = defaultObject(
+        parameter.getPropagateHeaderNameFilter(), clientConfig.getPropagateHeaderNameFilter());
+    if (propagateHeaderNameFilter != null) {
       // TODO FIXME use client request filter
       HttpRequest request = ResteasyProviderFactory.getInstance().getContextData(HttpRequest.class);
       if (request != null) {
         request.getHttpHeaders().getRequestHeaders().forEach((k, v) -> {
-          if (parameter.getPropagateHeaderNameFilter().test(k)) {
+          if (propagateHeaderNameFilter.test(k)) {
             builder.header(k, v);
           }
         });

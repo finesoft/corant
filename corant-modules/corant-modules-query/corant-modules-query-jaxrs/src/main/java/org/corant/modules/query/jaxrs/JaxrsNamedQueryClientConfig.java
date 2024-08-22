@@ -16,6 +16,7 @@ package org.corant.modules.query.jaxrs;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.time.Duration;
 import java.util.Map;
+import java.util.function.Predicate;
 import org.corant.config.declarative.ConfigKeyItem;
 import org.corant.config.declarative.ConfigKeyRoot;
 import org.corant.config.declarative.DeclarativeConfig;
@@ -72,6 +73,11 @@ public class JaxrsNamedQueryClientConfig extends AbstractNamedObject implements 
   @ConfigKeyItem
   protected String trustStorePassword;
 
+  @ConfigKeyItem
+  protected String propagateHeaderNameWildcards;
+
+  protected transient Predicate<String> propagateHeaderNameFilter = null;
+
   public Duration getConnectTimeout() {
     return connectTimeout;
   }
@@ -90,6 +96,14 @@ public class JaxrsNamedQueryClientConfig extends AbstractNamedObject implements 
 
   public String getKeyStoreType() {
     return keyStoreType;
+  }
+
+  public Predicate<String> getPropagateHeaderNameFilter() {
+    return propagateHeaderNameFilter;
+  }
+
+  public String getPropagateHeaderNameWildcards() {
+    return propagateHeaderNameWildcards;
   }
 
   public Map<String, String> getProperties() {
@@ -132,5 +146,7 @@ public class JaxrsNamedQueryClientConfig extends AbstractNamedObject implements 
   @Override
   public void onPostConstruct(Config config, String key) {
     setName(key);
+    propagateHeaderNameFilter =
+        JaxrsQueryParameter.parsePropagateHeaderNameFilter(getPropagateHeaderNameWildcards());
   }
 }

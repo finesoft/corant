@@ -21,7 +21,6 @@ import org.corant.modules.lang.shared.ScriptEngineService;
 import org.corant.modules.query.FetchQueryHandler;
 import org.corant.modules.query.QueryHandler;
 import org.corant.modules.query.QueryParameter;
-import org.corant.modules.query.jaxrs.JaxrsNamedQuerier.JaxrsQueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.shared.AbstractNamedQuerierBuilder;
 import org.corant.shared.exception.NotSupportedException;

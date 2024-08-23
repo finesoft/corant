@@ -186,7 +186,8 @@ public class MessageReceivingExecutor implements ManagedMessageReceivingExecutor
         new MessageReceivingTaskExecution(meta, taskFactory.create(meta));
     ScheduleFutureTask task = new ScheduleFutureTask(execution, queue);
     long delay = Math.max(0, executorConfig.getInitialDelay().toMillis());
-    logger.info(format("Task will be executed after [%s]ms", delay));
+    logger.info(format("Message receiving task for destination [%s] will be executed after [%s]ms",
+        meta.getDestination(), delay));
     ScheduledFuture<?> future = service.schedule(task, delay, MILLISECONDS);
     execution.updateFuture(future);
     return execution;

@@ -51,6 +51,7 @@ import org.corant.modules.query.sql.dialect.Dialects;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Names;
 import org.corant.shared.normal.Names.JndiNames;
+import org.corant.shared.ubiquity.Tuple.Pair;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -93,20 +94,9 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   public FetchableNamedQueryService get(Object qualifier) {
     String key = resolveQualifier(qualifier);
     return services.computeIfAbsent(key, k -> {
-      String dataSourceName = defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME);
-      DBMS dialect = defaultQualifierDialect;
-      String useKey = k;
-      boolean jndi = useKey.startsWith(JndiNames.JNDI_COMP_NME);
-      if (jndi) {
-        useKey = useKey.substring(JndiNames.JNDI_COMP_NME.length());
-      }
-      String[] qs = split(useKey, Names.DOMAIN_SPACE_SEPARATORS, true, true);
-      if (qs.length > 0) {
-        dataSourceName = jndi ? JndiNames.JNDI_COMP_NME.concat(qs[0]) : qs[0];
-        if (qs.length > 1) {
-          dialect = toObject(qs[1], DBMS.class);
-        }
-      }
+      Pair<DBMS, String> dsNames = resolveDataSourceSchema(k);
+      String dataSourceName = dsNames.right();
+      DBMS dialect = dsNames.left();
       logger.fine(format(
           "Create default sql named query service, the data source is [%s] and dialect is [%s].",
           dataSourceName, dialect));
@@ -117,6 +107,24 @@ public class SqlNamedQueryServiceManager implements NamedQueryServiceManager {
   @Override
   public QueryType getType() {
     return QueryType.SQL;
+  }
+
+  public Pair<DBMS, String> resolveDataSourceSchema(String key) {
+    String dataSourceName = defaultQualifierValue.orElse(Qualifiers.EMPTY_NAME);
+    DBMS dialect = defaultQualifierDialect;
+    String useKey = key;
+    boolean jndi = useKey.startsWith(JndiNames.JNDI_COMP_NME);
+    if (jndi) {
+      useKey = useKey.substring(JndiNames.JNDI_COMP_NME.length());
+    }
+    String[] qs = split(useKey, Names.DOMAIN_SPACE_SEPARATORS, true, true);
+    if (qs.length > 0) {
+      dataSourceName = jndi ? JndiNames.JNDI_COMP_NME.concat(qs[0]) : qs[0];
+      if (qs.length > 1) {
+        dialect = toObject(qs[1], DBMS.class);
+      }
+    }
+    return Pair.of(dialect, dataSourceName);
   }
 
   @PreDestroy

@@ -1919,8 +1919,8 @@ public class MongoTemplate {
     }
 
     /**
-     * Limit the result size, default is 1. If the given limit <= 0 means don't limit the result
-     * size.
+     * Limit the result size, default is 1. If the given limit {@code <=0} means don't limit the
+     * result size.
      *
      * @param limit the result size.
      */

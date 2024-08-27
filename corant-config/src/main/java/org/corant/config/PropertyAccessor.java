@@ -136,6 +136,10 @@ public class PropertyAccessor {
     return name.length() > prefix.length() && name.startsWith(prefix);
   }
 
+  public Class<?> getInstanceClass() {
+    return instanceClass;
+  }
+
   public Map<String, Method> getPropertyGetters() {
     return propertyGetters;
   }
@@ -181,6 +185,10 @@ public class PropertyAccessor {
     }
   }
 
+  public boolean isSupportNamedProperty() {
+    return supportNamedProperty;
+  }
+
   public <T> T obtain(Object instance, String propertyName)
       throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException {
@@ -194,7 +202,6 @@ public class PropertyAccessor {
       throw new NoSuchMethodException(format("No getter for property [%s] in class [%s]",
           propertyName, instanceClass.getName()));
     }
-
   }
 
   /**

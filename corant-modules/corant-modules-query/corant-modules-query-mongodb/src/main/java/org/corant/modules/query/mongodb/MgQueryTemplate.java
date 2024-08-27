@@ -449,7 +449,7 @@ public class MgQueryTemplate {
   }
 
   /**
-   * The expected number of query result set.
+   * The expected number of query result set, {@code <=0} means not limit, default is 1.
    *
    * @see FindIterable#limit(int)
    */
@@ -515,6 +515,8 @@ public class MgQueryTemplate {
   }
 
   /**
+   * Sets the number of documents to skip, {@code <=0} means not skip, default is 0.
+   *
    * @see FindIterable#skip(int)
    */
   public MgQueryTemplate offset(int offset) {

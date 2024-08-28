@@ -13,7 +13,6 @@
  */
 package org.corant.modules.security.annotation;
 
-import static java.util.Collections.unmodifiableCollection;
 import static org.corant.shared.util.Configurations.getAssembledConfigValue;
 import static org.corant.shared.util.Configurations.getConfigValue;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -27,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.corant.shared.util.Configurations;
 import org.corant.shared.util.Strings;
 
@@ -62,10 +60,9 @@ public class SecuredMetadata implements Serializable {
         getConfigValue(DEFAULT_SECURED_TYPE_CFG_NAME, String.class, SecuredType.ROLE.name()))
             .strip());
     this.runAs = defaultTrim(getAssembledConfigValue(defaultString(runAs)));
-    Collection<String> aws = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
+    this.allowed = Arrays.stream(defaultObject(allowed, EMPTY_ARRAY))
         .map(Configurations::getAssembledConfigValues).flatMap(List::stream)
-        .filter(Strings::isNotBlank).map(String::strip).collect(Collectors.toList());
-    this.allowed = unmodifiableCollection(aws);
+        .filter(Strings::isNotBlank).map(String::strip).toList();
     this.denyAll = denyAll;
     hash = Objects.hash(this.allowed, this.denyAll, this.runAs, this.type);
   }

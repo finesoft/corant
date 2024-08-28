@@ -45,7 +45,7 @@ public interface Authorizer extends Sortable {
    * @param roleOrPermit the necessary (pre-configured) roles or permissions, used to compute
    *        whether the caller has access privileges with the roles or permissions acquired by the
    *        caller context.
-   * @return whether have access permissions
+   * @return whether the given context and role or permit have access permissions
    */
   default boolean testAccess(Object context, Object roleOrPermit) {
     return false;

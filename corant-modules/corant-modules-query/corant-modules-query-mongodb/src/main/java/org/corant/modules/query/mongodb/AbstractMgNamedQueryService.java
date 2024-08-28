@@ -166,9 +166,10 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (docList != null) {
       final boolean setId = isAutoSetIdField(querier);
       list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+      int listSize = list.size();
       docList.clear();
-      if (list.size() > 0) {
-        if (list.size() > limit) {
+      if (listSize > 0) {
+        if (listSize > limit) {
           list.remove(limit);
           result.withHasNext(true);
         }
@@ -215,10 +216,11 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     if (docList != null) {
       final boolean setId = isAutoSetIdField(querier);
       list = docList.stream().map(r -> convertDocument(r, querier, setId)).collect(toList());
+      int listSize = list.size();
       docList.clear();
-      if (list.size() > 0) {
-        if (list.size() < limit) {
-          result.withTotal(offset + list.size());
+      if (listSize > 0) {
+        if (listSize < limit) {
+          result.withTotal(offset + listSize);
         } else {
           result.withTotal((int) handleCount(querier, true));
         }

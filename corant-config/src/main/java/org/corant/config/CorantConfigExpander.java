@@ -56,7 +56,7 @@ public class CorantConfigExpander {
 
   public static final int EXPANDED_LIMITED = 16;
 
-  private static final Logger logger = Logger.getLogger(CorantConfigResolver.class.getName());
+  private static final Logger logger = Logger.getLogger(CorantConfigExpander.class.getName());
 
   public static String expand(String configValue, CorantConfigRawValueProvider provider) {
     String value = configValue;

@@ -35,7 +35,7 @@ public abstract class AbstractJMSConfig implements JMSConfig, NamedObject, Decla
     private static final long serialVersionUID = 5340760550873711017L;
   };
 
-  // the connection factory id means a artemis server or cluster
+  // the connection factory id means an artemis server or cluster
   @ConfigKeyItem
   protected String connectionFactoryId = Qualifiers.EMPTY_NAME;
 

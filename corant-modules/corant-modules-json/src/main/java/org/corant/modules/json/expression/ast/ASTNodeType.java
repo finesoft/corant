@@ -125,7 +125,7 @@ public enum ASTNodeType {
   },
 
   /**
-   * Performs a XOR operation on an array with at least two expressions and returns the objects that
+   * Performs an XOR operation on an array with at least two expressions and returns the objects that
    * do not meet any of the expressions.
    */
   LG_XOR("$xor", false) {

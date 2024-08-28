@@ -77,7 +77,7 @@ public class CDIMessageSourceBundleLocator implements ResourceBundleLocator {
    * @author bingo 下午3:43:08
    *
    */
-  static class MessageSourceBundle extends ResourceBundle {
+  public static class MessageSourceBundle extends ResourceBundle {
 
     final List<MessageSource> sources;
     final Locale locale;

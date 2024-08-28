@@ -33,7 +33,7 @@ public abstract class AbstractKeyedCacheInterceptor<I, T extends StaticCacheKeyI
    *
    * @param cacheInvocationContext The invocation context to get the {@link CacheMethodDetailsImpl} from.
    * @param interceptorType        The current interceptor type, used for validation.
-   * @return The casted {@link CacheMethodDetailsImpl} object.
+   * @return The cast {@link CacheMethodDetailsImpl} object.
    */
   @SuppressWarnings("unchecked")
   protected T getStaticCacheKeyInvocationContext(

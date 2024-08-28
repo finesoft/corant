@@ -778,7 +778,7 @@ public class JDBCTemplate {
 
   }
 
-  static class StreamableQueryRunner extends DbUtilQueryRunner {
+  public static class StreamableQueryRunner extends DbUtilQueryRunner {
 
     public StreamableQueryRunner() {}
 

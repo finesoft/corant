@@ -183,19 +183,20 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
     if (limit != null) {
       s.put("size", limit);
     }
-    return getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(s, true, false);
+    return getQuerierResolver().getQueryHandler().getObjectMapper().toJsonString(s, true, true);
   }
 
   protected <T> Pair<Long, List<T>> searchHits(String q, EsNamedQuerier querier, Integer offset,
       Integer limit) throws Exception {
     String script = resolveScript(querier.getScript(), offset, limit);
-    log(q, querier.getQueryParameter(), script);
+    String indexName = resolveIndexName(querier);
+    log(q, querier.getQueryParameter(), indexName, script);
     Map<String, String> properties = new HashMap<>(querier.getQuery().getProperties());
     if (querier.resolveTimeout() != null) {
       properties.put(EsQueryExecutor.PRO_KEY_ACT_GET_TIMEOUT, querier.resolveTimeout().toString());
     }
-    Pair<Long, List<Map<String, Object>>> hits = getExecutor().searchHits(resolveIndexName(querier),
-        script, properties, querier.getHintKeys());
+    Pair<Long, List<Map<String, Object>>> hits =
+        getExecutor().searchHits(indexName, script, properties, querier.getHintKeys());
     List<T> result = new ArrayList<>();
     if (!isEmpty(hits.getValue())) {
       handleFetching(hits.getValue(), querier);

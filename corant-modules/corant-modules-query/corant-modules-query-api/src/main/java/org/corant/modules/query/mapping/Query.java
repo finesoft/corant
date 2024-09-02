@@ -13,6 +13,10 @@
  */
 package org.corant.modules.query.mapping;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
@@ -22,7 +26,6 @@ import static org.corant.shared.util.Strings.defaultStrip;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,24 +48,25 @@ public class Query implements Serializable {
 
   private static final long serialVersionUID = -2142303696673387541L;
 
-  private String name;
-  private Class<?> resultClass = Map.class;
-  private Class<?> resultSetMapping;
-  private boolean cache = false;
-  private boolean cacheResultSetMetadata = false;
-  private String description;
-  private Script script = new Script();
-  private List<FetchQuery> fetchQueries = new ArrayList<>();
-  private List<QueryHint> hints = new ArrayList<>();
-  private String version = EMPTY;
-  private Map<String, ParameterMapping> paramMappings = new HashMap<>();
-  private Map<String, Class<?>> paramConvertSchema = new HashMap<>();
-  private Map<String, String> properties = new HashMap<>();
-  private String mappingFilePath;
-  private String macroScript;// FIXME temporary
-  private QueryType type; // since 2023-11-21
-  private String qualifier; // since 2023-11-21
-  private String versionedName; // since 2024-07-29
+  protected String name;
+  protected QueryType type; // since 2023-11-21
+  protected String qualifier; // since 2023-11-21
+  protected Class<?> resultClass = Map.class;
+  protected Class<?> resultSetMapping;
+  protected boolean cache = false;
+  protected boolean cacheResultSetMetadata = false;
+  protected String description;
+  protected Script script = new Script();
+  protected List<FetchQuery> fetchQueries = new ArrayList<>();
+  protected List<QueryHint> hints = new ArrayList<>();
+  protected String version = EMPTY;
+  protected Map<String, ParameterMapping> paramMappings = new HashMap<>();
+  protected Map<String, Class<?>> paramConvertSchema = new HashMap<>();
+  protected Map<String, String> properties = new HashMap<>();
+  protected String mappingFilePath;
+  protected String macroScript;// FIXME temporary
+  protected String versionedName; // since 2024-07-29
+  protected boolean inline = false; // since 2024-08-31
 
   public Query() {}
 
@@ -73,6 +77,8 @@ public class Query implements Serializable {
 
   /**
    * @param name the query name
+   * @param type the query type
+   * @param qualifier the query qualifier
    * @param resultClass the class of the query result records
    * @param resultSetMapping reserved field, may be used in the future
    * @param cache reserved field, may be used in the future
@@ -88,12 +94,14 @@ public class Query implements Serializable {
    * @param mappingFilePath the file containing this query
    * @param macroScript the macro script use in this query
    */
-  public Query(String name, Class<?> resultClass, Class<?> resultSetMapping, boolean cache,
-      boolean cacheResultSetMetadata, String description, Script script,
-      List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
+  public Query(String name, QueryType type, String qualifier, Class<?> resultClass,
+      Class<?> resultSetMapping, boolean cache, boolean cacheResultSetMetadata, String description,
+      Script script, List<FetchQuery> fetchQueries, List<QueryHint> hints, String version,
       Map<String, ParameterMapping> paramMappings, Map<String, String> properties,
       String mappingFilePath, String macroScript) {
     setName(name);
+    setType(type);
+    setQualifier(qualifier);
     setResultClass(resultClass);
     setResultSetMapping(resultSetMapping);
     setCache(cache);
@@ -290,7 +298,7 @@ public class Query implements Serializable {
    * Returns the all sub-fetch query identifiers
    */
   public List<String> getVersionedFetchQueryNames() {
-    return fetchQueries.stream().map(f -> f.getReferenceQuery().getVersionedName())
+    return fetchQueries.stream().map(f -> f.getQueryReference().getVersionedName())
         .collect(Collectors.toList());
   }
 
@@ -324,6 +332,10 @@ public class Query implements Serializable {
     return cacheResultSetMetadata;
   }
 
+  public boolean isInline() {
+    return inline;
+  }
+
   protected void addFetchQuery(FetchQuery fetchQuery) {
     fetchQueries.add(fetchQuery);
   }
@@ -346,20 +358,20 @@ public class Query implements Serializable {
   protected void postConstruct() {
     if (fetchQueries != null) {
       fetchQueries.forEach(FetchQuery::postConstruct);
-      fetchQueries = Collections.unmodifiableList(fetchQueries);
+      fetchQueries = unmodifiableList(fetchQueries);
     } else {
-      fetchQueries = Collections.emptyList();
+      fetchQueries = emptyList();
     }
     if (hints != null) {
       hints.forEach(QueryHint::postConstruct);
-      hints = Collections.unmodifiableList(hints);
+      hints = unmodifiableList(hints);
     } else {
-      hints = Collections.emptyList();
+      hints = emptyList();
     }
-    setParamMappings(getParamMappings() == null ? Collections.emptyMap()
-        : Collections.unmodifiableMap(getParamMappings()));
-    setProperties(getProperties() == null ? Collections.emptyMap()
-        : Collections.unmodifiableMap(getProperties()));
+    paramMappings = paramMappings == null ? emptyMap() : unmodifiableMap(paramMappings);
+    paramConvertSchema =
+        paramConvertSchema == null ? emptyMap() : unmodifiableMap(paramConvertSchema);
+    properties = properties == null ? emptyMap() : unmodifiableMap(properties);
 
   }
 
@@ -373,6 +385,10 @@ public class Query implements Serializable {
 
   protected void setDescription(String description) {
     this.description = description;
+  }
+
+  protected void setInline(boolean inline) {
+    this.inline = inline;
   }
 
   protected void setMacroScript(String macroScript) {
@@ -389,13 +405,20 @@ public class Query implements Serializable {
   }
 
   protected void setParamMappings(Map<String, ParameterMapping> paramMappings) {
-    this.paramMappings.putAll(paramMappings);
-    paramConvertSchema = Collections.unmodifiableMap(paramMappings.entrySet().stream()
-        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getType())));
+    this.paramMappings.clear();
+    paramConvertSchema.clear();
+    if (paramMappings != null) {
+      this.paramMappings.putAll(paramMappings);
+      paramConvertSchema = paramMappings.entrySet().stream()
+          .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getType()));
+    }
   }
 
   protected void setProperties(Map<String, String> properties) {
-    this.properties = properties;
+    this.properties.clear();
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
   }
 
   protected void setQualifier(String qualifier) {

@@ -122,7 +122,7 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
               } catch (Exception ex) {
                 throw new QueryRuntimeException(ex,
                     "Resolve fetch query [%s -> %s] injection script occurred error!",
-                    query.getVersionedName(), fq.getReferenceQuery().getVersionedName());
+                    query.getVersionedName(), fq.getQueryReference().getVersionedName());
               }
             }
             if (fq.getParameters() != null) {
@@ -134,7 +134,7 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
                   } catch (Exception ex) {
                     throw new QueryRuntimeException(ex,
                         "Resolve fetch query [%s -> %s] parameter script [%s] occurred error!",
-                        query.getVersionedName(), fq.getReferenceQuery().getVersionedName(),
+                        query.getVersionedName(), fq.getQueryReference().getVersionedName(),
                         fqp.getName());
                   }
                 }
@@ -147,7 +147,7 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
               } catch (Exception ex) {
                 throw new QueryRuntimeException(ex,
                     "Resolve fetch query [%s -> %s] predication occurred error!",
-                    query.getVersionedName(), fq.getReferenceQuery().getVersionedName());
+                    query.getVersionedName(), fq.getQueryReference().getVersionedName());
               }
             }
           }

@@ -96,7 +96,7 @@ public class QueryDeveloperKits {
       } catch (Exception e) {
         throwabls
             .add(new CorantRuntimeException(e, "FETCH-QUERY-PREDICATE-SCRIPT-ERROR : [%s -> %s]",
-                query.getVersionedName(), fq.getReferenceQuery()));
+                query.getVersionedName(), fq.getQueryReference()));
       }
     }
     if (fq.getInjectionScript().isValid()) {
@@ -105,7 +105,7 @@ public class QueryDeveloperKits {
             .apply(new ParameterAndResultPair(null, new ArrayList<>(), new ArrayList<>()));
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
-            query.getName(), fq.getReferenceQuery()));
+            query.getName(), fq.getQueryReference()));
       }
     }
   }

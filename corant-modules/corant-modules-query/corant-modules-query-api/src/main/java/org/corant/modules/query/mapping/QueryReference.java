@@ -29,15 +29,21 @@ public class QueryReference implements Serializable {
 
   private static final long serialVersionUID = 2437518228682652812L;
 
-  private String name;
-  private QueryType type;
-  private String qualifier;
-  private String version = EMPTY;
+  protected String name;
+  protected QueryType type;
+  protected String qualifier;
+  protected String version = EMPTY;
+
+  public QueryReference(Query query) {
+    setName(query.getName());
+    setType(query.getType());
+    setQualifier(query.getQualifier());
+    setVersion(query.getVersion());
+  }
 
   protected QueryReference() {}
 
   /**
-   *
    * @return the name
    */
   public String getName() {
@@ -45,7 +51,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @return the qualifier
    */
   public String getQualifier() {
@@ -53,7 +58,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @return the type
    */
   public QueryType getType() {
@@ -61,7 +65,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @return the version
    */
   public String getVersion() {
@@ -80,7 +83,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @param name the name to set
    */
   protected void setName(String name) {
@@ -96,7 +98,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @param type the type to set
    */
   protected void setType(QueryType type) {
@@ -104,7 +105,6 @@ public class QueryReference implements Serializable {
   }
 
   /**
-   *
    * @param version the version to set
    */
   protected void setVersion(String version) {

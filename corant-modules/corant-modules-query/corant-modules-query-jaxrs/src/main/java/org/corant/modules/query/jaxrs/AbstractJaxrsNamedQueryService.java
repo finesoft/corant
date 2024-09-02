@@ -60,7 +60,7 @@ public abstract class AbstractJaxrsNamedQueryService extends AbstractNamedQueryS
   public FetchedResult fetch(Object result, FetchQuery fetchQuery,
       FetchableNamedQuerier parentQuerier) {
     QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-    String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+    String refQueryName = fetchQuery.getQueryReference().getVersionedName();
     JaxrsNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
     int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
     QueryParameter usedFetchParam = new DefaultQueryParameter(fetchParam).limit(maxFetchSize);

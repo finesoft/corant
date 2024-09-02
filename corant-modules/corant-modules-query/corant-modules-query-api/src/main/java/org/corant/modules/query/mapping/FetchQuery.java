@@ -13,10 +13,15 @@
  */
 package org.corant.modules.query.mapping;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,33 +36,111 @@ import org.corant.shared.util.Strings;
  * parameters, and inject the results into the result set of the parent query. The fetch query is
  * generally used to query complex compound object result sets.
  * <p>
- * Fetch query actually defines a sub-query invocation, so each fetch query must refer to a real
- * {@link Query} and define the parameter and result set type of this query, and the processing
- * method of injecting into the parent query result, etc.
+ * Fetch query actually defines a sub-query invocation, so each fetch query can refer to an existing
+ * external query or define an in-line query but can't do either, as well as defining the parameter
+ * and result set type of the query, and the processing method of injecting into the parent query
+ * result, etc.
+ * <p>
+ * If fetch query define an in-line query, it can have owner sub-fetch query.
  *
  * @author bingo 上午10:26:45
  */
 public class FetchQuery implements Serializable {
 
   private static final long serialVersionUID = 449192431797295206L;
-  private QueryReference referenceQuery = new QueryReference();
-  private String injectPropertyName;
-  private String[] injectPropertyNamePath = Strings.EMPTY_ARRAY;
-  private Class<?> resultClass = Map.class;
-  private int maxSize = 0;
-  private List<FetchQueryParameter> parameters = new ArrayList<>();
-  private boolean multiRecords = true;
-  private Script predicateScript = new Script();
-  private Script injectionScript = new Script();
-  private boolean eagerInject = true;
-  private final String id = UUID.randomUUID().toString();
+
+  protected final String id = UUID.randomUUID().toString();
+
+  protected QueryReference queryReference;
+
+  protected String inlineQueryName; // since 2024-08-31
+  protected QueryType inlineQueryType; // since 2024-08-31
+  protected String inlineQueryQualifier; // since 2024-08-31
+  protected boolean inlineQueryCache;// since 2024-08-31
+  protected Map<String, String> properties = new HashMap<>(); // since 2024-08-31
+  protected Script inlineQueryScript = Script.EMPTY; // since 2024-08-31
+
+  protected String referenceQueryName;
+  protected QueryType referenceQueryType;
+  protected String referenceQueryQualifier;
+  protected String referenceQueryVersion;
+
+  protected String description;
+
+  protected String injectPropertyName;
+  protected String[] injectPropertyNamePath = Strings.EMPTY_ARRAY;
+  protected Class<?> resultClass = Map.class;
+  protected int maxSize = 0;
+  protected List<FetchQueryParameter> parameters = new ArrayList<>();
+  protected boolean multiRecords = true;
+  protected Script predicateScript = new Script();
+  protected Script injectionScript = new Script();
+  protected boolean eagerInject = true;
+
+  protected List<FetchQuery> fetchQueries = new ArrayList<>();// 2024-08-31
 
   public FetchQuery() {}
 
   /**
-   * Construct a fetch query
+   * Construct an in-line fetch query
    *
-   * @param referenceQuery the real query corresponding to this fetch query
+   * @param inlineQueryName the in-line fetch query name
+   * @param inlineQueryType the in-line fetch query type
+   * @param inlineQueryQualifier the in-line fetch query qualifier
+   * @param properties the query execution properties, used to tune the execution of the query
+   * @param inlineQueryScript the in-line fetch query script
+   * @param inlineQueryCache whether to cache in-line query result
+   * @param injectPropertyName the name of the parent query result property which use to hold the
+   *        fetch query results
+   * @param resultClass the fetch query result record class
+   * @param maxSize the max fetch query result size, -1 means unlimited
+   * @param parameters the fetch query parameters
+   * @param multiRecords indicates that the fetch query result set is multiple records
+   * @param predicate the script use to detect whether performance the fetch query
+   * @param injection the script use to performance inject the fetch query result to parent query
+   *        results.
+   * @param eagerInject indicates whether to performance the fetch query eager.
+   * @param fetchQueries the sub-fetch query
+   */
+  public FetchQuery(String inlineQueryName, QueryType inlineQueryType, String inlineQueryQualifier,
+      Map<String, String> properties, Script inlineQueryScript, boolean inlineQueryCache,
+      String injectPropertyName, Class<?> resultClass, int maxSize,
+      List<FetchQueryParameter> parameters, boolean multiRecords, Script predicate,
+      Script injection, boolean eagerInject, List<FetchQuery> fetchQueries) {
+    setInlineQueryName(inlineQueryName);
+    setInlineQueryType(inlineQueryType);
+    setInlineQueryQualifier(inlineQueryQualifier);
+    setProperties(properties);
+    setInlineQueryCache(inlineQueryCache);
+    setInlineQueryScript(inlineQueryScript);
+    setInjectPropertyName(injectPropertyName);
+    setResultClass(resultClass);
+    setMaxSize(maxSize);
+    if (parameters != null) {
+      this.parameters.addAll(parameters);
+    }
+    setMultiRecords(multiRecords);
+    if (predicate != null) {
+      setPredicateScript(predicate);
+    }
+    if (injection != null) {
+      setInjectionScript(injection);
+    }
+    setEagerInject(eagerInject);
+    if (isNotEmpty(fetchQueries)) {
+      for (FetchQuery fq : fetchQueries) {
+        addFetchQuery(fq);
+      }
+    }
+  }
+
+  /**
+   * Construct a reference fetch query
+   *
+   * @param referenceQueryName the real query name corresponding to this fetch query
+   * @param referenceQueryType the real query type corresponding to this fetch query
+   * @param referenceQueryQualifier the real query qualifier corresponding to this fetch query
+   * @param referenceQueryVersion the real query version corresponding to this fetch query
    * @param injectPropertyName the name of the parent query result property which use to hold the
    *        fetch query results
    * @param resultClass the fetch query result record class
@@ -69,10 +152,14 @@ public class FetchQuery implements Serializable {
    *        results.
    * @param eagerInject indicates whether to performance the fetch query eager.
    */
-  public FetchQuery(QueryReference referenceQuery, String injectPropertyName, Class<?> resultClass,
-      int maxSize, List<FetchQueryParameter> parameters, boolean multiRecords, Script predicate,
-      Script injection, boolean eagerInject) {
-    setReferenceQuery(referenceQuery);
+  public FetchQuery(String referenceQueryName, QueryType referenceQueryType,
+      String referenceQueryQualifier, String referenceQueryVersion, String injectPropertyName,
+      Class<?> resultClass, int maxSize, List<FetchQueryParameter> parameters, boolean multiRecords,
+      Script predicate, Script injection, boolean eagerInject) {
+    setReferenceQueryName(referenceQueryName);
+    setReferenceQueryType(referenceQueryType);
+    setReferenceQueryQualifier(referenceQueryQualifier);
+    setReferenceQueryVersion(referenceQueryVersion);
     setInjectPropertyName(injectPropertyName);
     setResultClass(resultClass);
     setMaxSize(maxSize);
@@ -103,6 +190,14 @@ public class FetchQuery implements Serializable {
     } else {
       return id.equals(other.id);
     }
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public List<FetchQuery> getFetchQueries() {
+    return fetchQueries;
   }
 
   /**
@@ -136,6 +231,34 @@ public class FetchQuery implements Serializable {
   }
 
   /**
+   * Returns the in-line query name
+   */
+  public String getInlineQueryName() {
+    return inlineQueryName;
+  }
+
+  /**
+   * Returns the in-line query qualifier
+   */
+  public String getInlineQueryQualifier() {
+    return inlineQueryQualifier;
+  }
+
+  /**
+   * Returns the in-line query script
+   */
+  public Script getInlineQueryScript() {
+    return inlineQueryScript;
+  }
+
+  /**
+   * Returns the in-line query type
+   */
+  public QueryType getInlineQueryType() {
+    return inlineQueryType;
+  }
+
+  /**
    * Returns the max fetch query result size, 0 means unlimited
    */
   public int getMaxSize() {
@@ -157,10 +280,31 @@ public class FetchQuery implements Serializable {
   }
 
   /**
-   * Returns the real query corresponding to this fetch query
+   * Returns all in-line query properties of this query. The properties can be used for some query
+   * process control, such as timeout or maximum number of result sets, etc.
    */
-  public QueryReference getReferenceQuery() {
-    return referenceQuery;
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  public QueryReference getQueryReference() {
+    return queryReference;
+  }
+
+  public String getReferenceQueryName() {
+    return referenceQueryName;
+  }
+
+  public String getReferenceQueryQualifier() {
+    return referenceQueryQualifier;
+  }
+
+  public QueryType getReferenceQueryType() {
+    return referenceQueryType;
+  }
+
+  public String getReferenceQueryVersion() {
+    return referenceQueryVersion;
   }
 
   /**
@@ -184,6 +328,10 @@ public class FetchQuery implements Serializable {
     return eagerInject;
   }
 
+  public boolean isInlineQueryCache() {
+    return inlineQueryCache;
+  }
+
   /**
    * Returns true if the fetch query result set is multiple records, otherwise false.
    */
@@ -191,16 +339,29 @@ public class FetchQuery implements Serializable {
     return multiRecords;
   }
 
+  protected void addFetchQuery(FetchQuery fetchQuery) {
+    fetchQueries.add(fetchQuery);
+  }
+
   protected void addParameter(FetchQueryParameter parameter) {
     parameters.add(parameter);
   }
 
+  protected void addProperty(String name, String value) {
+    getProperties().put(name, value);
+  }
+
   /**
-   * Make query immutable
+   * Validate and make immutable
    */
   protected void postConstruct() {
-    parameters =
-        parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
+    parameters = parameters == null ? emptyList() : unmodifiableList(parameters);
+    fetchQueries = fetchQueries == null ? emptyList() : unmodifiableList(fetchQueries);
+    properties = properties == null ? emptyMap() : unmodifiableMap(properties);
+  }
+
+  protected void setDescription(String description) {
+    this.description = description;
   }
 
   protected void setEagerInject(boolean eagerInject) {
@@ -213,8 +374,27 @@ public class FetchQuery implements Serializable {
 
   protected void setInjectPropertyName(String injectPropertyName) {
     this.injectPropertyName = injectPropertyName;
-    // injectPropertyNamePath = split(injectPropertyName, Names.NAME_SPACE_SEPARATORS, true, false);
     injectPropertyNamePath = Names.splitNameSpace(injectPropertyName, true, false);
+  }
+
+  protected void setInlineQueryCache(boolean inlineQueryCache) {
+    this.inlineQueryCache = inlineQueryCache;
+  }
+
+  protected void setInlineQueryName(String inlineQueryName) {
+    this.inlineQueryName = inlineQueryName;
+  }
+
+  protected void setInlineQueryQualifier(String inlineQueryQualifier) {
+    this.inlineQueryQualifier = inlineQueryQualifier;
+  }
+
+  protected void setInlineQueryScript(Script inlineQueryScript) {
+    this.inlineQueryScript = inlineQueryScript;
+  }
+
+  protected void setInlineQueryType(QueryType inlineQueryType) {
+    this.inlineQueryType = inlineQueryType;
   }
 
   protected void setMaxSize(int maxSize) {
@@ -229,24 +409,31 @@ public class FetchQuery implements Serializable {
     predicateScript = defaultObject(predicate, Script.EMPTY);
   }
 
-  protected void setReferenceQuery(QueryReference referenceQuery) {
-    this.referenceQuery = referenceQuery;
+  protected void setProperties(Map<String, String> properties) {
+    this.properties.clear();
+    if (properties != null) {
+      this.properties.putAll(properties);
+    }
+  }
+
+  protected void setQueryReference(QueryReference queryReference) {
+    this.queryReference = queryReference;
   }
 
   protected void setReferenceQueryName(String referenceQueryName) {
-    referenceQuery.setName(referenceQueryName);
+    this.referenceQueryName = referenceQueryName;
   }
 
   protected void setReferenceQueryQualifier(String referenceQueryQualifier) {
-    referenceQuery.setQualifier(referenceQueryQualifier);
+    this.referenceQueryQualifier = referenceQueryQualifier;
   }
 
   protected void setReferenceQueryType(QueryType referenceQueryType) {
-    referenceQuery.setType(referenceQueryType);
+    this.referenceQueryType = referenceQueryType;
   }
 
   protected void setReferenceQueryVersion(String referenceQueryVersion) {
-    referenceQuery.setVersion(referenceQueryVersion);
+    this.referenceQueryVersion = referenceQueryVersion;
   }
 
   protected void setResultClass(Class<?> resultClass) {
@@ -268,17 +455,17 @@ public class FetchQuery implements Serializable {
 
     private static final long serialVersionUID = 5013658267151165784L;
 
-    private String name;
-    private String sourceName;
-    private String[] sourceNamePath = Strings.EMPTY_ARRAY;
-    private FetchQueryParameterSource source;
-    private String value;
-    private Class<?> type;
-    private boolean distinct = true;
-    private boolean singleAsList = false;
-    private boolean flatten = true;
-    private Script script;
-    private String group;
+    protected String name;
+    protected String sourceName;
+    protected String[] sourceNamePath = Strings.EMPTY_ARRAY;
+    protected FetchQueryParameterSource source;
+    protected String value;
+    protected Class<?> type;
+    protected boolean distinct = true;
+    protected boolean singleAsList = false;
+    protected boolean flatten = true;
+    protected Script script;
+    protected String group;
 
     public FetchQueryParameter() {}
 

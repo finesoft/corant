@@ -86,7 +86,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
   public boolean canFetch(Object result, QueryParameter queryParameter, FetchQuery fetchQuery) {
     String exs = getMapString(queryParameter.getContext(), CTX_QHH_EXCLUDE_FETCH_QUERY);
     if (isNotBlank(exs)) {
-      final String fetchQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      final String fetchQueryName = fetchQuery.getQueryReference().getVersionedName();
       for (String ex : split(exs, ",", true, true)) {
         if (WildcardMatcher.hasWildcard(ex) && matchWildcard(fetchQueryName, false, ex)
             || areEqual(fetchQueryName, ex)) {
@@ -267,7 +267,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
         } catch (Exception e) {
           throw new QueryRuntimeException(e,
               "Can not extract value from query result for resolve fetch query [%s] parameter!",
-              fetchQuery.getReferenceQuery());
+              fetchQuery.getQueryReference());
         }
       }
       if (useGroup) {

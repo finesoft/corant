@@ -44,10 +44,10 @@ public class QueryHint implements Serializable {
 
   private static final long serialVersionUID = 50753651544743202L;
 
-  private String key;
-  private Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
-  private Script script = new Script();
-  private final String id = UUID.randomUUID().toString();
+  protected final String id = UUID.randomUUID().toString();
+  protected String key;
+  protected Map<String, List<QueryHintParameter>> parameters = new LinkedHashMap<>();
+  protected Script script = new Script();
 
   public QueryHint() {}
 

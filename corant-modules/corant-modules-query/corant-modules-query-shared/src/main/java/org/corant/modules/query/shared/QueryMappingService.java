@@ -201,14 +201,14 @@ public class QueryMappingService {
                     .isEmpty()) {
               throw new QueryRuntimeException(
                   "The script of fetch query predicate [%s] in query [%s] file [%s] can't find the script resolver.",
-                  fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
+                  fq.getQueryReference().getVersionedName(), q.getVersionedName(), m.getUrl());
             } else if (fq.getInjectionScript() != null && fq.getInjectionScript().isValid()
                 && fq.getInjectionScript().getType() == ScriptType.CDI
                 && findNamed(FetchQueryResultInjector.class, fq.getInjectionScript().getCode())
                     .isEmpty()) {
               throw new QueryRuntimeException(
                   "The script of fetch query injection [%s] in query [%s] file [%s] can't find the script resolver.",
-                  fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
+                  fq.getQueryReference().getVersionedName(), q.getVersionedName(), m.getUrl());
             } else if (fq.getParameters() != null) {
               for (FetchQueryParameter fp : fq.getParameters()) {
                 if (fp.getScript() != null && fp.getScript().isValid()
@@ -217,7 +217,7 @@ public class QueryMappingService {
                         .isEmpty()) {
                   throw new QueryRuntimeException(
                       "The script of fetch query parameter [%s] in query [%s] file [%s] can't find the script resolver.",
-                      fq.getReferenceQuery().getVersionedName(), q.getVersionedName(), m.getUrl());
+                      fq.getQueryReference().getVersionedName(), q.getVersionedName(), m.getUrl());
                 }
               }
             }

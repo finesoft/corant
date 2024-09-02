@@ -75,6 +75,7 @@ public class QueryParseHandler extends DefaultHandler {
     String cqn = currentQName();
     if (SchemaNames.COMMON_SEGMENT.equalsIgnoreCase(cqn) || SchemaNames.X_DESC.equalsIgnoreCase(cqn)
         || SchemaNames.X_SCRIPT.equalsIgnoreCase(cqn)
+        || SchemaNames.FQE_ELE_INLINE_QUE_SCRIPT.equalsIgnoreCase(cqn)
         || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(cqn)
         || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(cqn)) {
       charStack.append(ch, start, length);
@@ -119,6 +120,7 @@ public class QueryParseHandler extends DefaultHandler {
     } else if (SchemaNames.X_PRO.equalsIgnoreCase(qName)) {
       handleProperty(false, qName, null);
     } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_INLINE_QUE_SCRIPT.equalsIgnoreCase(qName)
         || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)
         || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)) {
       handleScript(false, qName, null);
@@ -158,18 +160,15 @@ public class QueryParseHandler extends DefaultHandler {
     } else if (SchemaNames.COMMON_SEGMENT.equalsIgnoreCase(qName)) {
       handleCommonSegment(true, qName, attributes);
     } else if (SchemaNames.X_DESC.equalsIgnoreCase(qName)) {
-      if (currentObject() instanceof Query) {
-        handleQueryDesc(true, qName, attributes);
-      }
+      handleQueryDesc(true, qName, attributes);
     } else if (SchemaNames.X_PROS.equalsIgnoreCase(qName)) {
-      if (currentObject() instanceof Query) {
-        handleQueryProperties(true, qName, attributes);
-      }
+      handleQueryProperties(true, qName, attributes);
     } else if (SchemaNames.X_PRO.equalsIgnoreCase(qName)) {
       if (currentObject() instanceof Properties) {
         handleProperty(true, qName, attributes);
       }
     } else if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)
+        || SchemaNames.FQE_ELE_INLINE_QUE_SCRIPT.equalsIgnoreCase(qName)
         || SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)
         || SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)) {
       handleScript(true, qName, attributes);
@@ -206,12 +205,20 @@ public class QueryParseHandler extends DefaultHandler {
             fq.setInjectPropertyName(atv);
           } else if (SchemaNames.FQE_ATT_EAGER_INJECT_NAME.equalsIgnoreCase(aqn)) {
             fq.setEagerInject(isBlank(atv) ? true : toBoolean(atv));
-          } else if (SchemaNames.FQE_ATT_VER.equalsIgnoreCase(aqn)) {
+          } else if (SchemaNames.FQE_ATT_REF_QUE_VER.equalsIgnoreCase(aqn)) {
             fq.setReferenceQueryVersion(defaultString(atv));
           } else if (SchemaNames.QUE_ATT_RST_CLS.equalsIgnoreCase(aqn)) {
             fq.setResultClass(isBlank(atv) ? java.util.Map.class : asClass(atv));
           } else if (SchemaNames.FQE_ATT_MULT_RECORDS.equalsIgnoreCase(aqn)) {
             fq.setMultiRecords(isBlank(atv) ? true : toBoolean(atv));
+          } else if (SchemaNames.FQE_ATT_INL_QUE_TYP.equalsIgnoreCase(aqn)) { // since 2024-08-31
+            fq.setInlineQueryType(isBlank(atv) ? null : toEnum(atv, QueryType.class));
+          } else if (SchemaNames.FQE_ATT_INL_QUE_QUA.equalsIgnoreCase(aqn)) { // since 2024-08-31
+            fq.setInlineQueryQualifier(Configurations.getAssembledConfigValue(atv));
+          } else if (SchemaNames.FQE_ATT_INL_QUE.equalsIgnoreCase(aqn)) { // since 2024-08-31
+            fq.setInlineQueryName(atv);
+          } else if (SchemaNames.FQE_ATT_INL_QUE_CACHE.equalsIgnoreCase(aqn)) { // since 2024-08-31
+            fq.setInlineQueryCache(toBoolean(atv));
           }
         }
       }
@@ -219,12 +226,15 @@ public class QueryParseHandler extends DefaultHandler {
       nameStack.push(qName);
     } else {
       Object obj = valueStack.pop();
-      Query q = this.currentObject();
-      if (q == null) {
-        throw new QueryRuntimeException("Parse %s error the fetch query must be in query element!",
-            url);
+      Object curObj = this.currentObject();
+      if (curObj instanceof Query q) {
+        q.addFetchQuery((FetchQuery) obj);
+      } else if (curObj instanceof FetchQuery fq) {
+        fq.addFetchQuery((FetchQuery) obj);
+      } else {
+        throw new QueryRuntimeException(
+            "Parse %s error the fetch query must be in query/fetch query element!", url);
       }
-      q.addFetchQuery((FetchQuery) obj);
       nameStack.pop();
     }
   }
@@ -363,12 +373,14 @@ public class QueryParseHandler extends DefaultHandler {
     } else {
       String desc = charStack.toString();
       charStack.delete(0, charStack.length());
-      Query q = this.currentObject();
-      if (q == null) {
+      if (this.currentObject() instanceof Query q) {
+        q.setDescription(desc.trim());
+      } else if (this.currentObject() instanceof FetchQuery fq) {
+        fq.setDescription(desc.trim());
+      } else {
         throw new QueryRuntimeException(
-            "Parse %s error the query description must be in query element!", url);
+            "Parse %s error the query description must be in query or fetch query element!", url);
       }
-      q.setDescription(desc.trim());
       nameStack.pop();
     }
   }
@@ -438,12 +450,14 @@ public class QueryParseHandler extends DefaultHandler {
       nameStack.push(qName);
     } else {
       Object obj = valueStack.pop();
-      Query q = this.currentObject();
-      if (q == null) {
-        throw new QueryRuntimeException("Parse %s error the fetch query must be in query element!",
-            url);
+      if (this.currentObject() instanceof Query q) {
+        ((Properties) obj).toMap().forEach(q::addProperty);
+      } else if (this.currentObject() instanceof FetchQuery fq) {
+        ((Properties) obj).toMap().forEach(fq::addProperty);
+      } else {
+        throw new QueryRuntimeException(
+            "Parse %s error the fetch query must be in query or fetch query element!", url);
       }
-      ((Properties) obj).toMap().forEach(q::addProperty);
       nameStack.pop();
     }
   }
@@ -464,7 +478,10 @@ public class QueryParseHandler extends DefaultHandler {
           }
         }
         st.setType(
-            typ == null ? this.currentObject() instanceof Query ? ScriptType.FM : ScriptType.JS
+            typ == null
+                ? (this.currentObject() instanceof Query
+                    || SchemaNames.FQE_ELE_INLINE_QUE_SCRIPT.equals(qName)) ? ScriptType.FM
+                        : ScriptType.JS
                 : typ);
         st.setSrc(src);
       }
@@ -484,52 +501,55 @@ public class QueryParseHandler extends DefaultHandler {
       charStack.delete(0, charStack.length());
       obj.setCode(scriptCode);
       if (SchemaNames.X_SCRIPT.equalsIgnoreCase(qName)) {
-        if (this.currentObject() instanceof Query) {
-          Query q = this.currentObject();
-          if (q == null || !obj.isValid()) {
+        if (this.currentObject() instanceof Query q) {
+          if (!obj.isValid()) {
             throw new QueryRuntimeException(
                 "Parse %s error the query script must be in query element and script can't null!",
                 url);
           }
           q.setScript(obj);
-        } else if (this.currentObject() instanceof QueryHint) {
-          QueryHint q = this.currentObject();
-          if (q == null || !obj.isValid()) {
+        } else if (this.currentObject() instanceof QueryHint qh) {
+          if (!obj.isValid()) {
             throw new QueryRuntimeException(
                 "Parse %s error the query hit script must be in query element and script can't null!",
                 url);
           }
-          q.setScript(obj);
-        } else if (this.currentObject() instanceof FetchQueryParameter) {
-          FetchQueryParameter p = this.currentObject();
-          if (p == null || p.getSource() != FetchQueryParameterSource.S) {
+          qh.setScript(obj);
+        } else if (this.currentObject() instanceof FetchQueryParameter fqp) {
+          if (fqp.getSource() != FetchQueryParameterSource.S) {
             throw new QueryRuntimeException(
                 "Parse %s error the fetch query parameter script must be in parameter element and the source must be 'S'!",
                 url);
           }
-          p.setScript(obj);
+          fqp.setScript(obj);
         }
       } else if (SchemaNames.FQE_ELE_PREDICATE_SCRIPT.equalsIgnoreCase(qName)) {
-        if (this.currentObject() instanceof FetchQuery) {
-          FetchQuery q = this.currentObject();
-          if (q == null || !obj.isValid()) {
+        if (this.currentObject() instanceof FetchQuery fq) {
+          if (!obj.isValid()) {
             throw new QueryRuntimeException(
                 "Parse %s error the fetch query predicate script must be in predicate-script element and script can't null!",
                 url);
           }
-          q.setPredicateScript(obj);
+          fq.setPredicateScript(obj);
         }
-      } else if (SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)
-          && this.currentObject() instanceof FetchQuery) {
-        FetchQuery q = this.currentObject();
-        if (q == null || !obj.isValid()) {
+      } else if (SchemaNames.FQE_ELE_INJECTION_SCRIPT.equalsIgnoreCase(qName)) {
+        if (this.currentObject() instanceof FetchQuery fq) {
+          if (!obj.isValid()) {
+            throw new QueryRuntimeException(
+                "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!",
+                url);
+          }
+          fq.setInjectionScript(obj);
+        }
+      } else if (SchemaNames.FQE_ELE_INLINE_QUE_SCRIPT.equalsIgnoreCase(qName)
+          && (this.currentObject() instanceof FetchQuery fq)) {
+        if (!obj.isValid()) {
           throw new QueryRuntimeException(
-              "Parse %s error the fetch query injection script must be in predicate-script element and script can't null!",
+              "Parse %s error the fetch query inline query script must be in inline-query-script element and script can't null!",
               url);
         }
-        q.setInjectionScript(obj);
+        fq.setInlineQueryScript(obj);
       }
-
       nameStack.pop();
     }
   }

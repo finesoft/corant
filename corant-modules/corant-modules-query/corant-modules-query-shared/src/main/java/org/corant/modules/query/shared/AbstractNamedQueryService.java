@@ -363,19 +363,19 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     FetchableNamedQueryService service;
-    final Query query = getQuery(fq.getReferenceQuery().getVersionedName());
-    final QueryType type = defaultObject(fq.getReferenceQuery().getType(), query.getType());
+    final Query query = getQuery(fq.getQueryReference().getVersionedName());
+    final QueryType type = defaultObject(fq.getQueryReference().getType(), query.getType());
     final String qualifier =
-        defaultObject(fq.getReferenceQuery().getQualifier(), query.getQualifier());
+        defaultObject(fq.getQueryReference().getQualifier(), query.getQualifier());
     if (type == null && isBlank(qualifier)) {
       service = this;
     } else {
       service = shouldInstanceOf(NamedQueryServiceManager.resolveQueryService(type, qualifier),
           FetchableNamedQueryService.class,
-          "Can't find any query service to execute fetch query [%s]", fq.getReferenceQuery());
+          "Can't find any query service to execute fetch query [%s]", fq.getQueryReference());
     }
     logger.fine(() -> format("Resolve fetch query [%s] service [%s]",
-        fq.getReferenceQuery().getName(), Classes.getUserClass(service)));
+        fq.getQueryReference().getName(), Classes.getUserClass(service)));
     return service;
   }
 

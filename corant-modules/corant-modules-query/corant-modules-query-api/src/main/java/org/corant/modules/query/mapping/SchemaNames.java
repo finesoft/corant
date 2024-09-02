@@ -54,15 +54,22 @@ public class SchemaNames {
   public static final String FQE_ELE_PARAM_ATT_SRC = "source";
   public static final String FQE_ELE_PARAM_ATT_SRC_NME = "source-name";
   public static final String FQE_ELE_PREDICATE_SCRIPT = "predicate-script";
+  public static final String FQE_ELE_INLINE_QUE_SCRIPT = "inline-query-script";
   public static final String FQE_ELE_INJECTION_SCRIPT = "injection-script";
   public static final String FQE_ATT_REF_QUE = "reference-query";
   public static final String FQE_ATT_REF_QUE_TYP = "reference-query-type";
   public static final String FQE_ATT_REF_QUE_QUA = "reference-query-qualifier";
+  public static final String FQE_ATT_REF_QUE_VER = "reference-query-version";
+  public static final String FQE_ATT_INL_QUE = "inline-query";
+  public static final String FQE_ATT_INL_QUE_CACHE = "inline-query-cache";
+  public static final String FQE_ATT_INL_QUE_TYP = "inline-query-type";
+  public static final String FQE_ATT_INL_QUE_QUA = "inline-query-qualifier";
   public static final String FQE_ATT_PRO_NAME = "inject-property-name";
   public static final String FQE_ATT_EAGER_INJECT_NAME = "eager-inject";
   public static final String FQE_ATT_MAX_SIZE = "max-fetch-size";
-  public static final String FQE_ATT_VER = "reference-query-version";
   public static final String FQE_ATT_MULT_RECORDS = "multi-records";
+
+  public static final String QUE_NAME_SPACE_SEPARATOR = " > "; // since 2024-08-31
 
   private SchemaNames() {}
 

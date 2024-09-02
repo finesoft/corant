@@ -44,7 +44,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      String refQueryName = fetchQuery.getQueryReference().getVersionedName();
       SqlNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       String sql = querier.getScript();
@@ -56,7 +56,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     } catch (SQLException e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
-          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
+          fetchQuery.getQueryReference().getVersionedName(), e.getMessage());
     }
   }
 

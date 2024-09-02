@@ -1,543 +1,677 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsd:schema targetNamespace="http://corant.org/schema/nqms" xmlns:nqms="http://corant.org/schema/nqms"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-            attributeFormDefault="unqualified">
-    <xsd:element name="query-mappings">
-        <xsd:annotation>
-            <xsd:documentation>
-	            <![CDATA[
-	            	Root node of query mapping must have at least one query element as its child.
-	            ]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="parameters-mapping" type="nqms:parameters-mapping" maxOccurs="1" minOccurs="0"/>
-                <xsd:element name="common-segment" type="nqms:common-segment" maxOccurs="1" minOccurs="0"/>
-                <xsd:element name="query" type="nqms:query" minOccurs="1" maxOccurs="unbounded"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:complexType name="parameters-mapping">
-        <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-	         		Query parameter type mappings, use to convert the value of input query parameter to other related type, 
-	         		the built-in converters will be used in conversion processing, see also tha package [org.corant.shared.conversion].
-            	]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element name="entry" type="nqms:parameter-type-mapping" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
+<xsd:schema targetNamespace="http://corant.org/schema/nqms"
+  xmlns:nqms="http://corant.org/schema/nqms"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xsd:element name="query-mappings">
+    <xsd:annotation>
+      <xsd:documentation>
+        <![CDATA[
+        	Root node of query mapping must have at least one query element as its child.
+        ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="parameters-mapping"
+          type="nqms:parameters-mapping" maxOccurs="1" minOccurs="0" />
+        <xsd:element name="common-segment"
+          type="nqms:common-segment" maxOccurs="1" minOccurs="0" />
+        <xsd:element name="query" type="nqms:query"
+          minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
     </xsd:complexType>
-    <xsd:complexType name="parameter-type-mapping">
+  </xsd:element>
+
+  <xsd:complexType name="parameters-mapping">
+    <xsd:annotation>
+      <xsd:documentation>
+      	<![CDATA[
+     		Query parameter type mappings, use to convert the value of input query parameter to other related type, 
+     		the built-in converters will be used in conversion processing, see also tha package [org.corant.shared.conversion].
+      	]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="entry"
+        type="nqms:parameter-type-mapping" minOccurs="0"
+        maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="parameter-type-mapping">
+    <xsd:annotation>
+      <xsd:documentation>
+      	<![CDATA[
+      		The value of the [name] attribute is used to specify the name of the criteria which value needs to be converted in the query parameter; 
+      		the value of the [type] attribute specifies the conversion target type that must be a complete class name, such as 'java.lang.Integer' etc.
+          ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string"
+      use="required"></xsd:attribute>
+    <xsd:attribute name="type" type="xsd:string"
+      use="required"></xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="property">
+    <xsd:annotation>
+      <xsd:documentation>
+      	<![CDATA[
+          	The value of the [name] attribute is used to specify the name of the property.
+          	The value of the [value] attribute is used to specify the value of property.
+          ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string"
+      use="required"></xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string"
+      use="required"></xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="properties">
+    <xsd:annotation>
+      <xsd:documentation>
+        <![CDATA[
+				Query properties, string based key value pairs.
+        ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="property" type="nqms:property"
+        minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="query">
+    <xsd:annotation>
+      <xsd:documentation>
+      	<![CDATA[
+        Query node is used to map a query, such as specifying query uniqueness name, query script and script type, specifying query result set type or result set processing hints, sub fetch queries etc.
+        ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="description" type="xsd:string"
+        maxOccurs="1" minOccurs="0" />
+      <xsd:element name="properties" type="nqms:properties"
+        maxOccurs="1" minOccurs="0">
         <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-            		The value of the [name] attribute is used to specify the name of the criteria which value needs to be converted in the query parameter; 
-            		the value of the [type] attribute specifies the conversion target type that must be a complete class name, such as 'java.lang.Integer' etc.
-                ]]>
-            </xsd:documentation>
+          <xsd:documentation>
+          	<![CDATA[
+          	Query properties, use to enhance query processing, such as query timeout, result set size limitations etc. this is an optional setting.
+          	See also the interface [org.corant.modules.query.QuerierConfig].
+          	]]>
+          </xsd:documentation>
         </xsd:annotation>
-        <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
-        <xsd:attribute name="type" type="xsd:string" use="required"></xsd:attribute>
-    </xsd:complexType>
-
-    <xsd:complexType name="property">
+      </xsd:element>
+      <xsd:element name="script" type="nqms:script"
+        maxOccurs="1" minOccurs="1">
         <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-                	The value of the [name] attribute is used to specify the name of the property.
-                	The value of the [value] attribute is used to specify the value of property.
-                ]]>
-            </xsd:documentation>
+          <xsd:documentation>
+          	<![CDATA[
+          		Query script, may be a actual script (such as sql) and macro script (such as freemarker) mixed script.
+          	]]>
+          </xsd:documentation>
         </xsd:annotation>
-        <xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
-        <xsd:attribute name="value" type="xsd:string" use="required"></xsd:attribute>
-    </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="fetch-query"
+        type="nqms:fetch-query" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="hint" type="nqms:hint"
+        minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string"
+      use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+        	<![CDATA[
+          The uniqueness name of the query, the actual name maybe append version mark.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="result-class" type="xsd:string"
+      use="optional" default="java.util.Map">
+      <xsd:annotation>
+        <xsd:documentation>
+        	<![CDATA[
+          The query result class, default is [java.util.Map] such as Map<String,?>.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="result-set-mapping"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="cache" type="xsd:boolean"
+      use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="cache-result-set-metadata"
+      type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="type" type="nqms:query-type"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The query type of actual execution query for query, If not set use default setting.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="qualifier" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The query qualifier of actual execution query for query.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="version" type="xsd:string"
+      use="optional"></xsd:attribute>
+  </xsd:complexType>
 
-    <xsd:complexType name="properties">
+
+  <xsd:complexType name="fetch-query">
+    <xsd:annotation>
+      <xsd:documentation>
+        <![CDATA[
+        The fetch query, through fetch query, parent query can call another query based on its result set and query parameters, 
+        and inject the result set of the another query into the result set of itself according to appropriate conditions. 
+        In the default implementation, all injections may be only reference injections, 
+        and no deep clone, which means that must be careful when modifying the result set.
+        The fetch query supports two ways, one is inline query the other is reference query and only one of the two can be chosen. 
+        Only inline query can have children fetch query and must have inline query script.
+        ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="description" type="xsd:string"
+        maxOccurs="1" minOccurs="0" />
+      <xsd:element name="properties" type="nqms:properties"
+        maxOccurs="1" minOccurs="0">
         <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-					Query properties, string based key value pairs.
-                ]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element name="property" type="nqms:property" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="query">
-        <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-                	Query node is used to map a query, such as specifying query uniqueness name, query script and script type, specifying query result set type or result set processing hints, sub fetch queries etc.
-                ]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element name="description" type="xsd:string" maxOccurs="1" minOccurs="0"/>
-            <xsd:element name="properties" type="nqms:properties" maxOccurs="1" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                    	<![CDATA[
-		                	Query properties, use to enhance query processing, such as query timeout, result set size limitations etc. this is an optional setting.
-		                	See also the interface [org.corant.modules.query.QuerierConfig].
-                    	]]>
-                    </xsd:documentation>
-                </xsd:annotation>            
-            </xsd:element>
-            <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                    	<![CDATA[
-                    		Query script, may be a actual script (such as sql) and macro script (such as freemarker) mixed script.
-                    	]]>
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="fetch-query" type="nqms:fetch-query" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element name="hint" type="nqms:hint" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
-        <xsd:attribute name="name" type="xsd:string" use="required">
-            <xsd:annotation>
-                <xsd:documentation>
-                	<![CDATA[
-                    	The uniqueness name of the query, the actual name maybe append version mark.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="result-class" type="xsd:string" use="optional" default="java.util.Map">
-            <xsd:annotation>
-                <xsd:documentation>
-                	<![CDATA[
-                    	The query result class, default is [java.util.Map] such as Map<String,?>.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="result-set-mapping" type="xsd:string" use="optional">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="cache" type="xsd:boolean" use="optional" default="false">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="cache-result-set-metadata" type="xsd:boolean" use="optional" default="false">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="type" type="nqms:query-type" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    The query type of actual execution query for query, If not set use default setting.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>        
-        <xsd:attribute name="qualifier" type="xsd:string" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    The query qualifier of actual execution query for query.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>           
-        <xsd:attribute name="version" type="xsd:string" use="optional"></xsd:attribute>
-    </xsd:complexType>
-
-
-    <xsd:complexType name="fetch-query">
-        <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[
-					The fetch query, through fetch query, parent query can call another query based on its result set and query parameters, and inject the result set of the another query into the result set of itself according to appropriate conditions. 
-In the default implementation, all injections may be only reference injections, and nodeep clone, which means that must be careful when modifying the result set.
-                ]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:sequence>
-			<xsd:element name="predicate-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
-                <xsd:annotation>
-                    <xsd:documentation>
-                    	<![CDATA[
-	                    	The precondition script for decide execute this fetch query or not,
-	                        script may be a function that receive query param and return bool,
-	                        the default script type is Java Script. 
-	                        Example: 
-	                         (function(p,r){ 
-									return p.criteria.get("key")!=null || r.get("key")!=null;
-							 })(p,r);
-							 the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
-							 the parameter 'r' is the parent query result record, usually is java util.Map;
-							 the function must return boolean result.
-						 ]]>
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>        
-            <xsd:element name="parameter" type="nqms:fetch-query-parameter" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element name="injection-script" type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
-                <xsd:annotation>
-                    <xsd:documentation>
-                    	<![CDATA[
-                    	Experimental feature. Scripts for injection processing, 
-                    	the default script type is Java Script. Script may be a function that receive 
-                    	parent query result record and fetch query result records, you can programic 
-                    	handle parent query result record use those parameters.
-                    	Example:
-						(function(rs,frs){ 
-							for each (var r in rs){
-								for each (var fr in frs){
-									if(r.get("key").equals(fr.get("key"))){
-										r.put("inject property name",fr);
-									}
-								}
-							}
-						})(rs,frs);           
-						the parameter 'rs' is the parent query result records and the parameter 'frs' 
-						is the fetch query result records, usually the parameter 'rs' is java.util.ArrayList<java.util.Map> or java.util.Map[],
-						the paremeter 'frs' is java.util.ArrayList<java.util.Map>
-						the function return value is ignored.    
-						]]>    	
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>    
-        </xsd:sequence>
-        <xsd:attribute name="reference-query" type="xsd:string" use="required">
-            <xsd:annotation>
-                <xsd:documentation>
-                    The name of actual execution query for fetch query.
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="inject-property-name" type="xsd:string" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                	<![CDATA[
-                    The property name in parent query result to inject the fetch query result.
-                    Note: If <injection-script> is specified, <injection-script> is preferred.
-                    ]]>  
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="max-fetch-size" type="xsd:nonNegativeInteger" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                	<![CDATA[
-                    Specify the number of records that fetchquery is expected to return. 
-                    less than 1 indicate unlimited (the underlying database may have constraints),
-                    default is unlimited.
-                    Note: Must be careful when using this attribute, as there may be unexpected results. 
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="eager-inject" type="xsd:boolean" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    Represents whether to grab immediately, if true the fetch query is launched 
-                    when the result set of each parent query is processed; otherwise the fetch query
-                    is launched after the result set of all parent queries has been processed, 
-                    Useful for paging queries, especially to reduce the use of connection pooling.
-                    Default is true. When eager-inject is true, the injection script must be set.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="reference-query-version" type="xsd:string" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    The version of actual execution query for fetch query.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="reference-query-type" type="nqms:query-type" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    The query type of actual execution query for fetch query, If not set use the parent query service.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>        
-        <xsd:attribute name="reference-query-qualifier" type="xsd:string" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                <![CDATA[
-                    The query type qualifier of actual execution query for fetch query.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>             
-        <xsd:attribute name="result-class" type="xsd:string" use="optional"></xsd:attribute>
-        <xsd:attribute name="multi-records" type="xsd:boolean" use="optional">
-            <xsd:annotation>
-                <xsd:documentation>
-                	<![CDATA[
-                    Specify whether the query result set is multi-record or single-record,
-                    similar to one to many or one to one.
-                    ]]>
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-    </xsd:complexType>
-
-    <xsd:complexType name="fetch-query-parameter">
-        <xsd:annotation>
-            <xsd:documentation><![CDATA[The fetch query parameters]]></xsd:documentation>
-        </xsd:annotation>
-		<xsd:sequence>
-			<xsd:element name="script" type="nqms:script"
-				maxOccurs="1" minOccurs="0" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>
-                    	<![CDATA[
-							The parameter processing script, used to receive the parent query 
-							result set and parent query parameters and process and return a value, 
-							which is the parameter value of the query condition.
-	                        The default script type is Java Script. 
-	                        Example: 
-	                         (function(p,rs){ 
-									return p.criteria.get("key");
-							 })(p,rs);
-							 the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
-							 the parameter 'rs' is the parent query result record, usually is List<java util.Map>;
-							 the function must return a value.
-						 ]]>
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
-		</xsd:sequence>    
-        <xsd:attribute name="group" type="xsd:string" use="optional">
-            <xsd:annotation>
-                 <xsd:documentation>
-                  <![CDATA[
-                    The fetch query parameter group use for aggregate parameters to a collection. 
-                    Note: this is experimental and not recommended for production environments.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>
-        </xsd:attribute>        
-        <xsd:attribute name="name" type="xsd:string" use="required">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 	<![CDATA[
-                    The fetch query parameter name.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="source" type="nqms:fetch-query-parameter-source" use="required">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    The source type that the parameter value comes from, the parameter value may be extracted from the
-                    parent query result record or the parent query parameter or comes from some definite constant.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>            
-        </xsd:attribute>
-        <xsd:attribute name="source-name" type="xsd:string" use="optional">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    For example, when the source is specified as R (parent query result), the parameter value comes from the parent query result set, 
-                    so the source-name can be the query field name, and when the source is specified as P (parent query parameter), 
-                    the parameter value comes from the parent query parameter, 
-                    so the source-name can be the property name of the query parameter object.
-                    when the source is specified as C (constant), the parameter value comes from definite constant, the source-name is not necessary to set.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>        
-        </xsd:attribute>
-        <xsd:attribute name="value" type="xsd:string" use="optional">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    The specific parameter value, if source is specified as C (constant) then must set specific value, otherwise is not necessary to set.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>          
-        </xsd:attribute>
-        <xsd:attribute name="type" type="xsd:string" use="optional">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    The parameter type to convert the value extracted from the source.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>            
-        </xsd:attribute>
-        <xsd:attribute name="single-as-list" type="xsd:boolean" use="optional" default="false">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    When the parameter value is a single object, whether to treat it as a list.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>           
-        </xsd:attribute>
-        <xsd:attribute name="distinct" type="xsd:boolean" use="optional" default="true">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    When the parameter is a collection, this value specifies whether to remove the duplicate.
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>           
-        </xsd:attribute>
-        <xsd:attribute name="flatten" type="xsd:boolean" use="optional" default="true">
-            <xsd:annotation>
-                 <xsd:documentation>
-                 <![CDATA[
-                    When the parameter value is multiple collections, 
-                    whether to extract the values in the collection to form a new collection
-                    ]]>
-                 </xsd:documentation>
-             </xsd:annotation>           
-        </xsd:attribute>        
-    </xsd:complexType>
-    
-    <xsd:simpleType name="fetch-query-parameter-source">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="P">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Parameter value from parent query parameter.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="R">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Parameter value from parent query result.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="C">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Parameter value is constant.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="S">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Parameter value is script.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>            
-        </xsd:restriction>
-    </xsd:simpleType>
-
-    <xsd:complexType name="hint">
-        <xsd:annotation>
-            <xsd:documentation>
-            	<![CDATA[The query hints for additional query parameter process or result process.]]>
-            </xsd:documentation>
-        </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element name="parameter" type="nqms:hint-parameter" minOccurs="0" maxOccurs="unbounded"></xsd:element>
-            <xsd:element name="script" type="nqms:script" maxOccurs="1" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[The script for hint]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-        </xsd:sequence>
-        <xsd:attribute name="key" type="xsd:string"></xsd:attribute>
-    </xsd:complexType>
-    
-    <xsd:complexType name="hint-parameter">
-        <xsd:attribute name="name" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="value" type="xsd:string"></xsd:attribute>
-        <xsd:attribute name="type" type="xsd:string" use="optional" default="java.lang.String"></xsd:attribute>
-    </xsd:complexType>
-
-    <xsd:simpleType name="common-segment">
-        <xsd:restriction base="xsd:string"></xsd:restriction>
-    </xsd:simpleType>
-    
-    <xsd:complexType name="script">
-        <xsd:annotation>
-            <xsd:documentation>
+          <xsd:documentation>
             <![CDATA[
-                The scripts that are used for dynamically generating query statements or handle query parameter or handle query result.
-                ]]>
-            </xsd:documentation>
+            Inline query properties, use to enhance query processing, such as query timeout, result set size limitations etc. this is an optional setting.
+            See also the interface [org.corant.modules.query.QuerierConfig].
+            ]]>
+          </xsd:documentation>
         </xsd:annotation>
-        <xsd:simpleContent>
-      		<xsd:extension base="xsd:string">
-         		<xsd:attribute name="type" type="nqms:script-type" use="optional"></xsd:attribute>
-        		<xsd:attribute name="src" type="xsd:string" use="optional"></xsd:attribute>
-      		</xsd:extension>
-    	</xsd:simpleContent>
-    </xsd:complexType>
-    
-    <xsd:simpleType name="script-type">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="JS">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script language is Java Script.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="FM">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script language is Freemarker.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="KT">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script language is Kotlin.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="CDI">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script is java CDI named qualifier]]></xsd:documentation>
-                </xsd:annotation>                
-            </xsd:enumeration>      
-            <xsd:enumeration value="JSE">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Specify that the script is json expression]]></xsd:documentation>
-                </xsd:annotation>                
-            </xsd:enumeration>                     
-        </xsd:restriction>
-    </xsd:simpleType>    
-        
- 	<xsd:simpleType name="query-type">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="SQL">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Use sql query service to execute the fetch query.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="MG">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Use mongodb query service to execute the fetch query.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="ES">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Use elastic query service to execute the fetch query.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="JPQL">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Use jpql query service to execute the fetch query.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-            <xsd:enumeration value="JAXRS">
-                <xsd:annotation>
-                    <xsd:documentation><![CDATA[Use jaxrs service to execute the fetch query.]]></xsd:documentation>
-                </xsd:annotation>
-            </xsd:enumeration>
-        </xsd:restriction>
-    </xsd:simpleType>        
-        
+      </xsd:element>
+      <xsd:element name="predicate-script"
+        type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            <![CDATA[
+            The precondition script for decide execute this fetch query or not,
+            script may be a function that receive query param and return bool,
+            the default script type is Java Script. 
+            
+            Example: 
+            
+              (function(p,r){ 
+                return p.criteria.get("key")!=null || r.get("key")!=null;
+              })(p,r);
+              
+            the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
+            the parameter 'r' is the parent query result record, usually is java util.Map;
+            the function must return boolean result.
+            ]]>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="parameter"
+        type="nqms:fetch-query-parameter" minOccurs="0"
+        maxOccurs="unbounded" />
+      <xsd:element name="inline-query-script"
+        type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            <![CDATA[
+              Inline query script, may be a actual script (such as sql) and macro script (such as freemarker) mixed script.
+            ]]>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="fetch-query"
+        type="nqms:fetch-query" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            <![CDATA[
+              Sub fetch queries for inline query, only used when the parent fetch query is an inline query, not supported if the parent fetch query is a referenced query
+            ]]>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="injection-script"
+        type="nqms:script" maxOccurs="1" minOccurs="0" nillable="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            <![CDATA[
+            Experimental feature. Scripts for injection processing, 
+            the default script type is Java Script. Script may be a function that receive 
+            parent query result record and fetch query result records, you can programic 
+            handle parent query result record use those parameters.
+            
+            Example:
+            
+              (function(rs,frs){ 
+                for each (var r in rs){
+              	  for each (var fr in frs){
+              		  if(r.get("key").equals(fr.get("key"))){
+              			  r.put("inject property name",fr);
+              		  }
+              	  }
+                }
+              })(rs,frs);   
+                    
+            the parameter 'rs' is the parent query result records and the parameter 'frs' 
+            is the fetch query result records, usually the parameter 'rs' is java.util.ArrayList<java.util.Map> or java.util.Map[],
+            the paremeter 'frs' is java.util.ArrayList<java.util.Map>
+            the function return value is ignored.    
+            ]]>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+
+    <xsd:attribute name="inline-query" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The inline query name.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="inline-query-type"
+      type="nqms:query-type" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The inline query type of actual execution query for fetch query, If not set use the parent query service.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="inline-query-qualifier"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The inline query qualifier of actual execution query for query.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="inline-query-cache"
+      type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation><![CDATA[Reserve zone]]></xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="reference-query"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          The name of another query for fetch query refer to.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="reference-query-type"
+      type="nqms:query-type" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The query type of another query for fetch query refer to, if not set use the parent query service.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="reference-query-qualifier"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The query type qualifier of another query for fetch query refer to
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="reference-query-version"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The version of actual another query for fetch query refer to
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="inject-property-name"
+      type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The property name in parent query result to inject the fetch query result.
+          Note: If <injection-script> is specified, <injection-script> is preferred.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="max-fetch-size"
+      type="xsd:nonNegativeInteger" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          Specify the number of records that fetchquery is expected to return. 
+          less than 1 indicate unlimited (the underlying database may have constraints),
+          default is unlimited.
+          Note: Must be careful when using this attribute, as there may be unexpected results. 
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="eager-inject" type="xsd:boolean"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          Represents whether to grab immediately, if true the fetch query is launched 
+          when the result set of each parent query is processed; otherwise the fetch query
+          is launched after the result set of all parent queries has been processed, 
+          Useful for paging queries, especially to reduce the use of connection pooling.
+          Default is true. When eager-inject is true, the injection script must be set.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="result-class" type="xsd:string"
+      use="optional"></xsd:attribute>
+    <xsd:attribute name="multi-records" type="xsd:boolean"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          Specify whether the query result set is multi-record or single-record,
+          similar to one to many or one to one.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="fetch-query-parameter">
+    <xsd:annotation>
+      <xsd:documentation><![CDATA[The fetch query parameters]]></xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="script" type="nqms:script"
+        maxOccurs="1" minOccurs="0" nillable="false">
+        <xsd:annotation>
+          <xsd:documentation>
+            <![CDATA[
+            The parameter processing script, used to receive the parent query 
+            result set and parent query parameters and process and return a value, 
+            which is the parameter value of the query condition.
+            The default script type is Java Script.
+            
+            Example: 
+            
+              (function(p,rs){ 
+                return p.criteria.get("key");
+              })(p,rs);
+            
+            the parameter 'p' is the query parameter criteria, usually is java.util.Map; 
+            the parameter 'rs' is the parent query result record, usually is List<java util.Map>;
+            the function must return a value.
+            ]]>
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="group" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The fetch query parameter group use for aggregate parameters to a collection. 
+          Note: this is experimental and not recommended for production environments.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="name" type="xsd:string"
+      use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The fetch query parameter name.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="source"
+      type="nqms:fetch-query-parameter-source" use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The source type that the parameter value comes from, the parameter value may be extracted from the
+          parent query result record or the parent query parameter or comes from some definite constant.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="source-name" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          For example, when the source is specified as R (parent query result), the parameter value comes from the parent query result set, 
+          so the source-name can be the query field name, and when the source is specified as P (parent query parameter), 
+          the parameter value comes from the parent query parameter, 
+          so the source-name can be the property name of the query parameter object.
+          when the source is specified as C (constant), the parameter value comes from definite constant, the source-name is not necessary to set.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The specific parameter value, if source is specified as C (constant) then must set specific value, otherwise is not necessary to set.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="type" type="xsd:string"
+      use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          The parameter type to convert the value extracted from the source.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="single-as-list"
+      type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          When the parameter value is a single object, whether to treat it as a list.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="distinct" type="xsd:boolean"
+      use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          When the parameter is a collection, this value specifies whether to remove the duplicate.
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="flatten" type="xsd:boolean"
+      use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          When the parameter value is multiple collections, 
+          whether to extract the values in the collection to form a new collection
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:simpleType name="fetch-query-parameter-source">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="P">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Parameter value from parent query parameter.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="R">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Parameter value from parent query result.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="C">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Parameter value is constant.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="S">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Parameter value is script.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="hint">
+    <xsd:annotation>
+      <xsd:documentation>
+        <![CDATA[The query hints for additional query parameter process or result process.]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="parameter"
+        type="nqms:hint-parameter" minOccurs="0" maxOccurs="unbounded"></xsd:element>
+      <xsd:element name="script" type="nqms:script"
+        maxOccurs="1" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[The script for hint]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="key" type="xsd:string"></xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="hint-parameter">
+    <xsd:attribute name="name" type="xsd:string"></xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string"></xsd:attribute>
+    <xsd:attribute name="type" type="xsd:string"
+      use="optional" default="java.lang.String"></xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:simpleType name="common-segment">
+    <xsd:restriction base="xsd:string"></xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="script">
+    <xsd:annotation>
+      <xsd:documentation>
+        <![CDATA[
+        The scripts that are used for dynamically generating query statements or handle query parameter or handle query result.
+        ]]>
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute name="type" type="nqms:script-type"
+          use="optional"></xsd:attribute>
+        <xsd:attribute name="src" type="xsd:string"
+          use="optional"></xsd:attribute>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:simpleType name="script-type">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="JS">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Specify that the script language is Java Script.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="FM">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Specify that the script language is Freemarker.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="KT">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Specify that the script language is Kotlin.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="CDI">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Specify that the script is java CDI named qualifier]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="JSE">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Specify that the script is json expression]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="query-type">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="SQL">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Use sql query service to execute the fetch query.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="MG">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Use mongodb query service to execute the fetch query.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="ES">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Use elastic query service to execute the fetch query.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="JPQL">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Use jpql query service to execute the fetch query.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="JAXRS">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Use jaxrs service to execute the fetch query.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
 </xsd:schema>

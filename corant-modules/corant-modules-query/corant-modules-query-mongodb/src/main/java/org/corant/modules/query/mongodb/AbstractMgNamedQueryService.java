@@ -111,7 +111,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
       FetchableNamedQuerier parentQuerier) {
     try {
       QueryParameter fetchParam = parentQuerier.resolveFetchQueryParameter(result, fetchQuery);
-      String refQueryName = fetchQuery.getReferenceQuery().getVersionedName();
+      String refQueryName = fetchQuery.getQueryReference().getVersionedName();
       MgNamedQuerier querier = getQuerierResolver().resolve(getQuery(refQueryName), fetchParam);
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       log(refQueryName, querier.getQueryParameter(), querier.getOriginalScript());
@@ -130,7 +130,7 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
     } catch (Exception e) {
       throw new QueryRuntimeException(e,
           "An error occurred while executing the fetch query [%s], exception [%s].",
-          fetchQuery.getReferenceQuery().getVersionedName(), e.getMessage());
+          fetchQuery.getQueryReference().getVersionedName(), e.getMessage());
     }
   }
 

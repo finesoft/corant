@@ -29,13 +29,10 @@ public class Script implements Serializable {
 
   public static final Script EMPTY = new Script();
 
-  private final String id = UUID.randomUUID().toString();
-
-  private String code;
-
-  private String src;
-
-  private ScriptType type;
+  protected final String id = UUID.randomUUID().toString();
+  protected String code;
+  protected String src;
+  protected ScriptType type;
 
   /**
    * Returns script source code

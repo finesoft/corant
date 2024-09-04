@@ -35,10 +35,10 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
-import org.corant.config.PropertyAccessor;
 import org.corant.context.CDIs;
 import org.corant.modules.jta.shared.TransactionIntegration;
 import org.corant.shared.exception.CorantRuntimeException;
+import org.corant.shared.ubiquity.PropertyAccessor;
 
 /**
  * corant-modules-datasource-shared

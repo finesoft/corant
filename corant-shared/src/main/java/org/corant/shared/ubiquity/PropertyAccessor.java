@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.config;
+package org.corant.shared.ubiquity;
 
 import static java.lang.String.format;
 import static org.corant.shared.util.Assertions.shouldNotNull;
@@ -34,7 +34,7 @@ import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.util.Sets;
 
 /**
- * corant-config
+ * corant-shared
  *
  * @author bingo 下午2:53:54
  */
@@ -205,7 +205,7 @@ public class PropertyAccessor {
   }
 
   /**
-   * corant-config
+   * corant-shared
    *
    * @author bingo 13:58:55
    */

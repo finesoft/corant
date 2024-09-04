@@ -24,7 +24,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Cache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
 import org.corant.modules.ddd.Entity;
+import org.corant.modules.ddd.Entity.EntityManagerProvider;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.UpdatableJPAQuery;
@@ -40,12 +42,16 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
 
   protected volatile Class<T> entityClass;
   protected volatile String persistenceUnitName;
+  protected volatile PersistenceContext persistenceContext;
 
   protected AbstractTypedJPARepository() {}
 
   protected AbstractTypedJPARepository(Class<T> entityClass, String persistenceUnitName) {
     this.entityClass = requireNotNull(entityClass, ERR_OBJ_CONSTRUCT);
     this.persistenceUnitName = persistenceUnitName;
+    if (persistenceUnitName != null) {
+      persistenceContext = PersistenceContextLiteral.of(persistenceUnitName);
+    }
   }
 
   @Override
@@ -84,13 +90,16 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
     return id != null ? getEntityManager().find(entityClass, id, properties) : null;
   }
 
+  public Class<T> getEntityClass() {
+    return entityClass;
+  }
+
   @Override
   public EntityManager getEntityManager() {
-    if (persistenceUnitName != null) {
-      return resolve(EntityManagers.class)
-          .getEntityManager(PersistenceContextLiteral.of(persistenceUnitName));
+    if (persistenceContext != null) {
+      return resolve(EntityManagerProvider.class).getEntityManager(persistenceContext);
     }
-    return resolve(EntityManagers.class).getEntityManager(entityClass);
+    return resolve(EntityManagerProvider.class).getEntityManager(entityClass);
   }
 
   @Override
@@ -129,13 +138,13 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
   }
 
   @Override
-  public UpdatableJPAQuery updatableNativeQuery(String sqlString) {
-    return JPAQueries.updatableNativeQuery(sqlString).entityManager(this::getEntityManager);
+  public UpdatableJPAQuery updatableNamedQuery(String name) {
+    return JPAQueries.updatableNamedQuery(name).entityManager(this::getEntityManager);
   }
 
   @Override
-  public UpdatableJPAQuery updatableNamedQuery(String name) {
-    return JPAQueries.updatableNamedQuery(name).entityManager(this::getEntityManager);
+  public UpdatableJPAQuery updatableNativeQuery(String sqlString) {
+    return JPAQueries.updatableNativeQuery(sqlString).entityManager(this::getEntityManager);
   }
 
   @Override

@@ -38,8 +38,34 @@ public interface Entity extends Serializable {
     Serializable getType();
   }
 
-  @FunctionalInterface
+  /**
+   * corant-modules-ddd-api
+   *
+   * @author bingo 14:58:45
+   */
   interface EntityManagerProvider {
-    EntityManager getEntityManager(PersistenceContext qualifier);
+
+    /**
+     * Returns an entity manager by the given entity class
+     * FIXME nonstandard
+     * @param entityClass the entity class
+     */
+    default EntityManager getEntityManager(Class<?> entityClass) {
+      return getEntityManager(getPersistenceContext(entityClass));
+    }
+
+    /**
+     * Returns an entity manager by the given persistence context
+     *
+     * @param persistenceContext the persistence context
+     */
+    EntityManager getEntityManager(PersistenceContext persistenceContext);
+
+    /**
+     * Returns the persistence context for the given entity class
+     * FIXME nonstandard
+     * @param entityClass the entity class
+     */
+    PersistenceContext getPersistenceContext(Class<?> entityClass);
   }
 }

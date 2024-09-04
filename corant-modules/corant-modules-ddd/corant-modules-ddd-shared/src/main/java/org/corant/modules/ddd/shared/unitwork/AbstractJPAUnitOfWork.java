@@ -37,7 +37,6 @@ import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.AggregateIdentifier;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.DefaultAggregateIdentifier;
-import org.corant.modules.ddd.Entity.EntityManagerProvider;
 import org.corant.modules.ddd.Message;
 import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.UnitOfWorksManager;
@@ -66,7 +65,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  *
  * @author bingo 下午7:13:58
  */
-public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManagerProvider {
+public abstract class AbstractJPAUnitOfWork implements UnitOfWork {
 
   protected static final boolean USE_MANUAL_FLUSH_MODEL = ConfigProvider.getConfig()
       .getOptionalValue("corant.ddd.unitofwork.use-manual-flush", Boolean.class)
@@ -103,7 +102,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   public void deregister(Object obj) {
     if (isActivated()) {
       if (obj instanceof Aggregate aggregate) {
-          if (aggregate.getId() != null) {
+        if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.remove(ai);
           evolutionaryAggregates.remove(ai);
@@ -112,7 +111,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
       } else if (obj instanceof Message) {
         registeredMessages.removeIf(um -> areEqual(obj, um.delegate));
       } else if (obj instanceof Map.Entry<?, ?> p) {
-          registeredVariables.remove(p.getKey());
+        registeredVariables.remove(p.getKey());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);
@@ -134,7 +133,6 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
    * Note: For now we only accept the persistence context that type is TRANSACTION and
    * synchronization is SYNCHRONIZED.
    */
-  @Override
   public EntityManager getEntityManager(PersistenceContext pc) {
     return entityManagers.computeIfAbsent(pc, k -> {
       shouldBeTrue(
@@ -199,7 +197,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
   public void register(Object obj) {
     if (isActivated()) {
       if (obj instanceof Aggregate aggregate) {
-          if (aggregate.getId() != null) {
+        if (aggregate.getId() != null) {
           AggregateIdentifier ai = new DefaultAggregateIdentifier(aggregate);
           registeredAggregates.put(ai, aggregate);
           Lifecycle al = aggregate.getLifecycle();
@@ -218,7 +216,7 @@ public abstract class AbstractJPAUnitOfWork implements UnitOfWork, EntityManager
       } else if (obj instanceof Message) {
         WrappedMessage.mergeToQueue(registeredMessages, new WrappedMessage((Message) obj));
       } else if (obj instanceof Map.Entry<?, ?> p) {
-          registeredVariables.put(p.getKey(), p.getValue());
+        registeredVariables.put(p.getKey(), p.getValue());
       }
     } else {
       throw new GeneralRuntimeException(PkgMsgCds.ERR_UOW_NOT_ACT);

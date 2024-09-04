@@ -32,6 +32,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import org.corant.context.Beans;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.ddd.Entity.EntityManagerProvider;
 import org.corant.modules.ddd.annotation.Repositories;
 import org.corant.modules.ddd.shared.unitwork.AbstractJPAUnitOfWorksManager;
 import org.corant.modules.ddd.shared.unitwork.AbstractJTAJPAUnitOfWorksManager;
@@ -49,7 +50,8 @@ public class JPARepositoryExtension implements Extension {
   final Map<String, Annotation[]> qualifiers = new HashMap<>();
 
   public Annotation[] resolveQualifiers(Class<?> cls) {
-    return qualifiers.get(resolve(EntityManagers.class).getPersistenceContext(cls).unitName());
+    return qualifiers
+        .get(resolve(EntityManagerProvider.class).getPersistenceContext(cls).unitName());
   }
 
   public JPARepository resolveRepository(Class<?> cls) {

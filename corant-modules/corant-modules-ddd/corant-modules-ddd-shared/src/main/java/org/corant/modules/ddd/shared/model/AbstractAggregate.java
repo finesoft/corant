@@ -40,7 +40,6 @@ import org.corant.modules.ddd.UnitOfWork;
 import org.corant.modules.ddd.annotation.AggregateType.AggregateTypeLiteral;
 import org.corant.modules.ddd.shared.event.AggregateLifecycleEvent;
 import org.corant.modules.ddd.shared.message.AggregateLifecycleMessage;
-import org.corant.shared.util.Annotations;
 
 /**
  * corant-modules-ddd-shared
@@ -131,30 +130,14 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   /**
    * Destroy the aggregate if is persisted then remove it from entity manager else just mark
    * destroyed, in JPA environment this method will invoke entity manager to remove the aggregate.
-   * <p>
-   * Note: The persistence context is determined by this aggregate class
-   *
-   * @see #destroy(boolean, Annotation...)
    *
    * @param immediately In JPA environment, if it true the entity manager will be flushed.
-   */
-  protected synchronized void destroy(boolean immediately) {
-    destroy(immediately, Annotations.EMPTY_ARRAY);
-  }
-
-  /**
-   * Destroy the aggregate if is persisted then remove it from entity manager else just mark
-   * destroyed, in JPA environment this method will invoke entity manager to remove the aggregate.
-   *
-   * @param immediately In JPA environment, if it true the entity manager will be flushed.
-   * @param qualifiers the persistence qualifiers
    * @see AggregateLifecycleManager
    * @see EntityManager#remove(Object)
    */
-  protected synchronized void destroy(boolean immediately, Annotation... qualifiers) {
+  protected synchronized void destroy(boolean immediately) {
     requireFalse(lifecycle.getSign() < 0, PkgMsgCds.ERR_AGG_LC);
-    this.raise(
-        new AggregateLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately, qualifiers));
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.REMOVE, immediately));
     setLifecycle(Lifecycle.DESTROYED);
   }
 
@@ -193,33 +176,16 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
   /**
    * Preserve the aggregate if is not persisted then persist it else merges it, in JPA environment
    * this method will invoke entity manager to persist or merge the aggregate.
-   * <p>
-   * Note: The persistence context is determined by this aggregate class
-   *
-   * @see #preserve(boolean, Annotation...)
    *
    * @param immediately flush to storage immediately, in JPA environment if it true the entity
    *        manager will be flushed.
-   */
-  protected synchronized AbstractAggregate preserve(boolean immediately) {
-    return this.preserve(immediately, Annotations.EMPTY_ARRAY);
-  }
-
-  /**
-   * Preserve the aggregate if is not persisted then persist it else merges it, in JPA environment
-   * this method will invoke entity manager to persist or merge the aggregate.
-   *
-   * @param immediately flush to storage immediately, in JPA environment if it true the entity
-   *        manager will be flushed.
-   * @param qualifiers the persistence qualifiers
    * @see AggregateLifecycleManager
    * @see EntityManager#persist(Object)
    * @see EntityManager#merge(Object)
    */
-  protected synchronized AbstractAggregate preserve(boolean immediately, Annotation... qualifiers) {
+  protected synchronized AbstractAggregate preserve(boolean immediately) {
     requireFalse(lifecycle.getSign() < 0, PkgMsgCds.ERR_AGG_LC);
-    this.raise(
-        new AggregateLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately, qualifiers));
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.PERSIST, immediately));
     return setLifecycle(Lifecycle.PRESERVED);
   }
 
@@ -227,13 +193,12 @@ public abstract class AbstractAggregate extends AbstractEntity implements Aggreg
    * Recover from persistence, in JPA environment this method will invoke entity manager to refresh
    * the aggregate.
    *
-   * @param qualifiers the persistence qualifiers
    * @see AggregateLifecycleManager
    * @see EntityManager#refresh(Object)
    */
-  protected synchronized AbstractAggregate recover(Annotation... qualifiers) {
+  protected synchronized AbstractAggregate recover() {
     requireFalse(lifecycle == null || !lifecycle.signRefreshable(), PkgMsgCds.ERR_AGG_LC);
-    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.RECOVER, true, qualifiers));
+    this.raise(new AggregateLifecycleManageEvent(this, LifecycleAction.RECOVER, true));
     return this;
   }
 

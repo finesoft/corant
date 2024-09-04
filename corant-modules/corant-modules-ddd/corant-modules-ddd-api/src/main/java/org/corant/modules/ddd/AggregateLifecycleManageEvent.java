@@ -14,13 +14,10 @@
 package org.corant.modules.ddd;
 
 import static org.corant.shared.util.Objects.forceCast;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.function.Supplier;
 import jakarta.persistence.LockModeType;
 import org.corant.modules.ddd.AggregateLifecycleManager.LifecycleAction;
 import org.corant.modules.ddd.annotation.Events;
-import org.corant.shared.util.Annotations;
 import org.corant.shared.util.Classes;
 
 /**
@@ -43,24 +40,21 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
 
   private final LockModeType lockModeType;
 
-  private final Annotation[] qualifiers;
-
   public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action) {
     this(source, action, false);
   }
 
   public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action,
-      boolean effectImmediately, Annotation... qualifiers) {
-    this(source, action, effectImmediately, null, qualifiers);
+      boolean effectImmediately) {
+    this(source, action, effectImmediately, null);
   }
 
   public AggregateLifecycleManageEvent(Aggregate source, LifecycleAction action,
-      boolean effectImmediately, LockModeType lockModeType, Annotation... qualifiers) {
+      boolean effectImmediately, LockModeType lockModeType) {
     super(source);
     this.action = action;
     this.effectImmediately = effectImmediately;
     this.lockModeType = lockModeType;
-    this.qualifiers = qualifiers == null ? Annotations.EMPTY_ARRAY : qualifiers;
   }
 
   public AggregateLifecycleManageEvent(Aggregate source, LockModeType lockModeType) {
@@ -80,16 +74,6 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
     return lockModeType;
   }
 
-  /**
-   * Returns the persistence qualifiers
-   */
-  public Annotation[] getQualifiers() {
-    if (qualifiers.length > 0) {
-      return Arrays.copyOf(qualifiers, qualifiers.length);
-    }
-    return Annotations.EMPTY_ARRAY;
-  }
-
   @Override
   public Aggregate getSource() {
     return forceCast(super.getSource());
@@ -105,8 +89,7 @@ public class AggregateLifecycleManageEvent extends AbstractEvent {
     String source =
         ai == null ? null : Classes.getUserClass(ai).getSimpleName() + " [id=" + ai.getId() + "]";
     return "AggregateLifecycleManageEvent [source=" + source + ", action=" + action
-        + ", effectImmediately=" + effectImmediately + ", lockModeType=" + ", qualifiers="
-        + Arrays.toString(qualifiers) + "]";
+        + ", effectImmediately=" + effectImmediately + ", lockModeType=" + lockModeType + "]";
   }
 
 }

@@ -13,6 +13,7 @@
  */
 package org.corant.context;
 
+import static org.corant.shared.util.Objects.defaultObject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -21,11 +22,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
-
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.transaction.TransactionScoped;
-import jakarta.annotation.PreDestroy;
 import org.jboss.weld.environment.se.contexts.ThreadScoped;
 
 /**
@@ -40,17 +40,22 @@ import org.jboss.weld.environment.se.contexts.ThreadScoped;
  */
 public interface ComponentManager<N, C> extends Serializable {
 
-  C computeIfAbsent(N name, Function<N, C> func);
+  C computeIfAbsent(N key, Function<N, C> func);
 
-  C get(N name);
+  C get(N key);
 
-  C remove(N name);
+  default C get(N key, C alt) {
+    return defaultObject(get(key), alt);
+  }
+
+  C put(N key, C component);
+
+  C remove(N key);
 
   /**
    * corant-kernel
    *
    * @author bingo 下午5:34:28
-   *
    */
   abstract class AbstractComponentManager<N, C> implements ComponentManager<N, C> {
 
@@ -61,18 +66,23 @@ public interface ComponentManager<N, C> extends Serializable {
     protected final transient Map<N, C> components = new ConcurrentHashMap<>();
 
     @Override
-    public C computeIfAbsent(N name, Function<N, C> func) {
-      return components.computeIfAbsent(name, func);
+    public C computeIfAbsent(N key, Function<N, C> func) {
+      return components.computeIfAbsent(key, func);
     }
 
     @Override
-    public C get(N name) {
-      return components.get(name);
+    public C get(N key) {
+      return components.get(key);
     }
 
     @Override
-    public C remove(N name) {
-      return components.remove(name);
+    public C put(N key, C component) {
+      return components.put(key, component);
+    }
+
+    @Override
+    public C remove(N key) {
+      return components.remove(key);
     }
 
     @PreDestroy
@@ -97,7 +107,6 @@ public interface ComponentManager<N, C> extends Serializable {
    * Request scoped component manager
    *
    * @author bingo 上午10:50:08
-   *
    */
   @RequestScoped
   abstract class RsComponentManager<N, C> extends AbstractComponentManager<N, C> {
@@ -110,7 +119,6 @@ public interface ComponentManager<N, C> extends Serializable {
    * Session scoped component manager
    *
    * @author bingo 上午10:50:29
-   *
    */
   @SessionScoped
   abstract class SsComponentManager<N, C> extends AbstractComponentManager<N, C> {
@@ -123,7 +131,6 @@ public interface ComponentManager<N, C> extends Serializable {
    * Thread scoped component manager
    *
    * @author bingo 上午10:50:50
-   *
    */
   @ThreadScoped
   abstract class ThComponentManager<N, C> extends AbstractComponentManager<N, C> {
@@ -136,7 +143,6 @@ public interface ComponentManager<N, C> extends Serializable {
    * Transaction scoped component manager
    *
    * @author bingo 上午10:51:21
-   *
    */
   @TransactionScoped
   abstract class TsComponentManager<N, C> extends AbstractComponentManager<N, C> {

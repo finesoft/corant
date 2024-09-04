@@ -14,7 +14,10 @@
 package org.corant.modules.ddd.shared.model;
 
 import static java.lang.String.format;
+import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Configurations.getConfigValue;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,6 +26,7 @@ import jakarta.enterprise.event.TransactionPhase;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
 import org.corant.modules.ddd.Aggregate;
 import org.corant.modules.ddd.Aggregate.Lifecycle;
 import org.corant.modules.ddd.AggregateLifecycleManageEvent;
@@ -57,13 +61,13 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
     if (e.getSource() != null) {
       Aggregate entity = e.getSource();
       handle(entity, e.getAction(), e.isEffectImmediately(), e.getLockModeType());
-      logger.fine(() -> format("Handle %s %s %s.", entity.getClass().getName(),
-          e.getAction().name(), entity.getId()));
+      logger.fine(() -> format("Handle %s %s %s %s.", entity.getClass().getName(),
+          e.getAction().name(), entity.getId(), Arrays.toString(e.getQualifiers())));
     }
   }
 
   protected void handle(Aggregate entity, LifecycleAction action, boolean effectImmediately,
-      LockModeType lockModeType) {
+      LockModeType lockModeType, Annotation... qualifiers) {
     EntityManager em = entityManagers.getEntityManager(entity.getClass());
     if (action == LifecycleAction.PERSIST) {
       if (entity.getLifecycle() == Lifecycle.INITIAL) {
@@ -91,4 +95,13 @@ public class DefaultAggregateLifecycleManager implements AggregateLifecycleManag
     }
   }
 
+  protected EntityManager resolveEntityManager(Class<?> clazz, Annotation[] qualifiers) {
+    if (qualifiers == null || qualifiers.length == 0) {
+      return entityManagers.getEntityManager(clazz);
+    } else if (qualifiers.length == 1 && qualifiers[0] instanceof PersistenceContext pc) {
+      return entityManagers.getEntityManager(pc);
+    } else {
+      return resolve(EntityManager.class, qualifiers);
+    }
+  }
 }

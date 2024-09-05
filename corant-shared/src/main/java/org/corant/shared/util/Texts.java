@@ -19,6 +19,7 @@ import static org.corant.shared.util.Assertions.shouldBeTrue;
 import static org.corant.shared.util.Assertions.shouldNoneNull;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.max;
@@ -50,9 +51,12 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -275,6 +279,30 @@ public class Texts {
    */
   public static Stream<List<String>> asXSVLines(final InputStream is, final String delimiter) {
     return asXSVLines(is, UTF_8, 0, null, delimiter);
+  }
+
+  /**
+   * Returns a locale-sensitive and null-safe text comparator.
+   *
+   * @param locale the locale used for comparing, for example: {@code Locale.CHINESE} means use
+   *        Chinese (GBK) Pin Yin for comparing. Default is {@code Locale.ROOT} if null.
+   * @param nullIsLess whether consider {@code null} value less than non-{@code null} value
+   */
+  public static Comparator<Object> comparatorOf(Locale locale, boolean nullIsLess) {
+    final Comparator<Object> localeComparator =
+        Collator.getInstance(defaultObject(locale, Locale.ROOT));
+    return (s1, s2) -> {
+      if (s1 == s2) {
+        return 0;
+      }
+      if (s1 == null) {
+        return nullIsLess ? -1 : 1;
+      }
+      if (s2 == null) {
+        return nullIsLess ? 1 : -1;
+      }
+      return localeComparator.compare(s1, s2);
+    };
   }
 
   /**
@@ -759,6 +787,34 @@ public class Texts {
    */
   public static List<String> readLines(final String path) {
     return Texts.lines(new File(path)).collect(Collectors.toList());
+  }
+
+  /**
+   * Sort the given texts by the given locale use ascending order. Null text is assumed to be less
+   * than a non-null text.
+   *
+   * @param texts the texts to be sorted
+   * @param locale the locale used for comparing, for example: {@code Locale.CHINESE} means use
+   *        Chinese (GBK) Pin Yin for comparing
+   */
+  public static void sort(List<String> texts, Locale locale) {
+    sort(texts, locale, false);
+  }
+
+  /**
+   * Sort the given texts by the given locale. Null text is assumed to be less than a non-null text.
+   *
+   * @param texts the texts to be sorted
+   * @param locale the locale used for comparing, for example: {@code Locale.CHINESE} means use
+   *        Chinese (GBK) Pin Yin for comparing
+   * @param descending {@code true} uses descending order, {@code false} uses ascending order.
+   */
+  public static void sort(List<String> texts, Locale locale, boolean descending) {
+    if (isEmpty(texts)) {
+      return;
+    }
+    Comparator<Object> comparator = comparatorOf(locale, true);
+    texts.sort(descending ? comparator.reversed() : comparator);
   }
 
   /**

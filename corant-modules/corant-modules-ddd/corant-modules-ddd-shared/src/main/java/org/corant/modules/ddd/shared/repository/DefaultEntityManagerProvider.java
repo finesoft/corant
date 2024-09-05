@@ -43,7 +43,7 @@ import org.corant.shared.util.Configurations;
 /**
  * corant-modules-ddd-shared
  * <p>
- * Default entity manager provider that use to retrieve entity manage from current unit of work,
+ * Default entity manager provider that use to retrieve entity manager from current unit of work,
  * also supports bind/un-bind a transaction scoped persistence context for special entity classes.
  *
  * @author bingo 下午8:56:24

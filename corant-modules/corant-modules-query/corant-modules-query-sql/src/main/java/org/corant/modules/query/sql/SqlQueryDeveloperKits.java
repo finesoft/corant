@@ -15,16 +15,17 @@ package org.corant.modules.query.sql;
 
 import static java.util.Collections.emptyMap;
 import static org.corant.context.Beans.resolve;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.isNotBlank;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import javax.sql.DataSource;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.query.mapping.Query;
@@ -80,6 +81,17 @@ public class SqlQueryDeveloperKits {
   }
 
   @Experimental
+  public static void validateFreemarkerSQLQueryScriptStatically() {
+    validateFreemarkerSQLQueryScriptStatically("null", "");
+  }
+
+  @Experimental
+  public static void validateFreemarkerSQLQueryScriptStatically(
+      Map<String, String> specificReplacements) {
+    validateFreemarkerSQLQueryScriptStatically("null", "", specificReplacements);
+  }
+
+  @Experimental
   public static void validateFreemarkerSQLQueryScriptStatically(String variableReplacement,
       String directiveReplacement) {
     validateFreemarkerSQLQueryScriptStatically(variableReplacement, directiveReplacement,
@@ -103,8 +115,10 @@ public class SqlQueryDeveloperKits {
           resolve(SqlNamedQueryServiceManager.class);
       final DataSourceService dataSources = resolve(DataSourceService.class);
       Map<String, List<ValidationError>> errors = new LinkedHashMap<>();
+      boolean hasErrors = false;
       for (Query query : service.getQueries()) {
         if (query.getScript().getType() != ScriptType.FM || query.getType() != QueryType.SQL) {
+          System.out.println("[SKIP]: " + query.getVersionedName());
           continue;
         }
         String script = cleanFreemarkerTargets(query.getScript().getCode(), variableReplacement,
@@ -133,29 +147,42 @@ public class SqlQueryDeveloperKits {
           default:
             break;
         }
-        DataSource ds = dataSources.resolve(dsName);
-        Validation validation =
-            new Validation(defaultObject(validatorFeatureConfig, FeatureConfiguration::new),
-                Arrays.asList(dsType,
-                    new JdbcDatabaseMetaDataCapability(ds.getConnection(), NamesLookup.LOWERCASE)),
-                script);
-        errors.put(query.getVersionedName(), validation.validate());
-      }
-      errors.forEach((k, v) -> {
-        if (isNotEmpty(v)) {
-          v.forEach(e -> {
-            if (isNotEmpty(e.getErrors())) {
-              System.out.println("[QUERY NAME]:\n" + k);
-              System.out.println("[ERROR SQL]:\n" + e.getStatements());
-              System.out.println("[ERROR MESSAGE]:");
-              e.getErrors().stream().map(
-                  (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
-                  .forEach(System.out::println);
-              System.out.println("*".repeat(100));
-            }
-          });
+        try (Connection conn = dataSources.resolve(dsName).getConnection()) {
+          Validation validation =
+              new Validation(defaultObject(validatorFeatureConfig, FeatureConfiguration::new),
+                  Arrays.asList(dsType,
+                      new JdbcDatabaseMetaDataCapability(conn, NamesLookup.NO_TRANSFORMATION)),
+                  script);
+          List<ValidationError> validationErrors = validation.validate();
+          errors.put(query.getVersionedName(), validationErrors);
+          if (isEmpty(validationErrors)) {
+            System.out.println("[VALIDATED]: " + query.getVersionedName());
+          } else {
+            hasErrors = true;
+            System.out.println("[VALIDATED]: " + query.getVersionedName() + " ["
+                + validationErrors.size() + "] ERRORS");
+          }
         }
-      });
+      }
+      if (hasErrors) {
+        System.out.println("[VALIDATION]: completed, output error messages");
+        System.out.println("*".repeat(100));
+        errors.forEach((k, v) -> {
+          if (isNotEmpty(v)) {
+            v.forEach(e -> {
+              if (isNotEmpty(e.getErrors())) {
+                System.out.println("[QUERY NAME]: " + k);
+                System.out.println("[ERROR SQL]:\n" + e.getStatements());
+                System.out.println("[ERROR MESSAGE]:");
+                e.getErrors().stream().map(
+                    (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
+                    .forEach(System.out::println);
+                System.out.println("*".repeat(100));
+              }
+            });
+          }
+        });
+      }
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }

@@ -184,7 +184,7 @@ public class SqlQueryDeveloperKits {
         for (Query query : service.getQueries()) {
           if (query.getScript().getType() != ScriptType.FM || query.getType() != QueryType.SQL
               || skipQueryQualifier.contains(query.getQualifier())
-              || queryNameSkiper.test(query.getVersion())) {
+              || queryNameSkiper.test(query.getVersionedName())) {
             System.out.println("[SKIP]: " + query.getVersionedName());
             continue;
           }

@@ -197,7 +197,7 @@ public class SqlQueryDeveloperKits {
                     .addError(new ValidationException(e))));
           }
           if (isBlank(script)) {
-            System.out.println("[SKIP]: " + query.getVersionedName() + " script extract error!");
+            System.out.println("[INVALID]: " + query.getVersionedName() + " script extract error!");
             continue;
           }
           Pair<DBMS, String> dss = sqlQueryService.resolveDataSourceSchema(query.getQualifier());
@@ -232,10 +232,10 @@ public class SqlQueryDeveloperKits {
             List<ValidationError> validationErrors = validation.validate();
             errors.put(query.getVersionedName(), validationErrors);
             if (isEmpty(validationErrors)) {
-              System.out.println("[VALIDATED]: " + query.getVersionedName());
+              System.out.println("[VALID]: " + query.getVersionedName());
             } else {
               hasErrors = true;
-              System.out.println("[VALIDATED]: " + query.getVersionedName() + " ["
+              System.out.println("[INVALID]: " + query.getVersionedName() + " ["
                   + validationErrors.size() + "] ERRORS");
             }
           }

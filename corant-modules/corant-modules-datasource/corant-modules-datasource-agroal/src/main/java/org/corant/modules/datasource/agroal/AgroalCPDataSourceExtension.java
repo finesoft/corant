@@ -19,10 +19,13 @@ import static org.corant.shared.normal.Names.applicationName;
 import static org.corant.shared.util.Classes.defaultClassLoader;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.MBeans.registerToMBean;
+import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -43,8 +46,10 @@ import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.MBeans;
+import org.corant.shared.util.Objects;
 import org.corant.shared.util.Services;
 import io.agroal.api.AgroalDataSource;
+import io.agroal.api.AgroalDataSourceListener;
 import io.agroal.api.configuration.AgroalConnectionFactoryConfiguration.TransactionIsolation;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration;
 import io.agroal.api.configuration.AgroalConnectionPoolConfiguration.ConnectionValidator;
@@ -180,9 +185,17 @@ public class AgroalCPDataSourceExtension extends AbstractDataSourceExtension {
         cfgs.connectionPoolConfiguration().connectionValidator(validators.get());
       }
     }
+    List<AgroalDataSourceListener> listeners = new ArrayList<>();
     Services.selectRequired(AgroalCPDataSourceConfigurator.class, defaultClassLoader())
-        .sorted(Sortable::reverseCompare).forEach(c -> c.configure(cfg, cfgs));
-    AgroalDataSource agroalDataSource = AgroalDataSource.from(cfgs);
+        .sorted(Sortable::reverseCompare).forEach(c -> {
+          c.configure(cfg, cfgs);
+          c.getListeners().stream().filter(Objects::isNotNull).forEach(listeners::add);
+        });
+    if (getMapBoolean(cfg.getCtrlProperties(), "allow-logging", true)) {
+      listeners.add(new AgroalCPDataSourceLogger());
+    }
+    AgroalDataSource agroalDataSource =
+        AgroalDataSource.from(cfgs, listeners.toArray(AgroalDataSourceListener[]::new));
     if (cfg.isEnableMetrics()) {
       registerMetricsMBean(cfg.getName());
     }

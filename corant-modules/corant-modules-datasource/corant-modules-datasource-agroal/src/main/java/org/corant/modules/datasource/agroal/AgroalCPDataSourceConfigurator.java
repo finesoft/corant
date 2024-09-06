@@ -13,8 +13,11 @@
  */
 package org.corant.modules.datasource.agroal;
 
+import static java.util.Collections.emptyList;
+import java.util.List;
 import org.corant.modules.datasource.shared.DataSourceConfig;
 import org.corant.shared.ubiquity.Sortable;
+import io.agroal.api.AgroalDataSourceListener;
 import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
 
 /**
@@ -25,5 +28,9 @@ import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplie
 public interface AgroalCPDataSourceConfigurator extends Sortable {
 
   void configure(DataSourceConfig config, AgroalDataSourceConfigurationSupplier agroalConfig);
+
+  default List<AgroalDataSourceListener> getListeners() {
+    return emptyList();
+  }
 
 }

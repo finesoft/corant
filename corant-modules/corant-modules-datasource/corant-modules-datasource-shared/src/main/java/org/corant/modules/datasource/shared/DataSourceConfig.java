@@ -83,8 +83,8 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
   @ConfigKeyItem(defaultValue = "PT0S")
   protected Duration loginTimeout = Duration.ofSeconds(0);
 
-  @ConfigKeyItem(defaultValue = "PT0S")
-  protected Duration leakTimeout = Duration.ofSeconds(0);
+  @ConfigKeyItem(defaultValue = "PT2H")
+  protected Duration leakTimeout = Duration.ofHours(2);
 
   @ConfigKeyItem(defaultValue = "PT0M")
   protected Duration maxLifetime = Duration.ofMinutes(0);
@@ -216,7 +216,7 @@ public class DataSourceConfig extends AbstractNamedObject implements Declarative
 
   /**
    * Connections acquired for longer than this time period may be reported as leaking. A duration of
-   * {@link Duration#ZERO} means that this feature is disabled. Default is disabled.
+   * {@link Duration#ZERO} means that this feature is disabled. Default 2 hours.
    */
   public Duration getLeakTimeout() {
     return leakTimeout;

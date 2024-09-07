@@ -13,26 +13,37 @@
  */
 package org.corant.modules.query.sql;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
+import static org.corant.shared.util.Strings.trim;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.datasource.shared.DataSourceService;
+import org.corant.modules.query.mapping.FetchQuery;
+import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mapping.Script.ScriptType;
@@ -46,9 +57,15 @@ import org.corant.shared.ubiquity.Mutable.MutableString;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings;
+import org.corant.shared.util.Systems;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.util.validation.Validation;
 import net.sf.jsqlparser.util.validation.ValidationError;
 import net.sf.jsqlparser.util.validation.ValidationException;
@@ -77,9 +94,34 @@ public class SqlQueryDeveloperKits {
   public static final Set<String> DEFAULT_TM_VARIABLE_PATTERNS =
       new ImmutableSetBuilder<>("\\$\\{TM.*?}").build();
 
+  public static final String JSE_RESULT_PARAM_PATTERN = "@r\\.[.a-zA-Z0-9]*";
+
+  public static final String JSE_FETCH_RESULT_PARAM_PATTERN = "@fr\\.[.a-zA-Z0-9]*";
+
   @Experimental
   public static FreemarkerQueryScriptValidator freemarkerQueryScriptValidator() {
     return new FreemarkerQueryScriptValidator();
+  }
+
+  @Experimental
+  public static List<String> resolveJSEResultVariableNames(String express, boolean fetch) {
+    if (isNotBlank(express)) {
+      Pattern pattern =
+          Pattern.compile(fetch ? JSE_FETCH_RESULT_PARAM_PATTERN : JSE_RESULT_PARAM_PATTERN);
+      Matcher matcher = pattern.matcher(express);
+      List<String> matches = new ArrayList<>();
+      while (matcher.find()) {
+        String name = matcher.group();
+        if (fetch && name.length() > 4) {
+          name = name.substring(4);
+        } else if (name.length() > 3) {
+          name = name.substring(3);
+        }
+        matches.add(name);
+      }
+      return unmodifiableList(matches);
+    }
+    return emptyList();
   }
 
   /**
@@ -96,8 +138,21 @@ public class SqlQueryDeveloperKits {
     String defaultDirectiveReplacement = "";
     FeatureConfiguration featureConfiguration = new FeatureConfiguration();
     boolean includeMacro = false;
+    boolean includeFetchQuery;
+    boolean printSkipDirectiveStacks = false;
     Set<String> skipQueryQualifier = new HashSet<>();
-    Predicate<String> queryNameSkiper = Functions.emptyPredicate(false);
+    Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
+    Predicate<String> queryNameFilter = Functions.emptyPredicate(true);
+    List<String> skipDirectiveStacks = new ArrayList<>();// TODO FIXME
+
+    public FreemarkerQueryScriptValidator addSkipDirectiveStacks(String... strings) {
+      for (String s : strings) {
+        if (isNotBlank(s)) {
+          skipDirectiveStacks.add(trim(s));
+        }
+      }
+      return this;
+    }
 
     public FreemarkerQueryScriptValidator defaultDirectiveReplacement(
         String defaultDirectiveReplacement) {
@@ -119,6 +174,13 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
+    @Experimental
+    public FreemarkerQueryScriptValidator includeFetchQuery(boolean includeFetchQuery) {
+      this.includeFetchQuery = includeFetchQuery;
+      return this;
+    }
+
+    @Experimental
     public FreemarkerQueryScriptValidator includeMacro(boolean includeMacro) {
       this.includeMacro = includeMacro;
       if (this.includeMacro) {
@@ -128,6 +190,12 @@ public class SqlQueryDeveloperKits {
         directivePatterns = DEFAULT_DIRECTIVE_PATTERNS;
         variablePatterns = DEFAULT_VARIABLE_PATTERNS;
       }
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator printSkipDirectiveStacks(
+        boolean printSkipDirectiveStacks) {
+      this.printSkipDirectiveStacks = printSkipDirectiveStacks;
       return this;
     }
 
@@ -142,12 +210,26 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
-    public FreemarkerQueryScriptValidator queryNameSkiper(Predicate<String> queryNameSkiper) {
-      if (this.queryNameSkiper != null) {
-        this.queryNameSkiper = queryNameSkiper;
+    public FreemarkerQueryScriptValidator queryNameFilter(Predicate<String> queryNameFilter) {
+      if (this.queryNameFilter != null) {
+        this.queryNameFilter = queryNameFilter;
       } else {
-        this.queryNameSkiper = Functions.emptyPredicate(false);
+        this.queryNameFilter = Functions.emptyPredicate(true);
       }
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator queryNameSkipper(Predicate<String> queryNameSkipper) {
+      if (this.queryNameSkipper != null) {
+        this.queryNameSkipper = queryNameSkipper;
+      } else {
+        this.queryNameSkipper = Functions.emptyPredicate(false);
+      }
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator removeSkipDirectiveStacksIf(Predicate<String> predicate) {
+      skipDirectiveStacks.removeIf(predicate);
       return this;
     }
 
@@ -179,22 +261,23 @@ public class SqlQueryDeveloperKits {
         final SqlNamedQueryServiceManager sqlQueryService =
             resolve(SqlNamedQueryServiceManager.class);
         final DataSourceService dataSources = resolve(DataSourceService.class);
-        Map<String, List<ValidationError>> errors = new LinkedHashMap<>();
+        Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
         boolean hasErrors = false;
         for (Query query : service.getQueries()) {
           if (query.getScript().getType() != ScriptType.FM || query.getType() != QueryType.SQL
               || skipQueryQualifier.contains(query.getQualifier())
-              || queryNameSkiper.test(query.getVersionedName())) {
+              || queryNameSkipper.test(query.getVersionedName())
+              || !queryNameFilter.test(query.getVersionedName())) {
             System.out.println("[SKIP]: " + query.getVersionedName());
             continue;
           }
+          List<ValidationError> errors =
+              errorMaps.computeIfAbsent(query.getVersionedName(), k1 -> new ArrayList<>());
           String script = null;
           try {
             script = getScript(query);
           } catch (Exception e) {
-            errors.put(query.getVersionedName(),
-                listOf(new ValidationError("Parse script occurred error!")
-                    .addError(new ValidationException(e))));
+            errors.add(createValidationError("Parse script occurred error!", e));
           }
           if (isBlank(script)) {
             System.out.println("[INVALID]: " + query.getVersionedName() + " script extract error!");
@@ -230,26 +313,34 @@ public class SqlQueryDeveloperKits {
                     new JdbcDatabaseMetaDataCapability(conn, NamesLookup.NO_TRANSFORMATION)),
                 script);
             List<ValidationError> validationErrors = validation.validate();
-            errors.put(query.getVersionedName(), validationErrors);
-            if (isEmpty(validationErrors)) {
+            errors.addAll(validationErrors);
+            if (isNotEmpty(query.getFetchQueries()) && includeFetchQuery) {
+              // check fetch query parameter from result set
+              validateFetchQuery(query, validation, errors);
+            }
+            if (isEmpty(errors)) {
               System.out.println("[VALID]: " + query.getVersionedName());
             } else {
               hasErrors = true;
-              System.out.println("[INVALID]: " + query.getVersionedName() + " ["
-                  + validationErrors.size() + "] ERRORS");
+              System.out.println(
+                  "[INVALID]: " + query.getVersionedName() + " [" + errors.size() + "] ERRORS");
             }
           }
 
         }
         if (hasErrors) {
+          System.out.println();
+          System.out.println();
+          System.out.println("$".repeat(100));
           System.out.println("[VALIDATION]: completed, output error messages");
-          System.out.println("*".repeat(100));
-          errors.forEach((k, v) -> {
+          errorMaps.forEach((k, v) -> {
             if (isNotEmpty(v)) {
               v.forEach(e -> {
                 if (isNotEmpty(e.getErrors())) {
                   System.out.println("[QUERY NAME]: " + k);
-                  System.out.println("[ERROR SQL]:\n" + e.getStatements());
+                  if (isNotBlank(e.getStatements())) {
+                    System.out.println("[ERROR SQL]:\n" + e.getStatements());
+                  }
                   System.out.println("[ERROR MESSAGE]:");
                   e.getErrors().stream().map(
                       (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
@@ -265,33 +356,7 @@ public class SqlQueryDeveloperKits {
       }
     }
 
-    protected String getScript(Query query) throws TemplateException, IOException {
-      String script = query.getScript().getCode();
-      String macro = query.getMacroScript();
-      String text = script;
-      if (includeMacro && isNotBlank(macro)) {
-        text = macro + "\n" + script;
-        try (StringWriter sw = new StringWriter()) {
-          text = cleanFreemarkerTargets(text);
-          new Template(query.getVersionedName(), text, FreemarkerExecutions.FM_CFG)
-              .createProcessingEnvironment(emptyMap(), sw).process();
-          text = sw.toString();
-          MutableString result = new MutableString(text);
-          for (String vp : DEFAULT_VARIABLE_PATTERNS) {
-            result.apply(r -> r.replaceAll(vp, defaultVariableReplacement));
-          }
-          for (String dp : DEFAULT_DIRECTIVE_PATTERNS) {
-            result.apply(r -> r.replaceAll(dp, defaultDirectiveReplacement));
-          }
-          text = result.get();
-        }
-      } else {
-        text = cleanFreemarkerTargets(text);
-      }
-      return text;
-    }
-
-    String cleanFreemarkerTargets(String text) {
+    protected String cleanFreemarkerTargets(String text) {
       if (isNotBlank(text)) {
         MutableString result = new MutableString(text);
         if (specVarReplacements != null) {
@@ -309,6 +374,185 @@ public class SqlQueryDeveloperKits {
         return result.get();
       }
       return text;
+    }
+
+    protected ValidationError createValidationError(String msg, Throwable t) {
+      ValidationError ve = new ValidationError(msg);
+      if (t instanceof ValidationException x) {
+        ve.addError(x);
+      } else if (t != null) {
+        ve.addError(new ValidationException(t));
+      }
+      return ve;
+    }
+
+    protected String getScript(Query query) throws TemplateException, IOException {
+      String script = query.getScript().getCode();
+      String macro = query.getMacroScript();
+      String text = script;
+      if (includeMacro && isNotBlank(macro)) {
+        text = skipDirectiveStacksNecessary(macro + Systems.getLineSeparator() + script);
+        try (StringWriter sw = new StringWriter()) {
+          text = cleanFreemarkerTargets(text);
+          new Template(query.getVersionedName(), text, FreemarkerExecutions.FM_CFG)
+              .createProcessingEnvironment(emptyMap(), sw).process();
+          text = sw.toString();
+          MutableString result = new MutableString(text);
+          for (String vp : DEFAULT_VARIABLE_PATTERNS) {
+            result.apply(r -> r.replaceAll(vp, defaultVariableReplacement));
+          }
+          for (String dp : DEFAULT_DIRECTIVE_PATTERNS) {
+            result.apply(r -> r.replaceAll(dp, defaultDirectiveReplacement));
+          }
+          text = result.get();
+        }
+      } else {
+        text = cleanFreemarkerTargets(skipDirectiveStacksNecessary(text));
+      }
+      return text;
+    }
+
+    protected List<String> resolveFiledNames(Validation validation) {
+      if (validation.getParsedStatements() != null
+          && isNotEmpty(validation.getParsedStatements().getStatements())) {
+        for (Statement st : validation.getParsedStatements().getStatements()) {
+          if ((st instanceof Select select) && (select.getSelectBody() instanceof PlainSelect ps)) {
+            List<String> fieldNames = new ArrayList<>();
+            for (SelectItem item : ps.getSelectItems()) {
+              if (item instanceof SelectExpressionItem si) {
+                if (si.getAlias() != null) {
+                  fieldNames.add(si.getAlias().getName());
+                } else {
+                  // FIXME use . ??
+                  String fn = si.getExpression().toString();
+                  int dot = fn.indexOf('.');
+                  if (dot != -1 && fn.length() > (dot + 1)) {
+                    fieldNames.add(fn.substring(dot + 1));
+                  } else {
+                    fieldNames.add(fn);
+                  }
+                }
+              }
+            }
+            return unmodifiableList(fieldNames);
+          }
+        }
+      }
+      return emptyList();
+    }
+
+    protected Set<Integer> resolveSkipDirectiveStacksLines(String sd, List<String> lines) {
+      String usd = trim(sd);
+      int s = usd.indexOf(' ');
+      String start = usd.substring(0, s);
+      String end = "</" + usd.substring(1, s) + ">";
+      Set<Integer> ps = new LinkedHashSet<>();
+      int lineNo = 0;
+      Stack<String> stack = new Stack<>();
+      boolean inStack = false;
+      for (String line : lines) {
+        String tl = trim(line);
+        if (inStack) {
+          ps.add(lineNo);
+          if (tl.startsWith(start)) {
+            stack.push(tl);
+          } else if (tl.equals(end)) {
+            stack.pop();
+            if (stack.isEmpty()) {
+              return ps;
+            }
+          }
+        } else if (tl.equals(usd)) {
+          ps.add(lineNo);
+          stack.push(tl);
+          inStack = true;
+          if (tl.endsWith("/>")) {
+            stack.clear();
+            return ps;
+          }
+        }
+        lineNo++;
+      }
+      return emptySet();
+    }
+
+    protected String skipDirectiveStacksNecessary(String string) {
+      if (isEmpty(skipDirectiveStacks)) {
+        return string;
+      }
+      List<String> lines = string.lines().toList();
+      Set<Integer> skipLns = new LinkedHashSet<>();
+      for (String sd : skipDirectiveStacks) {
+        skipLns.addAll(resolveSkipDirectiveStacksLines(sd, lines));
+      }
+      if (skipLns.isEmpty()) {
+        return string;
+      }
+      StringBuilder sb = new StringBuilder();
+      String lineSpr = Systems.getLineSeparator();
+      StringBuilder re = new StringBuilder();
+      int size = lines.size();
+      for (int i = 0; i < size; i++) {
+        if (!skipLns.contains(i)) {
+          sb.append(lines.get(i)).append(lineSpr);
+        } else if (printSkipDirectiveStacks) {
+          re.append("|- ").append(lines.get(i)).append(lineSpr);
+        }
+      }
+      if (printSkipDirectiveStacks && !re.isEmpty()) {
+        System.out.println("[STACK-SKIP]:");
+        System.out.println("-".repeat(100));
+        System.out.println(re.substring(0, re.length() - lineSpr.length()));
+        System.out.println("-".repeat(100));
+      }
+      return sb.toString();
+    }
+
+    protected void validateFetchQuery(Query query, Validation validation,
+        List<ValidationError> errors) {
+      if (isEmpty(query.getFetchQueries())) {
+        return;
+      }
+      List<String> fieldNames = resolveFiledNames(validation);
+      if (isEmpty(fieldNames)) {
+        return;
+      }
+      for (FetchQuery fq : query.getFetchQueries()) {
+        String fqn = defaultString(fq.getInlineQueryName(), fq.getReferenceQueryName());
+        if (fq.getPredicateScript().isValid()
+            && fq.getPredicateScript().getType() == ScriptType.JSE) {
+          List<String> resultParamNames =
+              resolveJSEResultVariableNames(fq.getPredicateScript().getCode(), false);
+          if (isNotEmpty(resultParamNames)) {
+            for (String rpn : resultParamNames) {
+              if (!fieldNames.contains(rpn)) {
+                errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+                    + "] predicate script variable: [" + rpn + "] not exists")));
+              }
+            }
+          }
+        }
+        fq.getParameters().forEach(fp -> {
+          if ((fp.getSource() == FetchQueryParameterSource.R)
+              && !fieldNames.contains(fp.getSourceNamePath()[0])) {
+            errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+                + "] parameter: [" + fp.getSourceNamePath()[0] + "] not exists")));
+          }
+        });
+        if (fq.getInjectionScript().isValid()
+            && fq.getInjectionScript().getType() == ScriptType.JSE) {
+          List<String> resultParamNames =
+              resolveJSEResultVariableNames(fq.getInjectionScript().getCode(), false);
+          if (isNotEmpty(resultParamNames)) {
+            for (String rpn : resultParamNames) {
+              if (!fieldNames.contains(rpn)) {
+                errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+                    + "] injection script variable: [" + rpn + "] not exists")));
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

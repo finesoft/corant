@@ -345,7 +345,7 @@ public class SqlQueryDeveloperKits {
                   e.getErrors().stream().map(
                       (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
                       .forEach(System.err::println);
-                  System.out.println("*".repeat(100));
+                  System.err.println("*".repeat(100));
                 }
               });
             }

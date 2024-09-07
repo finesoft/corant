@@ -337,14 +337,14 @@ public class SqlQueryDeveloperKits {
             if (isNotEmpty(v)) {
               v.forEach(e -> {
                 if (isNotEmpty(e.getErrors())) {
-                  System.out.println("[QUERY NAME]: " + k);
+                  System.err.println("[QUERY NAME]: " + k);
                   if (isNotBlank(e.getStatements())) {
-                    System.out.println("[ERROR SQL]:\n" + e.getStatements());
+                    System.err.println("[ERROR SQL]:\n" + e.getStatements());
                   }
-                  System.out.println("[ERROR MESSAGE]:");
+                  System.err.println("[ERROR MESSAGE]:");
                   e.getErrors().stream().map(
                       (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
-                      .forEach(System.out::println);
+                      .forEach(System.err::println);
                   System.out.println("*".repeat(100));
                 }
               });

@@ -15,7 +15,6 @@ package org.corant.modules.query.sql;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
@@ -92,7 +91,7 @@ public class SqlQueryDeveloperKits {
       new ImmutableSetBuilder<>("\\$\\{.*?}").build();
 
   public static final Set<String> DEFAULT_TM_VARIABLE_PATTERNS =
-      new ImmutableSetBuilder<>("\\$\\{TM.*?}").build();
+      new ImmutableSetBuilder<>("\\$\\{TM.*?}", "\\$\\{CM.*?}").build();
 
   public static final String JSE_RESULT_PARAM_PATTERN = "@r\\.[.a-zA-Z0-9]*";
 
@@ -329,10 +328,8 @@ public class SqlQueryDeveloperKits {
 
         }
         if (hasErrors) {
-          System.out.println();
-          System.out.println();
-          System.out.println("$".repeat(100));
-          System.out.println("[VALIDATION]: completed, output error messages");
+          System.err.println("$".repeat(100));
+          System.err.println("Validation completed, output error messages");
           errorMaps.forEach((k, v) -> {
             if (isNotEmpty(v)) {
               v.forEach(e -> {
@@ -441,39 +438,44 @@ public class SqlQueryDeveloperKits {
       return emptyList();
     }
 
-    protected Set<Integer> resolveSkipDirectiveStacksLines(String sd, List<String> lines) {
+    protected List<Integer> resolveSkipDirectiveStacksLines(String sd, List<String> lines) {
       String usd = trim(sd);
       int s = usd.indexOf(' ');
       String start = usd.substring(0, s);
       String end = "</" + usd.substring(1, s) + ">";
-      Set<Integer> ps = new LinkedHashSet<>();
+      List<Integer> poses = new ArrayList<>();
+      List<Integer> stackPoses = new ArrayList<>();
       int lineNo = 0;
       Stack<String> stack = new Stack<>();
       boolean inStack = false;
       for (String line : lines) {
         String tl = trim(line);
         if (inStack) {
-          ps.add(lineNo);
+          stackPoses.add(lineNo);
           if (tl.startsWith(start)) {
             stack.push(tl);
           } else if (tl.equals(end)) {
             stack.pop();
             if (stack.isEmpty()) {
-              return ps;
+              poses.addAll(stackPoses);
+              inStack = false;
+              stackPoses.clear();
             }
           }
         } else if (tl.equals(usd)) {
-          ps.add(lineNo);
+          stackPoses.add(lineNo);
           stack.push(tl);
           inStack = true;
           if (tl.endsWith("/>")) {
             stack.clear();
-            return ps;
+            poses.addAll(stackPoses);
+            inStack = false;
+            stackPoses.clear();
           }
         }
         lineNo++;
       }
-      return emptySet();
+      return poses;
     }
 
     protected String skipDirectiveStacksNecessary(String string) {
@@ -517,6 +519,7 @@ public class SqlQueryDeveloperKits {
       if (isEmpty(fieldNames)) {
         return;
       }
+      // FIXME validate @fr & projection
       for (FetchQuery fq : query.getFetchQueries()) {
         String fqn = defaultString(fq.getInlineQueryName(), fq.getReferenceQueryName());
         if (fq.getPredicateScript().isValid()

@@ -19,7 +19,8 @@ import static java.util.Collections.unmodifiableList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
-import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Maps.getMapMap;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.trim;
@@ -33,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Function;
@@ -41,6 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.datasource.shared.DataSourceService;
+import org.corant.modules.json.ObjectMappers;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
 import org.corant.modules.query.mapping.Query;
@@ -48,6 +51,7 @@ import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.QueryMappingService;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerExecutions;
+import org.corant.modules.query.shared.dynamic.jsonexpression.JsonExpressionScriptProcessor;
 import org.corant.modules.query.sql.cdi.SqlNamedQueryServiceManager;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.ubiquity.Experimental;
@@ -57,6 +61,7 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
@@ -137,7 +142,7 @@ public class SqlQueryDeveloperKits {
     String defaultDirectiveReplacement = "";
     FeatureConfiguration featureConfiguration = new FeatureConfiguration();
     boolean includeMacro = false;
-    boolean includeFetchQuery;
+    boolean includeFetchQueryHandling;
     boolean printSkipDirectiveStacks = false;
     Set<String> skipQueryQualifier = new HashSet<>();
     Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
@@ -174,8 +179,9 @@ public class SqlQueryDeveloperKits {
     }
 
     @Experimental
-    public FreemarkerQueryScriptValidator includeFetchQuery(boolean includeFetchQuery) {
-      this.includeFetchQuery = includeFetchQuery;
+    public FreemarkerQueryScriptValidator includeFetchQueryHandling(
+        boolean includeFetchQueryHandling) {
+      this.includeFetchQueryHandling = includeFetchQueryHandling;
       return this;
     }
 
@@ -261,6 +267,7 @@ public class SqlQueryDeveloperKits {
             resolve(SqlNamedQueryServiceManager.class);
         final DataSourceService dataSources = resolve(DataSourceService.class);
         Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
+        Map<String, List<String>> queryFieldNames = new LinkedHashMap<>();
         boolean hasErrors = false;
         for (Query query : service.getQueries()) {
           if (query.getScript().getType() != ScriptType.FM || query.getType() != QueryType.SQL
@@ -270,8 +277,10 @@ public class SqlQueryDeveloperKits {
             System.out.println("[SKIP]: " + query.getVersionedName());
             continue;
           }
+
           List<ValidationError> errors =
               errorMaps.computeIfAbsent(query.getVersionedName(), k1 -> new ArrayList<>());
+
           String script = null;
           try {
             script = getScript(query);
@@ -313,9 +322,9 @@ public class SqlQueryDeveloperKits {
                 script);
             List<ValidationError> validationErrors = validation.validate();
             errors.addAll(validationErrors);
-            if (isNotEmpty(query.getFetchQueries()) && includeFetchQuery) {
-              // check fetch query parameter from result set
-              validateFetchQuery(query, validation, errors);
+            List<String> fieldNames = resolveFiledNames(validation);
+            if (isNotEmpty(fieldNames)) {
+              queryFieldNames.put(query.getVersionedName(), fieldNames);
             }
             if (isEmpty(errors)) {
               System.out.println("[VALID]: " + query.getVersionedName());
@@ -325,11 +334,17 @@ public class SqlQueryDeveloperKits {
                   "[INVALID]: " + query.getVersionedName() + " [" + errors.size() + "] ERRORS");
             }
           }
-
         }
+
+        // validate fetch query no-sql script field names
+        if (includeFetchQueryHandling) {
+          validateFetchQueries(queryFieldNames, errorMaps, service::getQuery);
+        }
+        System.out
+            .println("Validation completed" + (hasErrors ? ", output error messages" : EMPTY));
+        System.out.println("");
         if (hasErrors) {
           System.err.println("$".repeat(100));
-          System.err.println("Validation completed, output error messages");
           errorMaps.forEach((k, v) -> {
             if (isNotEmpty(v)) {
               v.forEach(e -> {
@@ -418,15 +433,15 @@ public class SqlQueryDeveloperKits {
             for (SelectItem item : ps.getSelectItems()) {
               if (item instanceof SelectExpressionItem si) {
                 if (si.getAlias() != null) {
-                  fieldNames.add(si.getAlias().getName());
+                  fieldNames.add(trim(si.getAlias().getName()));
                 } else {
                   // FIXME use . ??
                   String fn = si.getExpression().toString();
                   int dot = fn.indexOf('.');
                   if (dot != -1 && fn.length() > (dot + 1)) {
-                    fieldNames.add(fn.substring(dot + 1));
+                    fieldNames.add(trim(fn.substring(dot + 1)));
                   } else {
-                    fieldNames.add(fn);
+                    fieldNames.add(trim(fn));
                   }
                 }
               }
@@ -510,49 +525,92 @@ public class SqlQueryDeveloperKits {
       return sb.toString();
     }
 
-    protected void validateFetchQuery(Query query, Validation validation,
-        List<ValidationError> errors) {
-      if (isEmpty(query.getFetchQueries())) {
+    protected void validateFetchQueries(Map<String, List<String>> queryFieldNames,
+        Map<String, List<ValidationError>> errorMaps, Function<String, Query> mapping) {
+      for (Entry<String, List<String>> entry : queryFieldNames.entrySet()) {
+        Query query;
+        if (isEmpty(entry.getValue())
+            || isEmpty((query = mapping.apply(entry.getKey())).getFetchQueries())) {
+          continue;
+        }
+        List<ValidationError> errors =
+            errorMaps.computeIfAbsent(entry.getKey(), k1 -> new ArrayList<>());
+        for (FetchQuery fq : query.getFetchQueries()) {
+          validateFetchQuery(entry.getValue(), errors, fq,
+              queryFieldNames.get(fq.getQueryReference().getVersionedName()));
+        }
+      }
+    }
+
+    protected void validateFetchQuery(List<String> fieldNames, List<ValidationError> errors,
+        FetchQuery fq, List<String> fetchQueryFieldNames) {
+      if (isEmpty(fieldNames) || fq.getQueryReference().getType() != QueryType.SQL) {
         return;
       }
-      List<String> fieldNames = resolveFiledNames(validation);
-      if (isEmpty(fieldNames)) {
-        return;
-      }
-      // FIXME validate @fr & projection
-      for (FetchQuery fq : query.getFetchQueries()) {
-        String fqn = defaultString(fq.getInlineQueryName(), fq.getReferenceQueryName());
-        if (fq.getPredicateScript().isValid()
-            && fq.getPredicateScript().getType() == ScriptType.JSE) {
-          List<String> resultParamNames =
-              resolveJSEResultVariableNames(fq.getPredicateScript().getCode(), false);
-          if (isNotEmpty(resultParamNames)) {
-            for (String rpn : resultParamNames) {
-              if (!fieldNames.contains(rpn)) {
-                errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
-                    + "] predicate script variable: [" + rpn + "] not exists")));
-              }
+
+      // check predicate script variables
+      String fqn = fq.getQueryReference().getVersionedName();
+      if (fq.getPredicateScript().isValid()
+          && fq.getPredicateScript().getType() == ScriptType.JSE) {
+        List<String> resultParamNames =
+            resolveJSEResultVariableNames(fq.getPredicateScript().getCode(), false);
+        if (isNotEmpty(resultParamNames)) {
+          for (String rpn : resultParamNames) {
+            if (!fieldNames.contains(trim(rpn))) {
+              errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+                  + "] predicate script variable: [" + rpn + "] not exists")));
             }
           }
         }
-        fq.getParameters().forEach(fp -> {
-          if ((fp.getSource() == FetchQueryParameterSource.R)
-              && !fieldNames.contains(fp.getSourceNamePath()[0])) {
-            errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
-                + "] parameter: [" + fp.getSourceNamePath()[0] + "] not exists")));
+      }
+
+      // check query parameter variables
+      fq.getParameters().forEach(fp -> {
+        if ((fp.getSource() == FetchQueryParameterSource.R)
+            && !fieldNames.contains(fp.getSourceNamePath()[0])) {
+          errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+              + "] parameter: [" + fp.getSourceNamePath()[0] + "] not exists")));
+        }
+      });
+
+      // check injection script variables
+      if (fq.getInjectionScript().isValid()
+          && fq.getInjectionScript().getType() == ScriptType.JSE) {
+        String injectCode = fq.getInjectionScript().getCode();
+        List<String> parentResultParamNames = resolveJSEResultVariableNames(injectCode, false);
+        if (isNotEmpty(parentResultParamNames)) {
+          for (String rpn : parentResultParamNames) {
+            if (!fieldNames.contains(trim(rpn))) {
+              errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
+                  + "] injection script variable: [@r." + rpn + "] not exists")));
+            }
           }
-        });
-        if (fq.getInjectionScript().isValid()
-            && fq.getInjectionScript().getType() == ScriptType.JSE) {
-          List<String> resultParamNames =
-              resolveJSEResultVariableNames(fq.getInjectionScript().getCode(), false);
-          if (isNotEmpty(resultParamNames)) {
-            for (String rpn : resultParamNames) {
-              if (!fieldNames.contains(rpn)) {
+        }
+        if (isNotEmpty(fetchQueryFieldNames)) {
+          List<String> fetchResultParamNames = resolveJSEResultVariableNames(injectCode, true);
+          if (isNotEmpty(fetchResultParamNames)) {
+            for (String frpn : fetchResultParamNames) {
+              if (!fetchQueryFieldNames.contains(trim(frpn))) {
                 errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
-                    + "] injection script variable: [" + rpn + "] not exists")));
+                    + "] injection script variable: [@fr." + frpn + "] not exists")));
               }
             }
+          }
+          try {
+            Map<Object, Object> map = ObjectMappers.mapReader().readValue(injectCode);
+            Map<String, Object> projectionMap =
+                getMapMap(map, JsonExpressionScriptProcessor.PROJECTION_KEY);
+            if (isNotEmpty(projectionMap)) {
+              for (String frpn : projectionMap.keySet()) {
+                if (!fetchQueryFieldNames.contains(trim(frpn))) {
+                  errors.add(createValidationError(null, new ValidationException("Fetch query ["
+                      + fqn + "] injection script projection name: [" + frpn + "] not exists")));
+                }
+              }
+            }
+          } catch (JsonProcessingException e) {
+            errors.add(createValidationError(null,
+                new ValidationException("Fetch query injection script process error!")));
           }
         }
       }

@@ -558,7 +558,7 @@ public class SqlQueryDeveloperKits {
           for (String rpn : resultParamNames) {
             if (!fieldNames.contains(trim(rpn))) {
               errors.add(createValidationError(null, new ValidationException("Fetch query [" + fqn
-                  + "] predicate script variable: [" + rpn + "] not exists")));
+                  + "] predicate script variable: [@r." + rpn + "] not exists")));
             }
           }
         }

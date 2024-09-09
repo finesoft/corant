@@ -19,7 +19,10 @@ import static java.util.Collections.unmodifiableList;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
+import static org.corant.shared.util.Functions.emptyConsumer;
 import static org.corant.shared.util.Maps.getMapMap;
+import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Maps.transform;
 import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -29,14 +32,17 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -134,27 +140,39 @@ public class SqlQueryDeveloperKits {
    * @author bingo 18:48:09
    */
   public static class FreemarkerQueryScriptValidator {
-    Map<String, String> specVarReplacements = new LinkedHashMap<>();
-    Map<String, String> specVarPatternReplacements = new LinkedHashMap<>();
-    Set<String> directivePatterns = DEFAULT_DIRECTIVE_PATTERNS;
-    Set<String> variablePatterns = DEFAULT_VARIABLE_PATTERNS;
-    String defaultVariableReplacement = "NULL";
-    String defaultDirectiveReplacement = "";
-    FeatureConfiguration featureConfiguration = new FeatureConfiguration();
-    boolean includeMacro = false;
-    boolean includeFetchQueryHandling;
-    boolean printSkipDirectiveStacks = false;
-    Set<String> skipQueryQualifier = new HashSet<>();
-    Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
-    Predicate<String> queryNameFilter = Functions.emptyPredicate(true);
-    List<String> skipDirectiveStacks = new ArrayList<>();// TODO FIXME
+    protected Map<String, String> specVarReplacements = new LinkedHashMap<>();
+    protected Map<String, String> specVarPatternReplacements = new LinkedHashMap<>();
+    protected Set<String> directivePatterns = DEFAULT_DIRECTIVE_PATTERNS;
+    protected Set<String> variablePatterns = DEFAULT_VARIABLE_PATTERNS;
+    protected String defaultVariableReplacement = "NULL";
+    protected String defaultDirectiveReplacement = "";
+    protected FeatureConfiguration featureConfiguration = new FeatureConfiguration();
+    protected boolean includeMacro = false;
+    protected boolean includeFetchQueryHandling;
+    protected boolean outputReplacedDirectiveStacks = false;
+    protected boolean outputProcessedValidScript = false;
+    protected Set<String> skipQueryQualifier = new HashSet<>();
+    protected Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
+    protected Predicate<String> queryNameFilter = Functions.emptyPredicate(true);
+    protected Map<String, Object> directiveStacksReplacements = new LinkedHashMap<>();
+    protected Consumer<String> validatingInfoHandler = System.out::println;
+    protected BiConsumer<String, List<ValidationError>> validationErrorHandler =
+        (k, v) -> v.forEach(e -> {
+          if (isNotEmpty(e.getErrors())) {
+            System.err.println("[QUERY NAME]: " + k);
+            if (isNotBlank(e.getStatements())) {
+              System.err.println("[ERROR SQL]:\n" + e.getStatements());
+            }
+            System.err.println("[ERROR MESSAGE]:");
+            e.getErrors().stream().map(
+                (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
+                .forEach(System.err::println);
+            System.err.println("*".repeat(100));
+          }
+        });
 
-    public FreemarkerQueryScriptValidator addSkipDirectiveStacks(String... strings) {
-      for (String s : strings) {
-        if (isNotBlank(s)) {
-          skipDirectiveStacks.add(trim(s));
-        }
-      }
+    public FreemarkerQueryScriptValidator addSkipQueryQualifier(String... skipQueryQualifiers) {
+      Collections.addAll(skipQueryQualifier, skipQueryQualifiers);
       return this;
     }
 
@@ -198,9 +216,38 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
-    public FreemarkerQueryScriptValidator printSkipDirectiveStacks(
-        boolean printSkipDirectiveStacks) {
-      this.printSkipDirectiveStacks = printSkipDirectiveStacks;
+    public FreemarkerQueryScriptValidator outputProcessedValidScript(
+        boolean outputProcessedValidScript) {
+      this.outputProcessedValidScript = outputProcessedValidScript;
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator outputReplacedDirectiveStacks(
+        boolean outputReplacedDirectiveStacks) {
+      this.outputReplacedDirectiveStacks = outputReplacedDirectiveStacks;
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator putDirectiveStackReplacement(String directiveStack,
+        String replacement) {
+      if (isNotBlank(directiveStack)) {
+        directiveStacksReplacements.put(trim(directiveStack), trim(replacement));
+      }
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator putDirectiveStackReplacements(String directiveStack,
+        Map<String, String> specQueryNameReplacements) {
+      if (isNotBlank(directiveStack)) {
+        if (isEmpty(specQueryNameReplacements)) {
+          directiveStacksReplacements.put(trim(directiveStack), null);
+        } else {
+          directiveStacksReplacements.put(trim(directiveStack),
+              transform(specQueryNameReplacements,
+                  (Function<? super String, ? extends String>) Strings::defaultString,
+                  (Function<? super String, ? extends String>) Strings::defaultTrim));
+        }
+      }
       return this;
     }
 
@@ -233,8 +280,15 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
-    public FreemarkerQueryScriptValidator removeSkipDirectiveStacksIf(Predicate<String> predicate) {
-      skipDirectiveStacks.removeIf(predicate);
+    public FreemarkerQueryScriptValidator removeDirectiveStackReplacementsIf(
+        Predicate<String> predicate) {
+      if (predicate != null) {
+        List<String> removeKeys =
+            directiveStacksReplacements.keySet().stream().filter(predicate).toList();
+        if (isNotEmpty(removeKeys)) {
+          removeKeys.forEach(directiveStacksReplacements::remove);
+        }
+      }
       return this;
     }
 
@@ -274,7 +328,7 @@ public class SqlQueryDeveloperKits {
               || skipQueryQualifier.contains(query.getQualifier())
               || queryNameSkipper.test(query.getVersionedName())
               || !queryNameFilter.test(query.getVersionedName())) {
-            System.out.println("[SKIP]: " + query.getVersionedName());
+            validatingInfoHandler.accept("[SKIP]: " + query.getVersionedName());
             continue;
           }
 
@@ -288,7 +342,8 @@ public class SqlQueryDeveloperKits {
             errors.add(createValidationError("Parse script occurred error!", e));
           }
           if (isBlank(script)) {
-            System.out.println("[INVALID]: " + query.getVersionedName() + " script extract error!");
+            errors.add(createValidationError(
+                "[INVALID]: " + query.getVersionedName() + " script extract error!", null));
             continue;
           }
           Pair<DBMS, String> dss = sqlQueryService.resolveDataSourceSchema(query.getQualifier());
@@ -327,10 +382,14 @@ public class SqlQueryDeveloperKits {
               queryFieldNames.put(query.getVersionedName(), fieldNames);
             }
             if (isEmpty(errors)) {
-              System.out.println("[VALID]: " + query.getVersionedName());
+              validatingInfoHandler.accept("[VALID]: " + query.getVersionedName());
+              if (outputProcessedValidScript) {
+                validatingInfoHandler.accept("[SCRIPT]");
+                validatingInfoHandler.accept(script);
+              }
             } else {
               hasErrors = true;
-              System.out.println(
+              validatingInfoHandler.accept(
                   "[INVALID]: " + query.getVersionedName() + " [" + errors.size() + "] ERRORS");
             }
           }
@@ -340,32 +399,36 @@ public class SqlQueryDeveloperKits {
         if (includeFetchQueryHandling) {
           validateFetchQueries(queryFieldNames, errorMaps, service::getQuery);
         }
-        System.out
-            .println("Validation completed" + (hasErrors ? ", output error messages" : EMPTY));
-        System.out.println("");
+        validatingInfoHandler
+            .accept("Validation completed" + (hasErrors ? ", some errors were found" : EMPTY));
         if (hasErrors) {
-          System.err.println("$".repeat(100));
           errorMaps.forEach((k, v) -> {
             if (isNotEmpty(v)) {
-              v.forEach(e -> {
-                if (isNotEmpty(e.getErrors())) {
-                  System.err.println("[QUERY NAME]: " + k);
-                  if (isNotBlank(e.getStatements())) {
-                    System.err.println("[ERROR SQL]:\n" + e.getStatements());
-                  }
-                  System.err.println("[ERROR MESSAGE]:");
-                  e.getErrors().stream().map(
-                      (Function<? super ValidationException, ? extends String>) ValidationException::getMessage)
-                      .forEach(System.err::println);
-                  System.err.println("*".repeat(100));
-                }
-              });
+              validationErrorHandler.accept(k, v);
             }
           });
         }
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
+    }
+
+    public FreemarkerQueryScriptValidator validatingInfoHandler(
+        Consumer<String> validatingInfoHandler) {
+      if (validatingInfoHandler != null) {
+        this.validatingInfoHandler = validatingInfoHandler;
+      } else {
+        this.validatingInfoHandler = emptyConsumer();
+      }
+      return this;
+    }
+
+    public FreemarkerQueryScriptValidator validationErrorHandler(
+        BiConsumer<String, List<ValidationError>> validationErrorHandler) {
+      if (validationErrorHandler != null) {
+        this.validationErrorHandler = validationErrorHandler;
+      }
+      return this;
     }
 
     protected String cleanFreemarkerTargets(String text) {
@@ -403,7 +466,7 @@ public class SqlQueryDeveloperKits {
       String macro = query.getMacroScript();
       String text = script;
       if (includeMacro && isNotBlank(macro)) {
-        text = skipDirectiveStacksNecessary(macro + Systems.getLineSeparator() + script);
+        text = replaceDirectiveStacksNecessary(query, macro + Systems.getLineSeparator() + script);
         try (StringWriter sw = new StringWriter()) {
           text = cleanFreemarkerTargets(text);
           new Template(query.getVersionedName(), text, FreemarkerExecutions.FM_CFG)
@@ -419,9 +482,96 @@ public class SqlQueryDeveloperKits {
           text = result.get();
         }
       } else {
-        text = cleanFreemarkerTargets(skipDirectiveStacksNecessary(text));
+        text = cleanFreemarkerTargets(replaceDirectiveStacksNecessary(query, text));
       }
       return text;
+    }
+
+    protected String replaceDirectiveStacksNecessary(Query query, String string) {
+      if (isEmpty(directiveStacksReplacements)) {
+        return string;
+      }
+
+      List<String> lines = string.lines().toList();
+
+      List<Pair<List<Integer>, Object>> collectedRepLns = new ArrayList<>();
+      directiveStacksReplacements.forEach((k, v) -> {
+        List<List<Integer>> tmp = resolveReplaceDirectiveStacksLines(k, lines);
+        if (isNotEmpty(tmp)) {
+          for (List<Integer> tmpLs : tmp) {
+            if (isNotEmpty(tmpLs)) {
+              collectedRepLns.add(Pair.of(new ArrayList<>(tmpLs), v));
+            }
+          }
+        }
+      });
+
+      if (isEmpty(collectedRepLns)) {
+        return string;
+      }
+
+      // sort the replacement line numbers
+      collectedRepLns.sort(Comparator.comparing(p -> p.left().get(0)));
+
+      // remove the intersect line numbers
+      List<Pair<List<Integer>, Object>> repLns = new ArrayList<>();
+      List<Integer> pre = null;
+      for (Pair<List<Integer>, Object> tmp : collectedRepLns) {
+        if (pre == null || pre.stream().noneMatch(tmp.left()::contains)) {
+          repLns.add(tmp);
+          pre = tmp.left();
+        }
+      }
+      if (repLns.isEmpty()) {
+        return string;
+      }
+
+      StringBuilder sb = new StringBuilder();
+      String lineSpr = Systems.getLineSeparator();
+      StringBuilder re = new StringBuilder();
+      int size = lines.size();
+      Pair<List<Integer>, Object> matches = null;
+      for (int i = 0; i < size; i++) {
+        if (matches == null) {
+          for (Pair<List<Integer>, Object> repLn : repLns) {
+            if (repLn.left().contains(i)) {
+              matches = repLn;
+              repLns.remove(repLn);
+              break;
+            }
+          }
+        }
+        String line = lines.get(i);
+        if (matches == null) {
+          sb.append(line).append(lineSpr);
+        } else {
+          matches.left().remove(Integer.valueOf(i));
+          if (matches.left().isEmpty()) {
+            if (matches.right() != null) {
+              Object replacement = matches.right();
+              if (replacement instanceof String) {
+                sb.append(replacement).append(lineSpr);
+              } else if (replacement instanceof Map<?, ?> mr) {
+                String x = getMapString(mr, query.getVersionedName());
+                if (x != null) {
+                  sb.append(x).append(lineSpr);
+                }
+              }
+            }
+            matches = null;
+          }
+          if (outputReplacedDirectiveStacks) {
+            re.append("|- ").append(line).append(lineSpr);
+          }
+        }
+      }
+      if (outputReplacedDirectiveStacks && !re.isEmpty()) {
+        validatingInfoHandler.accept("[STACK-REP]:");
+        validatingInfoHandler.accept("-".repeat(100));
+        validatingInfoHandler.accept(re.substring(0, re.length() - lineSpr.length()));
+        validatingInfoHandler.accept("-".repeat(100));
+      }
+      return sb.toString();
     }
 
     protected List<String> resolveFiledNames(Validation validation) {
@@ -453,12 +603,13 @@ public class SqlQueryDeveloperKits {
       return emptyList();
     }
 
-    protected List<Integer> resolveSkipDirectiveStacksLines(String sd, List<String> lines) {
+    protected List<List<Integer>> resolveReplaceDirectiveStacksLines(String sd,
+        List<String> lines) {
       String usd = trim(sd);
       int s = usd.indexOf(' ');
       String start = usd.substring(0, s);
       String end = "</" + usd.substring(1, s) + ">";
-      List<Integer> poses = new ArrayList<>();
+      List<List<Integer>> poses = new ArrayList<>();
       List<Integer> stackPoses = new ArrayList<>();
       int lineNo = 0;
       Stack<String> stack = new Stack<>();
@@ -472,7 +623,7 @@ public class SqlQueryDeveloperKits {
           } else if (tl.equals(end)) {
             stack.pop();
             if (stack.isEmpty()) {
-              poses.addAll(stackPoses);
+              poses.add(new ArrayList<>(stackPoses));
               inStack = false;
               stackPoses.clear();
             }
@@ -483,7 +634,7 @@ public class SqlQueryDeveloperKits {
           inStack = true;
           if (tl.endsWith("/>")) {
             stack.clear();
-            poses.addAll(stackPoses);
+            poses.add(new ArrayList<>(stackPoses));
             inStack = false;
             stackPoses.clear();
           }
@@ -491,38 +642,6 @@ public class SqlQueryDeveloperKits {
         lineNo++;
       }
       return poses;
-    }
-
-    protected String skipDirectiveStacksNecessary(String string) {
-      if (isEmpty(skipDirectiveStacks)) {
-        return string;
-      }
-      List<String> lines = string.lines().toList();
-      Set<Integer> skipLns = new LinkedHashSet<>();
-      for (String sd : skipDirectiveStacks) {
-        skipLns.addAll(resolveSkipDirectiveStacksLines(sd, lines));
-      }
-      if (skipLns.isEmpty()) {
-        return string;
-      }
-      StringBuilder sb = new StringBuilder();
-      String lineSpr = Systems.getLineSeparator();
-      StringBuilder re = new StringBuilder();
-      int size = lines.size();
-      for (int i = 0; i < size; i++) {
-        if (!skipLns.contains(i)) {
-          sb.append(lines.get(i)).append(lineSpr);
-        } else if (printSkipDirectiveStacks) {
-          re.append("|- ").append(lines.get(i)).append(lineSpr);
-        }
-      }
-      if (printSkipDirectiveStacks && !re.isEmpty()) {
-        System.out.println("[STACK-SKIP]:");
-        System.out.println("-".repeat(100));
-        System.out.println(re.substring(0, re.length() - lineSpr.length()));
-        System.out.println("-".repeat(100));
-      }
-      return sb.toString();
     }
 
     protected void validateFetchQueries(Map<String, List<String>> queryFieldNames,

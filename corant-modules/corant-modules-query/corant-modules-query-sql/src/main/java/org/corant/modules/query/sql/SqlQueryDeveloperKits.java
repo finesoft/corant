@@ -420,7 +420,7 @@ public class SqlQueryDeveloperKits {
         // validate query self
         errors.addAll(validation.validate());
 
-        List<String> fieldNames = resolveFiledNames(validation);
+        List<String> fieldNames = resolveFieldNames(validation);
 
         // validate fetch queries if necessary
         if (isNotEmpty(query.getFetchQueries()) && includeFetchQueryHandling) {
@@ -677,7 +677,7 @@ public class SqlQueryDeveloperKits {
       return resolveQueryType(parentQuery);
     }
 
-    protected List<String> resolveFiledNames(Validation validation) {
+    protected List<String> resolveFieldNames(Validation validation) {
       if (validation.getParsedStatements() != null
           && isNotEmpty(validation.getParsedStatements().getStatements())) {
         for (Statement st : validation.getParsedStatements().getStatements()) {

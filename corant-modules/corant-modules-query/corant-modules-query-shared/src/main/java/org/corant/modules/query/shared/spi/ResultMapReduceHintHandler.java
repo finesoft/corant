@@ -168,6 +168,86 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     }
   }
 
+  public String resolveMapFieldname(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
+    return isNotEmpty(params) ? params.get(0).getValue() : null;
+  }
+
+  public boolean resolveNullableReduce(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_NULLABLE_REDUCE);
+    if (isEmpty(params)) {
+      return true;
+    }
+    return toBoolean(params.get(0).getValue());
+  }
+
+  public Triple<String, String[], Class<?>> resolveReduceField(String fieldExp) {
+    if (!fieldExp.contains(Names.DOMAIN_SPACE_SEPARATORS)
+        && !fieldExp.contains(TYPE_VALUE_PREFIX)) {
+      // System.out.println(fieldExp);
+      return Triple.of(fieldExp, Names.splitNameSpace(fieldExp, true, false),
+          java.lang.Object.class);
+    } else {
+      int e = -1;
+      int pps = -1;
+      int ppe = -1;
+      int cps = -1;
+      int cpe = -1;
+      int len = fieldExp.length();
+      for (int i = 0; i < len; i++) {
+        char c = fieldExp.charAt(i);
+        if (c == Names.DOMAIN_SPACE_SEPARATOR) {
+          if (e == -1) {
+            e = i;
+          }
+          if (pps == -1) {
+            pps = ppe = i + 1;
+            for (; ppe < len; ppe++) {
+              c = fieldExp.charAt(ppe);
+              if (c == TYPE_VALUE_PREFIX_SIGN || c == Names.DOMAIN_SPACE_SEPARATOR) {
+                break;
+              }
+            }
+          }
+        } else if (c == TYPE_VALUE_PREFIX_SIGN) {
+          if (e == -1) {
+            e = i;
+          }
+          if (cps == -1) {
+            cps = cpe = i + 1;
+            for (; cpe < len; cpe++) {
+              c = fieldExp.charAt(cpe);
+              if (c == Names.DOMAIN_SPACE_SEPARATOR || c == TYPE_VALUE_PREFIX_SIGN) {
+                break;
+              }
+            }
+          }
+        }
+      }
+      String fieldName = fieldExp.substring(0, e);
+      String projectName = ppe > pps ? fieldExp.substring(pps, ppe) : fieldName;
+      String className = cpe > cps ? fieldExp.substring(cps, cpe) : null;
+      return Triple.of(projectName, Names.splitNameSpace(fieldName, true, false),
+          isBlank(className) ? null : Classes.asClass(strip(className)));
+    }
+  }
+
+  public List<Triple<String, String[], Class<?>>> resolveReduceFields(QueryHint qh) {
+    // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
+    List<Triple<String, String[], Class<?>>> fields = new ArrayList<>();
+    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
+    if (isNotEmpty(params)) {
+      linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).stream()
+          .map(this::resolveReduceField).forEach(fields::add);
+    }
+    return fields;
+  }
+
+  public boolean resolveRetainFields(QueryHint qh) {
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_RETAIN_FEILDS);
+    return isNotEmpty(params) ? toBoolean(params.get(0).getValue()) : false;
+  }
+
   @Override
   public boolean supports(Class<?> resultClass, QueryHint hint) {
     return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
@@ -226,85 +306,5 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
     }
     brokens.add(qh.getId());
     return null;
-  }
-
-  protected String resolveMapFieldname(QueryHint qh) {
-    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
-    return isNotEmpty(params) ? params.get(0).getValue() : null;
-  }
-
-  protected boolean resolveNullableReduce(QueryHint qh) {
-    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_NULLABLE_REDUCE);
-    if (isEmpty(params)) {
-      return true;
-    }
-    return toBoolean(params.get(0).getValue());
-  }
-
-  protected Triple<String, String[], Class<?>> resolveReduceField(String fieldExp) {
-    if (!fieldExp.contains(Names.DOMAIN_SPACE_SEPARATORS)
-        && !fieldExp.contains(TYPE_VALUE_PREFIX)) {
-      // System.out.println(fieldExp);
-      return Triple.of(fieldExp, Names.splitNameSpace(fieldExp, true, false),
-          java.lang.Object.class);
-    } else {
-      int e = -1;
-      int pps = -1;
-      int ppe = -1;
-      int cps = -1;
-      int cpe = -1;
-      int len = fieldExp.length();
-      for (int i = 0; i < len; i++) {
-        char c = fieldExp.charAt(i);
-        if (c == Names.DOMAIN_SPACE_SEPARATOR) {
-          if (e == -1) {
-            e = i;
-          }
-          if (pps == -1) {
-            pps = ppe = i + 1;
-            for (; ppe < len; ppe++) {
-              c = fieldExp.charAt(ppe);
-              if (c == TYPE_VALUE_PREFIX_SIGN || c == Names.DOMAIN_SPACE_SEPARATOR) {
-                break;
-              }
-            }
-          }
-        } else if (c == TYPE_VALUE_PREFIX_SIGN) {
-          if (e == -1) {
-            e = i;
-          }
-          if (cps == -1) {
-            cps = cpe = i + 1;
-            for (; cpe < len; cpe++) {
-              c = fieldExp.charAt(cpe);
-              if (c == Names.DOMAIN_SPACE_SEPARATOR || c == TYPE_VALUE_PREFIX_SIGN) {
-                break;
-              }
-            }
-          }
-        }
-      }
-      String fieldName = fieldExp.substring(0, e);
-      String projectName = ppe > pps ? fieldExp.substring(pps, ppe) : fieldName;
-      String className = cpe > cps ? fieldExp.substring(cps, cpe) : null;
-      return Triple.of(projectName, Names.splitNameSpace(fieldName, true, false),
-          isBlank(className) ? null : Classes.asClass(strip(className)));
-    }
-  }
-
-  protected List<Triple<String, String[], Class<?>>> resolveReduceFields(QueryHint qh) {
-    // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
-    List<Triple<String, String[], Class<?>>> fields = new ArrayList<>();
-    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
-    if (isNotEmpty(params)) {
-      linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).stream()
-          .map(this::resolveReduceField).forEach(fields::add);
-    }
-    return fields;
-  }
-
-  protected boolean resolveRetainFields(QueryHint qh) {
-    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_RETAIN_FEILDS);
-    return isNotEmpty(params) ? toBoolean(params.get(0).getValue()) : false;
   }
 }

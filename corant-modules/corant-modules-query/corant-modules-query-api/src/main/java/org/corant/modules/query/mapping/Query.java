@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
  * Query class, used to define a query. It contains the definition of query name version, query
  * script, sub-fetch query, query result set and parameters processing, etc.
  * <p>
+ * Note: the version name of the query must be globally unique.
+ * <p>
  * Each query has a name and version, the name and version of the query form the identifier of the
  * query. The query script may be a SQL query script or NoSQL query script or a mixed script and
  * expression.
@@ -399,6 +401,11 @@ public class Query implements Serializable {
     this.mappingFilePath = mappingFilePath;
   }
 
+  /**
+   * Set the query name, the version name of the query must be globally unique.
+   *
+   * @param name the name to be set can't null
+   */
   protected void setName(String name) {
     this.name = name;
     handleVersionedName();
@@ -421,6 +428,9 @@ public class Query implements Serializable {
     }
   }
 
+  /**
+   * Set the query qualifier, if null the global configuration property is used by default.
+   */
   protected void setQualifier(String qualifier) {
     this.qualifier = qualifier;
   }
@@ -437,10 +447,18 @@ public class Query implements Serializable {
     this.script = defaultObject(script, Script.EMPTY);
   }
 
+  /**
+   * Set the query type, if null the global configuration property is used by default.
+   */
   protected void setType(QueryType type) {
     this.type = type;
   }
 
+  /**
+   * Set the query version, the version name of the query must be globally unique.
+   *
+   * @param name the version to be set
+   */
   protected void setVersion(String version) {
     this.version = version;
     handleVersionedName();

@@ -363,19 +363,28 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
 
   protected FetchableNamedQueryService resolveFetchQueryService(final FetchQuery fq) {
     FetchableNamedQueryService service;
-    final Query query = getQuery(fq.getQueryReference().getVersionedName());
-    final QueryType type = defaultObject(fq.getQueryReference().getType(), query.getType());
-    final String qualifier =
-        defaultObject(fq.getQueryReference().getQualifier(), query.getQualifier());
-    if (type == null && isBlank(qualifier)) {
+    String queryName = fq.getQueryReference().getVersionedName();
+    // specially specified type & qualifier
+    QueryType queryType = fq.getQueryReference().getType();
+    String queryQualifier = fq.getQueryReference().getQualifier();
+
+    // actual used query
+    Query usedQuery = getQuery(queryName);
+    // use the type & qualifier of the actual query if not specified specially
+    QueryType usedQuerytype = defaultObject(queryType, usedQuery.getType());
+    String usedQueryQualifier = defaultObject(queryQualifier, usedQuery.getQualifier());
+
+    if (usedQuerytype == null && isBlank(usedQueryQualifier)) {
+      // use the type & qualifier of the parent query if the actual query also not specify.
       service = this;
     } else {
-      service = shouldInstanceOf(NamedQueryServiceManager.resolveQueryService(type, qualifier),
+      service = shouldInstanceOf(
+          NamedQueryServiceManager.resolveQueryService(usedQuerytype, usedQueryQualifier),
           FetchableNamedQueryService.class,
           "Can't find any query service to execute fetch query [%s]", fq.getQueryReference());
     }
-    logger.fine(() -> format("Resolve fetch query [%s] service [%s]",
-        fq.getQueryReference().getName(), Classes.getUserClass(service)));
+    logger.fine(() -> format("Resolve fetch query [%s] service [%s]", queryName,
+        Classes.getUserClass(service)));
     return service;
   }
 

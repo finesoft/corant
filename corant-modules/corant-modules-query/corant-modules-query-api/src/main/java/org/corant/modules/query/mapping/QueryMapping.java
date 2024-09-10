@@ -21,6 +21,7 @@ import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Maps.newHashMap;
 import static org.corant.shared.util.Objects.areEqual;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.isNull;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -238,8 +239,8 @@ public class QueryMapping {
             .concat(fq.getInlineQueryName());
         inlineQuery.setInline(true);
         inlineQuery.setName(inlineQueryName);
-        inlineQuery.setQualifier(fq.getInlineQueryQualifier());
-        inlineQuery.setType(fq.getInlineQueryType());
+        inlineQuery.setQualifier(defaultObject(fq.getInlineQueryQualifier(), query.getQualifier()));
+        inlineQuery.setType(defaultObject(fq.getInlineQueryType(), query.getType()));
         inlineQuery.setScript(fq.getInlineQueryScript());
         inlineQuery.setCache(fq.isInlineQueryCache());
         inlineQuery.setDescription(fq.getDescription());

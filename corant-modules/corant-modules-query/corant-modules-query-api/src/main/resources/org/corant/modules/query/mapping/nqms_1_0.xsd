@@ -301,7 +301,9 @@
       <xsd:annotation>
         <xsd:documentation>
           <![CDATA[
-          The inline query type of actual execution query for fetch query, If not set use the parent query service.
+          The type of inline query to be specified, not specified by default.
+          By default, the query service uses the query type of the parent query. 
+          If this attribute is specified, the query service should be forced to use the specified type.
           ]]>
         </xsd:documentation>
       </xsd:annotation>
@@ -311,7 +313,9 @@
       <xsd:annotation>
         <xsd:documentation>
           <![CDATA[
-          The inline query qualifier of actual execution query for query.
+          The qualifier of inline query to be specified, not specified by default.
+          By default, the query service uses the query qualifier of the parent query. 
+          If this attribute is specified, the query service should be forced to use the specified qualifier.
           ]]>
         </xsd:documentation>
       </xsd:annotation>
@@ -326,8 +330,7 @@
       type="xsd:string" use="optional">
       <xsd:annotation>
         <xsd:documentation>
-          The name of another query for fetch query
-          refer to.
+          The name of the query for fetch query refer to.
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
@@ -336,7 +339,10 @@
       <xsd:annotation>
         <xsd:documentation>
           <![CDATA[
-          The query type of another query for fetch query refer to, if not set use the parent query service.
+          The type of reference query to be specified, not specified by default.
+          By default, the query service uses the type of the referenced query, 
+          or the query type of the parent query if the referenced query type is also unspecified. 
+          If this attribute is specified, the query service should be forced to use the specified type.
           ]]>
         </xsd:documentation>
       </xsd:annotation>
@@ -346,7 +352,10 @@
       <xsd:annotation>
         <xsd:documentation>
           <![CDATA[
-          The query type qualifier of another query for fetch query refer to
+          The qualifier of reference query to be specified, not specified by default.
+          By default, the query service uses the qualifier of the referenced query, 
+          or the query qualifier of the parent query if the referenced query qualifier is also unspecified. 
+          If this attribute is specified, the query service should be forced to use the specified qualifier.
           ]]>
         </xsd:documentation>
       </xsd:annotation>
@@ -356,7 +365,7 @@
       <xsd:annotation>
         <xsd:documentation>
           <![CDATA[
-          The version of actual another query for fetch query refer to
+          The version of actual referenced query for fetch query refer to
           ]]>
         </xsd:documentation>
       </xsd:annotation>

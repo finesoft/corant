@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Immutable.ImmutableListBuilder;
 import org.corant.shared.ubiquity.Mutable.MutableInteger;
@@ -165,6 +166,25 @@ public class Lists {
   public static <E> List<E> defaultEmpty(Collection<E> list, List<E> defaultList) {
     if (list == null || list.isEmpty()) {
       return defaultList;
+    }
+    if (list instanceof List<E> s) {
+      return s;
+    } else {
+      return new ArrayList<>(list);
+    }
+  }
+
+  /**
+   * Returns either the passed in list, or if the list is {@code null} or {@link List#isEmpty()} the
+   * result of {@code supplier}.
+   *
+   * @param <E> the element type
+   * @param list the list, possibly {@code null} or {@link List#isEmpty()}
+   * @param supplier the returned values supplier if list is {@code null} or {@link List#isEmpty()}
+   */
+  public static <E> List<E> defaultEmpty(Collection<E> list, Supplier<List<E>> supplier) {
+    if (list == null || list.isEmpty()) {
+      return supplier.get();
     }
     if (list instanceof List<E> s) {
       return s;

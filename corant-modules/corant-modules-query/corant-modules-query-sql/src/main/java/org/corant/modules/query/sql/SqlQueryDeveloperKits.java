@@ -13,6 +13,7 @@
  */
 package org.corant.modules.query.sql;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableList;
@@ -21,6 +22,7 @@ import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Functions.emptyConsumer;
+import static org.corant.shared.util.Lists.defaultEmpty;
 import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Maps.transform;
@@ -32,6 +34,8 @@ import static org.corant.shared.util.Strings.trim;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +43,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +54,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.corant.Corant;
+import org.corant.config.CorantConfigResolver;
+import org.corant.kernel.logging.LoggerFactory;
+import org.corant.kernel.util.CommandLine;
 import org.corant.modules.datasource.shared.DBMS;
 import org.corant.modules.datasource.shared.DataSourceService;
 import org.corant.modules.json.ObjectMappers;
@@ -75,12 +84,15 @@ import org.corant.shared.util.Systems;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.util.validation.Validation;
 import net.sf.jsqlparser.util.validation.ValidationError;
 import net.sf.jsqlparser.util.validation.ValidationException;
@@ -325,36 +337,42 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
-    public void validate() {
-      try {
-        final QueryMappingService service = resolve(QueryMappingService.class);
-        final SqlNamedQueryServiceManager sqlQueryService =
-            resolve(SqlNamedQueryServiceManager.class);
-        final DataSourceService dataSources = resolve(DataSourceService.class);
-        final ResultMapReduceHintHandler mapReduceHintHandler =
-            resolve(ResultMapReduceHintHandler.class);
-        Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
-        Map<String, List<String>> queryFieldNames = new LinkedHashMap<>();
-        Set<String> validatedQueries = new HashSet<>();
-        for (Query query : service.getQueries()) {
-          if (!validatedQueries.contains(query.getVersionedName())) {
-            validateQuery(service, sqlQueryService, dataSources, mapReduceHintHandler, errorMaps,
-                queryFieldNames, query, validatedQueries);
-          }
-        }
-        boolean hasErrors = errorMaps.values().stream().anyMatch(es -> !es.isEmpty());
-        validatingInfoHandler
-            .accept("Validation completed" + (hasErrors ? ", some errors were found" : EMPTY));
-        if (hasErrors) {
-          errorMaps.forEach((k, v) -> {
-            if (isNotEmpty(v)) {
-              validationErrorHandler.accept(k, v);
-            }
-          });
-        }
+    public void run() {
+      try (Corant corant = prepare()) {
+        validate();
       } catch (Exception e) {
         throw new CorantRuntimeException(e);
       }
+    }
+
+    public void validate() {
+      final QueryMappingService service = resolve(QueryMappingService.class);
+      final SqlNamedQueryServiceManager sqlQueryService =
+          resolve(SqlNamedQueryServiceManager.class);
+      final DataSourceService dataSources = resolve(DataSourceService.class);
+      final ResultMapReduceHintHandler mapReduceHintHandler =
+          resolve(ResultMapReduceHintHandler.class);
+      Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
+      Map<String, List<String>> queryFieldNames = new LinkedHashMap<>();
+      Set<String> validatedQueries = new HashSet<>();
+      validatingInfoHandler.accept(format("Validating %s queries", service.getQueries().size()));
+      for (Query query : service.getQueries()) {
+        if (!validatedQueries.contains(query.getVersionedName())) {
+          validateQuery(service, sqlQueryService, dataSources, mapReduceHintHandler, errorMaps,
+              queryFieldNames, query, validatedQueries);
+        }
+      }
+      boolean hasErrors = errorMaps.values().stream().anyMatch(es -> !es.isEmpty());
+      validatingInfoHandler
+          .accept("Validation completed" + (hasErrors ? ", some errors were found" : EMPTY));
+      if (hasErrors) {
+        errorMaps.forEach((k, v) -> {
+          if (isNotEmpty(v)) {
+            validationErrorHandler.accept(k, v);
+          }
+        });
+      }
+
     }
 
     public void validateQuery(final QueryMappingService service,
@@ -420,8 +438,12 @@ public class SqlQueryDeveloperKits {
         // validate query self
         errors.addAll(validation.validate());
 
-        List<String> fieldNames = resolveFieldNames(validation);
-
+        List<String> fieldNames = new ArrayList<>();
+        if (isEmpty(validation.getErrors())) {
+          final String sql = script;
+          fieldNames.addAll(defaultEmpty(resolveFieldNames(validation),
+              () -> resolveFieldNames(conn, queryName, sql, errors)));
+        }
         // validate fetch queries if necessary
         if (isNotEmpty(query.getFetchQueries()) && includeFetchQueryHandling) {
           for (FetchQuery fetchQuery : query.getFetchQueries()) {
@@ -575,6 +597,18 @@ public class SqlQueryDeveloperKits {
       return text;
     }
 
+    protected Corant prepare() {
+      LoggerFactory.disableAccessWarnings();
+      LoggerFactory.disableLogger();
+      Systems.setProperty("corant.query.verify-deployment", "true");
+      CorantConfigResolver.adjust("corant.webserver.auto-start", "false",
+          "corant.flyway.migrate.enable", "false", "corant.jta.transaction.auto-recovery", "false");
+      return Corant.startup(SqlQueryDeveloperKits.class,
+          new String[] {Corant.DISABLE_BOOST_LINE_CMD,
+              new CommandLine(Corant.DISABLE_BEFORE_START_HANDLER_CMD,
+                  "org.corant.modules.logging.Log4jProvider").toString()});
+    }
+
     protected String replaceDirectiveStacksNecessary(Query query, String string) {
       if (isEmpty(directiveStacksReplacements)) {
         return string;
@@ -677,6 +711,45 @@ public class SqlQueryDeveloperKits {
       return resolveQueryType(parentQuery);
     }
 
+    protected List<String> resolveFieldNames(Connection conn, String queryName, String sql,
+        List<ValidationError> errors) {
+      List<String> fieldNames = new ArrayList<>();
+      try {
+        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        SelectBody selectBody = select.getSelectBody();
+        if (selectBody instanceof PlainSelect psBody) {
+          psBody.withWhere(null);
+        } else if (selectBody instanceof SetOperationList solBody) {
+          LinkedList<SelectBody> sbs = new LinkedList<>(solBody.getSelects());
+          SelectBody sb;
+          int it = 16; // Max iteration
+          while ((sb = sbs.poll()) != null) {
+            if (sb instanceof PlainSelect sbpsBody) {
+              sbpsBody.withWhere(null);
+            } else if (sb instanceof SetOperationList sls) {
+              for (SelectBody s : sls.getSelects()) {
+                sbs.offer(s);
+              }
+            }
+            if (--it == 0) {
+              break;
+            }
+          }
+        }
+        String usedSql = select.toString();
+        try (PreparedStatement ps = conn.prepareStatement(usedSql)) {
+          ResultSetMetaData metaData = ps.getMetaData();
+          for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            fieldNames.add(metaData.getColumnLabel(i));
+          }
+        }
+      } catch (Exception ex) {
+        errors.add(createValidationError(
+            "Resolve query [" + queryName + "] field names occurred error", ex));
+      }
+      return fieldNames;
+    }
+
     protected List<String> resolveFieldNames(Validation validation) {
       if (validation.getParsedStatements() != null
           && isNotEmpty(validation.getParsedStatements().getStatements())) {
@@ -697,9 +770,12 @@ public class SqlQueryDeveloperKits {
                     fieldNames.add(trim(fn));
                   }
                 }
+              } else {
+                // not supports clear
+                fieldNames.clear();
+                break;
               }
             }
-            // FIXME AllColumns AllTableColumns
             return fieldNames;
           }
         }

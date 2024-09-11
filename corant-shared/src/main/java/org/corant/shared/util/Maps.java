@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.converter.NumberLocalDateConverter;
@@ -79,6 +80,38 @@ import org.corant.shared.ubiquity.TypeLiteral;
 public class Maps {
 
   private Maps() {}
+
+  /**
+   * Returns either the passed in map, or if the map is {@code null} or {@link Map#isEmpty()} the
+   * value of {@code defaultMap}.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map, possibly {@code null} or {@link Map#isEmpty()}
+   * @param defaultMap the returned values if map is {@code null} or {@link Map#isEmpty()}
+   */
+  public static <K, V> Map<K, V> defaultEmpty(Map<K, V> map, Map<K, V> defaultMap) {
+    if (map == null || map.isEmpty()) {
+      return defaultMap;
+    }
+    return map;
+  }
+
+  /**
+   * Returns either the passed in map, or if the map is {@code null} or {@link Map#isEmpty()} the
+   * result of {@code supplier}.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param map the map, possibly {@code null} or {@link Map#isEmpty()}
+   * @param supplier the returned values supplier if map is {@code null} or {@link Map#isEmpty()}
+   */
+  public static <K, V> Map<K, V> defaultEmpty(Map<K, V> map, Supplier<Map<K, V>> supplier) {
+    if (map == null || map.isEmpty()) {
+      return supplier.get();
+    }
+    return map;
+  }
 
   /**
    * Extract the value corresponding to the given key path in the given object, and remove the key

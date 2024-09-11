@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.corant.shared.ubiquity.Immutable.ImmutableSetBuilder;
 
@@ -48,6 +49,25 @@ public class Sets {
   public static <E> Set<E> defaultEmpty(Collection<E> set, Set<E> defaultSet) {
     if (set == null || set.isEmpty()) {
       return defaultSet;
+    }
+    if (set instanceof Set<E> s) {
+      return s;
+    } else {
+      return new HashSet<>(set);
+    }
+  }
+
+  /**
+   * Returns either the passed in set, or if the set is {@code null} or {@link Set#isEmpty()} the
+   * result of {@code supplier}.
+   *
+   * @param <E> the element type
+   * @param set the set, possibly {@code null} or {@link Set#isEmpty()}
+   * @param supplier the returned values supplier if set is {@code null} or {@link Set#isEmpty()}
+   */
+  public static <E> Set<E> defaultEmpty(Collection<E> set, Supplier<Set<E>> supplier) {
+    if (set == null || set.isEmpty()) {
+      return supplier.get();
     }
     if (set instanceof Set<E> s) {
       return s;

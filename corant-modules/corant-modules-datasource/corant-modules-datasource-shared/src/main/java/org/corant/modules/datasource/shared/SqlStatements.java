@@ -146,7 +146,7 @@ public class SqlStatements {
    */
   public static Pair<String, Object[]> normalize(String sql, Object... ordinaryParameters) {
     if (isBlank(sql) || ordinaryParameters.length == 0
-        || streamOf(ordinaryParameters).noneMatch(p -> p instanceof Collection)) {
+        || streamOf(ordinaryParameters).noneMatch(Collection.class::isInstance)) {
       return Pair.of(sql, ordinaryParameters);
     }
     try {
@@ -225,14 +225,13 @@ public class SqlStatements {
   }
 
   static boolean canBeOptimized(SelectBody selectBody, Collection<String> aggregationFunctions) {
-    if (selectBody instanceof PlainSelect) {
-      PlainSelect plainSelect = (PlainSelect) selectBody;
+    if (selectBody instanceof PlainSelect plainSelect) {
       if (plainSelect.getGroupBy() != null || plainSelect.getDistinct() != null
           || plainSelect.getHaving() != null) {
         return false;
       }
       for (SelectItem it : plainSelect.getSelectItems()) {
-        // check whether select item contains variable place holder
+        // check whether select item contains variable placeholder
         if (it.toString().indexOf('?') != -1) {
           return false;
         }
@@ -267,8 +266,7 @@ public class SqlStatements {
 
   static void normalize(Statement statement, StringBuilder buffer,
       ExpressionDeParser expressionDeParser) {
-    if (statement instanceof Select) {
-      Select select = (Select) statement;
+    if (statement instanceof Select select) {
       SelectDeParser deparser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(deparser);
       expressionDeParser.setBuffer(buffer);
@@ -284,30 +282,26 @@ public class SqlStatements {
         }
       }
       select.getSelectBody().accept(deparser);
-    } else if (statement instanceof Delete) {
-      Delete delete = (Delete) statement;
+    } else if (statement instanceof Delete delete) {
       SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(selectDeParser);
       expressionDeParser.setBuffer(buffer);
       DeleteDeParser deleteDeParser = new DeleteDeParser(expressionDeParser, buffer);
       deleteDeParser.deParse(delete);
-    } else if (statement instanceof Insert) {
-      Insert insert = (Insert) statement;
+    } else if (statement instanceof Insert insert) {
       SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(selectDeParser);
       expressionDeParser.setBuffer(buffer);
       InsertDeParser insertDeParser =
           new InsertDeParser(expressionDeParser, selectDeParser, buffer);
       insertDeParser.deParse(insert);
-    } else if (statement instanceof Update) {
-      Update update = (Update) statement;
+    } else if (statement instanceof Update update) {
       SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(selectDeParser);
       expressionDeParser.setBuffer(buffer);
       UpdateDeParser updateDeParser = new UpdateDeParser(expressionDeParser, buffer);
       updateDeParser.deParse(update);
-    } else if (statement instanceof Upsert) {
-      Upsert upsert = (Upsert) statement;
+    } else if (statement instanceof Upsert upsert) {
       SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, buffer);
       expressionDeParser.setSelectVisitor(selectDeParser);
       expressionDeParser.setBuffer(buffer);
@@ -315,14 +309,13 @@ public class SqlStatements {
           new UpsertDeParser(expressionDeParser, selectDeParser, buffer);
       upsertDeParser.deParse(upsert);
     } else {
-      throw new NotSupportedException("Only supports SELECT/UPDATE/INSERT/DELETE statemens!");
+      throw new NotSupportedException("Only supports SELECT/UPDATE/INSERT/DELETE statements!");
     }
   }
 
   static void reviseCountSqlFromItem(FromItem fromItem) {
-    if (fromItem instanceof SubJoin) {
-      SubJoin subJoin = (SubJoin) fromItem;
-      if (subJoin.getJoinList() != null && subJoin.getJoinList().size() > 0) {
+    if (fromItem instanceof SubJoin subJoin) {
+      if (subJoin.getJoinList() != null && !subJoin.getJoinList().isEmpty()) {
         for (Join join : subJoin.getJoinList()) {
           if (join.getRightItem() != null) {
             reviseCountSqlFromItem(join.getRightItem());
@@ -332,18 +325,15 @@ public class SqlStatements {
       if (subJoin.getLeft() != null) {
         reviseCountSqlFromItem(subJoin.getLeft());
       }
-    } else if (fromItem instanceof SubSelect) {
-      SubSelect subSelect = (SubSelect) fromItem;
+    } else if (fromItem instanceof SubSelect subSelect) {
       if (subSelect.getSelectBody() != null) {
         reviseCountSqlSelectBody(subSelect.getSelectBody());
       }
-    } else if (fromItem instanceof LateralSubSelect) {
-      LateralSubSelect lateralSubSelect = (LateralSubSelect) fromItem;
-      if (lateralSubSelect.getSubSelect() != null) {
-        SubSelect subSelect = lateralSubSelect.getSubSelect();
-        if (subSelect.getSelectBody() != null) {
-          reviseCountSqlSelectBody(subSelect.getSelectBody());
-        }
+    } else if ((fromItem instanceof LateralSubSelect lateralSubSelect)
+        && (lateralSubSelect.getSubSelect() != null)) {
+      SubSelect subSelect = lateralSubSelect.getSubSelect();
+      if (subSelect.getSelectBody() != null) {
+        reviseCountSqlSelectBody(subSelect.getSelectBody());
       }
     }
   }
@@ -355,7 +345,7 @@ public class SqlStatements {
     if (plainSelect.getFromItem() != null) {
       reviseCountSqlFromItem(plainSelect.getFromItem());
     }
-    if (plainSelect.getJoins() != null && plainSelect.getJoins().size() > 0) {
+    if (plainSelect.getJoins() != null && !plainSelect.getJoins().isEmpty()) {
       List<Join> joins = plainSelect.getJoins();
       for (Join join : joins) {
         if (join.getRightItem() != null) {
@@ -369,14 +359,13 @@ public class SqlStatements {
     if (selectBody != null) {
       if (selectBody instanceof PlainSelect) {
         reviseCountSqlPlainSelect((PlainSelect) selectBody);
-      } else if (selectBody instanceof WithItem) {
-        WithItem withItem = (WithItem) selectBody;
+      } else if (selectBody instanceof WithItem withItem) {
         if (withItem.getSubSelect() != null) {
           reviseCountSqlSelectBody(withItem.getSubSelect().getSelectBody());
         }
       } else {
         SetOperationList operationList = (SetOperationList) selectBody;
-        if (operationList.getSelects() != null && operationList.getSelects().size() > 0) {
+        if (operationList.getSelects() != null && !operationList.getSelects().isEmpty()) {
           List<SelectBody> plainSelects = operationList.getSelects();
           for (SelectBody plainSelect : plainSelects) {
             reviseCountSqlSelectBody(plainSelect);
@@ -415,7 +404,7 @@ public class SqlStatements {
     @Override
     public void visit(JdbcNamedParameter jdbcParameter) {
       String name = jdbcParameter.getName();
-      shouldBeTrue(namedParameters.containsKey(name),
+      shouldBeTrue(namedParameters != null && namedParameters.containsKey(name),
           "The named parameter [%s] in SQL does not match the given parameter!", name);
       Object parameter = namedParameters.get(name);
       List<Object> tempParams = resolveParameter(parameter);

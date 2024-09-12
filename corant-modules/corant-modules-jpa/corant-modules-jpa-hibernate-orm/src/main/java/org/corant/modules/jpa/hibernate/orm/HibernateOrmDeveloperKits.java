@@ -41,7 +41,6 @@ import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.Bootstrap;
-import org.hibernate.query.spi.QueryEngine;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.hbm2ddl.SchemaExport.Action;
 import org.hibernate.tool.hbm2ddl.SchemaUpdate;
@@ -140,17 +139,17 @@ public class HibernateOrmDeveloperKits {
       SessionFactoryImplementor sf =
           (SessionFactoryImplementor) createEntityManagerFactoryBuilderImpl(pu, integrations)
               .build();
-      QueryEngine qe = sf.getQueryEngine();
-      qe.getNamedObjectRepository().checkNamedQueries(qe);
+      // 6.0 only HQL
+      sf.getQueryEngine().validateNamedQueries();
       out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }
   }
 
-  public static void validateSchema(String pu, String pkg) {
+  public static void validateSchema(String pu, String... integrations) {
     try (Corant corant = prepare()) {
-      new SchemaValidator().validate(createMetadataImplementor(pu));
+      new SchemaValidator().validate(createMetadataImplementor(pu, integrations));
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
     }
@@ -159,9 +158,7 @@ public class HibernateOrmDeveloperKits {
   protected static EntityManagerFactoryBuilderImpl createEntityManagerFactoryBuilderImpl(String pu,
       String... integrations) {
     Properties props = propertiesOf(integrations);
-    HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach((k, v) -> {
-      props.putIfAbsent(k, v);
-    });
+    HibernateJPAOrmProvider.DEFAULT_PROPERTIES.forEach(props::putIfAbsent);
     props.put(SchemaToolingSettings.UNIQUE_CONSTRAINT_SCHEMA_UPDATE_STRATEGY,
         UniqueConstraintSchemaUpdateStrategy.RECREATE_QUIETLY);
     props.put(SchemaToolingSettings.HBM2DDL_CHARSET_NAME, "UTF-8");
@@ -174,10 +171,10 @@ public class HibernateOrmDeveloperKits {
             "Can't find any metadata for persistence unit %s", pu);
     PersistenceUnitInfoMetaData usePum =
         pum.with(pum.getProperties(), PersistenceUnitTransactionType.JTA);
-    usePum.configDataSource(dsn -> dataSourceService.tryResolve(dsn));
+    usePum.configDataSource(dataSourceService::tryResolve);
     props.putAll(usePum.getProperties());
-    return EntityManagerFactoryBuilderImpl.class
-        .cast(Bootstrap.getEntityManagerFactoryBuilder(usePum, props));
+    return (EntityManagerFactoryBuilderImpl) Bootstrap.getEntityManagerFactoryBuilder(usePum,
+        props);
   }
 
   protected static MetadataImplementor createMetadataImplementor(String pu,

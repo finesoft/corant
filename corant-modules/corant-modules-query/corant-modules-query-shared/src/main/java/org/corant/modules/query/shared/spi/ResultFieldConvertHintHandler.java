@@ -188,6 +188,31 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     }
   }
 
+  public List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveConversions(
+      QueryHint qh) {
+    List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_FIELD_NME);
+    List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_TARGET_TYP);
+    List<QueryHintParameter> dvPs = qh.getParameters(HNIT_PARA_DEFAULT_VAL);
+    List<QueryHintParameter> pthk = qh.getParameters(HNIT_PARA_CVT_HIT_KEY);
+    List<QueryHintParameter> pthv = qh.getParameters(HNIT_PARA_CVT_HIT_VAL);
+    try {
+      if (isNotEmpty(pnPs) && isNotEmpty(ptPs)) {
+        String propertyName = defaultString(pnPs.get(0).getValue());
+        String propertyType = defaultString(ptPs.get(0).getValue());
+        if (isNoneBlank(propertyName, propertyType)) {
+          Class<?> targetClass = tryAsClass(propertyType);
+          String defaultValueParameter = isNotEmpty(dvPs) ? dvPs.get(0).getValue() : null;
+          if (targetClass != null) {
+            return resolveConversions(propertyName, targetClass, pthk, pthv, defaultValueParameter);
+          }
+        }
+      }
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e, () -> "The query hint has some error!");
+    }
+    return null;
+  }
+
   @Override
   public boolean supports(Class<?> resultClass, QueryHint hint) {
     return hint != null && areEqual(hint.getKey(), HINT_NAME);
@@ -247,38 +272,7 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
     logger.fine(() -> "Clear result field converter hint handler caches.");
   }
 
-  protected List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveHint(
-      QueryHint qh) {
-    if (caches.containsKey(qh.getId())) {
-      return caches.get(qh.getId());
-    } else {
-      List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_FIELD_NME);
-      List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_TARGET_TYP);
-      List<QueryHintParameter> dvPs = qh.getParameters(HNIT_PARA_DEFAULT_VAL);
-      List<QueryHintParameter> pthk = qh.getParameters(HNIT_PARA_CVT_HIT_KEY);
-      List<QueryHintParameter> pthv = qh.getParameters(HNIT_PARA_CVT_HIT_VAL);
-      try {
-        if (isNotEmpty(pnPs) && isNotEmpty(ptPs)) {
-          String propertyName = defaultString(pnPs.get(0).getValue());
-          String propertyType = defaultString(ptPs.get(0).getValue());
-          if (isNoneBlank(propertyName, propertyType)) {
-            Class<?> targetClass = tryAsClass(propertyType);
-            String defaultValueParameter = isNotEmpty(dvPs) ? dvPs.get(0).getValue() : null;
-            if (targetClass != null) {
-              return caches.computeIfAbsent(qh.getId(),
-                  k -> resolveHint(propertyName, targetClass, pthk, pthv, defaultValueParameter));
-            }
-          }
-        }
-      } catch (Exception e) {
-        logger.log(Level.WARNING, e, () -> "The query hint has some error!");
-      }
-    }
-    brokens.add(qh.getId());
-    return null;
-  }
-
-  protected List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveHint(
+  protected List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveConversions(
       String propertyName, Class<?> targetClass, List<QueryHintParameter> pthk,
       List<QueryHintParameter> pthv, String defaultValueParameter) {
     final Map<String, Object> convertHints = isNotEmpty(pthk) && isNotEmpty(pthv)
@@ -289,5 +283,20 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
         .forEach(p -> list.add(Pair.of(split(p, ".", true, true),
             Triple.of(targetClass, convertHints, defaultValueParameter))));
     return list;
+  }
+
+  protected List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveHint(
+      QueryHint qh) {
+    if (caches.containsKey(qh.getId())) {
+      return caches.get(qh.getId());
+    } else {
+      List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> hit =
+          resolveConversions(qh);
+      if (hit != null) {
+        return caches.computeIfAbsent(qh.getId(), k -> hit);
+      }
+    }
+    brokens.add(qh.getId());
+    return null;
   }
 }

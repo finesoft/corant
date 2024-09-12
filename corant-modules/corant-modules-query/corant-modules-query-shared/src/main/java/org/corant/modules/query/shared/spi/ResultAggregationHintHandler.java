@@ -127,6 +127,31 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     }
   }
 
+  public Pair<Boolean, Set<String>> resolveAggFieldNames(QueryHint qh) {
+    List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
+    if (isEmpty(aggFieldNames)) {
+      return Pair.empty();
+    } else {
+      String names = defaultStrip(aggFieldNames.get(0).getValue());
+      boolean exclude = !names.isEmpty() && names.charAt(0) == '!';
+      if (exclude) {
+        names = names.substring(1);
+      }
+      return Pair.of(exclude, linkedHashSetOf(split(names, ",", true, true)));
+    }
+  }
+
+  public String resolveAggNames(QueryHint qh) {
+    List<QueryHintParameter> aggNames = qh.getParameters(HNIT_PARA_AGGS_NME);
+    if (isNotEmpty(aggNames)) {
+      String aggName = aggNames.get(0).getValue();
+      if (isNotBlank(aggName)) {
+        return aggName;
+      }
+    }
+    return null;
+  }
+
   @Override
   public boolean supports(Class<?> resultClass, QueryHint hint) {
     return (resultClass == null || Map.class.isAssignableFrom(resultClass)) && hint != null
@@ -158,14 +183,10 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
     if (caches.containsKey(qh.getId())) {
       return caches.get(qh.getId());
     } else {
-      List<QueryHintParameter> aggNames = qh.getParameters(HNIT_PARA_AGGS_NME);
-      List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
       try {
-        Pair<Boolean, Set<String>> fieldNames = resolveAggFieldNames(aggFieldNames);
-        String aggName;
-        if (!fieldNames.isEmpty() && isNotEmpty(aggNames)
-            && isNotBlank(aggName = aggNames.get(0).getValue())) {
-          final String useAggName = aggName;
+        final Pair<Boolean, Set<String>> fieldNames = resolveAggFieldNames(qh);
+        final String aggName = resolveAggNames(qh);
+        if (!fieldNames.isEmpty() && isNotBlank(aggName)) {
           return caches.computeIfAbsent(qh.getId(), k -> list -> {
             Map<Map<Object, Object>, List<Map<Object, Object>>> temp =
                 new LinkedHashMap<>(list.size());
@@ -189,7 +210,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
             }
             list.clear();
             for (Entry<Map<Object, Object>, List<Map<Object, Object>>> e : temp.entrySet()) {
-              e.getKey().put(useAggName, e.getValue());
+              e.getKey().put(aggName, e.getValue());
               list.add(e.getKey());
             }
             temp.clear();

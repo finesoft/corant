@@ -14,6 +14,7 @@
 package org.corant.modules.query.sql;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableList;
@@ -28,6 +29,7 @@ import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Maps.transform;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.isNotBlank;
 import static org.corant.shared.util.Strings.trim;
@@ -39,7 +41,6 @@ import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -47,7 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -71,6 +71,8 @@ import org.corant.modules.query.shared.NamedQueryServiceManager;
 import org.corant.modules.query.shared.QueryMappingService;
 import org.corant.modules.query.shared.dynamic.freemarker.FreemarkerExecutions;
 import org.corant.modules.query.shared.dynamic.jsonexpression.JsonExpressionScriptProcessor;
+import org.corant.modules.query.shared.spi.ResultAggregationHintHandler;
+import org.corant.modules.query.shared.spi.ResultFieldConvertHintHandler;
 import org.corant.modules.query.shared.spi.ResultMapReduceHintHandler;
 import org.corant.modules.query.sql.cdi.SqlNamedQueryServiceManager;
 import org.corant.shared.exception.CorantRuntimeException;
@@ -78,6 +80,7 @@ import org.corant.shared.ubiquity.Experimental;
 import org.corant.shared.ubiquity.Immutable.ImmutableSetBuilder;
 import org.corant.shared.ubiquity.Mutable.MutableString;
 import org.corant.shared.ubiquity.Tuple.Pair;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Functions;
 import org.corant.shared.util.Strings;
 import org.corant.shared.util.Systems;
@@ -161,12 +164,14 @@ public class SqlQueryDeveloperKits {
     protected Map<String, String> specVarPatternReplacements = new LinkedHashMap<>();
     protected Set<String> directivePatterns = DEFAULT_DIRECTIVE_PATTERNS;
     protected Set<String> variablePatterns = DEFAULT_VARIABLE_PATTERNS;
-    protected String defaultVariableReplacement = "NULL";
+    protected String defaultVariableReplacement = "?";
     protected String defaultDirectiveReplacement = "";
     protected FeatureConfiguration featureConfiguration = new FeatureConfiguration();
     protected boolean includeMacro;
     protected boolean includeFetchQueryHandling;
     protected boolean includeMapReduceHints;
+    protected boolean includeAggregationHints;
+    protected boolean includeFieldConvertHints;
     protected boolean outputReplacedDirectiveStacks;
     protected boolean outputProcessedValidScript;
     protected Set<String> skipQueryQualifier = new HashSet<>();
@@ -215,9 +220,22 @@ public class SqlQueryDeveloperKits {
     }
 
     @Experimental
+    public FreemarkerQueryScriptValidator includeAggregationHints(boolean includeAggregationHints) {
+      this.includeAggregationHints = includeAggregationHints;
+      return this;
+    }
+
+    @Experimental
     public FreemarkerQueryScriptValidator includeFetchQueryHandling(
         boolean includeFetchQueryHandling) {
       this.includeFetchQueryHandling = includeFetchQueryHandling;
+      return this;
+    }
+
+    @Experimental
+    public FreemarkerQueryScriptValidator includeFieldConvertHints(
+        boolean includeFieldConvertHints) {
+      this.includeFieldConvertHints = includeFieldConvertHints;
       return this;
     }
 
@@ -251,6 +269,7 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
+    @Experimental
     public FreemarkerQueryScriptValidator putDirectiveStackReplacement(String directiveStack,
         String replacement) {
       if (isNotBlank(directiveStack)) {
@@ -259,6 +278,7 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
+    @Experimental
     public FreemarkerQueryScriptValidator putDirectiveStackReplacements(String directiveStack,
         Map<String, String> specQueryNameReplacements) {
       if (isNotBlank(directiveStack)) {
@@ -347,19 +367,15 @@ public class SqlQueryDeveloperKits {
 
     public void validate() {
       final QueryMappingService service = resolve(QueryMappingService.class);
-      final SqlNamedQueryServiceManager sqlQueryService =
-          resolve(SqlNamedQueryServiceManager.class);
-      final DataSourceService dataSources = resolve(DataSourceService.class);
-      final ResultMapReduceHintHandler mapReduceHintHandler =
-          resolve(ResultMapReduceHintHandler.class);
+
       Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
-      Map<String, List<String>> queryFieldNames = new LinkedHashMap<>();
+      Map<String, Set<String>> queryFieldNames = new LinkedHashMap<>();
       Set<String> validatedQueries = new HashSet<>();
-      validatingInfoHandler.accept(format("Validating %s queries", service.getQueries().size()));
+      int size = service.getQueries().size();
+      validatingInfoHandler.accept(format("Validating %s queries", size));
       for (Query query : service.getQueries()) {
         if (!validatedQueries.contains(query.getVersionedName())) {
-          validateQuery(service, sqlQueryService, dataSources, mapReduceHintHandler, errorMaps,
-              queryFieldNames, query, validatedQueries);
+          validateQuery(errorMaps, queryFieldNames, query, validatedQueries, size);
         }
       }
       boolean hasErrors = errorMaps.values().stream().anyMatch(es -> !es.isEmpty());
@@ -375,59 +391,48 @@ public class SqlQueryDeveloperKits {
 
     }
 
-    public void validateQuery(final QueryMappingService service,
-        final SqlNamedQueryServiceManager sqlQueryService, final DataSourceService dataSources,
-        final ResultMapReduceHintHandler mapReduceHintHandler,
-        Map<String, List<ValidationError>> errorMaps, Map<String, List<String>> queryFieldNames,
-        Query query, Set<String> validatedQueries) {
+    public void validateQuery(Map<String, List<ValidationError>> errorMaps,
+        Map<String, Set<String>> queryFieldNames, Query query, Set<String> validatedQueries,
+        int total) {
+
+      final QueryMappingService service = resolve(QueryMappingService.class);
+      final SqlNamedQueryServiceManager sqlQueryService =
+          resolve(SqlNamedQueryServiceManager.class);
+      final DataSourceService dataSources = resolve(DataSourceService.class);
+      final ResultMapReduceHintHandler mapReduceHintHandler =
+          resolve(ResultMapReduceHintHandler.class);
+      final ResultAggregationHintHandler aggregationHintHandler =
+          resolve(ResultAggregationHintHandler.class);
+      final ResultFieldConvertHintHandler fieldConvertHintHandler =
+          resolve(ResultFieldConvertHintHandler.class);
 
       final String queryName = query.getVersionedName();
       if (query.getScript().getType() != ScriptType.FM || resolveQueryType(query) != QueryType.SQL
           || skipQueryQualifier.contains(query.getQualifier()) || queryNameSkipper.test(queryName)
           || !queryNameFilter.test(queryName)) {
-        validatingInfoHandler.accept("[SKIP]: " + queryName);
         validatedQueries.add(queryName);
+        validatingInfoHandler
+            .accept(format("[SKIP]: %s, [%s/%s]", queryName, validatedQueries.size(), total));
         return;
       }
 
       List<ValidationError> errors = errorMaps.computeIfAbsent(queryName, k1 -> new ArrayList<>());
 
-      String script = null;
+      String script;
       try {
         script = getScript(query);
       } catch (Exception e) {
         errors.add(createValidationError("Parse script occurred error!", e));
-      }
-      if (isBlank(script)) {
         errors.add(createValidationError("[INVALID]: " + queryName + " script extract error!"));
         validatedQueries.add(queryName);
+        validatingInfoHandler.accept(format("[INVALID]: %s script extract error, [%s/%s]",
+            queryName, validatedQueries.size(), total));
         return;
       }
       Pair<DBMS, String> dss =
           sqlQueryService.resolveDataSourceSchema(resolveQueryQualifier(query));
       String dsName = dss.right();
-      DatabaseType dsType = DatabaseType.ANSI_SQL;
-      switch (dss.left()) {
-        case ORACLE:
-          dsType = DatabaseType.ORACLE;
-          break;
-        case POSTGRE:
-          dsType = DatabaseType.POSTGRESQL;
-          break;
-        case H2:
-          dsType = DatabaseType.H2;
-          break;
-        case MYSQL:
-          dsType = DatabaseType.MYSQL;
-          break;
-        case SQLSERVER2005:
-        case SQLSERVER2008:
-        case SQLSERVER2012:
-          dsType = DatabaseType.SQLSERVER;
-          break;
-        default:
-          break;
-      }
+      DatabaseType dsType = resolveDatabaseType(dss.left());
       try (Connection conn = dataSources.resolve(dsName).getConnection()) {
         Validation validation =
             new Validation(featureConfiguration,
@@ -437,13 +442,15 @@ public class SqlQueryDeveloperKits {
 
         // validate query self
         errors.addAll(validation.validate());
-
-        List<String> fieldNames = new ArrayList<>();
-        if (isEmpty(validation.getErrors())) {
-          final String sql = script;
-          fieldNames.addAll(defaultEmpty(resolveFieldNames(validation),
-              () -> resolveFieldNames(conn, queryName, sql, errors)));
+        if (isNotEmpty(validation.getErrors())) {
+          return;
         }
+
+        // collect the select field names
+        final String sql = script;
+        Set<String> fieldNames = new LinkedHashSet<>(defaultEmpty(resolveFieldNames(validation),
+            () -> resolveFieldNames(conn, queryName, sql, errors)));
+
         // validate fetch queries if necessary
         if (isNotEmpty(query.getFetchQueries()) && includeFetchQueryHandling) {
           for (FetchQuery fetchQuery : query.getFetchQueries()) {
@@ -451,11 +458,10 @@ public class SqlQueryDeveloperKits {
             Query usedFetchQuery = service.getQuery(fetchQueryName);
             if (canValidateFetchQuery(query, fetchQuery, usedFetchQuery)) {
               if (!validatedQueries.contains(fetchQueryName)) {
-                validateQuery(service, sqlQueryService, dataSources, mapReduceHintHandler,
-                    errorMaps, queryFieldNames, usedFetchQuery, validatedQueries);
+                validateQuery(errorMaps, queryFieldNames, usedFetchQuery, validatedQueries, total);
               }
-              List<String> fetchQueryFieldNames =
-                  queryFieldNames.getOrDefault(fetchQueryName, new ArrayList<>());
+              Set<String> fetchQueryFieldNames =
+                  queryFieldNames.getOrDefault(fetchQueryName, new LinkedHashSet<>());
               validateFetchQuery(fieldNames, errors, fetchQuery, fetchQueryFieldNames);
             } else {
               validatingInfoHandler.accept(
@@ -463,47 +469,36 @@ public class SqlQueryDeveloperKits {
             }
           }
         }
-
-        // validate map reduce query hints if necessary
-        if (isNotEmpty(query.getHints()) && includeMapReduceHints) {
-          final List<String> cfns = fieldNames;
-          Set<String> appendFieldNames = new LinkedHashSet<>();
+        if (isNotEmpty(query.getHints())) {
           for (QueryHint qh : query.getHints()) {
-            if (mapReduceHintHandler.supports(Map.class, qh) && isNotEmpty(cfns)) {
-              String mapName = mapReduceHintHandler.resolveMapFieldname(qh);
-              if (isNotBlank(mapName)) {
-                appendFieldNames.add(mapName);
-              }
-              mapReduceHintHandler.resolveReduceFields(qh).stream().map(t -> t.getMiddle()[0])
-                  .forEach(rf -> {
-                    if (!cfns.contains(rf)) {
-                      errors.add(createValidationError(
-                          "Map reduce query hint reduce field [" + rf + "] not exits!"));
-                    }
-                  });
-            }
-          }
-          if (!appendFieldNames.isEmpty()) {
-            cfns.addAll(appendFieldNames);
+            // validate map reduce query hints if necessary
+            validateMapReduceHintsIfNecessary(qh, mapReduceHintHandler, query, errors, fieldNames);
+            // validate aggregation query hints if necessary
+            validateAggregationHintsIfNecessary(qh, aggregationHintHandler, query, errors,
+                fieldNames);
+            // validate field convert query hints if necessary
+            validateFieldConvertHintsIfNecessary(qh, fieldConvertHintHandler, query, errors,
+                fieldNames);
           }
         }
 
         queryFieldNames.put(queryName, fieldNames);
 
+      } catch (Exception ex) {
+        errors.add(createValidationError("Validation occurred error!", ex));
+      } finally {
+        validatedQueries.add(queryName);
         if (isEmpty(errors)) {
-          validatingInfoHandler.accept("[VALID]: " + queryName);
+          validatingInfoHandler
+              .accept(format("[VALID]: %s, [%s/%s]", queryName, validatedQueries.size(), total));
           if (outputProcessedValidScript) {
             validatingInfoHandler.accept("[SCRIPT]");
             validatingInfoHandler.accept(script);
           }
         } else {
-          validatingInfoHandler
-              .accept("[INVALID]: " + queryName + " [" + errors.size() + "] ERRORS");
+          validatingInfoHandler.accept(format("[INVALID]: %s [%s] ERRORS, [%s/%s]", queryName,
+              errors.size(), validatedQueries.size(), total));
         }
-      } catch (Exception ex) {
-        errors.add(createValidationError("Validation occurred error!", ex));
-      } finally {
-        validatedQueries.add(queryName);
       }
     }
 
@@ -616,13 +611,13 @@ public class SqlQueryDeveloperKits {
 
       List<String> lines = string.lines().toList();
 
-      List<Pair<List<Integer>, Object>> collectedRepLns = new ArrayList<>();
+      List<LineReplacement> collectedRepLns = new ArrayList<>();
       directiveStacksReplacements.forEach((k, v) -> {
-        List<List<Integer>> tmp = resolveReplaceDirectiveStacksLines(k, lines);
+        List<LineReplacement> tmp = resolveReplaceDirectiveStacksLines(k, v, lines);
         if (isNotEmpty(tmp)) {
-          for (List<Integer> tmpLs : tmp) {
-            if (isNotEmpty(tmpLs)) {
-              collectedRepLns.add(Pair.of(new ArrayList<>(tmpLs), v));
+          for (LineReplacement tmpLs : tmp) {
+            if (isNotEmpty(tmpLs.lineNos)) {
+              collectedRepLns.add(tmpLs);
             }
           }
         }
@@ -633,67 +628,97 @@ public class SqlQueryDeveloperKits {
       }
 
       // sort the replacement line numbers
-      collectedRepLns.sort(Comparator.comparing(p -> p.left().get(0)));
+      Collections.sort(collectedRepLns);
 
       // remove the intersect line numbers
-      List<Pair<List<Integer>, Object>> repLns = new ArrayList<>();
+      List<LineReplacement> repLns = new ArrayList<>();
       List<Integer> pre = null;
-      for (Pair<List<Integer>, Object> tmp : collectedRepLns) {
-        if (pre == null || pre.stream().noneMatch(tmp.left()::contains)) {
+      for (LineReplacement tmp : collectedRepLns) {
+        if (pre == null || pre.stream().noneMatch(tmp.lineNos::contains)) {
           repLns.add(tmp);
-          pre = tmp.left();
+          pre = tmp.lineNos;
         }
       }
       if (repLns.isEmpty()) {
         return string;
       }
 
-      StringBuilder sb = new StringBuilder();
       String lineSpr = Systems.getLineSeparator();
+      StringBuilder sb = new StringBuilder();
       StringBuilder re = new StringBuilder();
       int size = lines.size();
-      Pair<List<Integer>, Object> matches = null;
+      LineReplacement matchLines = null;
+      String matchReplacement = null;
       for (int i = 0; i < size; i++) {
-        if (matches == null) {
-          for (Pair<List<Integer>, Object> repLn : repLns) {
-            if (repLn.left().contains(i)) {
-              matches = repLn;
+        if (matchLines == null) {
+          for (LineReplacement repLn : repLns) {
+            if (repLn.lineNos.contains(i)) {
+              matchLines = repLn;
+              if (repLn.replacement instanceof String sr) {
+                matchReplacement = sr;
+              } else if (repLn.replacement instanceof Map<?, ?> mr) {
+                matchReplacement = getMapString(mr, query.getVersionedName());
+              }
               repLns.remove(repLn);
               break;
             }
           }
         }
+
         String line = lines.get(i);
-        if (matches == null) {
+
+        if (matchLines == null) {
           sb.append(line).append(lineSpr);
         } else {
-          matches.left().remove(Integer.valueOf(i));
-          if (matches.left().isEmpty()) {
-            if (matches.right() != null) {
-              Object replacement = matches.right();
-              if (replacement instanceof String) {
-                sb.append(replacement).append(lineSpr);
-              } else if (replacement instanceof Map<?, ?> mr) {
-                String x = getMapString(mr, query.getVersionedName());
-                if (x != null) {
-                  sb.append(x).append(lineSpr);
-                }
-              }
+          matchLines.lineNos.remove(Integer.valueOf(i));
+          if (matchLines.lineNos.isEmpty()) {
+            if (matchReplacement != null) {
+              sb.append(matchReplacement).append(lineSpr);
             }
-            matches = null;
-          }
-          if (outputReplacedDirectiveStacks) {
-            re.append("|- ").append(line).append(lineSpr);
+            if (outputReplacedDirectiveStacks) {
+              re.append("[STACK-REPLACE]: \"").append(matchLines.matched)
+                  .append("\" replaced by \"").append(defaultString(matchReplacement)).append("\"")
+                  .append(lineSpr);
+              re.append("|-").append(lineSpr);
+              for (String rl : matchLines.lines) {
+                re.append("|- ").append(rl).append(lineSpr);
+              }
+              re.append("-".repeat(100)).append(lineSpr);
+            }
+            matchLines = null;
           }
         }
       }
       if (outputReplacedDirectiveStacks && !re.isEmpty()) {
-        validatingInfoHandler.accept("[STACK-REP]:");
-        validatingInfoHandler.accept("-".repeat(100));
-        validatingInfoHandler.accept(re.substring(0, re.length() - lineSpr.length()));
-        validatingInfoHandler.accept("-".repeat(100));
+        validatingInfoHandler.accept(re.toString());
       }
       return sb.toString();
+    }
+
+    protected DatabaseType resolveDatabaseType(DBMS dbms) {
+      DatabaseType dsType = DatabaseType.ANSI_SQL;
+      switch (dbms) {
+        case ORACLE:
+          dsType = DatabaseType.ORACLE;
+          break;
+        case POSTGRE:
+          dsType = DatabaseType.POSTGRESQL;
+          break;
+        case H2:
+          dsType = DatabaseType.H2;
+          break;
+        case MYSQL:
+          dsType = DatabaseType.MYSQL;
+          break;
+        case SQLSERVER2005:
+        case SQLSERVER2008:
+        case SQLSERVER2012:
+          dsType = DatabaseType.SQLSERVER;
+          break;
+        default:
+          break;
+      }
+      return dsType;
     }
 
     protected QueryType resolveFetchQueryType(Query parentQuery, FetchQuery fetchQuery,
@@ -797,40 +822,51 @@ public class SqlQueryDeveloperKits {
       return defaultObject(query.getType(), NamedQueryServiceManager.DEFAULT_QUERY_TYPE);
     }
 
-    protected List<List<Integer>> resolveReplaceDirectiveStacksLines(String sd,
+    // FIXME using char stream ??
+    protected List<LineReplacement> resolveReplaceDirectiveStacksLines(String sd, Object rep,
         List<String> lines) {
       String usd = trim(sd);
       int s = usd.indexOf(' ');
       String start = usd.substring(0, s);
       String end = "</" + usd.substring(1, s) + ">";
-      List<List<Integer>> poses = new ArrayList<>();
+      List<LineReplacement> poses = new ArrayList<>();
       List<Integer> stackPoses = new ArrayList<>();
+      List<String> stackLines = new ArrayList<>();
       int lineNo = 0;
-      Stack<String> stack = new Stack<>();
+      int io = 0;
+      // Stack<String> stack = new Stack<>();
       boolean inStack = false;
       for (String line : lines) {
         String tl = trim(line);
         if (inStack) {
           stackPoses.add(lineNo);
-          if (tl.startsWith(start)) {
-            stack.push(tl);
+          stackLines.add(line);
+          if (tl.startsWith(start) && !tl.endsWith("/>")) {
+            // stack.push(tl);
+            io++;
           } else if (tl.equals(end)) {
-            stack.pop();
-            if (stack.isEmpty()) {
-              poses.add(new ArrayList<>(stackPoses));
+            // stack.pop();
+            io--;
+            if (io == 0) {
+              poses.add(new LineReplacement(sd, rep, stackPoses, stackLines));
               inStack = false;
               stackPoses.clear();
+              stackLines.clear();
             }
           }
         } else if (tl.equals(usd)) {
+          io++;
           stackPoses.add(lineNo);
-          stack.push(tl);
+          stackLines.add(line);
+          // stack.push(tl);
           inStack = true;
           if (tl.endsWith("/>")) {
-            stack.clear();
-            poses.add(new ArrayList<>(stackPoses));
+            io = 0;
+            // stack.clear();
+            poses.add(new LineReplacement(sd, rep, stackPoses, stackLines));
             inStack = false;
             stackPoses.clear();
+            stackLines.clear();
           }
         }
         lineNo++;
@@ -838,11 +874,46 @@ public class SqlQueryDeveloperKits {
       return poses;
     }
 
-    protected void validateFetchQuery(List<String> fieldNames, List<ValidationError> errors,
-        FetchQuery fq, List<String> fetchQueryFieldNames) {
+    protected void validateAggregationHintsIfNecessary(QueryHint qh,
+        final ResultAggregationHintHandler aggregationHintHandler, Query query,
+        List<ValidationError> errors, Set<String> fieldNames) {
+      if (!includeAggregationHints) {
+        return;
+      }
+      if (aggregationHintHandler.supports(Map.class, qh) && isNotEmpty(fieldNames)) {
+        String aggName = aggregationHintHandler.resolveAggNames(qh);
+        if (isBlank(aggName)) {
+          return;
+        }
+        Pair<Boolean, Set<String>> pair = aggregationHintHandler.resolveAggFieldNames(qh);
+        if (isEmpty(pair)) {
+          return;
+        }
+        Set<String> appends = new LinkedHashSet<>();
+        appends.add(aggName);
+        pair.right().forEach(rf -> {
+          if (!fieldNames.contains(rf)) {
+            errors.add(createValidationError(
+                format("Aggregation query hint aggregated field [%s] not exits, valid names: [%s]",
+                    rf, join(",", fieldNames))));
+          } else {
+            appends.add(aggName.concat(".").concat(rf));
+          }
+        });
+        if (pair.first()) {
+          fieldNames.removeIf(f -> !pair.contains(f));
+        } else {
+          fieldNames.removeIf(pair::contains);
+        }
 
-      Set<String> injectFieldNames = new LinkedHashSet<>();
+        if (isNotEmpty(appends)) {
+          fieldNames.addAll(appends);
+        }
+      }
+    }
 
+    protected void validateFetchQuery(Set<String> fieldNames, List<ValidationError> errors,
+        FetchQuery fq, Set<String> fetchQueryFieldNames) {
       // check JSE predicate script variables
       String fqn = fq.getQueryReference().getVersionedName();
       if (isNotEmpty(fieldNames) && fq.getPredicateScript().isValid()
@@ -852,8 +923,9 @@ public class SqlQueryDeveloperKits {
         if (isNotEmpty(resultParamNames)) {
           for (String rpn : resultParamNames) {
             if (!fieldNames.contains(trim(rpn))) {
-              errors.add(createValidationError("Fetch query [" + fqn
-                  + "] predicate script variable: [@r." + rpn + "] not exists"));
+              errors.add(createValidationError(format(
+                  "Fetch query [%s] predicate script variable: [@r.%s] not exists, valid field names: [%s]",
+                  fqn, rpn, join(", ", fieldNames))));
             }
           }
         }
@@ -863,9 +935,10 @@ public class SqlQueryDeveloperKits {
       if (isNotEmpty(fieldNames)) {
         fq.getParameters().forEach(fp -> {
           if ((fp.getSource() == FetchQueryParameterSource.R)
-              && !fieldNames.contains(fp.getSourceNamePath()[0])) {
-            errors.add(createValidationError("Fetch query [" + fqn + "] parameter: ["
-                + fp.getSourceNamePath()[0] + "] not exists"));
+              && !fieldNames.contains(fp.getSourceName())) {
+            errors.add(createValidationError(
+                format("Fetch query [%s] parameter: [%s] not exists, valid names: [%s]", fqn,
+                    fp.getSourceName(), join(", ", fieldNames))));
           }
         });
       }
@@ -882,8 +955,9 @@ public class SqlQueryDeveloperKits {
           if (isNotEmpty(parentResultParamNames)) {
             for (String rpn : parentResultParamNames) {
               if (!fieldNames.contains(trim(rpn))) {
-                errors.add(createValidationError("Fetch query [" + fqn
-                    + "] injection script variable: [@r." + rpn + "] not exists"));
+                errors.add(createValidationError(format(
+                    "Fetch query [%s] injection script variable: [@r.%s] not exists, valid names: [%s]",
+                    fqn, rpn, join(", ", fieldNames))));
               }
             }
           }
@@ -894,13 +968,15 @@ public class SqlQueryDeveloperKits {
           if (isNotEmpty(fetchResultParamNames)) {
             for (String frpn : fetchResultParamNames) {
               if (!fetchQueryFieldNames.contains(trim(frpn))) {
-                errors.add(createValidationError("Fetch query [" + fqn
-                    + "] injection script variable: [@fr." + frpn + "] not exists"));
+                errors.add(createValidationError(format(
+                    "Fetch query [%s] injection script variable: [@fr.%s] not exists, valid names: [%s]",
+                    fqn, frpn, join(", ", fetchQueryFieldNames))));
               }
             }
           }
         }
         // check projection names
+        Set<String> injectFieldNames = new LinkedHashSet<>();
         Set<String> projectFieldNames = new LinkedHashSet<>();
         try {
           Map<Object, Object> map = ObjectMappers.mapReader().readValue(injectCode);
@@ -909,8 +985,9 @@ public class SqlQueryDeveloperKits {
           if (isNotEmpty(projectionMap) && isNotEmpty(fetchQueryFieldNames)) {
             for (String frpn : projectionMap.keySet()) {
               if (!fetchQueryFieldNames.contains(trim(frpn))) {
-                errors.add(createValidationError("Fetch query [" + fqn
-                    + "] injection script projection name: [" + frpn + "] not exists"));
+                errors.add(createValidationError(format(
+                    "Fetch query [%s] injection script projection name: [%s] not exists, valid names: [%s]",
+                    fqn, frpn, join(", ", fetchQueryFieldNames))));
               } else {
                 Object projectValue = projectionMap.get(frpn);
                 if (projectValue instanceof Map<?, ?> pm) {
@@ -928,17 +1005,114 @@ public class SqlQueryDeveloperKits {
         } catch (JsonProcessingException e) {
           errors.add(createValidationError("Fetch query injection script process error!"));
         }
+
+        if (projectFieldNames.isEmpty() && isNotEmpty(fetchQueryFieldNames)) {
+          projectFieldNames.addAll(fetchQueryFieldNames);
+        }
         if (isNotBlank(fq.getInjectPropertyName())) {
-          // FIXME name path
           injectFieldNames.add(fq.getInjectPropertyName());
-        } else if (projectFieldNames.isEmpty() && isNotEmpty(fetchQueryFieldNames)) {
-          injectFieldNames.addAll(fetchQueryFieldNames);
+          for (String pfn : projectFieldNames) {
+            injectFieldNames.add(fq.getInjectPropertyName().concat(".").concat(pfn));
+          }
         } else {
           injectFieldNames.addAll(projectFieldNames);
         }
+        fieldNames.addAll(injectFieldNames);
       }
-      fieldNames.addAll(injectFieldNames);
     }
 
+    protected void validateFieldConvertHintsIfNecessary(QueryHint qh,
+        final ResultFieldConvertHintHandler fieldConvertHintHandler, Query query,
+        List<ValidationError> errors, Set<String> fieldNames) {
+      if (!includeFieldConvertHints) {
+        return;
+      }
+      if (fieldConvertHintHandler.supports(Map.class, qh) && isNotEmpty(fieldNames)) {
+        List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> list =
+            fieldConvertHintHandler.resolveConversions(qh);
+        if (isNotEmpty(list)) {
+          list.forEach(p -> {
+            String rf = String.join(".", p.first());
+            if (!fieldNames.contains(rf)) {
+              errors.add(createValidationError(
+                  format("Field convert query hint field [%s] not exits, valid names: [%s]", rf,
+                      join(", ", fieldNames))));
+            }
+          });
+        }
+      }
+    }
+
+    protected void validateMapReduceHintsIfNecessary(QueryHint qh,
+        final ResultMapReduceHintHandler mapReduceHintHandler, Query query,
+        List<ValidationError> errors, Set<String> fieldNames) {
+      if (!includeMapReduceHints) {
+        return;
+      }
+      if (mapReduceHintHandler.supports(Map.class, qh) && isNotEmpty(fieldNames)) {
+        String mapName = mapReduceHintHandler.resolveMapFieldname(qh);
+        if (isBlank(mapName)) {
+          return;
+        }
+        List<Triple<String, String[], Class<?>>> list =
+            mapReduceHintHandler.resolveReduceFields(qh);
+        if (isEmpty(list)) {
+          return;
+        }
+        Set<String> removes = new LinkedHashSet<>();
+        Set<String> appends = new LinkedHashSet<>();
+        appends.add(mapName);
+        boolean remain = mapReduceHintHandler.resolveRetainFields(qh);
+        list.forEach(x -> {
+          String rf = String.join(".", x.getMiddle());
+          if (!remain) {
+            removes.add(rf);
+          }
+          if (!fieldNames.contains(rf)) {
+            errors.add(createValidationError(
+                format("Map reduce query hint reduce field [%s] not exits, valid names: [%s]", rf,
+                    join(", ", fieldNames))));
+          } else {
+            appends.add(mapName.concat(".").concat(x.left()));
+          }
+        });
+        if (isNotEmpty(removes)) {
+          fieldNames.removeAll(removes);
+        }
+        if (isNotEmpty(appends)) {
+          fieldNames.addAll(appends);
+        }
+      }
+    }
+
+    /**
+     * corant-modules-query-sql
+     *
+     * @author bingo 09:58:35
+     */
+    protected static class LineReplacement implements Comparable<LineReplacement> {
+      final String matched;
+      final Object replacement;
+      final List<Integer> lineNos = new ArrayList<>();
+      final List<String> lines = new ArrayList<>();
+
+      LineReplacement(String matched, Object replacement, List<Integer> lineNos,
+          List<String> lines) {
+        this.matched = matched;
+        this.replacement = replacement;
+        if (lineNos != null) {
+          this.lineNos.addAll(lineNos);
+        }
+        if (lines != null) {
+          this.lines.addAll(lines);
+        }
+      }
+
+      @Override
+      public int compareTo(LineReplacement o) {
+        return lineNos.get(0).compareTo(o.lineNos.get(0));
+      }
+
+    }
   }
 }

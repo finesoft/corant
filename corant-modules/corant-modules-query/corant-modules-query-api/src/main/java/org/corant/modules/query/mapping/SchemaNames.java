@@ -13,6 +13,11 @@
  */
 package org.corant.modules.query.mapping;
 
+import static org.corant.shared.util.Strings.EMPTY;
+import static org.corant.shared.util.Strings.UNDERSCORE;
+import static org.corant.shared.util.Strings.defaultString;
+import static org.corant.shared.util.Strings.isNotBlank;
+
 /**
  * corant-modules-query-api
  *
@@ -72,5 +77,9 @@ public class SchemaNames {
   public static final String QUE_NAME_SPACE_SEPARATOR = " > "; // since 2024-08-31
 
   private SchemaNames() {}
+
+  public static String resolveVersionedName(String name, String version) {
+    return defaultString(name) + (isNotBlank(version) ? UNDERSCORE + version : EMPTY);
+  }
 
 }

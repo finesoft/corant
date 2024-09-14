@@ -44,7 +44,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,15 +86,12 @@ import org.corant.shared.util.Systems;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.util.validation.Validation;
 import net.sf.jsqlparser.util.validation.ValidationError;
 import net.sf.jsqlparser.util.validation.ValidationException;
@@ -174,6 +170,7 @@ public class SqlQueryDeveloperKits {
     protected boolean includeFieldConvertHints;
     protected boolean outputReplacedDirectiveStacks;
     protected boolean outputProcessedValidScript;
+    protected boolean usingJSqlParser = false;
     protected Set<String> skipQueryQualifier = new HashSet<>();
     protected Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
     protected Predicate<String> queryNameFilter = Functions.emptyPredicate(true);
@@ -365,6 +362,11 @@ public class SqlQueryDeveloperKits {
       }
     }
 
+    public FreemarkerQueryScriptValidator usingJSqlParser(boolean usingJSqlParser) {
+      this.usingJSqlParser = usingJSqlParser;
+      return this;
+    }
+
     public void validate() {
       final QueryMappingService service = resolve(QueryMappingService.class);
 
@@ -432,25 +434,14 @@ public class SqlQueryDeveloperKits {
       Pair<DBMS, String> dss =
           sqlQueryService.resolveDataSourceSchema(resolveQueryQualifier(query));
       String dsName = dss.right();
-      DatabaseType dsType = resolveDatabaseType(dss.left());
       try (Connection conn = dataSources.resolve(dsName).getConnection()) {
-        Validation validation =
-            new Validation(featureConfiguration,
-                Arrays.asList(dsType,
-                    new JdbcDatabaseMetaDataCapability(conn, NamesLookup.NO_TRANSFORMATION)),
-                script);
-
-        // validate query self
-        errors.addAll(validation.validate());
-        if (isNotEmpty(validation.getErrors())) {
+        Pair<List<ValidationError>, Set<String>> results =
+            doJSqlValidateAndGetFieldNames(queryName, script, dss, conn);
+        if (isNotEmpty(results.left())) {
+          errors.addAll(results.left());
           return;
         }
-
-        // collect the select field names
-        final String sql = script;
-        Set<String> fieldNames = new LinkedHashSet<>(defaultEmpty(resolveFieldNames(validation),
-            () -> resolveFieldNames(conn, queryName, sql, errors)));
-
+        Set<String> fieldNames = new LinkedHashSet<>(results.right());
         // validate fetch queries if necessary
         if (isNotEmpty(query.getFetchQueries()) && includeFetchQueryHandling) {
           for (FetchQuery fetchQuery : query.getFetchQueries()) {
@@ -564,6 +555,56 @@ public class SqlQueryDeveloperKits {
         ve.addError(new ValidationException(msg));
       }
       return ve;
+    }
+
+    protected Pair<List<ValidationError>, Set<String>> doJSqlValidateAndGetFieldNames(
+        final String queryName, String script, Pair<DBMS, String> dss, Connection conn) {
+      Set<String> fieldNames = new LinkedHashSet<>();
+      List<ValidationError> errors = new ArrayList<>();
+      if (usingJSqlParser) {
+        Validation validation =
+            new Validation(featureConfiguration,
+                Arrays.asList(resolveDatabaseType(dss.left()),
+                    new JdbcDatabaseMetaDataCapability(conn, NamesLookup.NO_TRANSFORMATION)),
+                script);
+        // validate query self
+        if (isNotEmpty(validation.validate())) {
+          errors.addAll(validation.getErrors());
+        } else {
+          // collect the select field names
+          Set<String> resolvedFieldNames =
+              new LinkedHashSet<>(defaultEmpty(resolveFieldNames(validation),
+                  () -> doSqlValidateAndGetFieldNames(conn, queryName, script, errors)));
+          fieldNames.addAll(resolvedFieldNames);
+        }
+      } else {
+        Set<String> resolvedFieldNames =
+            new LinkedHashSet<>(doSqlValidateAndGetFieldNames(conn, queryName, script, errors));
+        fieldNames.addAll(resolvedFieldNames);
+      }
+      return Pair.of(errors, fieldNames);
+    }
+
+    protected List<String> doSqlValidateAndGetFieldNames(Connection conn, String queryName,
+        String sql, List<ValidationError> errors) {
+      List<String> fieldNames = new ArrayList<>();
+      try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ResultSetMetaData metaData = ps.getMetaData();
+        if (metaData == null || metaData.getColumnCount() < 1) {
+          ValidationError err = new ValidationError(sql);
+          err.addError(new ValidationException("Can't find any cloumn"));
+          errors.add(err);
+        }
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+          fieldNames.add(metaData.getColumnLabel(i));
+        }
+      } catch (Exception ex) {
+        fieldNames.clear();
+        ValidationError err = new ValidationError(sql);
+        err.addError(new ValidationException(ex));
+        errors.add(err);
+      }
+      return fieldNames;
     }
 
     protected String getScript(Query query) throws TemplateException, IOException {
@@ -736,69 +777,29 @@ public class SqlQueryDeveloperKits {
       return resolveQueryType(parentQuery);
     }
 
-    protected List<String> resolveFieldNames(Connection conn, String queryName, String sql,
-        List<ValidationError> errors) {
-      List<String> fieldNames = new ArrayList<>();
-      try {
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
-        SelectBody selectBody = select.getSelectBody();
-        if (selectBody instanceof PlainSelect psBody) {
-          psBody.withWhere(null);
-        } else if (selectBody instanceof SetOperationList solBody) {
-          LinkedList<SelectBody> sbs = new LinkedList<>(solBody.getSelects());
-          SelectBody sb;
-          int it = 16; // Max iteration
-          while ((sb = sbs.poll()) != null) {
-            if (sb instanceof PlainSelect sbpsBody) {
-              sbpsBody.withWhere(null);
-            } else if (sb instanceof SetOperationList sls) {
-              for (SelectBody s : sls.getSelects()) {
-                sbs.offer(s);
-              }
-            }
-            if (--it == 0) {
-              break;
-            }
-          }
-        }
-        String usedSql = select.toString();
-        try (PreparedStatement ps = conn.prepareStatement(usedSql)) {
-          ResultSetMetaData metaData = ps.getMetaData();
-          for (int i = 1; i <= metaData.getColumnCount(); i++) {
-            fieldNames.add(metaData.getColumnLabel(i));
-          }
-        }
-      } catch (Exception ex) {
-        errors.add(createValidationError(
-            "Resolve query [" + queryName + "] field names occurred error", ex));
-      }
-      return fieldNames;
-    }
-
     protected List<String> resolveFieldNames(Validation validation) {
       if (validation.getParsedStatements() != null
-          && isNotEmpty(validation.getParsedStatements().getStatements())) {
-        for (Statement st : validation.getParsedStatements().getStatements()) {
-          if ((st instanceof Select select) && (select.getSelectBody() instanceof PlainSelect ps)) {
+          && isNotEmpty(validation.getParsedStatements())) {
+        for (Statement st : validation.getParsedStatements()) {
+          if (st instanceof PlainSelect ps) {
             List<String> fieldNames = new ArrayList<>();
-            for (SelectItem item : ps.getSelectItems()) {
-              if (item instanceof SelectExpressionItem si) {
-                if (si.getAlias() != null) {
-                  fieldNames.add(trim(si.getAlias().getName()));
-                } else {
-                  // FIXME use . ??
-                  String fn = si.getExpression().toString();
-                  int dot = fn.indexOf('.');
-                  if (dot != -1 && fn.length() > (dot + 1)) {
-                    fieldNames.add(trim(fn.substring(dot + 1)));
-                  } else {
-                    fieldNames.add(trim(fn));
-                  }
-                }
-              } else {
-                // not supports clear
+            for (SelectItem<?> si : ps.getSelectItems()) {
+              Expression item = si.getExpression();
+              if (item instanceof AllColumns) {
                 fieldNames.clear();
                 break;
+              }
+              if (si.getAlias() != null) {
+                fieldNames.add(trim(si.getAlias().getName()));
+              } else {
+                // FIXME use . ??
+                String fn = si.getExpression().toString();
+                int dot = fn.indexOf('.');
+                if (dot != -1 && fn.length() > (dot + 1)) {
+                  fieldNames.add(trim(fn.substring(dot + 1)));
+                } else {
+                  fieldNames.add(trim(fn));
+                }
               }
             }
             return fieldNames;

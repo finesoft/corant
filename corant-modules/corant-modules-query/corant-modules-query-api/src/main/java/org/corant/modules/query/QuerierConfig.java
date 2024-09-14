@@ -30,6 +30,8 @@ public interface QuerierConfig {
   String PRO_KEY_LIMIT = ".limit";
   String PRO_KEY_STREAM_LIMIT = ".stream-limit";
   String PRO_KEY_TIMEOUT = ".timeout";
+  String PRO_KEY_PAGINATION_COUNT_QUERY_NAME = ".pagination-count-query-name";
+  String PRO_KEY_PAGINATION_COUNT_QUERY_VERSION = ".pagination-count-query-version";
 
   int getDefaultLimit();
 

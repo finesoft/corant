@@ -101,7 +101,7 @@
 		<version.jcip-annotations>1.0-1</version.jcip-annotations>
 		<version.jetty>11.0.15</version.jetty>
 		<version.jose4j>0.9.3</version.jose4j>
-		<version.jsqlparser>4.6</version.jsqlparser>
+		<version.jsqlparser>5.0</version.jsqlparser>
 		<version.jsoup>1.15.4</version.jsoup>
 		<version.junit>4.13.2</version.junit>
 		<version.jython>2.7.3</version.jython>

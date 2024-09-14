@@ -20,10 +20,7 @@ import static java.util.Collections.unmodifiableMap;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Strings.EMPTY;
-import static org.corant.shared.util.Strings.UNDERSCORE;
-import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.defaultStrip;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -351,7 +348,7 @@ public class Query implements Serializable {
   }
 
   protected void handleVersionedName() {
-    versionedName = defaultString(name) + (isNotBlank(version) ? UNDERSCORE + version : EMPTY);
+    versionedName = SchemaNames.resolveVersionedName(name, version);
   }
 
   /**
@@ -457,7 +454,7 @@ public class Query implements Serializable {
   /**
    * Set the query version, the version name of the query must be globally unique.
    *
-   * @param name the version to be set
+   * @param version the version to be set
    */
   protected void setVersion(String version) {
     this.version = version;

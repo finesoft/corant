@@ -13,9 +13,12 @@
  */
 package org.corant.modules.query.sql;
 
+import static java.lang.String.format;
+import static org.corant.shared.util.Conversions.toInteger;
 import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.getMapInteger;
 import static org.corant.shared.util.Streams.batchStream;
+import static org.corant.shared.util.Strings.isNotBlank;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
@@ -157,10 +160,18 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       if (size < limit) {
         result.withTotal(offset + size);
       } else {
-        String totalSql = getDialect().getCountSql(sql, properties);
-        log(query.getVersionedName() + " -> total", scriptParameter, totalSql);
-        result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
-            Dialect.COUNT_FIELD_NAME));
+        final String countNamedQuery = querier.getPaginationCountQueryName();
+        if (isNotBlank(countNamedQuery)) {
+          logger.fine(() -> format("%n[Query name]: %s -> total: referenced query name [%s]",
+              query.getVersionedName(), countNamedQuery));
+          result.withTotal(toInteger(this.doGet(getQuery(countNamedQuery), parameter)));
+        } else {
+          String totalSql = getDialect().getCountSql(sql, properties);
+          log(query.getVersionedName() + " -> total", scriptParameter, totalSql);
+          result.withTotal(getMapInteger(getExecutor().get(totalSql, timeout, scriptParameter),
+              Dialect.COUNT_FIELD_NAME));
+        }
+
       }
       handleFetching(list, querier);
     }

@@ -13,6 +13,9 @@
  */
 package org.corant.modules.query.sql;
 
+import static org.corant.shared.util.Strings.isNotBlank;
+import org.corant.modules.query.QuerierConfig;
+import org.corant.modules.query.mapping.SchemaNames;
 import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 
 /**
@@ -23,7 +26,17 @@ import org.corant.modules.query.shared.dynamic.DynamicQuerier;
 public interface SqlNamedQuerier extends DynamicQuerier<Object[], String> {
 
   String PRO_KEY_PAGINATION_PROCESS_PATTERN = ".pagination-process-pattern";
-  String PRO_KEY_PAGINATION_COUNT_QUERY = ".pagination-count-query";
+
+  default String getPaginationCountQueryName() {
+    String queryName =
+        resolveProperty(QuerierConfig.PRO_KEY_PAGINATION_COUNT_QUERY_NAME, String.class, null);
+    String version =
+        resolveProperty(QuerierConfig.PRO_KEY_PAGINATION_COUNT_QUERY_VERSION, String.class, null);
+    if (isNotBlank(queryName)) {
+      return SchemaNames.resolveVersionedName(queryName, version);
+    }
+    return null;
+  }
 
   default PaginationProcessPattern resolvePaginationProcessPattern() {
     return resolveProperty(PRO_KEY_PAGINATION_PROCESS_PATTERN, PaginationProcessPattern.class,

@@ -15,27 +15,38 @@ package org.corant.modules.jpa.hibernate.orm;
 
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
+import static org.corant.shared.util.Empties.sizeOf;
 import static org.corant.shared.util.Maps.propertiesOf;
+import static org.corant.shared.util.Strings.EMPTY;
 import static org.corant.shared.util.Strings.replace;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
+import javax.sql.DataSource;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.corant.Corant;
 import org.corant.config.CorantConfigResolver;
 import org.corant.kernel.logging.LoggerFactory;
 import org.corant.kernel.util.CommandLine;
 import org.corant.modules.datasource.shared.DataSourceService;
+import org.corant.modules.datasource.shared.SqlStatements;
 import org.corant.modules.jpa.shared.JPAExtension;
 import org.corant.modules.jpa.shared.JPAUtils;
 import org.corant.modules.jpa.shared.PersistenceService.PersistenceUnitLiteral;
 import org.corant.modules.jpa.shared.metadata.PersistenceUnitInfoMetaData;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResource;
+import org.corant.shared.ubiquity.Mutable.MutableInteger;
+import org.corant.shared.ubiquity.Tuple.Triple;
 import org.corant.shared.util.Resources;
+import org.corant.shared.util.Throwables;
+import org.hibernate.boot.internal.MetadataImpl;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -127,6 +138,53 @@ public class HibernateOrmDeveloperKits {
       out(false);
       new SchemaUpdate().setFormat(true).setDelimiter(delimiter)
           .execute(EnumSet.of(TargetType.STDOUT), createMetadataImplementor(pu, integrations));
+      out(true);
+    } catch (Exception e) {
+      throw new CorantRuntimeException(e);
+    }
+  }
+
+  public static void validateNamedNativeQuery(String pu, String... integrations) {
+    try (Corant corant = prepare()) {
+      out(false);
+      JPAExtension extension = select(JPAExtension.class).get();
+      DataSourceService dataSourceService = select(DataSourceService.class).get();
+      PersistenceUnitInfoMetaData pum =
+          shouldNotNull(extension.getPersistenceUnitInfoMetaData(PersistenceUnitLiteral.of(pu)),
+              "Can't find any metadata for persistence unit %s", pu);
+      MetadataImplementor metadataImplementor = createMetadataImplementor(pu, integrations);
+      DataSource ds = dataSourceService.resolve(pum.getJtaDataSourceName());
+      if (metadataImplementor instanceof MetadataImpl mi) {
+        List<Triple<String, String, Exception>> errors = new ArrayList<>();
+        final int totals = sizeOf(mi.getNamedNativeQueryMap());
+        final MutableInteger counter = new MutableInteger(1);
+        mi.getNamedNativeQueryMap().forEach((k, v) -> {
+          try (Connection conn = ds.getConnection();
+              PreparedStatement ps = conn.prepareStatement(
+                  SqlStatements.normalizeJdbcParameterPlaceHolder(v.getSqlQueryString()))) {
+            System.out.printf("[VALID]: %s, columns %s, [%s/%s]%n", k,
+                ps.getMetaData() != null ? ps.getMetaData().getColumnCount() : 0, counter, totals);
+          } catch (Exception ex) {
+            System.out.printf("[INVALID]: %s, [%s/%s]%n", k, counter, totals);
+            errors.add(Triple.of(k, v.getSqlQueryString(), ex));
+          } finally {
+            counter.increment();
+          }
+        });
+        System.out.println(
+            "Validation completed" + (!errors.isEmpty() ? ", some errors were found" : EMPTY));
+        if (!errors.isEmpty()) {
+          errors.forEach(e -> {
+            System.err.println("[ERROR QUERY]: " + e.left());
+            System.err.println("[ERROR SQL]:\n" + e.middle());
+            System.err.println("[ERROR MESSAGE]: " + e.right().getMessage());
+            System.err.println("[ERROR STACK]:\n" + Throwables.stackTraceAsString(e.right()));
+            System.err.println("*".repeat(100));
+          });
+        }
+      } else {
+        System.err.println("Not suppport named native query validation!");
+      }
       out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);

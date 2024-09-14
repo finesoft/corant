@@ -14,9 +14,6 @@
 package org.corant.modules.query.mapping;
 
 import static org.corant.shared.util.Strings.EMPTY;
-import static org.corant.shared.util.Strings.UNDERSCORE;
-import static org.corant.shared.util.Strings.defaultString;
-import static org.corant.shared.util.Strings.isNotBlank;
 import java.io.Serializable;
 import org.corant.modules.query.mapping.Query.QueryType;
 
@@ -72,8 +69,7 @@ public class QueryReference implements Serializable {
   }
 
   public String getVersionedName() {
-    return defaultString(getName())
-        + (isNotBlank(getVersion()) ? UNDERSCORE + getVersion() : EMPTY);
+    return SchemaNames.resolveVersionedName(getName(), getVersion());
   }
 
   @Override

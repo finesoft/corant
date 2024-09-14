@@ -42,12 +42,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import org.corant.modules.query.QuerierConfig;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.Query;
 import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryParser;
+import org.corant.modules.query.mapping.SchemaNames;
 import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.spi.FetchQueryParameterResolver;
 import org.corant.modules.query.spi.FetchQueryPredicate;
@@ -227,6 +229,21 @@ public class QueryMappingService {
     });
     queries.keySet().forEach(q -> {
       List<String> refs = new LinkedList<>();
+
+      // check pagination count query
+      Query query = queries.get(q);
+      String paginationQueryName =
+          query.getProperty(QuerierConfig.PRO_KEY_PAGINATION_COUNT_QUERY_NAME, String.class);
+      if (isNotBlank(paginationQueryName)) {
+        String paginationQuery = SchemaNames.resolveVersionedName(paginationQueryName,
+            query.getProperty(QuerierConfig.PRO_KEY_PAGINATION_COUNT_QUERY_VERSION, String.class));
+        if (!queries.containsKey(paginationQuery)) {
+          throw new QueryRuntimeException(
+              "Can't not find any [%s] pagination count query for query [%s]", paginationQuery, q);
+        }
+      }
+
+      // check circular reference
       List<String> tmp = new LinkedList<>(queries.get(q).getVersionedFetchQueryNames());
       while (!tmp.isEmpty()) {
         String tq = tmp.remove(0);

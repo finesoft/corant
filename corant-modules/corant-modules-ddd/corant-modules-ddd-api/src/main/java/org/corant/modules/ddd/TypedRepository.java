@@ -27,7 +27,7 @@ public interface TypedRepository<T, Q> {
    * Retrieve an object from repository by id and object class
    *
    *
-   * @param id the entity i
+   * @param id the entity identifier
    * @return the entity
    */
   T get(Serializable id);

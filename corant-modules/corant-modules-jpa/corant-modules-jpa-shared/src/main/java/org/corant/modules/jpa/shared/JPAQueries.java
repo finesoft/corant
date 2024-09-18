@@ -531,6 +531,45 @@ public class JPAQueries {
     protected FlushModeType flushMode;
     protected LockModeType lockMode;
 
+    public void setParameters(final Map<?, ?> parameterMap) {
+      checkNoParametersConfigured();
+      parameterBuilder = new ParameterBuilder() {
+        @Override
+        public void populateQuery(EntityManager entityManager, Query query) {
+          if (parameterMap != null) {
+            for (Entry<?, ?> entry : parameterMap.entrySet()) {
+              query.setParameter(asString(entry.getKey()), entry.getValue());
+            }
+          }
+        }
+
+        @Override
+        public String toString() {
+          return "Parameters: " + parameterMap;
+        }
+      };
+    }
+
+    public void setParameters(final Object... parameters) {
+      checkNoParametersConfigured();
+      parameterBuilder = new ParameterBuilder() {
+        @Override
+        public void populateQuery(EntityManager entityManager, Query query) {
+          if (parameters != null) {
+            int counter = 1;
+            for (Object parameter : parameters) {
+              query.setParameter(counter++, parameter);
+            }
+          }
+        }
+
+        @Override
+        public String toString() {
+          return "Parameters: " + Arrays.toString(parameters);
+        }
+      };
+    }
+
     protected void checkNoParametersConfigured() {
       if (parameterBuilder != null) {
         throw new IllegalArgumentException(
@@ -595,45 +634,6 @@ public class JPAQueries {
 
     void setParameters(Collection<?> parameters) {
       setParameters(parameters == null ? null : parameters.toArray());
-    }
-
-    void setParameters(final Map<?, ?> parameterMap) {
-      checkNoParametersConfigured();
-      parameterBuilder = new ParameterBuilder() {
-        @Override
-        public void populateQuery(EntityManager entityManager, Query query) {
-          if (parameterMap != null) {
-            for (Entry<?, ?> entry : parameterMap.entrySet()) {
-              query.setParameter(asString(entry.getKey()), entry.getValue());
-            }
-          }
-        }
-
-        @Override
-        public String toString() {
-          return "Parameters: " + parameterMap;
-        }
-      };
-    }
-
-    void setParameters(final Object... parameters) {
-      checkNoParametersConfigured();
-      parameterBuilder = new ParameterBuilder() {
-        @Override
-        public void populateQuery(EntityManager entityManager, Query query) {
-          if (parameters != null) {
-            int counter = 1;
-            for (Object parameter : parameters) {
-              query.setParameter(counter++, parameter);
-            }
-          }
-        }
-
-        @Override
-        public String toString() {
-          return "Parameters: " + Arrays.toString(parameters);
-        }
-      };
     }
 
   }
@@ -1112,7 +1112,6 @@ public class JPAQueries {
 
     /**
      * Execute a SELECT query and return the query results as a typed List.
-     *
      *
      * @return a list of the results
      */

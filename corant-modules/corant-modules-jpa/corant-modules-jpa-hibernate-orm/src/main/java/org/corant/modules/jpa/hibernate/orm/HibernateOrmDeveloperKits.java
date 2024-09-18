@@ -162,8 +162,17 @@ public class HibernateOrmDeveloperKits {
           try (Connection conn = ds.getConnection();
               PreparedStatement ps = conn.prepareStatement(
                   SqlStatements.normalizeJdbcParameterPlaceHolder(v.getSqlQueryString()))) {
+            boolean setAutoCommit = false;
+            if (conn.getAutoCommit()) {
+              conn.setAutoCommit(false);
+              setAutoCommit = true;
+            }
             System.out.printf("[VALID]: %s, columns %s, [%s/%s]%n", k,
                 ps.getMetaData() != null ? ps.getMetaData().getColumnCount() : 0, counter, totals);
+            if (setAutoCommit) {
+              conn.rollback();
+              conn.setAutoCommit(true);
+            }
           } catch (Exception ex) {
             System.out.printf("[INVALID]: %s, [%s/%s]%n", k, counter, totals);
             errors.add(Triple.of(k, v.getSqlQueryString(), ex));

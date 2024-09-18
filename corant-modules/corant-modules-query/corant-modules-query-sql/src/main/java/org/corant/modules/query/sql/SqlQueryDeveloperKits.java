@@ -434,7 +434,13 @@ public class SqlQueryDeveloperKits {
       Pair<DBMS, String> dss =
           sqlQueryService.resolveDataSourceSchema(resolveQueryQualifier(query));
       String dsName = dss.right();
+
       try (Connection conn = dataSources.resolve(dsName).getConnection()) {
+        boolean setAutoCommit = false;
+        if (conn.getAutoCommit()) {
+          conn.setAutoCommit(false);
+          setAutoCommit = true;
+        }
         Pair<List<ValidationError>, Set<String>> results =
             doJSqlValidateAndGetFieldNames(queryName, script, dss, conn);
         if (isNotEmpty(results.left())) {
@@ -474,7 +480,10 @@ public class SqlQueryDeveloperKits {
         }
 
         queryFieldNames.put(queryName, fieldNames);
-
+        if (setAutoCommit) {
+          conn.rollback();
+          conn.setAutoCommit(true);
+        }
       } catch (Exception ex) {
         errors.add(createValidationError("Validation occurred error!", ex));
       } finally {

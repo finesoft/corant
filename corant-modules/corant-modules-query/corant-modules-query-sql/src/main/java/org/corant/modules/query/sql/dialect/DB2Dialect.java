@@ -13,7 +13,10 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -24,6 +27,20 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
 public class DB2Dialect implements Dialect {
 
   public static final Dialect INSTANCE = new DB2Dialect();
+
+  // DB2 12
+  public static final Set<String> AGGREGATE_FUNCTIONS =
+      immutableSetOf("ARRAY_AGG", "AVG", "CORR", "CORRELATION", "COUNT", "COUNT_BIG", "COVAR_POP",
+          "COVARIANCE", "COVAR", "COVAR_SAMP", "COVARIANCE_SAMP", "CUME_DIST", "GROUPING",
+          "LISTAGG", "MAX", "MEDIAN", "MIN", "PERCENTILE_CONT", "PERCENTILE_DISC", "PERCENT_RANK",
+          "REGR_AVGX", "REGR_AVGY", "REGR_COUNT", "REGR_INTERCEPT", "REGR_ICPT", "REGR_R2",
+          "REGR_SLOPE", "REGR_SXX", "REGR_SXY", "REGR_SYY", "STDDEV_POP", "STDDEV", "STDDEV_SAMP",
+          "SUM", "VAR_POP", "VARIANCE", "VAR", "VAR_SAMP", "VARIANCE_SAMP", "XMLAGG");
+
+  @Override
+  public Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
 
   @Override
   public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {

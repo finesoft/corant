@@ -13,7 +13,10 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -24,6 +27,20 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
 public class PostgreSQLDialect implements Dialect {
 
   public static final Dialect INSTANCE = new PostgreSQLDialect();
+
+  // PostgreSQL 16
+  public static final Set<String> AGGREGATE_FUNCTIONS = immutableSetOf("ARRAY_AGG", "AVG",
+      "BIT_AND", "BIT_OR", "BIT_XOR", "BOOL_AND", "BOOL_OR", "COUNT", "EVERY", "JSON_AGG",
+      "JSONB_AGG", "JSON_OBJECTAGG", "JSON_OBJECT_AGG", "JSONB_OBJECT_AGG",
+      "JSON_OBJECT_AGG_STRICT", "JSONB_OBJECT_AGG_STRICT", "JSON_OBJECT_AGG_UNIQUE",
+      "JSONB_OBJECT_AGG_UNIQUE", "JSON_ARRAYAGG", "JSON_OBJECT_AGG_UNIQUE_STRICT",
+      "JSONB_OBJECT_AGG_UNIQUE_STRICT", "MAX", "MIN", "RANGE_AGG", "RANGE_INTERSECT_AGG",
+      "JSON_AGG_STRICT", "JSONB_AGG_STRICT", "STRING_AGG", "SUM", "XMLAGG");
+
+  @Override
+  public Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
 
   @Override
   public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {

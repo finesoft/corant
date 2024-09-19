@@ -13,6 +13,10 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * corant-modules-query-sql
  *
@@ -21,6 +25,16 @@ package org.corant.modules.query.sql.dialect;
 public abstract class SQLServerDialect implements Dialect {
 
   public static final String SQL_DFLT_ORDERBY = "ORDER BY CURRENT_TIMESTAMP";
+
+  // SQLServer 2017 above
+  public static final Set<String> AGGREGATE_FUNCTIONS = immutableSetOf("APPROX_COUNT_DISTINCT",
+      "AVG", "CHECKSUM_AGG", "COUNT", "COUNT_BIG", "GROUPING", "GROUPING_ID", "MAX", "MIN", "STDEV",
+      "STDEVP", "STRING_AGG", "SUM", "VAR", "VARP");
+
+  @Override
+  public Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
 
   @Override
   public boolean supportsLimit() {

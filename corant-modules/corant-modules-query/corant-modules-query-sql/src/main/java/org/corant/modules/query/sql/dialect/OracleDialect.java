@@ -13,8 +13,11 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
@@ -30,6 +33,26 @@ public class OracleDialect implements Dialect {
   public static final String ORDER_SIBLINGS_BY = "order\\s+siblings\\s+by";
   public static final Pattern ORDER_SIBLINGS_BY_PATTERN =
       SqlHelper.buildShallowIndexPattern(ORDER_SIBLINGS_BY, true);
+
+  // ORACLE release 19
+  public static final Set<String> AGGREGATE_FUNCTIONS = immutableSetOf("APPROX_COUNT",
+      "APPROX_COUNT_DISTINCT", "APPROX_COUNT_DISTINCT_AGG", "APPROX_COUNT_DISTINCT_DETAIL",
+      "APPROX_MEDIAN", "APPROX_PERCENTILE", "APPROX_PERCENTILE_AGG", "APPROX_PERCENTILE_DETAIL",
+      "APPROX_RANK", "APPROX_SUM", "AVG", "COLLECT", "CORR", "CORR_S", "CORR_K", "COUNT",
+      "COVAR_POP", "COVAR_SAMP", "CUME_DIST", "DENSE_RANK", "FIRST", "GROUP_ID", "GROUPING",
+      "GROUPING_ID", "JSON_ARRAYAGG", "JSON_OBJECTAGG", "LAST", "LISTAGG", "MAX", "MEDIAN", "MIN",
+      "PERCENT_RANK", "PERCENTILE_CONT", "PERCENTILE_DISC", "RANK", "REGR_SLOPE", "REGR_INTERCEPT",
+      "REGR_COUNT", "REGR_R2", "REGR_AVGX", "REGR_AVGY", "REGR_SXX", "REGR_SYY", "REGR_SXY",
+      "STATS_BINOMIAL_TEST", "STATS_CROSSTAB", "STATS_F_TEST", "STATS_KS_TEST", "STATS_MODE",
+      "STATS_MW_TEST", "STATS_ONE_WAY_ANOVA", "STATS_T_TEST_ONE", "STATS_T_TEST_PAIRED",
+      "STATS_T_TEST_INDEP", "STATS_T_TEST_INDEPU", "STATS_WSR_TEST", "STDDEV", "STDDEV_POP",
+      "STDDEV_SAMP", "SUM", "SYS_OP_ZONE_ID", "SYS_XMLAGG", "TO_APPROX_COUNT_DISTINCT",
+      "TO_APPROX_PERCENTILE", "VAR_POP", "VAR_SAMP", "VARIANCE", "XMLAGG");
+
+  @Override
+  public Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
 
   @Override
   public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {

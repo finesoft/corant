@@ -13,10 +13,10 @@
  */
 package org.corant.modules.query.sql.dialect;
 
-import static org.corant.shared.util.Lists.immutableListOf;
+import static org.corant.shared.util.Sets.immutableSetOf;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -30,7 +30,8 @@ public class MySQLDialect implements Dialect {
 
   public static final Dialect INSTANCE = new MySQLDialect();
 
-  public static final List<String> AGGREGATE_FUNCTIONS = immutableListOf("AVG", "BIT_AND", "BIT_OR",
+  // MYSQL 57 above
+  public static final Set<String> AGGREGATE_FUNCTIONS = immutableSetOf("AVG", "BIT_AND", "BIT_OR",
       "BIT_XOR", "COUNT", "GROUP_CONCAT", "JSON_ARRAYAGG", "JSON_OBJECTAGG", "MAX", "MIN", "STD",
       "STDDEV", "STDDEV_POP", "STDDEV_SAMP", "SUM", "VARIANCE", "VAR_POP", "VAR_SAMP");
 
@@ -73,7 +74,7 @@ public class MySQLDialect implements Dialect {
    *    [PROCEDURE procedure_name(argument_list)]
    *    [into_option]
    *    [FOR UPDATE | LOCK IN SHARE MODE]
-
+  
    * into_option: {
    *    INTO OUTFILE 'file_name'
    *    * [CHARACTER SET charset_name]

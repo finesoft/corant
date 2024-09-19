@@ -27,6 +27,7 @@ import static org.corant.shared.util.Strings.defaultBlank;
 import static org.corant.shared.util.Strings.defaultString;
 import static org.corant.shared.util.Strings.isBlank;
 import static org.corant.shared.util.Strings.substring;
+import static org.corant.shared.util.Strings.trim;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -262,11 +263,9 @@ public class SqlStatements {
           if (isEmpty(aggregationFunctions)) {
             return false;
           } else {
-            String funcName = ((Function) sie).getName().toUpperCase(Locale.ROOT);
-            for (String af : aggregationFunctions) {
-              if (funcName.startsWith(af)) {
-                return false;
-              }
+            String funcName = trim(((Function) sie).getName()).toUpperCase(Locale.ROOT);
+            if (aggregationFunctions.contains(funcName)) {
+              return false;
             }
           }
         } else if (sie instanceof ParenthesedExpressionList && si.getAlias() != null) {

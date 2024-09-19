@@ -13,7 +13,10 @@
  */
 package org.corant.modules.query.sql.dialect;
 
+import static org.corant.shared.util.Sets.immutableSetOf;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.corant.modules.query.shared.dynamic.SqlHelper;
 
 /**
@@ -24,6 +27,20 @@ import org.corant.modules.query.shared.dynamic.SqlHelper;
 public class H2Dialect implements Dialect {
 
   public static final Dialect INSTANCE = new H2Dialect();
+
+  // H2 version 2.3.232
+  public static final Set<String> AGGREGATE_FUNCTIONS = immutableSetOf("AVG", "MAX", "MIN", "SUM",
+      "EVERY", "ANY", "COUNT", "STDDEV_POP", "STDDEV_SAMP", "VAR_POP", "VAR_SAMP", "ANY_VALUE",
+      "BIT_AND_AGG", "BIT_OR_AGG", "BIT_XOR_AGG", "BIT_NAND_AGG", "BIT_NOR_AGG", "BIT_XNOR_AGG",
+      "ENVELOPE", "COVAR_POP", "COVAR_SAMP", "CORR", "REGR_SLOPE", "REGR_INTERCEPT", "REGR_COUNT",
+      "REGR_R2", "REGR_AVGX", "REGR_AVGY", "REGR_SXX", "REGR_SYY", "REGR_SXY", "LISTAGG",
+      "ARRAY_AGG", "RANK", "DENSE_RANK", "PERCENT_RANK", "CUME_DIST", "PERCENTILE_CONT",
+      "PERCENTILE_DISC", "MEDIAN", "MODE", "JSON_OBJECTAGG", "JSON_ARRAYAGG");
+
+  @Override
+  public Collection<String> getAggregationFunctionNames() {
+    return AGGREGATE_FUNCTIONS;
+  }
 
   @Override
   public String getLimitSql(String sql, int offset, int limit, Map<String, ?> hints) {

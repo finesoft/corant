@@ -601,7 +601,7 @@ public class SqlQueryDeveloperKits {
         ResultSetMetaData metaData = ps.getMetaData();
         if (metaData == null || metaData.getColumnCount() < 1) {
           ValidationError err = new ValidationError(sql);
-          err.addError(new ValidationException("Can't find any cloumn"));
+          err.addError(new ValidationException("Can't find any column"));
           errors.add(err);
         }
         for (int i = 1; i <= metaData.getColumnCount(); i++) {

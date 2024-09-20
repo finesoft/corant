@@ -44,7 +44,6 @@ import freemarker.template.TemplateModelException;
  *
  * @author bingo 上午10:00:50
  */
-@SuppressWarnings("deprecation")
 public abstract class FreemarkerDynamicQuerierBuilder<P, S, Q extends DynamicQuerier<P, S>>
     extends AbstractDynamicQuerierBuilder<P, S, Q> {
 

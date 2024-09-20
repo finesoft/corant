@@ -708,6 +708,16 @@ public class Texts {
   }
 
   /**
+   * String not blank lines from file, use for read text file line by line.
+   *
+   * @param file the text file
+   * @return lines
+   */
+  public static Stream<String> notBlankLines(final File file) {
+    return lines(file, -1, -1).filter(Strings::isNotBlank);
+  }
+
+  /**
    * Parse CSV line to field list
    * <p>
    * NOTE: Some codes come from com.sun.tools.jdeprscan.CSV, if there is infringement, please inform

@@ -130,8 +130,8 @@ import org.corant.shared.util.Objects;
 public class ResultMapReduceHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-map-reduce";
-  public static final String HNIT_PARA_REDUCE_FIELD_NME = "reduce-field-names";
-  public static final String HNIT_PARA_MAP_FIELD_NME = "map-field-name";
+  public static final String HINT_PARA_REDUCE_FIELD_NME = "reduce-field-names";
+  public static final String HINT_PARA_MAP_FIELD_NME = "map-field-name";
   public static final String HINT_PARA_RETAIN_FEILDS = "retain-reduce-fields";
   public static final String HINT_PARA_NULLABLE_REDUCE = "nullable-reduce";
   public static final String TYPE_VALUE_PREFIX = "@";
@@ -169,7 +169,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   }
 
   public String resolveMapFieldname(QueryHint qh) {
-    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_MAP_FIELD_NME);
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_MAP_FIELD_NME);
     return isNotEmpty(params) ? params.get(0).getValue() : null;
   }
 
@@ -235,7 +235,7 @@ public class ResultMapReduceHintHandler implements ResultHintHandler {
   public List<Triple<String, String[], Class<?>>> resolveReduceFields(QueryHint qh) {
     // Triple <ProjectName, fieldNamePath, ProjectTypeClass>
     List<Triple<String, String[], Class<?>>> fields = new ArrayList<>();
-    List<QueryHintParameter> params = qh.getParameters(HNIT_PARA_REDUCE_FIELD_NME);
+    List<QueryHintParameter> params = qh.getParameters(HINT_PARA_REDUCE_FIELD_NME);
     if (isNotEmpty(params)) {
       linkedHashSetOf(split(params.get(0).getValue(), ",", true, true)).stream()
           .map(this::resolveReduceField).forEach(fields::add);

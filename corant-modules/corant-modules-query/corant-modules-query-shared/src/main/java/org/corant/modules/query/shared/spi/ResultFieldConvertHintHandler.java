@@ -96,11 +96,11 @@ import org.corant.shared.ubiquity.Tuple.Triple;
 public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-field-convert";
-  public static final String HNIT_PARA_FIELD_NME = "field-name";
-  public static final String HNIT_PARA_TARGET_TYP = "target-type";
-  public static final String HNIT_PARA_DEFAULT_VAL = "default-value";
-  public static final String HNIT_PARA_CVT_HIT_KEY = "convert-hint-key";
-  public static final String HNIT_PARA_CVT_HIT_VAL = "convert-hint-value";
+  public static final String HINT_PARA_FIELD_NME = "field-name";
+  public static final String HINT_PARA_TARGET_TYP = "target-type";
+  public static final String HINT_PARA_DEFAULT_VAL = "default-value";
+  public static final String HINT_PARA_CVT_HIT_KEY = "convert-hint-key";
+  public static final String HINT_PARA_CVT_HIT_VAL = "convert-hint-value";
 
   // <QueryHint.id, <FieldPath, <TargetClass, <ConvertHintKey,ConvertHintValue>, DefaultValue>>>
   protected final Map<String, List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>>> caches =
@@ -190,11 +190,11 @@ public class ResultFieldConvertHintHandler implements ResultHintHandler {
 
   public List<Pair<String[], Triple<Class<?>, Map<String, Object>, String>>> resolveConversions(
       QueryHint qh) {
-    List<QueryHintParameter> pnPs = qh.getParameters(HNIT_PARA_FIELD_NME);
-    List<QueryHintParameter> ptPs = qh.getParameters(HNIT_PARA_TARGET_TYP);
-    List<QueryHintParameter> dvPs = qh.getParameters(HNIT_PARA_DEFAULT_VAL);
-    List<QueryHintParameter> pthk = qh.getParameters(HNIT_PARA_CVT_HIT_KEY);
-    List<QueryHintParameter> pthv = qh.getParameters(HNIT_PARA_CVT_HIT_VAL);
+    List<QueryHintParameter> pnPs = qh.getParameters(HINT_PARA_FIELD_NME);
+    List<QueryHintParameter> ptPs = qh.getParameters(HINT_PARA_TARGET_TYP);
+    List<QueryHintParameter> dvPs = qh.getParameters(HINT_PARA_DEFAULT_VAL);
+    List<QueryHintParameter> pthk = qh.getParameters(HINT_PARA_CVT_HIT_KEY);
+    List<QueryHintParameter> pthv = qh.getParameters(HINT_PARA_CVT_HIT_VAL);
     try {
       if (isNotEmpty(pnPs) && isNotEmpty(ptPs)) {
         String propertyName = defaultString(pnPs.get(0).getValue());

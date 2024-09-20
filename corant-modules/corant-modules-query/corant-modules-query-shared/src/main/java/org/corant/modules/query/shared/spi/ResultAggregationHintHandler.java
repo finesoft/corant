@@ -98,8 +98,8 @@ import org.corant.shared.ubiquity.Tuple.Pair;
 public class ResultAggregationHintHandler implements ResultHintHandler {
 
   public static final String HINT_NAME = "result-aggregation";
-  public static final String HNIT_PARA_AGGS_FIELD_NME = "aggs-field-names";
-  public static final String HNIT_PARA_AGGS_NME = "aggs-name";
+  public static final String HINT_PARA_AGGS_FIELD_NME = "aggs-field-names";
+  public static final String HINT_PARA_AGGS_NME = "aggs-name";
 
   protected final Map<String, Consumer<List<Map<?, ?>>>> caches = new ConcurrentHashMap<>();// static?
   protected final Set<String> brokens = new CopyOnWriteArraySet<>();
@@ -128,7 +128,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   }
 
   public Pair<Boolean, Set<String>> resolveAggFieldNames(QueryHint qh) {
-    List<QueryHintParameter> aggFieldNames = qh.getParameters(HNIT_PARA_AGGS_FIELD_NME);
+    List<QueryHintParameter> aggFieldNames = qh.getParameters(HINT_PARA_AGGS_FIELD_NME);
     if (isEmpty(aggFieldNames)) {
       return Pair.empty();
     } else {
@@ -142,7 +142,7 @@ public class ResultAggregationHintHandler implements ResultHintHandler {
   }
 
   public String resolveAggNames(QueryHint qh) {
-    List<QueryHintParameter> aggNames = qh.getParameters(HNIT_PARA_AGGS_NME);
+    List<QueryHintParameter> aggNames = qh.getParameters(HINT_PARA_AGGS_NME);
     if (isNotEmpty(aggNames)) {
       String aggName = aggNames.get(0).getValue();
       if (isNotBlank(aggName)) {

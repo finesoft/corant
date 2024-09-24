@@ -43,6 +43,8 @@ import org.corant.shared.exception.NotSupportedException;
 
 /**
  * corant-modules-jms-shared
+ * <p>
+ * An extended JMS Context for contextual injection
  *
  * <pre>
  * If an injected JMSContext is used in a JTA transaction (both bean-managed and container-managed),
@@ -298,7 +300,8 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void setAutoStart(final boolean autoStart) {
-    context().setAutoStart(autoStart);
+    // context().setAutoStart(autoStart);
+    prohibitStateChange();// since 2.1.0
   }
 
   @Override
@@ -315,7 +318,8 @@ public class ExtendedJMSContext implements JMSContext, Serializable {
 
   @Override
   public void start() {
-    context().start();
+    // context().start();
+    prohibitStateChange();// since 2.1.0
   }
 
   @Override

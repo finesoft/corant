@@ -53,7 +53,6 @@ public class JMSContextKey implements Serializable {
   private final String connectionFactoryId;
   private final boolean dupsOkAck;
   private final int hash;
-  private volatile ConnectionFactory connectionFactory;
 
   public JMSContextKey(final String connectionFactoryId, final boolean dupsOkAck) {
     this.connectionFactoryId = Qualifiers.resolveName(connectionFactoryId);
@@ -82,7 +81,7 @@ public class JMSContextKey implements Serializable {
       if (xa) {
         shouldBeTrue(config.isXa(), "The connection factory %s can't support XA!",
             connectionFactoryId);
-        XAJMSContext ctx = ((XAConnectionFactory) connectionFactory()).createXAContext();
+        XAJMSContext ctx = xaConnectionFactory().createXAContext();
         TransactionService.enlistXAResourceToCurrentTransaction(ctx.getXAResource());
         logger.fine(() -> "Create new XAJMSContext and register it to current transaction!");
         return ctx;
@@ -127,19 +126,16 @@ public class JMSContextKey implements Serializable {
         + "]";
   }
 
-  ConnectionFactory connectionFactory() {
-    if (connectionFactory != null) {
-      return connectionFactory;
-    }
-    synchronized (this) {
-      if (connectionFactory != null) {
-        return connectionFactory;
-      }
-      return connectionFactory =
-          findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
-              () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
-                  connectionFactoryId));
-    }
+  protected ConnectionFactory connectionFactory() {
+    return findNamed(ConnectionFactory.class, connectionFactoryId).orElseThrow(
+        () -> new CorantRuntimeException("Can not find any JMS connection factory for %s.",
+            connectionFactoryId));
+  }
+
+  protected XAConnectionFactory xaConnectionFactory() {
+    return findNamed(XAConnectionFactory.class, connectionFactoryId).orElseThrow(
+        () -> new CorantRuntimeException("Can not find any JMS xa connection factory for %s.",
+            connectionFactoryId));
   }
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {

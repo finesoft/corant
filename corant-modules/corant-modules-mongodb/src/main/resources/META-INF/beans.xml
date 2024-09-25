@@ -1,15 +1,6 @@
-<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_2_0.xsd"
-	bean-discovery-mode="annotated">
-	<!--  
-	<interceptors>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorMandatory</class>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorNever</class>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorNotSupported</class>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorRequired</class>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorRequiresNew</class>
-		<class>com.arjuna.ats.jta.cdi.transactional.TransactionalInterceptorSupports</class>
-	</interceptors>
-	-->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="https://jakarta.ee/xml/ns/jakartaee"
+  xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
+  version="4.0" bean-discovery-mode="annotated">
 </beans>

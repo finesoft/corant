@@ -96,7 +96,7 @@ public class MpJWTAuthorizationFilter implements ContainerRequestFilter, Contain
       callbacks().forEachOrdered(
           cb -> cb.postSecuredIntercepted(getCurrentSecuredInterceptionContext(), success));
     } finally {
-      contexts.set(null);
+      contexts.remove();
     }
   }
 

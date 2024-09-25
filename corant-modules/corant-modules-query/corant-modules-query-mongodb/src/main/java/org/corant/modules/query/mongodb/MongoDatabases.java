@@ -16,6 +16,7 @@ package org.corant.modules.query.mongodb;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.lang.ref.Cleaner;
+import org.bson.codecs.configuration.CodecRegistry;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -45,5 +46,13 @@ public class MongoDatabases {
     } else {
       return findNamed(MongoDatabase.class, database).orElse(null);
     }
+  }
+
+  public static MongoDatabase resolveDatabase(String database, CodecRegistry codecRegistry) {
+    MongoDatabase mongoDatabase = resolveDatabase(database);
+    if (mongoDatabase != null && codecRegistry != null) {
+      return mongoDatabase.withCodecRegistry(codecRegistry);
+    }
+    return mongoDatabase;
   }
 }

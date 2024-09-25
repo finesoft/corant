@@ -135,9 +135,9 @@ public class CorantConfigBuilder implements ConfigBuilder {
   void addSource(ConfigSource source) {
     sources.add(shouldNotNull(source, "Config source can not null."));
     logger.fine(() -> format(
-        "Found config source, ordinal:[%s], items:[%s], name:[%s], class loader:[%s], source class:[%s].",
+        "Found config source, ordinal:[%s], items:[%s], name:[%s],  source class:[%s].",
         source.getOrdinal(), source.getProperties().size(), source.getName(),
-        classLoader.getClass().getName(), source.getClass().getName()));
+        source.getClass().getName()));
   }
 
   void validate(CorantConfigSources sources, CorantConfig config) {

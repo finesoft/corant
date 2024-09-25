@@ -16,6 +16,7 @@ package org.corant.modules.query.mongodb;
 import static java.util.stream.Collectors.toList;
 import static org.corant.shared.util.Conversions.toEnum;
 import static org.corant.shared.util.Lists.listOf;
+import static org.corant.shared.util.Lists.transform;
 import static org.corant.shared.util.Maps.getMapEnum;
 import static org.corant.shared.util.Maps.getOptMapObject;
 import static org.corant.shared.util.Objects.defaultObject;
@@ -123,8 +124,9 @@ public abstract class AbstractMgNamedQueryService extends AbstractNamedQueryServ
         mi.batchSize(min(maxFetchSize, 128));
       }
       List<Map<String, Object>> fetchedList;
+      final boolean setId = isAutoSetIdField(querier);
       try (MongoCursor<Document> cursor = mi.iterator()) {
-        fetchedList = listOf(cursor);// streamOf(fi).collect(Collectors.toList());
+        fetchedList = transform(listOf(cursor), x -> convertDocument(x, querier, setId));
       }
       return new FetchedResult(fetchQuery, querier, fetchedList);
     } catch (Exception e) {

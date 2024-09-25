@@ -13,6 +13,8 @@
  */
 package org.corant.modules.mongodb;
 
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.context.Beans.resolve;
 import static org.corant.shared.util.Objects.asString;
@@ -37,14 +39,19 @@ import org.bson.BsonObjectId;
 import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.DocumentCodecProvider;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.corant.modules.bson.Bsons;
+import org.corant.modules.bson.ExtendedCodecProvider;
 import org.corant.modules.json.ObjectMappers;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -68,24 +75,27 @@ public class Mongos {
   public static final String GFS_METADATA_PROPERTY_NAME = "metadata";
   public static final UpdateResult EMPTY_UPDATE_RESULT = new EmptyUpdateResult();
 
+  public static final DocumentCodecProvider DEFAULT_DOCUMENT_CODEC_PROVIDER =
+      new DocumentCodecProvider(Bsons.DEFAULT_BSON_TYPE_CLASS_MAP, new MongoBsonTransformer());
+
+  public static final CodecRegistry DEFAULT_CODEC_REGISTRY =
+      fromRegistries(fromProviders(DEFAULT_DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()),
+          MongoClientSettings.getDefaultCodecRegistry());
+
   static final ObjectMapper WRITE_OBJECT_MAPPER = ObjectMappers.copyForwardingObjectMapper();
   static final ObjectMapper READ_OBJECT_MAPPER = ObjectMappers.copyDefaultObjectMapper();
   static final JavaType WRITE_DOC_MAP_TYPE =
       WRITE_OBJECT_MAPPER.constructType(new TypeReference<Map<String, Object>>() {});
   static {
-    WRITE_OBJECT_MAPPER.setVisibility(
-        WRITE_OBJECT_MAPPER.getSerializationConfig()
-            .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-    );
+    WRITE_OBJECT_MAPPER.setVisibility(WRITE_OBJECT_MAPPER.getSerializationConfig()
+        .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE));
 
-    READ_OBJECT_MAPPER.setVisibility(
-        READ_OBJECT_MAPPER.getDeserializationConfig()
-            .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-    );
+    READ_OBJECT_MAPPER.setVisibility(READ_OBJECT_MAPPER.getDeserializationConfig()
+        .getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE));
   }
 
   public static BsonValue bsonId(Object id) {

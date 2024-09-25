@@ -73,8 +73,7 @@ public class MongoTemplateTest extends TestCase {
     MapPojo pojo = new MapPojo();
     Document doc = new Document(ObjectMappers.toDocMap(pojo));
     doc.put("$gt", Arrays.asList(799123L, 123123L));
-    BsonDocument bsonDoc =
-        doc.toBsonDocument(BsonDocument.class, MongoTemplate.DEFAULT_CODEC_REGISTRY);
+    BsonDocument bsonDoc = doc.toBsonDocument(BsonDocument.class, Mongos.DEFAULT_CODEC_REGISTRY);
     System.out.println(bsonDoc);
     System.out.println(MongoExtendedJsons.toBson(pojo, true));
   }

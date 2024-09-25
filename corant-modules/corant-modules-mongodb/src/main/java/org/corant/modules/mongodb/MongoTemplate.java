@@ -13,8 +13,7 @@
  */
 package org.corant.modules.mongodb;
 
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static org.corant.modules.mongodb.Mongos.DEFAULT_CODEC_REGISTRY;
 import static org.corant.modules.mongodb.Mongos.DOC_ID_FIELD_NAME;
 import static org.corant.modules.mongodb.Mongos.ENTITY_ID_FIELD_NAME;
 import static org.corant.modules.mongodb.Mongos.READ_OBJECT_MAPPER;
@@ -47,7 +46,6 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
 import org.corant.modules.bson.Bsons;
-import org.corant.modules.bson.ExtendedCodecProvider;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,7 +53,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.CursorType;
 import com.mongodb.ExplainVerbosity;
-import com.mongodb.MongoClientSettings;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
@@ -98,9 +95,6 @@ import com.mongodb.client.result.UpdateResult;
 @NotThreadSafe
 public class MongoTemplate {
 
-  public static final CodecRegistry DEFAULT_CODEC_REGISTRY =
-      fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-          fromProviders(Bsons.DOCUMENT_CODEC_PROVIDER, new ExtendedCodecProvider()));
   protected static final Function<Document, Object> DOC_ID_GETTER = d -> d.get(DOC_ID_FIELD_NAME);
 
   protected final MongoDatabase database;

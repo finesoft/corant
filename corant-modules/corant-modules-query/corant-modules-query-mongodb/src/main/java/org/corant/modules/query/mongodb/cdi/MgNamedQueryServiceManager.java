@@ -22,22 +22,29 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import jakarta.inject.Inject;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.corant.context.qualifier.Qualifiers;
+import org.corant.modules.mongodb.Mongos;
 import org.corant.modules.query.FetchableNamedQueryService;
 import org.corant.modules.query.mapping.Query.QueryType;
 import org.corant.modules.query.mongodb.AbstractMgNamedQueryService;
 import org.corant.modules.query.mongodb.Decimal128Utils;
+import org.corant.modules.query.mongodb.MgCodecRegistryProvider;
 import org.corant.modules.query.mongodb.MgNamedQuerier;
 import org.corant.modules.query.mongodb.MongoDatabases;
 import org.corant.modules.query.shared.AbstractNamedQuerierResolver;
 import org.corant.modules.query.shared.NamedQueryServiceManager;
+import org.corant.shared.ubiquity.Sortable;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.mongodb.client.MongoDatabase;
 
@@ -62,8 +69,12 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   protected Optional<String> defaultQualifierValue;
 
   @Inject
-  @ConfigProperty(name = "corant.query.mongodb.convert-decimal", defaultValue = "true")
-  protected boolean convertDecimal;
+  @ConfigProperty(name = "corant.query.mongodb.convert-decimal", defaultValue = "false")
+  protected boolean convertDecimal; // false, we are using MongoBsonTransformer since 2024-09-25
+
+  @Inject
+  @Any
+  protected Instance<MgCodecRegistryProvider> codecRegistryProvider;
 
   @Override
   public FetchableNamedQueryService get(Object qualifier) {
@@ -80,6 +91,14 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
   @Override
   public QueryType getType() {
     return QueryType.MG;
+  }
+
+  protected CodecRegistry getCodecRegistry() {
+    Optional<CodecRegistry> codecRegistry = Optional.empty();
+    if (!codecRegistryProvider.isUnsatisfied()) {
+      codecRegistry = codecRegistryProvider.stream().min(Sortable::compare).map(Supplier::get);
+    }
+    return codecRegistry.orElse(Mongos.DEFAULT_CODEC_REGISTRY);
   }
 
   @PreDestroy
@@ -121,15 +140,16 @@ public class MgNamedQueryServiceManager implements NamedQueryServiceManager {
     protected final boolean convertDecimal;
 
     public DefaultMgNamedQueryService(MongoDatabase dataBase, boolean convertDecimal,
-        AbstractNamedQuerierResolver<MgNamedQuerier> resolver) {
-      this.dataBase = dataBase;
+        AbstractNamedQuerierResolver<MgNamedQuerier> resolver, CodecRegistry codecRegistry) {
+      this.dataBase = codecRegistry != null ? dataBase.withCodecRegistry(codecRegistry) : dataBase;
       this.resolver = resolver;
       this.convertDecimal = convertDecimal;
     }
 
     protected DefaultMgNamedQueryService(String dataBase, MgNamedQueryServiceManager manager) {
-      this.dataBase = shouldNotNull(MongoDatabases.resolveDatabase(dataBase),
-          "Can't build default mongo named query, the data base named %s not found.", dataBase);
+      this.dataBase =
+          shouldNotNull(MongoDatabases.resolveDatabase(dataBase, manager.getCodecRegistry()),
+              "Can't build default mongo named query, the data base named %s not found.", dataBase);
       resolver = manager.resolver;
       convertDecimal = manager.convertDecimal;
     }

@@ -174,6 +174,7 @@ public class SqlQueryDeveloperKits {
     protected Set<String> skipQueryQualifier = new HashSet<>();
     protected Predicate<String> queryNameSkipper = Functions.emptyPredicate(false);
     protected Predicate<String> queryNameFilter = Functions.emptyPredicate(true);
+    protected Predicate<String> queryFileFilter = Functions.emptyPredicate(true);
     protected Map<String, Object> directiveStacksReplacements = new LinkedHashMap<>();
     protected Consumer<String> validatingInfoHandler = System.out::println;
     protected BiConsumer<String, List<ValidationError>> validationErrorHandler =
@@ -302,8 +303,17 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
+    public FreemarkerQueryScriptValidator queryFileFilter(Predicate<String> queryFileFilter) {
+      if (queryFileFilter != null) {
+        this.queryFileFilter = queryFileFilter;
+      } else {
+        this.queryFileFilter = Functions.emptyPredicate(true);
+      }
+      return this;
+    }
+
     public FreemarkerQueryScriptValidator queryNameFilter(Predicate<String> queryNameFilter) {
-      if (this.queryNameFilter != null) {
+      if (queryNameFilter != null) {
         this.queryNameFilter = queryNameFilter;
       } else {
         this.queryNameFilter = Functions.emptyPredicate(true);
@@ -312,7 +322,7 @@ public class SqlQueryDeveloperKits {
     }
 
     public FreemarkerQueryScriptValidator queryNameSkipper(Predicate<String> queryNameSkipper) {
-      if (this.queryNameSkipper != null) {
+      if (queryNameSkipper != null) {
         this.queryNameSkipper = queryNameSkipper;
       } else {
         this.queryNameSkipper = Functions.emptyPredicate(false);
@@ -373,9 +383,11 @@ public class SqlQueryDeveloperKits {
       Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
       Map<String, Set<String>> queryFieldNames = new LinkedHashMap<>();
       Set<String> validatedQueries = new HashSet<>();
-      int size = service.getQueries().size();
+      List<Query> queries = service.getQueries().stream()
+          .filter(q -> queryFileFilter.test(q.getMappingFilePath())).toList();
+      int size = queries.size();
       validatingInfoHandler.accept(format("Validating %s queries", size));
-      for (Query query : service.getQueries()) {
+      for (Query query : queries) {
         if (!validatedQueries.contains(query.getVersionedName())) {
           validateQuery(errorMaps, queryFieldNames, query, validatedQueries, size);
         }
@@ -411,7 +423,8 @@ public class SqlQueryDeveloperKits {
       final String queryName = query.getVersionedName();
       if (query.getScript().getType() != ScriptType.FM || resolveQueryType(query) != QueryType.SQL
           || skipQueryQualifier.contains(query.getQualifier()) || queryNameSkipper.test(queryName)
-          || !queryNameFilter.test(queryName)) {
+          || !queryNameFilter.test(queryName)
+          || !queryFileFilter.test(query.getMappingFilePath())) {
         validatedQueries.add(queryName);
         validatingInfoHandler
             .accept(format("[SKIP]: %s, [%s/%s]", queryName, validatedQueries.size(), total));

@@ -79,7 +79,7 @@ public class QueryMapping {
     getParamMappings().values().forEach(p -> {
       if (p.getType() == null) {
         brokens.add(format(
-            "The 'type' attribute: [query-mappings > parameters-mapping > parameter-type-mapping(%s) > type] can not null! query file [%s]",
+            "The 'type' attribute can't null, PS:[query-mappings >> parameters-mapping >> parameter-type-mapping (%s) >> type], query file [%s]",
             p.getName(), url));
       }
     });
@@ -99,43 +99,53 @@ public class QueryMapping {
       }
       if (q.getResultClass() == null) {
         brokens.add(format(
-            "The 'result-class' attribute: [query-mappings > query(%s) -> result-class] can not null! query file [%s]",
+            "The 'result-class' attribute can't null, PS:[query-mappings >> query (%s) >> result-class], query file [%s]",
             q.getName(), getUrl()));
       }
       if (!q.getScript().isValid()) {
         brokens.add(format(
-            "The 'script' element: [query-mappings > query(%s) > script] can not null! query file [%s]",
+            "The 'script' element can't null, PS:[query-mappings >> query (%s) >> script], query file [%s]",
             q.getName(), getUrl()));
       }
 
       if (queryNames.contains(q.getVersionedName())) {
         brokens.add(format(
-            "The 'name' attribute: [query-mappings > query(%s) -> name] can not repeat! query file [%s]",
+            "The 'name' attribute can't repeat, PS:[query-mappings >> query(%s) >> name], query file [%s]",
             q.getName(), getUrl()));
       } else {
         queryNames.add(q.getVersionedName());
       }
       // validate fetch queries elements
+      // Set<String> injectProNames = new HashSet<>();
       q.getFetchQueries().forEach(fq -> {
-        Set<String> injectProNames = new HashSet<>();
         if (isBlank(fq.getQueryReference().getVersionedName())) {
           brokens.add(format(
-              "The 'reference-query' attribute: [query-mappings > query(%s) > fetch-query -> reference-query] can not null! query file [%s]",
+              "The 'reference-query' attribute can't null, PS:[query-mappings >> query (%s) >> fetch-query >> reference-query], query file [%s]",
               q.getName(), getUrl()));
         }
         if (isBlank(fq.getInjectPropertyName()) && !fq.getInjectionScript().isValid()) {
           brokens.add(format(
-              "The 'fetch-query' element: [query-mappings > query(%s) > fetch-query(%s)] must contain either 'inject-property-name' attribute or 'injection-script' element! query file [%s]",
+              "The 'fetch-query' element must contain either 'inject-property-name' or 'injection-script', PS:[query-mappings >> query (%s) >> fetch-query (%s)], query file [%s]",
               q.getName(), fq.getQueryReference().getName(), getUrl()));
-        } else if (isNotBlank(fq.getInjectPropertyName())
-            && !injectProNames.add(fq.getInjectPropertyName())) {
-          brokens.add(format(
-              "The 'inject-property-name' attribute: [query-mappings > query(%s) > fetch-query(%s) -> inject-property-name(%s)] can not repeat! query file [%s]",
-              q.getName(), fq.getQueryReference().getName(), fq.getInjectPropertyName(), getUrl()));
+        } else if (isNotBlank(fq.getInjectPropertyName())) {
+          // if (!injectProNames.add(fq.getInjectPropertyName())) {
+          // brokens.add(format(
+          // "The 'inject-property-name' attribute can't repeat, PS:[query-mappings >> query (%s) >>
+          // fetch-query (%s) >> inject-property-name (%s)], query file [%s]",
+          // q.getName(), fq.getQueryReference().getName(), fq.getInjectPropertyName(),
+          // getUrl()));
+          // }
+          if (fq.getInjectionScript().isValid()
+              && (fq.getInjectionScript().getType() != ScriptType.JSE)) {
+            brokens.add(format(
+                "The 'inject-property-name' attribute not support, only supports with 'JSE' script, PS:[query-mappings >> query(%s) >> fetch-query(%s) >> inject-property-name (%s)], query file [%s]",
+                q.getName(), fq.getQueryReference().getName(), fq.getInjectPropertyName(),
+                getUrl()));
+          }
         } else if (fq.getInjectionScript().isValid()
             && fq.getInjectionScript().getType() == ScriptType.FM) {
           brokens.add(format(
-              "The 'type' attribute: [query-mappings > query(%s) > fetch-query(%s) > injection-script] can't be 'FM'! query file [%s]",
+              "The 'type' attribute can't be 'FM', PS:[query-mappings >> query(%s) >> fetch-query(%s) >> injection-script >> type], query file [%s]",
               q.getName(), fq.getQueryReference().getName(), getUrl()));
         }
 
@@ -156,7 +166,7 @@ public class QueryMapping {
 
         if (areEqual(q.getVersionedName(), fq.getQueryReference().getVersionedName())) {
           brokens.add(format(
-              "The 'reference-query' attribute: [query-mappings > query(%s) > fetch-query -> reference-query(%s)] can not reference the parent query! query file [%s]",
+              "The 'reference-query' attribute can't refer the parent query, PS:[query-mappings >> query (%s) >> fetch-query >> reference-query(%s)], query file [%s]",
               q.getName(), fq.getQueryReference().getName(), getUrl()));
         }
         // validate fetch queries parameter
@@ -165,36 +175,37 @@ public class QueryMapping {
         fq.getParameters().forEach(fqp -> {
           if (isBlank(fqp.getName())) {
             brokens.add(format(
-                "The 'name' attribute: [query-mappings > query(%s) > fetch-query(%s) > parameter -> name] can not null! query file [%s]",
+                "The 'name' attribute can't null, PS:[query-mappings >> query (%s) >> fetch-query (%s) >> parameter >> name], query file [%s]",
                 q.getName(), fq.getQueryReference().getName(), getUrl()));
           }
           if (!paramNames.add(fqp.getName())) {
             brokens.add(format(
-                "The 'name' attribute: [query-mappings > query(%s) > fetch-query(%s) > parameter -> name(%s)] can not repeat! query file [%s]",
+                "The 'name' attribute can not repeat, PS:[query-mappings >> query (%s) >> fetch-query (%s) >> parameter >> name (%s)], query file [%s]",
                 q.getName(), fq.getQueryReference().getName(), fqp.getName(), getUrl()));
           }
           if (isNull(fqp.getSource())) {
             brokens.add(format(
-                "The 'source' attribute: [query-mappings > query(%s) > fetch-query(%s) > parameter(%s) -> source] can not null! query file [%s]",
+                "The 'source' attribute can't null, PS:[query-mappings >> query (%s) >> fetch-query (%s) >> parameter (%s) >> source], query file [%s]",
                 q.getName(), fq.getQueryReference().getName(), fqp.getName(), getUrl()));
           } else if ((fqp.getSource() == FetchQueryParameterSource.R
               || fqp.getSource() == FetchQueryParameterSource.P) && isBlank(fqp.getSourceName())) {
             brokens.add(format(
-                "The 'source-name' attribute: [query-mappings > query(%s) > fetch-query(%s) > parameter(%s) -> source] can not null! query file [%s]",
+                "The 'source-name' attribute can't null, PS:[query-mappings >> query (%s) >> fetch-query (%s) >> parameter (%s) >> source], query file [%s]",
                 q.getName(), fq.getQueryReference().getName(), fqp.getName(), getUrl()));
           }
-          if (isNotBlank(fqp.getGroup())) {
-            paramGroups.add(fqp.getGroup());
+          if (isNotEmpty(fqp.getGroupPath())) {
+            paramGroups.add(fqp.getGroupPath()[0]);
           }
           if (paramGroups.contains(fqp.getName())) {
             brokens.add(format(
-                "The 'name' attribute: [query-mappings > query(%s) > fetch-query(%s) > parameter -> name(%s)] and the 'group' attribute can't have the same value! query file [%s]",
+                "The 'name' and 'group' attributes can't have the same value, PS:[query-mappings >> query (%s) >> fetch-query (%s) >> parameter >> name (%s)], query file [%s]",
                 q.getName(), fq.getQueryReference().getName(), fqp.getName(), getUrl()));
           }
         });
         paramNames.clear();
         paramGroups.clear();
       });
+      // injectProNames.clear();
     });
     queryNames.clear();
     return brokens;

@@ -282,6 +282,20 @@ public class Assertions {
   }
 
   /**
+   * Throw a certain runtime exception if given object is not assignment-compatible with the object
+   * represented by the given Class
+   *
+   * @param obj the object
+   * @param clazz the class
+   * @param ex the supplying function that produces an exception to be thrown
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T shouldInstanceOf(Object obj, Class<T> clazz, Supplier<RuntimeException> ex) {
+    shouldBeTrue(clazz.isInstance(obj), ex);
+    return (T) obj;
+  }
+
+  /**
    * Throw CorantRuntimeException if one of the given arguments is null.
    *
    * @param args the objects that should none null

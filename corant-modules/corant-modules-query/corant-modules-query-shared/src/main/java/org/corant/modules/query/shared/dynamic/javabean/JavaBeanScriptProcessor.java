@@ -69,7 +69,7 @@ public class JavaBeanScriptProcessor implements ScriptProcessor {
       shouldBeTrue(supports(script));
       return p -> {
         fetchQueryResultInjectors.select(NamedLiteral.of(script.getCode())).get()
-            .inject(p.parameter, p.parentResult, p.fetchedResult);
+            .inject(p.parameter, p.parentResult, p.fetchQuery, p.fetchedResult);
         return null;
       };
     }

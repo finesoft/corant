@@ -68,7 +68,7 @@ public abstract class AbstractEsNamedQueryService extends AbstractNamedQueryServ
       int maxFetchSize = querier.resolveMaxFetchSize(result, fetchQuery);
       String script =
           resolveScript(querier.getScript(), null, maxFetchSize > 0 ? maxFetchSize : null);
-      log("fetch-> " + refQueryName, querier.getQueryParameter(), script);
+      log("FETCH -> " + refQueryName, querier.getQueryParameter(), script);
       List<Map<String, Object>> fetchedList = getExecutor().searchHits(resolveIndexName(querier),
           script, querier.getQuery().getProperties(), querier.getHintKeys()).getValue();
       return new FetchedResult(fetchQuery, querier, fetchedList);

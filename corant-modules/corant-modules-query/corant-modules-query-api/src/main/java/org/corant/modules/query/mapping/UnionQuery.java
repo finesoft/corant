@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * corant-modules-query-api
  * <p>
- * Unfinish yet!
+ * Unfinished yet!
  *
  * @author bingo 下午7:28:59
  */
@@ -35,7 +35,6 @@ public class UnionQuery implements Serializable {
   private Script unionScript = new Script();
 
   /**
-   *
    * @return the queries
    */
   public List<QueryReference> getQueries() {
@@ -43,7 +42,6 @@ public class UnionQuery implements Serializable {
   }
 
   /**
-   *
    * @return the unionScript
    */
   public Script getUnionScript() {
@@ -51,7 +49,6 @@ public class UnionQuery implements Serializable {
   }
 
   /**
-   *
    * @return the distinct
    */
   public boolean isDistinct() {
@@ -59,7 +56,6 @@ public class UnionQuery implements Serializable {
   }
 
   /**
-   *
    * @param distinct the distinct to set
    */
   protected void setDistinct(boolean distinct) {
@@ -67,7 +63,6 @@ public class UnionQuery implements Serializable {
   }
 
   /**
-   *
    * @param queries the queries to set
    */
   protected void setQueries(List<QueryReference> queries) {
@@ -75,7 +70,6 @@ public class UnionQuery implements Serializable {
   }
 
   /**
-   *
    * @param unionScript the unionScript to set
    */
   protected void setUnionScript(Script unionScript) {

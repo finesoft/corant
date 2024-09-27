@@ -100,13 +100,13 @@ import org.corant.shared.util.Objects;
  *
  *          record1: {"id":1, "name":"a", bin:{"id":"1", "name":"one"}}
  *          record2: {"id":2, "name":"b", bin:{"id":"2", "name":"two"}}
- *          record2: {"id":3, "name":"c", bin:{"id":null, "name":null}}
+ *          record3: {"id":3, "name":"c", bin:{"id":null, "name":null}}
  *
  *      and if the hint parameter "retain-reduce-fields" is true:
  *
  *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one", bin:{"id":"1", "name":"one"}}
  *          record2: {"id":2, "name":"b", "binId":"2", "binName":"two", bin:{"id":"2", "name":"two"}}
- *          record2: {"id":3, "name":"c", "binId":null, "binName":null, bin:{"id":null, "name":null}}
+ *          record3: {"id":3, "name":"c", "binId":null, "binName":null, bin:{"id":null, "name":null}}
  *
  *      or if the hint parameter "reduce-field-names" contains ':' or '@', for example:
  *
@@ -114,13 +114,13 @@ import org.corant.shared.util.Objects;
  *
  *          record1: {"id":1, "name":"a", bin:{"binId":1, "binName":"one"}}
  *          record2: {"id":2, "name":"b", bin:{"binId":2, "binName":"two"}}
- *          record2: {"id":3, "name":"c", bin:{"binId":null, "binName":null}}
+ *          record3: {"id":3, "name":"c", bin:{"binId":null, "binName":null}}
  *
  *      or if the hint parameter "nullable-reduce" is false:
  *
  *          record1: {"id":1, "name":"a", "binId":"1", "binName":"one", bin:{"id":"1", "name":"one"}}
  *          record2: {"id":2, "name":"b", "binId":"2", "binName":"two", bin:{"id":"2", "name":"two"}}
- *          record2: {"id":3, "name":"c", "binId":null, "binName":null, bin:null}
+ *          record3: {"id":3, "name":"c", "binId":null, "binName":null, bin:null}
  * </pre>
  *
  * @author bingo 下午7:53:36

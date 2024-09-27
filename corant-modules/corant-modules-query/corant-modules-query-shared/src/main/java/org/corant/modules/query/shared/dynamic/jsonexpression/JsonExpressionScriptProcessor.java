@@ -20,6 +20,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static org.corant.shared.normal.Names.splitNameSpace;
 import static org.corant.shared.util.Assertions.shouldBeNull;
 import static org.corant.shared.util.Assertions.shouldBeTrue;
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Classes.asClass;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toObject;
@@ -150,7 +151,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     final Pair<Node<Boolean>, InjectionHandler> injectScripts = resolveInjectionScript(code);
     final Node<Boolean> filter = injectScripts.left();
     final InjectionHandler handler = injectScripts.right();
-    return p -> injectFetchResult(p, fetchQuery, filter, handler);
+    return p -> injectFetchResult(p, filter, handler);
   }
 
   /**
@@ -175,16 +176,19 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * Inject a fetched query results to parent query results.
    *
    * @param p current query parameter and parent query results and fetched query results
-   * @param fetchQuery a fetch query
    * @param filter an injection filter, used to determine which fetch results can be used for
    *        injection of the current parent result
    * @param handler a handler used to handle injection
    */
-  protected Object injectFetchResult(ParameterAndResultPair p, FetchQuery fetchQuery,
-      final Node<Boolean> filter, final InjectionHandler handler) {
-    List<Map<Object, Object>> parentResults = forceCast(p.parentResult);
-    List<Map<Object, Object>> fetchResults = forceCast(p.fetchedResult);
-    MyEvaluationContext injectCtx = new MyEvaluationContext(mapper, p.parameter, functionResolvers);
+  @SuppressWarnings({"unchecked"})
+  protected Object injectFetchResult(ParameterAndResultPair p, final Node<Boolean> filter,
+      final InjectionHandler handler) {
+    final List<Map<Object, Object>> parentResults = forceCast(p.parentResult);
+    final List<Map<Object, Object>> fetchResults = forceCast(p.fetchedResult);
+    final FetchQuery fetchQuery = p.fetchQuery;
+    final String[] injectPropertyNamePath = fetchQuery.getInjectPropertyNamePath();
+    final MyEvaluationContext injectCtx =
+        new MyEvaluationContext(mapper, p.parameter, functionResolvers);
     for (Map<Object, Object> r : parentResults) {
       // filter the fetched results which can be used for injecting
       injectCtx.unbindAllResults().bindParentResult(r);
@@ -206,12 +210,19 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         handledResults = handler.apply(injectResults, injectCtx, mapper);
       }
       // inject the handled results to the parent result
-      if (isNotEmpty(fetchQuery.getInjectPropertyNamePath())) {
+      if (isNotEmpty(injectPropertyNamePath)) {
         // inject with the property name path
         if (fetchQuery.isMultiRecords()) {
-          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(), handledResults);
+          Object exists = mapper.getMappedValue(r, injectPropertyNamePath);
+          if (exists != null) {
+            shouldInstanceOf(exists, List.class,
+                () -> new QueryRuntimeException("Inject property [%s] must be a list",
+                    fetchQuery.getInjectPropertyName())).addAll(handledResults);
+          } else {
+            mapper.putMappedValue(r, injectPropertyNamePath, new ArrayList<>(handledResults));
+          }
         } else {
-          mapper.putMappedValue(r, fetchQuery.getInjectPropertyNamePath(),
+          mapper.putMappedValue(r, injectPropertyNamePath,
               isNotEmpty(handledResults) ? handledResults.get(0) : null);
         }
       } else {
@@ -257,7 +268,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
               // parse evaluation DSL
               Object evalScript = getMapObject(vm, EVAL_KEY);
               Node<Object> evalNode = null;
-              if (evalScript instanceof Map map) {
+              if (evalScript instanceof Map<?, ?> map) {
                 evalNode = forceCast(SimpleParser.parse(map, MyASTNodeBuilder.INST));
               } else if (evalScript != null) {
                 throw new QueryRuntimeException(
@@ -374,7 +385,16 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
    * @author bingo 15:15:18
    */
   public interface InjectionHandler {
-    List<Object> apply(List<Map<Object, Object>> fetchResults, MyEvaluationContext injectionCtx,
+    /**
+     * Process the given fetched results with given injection context and return processed results.
+     * <p>
+     * Note: try not to modify the given fetched results to minimize side effects.
+     *
+     * @param fetchedResults the fetched results to be processed
+     * @param injectionCtx the injection context
+     * @param mapper object mapper to put/get the value
+     */
+    List<Object> apply(List<Map<Object, Object>> fetchedResults, MyEvaluationContext injectionCtx,
         QueryObjectMapper mapper);
   }
 

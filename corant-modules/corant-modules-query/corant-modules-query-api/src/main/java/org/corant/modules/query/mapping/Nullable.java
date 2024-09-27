@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Bingo.Chen (finesoft@gmail.com).
+ * Copyright (c) 2013-2023, Bingo.Chen (finesoft@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,18 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.corant.modules.query.spi;
-
-import org.corant.modules.query.mapping.FetchQuery;
+package org.corant.modules.query.mapping;
 
 /**
  * corant-modules-query-api
  *
- * @author bingo 下午5:32:44
+ * @author bingo 12:10:07
  */
-@FunctionalInterface
-public interface FetchQueryResultInjector {
-
-  void inject(Object parameter, Object parentResults, FetchQuery fetchQuery, Object fetchedResults);
-
+public enum Nullable {
+  TRUE, FALSE, AUTO
 }

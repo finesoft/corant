@@ -43,6 +43,7 @@ public class SchemaNames {
   public static final String X_FLATTEN = "flatten";
   public static final String X_SINGLE_AS_LIST = "single-as-list";
   public static final String X_GROUP = "group";
+  public static final String X_NULLABLE = "nullable";
 
   public static final String PARAM_ELE = "parameters-mapping";
 
@@ -74,7 +75,7 @@ public class SchemaNames {
   public static final String FQE_ATT_MAX_SIZE = "max-fetch-size";
   public static final String FQE_ATT_MULT_RECORDS = "multi-records";
 
-  public static final String QUE_NAME_SPACE_SEPARATOR = " > "; // since 2024-08-31
+  public static final String QUE_NAME_SPACE_SEPARATOR = "$"; // since 2024-08-31
 
   private SchemaNames() {}
 

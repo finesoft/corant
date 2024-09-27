@@ -14,12 +14,14 @@
 package org.corant.modules.query.shared;
 
 import static org.corant.modules.query.QueryParameter.CTX_QHH_EXCLUDE_FETCH_QUERY;
+import static org.corant.shared.util.Assertions.shouldInstanceOf;
 import static org.corant.shared.util.Assertions.shouldNotEmpty;
 import static org.corant.shared.util.Conversions.toBoolean;
 import static org.corant.shared.util.Conversions.toCollection;
 import static org.corant.shared.util.Conversions.toList;
 import static org.corant.shared.util.Conversions.toObject;
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Lists.listOf;
 import static org.corant.shared.util.Maps.getMapString;
 import static org.corant.shared.util.Objects.areEqual;
@@ -32,6 +34,7 @@ import static org.corant.shared.util.Strings.split;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,7 @@ import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameter;
 import org.corant.modules.query.mapping.FetchQuery.FetchQueryParameterSource;
+import org.corant.modules.query.mapping.Nullable;
 import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResult;
 import org.corant.modules.query.shared.ScriptProcessor.ParameterAndResultPair;
 import org.corant.modules.query.spi.QueryParameterReviser;
@@ -111,13 +115,20 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     }
     Function<ParameterAndResultPair, Object> fun = scriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
-      fun.apply(new ParameterAndResultPair(parameter, listOf(result), fetchedResults));
+      fun.apply(new ParameterAndResultPair(parameter, listOf(result), fetchQuery, fetchedResults));
     } else {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
       if (isEmpty(fetchedResults)) {
         objectMapper.putMappedValue(result, injectProNamePath, null);
       } else if (fetchQuery.isMultiRecords()) {
-        objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
+        Object exists = objectMapper.getMappedValue(result, injectProNamePath);
+        if (exists != null) {
+          shouldInstanceOf(exists, List.class,
+              () -> new QueryRuntimeException("Inject property [%s] must be a list",
+                  fetchQuery.getInjectPropertyName())).addAll(fetchedResults);
+        } else {
+          objectMapper.putMappedValue(result, injectProNamePath, new ArrayList(fetchedResults));
+        }
       } else {
         objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.iterator().next());
       }
@@ -132,7 +143,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     }
     Function<ParameterAndResultPair, Object> fun = scriptEngines.resolveFetchInjections(fetchQuery);
     if (fun != null) {
-      fun.apply(new ParameterAndResultPair(parameter, results,
+      fun.apply(new ParameterAndResultPair(parameter, results, fetchQuery,
           defaultObject(fetchedResults, ArrayList::new)));
     } else {
       String[] injectProNamePath = shouldNotEmpty(fetchQuery.getInjectPropertyNamePath());
@@ -143,7 +154,14 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       } else {
         for (Object result : results) {
           if (fetchQuery.isMultiRecords()) {
-            objectMapper.putMappedValue(result, injectProNamePath, fetchedResults);
+            Object exists = objectMapper.getMappedValue(result, injectProNamePath);
+            if (exists != null) {
+              shouldInstanceOf(exists, List.class,
+                  () -> new QueryRuntimeException("Inject property [%s] must be a list",
+                      fetchQuery.getInjectPropertyName())).addAll(fetchedResults);
+            } else {
+              objectMapper.putMappedValue(result, injectProNamePath, new ArrayList(fetchedResults));
+            }
           } else {
             objectMapper.putMappedValue(result, injectProNamePath, fetchedResults.get(0));
           }
@@ -199,69 +217,96 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
     logger.fine(() -> "Clear default fetch query handler caches.");
   }
 
-  protected Map<String, Object> resolveFetchQueryCriteria(Object result, FetchQuery fetchQuery,
-      QueryParameter parentQueryParameter) {
+  protected Map<String, Object> resolveFetchQueryCriteria(Object parentResult,
+      FetchQuery fetchQuery, QueryParameter parentQueryParameter) {
     Map<String, Object> criteria = extractCriteria(parentQueryParameter);
     Map<String, Object> fetchCriteria = new HashMap<>();
-    Map<String, Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria =
+    Map<String[], Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria =
         new HashMap<>();
     for (FetchQueryParameter parameter : fetchQuery.getParameters()) {
       final Class<?> type = parameter.getType();
       final boolean distinct = parameter.isDistinct();
       final boolean singleAsList = parameter.isSingleAsList();
       final boolean flatten = parameter.isFlatten();
+      final Nullable nullable = parameter.getNullable();
       final String name = parameter.getName();
       final FetchQueryParameterSource source = parameter.getSource();
-      final String group = parameter.getGroup();
-      final boolean useGroup = isNotBlank(group);
-      Object value = null;
-
+      final String[] groupPath = parameter.getGroupPath();
+      final boolean useGroup = isNotEmpty(groupPath);
+      Object value;
       if (source == FetchQueryParameterSource.C) {
         // Handle values from a specified constant
-        value = resolveFetchQueryCriteriaValue(parameter.getValue(), type, distinct, singleAsList,
-            flatten);
+        String constantValue = parameter.getValue();
+        if (constantValue != null || nullable != Nullable.FALSE) {
+          value =
+              resolveFetchQueryCriteriaValue(constantValue, type, distinct, singleAsList, flatten);
+        } else {
+          continue;
+        }
       } else if (source == FetchQueryParameterSource.P) {
         // Handle values from parent query parameters
-        value = resolveFetchQueryCriteriaValue(criteria.get(parameter.getSourceName()), type,
-            distinct, singleAsList, flatten);
+        Object parentQueryParameterValue = criteria.get(parameter.getSourceName());
+        if (parentQueryParameterValue != null || nullable != Nullable.FALSE) {
+          value = resolveFetchQueryCriteriaValue(parentQueryParameterValue, type, distinct,
+              singleAsList, flatten);
+        } else {
+          continue;
+        }
       } else if (source == FetchQueryParameterSource.S) {
         // handle values from a specified script
         Function<ParameterAndResult, Object> fun = scriptEngines.resolveFetchParameter(parameter);
-        List<Object> parentResults = result instanceof List ? (List) result : listOf(result);
-        Object funValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
-        value = resolveFetchQueryCriteriaValue(funValue, type, distinct, singleAsList, flatten);
-      } else if (result != null) {
+        List<Object> parentResults =
+            parentResult instanceof List ? (List) parentResult : listOf(parentResult);
+        Object evalValue = fun.apply(new ParameterAndResult(parentQueryParameter, parentResults));
+        if (evalValue != null || nullable != Nullable.FALSE) {
+          value = resolveFetchQueryCriteriaValue(evalValue, type, distinct, singleAsList, flatten);
+        } else {
+          continue;
+        }
+      } else if (parentResult != null) {
         String[] namePath = parameter.getSourceNamePath();
         try {
-          if (result instanceof List) {
-            // handle values from parent multi results
-            List<Object> resultValues = new ArrayList<>(((List<?>) result).size());
+          if (parentResult instanceof List parentRecords) {
+            // handle values from parent multi-records result
+            List<Object> criteriaValueList = new ArrayList<>(parentRecords.size());
             if (useGroup) {
-              for (Object resultItem : (List<?>) result) {
-                Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
-                resultValues.add(convertCriteriaValue(resultItemValue, type, flatten));
-              }
-              value = resultValues;
-            } else {
-              for (Object resultItem : (List<?>) result) {
-                Object resultItemValue = objectMapper.getMappedValue(resultItem, namePath);
-                if (resultItemValue instanceof Collection) {
-                  resultValues.addAll((Collection) resultItemValue);
-                } else if (resultItemValue != null) {
-                  resultValues.add(resultItemValue);
+              for (Object parentRecord : parentRecords) {
+                Object criteriaValue = objectMapper.getMappedValue(parentRecord, namePath);
+                if (criteriaValue != null || nullable == Nullable.TRUE) {
+                  criteriaValueList.add(convertCriteriaValue(criteriaValue, type, flatten));
                 }
               }
-              value = resolveFetchQueryCriteriaValue(resultValues, type, distinct, singleAsList,
-                  flatten);
+              if (!criteriaValueList.isEmpty()) {
+                value = criteriaValueList;
+              } else {
+                continue;
+              }
+            } else {
+              for (Object parentRecord : parentRecords) {
+                Object criteriaValue = objectMapper.getMappedValue(parentRecord, namePath);
+                if (criteriaValue != null || nullable == Nullable.TRUE) {
+                  criteriaValueList.add(criteriaValue);
+                }
+              }
+              if (!criteriaValueList.isEmpty()) {
+                value = resolveFetchQueryCriteriaValue(criteriaValueList, type, distinct,
+                    singleAsList, flatten);
+              } else {
+                continue;
+              }
             }
           } else {
-            // handle values from parent single result
-            Object resultValue = objectMapper.getMappedValue(result, namePath);
-            if (useGroup) {
-              value = listOf(convertCriteriaValue(resultValue, type, flatten));
+            // handle values from parent single record result
+            Object criteriaValue = objectMapper.getMappedValue(parentResult, namePath);
+            if (criteriaValue != null || nullable == Nullable.TRUE) {
+              if (useGroup) {
+                value = listOf(convertCriteriaValue(criteriaValue, type, flatten));
+              } else {
+                value = resolveFetchQueryCriteriaValue(criteriaValue, type, distinct, singleAsList,
+                    flatten);
+              }
             } else {
-              value = resolveFetchQueryCriteriaValue(resultValue, type, distinct, singleAsList,
-                  flatten);
+              continue;
             }
           }
         } catch (Exception e) {
@@ -269,23 +314,28 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
               "Can not extract value from query result for resolve fetch query [%s] parameter!",
               fetchQuery.getQueryReference());
         }
+      } else {
+        continue;// never happen??
       }
       if (useGroup) {
-        Map<String, Pair<FetchQueryParameterSource, Object>> groupCriteria =
-            groupFetchCriteria.computeIfAbsent(group, k -> new HashMap<>());
-        groupCriteria.put(name, Pair.of(source, value));
+        groupFetchCriteria.computeIfAbsent(groupPath, k -> new HashMap<>()).put(name,
+            Pair.of(source, value));
       } else {
         fetchCriteria.put(name, value);
       }
     }
     if (!groupFetchCriteria.isEmpty()) {
-      resolveFetchQueryCriteriaGroupValue(fetchCriteria, groupFetchCriteria);
+      Map<String, Object> groupCriteria = resolveFetchQueryCriteriaGroupValue(groupFetchCriteria);
+      if (groupCriteria != null) {
+        fetchCriteria.putAll(groupCriteria);
+      }
     }
     return fetchCriteria;
   }
 
-  protected void resolveFetchQueryCriteriaGroupValue(Map<String, Object> fetchCriteria,
-      Map<String, Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria) {
+  protected Map<String, Object> resolveFetchQueryCriteriaGroupValue(
+      Map<String[], Map<String, Pair<FetchQueryParameterSource, Object>>> groupFetchCriteria) {
+    Map<String, Object> groupCriteria = new LinkedHashMap<>();
     groupFetchCriteria.forEach((g, vs) -> {
       Map<String, List<Object>> resultCriteria = new HashMap<>();
       Map<String, Object> notResultCriteria = new HashMap<>();
@@ -303,6 +353,7 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       int size = resultCriteria.values().stream().filter(Objects::isNotNull).mapToInt(List::size)
           .min().orElse(0);
       if (size > 0) {
+        // flatten & merge the not result criteria to result criteria
         for (int i = 0; i < size; i++) {
           Map<String, Object> map = new HashMap<>(notResultCriteria);
           final int ii = i;
@@ -312,8 +363,10 @@ public class DefaultFetchQueryHandler implements FetchQueryHandler {
       } else {
         criteria.add(notResultCriteria);
       }
-      fetchCriteria.put(g, criteria);
+      objectMapper.putMappedValue(groupCriteria, g, criteria);
+      // groupCriteria.put(g, criteria);
     });
+    return groupCriteria;
   }
 
   protected Object resolveFetchQueryCriteriaValue(Object value, Class<?> type, boolean distinct,

@@ -258,19 +258,19 @@ public abstract class AbstractNamedQueryService implements FetchableNamedQuerySe
   protected abstract QueryHandler getQueryHandler();
 
   protected void log(String name, Object param, String... script) {
-    logger.fine(() -> format("%n[Query name]: %s %n[Query parameters]:%n%s %n[Query script]:%n%s",
+    logger.fine(() -> format("%n[QUERY NAME]: %s %n[QUERY PARAMETERS]:%n%s %n[QUERY SCRIPT]:%n%s",
         name, getQueryHandler().getObjectMapper().toJsonString(param, false, true),
         String.join("\n", script)));
   }
 
   protected void log(String name, Object[] param, String... script) {
-    logger.fine(() -> format("%n[Query name]: %s %n[Query parameters]:%n[%s] %n[Query script]:%n%s",
+    logger.fine(() -> format("%n[QUERY NAME]: %s %n[QUERY PARAMETERS]:%n[%s] %n[QUERY SCRIPT]:%n%s",
         name, String.join(",", asStrings(param)), String.join("\n", script)));
   }
 
   protected void log(String name, Supplier<List<String>> execution, Object param) {
     logger
-        .fine(() -> format("%n[Query name]: %s %n[Query execution]:%n%s %n[Query parameters]:%n%s ",
+        .fine(() -> format("%n[QUERY NAME]: %s %n[QUERY EXECUTION]:%n%s %n[QUERY PARAMETERS]:%n%s ",
             name, String.join("\n", execution.get()),
             getQueryHandler().getObjectMapper().toJsonString(param, false, true)));
   }

@@ -21,6 +21,7 @@ import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +228,7 @@ public class FetchQuery implements Serializable {
    * Returns the hierarchical property names.
    */
   public String[] getInjectPropertyNamePath() {
-    return injectPropertyNamePath;
+    return Arrays.copyOf(injectPropertyNamePath, injectPropertyNamePath.length);
   }
 
   /**
@@ -466,6 +467,8 @@ public class FetchQuery implements Serializable {
     protected boolean flatten = true;
     protected Script script;
     protected String group;
+    protected String[] groupPath = Strings.EMPTY_ARRAY;
+    protected Nullable nullable = Nullable.AUTO;
 
     public FetchQueryParameter() {}
 
@@ -485,10 +488,11 @@ public class FetchQuery implements Serializable {
      * @param singleAsList when the value is a single value, whether to convert it to a list
      * @param flatten When the parameter value is multiple collections, whether to extract the
      *        values in the collection to form a new collection
+     * @param nullable supports null value as parameter value
      */
     public FetchQueryParameter(String group, String name, String sourceName,
         FetchQueryParameterSource source, String value, Class<?> type, Script script,
-        boolean distinct, boolean singleAsList, boolean flatten) {
+        boolean distinct, boolean singleAsList, boolean flatten, Nullable nullable) {
       setGroup(group);
       setName(name);
       setSourceName(sourceName);
@@ -499,10 +503,15 @@ public class FetchQuery implements Serializable {
       setDistinct(distinct);
       setSingleAsList(singleAsList);
       setFlatten(flatten);
+      setNullable(nullable);
     }
 
     public String getGroup() {
       return group;
+    }
+
+    public String[] getGroupPath() {
+      return Arrays.copyOf(groupPath, groupPath.length);
     }
 
     /**
@@ -510,6 +519,10 @@ public class FetchQuery implements Serializable {
      */
     public String getName() {
       return name;
+    }
+
+    public Nullable getNullable() {
+      return nullable;
     }
 
     /**
@@ -584,10 +597,15 @@ public class FetchQuery implements Serializable {
 
     protected void setGroup(String group) {
       this.group = group;
+      groupPath = Names.splitNameSpace(group, true, true);
     }
 
     protected void setName(String name) {
       this.name = name;
+    }
+
+    protected void setNullable(Nullable nullable) {
+      this.nullable = defaultObject(nullable, Nullable.AUTO);
     }
 
     protected void setScript(Script script) {
@@ -604,7 +622,6 @@ public class FetchQuery implements Serializable {
 
     protected void setSourceName(String sourceName) {
       this.sourceName = sourceName;
-      // sourceNamePath = split(sourceName, Names.NAME_SPACE_SEPARATORS, true, false);
       sourceNamePath = Names.splitNameSpace(sourceName, true, false);
     }
 
@@ -615,7 +632,6 @@ public class FetchQuery implements Serializable {
     protected void setValue(String value) {
       this.value = value;
     }
-
   }
 
   /**
@@ -624,7 +640,6 @@ public class FetchQuery implements Serializable {
    * Defines the source of several fetch query parameters.
    *
    * @author bingo 上午11:21:02
-   *
    */
   public enum FetchQueryParameterSource {
     /**

@@ -72,7 +72,11 @@ public class Script implements Serializable {
   }
 
   protected void setCode(String code) {
-    this.code = strip(code);
+    if (type == ScriptType.CDI) {
+      this.code = strip(code);
+    } else {
+      this.code = code;
+    }
   }
 
   protected void setSrc(String src) {
@@ -81,6 +85,9 @@ public class Script implements Serializable {
 
   protected void setType(ScriptType type) {
     this.type = type;
+    if (this.type == ScriptType.CDI) {
+      code = strip(code);
+    }
   }
 
   /**

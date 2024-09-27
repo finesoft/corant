@@ -49,7 +49,7 @@ public abstract class AbstractCasNamedQueryService extends AbstractNamedQuerySer
       Duration timeout = querier.resolveTimeout();
       String ks = resolveKeyspace(querier);
       Object[] scriptParameter = querier.getScriptParameter();
-      log("fetch-> " + refQueryName, scriptParameter, cql);
+      log("FETCH -> " + refQueryName, scriptParameter, cql);
       List<Map<String, Object>> fetchedList;
       if (maxFetchSize > 0) {
         fetchedList = getExecutor().paging(ks, cql, 0, maxFetchSize, timeout, scriptParameter);

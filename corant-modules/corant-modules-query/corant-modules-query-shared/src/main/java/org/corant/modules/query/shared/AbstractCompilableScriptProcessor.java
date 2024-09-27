@@ -33,7 +33,6 @@ import org.corant.modules.query.mapping.Script.ScriptType;
 import org.corant.modules.query.shared.ScriptProcessor.AbstractScriptProcessor;
 
 /**
- *
  * corant-modules-query-shared
  *
  * @author bingo 下午2:34:03
@@ -45,8 +44,13 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
     final Script script = fetchQuery.getInjectionScript();
     if (script.isValid()) {
       shouldBeTrue(supports(script));
-      return compileFunction(script, null, RESULTS_FUNC_PARAMETER_NAME,
-          FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+      if (USING_INTEGRITY_FUNCTIONS) {
+        return compileFunction(script, PARAMETER_FUNC_PARAMETER_NAME, RESULTS_FUNC_PARAMETER_NAME,
+            FETCH_QUERY_FUNC_PARAMETER_NAME, FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+      } else {
+        return compileFunction(script, null, RESULTS_FUNC_PARAMETER_NAME, null,
+            FETCHED_RESULTS_FUNC_PARAMETER_NAME);
+      }
     }
     return null;
   }
@@ -87,8 +91,7 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
       String parameterPName, String resultPName) {
     return getParamResultFunctions().computeIfAbsent(script.getId(), k -> {
       try {
-        logger.fine(() -> format(
-            "Compile the query consumer script, id is %s, the thread name is %s id is %s",
+        logger.fine(() -> format("Compile query script [id:%s], current thread [name:%s, id:%s]",
             script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Compilable se = getCompilable(script.getType());
         final CompiledScript cs = se.compile(shouldNotBlank(script.getCode()));
@@ -111,11 +114,11 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
   }
 
   protected Function<ParameterAndResultPair, Object> compileFunction(Script script,
-      String parameterPName, String parentResultPName, String fetchResultPName) {
+      String parameterPName, String parentResultPName, String fetchQueryPName,
+      String fetchResultPName) {
     return getParamResultPairFunctions().computeIfAbsent(script.getId(), k -> {
       try {
-        logger.fine(() -> format(
-            "Compile the query consumer script, id is %s, the thread name is %s id is %s",
+        logger.fine(() -> format("Compile query script [id:%s], current thread [name:%s, id:%s]",
             script.getId(), Thread.currentThread().getName(), Thread.currentThread().getId()));
         final Compilable se = getCompilable(script.getType());
         final CompiledScript cs = se.compile(shouldNotBlank(script.getCode()));
@@ -126,6 +129,9 @@ public abstract class AbstractCompilableScriptProcessor extends AbstractScriptPr
               bindings.put(parameterPName, pns.parameter);
             }
             bindings.put(parentResultPName, pns.parentResult);
+            if (fetchQueryPName != null) {
+              bindings.put(fetchQueryPName, pns.fetchQuery);
+            }
             bindings.put(fetchResultPName, pns.fetchedResult);
             return cs.eval(bindings);
           } catch (ScriptException e) {

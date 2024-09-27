@@ -549,6 +549,16 @@
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>
+    <xsd:attribute name="nullable" type="nqms:nullable"
+      use="optional" default="AUTO">
+      <xsd:annotation>
+        <xsd:documentation>
+          <![CDATA[
+          Whether to support null value as parameter value
+          ]]>
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
   </xsd:complexType>
 
   <xsd:simpleType name="fetch-query-parameter-source">
@@ -571,6 +581,26 @@
       <xsd:enumeration value="S">
         <xsd:annotation>
           <xsd:documentation><![CDATA[Parameter value is script.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="nullable">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="TRUE">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Allow null value.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="FALSE">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Don't allow null value.]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="AUTO">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[Whether or not to allow is determined by the business logic.]]></xsd:documentation>
         </xsd:annotation>
       </xsd:enumeration>
     </xsd:restriction>

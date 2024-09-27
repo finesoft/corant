@@ -30,6 +30,7 @@ import org.corant.modules.query.shared.QueryMappingService.AfterQueryMappingInit
 import org.corant.modules.query.shared.spi.ResultScriptMapperHintHandler;
 import org.corant.shared.exception.NotSupportedException;
 import org.corant.shared.ubiquity.Sortable;
+import org.corant.shared.util.Configurations;
 
 /**
  * corant-modules-query-shared
@@ -38,11 +39,15 @@ import org.corant.shared.ubiquity.Sortable;
  */
 public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedHandler {
 
+  String PARAMETER_FUNC_PARAMETER_NAME = "p";
   String RESULT_FUNC_PARAMETER_NAME = "r";
   String RESULTS_FUNC_PARAMETER_NAME = "rs";
+  String FETCH_QUERY_FUNC_PARAMETER_NAME = "fq";
   String FETCHED_RESULT_FUNC_PARAMETER_NAME = "fr";
   String FETCHED_RESULTS_FUNC_PARAMETER_NAME = "frs";
-  String PARAMETER_FUNC_PARAMETER_NAME = "p";
+
+  boolean USING_INTEGRITY_FUNCTIONS = Configurations.getConfigValue(
+      "corant.query.script.processor.using-integrity-functions", Boolean.class, false);
 
   /**
    * Return an executable function converted from the injection script in fetch query. This function
@@ -161,9 +166,9 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
    * corant-modules-query-shared
    *
    * @author bingo 下午2:15:04
-   *
    */
   class ParameterAndResult {
+
     public final QueryParameter parameter;
     public final Object result;
 
@@ -177,18 +182,20 @@ public interface ScriptProcessor extends Sortable, AfterQueryMappingInitializedH
    * corant-modules-query-shared
    *
    * @author bingo 下午2:15:07
-   *
    */
   class ParameterAndResultPair {
+
     public final QueryParameter parameter;
     public final Object parentResult;
+    public final FetchQuery fetchQuery;
     public final Object fetchedResult;
 
     public ParameterAndResultPair(QueryParameter parameter, Object parentResult,
-        Object fetchedResult) {
+        FetchQuery fetchQuery, Object fetchedResult) {
       this.parameter = parameter;
       this.parentResult = parentResult;
       this.fetchedResult = fetchedResult;
+      this.fetchQuery = fetchQuery;
     }
   }
 }

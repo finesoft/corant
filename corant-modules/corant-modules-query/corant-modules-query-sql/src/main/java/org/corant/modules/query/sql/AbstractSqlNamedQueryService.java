@@ -53,7 +53,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
       String sql = querier.getScript();
       Duration timeout = querier.resolveTimeout();
       Object[] scriptParameter = querier.getScriptParameter();
-      log("fetch-> " + refQueryName, scriptParameter, sql);
+      log("FETCH -> " + refQueryName, scriptParameter, sql);
       return new FetchedResult(fetchQuery, querier,
           getExecutor().select(sql, maxFetchSize, timeout, scriptParameter));
     } catch (SQLException e) {
@@ -114,7 +114,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     Map<String, String> properties = querier.getQuery().getProperties();
     String limitSql = getDialect().getLimitSql(sql, offset, limit + 1, properties);
-    log(query.getVersionedName(), scriptParameter, sql, "Limit script: " + limitSql);
+    log(query.getVersionedName(), scriptParameter, sql, "LIMIT SCRIPT: " + limitSql);
     Forwarding<T> result = Forwarding.inst();
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     int size = sizeOf(list);
@@ -152,7 +152,7 @@ public abstract class AbstractSqlNamedQueryService extends AbstractNamedQuerySer
     Duration timeout = querier.resolveTimeout();
     Map<String, String> properties = querier.getQuery().getProperties();
     String limitSql = getDialect().getLimitSql(sql, offset, limit, properties);
-    log(query.getVersionedName(), scriptParameter, sql, "Limit script: " + limitSql);
+    log(query.getVersionedName(), scriptParameter, sql, "LIMIT SCRIPT: " + limitSql);
     List<Map<String, Object>> list = getExecutor().select(limitSql, timeout, scriptParameter);
     Paging<T> result = Paging.of(offset, limit);
     int size = sizeOf(list);

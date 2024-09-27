@@ -102,7 +102,7 @@ public class QueryDeveloperKits {
     if (fq.getInjectionScript().isValid()) {
       try {
         resolve(QueryScriptEngines.class).resolveFetchInjections(fq)
-            .apply(new ParameterAndResultPair(null, new ArrayList<>(), new ArrayList<>()));
+            .apply(new ParameterAndResultPair(null, new ArrayList<>(), fq, new ArrayList<>()));
       } catch (Exception e) {
         throwabls.add(new CorantRuntimeException(e, "FETCH-QUERY-INJECT-SCRIPT-ERROR : [%s -> %s]",
             query.getName(), fq.getQueryReference()));

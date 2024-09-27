@@ -46,7 +46,7 @@ public interface Defaults {
 
   int SIXTEEN_KBS = FOUR_KBS << 2;
 
-  long ONE_MB = ONE_KB * (long) ONE_KB;
+  int ONE_MB = ONE_KB * ONE_KB;
 
   int CORANT_SIGN = 3259;
 

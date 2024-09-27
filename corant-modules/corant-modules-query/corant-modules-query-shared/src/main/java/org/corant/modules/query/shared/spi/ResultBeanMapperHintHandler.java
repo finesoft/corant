@@ -104,6 +104,15 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   @Any
   protected Instance<ResultBeanMapper> instances;
 
+  public static Named resolveNamedQualifier(QueryHint qh) {
+    List<QueryHintParameter> nameds = qh.getParameters(HINT_PARA_BEAN_NME);
+    String named = null;
+    if (isNotEmpty(nameds)) {
+      named = defaultString(nameds.get(0).getValue(), null);
+    }
+    return named != null ? NamedLiteral.of(named) : null;
+  }
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void handle(QueryHint qh, Query query, Object parameter, Object result) throws Exception {
@@ -159,14 +168,7 @@ public class ResultBeanMapperHintHandler implements ResultHintHandler {
   }
 
   protected Named resolveBeanNamed(QueryHint qh) {
-    return nameds.computeIfAbsent(qh, k -> {
-      List<QueryHintParameter> nameds = qh.getParameters(HINT_PARA_BEAN_NME);
-      String named = null;
-      if (isNotEmpty(nameds)) {
-        named = defaultString(nameds.get(0).getValue(), null);
-      }
-      return named != null ? NamedLiteral.of(named) : null;
-    });
+    return nameds.computeIfAbsent(qh, k -> resolveNamedQualifier(qh));
   }
 
   protected Map<String, Object> resolveExtraParams(QueryHint qh) {

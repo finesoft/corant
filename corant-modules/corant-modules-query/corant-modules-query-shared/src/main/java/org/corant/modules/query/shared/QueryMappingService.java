@@ -15,6 +15,7 @@ package org.corant.modules.query.shared;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableCollection;
+import static org.corant.context.Beans.findAnyway;
 import static org.corant.context.Beans.findNamed;
 import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Empties.isNotEmpty;
@@ -42,6 +43,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.corant.modules.query.QuerierConfig;
 import org.corant.modules.query.QueryRuntimeException;
 import org.corant.modules.query.mapping.FetchQuery;
@@ -51,6 +53,8 @@ import org.corant.modules.query.mapping.QueryHint;
 import org.corant.modules.query.mapping.QueryParser;
 import org.corant.modules.query.mapping.SchemaNames;
 import org.corant.modules.query.mapping.Script.ScriptType;
+import org.corant.modules.query.shared.spi.ResultBeanMapperHintHandler;
+import org.corant.modules.query.shared.spi.ResultBeanMapperHintHandler.ResultBeanMapper;
 import org.corant.modules.query.spi.FetchQueryParameterResolver;
 import org.corant.modules.query.spi.FetchQueryPredicate;
 import org.corant.modules.query.spi.FetchQueryResultInjector;
@@ -192,6 +196,14 @@ public class QueryMappingService {
               throw new QueryRuntimeException(
                   "The script of query hint [%s] in query [%s] file [%s] can't find the script resolver.",
                   qh.getKey(), q.getVersionedName(), m.getUrl());
+            }
+            if (ResultBeanMapperHintHandler.HINT_NAME.equals(qh.getKey())) {
+              Named named = ResultBeanMapperHintHandler.resolveNamedQualifier(qh);
+              if (named == null || findAnyway(ResultBeanMapper.class, named).isEmpty()) {
+                throw new QueryRuntimeException(
+                    "The query hint [%s] in query [%s] file [%s] resolver can't find.", qh.getKey(),
+                    q.getVersionedName(), m.getUrl());
+              }
             }
           }
         }

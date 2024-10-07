@@ -14,6 +14,7 @@
 package org.corant.modules.ddd.shared.repository;
 
 import static org.corant.context.Beans.resolve;
+import static org.corant.context.Beans.selectParameterized;
 import static org.corant.shared.util.Objects.defaultObject;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
+import jakarta.enterprise.inject.Instance;
 import jakarta.persistence.Cache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -30,6 +32,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import org.corant.context.qualifier.AutoCreated;
 import org.corant.modules.ddd.Entity;
 import org.corant.modules.ddd.TypedRepository;
+import org.corant.modules.jpa.shared.JPAEntityRepository;
 import org.corant.modules.jpa.shared.JPAQueries;
 import org.corant.modules.jpa.shared.JPAQueries.TypedJPAQuery;
 import org.corant.modules.jpa.shared.JPAQueries.UpdatableJPAQuery;
@@ -39,7 +42,8 @@ import org.corant.modules.jpa.shared.JPAQueries.UpdatableJPAQuery;
  *
  * @author bingo 下午6:15:02
  */
-public interface TypedJPARepository<T extends Entity> extends TypedRepository<T, Query> {
+public interface TypedJPARepository<T extends Entity>
+    extends TypedRepository<T, Query>, JPAEntityRepository<T> {
 
   /**
    * Returns a typed JPA repository, the underling processing depends on CDI & Weld. If qualifiers
@@ -52,7 +56,13 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   static <T extends Entity> TypedJPARepository<T> instance(Class<T> entityClass,
       Annotation... qualifiers) {
     if (qualifiers.length == 0) {
-      return resolve(TypedJPARepository.class, new Class[] {entityClass}, AutoCreated.INST);
+      Instance<TypedJPARepository<T>> instance =
+          selectParameterized(TypedJPARepository.class, entityClass);
+      if (instance.isUnsatisfied()) {
+        return instance.select(AutoCreated.INST).get();
+      } else {
+        return instance.get();
+      }
     } else {
       return resolve(TypedJPARepository.class, new Class[] {entityClass}, qualifiers);
     }
@@ -405,16 +415,16 @@ public interface TypedJPARepository<T extends Entity> extends TypedRepository<T,
   /**
    * Returns a JPA query for execute updating.
    *
-   * @param sqlString the native SQL query statement
+   * @param name the name of a query defined in metadata
    */
-  UpdatableJPAQuery updatableNativeQuery(final String sqlString);
+  UpdatableJPAQuery updatableNamedQuery(final String name);
 
   /**
    * Returns a JPA query for execute updating.
    *
-   * @param name the name of a query defined in metadata
+   * @param sqlString the native SQL query statement
    */
-  UpdatableJPAQuery updatableNamedQuery(final String name);
+  UpdatableJPAQuery updatableNativeQuery(final String sqlString);
 
   /**
    * Returns a JPA query for execute updating.

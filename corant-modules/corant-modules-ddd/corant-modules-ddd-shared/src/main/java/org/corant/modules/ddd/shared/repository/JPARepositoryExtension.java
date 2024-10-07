@@ -86,7 +86,6 @@ public class JPARepositoryExtension implements Extension {
    * corant-modules-ddd-shared
    *
    * @author bingo 下午5:06:40
-   *
    */
   public static class DefaultJPARepository extends AbstractJPARepository {
 

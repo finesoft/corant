@@ -187,7 +187,6 @@ public abstract class AbstractTypedJPARepository<T extends Entity>
    * corant-modules-ddd-shared
    *
    * @author bingo 下午9:15:00
-   *
    */
   public static class TypedJPARepositoryTemplate<T extends Entity>
       extends AbstractTypedJPARepository<T> {

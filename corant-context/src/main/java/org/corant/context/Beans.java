@@ -156,7 +156,7 @@ public class Beans {
    * will return immediately; If it is not found and the qualifiers is empty, it will be loaded from
    * {@link org.corant.shared.util.Services#findRequired(Class)}. If there are multiple instances
    * and the given instance class is {@link Sortable}, then return the one with the highest
-   * priority.
+   * priority. This may cause the initialization of the bean to be advanced.
    * </p>
    *
    * @param <T> the bean type to be resolved
@@ -169,9 +169,8 @@ public class Beans {
     Instance<T> inst = select(instanceClass, qualifiers);
     if (inst.isResolvable()) {
       return Optional.of(inst.get());
-    } else if (!inst.isUnsatisfied() && Sortable.class.isAssignableFrom(instanceClass)) {
-      return forceCast(
-          inst.stream().map(Sortable.class::cast).sorted(Sortable::compare).findFirst());
+    } else if (inst.isAmbiguous()) {
+      return selectPreferentially(inst, instanceClass);
     } else {
       return isEmpty(qualifiers) ? findService(instanceClass) : Optional.empty();
     }
@@ -219,6 +218,49 @@ public class Beans {
   public static <T> Optional<T> findNamed(TypeLiteral<T> instanceType, String name) {
     Instance<T> inst = select(instanceType, Any.Literal.INSTANCE);
     return findNamed(inst, name);
+  }
+
+  /**
+   * Returns an {@link Optional} bean instance from CDI that matches the given instance class and
+   * qualifiers.
+   * <p>
+   * Note: Lookup in CDI through the given instance class and qualifiers, if find a hit, it will
+   * return immediately; If there are multiple instances and the given instance class is
+   * {@link Sortable} or {@link Comparable}, then return the one with the highest priority. This may
+   * cause the initialization of the bean to be advanced.
+   * </p>
+   *
+   * @param <T> the bean type to be resolved
+   * @param instanceClass the bean instance class to be resolved
+   * @param qualifiers the bean qualifiers that use to resolve
+   */
+  public static <T> Optional<T> findPreferentially(Class<T> instanceClass,
+      Annotation... qualifiers) {
+    return selectPreferentially(select(instanceClass, qualifiers), instanceClass);
+  }
+
+  /**
+   * Returns an {@link Optional} bean instance from CDI that matches the given instance type literal
+   * and qualifiers.
+   * <p>
+   * Note: Lookup in CDI through the given instance type and qualifiers, if find a hit, it will
+   * return immediately; If there are multiple instances and the given instance type class is
+   * {@link Sortable} or {@link Comparable}, then return the one with the highest priority. This may
+   * cause the initialization of the bean to be advanced.
+   * </p>
+   *
+   * @param <T> the bean type to be resolved
+   * @param instanceType the bean instance type to be resolved
+   * @param qualifiers the bean qualifiers that use to resolve
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Optional<T> findPreferentially(TypeLiteral<T> instanceType,
+      Annotation... qualifiers) {
+    Class<T> instanceClass = null;
+    if (instanceType.getType() instanceof Class<?> typeClass) {
+      instanceClass = (Class<T>) typeClass;
+    }
+    return selectPreferentially(select(instanceType, qualifiers), instanceClass);
   }
 
   /**
@@ -463,7 +505,7 @@ public class Beans {
    * Note: This method does not depend on the CDI being initialized or not, so the result returned
    * is not necessarily the actual situation
    *
-   * @param clazz the class to be resolve
+   * @param clazz the class to be resolved
    */
   public static Class<? extends Annotation> resolveScope(Class<?> clazz) {
     if (clazz != null) {
@@ -474,10 +516,10 @@ public class Beans {
         }
 
         if (annotation.annotationType().getAnnotation(Stereotype.class) != null) {
-          for (Annotation stereAnn : annotation.annotationType().getAnnotations()) {
-            if (stereAnn.annotationType().getAnnotation(NormalScope.class) != null
-                || stereAnn.annotationType().getAnnotation(Scope.class) != null) {
-              return stereAnn.annotationType();
+          for (Annotation stereoAnn : annotation.annotationType().getAnnotations()) {
+            if (stereoAnn.annotationType().getAnnotation(NormalScope.class) != null
+                || stereoAnn.annotationType().getAnnotation(Scope.class) != null) {
+              return stereoAnn.annotationType();
             }
           }
         }
@@ -493,7 +535,7 @@ public class Beans {
    * Note: This method does not depend on the CDI being initialized or not, so the result returned
    * is not necessarily the actual situation
    *
-   * @param clazz the class to be resolve
+   * @param clazz the class to be resolved
    */
   public static Class<? extends Annotation> resolveStereoType(Class<?> clazz) {
     if (clazz != null) {
@@ -656,5 +698,18 @@ public class Beans {
       }
     }
     return false;
+  }
+
+  static <T> Optional<T> selectPreferentially(Instance<T> instance, Class<T> instanceClass) {
+    if (instance.isResolvable()) {
+      return Optional.of(instance.get());
+    } else if (instance.isAmbiguous() && instanceClass != null) {
+      if (Sortable.class.isAssignableFrom(instanceClass)) {
+        return forceCast(instance.stream().map(Sortable.class::cast).min(Sortable::compare));
+      } else if (Comparable.class.isAssignableFrom(instanceClass)) {
+        return forceCast(instance.stream().sorted().findFirst());
+      }
+    }
+    return Optional.empty();
   }
 }

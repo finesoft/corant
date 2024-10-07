@@ -42,20 +42,9 @@ public class TypedJPARepositoryProducer {
   @SuppressWarnings("unchecked")
   @Produces
   @Dependent
-  @AutoCreated
-  protected <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
-    final Type type = ip.getType();
-    final ParameterizedType parameterizedType = (ParameterizedType) type;
-    final Type argType = parameterizedType.getActualTypeArguments()[0];
-    final Class<T> entityClass = (Class<T>) argType;
-    return factory.create(entityClass, null);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Produces
-  @Dependent
   @Preference
-  protected <T extends Entity> TypedJPARepository<T> produceTypedJPARepositoryx(InjectionPoint ip) {
+  protected <T extends Entity> TypedJPARepository<T> producePreferenceTypedJPARepository(
+      InjectionPoint ip) {
     final Type type = ip.getType();
     final Preference named = (Preference) ip.getQualifiers().stream()
         .filter(p -> p.annotationType().equals(Preference.class)).findFirst().orElse(null);
@@ -65,6 +54,18 @@ public class TypedJPARepositoryProducer {
     return factory.create(entityClass, named == null ? null : named.value());
   }
 
+  @SuppressWarnings("unchecked")
+  @Produces
+  @Dependent
+  @AutoCreated
+  protected <T extends Entity> TypedJPARepository<T> produceTypedJPARepository(InjectionPoint ip) {
+    final Type type = ip.getType();
+    final ParameterizedType parameterizedType = (ParameterizedType) type;
+    final Type argType = parameterizedType.getActualTypeArguments()[0];
+    final Class<T> entityClass = (Class<T>) argType;
+    return factory.create(entityClass, null);
+  }
+
   /**
    * corant-modules-ddd-shared
    * <p>
@@ -72,7 +73,6 @@ public class TypedJPARepositoryProducer {
    * ApplicationScope or Singleton.
    *
    * @author bingo 下午4:18:07
-   *
    */
   @FunctionalInterface
   public interface TypedJPARepositoryFactory extends Sortable {

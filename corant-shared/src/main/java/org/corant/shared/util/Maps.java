@@ -1406,6 +1406,18 @@ public class Maps {
     return removed;
   }
 
+  public static <K, V> Map<K, V> removeIfValue(Map<K, V> map, Predicate<V> predicate) {
+    Map<K, V> removed = new HashMap<>();
+    if (predicate != null && map != null) {
+      Set<K> removeKeys = map.entrySet().stream().filter(e -> predicate.test(e.getValue()))
+          .map(Entry::getKey).collect(Collectors.toSet());
+      for (K key : removeKeys) {
+        removed.put(key, map.remove(key));
+      }
+    }
+    return removed;
+  }
+
   @SafeVarargs
   public static <K, V> Map<K, V> removeMap(Map<K, V> target, K... keys) {
     for (K key : keys) {

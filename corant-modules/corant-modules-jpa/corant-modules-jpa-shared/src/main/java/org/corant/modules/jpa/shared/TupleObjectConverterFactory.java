@@ -15,15 +15,12 @@ package org.corant.modules.jpa.shared;
 
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Conversions.toObject;
-import static org.corant.shared.util.Primitives.isSimpleClass;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.lang.reflect.RecordComponent;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TupleElement;
@@ -31,10 +28,9 @@ import org.corant.shared.conversion.Converter;
 import org.corant.shared.conversion.ConverterFactory;
 import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.normal.Priorities;
+import org.corant.shared.ubiquity.PropertyAccessor;
 import org.corant.shared.ubiquity.Tuple.Pair;
 import org.corant.shared.util.Classes;
-import org.corant.shared.util.Fields;
-import org.corant.shared.util.Methods;
 import org.corant.shared.util.Systems;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -138,46 +134,34 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
    * corant-modules-ddd-shared
    *
    * @author bingo 下午4:21:54
-   *
    */
   static class PojoInjector implements Injector {
 
     final Class<?> pojoClass;
     final Constructor<?> constructor;
-    final Map<String, Pair<Method, Class<?>[]>> propertySetters = new HashMap<>();
+    final PropertyAccessor propertyAccessor;
+    final boolean recordClass;
+    final List<Pair<String, Class<?>>> recordComponents;
 
     public PojoInjector(Class<?> pojoClass) {
       this.pojoClass = shouldNotNull(pojoClass);
-      constructor = lookupConstructor(pojoClass);
-      if (constructor != null) {
-        constructor.setAccessible(true);
-        List<Field> fields = Fields.getAllFields(pojoClass);
-        for (Method method : pojoClass.getMethods()) {
-          if (method.isBridge()) {
-            continue;
-          }
-          method.setAccessible(true);
-          String name = method.getName();
-          Class<?>[] parameterTypes = method.getParameterTypes();
-          if (parameterTypes.length == 1) {
-            if (Methods.isSetter(method)) { // for common setter
-              String useName = name.substring(3);
-              useName = useName.substring(0, 1).toLowerCase(Locale.ROOT) + useName.substring(1);
-              propertySetters.put(useName, Pair.of(method, parameterTypes));
-            } else { // for fluent setter
-              for (Field field : fields) {
-                if (field.getGenericType() instanceof Class && field.getName().equals(name)
-                    && Methods.isParameterTypesMatching(
-                        new Class[] {(Class<?>) field.getGenericType()}, parameterTypes, true,
-                        method.isVarArgs())) {
-                  propertySetters.put(name, Pair.of(method, parameterTypes));
-                }
-              }
-            }
-          } else if (parameterTypes.length == 2 && "setProperty".equals(name)
-              && parameterTypes[0].equals(String.class) && isSimpleClass(parameterTypes[1])) {
-            propertySetters.put("Property", Pair.of(method, parameterTypes));
-          }
+      if (pojoClass.isRecord()) {
+        recordClass = true;
+        recordComponents = new ArrayList<>(pojoClass.getRecordComponents().length);
+        for (RecordComponent rc : pojoClass.getRecordComponents()) {
+          recordComponents.add(Pair.of(rc.getName(), rc.getType()));
+        }
+        constructor = lookupConstructor(pojoClass,
+            recordComponents.stream().map(Pair::right).toArray(Class<?>[]::new));
+        propertyAccessor = null;
+      } else {
+        recordClass = false;
+        recordComponents = null;
+        constructor = lookupConstructor(pojoClass);
+        if (constructor != null) {
+          propertyAccessor = new PropertyAccessor(pojoClass, true, true);
+        } else {
+          propertyAccessor = null;
         }
       }
     }
@@ -186,20 +170,24 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
     public Object injectAndGet(Tuple tuple) {
       if (tuple != null) {
         try {
-          Object instance = constructor.newInstance();
-          for (TupleElement<?> e : tuple.getElements()) {
-            String name = e.getAlias();
-            Object value = tuple.get(name);
-            if (propertySetters.containsKey(name)) {
-              Pair<Method, Class<?>[]> methods = propertySetters.get(name);
-              Method method = methods.key();
-              method.invoke(instance, toObject(value, methods.value()[0]));
-            } else if (propertySetters.containsKey("Property")) {
-              Method method = pojoClass.getMethod("setProperty", String.class, value.getClass());
-              method.invoke(instance, name, value);
+          if (recordClass) {
+            return constructor.newInstance(recordComponents.stream().map(rc -> {
+              for (TupleElement<?> e : tuple.getElements()) {
+                if (rc.left().equals(e.getAlias())) {
+                  return toObject(tuple.get(e.getAlias()), rc.right());
+                }
+              }
+              return null;
+            }).toArray());
+          } else {
+            Object instance = constructor.newInstance();
+            for (TupleElement<?> e : tuple.getElements()) {
+              String name = e.getAlias();
+              Object value = tuple.get(name);
+              propertyAccessor.inject(instance, name, value);
             }
+            return instance;
           }
-          return instance;
         } catch (IllegalAccessException | InstantiationException | IllegalArgumentException
             | InvocationTargetException | NoSuchMethodException | SecurityException e) {
           throw new CorantRuntimeException(e);
@@ -210,12 +198,13 @@ public class TupleObjectConverterFactory implements ConverterFactory<Tuple, Obje
 
     @Override
     public boolean isUsable() {
-      return !propertySetters.isEmpty();
+      return constructor != null
+          && ((recordClass && recordComponents != null) || propertyAccessor != null);
     }
 
-    Constructor<?> lookupConstructor(Class<?> pojoClass) {
+    Constructor<?> lookupConstructor(Class<?> pojoClass, Class<?>... parameterTypes) {
       try {
-        return Classes.getDeclaredConstructor(pojoClass);
+        return Classes.getDeclaredConstructor(pojoClass, parameterTypes);
       } catch (Exception e) {
         // Noop!
       }

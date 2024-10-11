@@ -99,22 +99,22 @@ public interface Converter<S, T> extends Sortable {
   }
 
   /**
-   * Returns whether the converter is a combined converter
-   *
-   * @see #compose(Converter)
-   * @see Converter#andThen(Converter)
-   */
-  default boolean isComposable() {
-    return true;
-  }
-
-  /**
    * Indicates whether there will be distortion in the conversion process
    *
    * @return isPossibleDistortion
    */
   default boolean isPossibleDistortion() {
     return false;
+  }
+
+  /**
+   * Returns whether the converter is a synthetic converter
+   *
+   * @see #compose(Converter)
+   * @see Converter#andThen(Converter)
+   */
+  default boolean isSynthetic() {
+    return true;
   }
 
   /**

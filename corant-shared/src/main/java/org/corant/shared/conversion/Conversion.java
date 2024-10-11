@@ -471,9 +471,10 @@ public class Conversion {
   }
 
   /**
-   * Convert the given object to the given target type. Note: If the target type is generic, only
-   * List/Set/Supplier/Optional/Map, etc. are supported, and the type parameter must be a concrete
-   * type.
+   * Convert the given object to the given target type.
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map/Tuple, etc. are
+   * supported, and the type parameter must be a concrete type.
    *
    * @param value the source object
    * @param targetType the target type
@@ -483,9 +484,10 @@ public class Conversion {
   }
 
   /**
-   * Convert the given object to the given target type. Note: If the target type is generic, only
-   * List/Set/Supplier/Optional/Map, etc. are supported, and the type parameter must be a concrete
-   * type.
+   * Convert the given object to the given target type.
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map/Tuple, etc. are
+   * supported, and the type parameter must be a concrete type.
    *
    * @param value the source object
    * @param targetType the target type

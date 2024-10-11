@@ -70,7 +70,7 @@ public @interface ConfigKeyRoot {
 
   boolean ignoreNoAnnotatedItem() default true;
 
-  InjectStrategy injectStrategy() default InjectStrategy.PROPERTY_FIELD;
+  InjectStrategy injectStrategy() default InjectStrategy.FIELD_PROPERTY;
 
   int keyIndex() default -1;
 
@@ -91,7 +91,7 @@ public @interface ConfigKeyRoot {
       this.ignoreNoAnnotatedItem = ignoreNoAnnotatedItem;
       this.keyIndex = keyIndex;
       this.value = value;
-      this.injectStrategy = defaultObject(injectStrategy, InjectStrategy.PROPERTY_FIELD);
+      this.injectStrategy = defaultObject(injectStrategy, InjectStrategy.FIELD_PROPERTY);
     }
 
     @Override

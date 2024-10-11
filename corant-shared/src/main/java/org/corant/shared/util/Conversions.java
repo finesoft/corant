@@ -19,6 +19,7 @@ import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Primitives.wrapArray;
 import static org.corant.shared.util.Streams.streamOf;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -489,9 +490,9 @@ public class Conversions {
   }
 
   /**
-   * Converts the given original object to given target type. if the given target type is an array,
-   * and the given original object is an array or a collection object, each element is converted,
-   * otherwise the overall conversion is performed.
+   * Converts the given original object to given target type class. if the given target type is an
+   * array, and the given original object is an array or a collection object, each element is
+   * converted, otherwise the overall conversion is performed.
    *
    * @param <T> the target type
    * @param obj the original object that will be converted
@@ -503,9 +504,9 @@ public class Conversions {
   }
 
   /**
-   * Converts the given original object to given target type with hints. if the given target type is
-   * an array, and the given original object is an array or a collection object, each element is
-   * converted, otherwise the overall conversion is performed.
+   * Converts the given original object to given target type class with hints. if the given target
+   * type is an array, and the given original object is an array or a collection object, each
+   * element is converted, otherwise the overall conversion is performed.
    *
    * @param <T> the target type
    * @param obj the original object that will be converted
@@ -521,9 +522,9 @@ public class Conversions {
   }
 
   /**
-   * Converts the given original object to given target type with hints. if the given target type is
-   * an array, and the given original object is an array or a collection object, each element is
-   * converted, otherwise the overall conversion is performed.
+   * Converts the given original object to given target type class with hints. if the given target
+   * type is an array, and the given original object is an array or a collection object, each
+   * element is converted, otherwise the overall conversion is performed.
    *
    * @param <T> the target type
    * @param obj the original object that will be converted
@@ -543,10 +544,54 @@ public class Conversions {
     return defaultObject(Conversion.convert(obj, clazz, hints), altVal);
   }
 
+  /**
+   * Convert the given object to the type of the given class name.
+   *
+   * @param obj the source object
+   * @param className the name of target class
+   * @return the converted target object
+   */
   public static Object toObject(Object obj, String className) {
     return toObject(obj, asClass(className));
   }
 
+  /**
+   * Convert the given object to the given target type.
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map/Tuple, etc. are
+   * supported, and the type parameter must be a concrete type.
+   *
+   * @param <T> the return object type
+   * @param obj the source object
+   * @param type the target type
+   * @return the converted target object
+   */
+  public static <T> T toObject(Object obj, Type type) {
+    return forceCast(Conversion.convertType(obj, type));
+  }
+
+  /**
+   * Convert the given object to the given target type with hints.
+   * <p>
+   * Note: If the target type is generic, only List/Set/Supplier/Optional/Map/Tuple, etc. are
+   * supported, and the type parameter must be a concrete type.
+   *
+   * @param <T> the return object type
+   * @param obj the source object
+   * @param type the target type
+   * @return the converted target object
+   */
+  public static <T> T toObject(Object obj, Type type, Map<String, ?> hints) {
+    return forceCast(Conversion.convertType(obj, type, hints));
+  }
+
+  /**
+   * Convert the given object to the target type object, use the given type literal.
+   *
+   * @param <T> the target type, including all actual type parameters
+   * @param obj the given object to be converted
+   * @param typeLiteral the type literal
+   */
   public static <T> T toObject(Object obj, TypeLiteral<T> typeLiteral) {
     return Conversion.convert(obj, typeLiteral);
   }

@@ -81,8 +81,8 @@ public abstract class AbstractJTAJPAUnitOfWorksManager extends AbstractJPAUnitOf
     return transactionManager;
   }
 
-  public void initializeCurrentUnitOfWork(Transaction transaction) {
-    uows.computeIfAbsent(transaction, key -> {
+  public AbstractJTAJPAUnitOfWork initializeCurrentUnitOfWork(Transaction transaction) {
+    return uows.computeIfAbsent(transaction, key -> {
       try {
         logger.fine(() -> "Register an new unit of work with the current transaction context.");
         AbstractJTAJPAUnitOfWork uow = buildUnitOfWork(key);

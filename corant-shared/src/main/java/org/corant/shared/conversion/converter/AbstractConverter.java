@@ -105,6 +105,11 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T> {
     return defaultValue;
   }
 
+  @Override
+  public boolean isSynthetic() {
+    return false;
+  }
+
   /**
    * Returns whether to throw an exception when a conversion error occurs
    */

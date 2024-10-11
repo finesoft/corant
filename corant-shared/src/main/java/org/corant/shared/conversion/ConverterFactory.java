@@ -13,6 +13,7 @@
  */
 package org.corant.shared.conversion;
 
+import java.util.Map;
 import org.corant.shared.normal.Priorities;
 import org.corant.shared.ubiquity.Sortable;
 
@@ -83,4 +84,31 @@ public interface ConverterFactory<S, T> extends Sortable {
    * @param targetClass the target class that will be converted to
    */
   boolean isSupportTargetClass(Class<?> targetClass);
+
+  /**
+   * corant-shared
+   *
+   * @author bingo 17:55:45
+   */
+  class FactoryConverter<X, Y> implements Converter<X, Y> {
+
+    protected final ConverterFactory<?, ?> factory;
+
+    protected final Converter<X, Y> syntheticConverter;
+
+    public FactoryConverter(ConverterFactory<?, ?> factory, Converter<X, Y> syntheticConverter) {
+      this.factory = factory;
+      this.syntheticConverter = syntheticConverter;
+    }
+
+    @Override
+    public Y convert(X t, Map<String, ?> hints) {
+      return syntheticConverter.convert(t, hints);
+    }
+
+    public ConverterFactory<?, ?> getFactory() {
+      return factory;
+    }
+
+  }
 }

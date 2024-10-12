@@ -14,7 +14,6 @@
 package org.corant.shared.util;
 
 import static java.lang.String.format;
-import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Streams.streamOf;
 import static org.corant.shared.util.Strings.isNotBlank;
@@ -24,9 +23,11 @@ import java.io.InputStream;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import org.corant.shared.exception.CorantRuntimeException;
 import org.corant.shared.resource.ClassPathResource;
 import org.corant.shared.resource.ClassPathResourceLoader;
 import org.corant.shared.resource.FileSystemResource;
@@ -45,7 +46,7 @@ public class Resources {
   static final Logger logger = Logger.getLogger(Resources.class.getName());
 
   /**
-   * Get URL resources from specified URL path, support Glob / Regex Pattern.
+   * Find all URL resources according to the given path, the path support Glob / Regex Pattern.
    * <p>
    * <ul>
    * <li>The incoming path start with 'filesystem:'({@link SourceType#FILE_SYSTEM}) means that get
@@ -78,7 +79,8 @@ public class Resources {
   }
 
   /**
-   * Use specified class loader to scan all class path resources.
+   * Find all class path resources according to the given class loader, throws exception if error
+   * occurs.
    *
    * @param classLoader class loader for loading resources
    * @return A class path resource stream
@@ -90,6 +92,10 @@ public class Resources {
   }
 
   /**
+   *
+   * Find all class path resources according to the given class loader and class path, throws
+   * exception if error occurs.
+   * <p>
    * Scan class path resource with path, path separator is '/', allowed for use glob-pattern/regex.
    * If path start with 'glob:' then use Glob pattern else if path start with 'regex:' then use
    * regex pattern; if pattern not found this method will auto decide matcher, if matcher no found
@@ -100,9 +106,7 @@ public class Resources {
    * 1.if path is "javax/sql/" then will scan all resources that under the javax.sql class path.
    * 2.if path is "java/sql/Driver.class" then will scan single resource javax.sql.Driver.
    * 3.if path is "META-INF/maven/" then will scan all resources under the META-INF/maven.
-   * 4.if path is blank ({@code
-   * Strings.isBlank
-   * }) then will scan all class path in the system.
+   * 4.if path is blank (Strings.isBlank) then will scan all class path in the system.
    * 5.if path is "javax/sql/*Driver.class" then will scan javax.sql class path and filter class name
    * end with Driver.class.
    * </pre>
@@ -118,7 +122,8 @@ public class Resources {
   }
 
   /**
-   * Use default class loader to scan the specified path resources.
+   * Find all class path resources according to the given class path and default class loader,
+   * throws exception if error occurs.
    *
    * @param classPath the resource class path or expression, supports glob-pattern/regex
    * @return A class path resource stream
@@ -129,19 +134,19 @@ public class Resources {
   }
 
   /**
-   * Use file create file system resource.
+   * Returns a file system resource according to the given file.
    *
-   * @param file used to build FileSystemResource
+   * @param file used to build FileSystemResource, can't null
    * @return A file system resource
    */
   public static FileSystemResource fromFileSystem(File file) {
-    return new FileSystemResource(shouldNotNull(file));
+    return new FileSystemResource(file);
   }
 
   /**
-   * Use Path to find file system resource.
+   * Returns a file system resource according to the given path.
    *
-   * @param path used to build FileSystemResource
+   * @param path used to build FileSystemResource , can't null
    * @return A file system resource
    * @throws IOException if an I/O error occurs
    */
@@ -150,7 +155,8 @@ public class Resources {
   }
 
   /**
-   * Use path string to find file system resource. Support glob/regex expression
+   * Find all file system resources according to the given path. the path support glob/regex
+   * expression.
    *
    * @param path the resource path or expression, supports glob-pattern/regex
    * @return A file system resource stream
@@ -163,15 +169,13 @@ public class Resources {
   }
 
   /**
-   * Use input stream to build input stream resource.
+   * Returns an input stream resource according to the given input stream and optional location.
    *
-   * @param inputStream used to build InputStreamResource
+   * @param inputStream used to build InputStreamResource, can't null
    * @param location used to denote the origin of a given input stream
    * @return an input stream resource
-   * @throws IOException if an I/O error occurs
    */
-  public static InputStreamResource fromInputStream(InputStream inputStream, String location)
-      throws IOException {
+  public static InputStreamResource fromInputStream(InputStream inputStream, String location) {
     return new InputStreamResource(inputStream, location, null);
   }
 
@@ -187,7 +191,7 @@ public class Resources {
   }
 
   /**
-   * Use specified URL string to find resource.
+   * Returns a URL resource according to the given URL string.
    *
    * @param url used to build URLResource
    * @return a URLResource
@@ -198,7 +202,7 @@ public class Resources {
   }
 
   /**
-   * Use specified URL to find resource.
+   * Returns a URL resource according to the given URL.
    *
    * @param url used to build URLResource
    * @return a URLResource
@@ -209,10 +213,10 @@ public class Resources {
   }
 
   /**
-   * Use specified http URL and proxy to find resource.
+   * Returns an input stream resource according to the given HTTP URL and proxy
    *
    * @param url used to build URLResource
-   * @param proxy the Proxy through which this connection will be made
+   * @param proxy the proxy through which this connection will be made
    * @return an input stream resource
    * @throws IOException if an I/O error occurs
    */
@@ -221,8 +225,31 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Resolve and return a resource from the given path, throws exception if resource not exists or
+   * any error occurs.
+   * <p>
+   * Note: if the path contains multiple resources return the first one.
    *
+   * @param <T> the returned resource type
+   * @param path the resource path, support Glob / Regex Pattern.
+   *
+   * @see #from(String)
+   */
+  public static <T extends URLResource> T resolve(String path) {
+    try (Stream<T> stream = from(path)) {
+      return stream.min(Comparator.comparing(URLResource::getURI)).orElseThrow(
+          () -> new CorantRuntimeException("Can not find resource from path %s", path));
+    } catch (Exception ex) {
+      throw new CorantRuntimeException(ex);
+    }
+  }
+
+  /**
+   * Try to get a URL resources from specified URL path, support Glob / Regex Pattern, not throw IO
+   * exception, just warning.
+   *
+   * @param <T> the returned resource type
+   * @param path the resource path
    * @see #from
    */
   public static <T extends URLResource> Stream<T> tryFrom(final String path) {
@@ -235,8 +262,10 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to get all class path resources by the specified class loader, not throw IO exception, just
+   * warning.
    *
+   * @param classLoader class loader for loading resources
    * @see #fromClassPath(ClassLoader)
    */
   public static Stream<ClassPathResource> tryFromClassPath(ClassLoader classLoader) {
@@ -250,8 +279,11 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to get all class path resources by the specified class loader and path, not throw IO
+   * exception, just warning.
    *
+   * @param classLoader class loader for loading resources
+   * @param classPath the resource class path or expression, supports glob-pattern/regex
    * @see #fromClassPath(ClassLoader, String)
    */
   public static Stream<ClassPathResource> tryFromClassPath(ClassLoader classLoader,
@@ -266,8 +298,11 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to get all class path resources by the specified class path, not throw IO exception, just
+   * warning.
    *
+   * @param classPath the resource class path or expression, supports glob-pattern/regex
+   * @return A class path resource stream
    * @see #fromClassPath(String)
    */
   public static Stream<ClassPathResource> tryFromClassPath(String classPath) {
@@ -280,7 +315,10 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to find a file system resource, not throw IO exception, just warning.
+   *
+   * @param path used to build FileSystemResource
+   * @return A file system resource or null if exception occurred
    *
    * @see #fromFileSystem(Path)
    */
@@ -294,8 +332,10 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to find all file system resources according to the given path. the path support glob/regex
+   * expression, not throw IO exception, just warning.
    *
+   * @param path the resource path or expression, supports glob-pattern/regex
    * @see #fromFileSystem(String)
    */
   public static Stream<FileSystemResource> tryFromFileSystem(String path) {
@@ -304,26 +344,31 @@ public class Resources {
     } catch (IOException e) {
       logger.log(Level.WARNING, e, () -> format("Can not find resource from path %s.", path));
     }
-    return null;
+    return Stream.empty();
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to return an input stream resource according to the given input stream and optional
+   * location or null if any error occurs.
    *
+   * @param inputStream used to build InputStreamResource, can't null
+   * @param location used to denote the origin of a given input stream
    * @see #fromInputStream(InputStream, String)
    */
   public static InputStreamResource tryFromInputStream(InputStream inputStream, String location) {
     try {
       return fromInputStream(inputStream, location);
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.log(Level.WARNING, e, () -> "Can not find resource from input stream");
     }
     return null;
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to return a URL resource according to the given URL string or null if error occurs.
    *
+   * @param url used to build URLResource
+   * @return a URLResource or null if error occurs
    * @see #fromUrl(String)
    */
   public static URLResource tryFromUrl(String url) {
@@ -336,8 +381,10 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to return a URL resource according to the given URL or null if error occurs.
    *
+   * @param url used to build URLResource
+   * @return a URLResource or null if error occurs
    * @see #fromUrl(URL)
    */
   public static URLResource tryFromUrl(URL url) {
@@ -350,8 +397,11 @@ public class Resources {
   }
 
   /**
-   * Not throw IO exception, just warning
+   * Try to return an input stream resource according to the given HTTP URL and proxy or null if
+   * error occurs.
    *
+   * @param url the resource URL
+   * @param proxy the proxy through which this connection will be made
    * @see #fromUrl(URL, Proxy)
    */
   public static InputStreamResource tryFromUrl(URL url, Proxy proxy) {
@@ -359,6 +409,21 @@ public class Resources {
       return fromUrl(url, proxy);
     } catch (IOException e) {
       logger.log(Level.WARNING, e, () -> format("Can not find url resource from %s.", url));
+    }
+    return null;
+  }
+
+  /**
+   * Try to resolve and return a resource from the given path or null if error occurs.
+   *
+   * @param path the resource path
+   * @see #resolve(String)
+   */
+  public static <T extends URLResource> T tryResolve(String path) {
+    try (Stream<T> stream = from(path)) {
+      return stream.min(Comparator.comparing(URLResource::getURI)).orElse(null);
+    } catch (Exception e) {
+      logger.log(Level.WARNING, e, () -> format("Can not find url resource from %s.", path));
     }
     return null;
   }

@@ -90,24 +90,12 @@ public interface ConverterFactory<S, T> extends Sortable {
    *
    * @author bingo 17:55:45
    */
-  class FactoryConverter<X, Y> implements Converter<X, Y> {
-
-    protected final ConverterFactory<?, ?> factory;
-
-    protected final Converter<X, Y> syntheticConverter;
-
-    public FactoryConverter(ConverterFactory<?, ?> factory, Converter<X, Y> syntheticConverter) {
-      this.factory = factory;
-      this.syntheticConverter = syntheticConverter;
-    }
+  record FactoryConverter<X, Y>(ConverterFactory<?, ?> factory, Converter<X, Y> delegate)
+      implements Converter<X, Y> {
 
     @Override
     public Y convert(X t, Map<String, ?> hints) {
-      return syntheticConverter.convert(t, hints);
-    }
-
-    public ConverterFactory<?, ?> getFactory() {
-      return factory;
+      return delegate.convert(t, hints);
     }
 
   }

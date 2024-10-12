@@ -78,7 +78,7 @@ public class ConverterRegistry {
         CONVERTER_FACTORIES.removeIf(f -> getUserClass(f.getClass()).equals(usedClass));
         return isNotEmpty(
             removeIfValue(SUPPORT_CONVERTERS, v -> (v instanceof FactoryConverter<?, ?> fc)
-                && getUserClass(fc.getFactory().getClass()).equals(usedClass)));
+                && getUserClass(fc.factory().getClass()).equals(usedClass)));
       }
     }
     return false;
@@ -121,7 +121,7 @@ public class ConverterRegistry {
   public static synchronized <S, T> boolean deregister(ConverterFactory<S, T> converterFactory) {
     boolean removed = CONVERTER_FACTORIES.remove(converterFactory);
     removed |= isNotEmpty(removeIfValue(SUPPORT_CONVERTERS,
-        v -> (v instanceof FactoryConverter<?, ?> fc) && fc.getFactory().equals(converterFactory)));
+        v -> (v instanceof FactoryConverter<?, ?> fc) && fc.factory().equals(converterFactory)));
     return removed;
   }
 

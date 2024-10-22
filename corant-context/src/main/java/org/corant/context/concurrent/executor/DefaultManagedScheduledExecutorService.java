@@ -14,8 +14,10 @@
 package org.corant.context.concurrent.executor;
 
 import static java.lang.String.format;
+import static org.corant.shared.util.Empties.isEmpty;
 import static org.corant.shared.util.Throwables.rethrow;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,16 +69,22 @@ public class DefaultManagedScheduledExecutorService extends ManagedScheduledExec
     super.execute(useCommand);
   }
 
-  void stop() {
-    // FIXME serialize the runnable task?
+  void stop(List<RemainExecutionHandler> handlers) {
     try {
-      super.shutdown();
-      if (awaitTermination != null
-          && !super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
-        super.shutdownNow();
-        if (!super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
-          logger.log(Level.WARNING,
-              () -> format("Shutdown managed scheduled executor service %s timeout!", name));
+      if (isEmpty(handlers)) {
+        super.shutdown();
+        if (awaitTermination != null
+            && !super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
+          super.shutdownNow();
+          if (!super.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
+            logger.log(Level.WARNING,
+                () -> format("Shutdown managed scheduled executor service %s timeout!", name));
+          }
+        }
+      } else {
+        List<Runnable> runnable = super.shutdownNow();
+        for (RemainExecutionHandler handler : handlers) {
+          handler.handle(true, getName(), runnable);
         }
       }
     } catch (InterruptedException e) {

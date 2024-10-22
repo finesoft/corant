@@ -14,6 +14,7 @@
 package org.corant.context.concurrent.executor;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.max;
@@ -27,10 +28,12 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.corant.context.ContainerEvents.PreContainerStopEvent;
 import org.corant.context.concurrent.ConcurrentExtension;
 import org.corant.context.concurrent.ManagedExecutorConfig;
+import org.corant.shared.ubiquity.Sortable;
 import org.corant.shared.util.Objects;
 import org.corant.shared.util.Strings;
 import org.glassfish.enterprise.concurrent.AbstractManagedExecutorService;
@@ -46,9 +49,9 @@ public class ExecutorServiceManager {
 
   protected static final Logger logger = Logger.getLogger(ExecutorServiceManager.class.getName());
 
-  protected final List<DefaultManagedExecutorService> executorService =
+  protected final List<DefaultManagedExecutorService> executorServices =
       new CopyOnWriteArrayList<>();
-  protected final List<DefaultManagedScheduledExecutorService> scheduledExecutorService =
+  protected final List<DefaultManagedScheduledExecutorService> scheduledExecutorServices =
       new CopyOnWriteArrayList<>();
 
   protected final Object monitor = new Object();
@@ -60,22 +63,25 @@ public class ExecutorServiceManager {
   @Inject
   protected ConcurrentExtension extension;
 
+  @Inject
+  protected Instance<RemainExecutionHandler> remainExecutionHandlers;
+
   public void register(DefaultManagedExecutorService service) {
-    executorService.add(service);
+    executorServices.add(service);
     initializeHungLoggerIfNecessary();
   }
 
   public void register(DefaultManagedScheduledExecutorService service) {
-    scheduledExecutorService.add(service);
+    scheduledExecutorServices.add(service);
     initializeHungLoggerIfNecessary();
   }
 
-  protected List<DefaultManagedExecutorService> getExecutorService() {
-    return executorService;
+  protected List<DefaultManagedExecutorService> getExecutorServices() {
+    return executorServices;
   }
 
-  protected List<DefaultManagedScheduledExecutorService> getScheduledExecutorService() {
-    return scheduledExecutorService;
+  protected List<DefaultManagedScheduledExecutorService> getScheduledExecutorServices() {
+    return scheduledExecutorServices;
   }
 
   protected void initializeHungLoggerIfNecessary() {
@@ -107,18 +113,21 @@ public class ExecutorServiceManager {
 
   protected void preContainerStopEvent(@Observes final PreContainerStopEvent event) {
     releaseHungLoggerIfNecessary();
-    for (DefaultManagedExecutorService service : executorService) {
+    final List<RemainExecutionHandler> handlers =
+        remainExecutionHandlers.isUnsatisfied() ? emptyList()
+            : remainExecutionHandlers.stream().sorted(Sortable::compare).toList();
+    for (DefaultManagedExecutorService service : executorServices) {
       logger.info(
           () -> format("The managed executor service %s will be shutdown!", service.getName()));
-      service.stop();
+      service.stop(handlers);
     }
-    for (DefaultManagedScheduledExecutorService service : scheduledExecutorService) {
+    for (DefaultManagedScheduledExecutorService service : scheduledExecutorServices) {
       logger.info(() -> format("The managed scheduled executor service %s will be shutdown!",
           service.getName()));
-      service.stop();
+      service.stop(handlers);
     }
-    executorService.clear();
-    scheduledExecutorService.clear();
+    executorServices.clear();
+    scheduledExecutorServices.clear();
   }
 
   protected void releaseHungLoggerIfNecessary() {
@@ -171,16 +180,16 @@ public class ExecutorServiceManager {
       try {
         while (manager.isRunning()) {
           Thread.sleep(checkPeriod);
-          if (!manager.getExecutorService().isEmpty() && manager.isRunning()) {
-            for (AbstractManagedExecutorService es : manager.getExecutorService()) {
+          if (!manager.getExecutorServices().isEmpty() && manager.isRunning()) {
+            for (AbstractManagedExecutorService es : manager.getExecutorServices()) {
               if (!manager.isRunning()) {
                 break;
               }
               log(es);
             }
           }
-          if (!manager.getScheduledExecutorService().isEmpty() && manager.isRunning()) {
-            for (AbstractManagedExecutorService es : manager.getScheduledExecutorService()) {
+          if (!manager.getScheduledExecutorServices().isEmpty() && manager.isRunning()) {
+            for (AbstractManagedExecutorService es : manager.getScheduledExecutorServices()) {
               if (!manager.isRunning()) {
                 break;
               }

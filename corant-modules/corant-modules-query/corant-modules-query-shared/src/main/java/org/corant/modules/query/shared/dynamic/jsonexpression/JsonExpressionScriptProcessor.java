@@ -30,6 +30,7 @@ import static org.corant.shared.util.Maps.getMapBoolean;
 import static org.corant.shared.util.Maps.getMapMap;
 import static org.corant.shared.util.Maps.getMapObject;
 import static org.corant.shared.util.Maps.getMapString;
+import static org.corant.shared.util.Objects.defaultObject;
 import static org.corant.shared.util.Objects.forceCast;
 import static org.corant.shared.util.Strings.isNotBlank;
 import java.util.ArrayList;
@@ -187,6 +188,8 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     final List<Map<Object, Object>> fetchResults = forceCast(p.fetchedResult);
     final FetchQuery fetchQuery = p.fetchQuery;
     final String[] injectPropertyNamePath = fetchQuery.getInjectPropertyNamePath();
+    final boolean one2Many = fetchQuery.isMultiRecords();
+    final boolean usePropertyInject = isNotEmpty(injectPropertyNamePath);
     final MyEvaluationContext injectCtx =
         new MyEvaluationContext(mapper, p.parameter, functionResolvers);
     for (Map<Object, Object> r : parentResults) {
@@ -200,19 +203,26 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
         for (Map<Object, Object> fr : fetchResults) {
           if (filter.getValue(injectCtx.bindFetchResult(fr))) {
             injectResults.add(fr);
+            if (!one2Many) {
+              break;
+            }
           }
         }
       }
       // since the handled may be a Single type list, we need to create a new list for them
-      List<?> handledResults = injectResults;
+      List<?> handledResults;
       // process the filtered injection results: extract->DSL evaluation->type conversion->rename
       if (handler != null && !injectResults.isEmpty()) {
         handledResults = handler.apply(injectResults, injectCtx, mapper);
+      } else {
+        handledResults = injectResults;
       }
+      // make handled result not null
+      handledResults = defaultObject(handledResults, ArrayList::new);
       // inject the handled results to the parent result
-      if (isNotEmpty(injectPropertyNamePath)) {
+      if (usePropertyInject) {
         // inject with the property name path
-        if (fetchQuery.isMultiRecords()) {
+        if (one2Many) {
           Object exists = mapper.getMappedValue(r, injectPropertyNamePath);
           if (exists != null) {
             shouldInstanceOf(exists, List.class,
@@ -231,7 +241,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
           if (handledResult != null) {
             Map<Object, Object> handledResultMap = forceCast(handledResult);
             r.putAll(handledResultMap);
-            if (!fetchQuery.isMultiRecords()) {
+            if (!one2Many) {
               break;
             }
           }
@@ -602,7 +612,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
     @Override
     public List<Object> apply(List<Map<Object, Object>> fetchResults,
         MyEvaluationContext injectionCtx, QueryObjectMapper mapper) {
-      List<Object> results = new ArrayList<>();
+      List<Object> results = new ArrayList<>(fetchResults.size());
       if (single) {
         if (mappings.isEmpty()) {
           results.addAll(fetchResults);

@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 import org.corant.modules.json.expression.EvaluationContext;
 import org.corant.shared.exception.NotSupportedException;
+import org.corant.shared.util.Iterables;
 
 /**
  * corant-modules-json
@@ -79,65 +80,67 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       if (left instanceof Comparable && right instanceof Comparable) {
         return compare(left, right);
       }
-      throw new NotSupportedException();
+      throw new NotSupportedException("Only supports comparable objects for comparison node");
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     protected int compare(Object left, Object right) {
-      if (left instanceof Number numberLeft && right instanceof Number numberRight) {
-        if (numberLeft instanceof BigDecimal || numberRight instanceof BigDecimal) {
-          return compare(numberLeft, numberRight, BigDecimal.class);
-        } else if (numberLeft instanceof Double || numberRight instanceof Double) {
-          return Double.compare(numberLeft.doubleValue(), numberRight.doubleValue());
-        } else if (numberLeft instanceof Float || numberRight instanceof Float) {
-          return Float.compare(numberLeft.floatValue(), numberRight.floatValue());
-        } else if (numberLeft instanceof BigInteger || numberRight instanceof BigInteger) {
-          return compare(numberLeft, numberRight, BigInteger.class);
-        } else if (numberLeft instanceof Long || numberRight instanceof Long) {
-          return Long.compare(numberLeft.longValue(), numberRight.longValue());
-        } else if (numberLeft instanceof Integer || numberRight instanceof Integer) {
-          return Integer.compare(numberLeft.intValue(), numberRight.intValue());
-        } else if (numberLeft instanceof Short || numberRight instanceof Short) {
-          return Short.compare(numberLeft.shortValue(), numberRight.shortValue());
-        } else if (numberLeft instanceof Byte || numberRight instanceof Byte) {
-          return Byte.compare(numberLeft.byteValue(), numberRight.byteValue());
+      if (left instanceof Number ln && right instanceof Number rn) {
+        if (ln instanceof BigDecimal || rn instanceof BigDecimal) {
+          return compare(ln, rn, BigDecimal.class);
+        } else if (ln instanceof Double || rn instanceof Double) {
+          return Double.compare(ln.doubleValue(), rn.doubleValue());
+        } else if (ln instanceof Float || rn instanceof Float) {
+          return Float.compare(ln.floatValue(), rn.floatValue());
+        } else if (ln instanceof BigInteger || rn instanceof BigInteger) {
+          return compare(ln, rn, BigInteger.class);
+        } else if (ln instanceof Long || rn instanceof Long) {
+          return Long.compare(ln.longValue(), rn.longValue());
+        } else if (ln instanceof Integer || rn instanceof Integer) {
+          return Integer.compare(ln.intValue(), rn.intValue());
+        } else if (ln instanceof Short || rn instanceof Short) {
+          return Short.compare(ln.shortValue(), rn.shortValue());
+        } else if (ln instanceof Byte || rn instanceof Byte) {
+          return Byte.compare(ln.byteValue(), rn.byteValue());
         } else {
           return compare(left, right, Double.class);
         }
       } else if (left instanceof TemporalAccessor && right instanceof TemporalAccessor) {
-        if (left instanceof Date && right instanceof Date) {
-          return ((Date) left).compareTo((Date) right);
-        } else if (left instanceof Instant && right instanceof Instant) {
-          return ((Instant) left).compareTo((Instant) right);
-        } else if (left instanceof ZonedDateTime && right instanceof ZonedDateTime) {
-          return ((ZonedDateTime) left).compareTo((ZonedDateTime) right);
-        } else if (left instanceof LocalTime && right instanceof LocalTime) {
-          return ((LocalTime) left).compareTo((LocalTime) right);
-        } else if (left instanceof LocalDate && right instanceof LocalDate) {
-          return ((LocalDate) left).compareTo((LocalDate) right);
-        } else if (left instanceof LocalDateTime && right instanceof LocalDateTime) {
-          return ((LocalDateTime) left).compareTo((LocalDateTime) right);
-        } else if (left instanceof MonthDay && right instanceof MonthDay) {
-          return ((MonthDay) left).compareTo((MonthDay) right);
-        } else if (left instanceof OffsetDateTime && right instanceof OffsetDateTime) {
-          return ((OffsetDateTime) left).compareTo((OffsetDateTime) right);
-        } else if (left instanceof OffsetTime && right instanceof OffsetTime) {
-          return ((OffsetTime) left).compareTo((OffsetTime) right);
-        } else if (left instanceof Year && right instanceof Year) {
-          return ((Year) left).compareTo((Year) right);
-        } else if (left instanceof YearMonth && right instanceof YearMonth) {
-          return ((YearMonth) left).compareTo((YearMonth) right);
-        } else if (left instanceof ZoneOffset && right instanceof ZoneOffset) {
-          return ((ZoneOffset) left).compareTo((ZoneOffset) right);
+        if (left instanceof Date ld && right instanceof Date rd) {
+          return ld.compareTo(rd);
+        } else if (left instanceof Instant li && right instanceof Instant ri) {
+          return li.compareTo(ri);
+        } else if (left instanceof ZonedDateTime lz && right instanceof ZonedDateTime rz) {
+          return lz.compareTo(rz);
+        } else if (left instanceof LocalTime llt && right instanceof LocalTime rlt) {
+          return llt.compareTo(rlt);
+        } else if (left instanceof LocalDate lld && right instanceof LocalDate rld) {
+          return lld.compareTo(rld);
+        } else if (left instanceof LocalDateTime lldt && right instanceof LocalDateTime rldt) {
+          return lldt.compareTo(rldt);
+        } else if (left instanceof MonthDay lmd && right instanceof MonthDay rmd) {
+          return lmd.compareTo(rmd);
+        } else if (left instanceof OffsetDateTime lodt && right instanceof OffsetDateTime rodt) {
+          return lodt.compareTo(rodt);
+        } else if (left instanceof OffsetTime lot && right instanceof OffsetTime rot) {
+          return lot.compareTo(rot);
+        } else if (left instanceof Year ly && right instanceof Year ry) {
+          return ly.compareTo(ry);
+        } else if (left instanceof YearMonth lym && right instanceof YearMonth rym) {
+          return lym.compareTo(rym);
+        } else if (left instanceof ZoneOffset lzo && right instanceof ZoneOffset rzo) {
+          return lzo.compareTo(rzo);
         }
       } else if (left instanceof String && right instanceof String) {
         return left.toString().compareTo(right.toString());
-      } else if (left instanceof Duration && right instanceof Duration) {
-        return ((Duration) left).compareTo((Duration) right);
-      } else if (areEqual(left.getClass(), right.getClass())) {
-        return ((Comparable) left).compareTo(right);
+      } else if (left instanceof Duration ld && right instanceof Duration rd) {
+        return ld.compareTo(rd);
       }
-      throw new NotSupportedException();
+      if (left instanceof Comparable lc && areEqual(left.getClass(), right.getClass())) {
+        return lc.compareTo(right);
+      }
+      throw new NotSupportedException(
+          "Only supports same type comparable objects for comparison node");
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -180,11 +183,11 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
+      if (left != null && left.equals(right)) {
+        return true;
+      }
       if (left instanceof Number && right instanceof Number) {
         return compare(left, right) == 0;
-      }
-      if (left != null) {
-        return left.equals(right);
       }
       return false;
     }
@@ -220,15 +223,16 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       super(ASTNodeType.CP_IN);
     }
 
-    @SuppressWarnings({"rawtypes"})
     @Override
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (right instanceof Collection) {
-        return ((Collection) right).contains(left);
-      } else if (right instanceof String && left instanceof String) {
-        return ((String) right).contains((String) left);
+      if (right instanceof Collection<?> collection) {
+        return collection.contains(left);
+      } else if (right instanceof String rs && left instanceof String ls) {
+        return rs.contains(ls);
+      } else if (right instanceof Object[] array) {
+        return Iterables.search(array, right) != -1;
       }
       return false;
     }
@@ -268,13 +272,16 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
+      if (left == null || right == null) {
+        return true;
+      }
+      if (left.equals(right)) {
+        return false;
+      }
       if (left instanceof Number && right instanceof Number) {
         return compare(left, right) != 0;
       }
-      if (left != null) {
-        return left.equals(right);
-      }
-      return false;
+      return true;
     }
   }
 
@@ -284,15 +291,16 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       super(ASTNodeType.CP_NIN);
     }
 
-    @SuppressWarnings({"rawtypes"})
     @Override
     public Boolean getValue(EvaluationContext ctx) {
       Object left = getLeftValue(ctx);
       Object right = getRightValue(ctx);
-      if (right instanceof Collection) {
-        return !((Collection) right).contains(left);
-      } else if (right instanceof String && left instanceof String) {
-        return !((String) right).contains((String) left);
+      if (right instanceof Collection<?> collection) {
+        return !collection.contains(left);
+      } else if (right instanceof String rs && left instanceof String ls) {
+        return !rs.contains(ls);
+      } else if (right instanceof Object[] array) {
+        return Iterables.search(array, right) == -1;
       }
       return true;
     }

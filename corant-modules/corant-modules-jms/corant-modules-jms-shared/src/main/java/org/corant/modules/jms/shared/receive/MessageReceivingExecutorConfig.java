@@ -33,7 +33,7 @@ import org.eclipse.microprofile.config.Config;
  *
  * @author bingo 下午7:17:04
  */
-@ConfigKeyRoot(value = "corant.jms", keyIndex = 2)
+@ConfigKeyRoot(value = "corant.jms.receiving")
 public class MessageReceivingExecutorConfig
     implements ManagedMessageReceivingExecutorConfig, NamedObject, DeclarativeConfig {
 

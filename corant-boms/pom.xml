@@ -126,14 +126,14 @@
 		<version.maven-resources-plugin>3.2.0</version.maven-resources-plugin>
 		<version.maven-surefire-plugin>3.0.0</version.maven-surefire-plugin>
 		<version.maven-project-info-reports-plugin>3.4.2</version.maven-project-info-reports-plugin>
-		<version.microprofile-config-api>3.0.2</version.microprofile-config-api>
+		<version.microprofile-config-api>3.1</version.microprofile-config-api>
 		<version.microprofile-fault-tolerance-api>4.0.2</version.microprofile-fault-tolerance-api>
 		<version.microprofile-health-api>4.0.1</version.microprofile-health-api>
 		<version.microprofile-jwt-auth-api>2.1</version.microprofile-jwt-auth-api>
 		<version.microprofile-metrics-api>5.0.0</version.microprofile-metrics-api>
 		<version.microprofile-openapi-api>3.1</version.microprofile-openapi-api>
 		<version.microprofile-opentracing-api>3.0</version.microprofile-opentracing-api>
-		<version.microprofile-rest-client-api>3.0.1</version.microprofile-rest-client-api>
+		<version.microprofile-rest-client-api>4.0</version.microprofile-rest-client-api>
 		<version.microprofile-lra-api>1.0</version.microprofile-lra-api>
 		<version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
 		<version.minio>8.3.0</version.minio>
@@ -159,8 +159,8 @@
 		<version.redis-clients-jedis>3.0.1</version.redis-clients-jedis>
 		<version.redisson>3.29.0</version.redisson>
 		<version.rest-assured>5.3.0</version.rest-assured>
-		<version.resteasy>6.2.9.Final</version.resteasy>
-		<version.resteasy-microprofile>2.1.5.Final</version.resteasy-microprofile>
+		<version.resteasy>6.2.10.Final</version.resteasy>
+		<version.resteasy-microprofile>3.0.0.Final</version.resteasy-microprofile>
 		<version.rsocket>1.1.1</version.rsocket>
 		<version.shiro>1.7.1</version.shiro>
 		<version.slf4j>2.0.13</version.slf4j>
@@ -179,7 +179,7 @@
 		<version.swagger>2.2.8</version.swagger>
 		<version.swagger-ui-webjars>4.18.2</version.swagger-ui-webjars>
 		<version.testng>6.9.9</version.testng>
-		<version.undertow>2.3.17.Final</version.undertow>
+		<version.undertow>2.3.18.Final</version.undertow>
 		<version.vertx>4.5.10</version.vertx>
 		<version.weld-junit4>4.0.3.Final</version.weld-junit4>
 		<version.weld-junit5>4.0.3.Final</version.weld-junit5>

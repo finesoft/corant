@@ -28,11 +28,13 @@ public interface ASTNodeVisitor extends Sortable {
   ASTNodeVisitor DFLT = node -> {
     switch (node.getType()) {
       case CP_EQ:
+      case CP_EQS:
       case CP_GT:
       case CP_GTE:
       case CP_LT:
       case CP_LTE:
       case CP_NE:
+      case CP_NES:
       case LG_XOR:
         shouldBeTrue(node.getChildren().size() == 2,
             () -> new ParseException("AST node [%s] must contain 2 children nodes",

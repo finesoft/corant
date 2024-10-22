@@ -340,6 +340,11 @@ public class FetchQuery implements Serializable {
     return multiRecords;
   }
 
+  @Override
+  public String toString() {
+    return "FetchQuery [queryReference=" + getQueryReference() + ", id=" + id + "]";
+  }
+
   protected void addFetchQuery(FetchQuery fetchQuery) {
     fetchQueries.add(fetchQuery);
   }

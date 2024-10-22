@@ -209,7 +209,7 @@ public class JsonExpressionScriptProcessor extends AbstractScriptProcessor {
           }
         }
       }
-      // since the handled may be a Single type list, we need to create a new list for them
+      // since the handled may be a single type list, we need to create a new list for them
       List<?> handledResults;
       // process the filtered injection results: extract->DSL evaluation->type conversion->rename
       if (handler != null && !injectResults.isEmpty()) {

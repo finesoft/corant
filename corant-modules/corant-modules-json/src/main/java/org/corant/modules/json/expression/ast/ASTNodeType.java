@@ -25,6 +25,8 @@ import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTLessThanNode;
 import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTNoEqualNode;
 import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTNoInNode;
 import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTRegexNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTEqualStrictlyNode;
+import org.corant.modules.json.expression.ast.ASTComparisonNode.ASTNoEqualStrictlyNode;
 import org.corant.modules.json.expression.ast.ASTFunctionNode.ASTDefaultFunctionNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicAndNode;
 import org.corant.modules.json.expression.ast.ASTLogicNode.ASTLogicNorNode;
@@ -125,8 +127,8 @@ public enum ASTNodeType {
   },
 
   /**
-   * Performs an XOR operation on an array with at least two expressions and returns the objects that
-   * do not meet any of the expressions.
+   * Performs an XOR operation on an array with at least two expressions and returns the objects
+   * that do not meet any of the expressions.
    */
   LG_XOR("$xor", false) {
     @Override
@@ -154,12 +156,32 @@ public enum ASTNodeType {
   },
 
   /**
+   * The strict equality comparator operator.
+   */
+  CP_EQS("$eqs", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTEqualStrictlyNode();
+    }
+  },
+
+  /**
    * The inequality comparator operator.
    */
   CP_NE("$ne", false) {
     @Override
     public ASTNode<?> buildNode(Object object) {
       return new ASTNoEqualNode();
+    }
+  },
+
+  /**
+   * The strict inequality comparator operator.
+   */
+  CP_NES("$nes", false) {
+    @Override
+    public ASTNode<?> buildNode(Object object) {
+      return new ASTNoEqualStrictlyNode();
     }
   },
 

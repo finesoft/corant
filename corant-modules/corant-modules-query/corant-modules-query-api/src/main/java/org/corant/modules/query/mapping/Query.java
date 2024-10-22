@@ -335,6 +335,11 @@ public class Query implements Serializable {
     return inline;
   }
 
+  @Override
+  public String toString() {
+    return "Query [" + getVersionedName() + "]";
+  }
+
   protected void addFetchQuery(FetchQuery fetchQuery) {
     fetchQueries.add(fetchQuery);
   }

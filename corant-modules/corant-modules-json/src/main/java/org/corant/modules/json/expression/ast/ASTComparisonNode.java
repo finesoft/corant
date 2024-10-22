@@ -86,7 +86,11 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     @SuppressWarnings("unchecked")
     protected int compare(Object left, Object right) {
       if (left instanceof Number ln && right instanceof Number rn) {
-        if (ln instanceof BigDecimal || rn instanceof BigDecimal) {
+        if (ln instanceof Long || rn instanceof Long) {
+          return Long.compare(ln.longValue(), rn.longValue());
+        } else if (ln instanceof Integer || rn instanceof Integer) {
+          return Integer.compare(ln.intValue(), rn.intValue());
+        } else if (ln instanceof BigDecimal || rn instanceof BigDecimal) {
           return compare(ln, rn, BigDecimal.class);
         } else if (ln instanceof Double || rn instanceof Double) {
           return Double.compare(ln.doubleValue(), rn.doubleValue());
@@ -94,10 +98,6 @@ public interface ASTComparisonNode extends ASTPredicateNode {
           return Float.compare(ln.floatValue(), rn.floatValue());
         } else if (ln instanceof BigInteger || rn instanceof BigInteger) {
           return compare(ln, rn, BigInteger.class);
-        } else if (ln instanceof Long || rn instanceof Long) {
-          return Long.compare(ln.longValue(), rn.longValue());
-        } else if (ln instanceof Integer || rn instanceof Integer) {
-          return Integer.compare(ln.intValue(), rn.intValue());
         } else if (ln instanceof Short || rn instanceof Short) {
           return Short.compare(ln.shortValue(), rn.shortValue());
         } else if (ln instanceof Byte || rn instanceof Byte) {
@@ -193,6 +193,20 @@ public interface ASTComparisonNode extends ASTPredicateNode {
     }
   }
 
+  class ASTEqualStrictlyNode extends AbstractASTComparisonNode {
+
+    public ASTEqualStrictlyNode() {
+      super(ASTNodeType.CP_EQS);
+    }
+
+    @Override
+    public Boolean getValue(EvaluationContext ctx) {
+      Object left = getLeftValue(ctx);
+      Object right = getRightValue(ctx);
+      return left != null && left.equals(right);
+    }
+  }
+
   class ASTGreaterThanEqualNode extends AbstractASTComparisonNode {
 
     public ASTGreaterThanEqualNode() {
@@ -280,6 +294,26 @@ public interface ASTComparisonNode extends ASTPredicateNode {
       }
       if (left instanceof Number && right instanceof Number) {
         return compare(left, right) != 0;
+      }
+      return true;
+    }
+  }
+
+  class ASTNoEqualStrictlyNode extends AbstractASTComparisonNode {
+
+    public ASTNoEqualStrictlyNode() {
+      super(ASTNodeType.CP_NES);
+    }
+
+    @Override
+    public Boolean getValue(EvaluationContext ctx) {
+      Object left = getLeftValue(ctx);
+      Object right = getRightValue(ctx);
+      if (left == null || right == null) {
+        return true;
+      }
+      if (left.equals(right)) {
+        return false;
       }
       return true;
     }

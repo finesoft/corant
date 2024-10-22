@@ -125,6 +125,11 @@ public class QueryHint implements Serializable {
     return prime * result + (id == null ? 0 : id.hashCode());
   }
 
+  @Override
+  public String toString() {
+    return "QueryHint [key=" + key + ", id=" + id + "]";
+  }
+
   protected void addParameter(QueryHintParameter parameter) {
     parameters.computeIfAbsent(parameter.getName(), n -> new ArrayList<>()).add(parameter);
   }

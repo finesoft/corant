@@ -53,18 +53,14 @@ public class HibernateAdditionalMappingContributor implements AdditionalMappingC
       InFlightMetadataCollector metadata, ResourceStreamLocator resourceStreamLocator,
       MetadataBuildingContext buildingContext) {
     if (CDIs.isEnabled()) {
-      Set<Class<?>> mappedClasses = metadata.getEntityBindings().stream()
-          .map(PersistentClass::getMappedClass).collect(Collectors.toSet());
-      Set<Class<?>> repositoryClasses = new LinkedHashSet<>();
-      Type type = new TypeLiteral<JPAEntityRepository<?>>() {}.getType();
-      CDI.current().getBeanManager().getBeans(type).stream()
-          .filter(b -> mappedClasses.contains(resolvePersistenceClass(b.getBeanClass())))
-          .forEach(b -> repositoryClasses.add(b.getBeanClass()));
-      logger.info(format("Find %s JPA entity repository classes", repositoryClasses.size()));
-      for (Class<?> clazz : repositoryClasses) {
-        bindNamedQueryIfNecessary(clazz, buildingContext);
-        bindNamedNativeQueryIfNecessary(clazz, buildingContext);
-        bindNamedStoredProcedureQueryIfNecessary(clazz, buildingContext);
+      Set<Class<?>> repositoryClasses = resolveRepositoryClasses(metadata);
+      if (!repositoryClasses.isEmpty()) {
+        logger.info(format("Find %s JPA entity repository classes", repositoryClasses.size()));
+        for (Class<?> clazz : repositoryClasses) {
+          bindNamedQueryIfNecessary(clazz, buildingContext);
+          bindNamedNativeQueryIfNecessary(clazz, buildingContext);
+          bindNamedStoredProcedureQueryIfNecessary(clazz, buildingContext);
+        }
       }
     } else {
       logger.info("Can't bind name queries from repository, CDI not enabled");
@@ -150,6 +146,17 @@ public class HibernateAdditionalMappingContributor implements AdditionalMappingC
       }
     } while (resolvedClass == null && (repoClass = repoClass.getSuperclass()) != null);
     return resolvedClass;
+  }
+
+  protected Set<Class<?>> resolveRepositoryClasses(InFlightMetadataCollector metadata) {
+    Set<Class<?>> mappedClasses = metadata.getEntityBindings().stream()
+        .map(PersistentClass::getMappedClass).collect(Collectors.toSet());
+    Set<Class<?>> repositoryClasses = new LinkedHashSet<>();
+    Type type = new TypeLiteral<JPAEntityRepository<?>>() {}.getType();
+    CDI.current().getBeanManager().getBeans(type).stream()
+        .filter(b -> mappedClasses.contains(resolvePersistenceClass(b.getBeanClass())))
+        .forEach(b -> repositoryClasses.add(b.getBeanClass()));
+    return repositoryClasses;
   }
 
 }

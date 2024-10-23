@@ -58,7 +58,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.corant.shared.conversion.Conversion;
 import org.corant.shared.conversion.converter.NumberLocalDateConverter;
 import org.corant.shared.conversion.converter.SqlDateLocalDateConverter;
@@ -1398,7 +1397,7 @@ public class Maps {
   public static <K, V> Map<K, V> removeIfKey(Map<K, V> map, Predicate<K> predicate) {
     Map<K, V> removed = new HashMap<>();
     if (predicate != null && map != null) {
-      Set<K> removeKeys = map.keySet().stream().filter(predicate).collect(Collectors.toSet());
+      List<K> removeKeys = map.keySet().stream().filter(predicate).toList();
       for (K key : removeKeys) {
         removed.put(key, map.remove(key));
       }
@@ -1409,8 +1408,8 @@ public class Maps {
   public static <K, V> Map<K, V> removeIfValue(Map<K, V> map, Predicate<V> predicate) {
     Map<K, V> removed = new HashMap<>();
     if (predicate != null && map != null) {
-      Set<K> removeKeys = map.entrySet().stream().filter(e -> predicate.test(e.getValue()))
-          .map(Entry::getKey).collect(Collectors.toSet());
+      List<K> removeKeys = map.entrySet().stream().filter(e -> predicate.test(e.getValue()))
+          .map(Entry::getKey).toList();
       for (K key : removeKeys) {
         removed.put(key, map.remove(key));
       }

@@ -157,6 +157,36 @@ public class Iterables {
   }
 
   /**
+   * Returns true if the given iterable is not null and contains the given element otherwise false.
+   *
+   * @param iterable the iterable to check
+   * @param element the element to check
+   */
+  public static boolean contains(Iterable<?> iterable, Object element) {
+    if (iterable instanceof Collection<?> collection) {
+      return collection.contains(element);
+    } else if (iterable != null) {
+      for (Object o : iterable) {
+        if (areEqual(o, element)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the given array is not null and contains the given element otherwise false.
+   *
+   * @param <T> the element type
+   * @param array the array to check
+   * @param element the element to check
+   */
+  public static <T> boolean contains(T[] array, T element) {
+    return search(array, element) != -1;
+  }
+
+  /**
    * Return a depth-first iterator for an iterable object whose internal elements are also iterable,
    * Mainly used for object traversal in tree structure.
    *

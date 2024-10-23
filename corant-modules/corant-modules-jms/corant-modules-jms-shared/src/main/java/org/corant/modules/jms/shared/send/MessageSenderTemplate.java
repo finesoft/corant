@@ -33,6 +33,7 @@ import jakarta.jms.JMSProducer;
 import jakarta.jms.XAConnectionFactory;
 import jakarta.jms.XAJMSContext;
 import jakarta.transaction.Transactional.TxType;
+import org.corant.modules.jms.JMSNames;
 import org.corant.modules.jms.marshaller.MessageMarshaller;
 import org.corant.modules.jta.shared.SynchronizationAdapter;
 import org.corant.modules.jta.shared.TransactionService;
@@ -51,6 +52,7 @@ public class MessageSenderTemplate extends DefaultMessageSender {
   protected TxType txType;
   protected String replyTo;
   protected boolean multicastReplyTo;
+  protected String replyMessageMarshalSchema;
   protected int priority = -1;
   protected CompletionListener completionListener;
   protected int sessionMode;
@@ -247,6 +249,17 @@ public class MessageSenderTemplate extends DefaultMessageSender {
   }
 
   /**
+   * Specifies the reply to message marshal schema
+   *
+   * @param replyMessageMarshalSchema the message marshal schema for receiver to marshal the reply
+   *        message
+   */
+  public MessageSenderTemplate replyMessageMarshalSchema(String replyMessageMarshalSchema) {
+    this.replyMessageMarshalSchema = replyMessageMarshalSchema;
+    return this;
+  }
+
+  /**
    * Specifies that messages sent using current JMSProducer will have their JMSReplyTo header value
    * set to the specified destination.
    *
@@ -390,6 +403,9 @@ public class MessageSenderTemplate extends DefaultMessageSender {
     if (isNotBlank(replyTo)) {
       producer
           .setJMSReplyTo(multicastReplyTo ? jmsc.createTopic(replyTo) : jmsc.createQueue(replyTo));
+      if (isNotBlank(replyMessageMarshalSchema)) {
+        producer.setProperty(JMSNames.REPLY_MSG_MARSHAL_SCHEMA, replyMessageMarshalSchema);
+      }
     }
     if (priority > -1) {
       producer.setPriority(priority);

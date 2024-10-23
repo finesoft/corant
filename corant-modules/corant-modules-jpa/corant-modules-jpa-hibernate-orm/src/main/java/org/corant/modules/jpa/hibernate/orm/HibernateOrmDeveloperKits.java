@@ -13,6 +13,7 @@
  */
 package org.corant.modules.jpa.hibernate.orm;
 
+import static java.lang.String.format;
 import static org.corant.context.Beans.select;
 import static org.corant.shared.util.Assertions.shouldNotNull;
 import static org.corant.shared.util.Empties.sizeOf;
@@ -74,6 +75,8 @@ public class HibernateOrmDeveloperKits {
           .sorted(String::compareTo).forEach(out);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
@@ -83,6 +86,8 @@ public class HibernateOrmDeveloperKits {
       stdoutPersistes(pkg, JPA_ORM_XML_NAME_END_WITH, ormFilesOut, entityClsOut);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
@@ -93,6 +98,8 @@ public class HibernateOrmDeveloperKits {
       stdoutPersistClasses(pkg, entityClsOut);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
@@ -101,6 +108,8 @@ public class HibernateOrmDeveloperKits {
       stdoutPersistJpaOrmXml(pkg, JPA_ORM_XML_NAME_END_WITH, out);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
@@ -126,6 +135,8 @@ public class HibernateOrmDeveloperKits {
       out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
@@ -141,12 +152,20 @@ public class HibernateOrmDeveloperKits {
       out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
+  }
+
+  public static void validate(String pu, String... integrations) {
+    validateSchema(pu, integrations);
+    validateNamedQuery(pu, integrations);
+    validateNamedNativeQuery(pu, integrations);
   }
 
   public static void validateNamedNativeQuery(String pu, String... integrations) {
     try (Corant corant = prepare()) {
-      out(false);
+      System.out.println(format("Validate named native query for persistence unit %s", pu));
       JPAExtension extension = select(JPAExtension.class).get();
       DataSourceService dataSourceService = select(DataSourceService.class).get();
       PersistenceUnitInfoMetaData pum =
@@ -194,31 +213,36 @@ public class HibernateOrmDeveloperKits {
       } else {
         System.err.println("Not suppport named native query validation!");
       }
-      out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
   public static void validateNamedQuery(String pu, String... integrations) {
     try (Corant corant = prepare()) {
-      out(false);
+      System.out.println(format("Validate named query for persistence unit %s", pu));
       SessionFactoryImplementor sf =
           (SessionFactoryImplementor) createEntityManagerFactoryBuilderImpl(pu, integrations)
               .build();
       // 6.0 only HQL
       sf.getQueryEngine().validateNamedQueries();
-      out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 
   public static void validateSchema(String pu, String... integrations) {
     try (Corant corant = prepare()) {
+      System.out.println(format("Validate schema for persistence unit %s", pu));
       new SchemaValidator().validate(createMetadataImplementor(pu, integrations));
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 

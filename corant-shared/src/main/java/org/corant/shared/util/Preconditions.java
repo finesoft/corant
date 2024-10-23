@@ -14,6 +14,7 @@
 package org.corant.shared.util;
 
 import static org.corant.shared.util.Empties.isEmpty;
+import static org.corant.shared.util.Empties.isNotEmpty;
 import static org.corant.shared.util.Objects.areDeepEqual;
 import static org.corant.shared.util.Objects.areEqual;
 import static org.corant.shared.util.Objects.forceCast;
@@ -69,6 +70,23 @@ public class Preconditions {
     if (!superCls.isAssignableFrom(subCls)) {
       throw new GeneralRuntimeException(code, parameters);
     }
+  }
+
+  /**
+   * Returns the given {@code collection} if it contains the given {@code element}, otherwise throws
+   * an exception with the given code and parameters.
+   *
+   * @param collection the collection to be search
+   * @param element the element to check
+   * @param code error message code
+   * @param parameters error message parameters
+   */
+  public static <C extends Collection<T>, T> C requireContains(C collection, Object element,
+      Object code, Object... parameters) {
+    if (collection == null || !collection.contains(element)) {
+      throw new GeneralRuntimeException(code, parameters);
+    }
+    return collection;
   }
 
   /**
@@ -507,6 +525,23 @@ public class Preconditions {
   }
 
   /**
+   * Returns the given {@code collection} if it not contains the given {@code element}, otherwise
+   * throws an exception with the given code and parameters.
+   *
+   * @param collection the collection to be search
+   * @param element the element to check
+   * @param code error message code
+   * @param parameters error message parameters
+   */
+  public static <C extends Collection<T>, T> C requireNotContains(C collection, Object element,
+      Object code, Object... parameters) {
+    if (collection != null && collection.contains(element)) {
+      throw new GeneralRuntimeException(code, parameters);
+    }
+    return collection;
+  }
+
+  /**
    * Returns the given {@code textToCheck} if it not contains the given {@code substring}, otherwise
    * throws an exception with the given code and parameters.
    *
@@ -661,7 +696,7 @@ public class Preconditions {
   }
 
   /**
-   * Returns the given {@code object} if it is null, throw an exception with the given code and
+   * Check the given {@code object} if it is null, throw an exception with the given code and
    * parameters otherwise.
    *
    * @param object the object to be checked
@@ -670,6 +705,20 @@ public class Preconditions {
    */
   public static void requireNull(Object object, Object code, Object... parameters) {
     if (object != null) {
+      throw new GeneralRuntimeException(code, parameters);
+    }
+  }
+
+  /**
+   * Check the given {@code object} if it is null or empty, throw an exception with the given code
+   * and parameters otherwise. Supports String/Collection/Map/Array/Enumeration/Optional/Tuple
+   *
+   * @param object the object to be checked
+   * @param code the exception code to use if the validation fails
+   * @param parameters the exception parameters
+   */
+  public static void requireNullOrEmpty(Object object, Object code, Object... parameters) {
+    if (isNotEmpty(object)) {
       throw new GeneralRuntimeException(code, parameters);
     }
   }

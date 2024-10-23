@@ -69,6 +69,8 @@ public class QueryDeveloperKits {
       out(true);
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 

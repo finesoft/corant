@@ -39,6 +39,8 @@ public class ElasticDeveloperKits {
       });
     } catch (Exception e) {
       throw new CorantRuntimeException(e);
+    } finally {
+      Corant.shutdown();
     }
   }
 

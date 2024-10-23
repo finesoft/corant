@@ -364,22 +364,24 @@ public class SqlQueryDeveloperKits {
       return this;
     }
 
-    public void run() {
-      try (Corant corant = prepare()) {
-        validate();
-      } catch (Exception e) {
-        throw new CorantRuntimeException(e);
-      }
-    }
-
     public FreemarkerQueryScriptValidator usingJSqlParser(boolean usingJSqlParser) {
       this.usingJSqlParser = usingJSqlParser;
       return this;
     }
 
     public void validate() {
-      final QueryMappingService service = resolve(QueryMappingService.class);
+      try (Corant corant = prepare()) {
+        System.out.println("Validate sql named queries");
+        validateAllQueries();
+      } catch (Exception e) {
+        throw new CorantRuntimeException(e);
+      } finally {
+        Corant.shutdown();
+      }
+    }
 
+    public void validateAllQueries() {
+      final QueryMappingService service = resolve(QueryMappingService.class);
       Map<String, List<ValidationError>> errorMaps = new LinkedHashMap<>();
       Map<String, Set<String>> queryFieldNames = new LinkedHashMap<>();
       Set<String> validatedQueries = new HashSet<>();
@@ -817,7 +819,7 @@ public class SqlQueryDeveloperKits {
                 // FIXME use . ??
                 String fn = si.getExpression().toString();
                 int dot = fn.indexOf('.');
-                if (dot != -1 && fn.length() > (dot + 1)) {
+                if (dot != -1 && fn.length() > dot + 1) {
                   fieldNames.add(trim(fn.substring(dot + 1)));
                 } else {
                   fieldNames.add(trim(fn));
@@ -957,7 +959,7 @@ public class SqlQueryDeveloperKits {
       // check query parameter variables
       if (isNotEmpty(fieldNames)) {
         fq.getParameters().forEach(fp -> {
-          if ((fp.getSource() == FetchQueryParameterSource.R)
+          if (fp.getSource() == FetchQueryParameterSource.R
               && !fieldNames.contains(fp.getSourceName())) {
             errors.add(createValidationError(
                 format("Fetch query [%s] parameter: [%s] not exists, valid names: [%s]", fqn,
